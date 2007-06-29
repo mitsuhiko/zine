@@ -286,6 +286,10 @@ class User(object):
     def get_authors():
         return User.select(User.c.role >= ROLE_AUTHOR)
 
+    @staticmethod
+    def get_all_but_nobody():
+        return User.select(User.c.user_id != NOBODY_USER_ID)
+
     @property
     def is_somebody(self):
         return self.user_id != NOBODY_USER_ID
@@ -293,6 +297,33 @@ class User(object):
     @property
     def is_manager(self):
         return self.role >= ROLE_AUTHOR
+
+    @property
+    def role_as_string(self):
+        """Human readable version of the role id."""
+        from textpress.api import _
+        if self.role == ROLE_ADMIN:
+            return _('Administrator')
+        elif self.role == ROLE_EDITOR:
+            return _('Editor')
+        elif self.role == ROLE_AUTHOR:
+            return _('Author')
+        elif self.role == ROLE_SUBSCRIBER:
+            return _('Subscriber')
+        return _('Nobody')
+
+    def _set_display_name(self, value):
+        self._display_name = value
+
+    def _get_display_name(self):
+        from string import Template
+        return Template(self._display_name).safe_substitute(
+            nick=self.username,
+            first=self.first_name,
+            last=self.last_name
+        )
+
+    display_name = property(_get_display_name, _set_display_name)
 
     def set_password(self, password):
         self.pw_hash = gen_pwhash(password)
@@ -542,7 +573,8 @@ class Comment(object):
 
 # connect the tables.
 db.mapper(User, users, properties={
-    'posts':    db.relation(Post, backref='author')
+    '_display_name':    users.c.display_name,
+    'posts':            db.relation(Post, backref='author')
 })
 db.mapper(Tag, tags)
 db.mapper(Comment, comments, properties={

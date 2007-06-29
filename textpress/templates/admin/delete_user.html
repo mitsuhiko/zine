@@ -1,0 +1,13 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['users', 'edit'] %}
+{% block title %}{% trans "Delete User" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Delete User" %}</h2>
+  <form action="" method="post">
+    <p>{% trans username=user.username|e %}
+      Do you really want to delete the user "{{ username }}"?.
+    {% endtrans %}</p>
+    <input type="submit" name="cancel" value="{% trans 'No' %}">
+    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+  </form>
+{% endblock %}

@@ -52,7 +52,7 @@
       {%- for state, caption in post_status_choices %}
         <li>{{ h.radio_button('post_status', state, form.post_status == state,
                id='post_status_' + (state|string)) }} <label for="post_status_{{
-               state }}">{{ caption }}</li>
+               state }}">{{ caption|e }}</li>
       {%- endfor %}
       </ul>
     </fieldset>

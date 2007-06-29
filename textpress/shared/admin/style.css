@@ -194,14 +194,22 @@ div.contents input[type="reset"] {
     border-style: double;
     border-width: 3px;
     color: #333;
+    cursor: pointer;
 }
 
 div.contents input[type="submit"]:active,
 div.contents input[type="button"]:active,
 div.contents input[type="reset"]:active {
-    border-color: #aaa #bbb #bbb #aaa;
+    border-color: #aaa #ccc #ccc #aaa;
     background-color: #f2f2f2;
     outline: none;
+}
+
+div.contents input[type="submit"]:hover,
+div.contents input[type="button"]:hover,
+div.contents input[type="reset"]:hover {
+    border-color: #999 #aaa #999 #aaa;
+    background-color: #fff;
 }
 
 div.contents input[name="delete"]:hover {

@@ -12,9 +12,11 @@
 """
 from datetime import datetime
 from textpress.api import *
-from textpress.models import User, Post, Tag, ROLE_AUTHOR, STATUS_PRIVATE, \
-     STATUS_DRAFT, STATUS_PUBLISHED, get_post_list
-from textpress.utils import parse_datetime, format_datetime
+from textpress.models import User, Post, Tag, ROLE_ADMIN, ROLE_EDITOR, \
+     ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, STATUS_DRAFT, \
+     STATUS_PUBLISHED, get_post_list
+from textpress.utils import parse_datetime, format_datetime, \
+     is_valid_email
 
 
 def render_admin_response(template_name, **values):
@@ -23,6 +25,7 @@ def render_admin_response(template_name, **values):
     it emits some events to collect navigation items and injects that
     into the template context.
     """
+    req = get_request()
     navigation_bar = [
         ('dashboard', url_for('admin/index'), _('Dashboard'), []),
         ('posts', url_for('admin/show_posts'), _('Posts'), [
@@ -32,12 +35,17 @@ def render_admin_response(template_name, **values):
         ('tags', url_for('admin/show_tags'), _('Tags'), [
             ('overview', url_for('admin/show_tags'), _('Overview')),
             ('edit', url_for('admin/new_tag'), _('Edit Tag'))
-        ]),
-        ('users', url_for('admin/show_users'), _('Users'), [
-            ('overview', url_for('admin/show_users'), _('Users')),
-            ('edit', url_for('admin/new_user'), _('Edit User'))
         ])
     ]
+
+    if req.user.role == ROLE_ADMIN:
+        navigation_bar += [
+            ('users', url_for('admin/show_users'), _('Users'), [
+                ('overview', url_for('admin/show_users'), _('Users')),
+                ('edit', url_for('admin/new_user'), _('Edit User'))
+            ])
+        ]
+
     for result in emit_event('collect-admin-navigation-links'):
         navigation_bar.extend(result or ())
 
@@ -215,6 +223,7 @@ def do_edit_post(req, post_id=None):
     )
 
 
+@require_role(ROLE_AUTHOR)
 def do_delete_post(req, post_id):
     post = Post.get(post_id)
     if post is None:
@@ -231,14 +240,16 @@ def do_delete_post(req, post_id):
     return render_admin_response('admin/delete_post.html', post=post)
 
 
+@require_role(ROLE_AUTHOR)
 def do_show_tags(req):
     return render_admin_response('admin/show_tags.html', tags=Tag.select())
 
 
+@require_role(ROLE_AUTHOR)
 def do_edit_tag(req, tag_id=None):
     """Edit a tag."""
     errors = []
-    form = {'slug': '', 'name': '', 'description': ''}
+    form = dict.fromkeys(['slug', 'name', 'description'], u'')
     new_tag = True
 
     if tag_id is not None:
@@ -289,6 +300,7 @@ def do_edit_tag(req, tag_id=None):
     )
 
 
+@require_role(ROLE_AUTHOR)
 def do_delete_tag(req, tag_id):
     tag = Tag.get(tag_id)
     if tag is None:
@@ -305,16 +317,131 @@ def do_delete_tag(req, tag_id):
     return render_admin_response('admin/delete_tag.html', tag=tag)
 
 
+@require_role(ROLE_ADMIN)
 def do_show_users(req):
-    return render_admin_response('admin/show_users.html', users=User.select())
+    return render_admin_response('admin/show_users.html',
+        users=User.get_all_but_nobody()
+    )
 
 
+@require_role(ROLE_ADMIN)
 def do_edit_user(req, user_id=None):
-    pass
+    user = None
+    errors = []
+    form = dict.fromkeys(['username', 'first_name', 'last_name',
+                          'display_name', 'description', 'email'], u'')
+    form['role'] = ROLE_AUTHOR
+
+    if user_id is not None:
+        user = User.get(user_id)
+        if user is None:
+            abort(404)
+        form.update(
+            username=user.username,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            display_name=user._display_name,
+            description=user.description,
+            email=user.email,
+            role=user.role
+        )
+    new_user = user is None
+
+    if req.method == 'POST':
+        if req.form.get('cancel'):
+            redirect(url_for('admin/show_users'))
+        elif req.form.get('delete') and user:
+            redirect(url_for('admin/delete_user', user_id=user.user_id))
+
+        username = form['username'] = req.form.get('username')
+        if not username:
+            errors.append(_('Username is required.'))
+        elif new_user and User.get_by(username=username) is not None:
+            errors.append(_('Username "%s" is taken.') % username)
+        password = form['password'] = req.form.get('password')
+        if new_user and not password:
+            errors.append(_('You have to provide a password.'))
+        first_name = form['first_name'] = req.form.get('first_name')
+        last_name = form['last_name'] = req.form.get('last_name')
+        display_name = form['display_name'] = req.form.get('display_name')
+        description = form['description'] = req.form.get('description')
+        email = form['email'] = req.form.get('email', '')
+        if not is_valid_email(email):
+            errors.append(_('The user needs a valid mail address.'))
+        try:
+            role = form['role'] = int(req.form.get('role', ''))
+            if role not in xrange(ROLE_ADMIN + 1):
+                raise ValueError()
+        except ValueError:
+            errors.append(_('Invalid user role.'))
+
+        if not errors:
+            if new_user:
+                user = User(username, password, email, first_name,
+                            last_name, description, role)
+                user.display_name = display_name or '$username'
+            else:
+                user.username = username
+                if password:
+                    user.set_password(password)
+                user.email = email
+                user.first_name = first_name
+                user.last_name = last_name
+                user.display_name = display_name or '$username'
+                user.description = description
+                user.role = role
+            db.flush()
+            if req.form.get('save_and_new'):
+                redirect(url_for('admin/new_user'))
+            else:
+                redirect(url_for('admin/edit_user', user_id=user.user_id))
+
+    if not new_user:
+        display_names = [
+            ('$first $last', u'%s %s' % (user.first_name, user.last_name)),
+            ('$last $first', u'%s %s' % (user.last_name, user.first_name)),
+            ('$nick', user.username),
+            ('$first', user.first_name),
+            ('$last', user.last_name),
+            ('$first "$nick" $last', u'%s "%s" %s' % (
+                user.first_name,
+                user.username,
+                user.last_name
+            ))
+        ]
+    else:
+        display_names = None
+
+    return render_admin_response('admin/edit_user.html',
+        new_user=user is None,
+        user=user,
+        form=form,
+        errors=errors,
+        display_names=display_names,
+        roles=[
+            (ROLE_ADMIN, _('Administrator')),
+            (ROLE_EDITOR, _('Editor')),
+            (ROLE_AUTHOR, _('Author')),
+            (ROLE_SUBSCRIBER, _('Subscriber'))
+        ]
+    )
 
 
+@require_role(ROLE_ADMIN)
 def do_delete_user(req, user_id):
-    pass
+    user = User.get(user_id)
+    if user is None:
+        redirect(url_for('admin/show_users'))
+
+    if req.method == 'POST':
+        if req.form.get('cancel'):
+            redirect(url_for('admin/edit_user', user_id=user.user_id))
+        elif req.form.get('confirm'):
+            user.delete()
+            db.flush()
+            redirect(url_for('admin/show_users'))
+
+    return render_admin_response('admin/delete_user.html', user=user)
 
 
 def do_login(req):
