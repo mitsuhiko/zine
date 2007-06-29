@@ -1,0 +1,24 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['users', 'overview'] %}
+{% block title %}{% trans "Manage Users" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Manage Users" %}</h2>
+  <table>
+    <tr>
+      <th>{% trans "ID" %}</th>
+      <th>{% trans "Username" %}</th>
+    </tr>
+  {%- for user in users %}
+    <tr class="{% cycle 'odd', 'even' %}">
+      <td>{{ user.user_id }}</td>
+      <td><a href="{{ url_for('admin/edit_user', user_id=user.user_id)|e }}">{{
+          user.username|e }}</a></td>
+    </tr>
+  {%- endfor %}
+  </table>
+  <div class="actions">
+    <form action="{{ url_for('admin/new_user')|e(true) }}" method="get">
+      <input type="submit" value="{% trans 'New User' %}">
+    </form>
+  </div>
+{% endblock %}

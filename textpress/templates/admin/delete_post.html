@@ -1,0 +1,13 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['posts', 'write'] %}
+{% block title %}{% trans "Delete Post" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Delete Post" %}</h2>
+  <form action="" method="post">
+    <p>{% trans post_title=post.title|e %}
+      Do you really want to delete post "{{ post_title }}"?.
+    {% endtrans %}</p>
+    <input type="submit" name="cancel" value="{% trans 'No' %}">
+    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+  </form>
+{% endblock %}

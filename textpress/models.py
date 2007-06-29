@@ -549,7 +549,8 @@ db.mapper(Comment, comments, properties={
     'children': db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
         cascade='all', order_by=[db.asc(comments.c.pub_date)],
-        backref=db.backref('parent', remote_side=[comments.c.comment_id])
+        backref=db.backref('parent', remote_side=[comments.c.comment_id]),
+        lazy=True
     )
 }, order_by=[db.desc(comments.c.pub_date)])
 db.mapper(Post, posts, properties={
@@ -559,5 +560,5 @@ db.mapper(Post, posts, properties={
                                 order_by=[db.asc(comments.c.pub_date)]),
     'tags':         db.relation(Tag, secondary=post_tags, lazy=False,
                                 order_by=[db.asc(tags.c.name)],
-                                cascade='all', backref='posts')
+                                cascade='all, expunge', backref='posts')
 }, order_by=[db.desc(posts.c.pub_date)])

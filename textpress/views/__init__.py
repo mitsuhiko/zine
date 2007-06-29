@@ -29,9 +29,15 @@ all_views = {
     'admin/show_posts':     admin.do_show_posts,
     'admin/new_post':       admin.do_edit_post,
     'admin/edit_post':      admin.do_edit_post,
+    'admin/delete_post':    admin.do_delete_post,
     'admin/show_tags':      admin.do_show_tags,
     'admin/new_tag':        admin.do_edit_tag,
     'admin/edit_tag':       admin.do_edit_tag,
+    'admin/delete_tag':     admin.do_delete_tag,
+    'admin/show_users':     admin.do_show_users,
+    'admin/new_user':       admin.do_edit_user,
+    'admin/edit_user':      admin.do_edit_user,
+    'admin/delete_user':    admin.do_delete_user,
     'admin/login':          admin.do_login,
     'admin/logout':         admin.do_logout
 }

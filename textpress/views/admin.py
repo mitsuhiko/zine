@@ -32,6 +32,10 @@ def render_admin_response(template_name, **values):
         ('tags', url_for('admin/show_tags'), _('Tags'), [
             ('overview', url_for('admin/show_tags'), _('Overview')),
             ('edit', url_for('admin/new_tag'), _('Edit Tag'))
+        ]),
+        ('users', url_for('admin/show_users'), _('Users'), [
+            ('overview', url_for('admin/show_users'), _('Users')),
+            ('edit', url_for('admin/new_user'), _('Edit User'))
         ])
     ]
     for result in emit_event('collect-admin-navigation-links'):
@@ -68,6 +72,7 @@ def do_edit_post(req, post_id=None):
     tags = []
     errors = []
     form = {}
+    post=None
 
     # edit existing post
     if post_id is not None:
@@ -108,6 +113,10 @@ def do_edit_post(req, post_id=None):
         # handle cancel
         if req.form.get('cancel'):
             redirect(url_for('admin/show_posts'))
+
+        # handle delete, redirect to confirmation page
+        if req.form.get('delete') and post_id is not None:
+            redirect(url_for('admin/delete_post', post_id=post_id))
 
         form['title'] = title = req.form.get('title')
         if not title:
@@ -196,12 +205,30 @@ def do_edit_post(req, post_id=None):
         form=form,
         tags=Tag.select(),
         created=created,
+        new_post=new_post,
+        post=post,
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
             (STATUS_DRAFT, _('Draft')),
             (STATUS_PRIVATE, _('Private'))
         ]
     )
+
+
+def do_delete_post(req, post_id):
+    post = Post.get(post_id)
+    if post is None:
+        redirect(url_for('admin/show_posts'))
+
+    if req.method == 'POST':
+        if req.form.get('cancel'):
+            redirect(url_for('admin/edit_post', post_id=post.post_id))
+        elif req.form.get('confirm'):
+            post.delete()
+            db.flush()
+            redirect(url_for('admin/show_posts'))
+
+    return render_admin_response('admin/delete_post.html', post=post)
 
 
 def do_show_tags(req):
@@ -228,8 +255,13 @@ def do_edit_tag(req, tag_id=None):
     old_slug = form['slug']
 
     if req.method == 'POST':
+        # cancel
         if req.form.get('cancel'):
             redirect(url_for('admin/show_tags'))
+
+        # delete
+        if req.form.get('delete'):
+            redirect(url_for('admin/delete_tag', tag_id=tag.tag_id))
 
         form['slug'] = slug = req.form.get('slug')
         form['name'] = name = req.form.get('name')
@@ -255,6 +287,34 @@ def do_edit_tag(req, tag_id=None):
         errors=errors,
         form=form
     )
+
+
+def do_delete_tag(req, tag_id):
+    tag = Tag.get(tag_id)
+    if tag is None:
+        redirect(url_for('admin/show_tags'))
+
+    if req.method == 'POST':
+        if req.form.get('cancel'):
+            redirect(url_for('admin/edit_tag', tag_id=tag.tag_id))
+        elif req.form.get('confirm'):
+            tag.delete()
+            db.flush()
+            redirect(url_for('admin/show_tags'))
+
+    return render_admin_response('admin/delete_tag.html', tag=tag)
+
+
+def do_show_users(req):
+    return render_admin_response('admin/show_users.html', users=User.select())
+
+
+def do_edit_user(req, user_id=None):
+    pass
+
+
+def do_delete_user(req, user_id):
+    pass
 
 
 def do_login(req):

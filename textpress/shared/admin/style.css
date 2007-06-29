@@ -204,6 +204,11 @@ div.contents input[type="reset"]:active {
     outline: none;
 }
 
+div.contents input[name="delete"]:hover {
+    background-color: #d00;
+    color: white;
+}
+
 div.contents fieldset {
     margin: 10px 0 0 0;
     padding: 10px;
@@ -279,6 +284,10 @@ div.contents table td {
 
 div.contents table tr.even {
     background-color: #f2f2f2;
+}
+
+p.preview {
+    text-align: right;
 }
 
 /* :::: LOGIN BOX :::: */

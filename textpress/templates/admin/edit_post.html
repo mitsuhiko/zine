@@ -79,9 +79,17 @@
         {{ h.input_field('author', form.author) }}
       </fieldset>
     {%- endif %}
+    {% if not new_post %}
+      <p class="preview">
+        <a href="{{ url_for(post) }}">{% trans "View Post" %}</a>
+      </p>
+    {% endif %}
     <div class="actions">
       <input type="submit" name="save_and_new" value="{% trans 'Save' %}">
       <input type="submit" name="save_and_continue" value="{% trans 'Save and continue editing' %}">
+      {%- if not new_post %}
+        <input type="submit" name="delete" value="{% trans 'Delete' %}">
+      {%- endif %}
       <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
     </div>
   </form>

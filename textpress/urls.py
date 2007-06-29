@@ -34,9 +34,15 @@ all_urls = [
         Rule('/posts/', endpoint='admin/show_posts'),
         Rule('/posts/new', endpoint='admin/new_post'),
         Rule('/posts/<int:post_id>', endpoint='admin/edit_post'),
+        Rule('/posts/<int:post_id>/delete', endpoint='admin/delete_post'),
         Rule('/tags/', endpoint='admin/show_tags'),
         Rule('/tags/new', endpoint='admin/new_tag'),
-        Rule('/tags/<int:tag_id>', endpoint='admin/edit_tag')
+        Rule('/tags/<int:tag_id>', endpoint='admin/edit_tag'),
+        Rule('/tags/<int:tag_id>/delete', endpoint='admin/delete_tag'),
+        Rule('/users/', endpoint='admin/show_users'),
+        Rule('/users/new', endpoint='admin/new_user'),
+        Rule('/users/<int:user_id>', endpoint='admin/edit_user'),
+        Rule('/users/<int:user_id>/delete', endpoint='admin/delete_user')
     ])
 ]
 
