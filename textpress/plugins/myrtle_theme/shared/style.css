@@ -1,0 +1,360 @@
+body {
+    padding: 0;
+    margin: 0;
+    background-color: #333;
+    font-family: 'Trebuchet MS', 'Verdana', 'Bitstream Vera Sans', sans-serif;
+    font-size: 0.9em;
+    text-align: justify;
+}
+
+a {
+    color: #21421e;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #5b7e57;
+    text-decoration: underline;
+}
+
+pre {
+    font-family: 'Consolas', 'Monaco', 'Bitstream Vera Sans Mono', monospace;
+    font-size: 0.9em;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 5px;
+    background-color: #f2f2f2;
+    background-image: url(img/code.png);
+    background-repeat: no-repeat;
+    background-position: bottom right;
+}
+
+blockquote {
+    margin: 5px 0 5px 0;
+    padding: 5px 10px 5px 40px;
+    background-image: url(img/quote.png);
+    background-repeat: no-repeat;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0.8em 0 0 0;
+    padding: 0;
+    font-family: 'Georgia', serif;
+    color: #21421e;
+    text-align: left;
+}
+
+h2 {
+    font-size: 2.5em;
+    font-weight: normal;
+    margin: 0.6em 0 0 0;
+    border-bottom: 1px solid #ccc;
+    letter-spacing: 0.02em;
+    font-variant: small-caps;
+    display: block;
+    padding: 1px 5px 2px 5px;
+    text-decoration: none;
+}
+
+h3 {
+    font-size: 1.6em;
+    font-weight: normal;
+}
+
+dl dt {
+    margin: 5px 0 4px 0;
+    font-size: 0.75em;
+    color: #888;
+    float: left;
+    clear: both;
+    width: 10em;
+}
+
+dl dd {
+    margin: 3px 0 3px 40px;
+    float: left;
+}
+
+p, blockquote {
+    line-height: 1.4em;
+}
+
+ul li, ol li {
+    padding: 4px 0 4px 0;
+}
+
+/* :::: FORM ELEMENTS :::: */
+input, textarea {
+    border: 1px solid #ccc;
+    font-family: 'Georgia', serif;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #2f2d2a;
+    background-color: #f2f2f2;
+    padding: 2px;
+}
+
+input:focus, textarea:focus {
+    background-color: white;
+}
+
+textarea {
+    width: 99%;
+}
+
+div.actions {
+    margin: 4px 0 4px 0;
+    padding: 2px;
+    border: 1px solid #ddd;
+    background-color: #f2f2f2;
+    text-align: right;
+}
+
+div.actions input {
+    background-color: white;
+    cursor: pointer;
+}
+
+/* :::: ERROR DIALOG :::: */
+div.error {
+    background-color: #ddd;
+    border: 1px solid #aaa;
+    padding: 5px;
+    margin: 10px 0 10px 0;
+    font-size: 0.9em;
+}
+
+div.error h3 {
+    color: #111;
+    margin: 0 0 5px 0;
+    padding: 0;
+    font-size: 1.4em;
+}
+
+div.error p {
+    margin: 0;
+    padding: 3px 0 3px 20px;
+}
+
+/* :::: PAGE :::: */
+div.pagewrapper {
+    border-top: 8px solid #222;
+    background-color: #444;
+    background-image: url(img/pagebg.png);
+    background-repeat: repeat-x;
+}
+
+div.page {
+    width: 600px;
+    margin: 0 auto 0 auto;
+    background-color: white;
+    background-repeat: repeat-x;
+    border: 5px solid #e9e9e9;
+    border-top: none;
+    border-bottom: none;
+    padding: 0 15px 0 15px;
+}
+
+div.contents {
+    min-height: 20em;
+}
+
+/* :::: HEADER :::: */
+div.header {
+    backkground-color: #736f6b;
+    background-image: url(img/header.png);
+    border: 1px solid black;
+}
+
+div.header h1 {
+    text-align: right;
+    padding: 90px 20px 0 0;
+    margin: 0;
+    font-size: 30px;
+    font-weight: normal;
+    font-variant: small-caps;
+    letter-spacing: 2px;
+}
+
+div.header h1 a {
+    color: white;
+    text-decoration: none;
+}
+
+div.header p.description {
+    padding: 5px 20px 20px 0;
+    margin: 0;
+    color: white;
+    text-align: right;
+    font-family: 'Georgia', serif;
+    font-size: 16px;
+}
+
+/* :::: FOOTER :::: */
+div.footer {
+    border-top: 1px solid #111;
+    width: 100%;
+    text-align: right;
+    letter-spacing: 0.06em;
+    color: #eee;
+    background-color: #333;
+}
+
+div.footer p {
+    margin: 0;
+    padding: 0 10px 0 10px;
+    line-height: 24px!important;
+    font-size: 11px;
+}
+
+div.footer a {
+    color: #aaa;
+    text-decoration: none;
+}
+
+div.footer a:hover {
+    color: white;
+}
+
+/* :::: SIDEBAR :::: */
+div.sidebar {
+    margin: 50px 0 0 0;
+    background-image: url(img/sidebarbg.png);
+    background-repeat: repeat-x;
+    background-color: #716d6a;
+    border: 5px solid #d9d9d9;
+    border-bottom: none;
+    padding: 5px 15px 40px 15px;
+    font-size: 0.9em;
+}
+
+div.sidebar a {
+    color: #ccc;
+}
+
+div.sidebar a:hover {
+    color: #fff;
+}
+
+div.sidebar h3 {
+    color: #eee;
+    font-size: 1.4em;
+    font-weight: bold;
+    margin: 10px 0 0 0;
+    padding: 0;
+}
+
+div.sidebar ul {
+    color: white;
+    margin: 8px 0 8px 0;
+    padding: 0 0 0 30px;
+}
+
+div.sidebar div.tag-cloud {
+    float: right;
+    padding: 15px 15px 10px 10px;
+}
+
+/* :::: POST LIST PAGES :::: */
+div.post h4 {
+    font-size: 1.9em;
+    font-weight: normal;
+    margin: 1em 0 0 0;
+    padding: 0;
+    border-bottom: 1px solid #ccc;
+    letter-spacing: 0.02em;
+    font-variant: small-caps;
+}
+
+div.post h4 a {
+    color: #21421e;
+    display: block;
+    padding: 1px 5px 2px 5px;
+    text-decoration: none;
+}
+
+div.post h4 a:hover {
+    background-color: #21421e;
+    color: #dae7d9;
+}
+
+div.post p.meta {
+    color: #888;
+    margin: 0;
+    padding: 4px 0 4px 5px;
+    font-size: 0.9em;
+    background-image: url(img/metabg.png);
+}
+
+div.post p.meta a {
+    color: #444;
+}
+
+div.post p.related {
+    text-align: right;
+    font-size: 0.9em;
+    padding: 3px 5px 3px 5px;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    background-color: #f2f2f2;
+    background-image: url(img/relatedbg.png);
+    color: #555;
+}
+
+div.post p.related a {
+    color: #222;
+}
+
+div.post div.text {
+    margin: 5px;
+}
+
+div.post div.intro {
+    margin: 5px;
+    color: #444;
+    font-style: italic;
+}
+
+div.pagination {
+    text-align: center;
+    margin: 10px 0 10px 0;
+}
+
+form.comments {
+    margin: 0 20px 30px 20px;
+}
+
+ul#comments, ol#comments {
+    list-style: none;
+    margin: 10px 0 10px 30px;
+    padding: 0;
+}
+
+ul#comments li, ol#comments li {
+    margin: 4px 0 4px 0;
+    padding: 0;
+}
+
+ul#comments li + li, ol#comments li + li {
+    border-top: 1px solid #ccc;
+    padding-top: 5px;
+}
+
+ul#comments p, ol#comments p {
+    margin: 0;
+    padding: 5px;
+}
+
+ul#comments p.meta, ol#comments p.meta {
+    margin: 0;
+    padding: 0;
+    text-align: right;
+    font-size: 0.8em;
+    color: #555;
+}
+
+/* :::: TAG CLOUD :::: */
+div.tag-cloud {
+    padding: 10px;
+    font-size: 0.9em;
+}

@@ -1,0 +1,10 @@
+{% macro render_comment(comment) %}
+  {%- if comment.can_see() %}
+    <div class="comment" id="comment-{{ comment.comment_id }}">
+      <div class="text">{{ comment.body }}</div>
+      <p class="meta">Comment by {% if comment.www %}<a href="{{ comment.www|e
+         }}">{{ comment.author|e }}</a>{% else %}{{ comment.author|e
+         }}{% endif %} &mdash; {{ comment.pub_date|datetimeformat }}</p>
+    </div>
+  {%- endif %}
+{%- endmacro %}

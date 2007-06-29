@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}{% trans "Index" %}{% endblock %}
+{% include "_post.html" %}
+{% block contents %}
+  {%- for post in posts %}
+    {{ render_post(post) }}
+  {%- else %}
+    <h2>{% trans %}Welcome{% endtrans %}</h2>
+    <div class="notification">
+      <p>{% trans %}So far there are no posts in this blog.{% endtrans %}</p>
+    </div>
+  {%- endfor %}
+  {%- if pagination.necessary %}
+  <div class="pagination">
+    {{ pagination.generate() }}
+  </div>
+  {%- endif %}
+{% endblock %}

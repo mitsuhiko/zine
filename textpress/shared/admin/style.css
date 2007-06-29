@@ -1,0 +1,372 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 15px;
+}
+
+a {
+    color: #316182;
+}
+
+a:hover {
+    color: #ffa800;
+}
+
+/* :::: ADMIN PANEL HEADER :::: */
+div.header {
+    background: #316182 url(img/dialogbg.png) repeat-x left center;
+    padding: 32px;
+    margin: 20px 20px 0 20px;
+}
+
+div.header:before {
+    background: transparent url(img/border-tr.png) no-repeat top right;
+    height: 32px;
+    line-height: 0;
+    margin: -32px -32px 0 -32px;
+    padding: 0;
+    display: block;
+    content: url(img/border-tl.png);
+}
+
+div.header h1 {
+    color: white;
+    margin: -10px 0 -10px -10px;
+    font-family: 'Georgia', serif;
+    font-weight: normal;
+    padding: 0;
+    font-size: 25px;
+}
+
+div.header div.metanav {
+    position: absolute;
+    top: 40px;
+    right: 50px;
+    background-color: #222e4b;
+    border: 1px solid #4f849d;
+    padding: 5px;
+    font-size: 13px;
+    text-align: center;
+    color: #eee;
+}
+
+div.header div.metanav a {
+    color: #ffa800;
+    text-decoration: none;
+}
+
+div.header div.metanav a:hover {
+    text-decoration: underline;
+}
+
+div.footer {
+    background: transparent url(img/footerbg.png) repeat-x top left;
+    padding: 0 20px 0 20px;
+    color: white;
+    margin: 0 20px 20px 20px;
+}
+
+div.footer a {
+    color: white;
+}
+
+div.footer p {
+    margin: -15px 0 -20px 0;
+    padding: 0;
+    font-size: 13px;
+    text-align: center;
+}
+
+div.footer:after {
+    background: transparent url(img/border-br.png) no-repeat bottom right;
+    height: 32px;
+    line-height: 0;
+    margin: 0 -20px 0 -20px;
+    display: block;
+    content: url(img/border-bl.png);
+}
+
+div.body ul.navbar {
+    margin: 0 20px 0 20px;
+    padding: 0 0 0 15px;
+    height: 30px;
+    background-color: #222e4b;
+    list-style: none;
+}
+
+div.body ul.navbar li {
+    float: left;
+    margin: 0;
+    padding: 4px 0 0 4px;
+}
+
+div.body ul.navbar li a {
+    display: block;
+    background: transparent url(img/dialogbg.png) repeat-x center left;
+    padding: 0 10px 0 10px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px!important;
+    line-height: 26px!important;
+    height: 26px!important;
+}
+
+div.body ul.navbar li a:hover {
+    background-position: bottom;
+}
+
+div.body ul.navbar li.active a {
+    background: white;
+    color: #316182;
+}
+
+div.body ul.navbar ul {
+    position: absolute;
+    right: 30px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+div.body ul.navbar ul li.active a {
+    background-color: #eee;
+    color: #222;
+}
+
+div.body ul.navbar ul li a:hover {
+    background-color: #aaa;
+    color: white;
+}
+
+div.body div.contents {
+    background: #fff url(img/bodybg.png) repeat-x bottom left;
+    border: 4px solid #222e4b;
+    border-top: none;
+    border-bottom-width: 26px;
+    margin: 0 20px 0 20px;
+    padding: 10px;
+}
+
+div.contents h2 {
+    color: #222e4b;
+    margin: 0;
+    padding: 0;
+    font-family: 'Georgia', serif;
+    font-size: 1.8em;
+    border-bottom: 1px solid #ccc;
+}
+
+div.contents input {
+    font-family: 'Georgia', sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    border-color: #999 #ccc #ccc #999;
+    border-style: solid;
+    border-width: 1px;
+    padding: 3px;
+}
+
+div.contents textarea {
+    font-family: 'Consolas', 'Bitstream Vera Sans Mono', monospace;
+    font-size: 1em;
+    font-weight: normal;
+    border-color: #999 #ccc #ccc #999;
+    border-style: solid;
+    border-width: 1px;
+    padding: 4px;
+    width: 99%;
+}
+
+div.contents input:focus,
+div.contents textarea:focus {
+    border: 1px solid #ffa800;
+    outline: 1px solid #ff7200;
+}
+
+div.contents input[type="submit"],
+div.contents input[type="button"],
+div.contents input[type="reset"] {
+    padding: 0.2em 0.7em;
+    background-color: #fefefe;
+    border-color: #bbb #aaa #aaa #bbb;
+    border-style: double;
+    border-width: 3px;
+    color: #333;
+}
+
+div.contents input[type="submit"]:active,
+div.contents input[type="button"]:active,
+div.contents input[type="reset"]:active {
+    border-color: #aaa #bbb #bbb #aaa;
+    background-color: #f2f2f2;
+    outline: none;
+}
+
+div.contents fieldset {
+    margin: 10px 0 0 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #f2f2f2;
+}
+
+div.contents fieldset legend {
+    font-family: 'Georgian', serif;
+    font-size: 1.1em;
+    padding: 3px;
+    font-weight: bold;
+    background-color: #222e4b;
+    color: white;
+    border: 1px solid #316182;
+}
+
+div.contents fieldset ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+div.contents div.error {
+    margin: 10px 0 10px 0;
+    padding: 10px;
+    border: 1px solid #c90000;
+    background-color: #ece4e4;
+}
+
+div.contents div.error h3 {
+    color: #7e0000;
+    margin: 0;
+    padding: 0;
+    font-family: 'Georgia', serif;
+    font-size: 1.4em;
+}
+
+div.contents div.error p {
+    margin: 0;
+    padding: 4px 10px 4px 10px;
+}
+
+div.contents div.error a {
+    color: #7e0000;
+}
+
+div.contents div.actions {
+    margin: 30px 0 10px 0;
+    padding: 6px;
+    background-color: #eee;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+}
+
+div.contents table {
+    margin: 20px 0 10px 0;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+div.contents table th {
+    background-color: #ccc;
+    padding: 4px;
+    text-align: left;
+}
+
+div.contents table td {
+    border-bottom: 1px dotted #ccc;
+    padding: 3px;
+}
+
+div.contents table tr.even {
+    background-color: #f2f2f2;
+}
+
+/* :::: LOGIN BOX :::: */
+div.login-box {
+    background: #316182 url(img/dialogbg.png) repeat-x;
+    padding: 32px;
+    width: 400px;
+    margin: 70px auto 0 auto;
+}
+
+div.login-box:before {
+    background: transparent url(img/border-tr.png) no-repeat top right;
+    height: 32px;
+    line-height: 0;
+    margin: -32px -32px 0 -32px;
+    padding: 0;
+    display: block;
+    content: url(img/border-tl.png);
+}
+
+div.login-box:after {
+    background: transparent url(img/border-br.png) no-repeat bottom right;
+    height: 32px;
+    line-height: 0;
+    display: block;
+    margin: 0 -32px -32px -32px;
+    padding: 0;
+    content: url(img/border-bl.png);
+}
+
+div.login-box h2 {
+    background: transparent url(img/banner.png) no-repeat center top;
+    margin: 0;
+    padding: 90px 0 0 0;
+}
+
+div.login-box h2 span {
+    display: none;
+}
+
+div.login-box div.error,
+div.login-box div.notice {
+    background-color: #222e4b;
+    border: 1px solid #4f849d;
+    padding: 5px;
+    margin: 10px 10px 0 10px;
+    font-size: 14px;
+    text-align: center;
+    color: #ffa800;
+}
+
+div.login-box form {
+    text-align: center;
+}
+
+div.login-box dl {
+    margin: 20px 0 30px 0;
+    padding: 0;
+}
+
+div.login-box dt {
+    margin: 5px 0 5px 0;
+    padding: 0;
+    color: white;
+    font-weight: bold;
+}
+
+div.login-box dd {
+    margin: 0;
+    padding: 0 20px 0 20px;
+}
+
+div.login-box input {
+    color: white;
+    background: #222e4b;
+    border: 1px solid #4f849d;
+    font-family: 'Georgia', serif;
+    font-size: 20px;
+    font-weight: bold;
+    width: 340px;
+    padding: 3px;
+}
+
+div.login-box input[type="submit"] {
+    background-color: #ebf0f3;
+    width: 130px;
+    border-color: #bbb #aaa #aaa #bbb;
+    border-style: double;
+    border-width: 3px;
+    color: #333;
+}

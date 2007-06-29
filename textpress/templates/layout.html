@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='stanley/style.css') }}">
+  {{ get_page_metadata() }}
+</head>
+<body>
+  <div class="header">
+    <h1>{{ cfg.blog_title|e }}</h1>
+    <p class="description">{{ cfg.blog_tagline }}</p>
+  </div>
+  <div class="contents">
+    {% block contents %}{% endblock %}
+  </div>
+  <div class="sidebar">
+    {% block sidebar %}{% endblock %}
+  </div>
+  <div class="footer">
+    {#- be kind and don't remove that message. but of course we can't hinder you :) #}
+    Proudly powered by <a href="http://textpress.pocoo.org/">TextPress</a>.
+  </div>
+</body>
+</html>

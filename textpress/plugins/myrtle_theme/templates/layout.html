@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('myrtle_theme/shared', filename='style.css') }}">
+  {{ get_page_metadata() }}
+</head>
+<body>
+  <div class="pagewrapper">
+    <div class="page">
+      <div class="header">
+        <h1><a href="{{ url_for('blog/index')|e }}">{{ cfg.blog_title|e }}</a></h1>
+        <p class="description">{{ cfg.blog_tagline }}</p>
+      </div>
+      <div class="contents">
+        {% block contents %}{% endblock %}
+      </div>
+      <div class="sidebar">
+        {% block sidebar %}{% endblock %}
+        {%- if blogroll %}
+          <h3>{% trans "Blogroll" %}</h3>
+          <ul>
+          {%- for blog in blogroll %}
+            <li><a href="{{ blog.href|e }}">{{ blog.name|e }}</a></li>
+          {%- endfor %}
+          </ul>
+        {%- endif %}
+
+        {%- set tag_cloud = get_tag_cloud() %}
+        {%- if tag_cloud %}
+          <div class="tag-cloud">
+          {%- for tag in tag_cloud -%}
+            <a href="{{ url_for('blog/show_tag', slug=tag.slug)|e }}" style="font-size: {{
+               tag.size }}%" title="{% trans count=tag.count, tag=(tag.name|e)
+               %}One post tagged {{ tag }}{% pluralize %}{{ count }} posts tagged {{ tag
+               }}{% endtrans %}">{{ tag.name|e }}</a>
+          {% endfor %}
+          </div>
+        {%- endif %}
+
+        {%- set archive = get_post_archive_summary('months', 6) %}
+        {%- if not archive.empty %}
+          <h3>{% trans "Archive" %}</h3>
+          <ul>
+          {%- for item in archive.months %}
+            <li><a href="{{ url_for('blog/archive', year=item.year,
+              month=item.month)|e }}">{{ item|monthformat }}</a></li>
+          {%- endfor %}
+          {%- if archive.more %}
+            <li><a href="{{ url_for('blog/archive')|e }}">{% trans
+              "Complete archive" %}</a></li>
+          {%- endif %}
+          </ul>
+        {%- endif %}
+      </div>
+    </div>
+    <div class="footer">
+      {#- be kind and don't remove that message. but of course we can't hinder you :) #}
+      <p>
+        Proudly powered by <a href="http://textpress.pocoo.org/">TextPress</a>,
+        <a href="http://textpress.pocoo.org/themes/myrtle/">Myrtle theme</a> designed
+        by <a href="http://lucumr.pocoo.org/">Armin Ronacher</a>.
+        {%- if req.user.is_manager %}
+          | <a href="{{ url_for('admin/index')|e }}">{% trans 'Admin Panel' %}</a>
+        {%- endif %}
+      </p>
+    </div>
+  </div>
+</body>
+</html>

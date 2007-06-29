@@ -1,0 +1,39 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['posts', 'overview'] %}
+{% block title %}{% trans "Manage Posts" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Manage Posts" %}</h2>
+  <table>
+    <tr>
+      <th>{% trans "ID" %}</th>
+      <th>{% trans "Title" %}</th>
+      <th>{% trans "Author" %}</th>
+      <th>{% trans "Tags" %}</th>
+      <th>{% trans "Comments" %}</th>
+      <th>{% trans "Date" %}</th>
+    </tr>
+  {%- for post in posts %}
+    <tr class="{% cycle 'odd', 'even' %}">
+      <td>{{ post.post_id }}</td>
+      <td><a href="{{ url_for('admin/edit_post', post_id=post.post_id)|e }}">{{
+          post.title|e }}</a></td>
+      <td>{{ post.author.display_name|e }}</td>
+      <td>{% for tag in post.tags %}{{ tag.name|e }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+      <td>{{ post.comments|count }}</td>
+      <td>{{ post.pub_date|datetimeformat|e }}</td>
+    </tr>
+  {%- else %}
+    <tr><td colspan="4">{% trans "No posts." %}</td></tr>
+  {%- endfor %}
+  </table>
+  {%- if pagination.necessary %}
+  <div class="pagination">
+    {{ pagination.generate() }}
+  </div>
+  {%- endif %}
+  <div class="actions">
+    <form action="{{ url_for('admin/new_post')|e(true) }}" method="get">
+      <input type="submit" value="{% trans 'New Post' %}">
+    </form>
+  </div>
+{% endblock %}

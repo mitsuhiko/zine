@@ -1,0 +1,16 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['dashboard'] %}
+{% block title %}{% trans "Dashboard" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Dashboard" %}</h2>
+  <p>
+    {% trans user=req.user.username|e %}Welcome in the admin interface {{ user }}{% endtrans %}.
+  </p>
+  <p>
+    {% trans "Use one of the following links to get started quickly:" %}
+  </p>
+  <ul>
+    <li><a href="{{ url_for('admin/new_post')|e }}">{% trans "New Post" %}</a></li>
+    <li><a href="{{ url_for('admin/show_posts')|e }}">{% trans "Manage Posts" %}</a></li>
+  </ul>
+{% endblock %}

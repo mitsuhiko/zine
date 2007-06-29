@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %}{{ user.display_name|e }}{% endblock %}
+{% include "_post.html" %}
+{% block contents %}
+  <h2>{{ user.display_name|e }}</h2>
+  {%- if user.first_name and user.last_name %}
+    <p>{{ user.first_name }} {{ user.last_name }}</p>
+  {%- endif %}
+  {%- if user.description %}
+    <div class="description">{{ user.description }}</div>
+  {%- endif %}
+  <h3>{% trans "Posts this user wrote" %}</h3>
+  {%- for post in posts %}
+    {{ render_post(post) }}
+  {%- endfor %}
+  {%- if pagination.necessary %}
+  <div class="pagination">
+    {{ pagination.generate() }}
+  </div>
+  {%- endif %}
+{% endblock %}

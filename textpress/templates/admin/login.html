@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>{% trans 'Login' %} &mdash; {{ cfg.blog_title|e }} {% trans "Administration" %}</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='admin/style.css') }}">
+  {{ get_page_metadata() }}
+</head>
+<body>
+  <div class="login-box">
+    <h2><span>{% trans "Login" %}</span></h2>
+    {%- if logged_out %}
+      <div class="notice">{% trans "Successfully logged out" %}</div>
+    {%- elif error %}
+      <div class="error">{{ error|e }}</div>
+    {%- endif %}
+    <form action="{{ url_for('admin/login') }}" method="post">
+      <dl>
+        <dt>{% trans "Username" %}</dt>
+        <dd>{{ h.input_field('username', username) }}</dd>
+        <dt>{% trans "Password" %}</dt>
+        <dd>{{ h.input_field('password', '', 'password') }}</dd>
+      </dl>
+      <input type="submit" value="{% trans 'Login' %}">
+    </form>
+  </div>
+</body>
+</html>

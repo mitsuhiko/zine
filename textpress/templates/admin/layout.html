@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }} {% trans "Administration" %}</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='admin/style.css') }}">
+  {{ get_page_metadata() }}
+</head>
+<body>
+  <div class="header">
+    <h1>{{ cfg.blog_title|e }} {% trans "Administration" %}</h1>
+    <div class="metanav">
+      <a href="{{ url_for('blog/index')|e }}">{% trans "View Blog" %}</a> |
+      <a href="{{ url_for('admin/logout') }}">{% trans "Logout" %}</a>
+    </div>
+  </div>
+  <div class="body">
+    <ul class="navbar">
+    {%- for item in admin.navigation %}
+      <li{% if active_menu_item[0] == item.id%} class="active"{% endif
+        %}><a href="{{ item.url|e(true) }}">{{ item.title|e }}</a>
+      {%- if item.children and active_menu_item[0] == item.id %}<ul>
+        {%- for child in item.children %}
+        <li{% if active_menu_item == [item.id, child.id] %} class="active"{% endif
+          %}><a href="{{ child.url|e(true) }}">{{ child.title|e }}</a></li>
+        {%- endfor %}
+      </ul>{% endif %}</li>
+    {%- endfor %}
+    </ul>
+    <div class="contents">{% block contents %}{% endblock %}</div>
+  </div>
+  <div class="footer">
+    <p>Powered by <a href="http://textpress.pocoo.org/">TextPress</a> {{
+      textpress.version }} | &copy; Copyright {{ textpress.copyright|e }}</p>
+  </div>
+</body>
+</html>

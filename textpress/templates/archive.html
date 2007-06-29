@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}{% trans "Archive" %}{% endblock %}
+{% include "_post.html" %}
+{% block contents %}
+  {%- if not month %}
+    <h2>{% trans year %}Archive for {{ year }}{% endtrans %}</h2>
+  {%- elif not day %}
+    <h2>{% trans year, month %}Archive for {{ month }}, {{ year }}{% endtrans %}</h2>
+  {%- else %}
+    <h2>{% trans year, month, day %}Archive for {{ month }} {{ day }}, {{ year }}{% endtrans %}</h2>
+  {%- endif %}
+  {%- for post in posts %}
+    {{ render_post(post) }}
+  {%- endfor %}
+  {%- if pagination.necessary %}
+  <div class="pagination">
+    {{ pagination.generate() }}
+  </div>
+  {%- endif %}
+{% endblock %}

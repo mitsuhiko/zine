@@ -1,0 +1,88 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['posts', 'write'] %}
+{% block title %}{% trans "Write Post" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Write Post" %}</h2>
+  {%- if errors %}
+    <div class="error message">
+      <h3>{% trans "Error when processing the Data" %}</h3>
+      {%- for error in errors %}
+        <p>{{ error|e }}</p>
+      {%- endfor %}
+      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
+    </div>
+  {%- endif %}
+  {%- if created %}
+    <div class="information message">
+      <h3>{% trans "Post created successfully" %}</h3>
+      <p>{% trans post_title=created.title|e, post_link=url_for(created)
+        %}Your post <a href="{{ post_link }}">{{ post_title
+          }}</a> was created successfully.{% endtrans %}</p>
+      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
+    </div>
+  {%- endif %}
+  <form action="" method="post">
+    <fieldset>
+      <legend>{% trans "Title" %}</legend>
+      {{ h.input_field('title', form.title, size=36) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Post" %}</legend>
+      {{ h.textarea('body', form.body, rows=20) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Intro" %}</legend>
+      {{ h.textarea('intro', form.intro, rows=5) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Tags" %}</legend>
+      {{ h.input_field('add_tag') }}
+      <input type="submit" value="{% trans 'Add' %}">
+      <ul>
+      {%- for tag in tags %}
+        <li>{{ h.checkbox('tags', tag.slug, tag.slug in form.tags,
+               id='tags_' + tag.slug) }} <label for="tags_{{
+          tag.slug }}">{{ tag.name|e }}</label></li>
+      {%- endfor %}
+      </ul>
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Post Status" %}</legend>
+      <ul>
+      {%- for state, caption in post_status_choices %}
+        <li>{{ h.radio_button('post_status', state, form.post_status == state,
+               id='post_status_' + (state|string)) }} <label for="post_status_{{
+               state }}">{{ caption }}</li>
+      {%- endfor %}
+      </ul>
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Discussion" %}</legend>
+      <ul>
+        <li>{{ h.checkbox('comments_enabled', checked=form.comments_enabled)
+          }} <label for="comments_enabled">{% trans "Allow comments" %}</label></li>
+        <li>{{ h.checkbox('pings_enabled', checked=form.pings_enabled)
+          }} <label for="pings_enabled">{% trans "Allow pings" %}</label></li>
+      </ul>
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Publication Date" %}</legend>
+      {{ h.input_field('pub_date', form.pub_date, 'datetime') }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Post Slug" %}</legend>
+      {{ h.input_field('slug', form.slug) }}
+    </fieldset>
+    {%- if can_change_author %}
+      <fieldset>
+        <legend>{% trans "Author" %}</legend>
+        {{ h.input_field('author', form.author) }}
+      </fieldset>
+    {%- endif %}
+    <div class="actions">
+      <input type="submit" name="save_and_new" value="{% trans 'Save' %}">
+      <input type="submit" name="save_and_continue" value="{% trans 'Save and continue editing' %}">
+      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+    </div>
+  </form>
+{% endblock %}

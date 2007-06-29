@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block contents %}
+  <h2>Welcome To TextPress</h2>
+  <p>
+    Welcome to the TextPress setup. This assistent will help you getting
+    TextPress running.
+  </p>
+  <p>
+    All you have to do is to enter the <a
+      href="http://textpress.pocoo.org/wiki/Database_URI">database uri</a>
+    for your database. Here some examples:
+  </p>
+  <dl>
+    <dt>MySQL</dt>
+    <dd>mysql://username:password@server/database_name</dd>
+    <dt>SQLite</dt>
+    <dd>sqlite:////path/to/database</dd>
+    <dt>Postgres</dt>
+    <dd>postgres://username:password@server/database_name</dd>
+  </dl>
+  <p>
+    If you have problems selecting the correct database uri have a look
+    at the installation howto page in the
+    <a href="http://textpress.pocoo.org/wiki/Installation_Howto">wiki</a>.
+  </p>
+  <h2>Database URI</h2>
+  <p>
+    Enter your database URI into the field below and click "start install".
+  </p>
+  <form action="" method="post">
+    <input type="text" size="30" value="{{ database_uri|e }}" name="database_uri">
+    <input class="submit" type="submit" value="start install">
+  </form>
+  {% if error %}
+    <div class="error">
+      {% if severe %}
+        <h3>Error during Table Creation</h3>
+        <p>
+          An error occoured while creating the database tables for
+          TextPress. It could be that the database is now in an inconsistent
+          state. This can happen because your user doesn't have table
+          create privileges or because someone killed the database
+          server while performing the table creation.
+        </p>
+        <p>Original Exception:</p>
+      {% else %}
+        <h3>Could not connect to database</h3>
+      {% endif %}
+      <p>{{ error|e }}</p>
+    </div>
+  {% endif %}
+{% endblock %}

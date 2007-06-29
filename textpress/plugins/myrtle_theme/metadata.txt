@@ -1,0 +1,4 @@
+Name: Myrtle Theme
+Author: Armin Ronacher <armin.ronacher@active-4.com>
+License: GPL
+Summary: Clean theme, the current TextPress default.
