@@ -5,6 +5,16 @@ body {
     font-size: 15px;
 }
 
+::-moz-selection {
+    background-color: #ffa800;
+    color: white;
+}
+
+::selection {
+    background-color: #ffa800;
+    color: white;
+}
+
 a {
     color: #316182;
 }
@@ -158,7 +168,8 @@ div.contents h2 {
     border-bottom: 1px solid #ccc;
 }
 
-div.contents input {
+div.contents input,
+div.contents select {
     font-family: 'Georgia', sans-serif;
     font-size: 1em;
     font-weight: bold;
@@ -180,7 +191,8 @@ div.contents textarea {
 }
 
 div.contents input:focus,
-div.contents textarea:focus {
+div.contents textarea:focus,
+div.contents select:focus {
     border: 1px solid #ffa800;
     outline: 1px solid #ff7200;
 }
@@ -296,6 +308,19 @@ div.contents table tr.even {
 
 p.preview {
     text-align: right;
+}
+
+/* :::: CONFIG EDITOR :::: */
+table.config-table tr.user-defined {
+    background: #eee;
+}
+
+table.config-table td.default {
+    text-align: right;
+}
+
+table.config-table td input[type="text"] {
+    width: 97%;
 }
 
 /* :::: LOGIN BOX :::: */

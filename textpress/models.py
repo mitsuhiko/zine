@@ -227,6 +227,7 @@ def get_post_archive_summary(detail='months', limit=None, ignore_role=False):
 
         there_are_more = False
         if detail == 'years':
+            now, oldest = [x.replace(month=1, day=1) for x in now, oldest]
             while True:
                 now = now.replace(year=now.year - 1)
                 if now < oldest:
@@ -235,12 +236,14 @@ def get_post_archive_summary(detail='months', limit=None, ignore_role=False):
             else:
                 there_are_more = True
         elif detail == 'months':
+            now, oldest = [x.replace(day=1) for x in now, oldest]
             while limit is None or len(result) < limit:
-                if now.month - 1 == 0:
+                if not now.month - 1:
                     now = now.replace(year=now.year - 1, month=1)
                 else:
                     now = now.replace(month=now.month - 1)
                 if now < oldest:
+                    print (now, oldest, result)
                     break
                 result.append(now)
             else:

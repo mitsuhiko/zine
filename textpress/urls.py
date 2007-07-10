@@ -44,7 +44,7 @@ all_urls = [
         Rule('/users/<int:user_id>', endpoint='admin/edit_user'),
         Rule('/users/<int:user_id>/delete', endpoint='admin/delete_user'),
         Rule('/options/', endpoint='admin/options'),
-        Rule('/options/<topic>', endpoint='admin/options')
+        Rule('/options/configuration', endpoint='admin/configuration')
     ])
 ]
 

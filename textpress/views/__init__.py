@@ -38,6 +38,8 @@ all_views = {
     'admin/new_user':       admin.do_edit_user,
     'admin/edit_user':      admin.do_edit_user,
     'admin/delete_user':    admin.do_delete_user,
+    'admin/options':        admin.do_options,
+    'admin/configuration':  admin.do_configuration,
     'admin/login':          admin.do_login,
     'admin/logout':         admin.do_logout
 }

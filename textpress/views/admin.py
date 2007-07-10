@@ -41,8 +41,13 @@ def render_admin_response(template_name, **values):
     if req.user.role == ROLE_ADMIN:
         navigation_bar += [
             ('users', url_for('admin/show_users'), _('Users'), [
-                ('overview', url_for('admin/show_users'), _('Users')),
+                ('overview', url_for('admin/show_users'), _('Overview')),
                 ('edit', url_for('admin/new_user'), _('Edit User'))
+            ]),
+            ('options', url_for('admin/options'), _('Options'), [
+                ('overview', url_for('admin/options'), _('Overview')),
+                ('configuration', url_for('admin/configuration'),
+                 _('Configuration Editor'))
             ])
         ]
 
@@ -442,6 +447,35 @@ def do_delete_user(req, user_id):
             redirect(url_for('admin/show_users'))
 
     return render_admin_response('admin/delete_user.html', user=user)
+
+
+@require_role(ROLE_ADMIN)
+def do_options(req):
+    redirect(url_for('admin/configuration'))
+
+
+@require_role(ROLE_ADMIN)
+def do_configuration(req):
+    if req.method == 'POST':
+        if req.form.get('enable_editor'):
+            req.session['configuration_editor_enabled'] = True
+        elif req.form.get('disable_editor'):
+            req.session['configuration_editor_enabled'] = False
+        else:
+            already_default = set()
+            for key, value in req.form.iteritems():
+                if key.endswith('__DEFAULT'):
+                    key = key[:-9]
+                    req.app.cfg.revert_to_default(key)
+                    already_default.add(key)
+                elif key in req.app.cfg and key not in already_default:
+                    req.app.cfg.set_from_string(key, value)
+        redirect(url_for('admin/configuration'))
+
+    return render_admin_response('admin/configuration.html',
+        categories=req.app.cfg.get_detail_list(),
+        editor_enabled=req.session.get('configuration_editor_enabled', False)
+    )
 
 
 def do_login(req):

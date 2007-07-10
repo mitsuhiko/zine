@@ -36,6 +36,24 @@ DEFAULT_VARS = {
 }
 
 
+def from_string(value, conv, default):
+    if conv is bool:
+        conv = lambda x: x == 'True'
+    try:
+        return conv(value)
+    except (ValueError, TypeError), e:
+        return default
+
+
+def get_converter_name(conv):
+    """Get the name of a converter"""
+    return {
+        bool:   'boolean',
+        int:    'integer',
+        float:  'float'
+    }.get(conv, 'string')
+
+
 class Configuration(object):
     """Helper class that manages configuration values."""
 
@@ -44,6 +62,8 @@ class Configuration(object):
         self.config_vars = DEFAULT_VARS.copy()
         self._engine = app.database_engine
         self._cache = {}
+
+        self.clear_cache = self._cache.clear
 
     def __getitem__(self, key):
         if key not in self.config_vars:
@@ -58,19 +78,14 @@ class Configuration(object):
         if row is None:
             rv = default
         else:
-            if conv is bool:
-                conv = lambda x: x == 'True'
-            try:
-                rv = conv(row.value)
-            except (ValueError, TypeError):
-                rv = default
+            rv = from_string(row.value, conv, default)
         self._cache[key] = rv
         return rv
 
     def __setitem__(self, key, value):
         if not key in self.config_vars:
             raise KeyError()
-        svalue = str(value)
+        svalue = unicode(value)
         c = configuration.c
         result = self._engine.execute(configuration.select(c.key == key))
         row = result.fetchone()
@@ -81,8 +96,21 @@ class Configuration(object):
                                  value=svalue)
         self._cache[key] = value
 
+    def set_from_string(self, key, value, override=False):
+        conv, default = self.config_vars[key]
+        new = from_string(value, conv, default)
+        if override or unicode(self[key]) != unicode(new):
+            self[key] = new
+
+    def revert_to_default(self, key):
+        self._engine.execute(configuration.delete(configuration.c.key == key))
+        self._cache.pop(key, None)
+
     def __iter__(self):
         return iter(self.config_vars)
+
+    def __contains__(self, key):
+        return key in self.config_vars
 
     iterkeys = __iter__
 
@@ -102,6 +130,42 @@ class Configuration(object):
 
     def items(self):
         return list(self.iteritems())
+
+    def get_detail_list(self):
+        """
+        Return a list of categories with keys and some more
+        details for the advanced configuration editor.
+        """
+        categories = {}
+
+        for key, (conv, default) in self.config_vars.iteritems():
+            c = configuration.c
+            result = self._engine.execute(configuration.select(c.key == key))
+            row = result.fetchone()
+            if row is None:
+                use_default = True
+                value = unicode(default)
+            else:
+                use_default = False
+                value = unicode(from_string(row.value, conv, default))
+            if '/' in key:
+                category, name = key.split('/', 1)
+            else:
+                category = '__core__'
+                name = key
+            categories.setdefault(category, []).append({
+                'name':         name,
+                'key':          key,
+                'type':         get_converter_name(conv),
+                'value':        value,
+                'use_default':  use_default,
+                'default':      default
+            })
+
+        return [{
+            'items':    sorted(children, key=lambda x: x['name']),
+            'name':     key
+        } for key, children in sorted(categories.items())]
 
     def __len__(self):
         return len(self.config_vars)
