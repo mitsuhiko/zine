@@ -1,0 +1,52 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['comments', 'edit'] %}
+{% block title %}{% trans "Edit Comment" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Edit Comment" %}</h2>
+  {%- if errors %}
+    <div class="error message">
+      <h3>{% trans "Error when processing the Data" %}</h3>
+      {%- for error in errors %}
+        <p>{{ error|e }}</p>
+      {%- endfor %}
+      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
+    </div>
+  {%- endif %}
+  <form action="" method="post">
+    <fieldset>
+      <legend>{% trans "Author" %}</legend>
+      {{ h.input_field('author', form.author) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "E-Mail" %}</legend>
+      {{ h.input_field('email', form.email) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Webpage" %}</legend>
+      {{ h.input_field('www', form.www) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Text" %}</legend>
+      {{ h.textarea('body', form.body, rows=7) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Date" %}</legend>
+      {{ h.input_field('pub_date', form.pub_date) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Block Comment" %}</legend>
+      {{ h.checkbox('blocked', 'yes', form.blocked) }}
+      {% if comment.blocked %}
+        <label for="blocked">{% trans reason=comment.blocked_msg|e
+          %}block comment ({{ reason }}){% endtrans %}</label>
+      {% else %}
+        <label for="blocked">{% trans "block comment" %}</label>
+      {% endif %}
+    </fieldset>
+    <div class="actions">
+      <input type="submit" value="{% trans 'Save' %}">
+      <input type="submit" name="delete" value="{% trans 'Delete' %}">
+      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+    </div>
+  </form>
+{% endblock %}

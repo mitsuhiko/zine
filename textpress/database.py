@@ -124,7 +124,8 @@ comments = db.Table('comments', metadata,
     db.Column('parent_id', db.Integer, db.ForeignKey('comments.comment_id')),
     db.Column('pub_date', db.DateTime),
     db.Column('blocked', db.Boolean),
-    db.Column('blocked_msg', db.Unicode(250))
+    db.Column('blocked_msg', db.Unicode(250)),
+    db.Column('submitter_ip', db.Unicode(100))
 )
 
 

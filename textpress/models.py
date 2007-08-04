@@ -243,7 +243,6 @@ def get_post_archive_summary(detail='months', limit=None, ignore_role=False):
                 else:
                     now = now.replace(month=now.month - 1)
                 if now < oldest:
-                    print (now, oldest, result)
                     break
                 result.append(now)
             else:
@@ -533,7 +532,8 @@ class Tag(object):
 class Comment(object):
     """Represent one comment."""
 
-    def __init__(self, post, author, email, www, body, parent=None, pub_date=None):
+    def __init__(self, post, author, email, www, body, parent=None, pub_date=None,
+                 submitter_ip='0.0.0.0'):
         if isinstance(post, (int, long)):
             self.post_id = post
         else:
@@ -551,6 +551,7 @@ class Comment(object):
         self.pub_date = pub_date
         self.blocked = False
         self.blocked_msg = None
+        self.submitter_ip = submitter_ip
 
     @staticmethod
     def get_blocked(self):

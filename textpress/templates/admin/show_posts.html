@@ -19,7 +19,7 @@
           post.title|e }}</a></td>
       <td>{{ post.author.display_name|e }}</td>
       <td>{% for tag in post.tags %}{{ tag.name|e }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
-      <td>{{ post.comments|count }}</td>
+      <td><a href="{{ url_for('admin/show_comments', post_id=post.post_id)|e }}">{{ post.comments|count }}</a></td>
       <td>{{ post.pub_date|datetimeformat|e }}</td>
     </tr>
   {%- else %}

@@ -229,17 +229,20 @@ def do_show_post(req, year, month, day, slug):
             errors.append(_('Your comment is too long.'))
 
         # allow plugins to do additional comment validation
-        for result in emit_event('before-comment-created', form):
+        data = {'form': form, 'request': req}
+        for result in emit_event('before-comment-created', data):
             errors.extend(result or ())
 
         # if we don't have errors let's save it and emit an
         # `before-comment-saved` event so that plugins can do
         # block comments so that administrators have to approve it
         if not errors:
-            comment = Comment(post, name, email, www, body)
-            emit_event('before-comment-saved', comment)
+            data = {'comment': comment, 'request': req}
+            ip = req.environ.get('REMOTE_ADDR') or '0.0.0.0'
+            comment = Comment(post, name, email, www, body, submitter_ip=ip)
+            emit_event('before-comment-saved', data)
             db.flush()
-            emit_event('after-comment-saved', comment)
+            emit_event('after-comment-saved', data)
             redirect(url_for(post))
 
     return render_response('show_post.html',

@@ -18,6 +18,7 @@ DEFAULT_VARS = {
     # general settings
     'blog_title':           (unicode, u'My TextPress Blog'),
     'blog_tagline':         (unicode, u'just another textpress blog'),
+    'blog_url':             (unicode, u''),
     'timezone':             (unicode, u'Europe/Vienna'),
     'maintenance_mode':     (bool, False),
     'sid_cookie_name':      (unicode, u'textpress_sid'),
@@ -60,7 +61,6 @@ class Configuration(object):
     def __init__(self, app):
         self.app = app
         self.config_vars = DEFAULT_VARS.copy()
-        self._engine = app.database_engine
         self._cache = {}
 
         self.clear_cache = self._cache.clear
@@ -72,7 +72,7 @@ class Configuration(object):
             return self._cache[key]
         conv, default = self.config_vars[key]
         c = configuration.c
-        result = self._engine.execute(configuration.select(c.key == key))
+        result = self.app.database_engine.execute(configuration.select(c.key == key))
         row = result.fetchone()
         conv, default = self.config_vars[key]
         if row is None:
@@ -87,12 +87,12 @@ class Configuration(object):
             raise KeyError()
         svalue = unicode(value)
         c = configuration.c
-        result = self._engine.execute(configuration.select(c.key == key))
+        result = self.app.database_engine.execute(configuration.select(c.key == key))
         row = result.fetchone()
         if row is None:
-            self._engine.execute(configuration.insert(), key=key, value=svalue)
+            self.app.database_engine.execute(configuration.insert(), key=key, value=svalue)
         else:
-            self._engine.execute(configuration.update(c.key == key),
+            self.app.database_engine.execute(configuration.update(c.key == key),
                                  value=svalue)
         self._cache[key] = value
 
@@ -103,7 +103,7 @@ class Configuration(object):
             self[key] = new
 
     def revert_to_default(self, key):
-        self._engine.execute(configuration.delete(configuration.c.key == key))
+        self.app.database_engine.execute(configuration.delete(configuration.c.key == key))
         self._cache.pop(key, None)
 
     def __iter__(self):
@@ -140,7 +140,7 @@ class Configuration(object):
 
         for key, (conv, default) in self.config_vars.iteritems():
             c = configuration.c
-            result = self._engine.execute(configuration.select(c.key == key))
+            result = self.app.database_engine.execute(configuration.select(c.key == key))
             row = result.fetchone()
             if row is None:
                 use_default = True

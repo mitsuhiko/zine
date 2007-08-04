@@ -268,6 +268,16 @@ def is_valid_url(url):
     return protocol and protocol != 'javascript'
 
 
+def is_valid_ip(value):
+    """Check if the string provided is a valid IP."""
+    # XXX: ipv6!
+    idx = 0
+    for idx, bit in enumerate(value.split('.')):
+        if not bit.isdigit() or not 0 <= int(value) <= 255:
+            return False
+    return idx == 3
+
+
 def parse_iso8601(value):
     """
     Parse an iso8601 date into a datetime object.

@@ -400,6 +400,10 @@ class TextPress(object):
         # add a list for database checks
         self._database_checks = [upgrade_database]
 
+        # and instanciate the configuration. this won't fail,
+        # even if the database is not connected.
+        self.cfg = Configuration(self)
+
         # if the application is not installed we replace the
         # dispatcher with a setup application
         database_uri = self.get_database_uri()
@@ -410,9 +414,6 @@ class TextPress(object):
 
         # connect to the database, ignore errors for now
         self.connect_to_database(database_uri)
-
-        # setup database based config
-        self.cfg = Configuration(self)
 
         # setup core package urls and shared stuff
         from textpress.urls import all_urls

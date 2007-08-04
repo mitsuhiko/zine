@@ -1,0 +1,55 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['options', 'configuration'] %}
+{% block title %}{% trans "Configuration Editor" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Configuration Editor" %}</h2>
+  <p>{% trans %}
+    Here you can tune all registered configuration values. Note that some of
+    them (especially the core configuration values) can easily break your
+    installation if set to an illegal value. Don't alter any of those values
+    if you don't know what effect they will have. This editor is especially
+    useful if you want to configure plugins that don't provide a configuration
+    page (yet).
+  {% endtrans %}</p>
+  <form action="" method="post">
+  {% if editor_enabled %}
+      <table class="config-table">
+      {%- for category in categories %}
+        <tr><th colspan="4">{{ category.name|e }}</th></tr>
+        {%- for item in category.items %}
+        <tr{% if not item.use_default %} class="user-defined"{% endif %}>
+          <td>{{ item.name|e }}</td>
+          <td>
+          {% if item.type == 'boolean' -%}
+            <select name="{{ item.key|e }}">
+              <option{% if item.value == 'True' %} selected{% endif %} value="True">{% trans "True" %}</option>
+              <option{% if item.value != 'True' %} selected{% endif %} value="False">{% trans "False" %}</option>
+            </select>
+          {%- else -%}
+            {{ h.input_field(item.key, item.value, size="30") }}
+          {%- endif %}</td>
+          <td>{{ item.type }}</td>
+          <td class="default">
+            {%- if not item.use_default -%}
+              {{ h.checkbox(item.key + '__DEFAULT') }}
+            {%- endif -%}
+          </td>
+        </tr>
+        {%- endfor %}
+      {%- endfor %}
+      </table>
+      <div class="actions">
+        <input type="submit" value="{% trans 'Save' %}">
+        <input type="submit" name="disable_editor" value="{% trans 'Disable Editor' %}">
+      </div>
+  {% else %}
+    <p>{% trans %}
+      The configuration editor is disabled because of this. If you really want
+      to use it, click the button to proceed.
+    {% endtrans %}</p>
+    <div class="actions">
+      <input type="submit" name="enable_editor" value="{% trans 'Enable Editor' %}">
+    </div>
+  {% endif %}
+  </form>
+{% endblock %}

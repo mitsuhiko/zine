@@ -11,7 +11,7 @@
 from os import path
 
 from werkzeug.wrappers import BaseRequest
-from werkzeug.utils import SharedDataMiddleware
+from werkzeug.utils import SharedDataMiddleware, get_current_url
 from jinja import Environment, FileSystemLoader
 
 
@@ -45,6 +45,10 @@ class WebSetup(object):
             self.app._reinit()
         return render_template(start_response, 'finished.html')
 
+    def calculate_blog_url(self, req):
+        """Return the URL to the blog."""
+        return get_current_url(req.environ, root_only=True)
+
     def do_setup(self, req, start_response):
         """Do the application setup."""
         tmpl = jinja_env.get_template('setup.html')
@@ -62,6 +66,7 @@ class WebSetup(object):
                 try:
                     self.app.perform_database_upgrade()
                     self.app.set_database_uri(database_uri)
+                    self.app.cfg['blog_url'] = self.calculate_blog_url(req)
                 except Exception, e:
                     error = str(e)
                     severe = True

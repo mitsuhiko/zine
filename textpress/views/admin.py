@@ -12,11 +12,11 @@
 """
 from datetime import datetime
 from textpress.api import *
-from textpress.models import User, Post, Tag, ROLE_ADMIN, ROLE_EDITOR, \
-     ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, STATUS_DRAFT, \
-     STATUS_PUBLISHED, get_post_list
+from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
+     ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
+     STATUS_DRAFT, STATUS_PUBLISHED, get_post_list
 from textpress.utils import parse_datetime, format_datetime, \
-     is_valid_email
+     is_valid_email, is_valid_url
 
 
 def render_admin_response(template_name, **values):
@@ -31,6 +31,9 @@ def render_admin_response(template_name, **values):
         ('posts', url_for('admin/show_posts'), _('Posts'), [
             ('overview', url_for('admin/show_posts'), _('Overview')),
             ('write', url_for('admin/new_post'), _('Write Post'))
+        ]),
+        ('comments', url_for('admin/show_comments'), _('Comments'), [
+            ('overview', url_for('admin/show_comments'), _('Overview'))
         ]),
         ('tags', url_for('admin/show_tags'), _('Tags'), [
             ('overview', url_for('admin/show_tags'), _('Overview')),
@@ -243,6 +246,106 @@ def do_delete_post(req, post_id):
             redirect(url_for('admin/show_posts'))
 
     return render_admin_response('admin/delete_post.html', post=post)
+
+
+@require_role(ROLE_AUTHOR)
+def do_show_comments(req, post_id=None):
+    post = None
+    if post_id is None:
+        comments = Comment.select()
+    else:
+        post = Post.get(post_id)
+        if post is None:
+            abort(404)
+        comments = Comment.select(Comment.c.post_id == post_id)
+    return render_admin_response('admin/show_comments.html',
+        post=post,
+        comments=comments
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_edit_comment(req, comment_id):
+    """Edit a comment."""
+    errors = []
+
+    comment = Comment.get(comment_id)
+    if comment is None:
+        abort(404)
+    form = {
+        'author':       comment.author,
+        'email':        comment.email,
+        'www':          comment.www,
+        'body':         comment.body,
+        'pub_date':     format_datetime(comment.pub_date),
+        'blocked':      comment.blocked
+    }
+
+    if req.method == 'POST':
+        # cancel
+        if req.form.get('cancel'):
+            redirect(url_for('admin/show_comments'))
+
+        # delete
+        if req.form.get('delete'):
+            redirect(url_for('admin/delete_comment', comment_id=comment_id))
+
+        form['author'] = author = req.form.get('author')
+        if not author:
+            errors.append(_('You have to give the comment an author.'))
+        form['email'] = email = req.form.get('email')
+        if not email or not is_valid_email(email):
+            errors.append(_('You have to provide a valid mail address for the author.'))
+        form['www'] = www = req.form.get('www')
+        form['body'] = body = req.form.get('body')
+        if not body:
+            errors.append(_('Need a text for this comment.'))
+        if www and not is_valid_url(www):
+            errors.append(_('You have to ommitt the url or provide a valid one.'))
+        form['pub_date'] = pub_date = req.form.get('pub_date')
+        try:
+            pub_date = parse_datetime(pub_date)
+        except ValueError:
+            errors.append(_('Invalid date for comment.'))
+        form['blocked'] = blocked = bool(req.form.get('blocked'))
+
+        if not errors:
+            comment.author = author
+            comment.email = email
+            comment.www = www
+            comment.pub_date = pub_date
+            comment.body = body
+            comment.blocked = blocked
+            if not blocked:
+                comment.blocked_msg = ''
+            elif not comment.blocked_msg:
+                comment.blocked_msg = _('blocked by user')
+            comment.save()
+            db.flush()
+            redirect(url_for('admin/show_comments'))
+
+    return render_admin_response('admin/edit_comment.html',
+        comment=comment,
+        form=form,
+        errors=errors
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_delete_comment(req, comment_id):
+    comment = Comment.get(comment_id)
+    if comment is None:
+        redirect(url_for('admin/show_comments'))
+
+    if req.method == 'POST':
+        if req.form.get('cancel'):
+            redirect(url_for('admin/edit_comment', comment_id=comment.comment_id))
+        elif req.form.get('confirm'):
+            comment.delete()
+            db.flush()
+            redirect(url_for('admin/show_comments'))
+
+    return render_admin_response('admin/delete_comment.html', comment=comment)
 
 
 @require_role(ROLE_AUTHOR)
