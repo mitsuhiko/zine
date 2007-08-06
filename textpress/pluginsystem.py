@@ -39,7 +39,7 @@ def find_plugins(app):
             full_name = path.join(folder, filename)
             if path.isdir(full_name) and \
                path.exists(path.join(full_name, 'metadata.txt')):
-                yield Plugin(app, filename, full_name,
+                yield Plugin(app, filename, path.abspath(full_name),
                              filename not in disabled_plugins)
 
 
@@ -94,7 +94,7 @@ class Plugin(object):
                 if not line or line.startswith('#'):
                     continue
                 key, value = line.split(':', 1)
-                result[key.rstrip()] = value.lstrip()
+                result[key.rstrip().lower()] = value.lstrip()
         finally:
             f.close()
         return result

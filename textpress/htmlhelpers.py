@@ -72,9 +72,9 @@ def radio_button(name, value='yes', checked=False, **attr):
     return _generate_tag('input', attr)
 
 
-def script(href, type='text/x-javascript', **attr):
+def script(src, type='text/javascript', **attr):
     """Render a script tag."""
-    attr.update(href=href, type=type, id=None)
+    attr.update(src=src, type=type, id=None)
     return _generate_tag('script', attr)
 
 

@@ -136,6 +136,27 @@ div.error p {
     padding: 3px 0 3px 20px;
 }
 
+/* ::: INFORMATION DIALOG :::: */
+div.info {
+    background-color: #e4e5d7;
+    border: 1px solid #aaa;
+    padding: 5px;
+    margin: 10px 0 10px 0;
+    font-size: 0.9em;
+}
+
+div.info h3 {
+    color: #111;
+    margin: 0 0 5px 0;
+    padding: 0;
+    font-size: 1.4em;
+}
+
+div.info p {
+    margin: 0;
+    padding: 3px 0 3px 20px;
+}
+
 /* :::: PAGE :::: */
 div.pagewrapper {
     border-top: 8px solid #222;
@@ -327,6 +348,13 @@ form.comments {
 ul#comments, ol#comments {
     list-style: none;
     margin: 10px 0 10px 30px;
+    padding: 0;
+}
+
+#comments ul, #comments ol {
+    border-top: 1px solid #ccc;
+    list-style: none;
+    margin: 10px 0 10px 20px;
     padding: 0;
 }
 

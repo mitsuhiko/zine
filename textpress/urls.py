@@ -27,6 +27,7 @@ all_urls = [
         Rule('/<string:tag>/feed.atom', endpoint='blog/atom_feed'),
     ]),
     Rule('/_services/', endpoint='blog/service_rsd'),
+    Rule('/_services/json/<identifier>', endpoint='blog/json_service'),
     Submount('/admin', [
         Rule('/', endpoint='admin/index'),
         Rule('/login', endpoint='admin/login'),
@@ -48,7 +49,9 @@ all_urls = [
         Rule('/users/<int:user_id>', endpoint='admin/edit_user'),
         Rule('/users/<int:user_id>/delete', endpoint='admin/delete_user'),
         Rule('/options/', endpoint='admin/options'),
-        Rule('/options/configuration', endpoint='admin/configuration')
+        Rule('/options/configuration', endpoint='admin/configuration'),
+        Rule('/about/', endpoint='admin/about'),
+        Rule('/about/textpress', endpoint='admin/about_textpress')
     ])
 ]
 

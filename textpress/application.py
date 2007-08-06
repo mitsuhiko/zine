@@ -190,13 +190,14 @@ class Request(BaseRequest):
         elif isinstance(user, basestring):
             user = User.get_by(username=user)
         if user is None:
-            raise RuntimeError('user does not exist')
+            raise RuntimeError('User does not exist')
         self.user = user
 
     def logout(self):
         """Log the current user out."""
         from textpress.models import User
         self.user = User.get_nobody()
+        self.session.clear()
 
     def save_session(self):
         """Save the session if required. Return True if it was saved."""
@@ -416,14 +417,18 @@ class TextPress(object):
         self.connect_to_database(database_uri)
 
         # setup core package urls and shared stuff
+        import textpress
         from textpress.urls import all_urls
         from textpress.views import all_views
+        from textpress.services import all_services
         self._views = all_views.copy()
         self._url_rules = all_urls[:]
+        self._services = all_services.copy()
         self._shared_exports = {}
         self._template_globals = {}
         self._template_filters = {}
-        self.themes = {}
+        self.themes = {'default': path.join(path.dirname(textpress.__file__),
+                                            'templates')}
         self.apis = {}
 
         # load plugins
@@ -440,7 +445,6 @@ class TextPress(object):
             self.perform_database_upgrade()
 
         # init the template system with the core stuff
-        import textpress
         from textpress import htmlhelpers, models
         env = Environment(loader=ThemeLoader(self))
         env.globals.update(
@@ -598,6 +602,12 @@ class TextPress(object):
             raise RuntimeError('cannot add view after application setup')
         self._views[endpoint] = callback
 
+    def add_servicepoint(self, identifier, callback):
+        """Add a new function as servicepoint."""
+        if self._setup_finished:
+            raise RuntimeError('cannot add servicepoint after application setup')
+        self._services[identifier] = callback
+
     def connect_event(self, event, callback):
         """Connect an event to the current application."""
         return self._event_manager.connect(event, callback)
@@ -613,11 +623,19 @@ class TextPress(object):
     def get_page_metadata(self):
         """Return the metadata as HTML part for templates."""
         from textpress.htmlhelpers import script, meta, link
+        from textpress.utils import dump_json
         generators = {'script': script, 'meta': meta, 'link': link}
         result = [
             meta(name='generator', content='TextPress'),
-            link('pingback', url_for('blog/service_rsd'))
+            link('pingback', url_for('blog/service_rsd')),
+            script(url_for('core/shared', filename='js/jQuery.js')),
+            script(url_for('core/shared', filename='js/TextPress.js'))
         ]
+        result.append(
+            u'<script type="text/javascript">'
+                u'TextPress.BLOG_URL = %s;'
+            u'</script>' % dump_json(self.cfg['blog_url'].rstrip('/'))
+        )
         for type, attr in _locals.page_metadata:
             result.append(generators[type](**attr))
         return u'\n'.join(result)

@@ -35,8 +35,9 @@
       <ul id="comments">
       {%- for comment in post.root_comments recursive %}
         {%- if not comment.blocked %}
-        <li>{{ render_comment(comment) }}{% if comment.children
-          %}<ul>{{ loop(comment.children) }}</ul>{% endif %}</li>
+        <li>{{ render_comment(comment, post.comments_enabled
+          and not cfg.use_flat_comments) }}{% if
+          comment.children %}<ul>{{ loop(comment.children) }}</ul>{% endif %}</li>
         {%- endif %}
       {%- endfor %}
       </ul>
@@ -45,6 +46,7 @@
   {%- if post.comments_enabled %}
     <h3 id="leave-reply">{% trans "Leave a Reply" %}</h3>
     <form action="#leave-reply" class="comments" method="post">
+      {{ h.input_field('parent', form.parent, 'hidden') }}
       <dl>
         <dt><label for="name">{% trans "Name*" %}</label></dt>
         <dd>{{ h.input_field('name', form.name) }}</dd>
@@ -54,6 +56,7 @@
         <dd>{{ h.input_field('www', form.www) }}</dd>
       </dl>
       {{ h.textarea('body', form.body) }}
+      <div id="comment-message">{# used for the reply callback #}</div>
       {%- if errors %}
         <div class="error">
           <h3>{% trans 'Could not Post Comment' %}</h3>

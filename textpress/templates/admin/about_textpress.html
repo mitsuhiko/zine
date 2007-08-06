@@ -1,0 +1,18 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['about', 'textpress'] %}
+{% block title %}{% trans "About TextPress" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "About TextPress" %}</h2>
+  <div class="text">
+    <p>
+      TextPress is am open source content publishing platform emphasizing ease
+      of use and extensibility. It provides an powerful internal infrastructure,
+      an simple and an intuitive userinterface.
+    </p>
+    <p>
+      TextPress is distributed under the modified BSD License. The complete text of
+      the license can be found online as well as in the LICENSE file included in
+      the distribution.
+    </p>
+  </div>
+{% endblock %}

@@ -57,6 +57,11 @@ def render_admin_response(template_name, **values):
     for result in emit_event('collect-admin-navigation-links'):
         navigation_bar.extend(result or ())
 
+    navigation_bar.append(('about', url_for('admin/about'), _('About'), [
+        ('system', url_for('admin/about'), _('System')),
+        ('textpress', url_for('admin/about_textpress'), _('TextPress'))
+    ]))
+
     values['admin'] = {
         'navigation':   [{
             'id':       id,
@@ -579,6 +584,45 @@ def do_configuration(req):
         categories=req.app.cfg.get_detail_list(),
         editor_enabled=req.session.get('configuration_editor_enabled', False)
     )
+
+
+@require_role(ROLE_AUTHOR)
+def do_about(req):
+    from threading import activeCount
+    thread_count = activeCount()
+    multithreaded = thread_count > 1 and req.environ['wsgi.multithread']
+
+    return render_admin_response('admin/about.html',
+        apis=[{
+            'name':         name,
+            'blog_id':      blog_id,
+            'preferred':    preferred,
+            'endpoint':     endpoint
+        } for name, (blog_id, preferred, endpoint) in req.app.apis.iteritems()],
+        endpoints=[{
+            'name':         rule.endpoint,
+            'rule':         unicode(rule)
+        } for rule in sorted(req.app.url_map._rules, key=lambda x: x.endpoint)],
+        servicepoints=sorted(req.app._services.keys()),
+        configuration=[{
+            'key':          key,
+            'default':      default,
+            'value':        req.app.cfg[key]
+        } for key, (_, default) in req.app.cfg.config_vars.iteritems()],
+        hosting_env={
+            'persistent':       not req.environ['wsgi.run_once'],
+            'multithreaded':    multithreaded,
+            'thread_count':     thread_count,
+            'multiprocess':     req.environ['wsgi.multiprocess'],
+            'wsgi_version':     '.'.join(map(str, req.environ['wsgi.version']))
+        },
+        plugins=sorted(req.app.plugins.values(), key=lambda x: x.name)
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_about_textpress(req):
+    return render_admin_response('admin/about_textpress.html')
 
 
 def do_login(req):

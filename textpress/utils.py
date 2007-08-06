@@ -18,6 +18,7 @@ from time import time, strptime
 from datetime import datetime, timedelta
 from random import choice, randrange, random
 from urlparse import urlparse
+from simplejson import dumps as dump_json, loads as load_json
 
 from werkzeug.utils import lazy_property
 

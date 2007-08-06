@@ -1,0 +1,86 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['about', 'system'] %}
+{% block title %}{% trans "About The System" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "About The System" %}</h2>
+  <h3>{% trans "Hosting Environment" %}</h3>
+  <dl>
+    <dt>TextPress Version</dt>
+    <dd>{{ textpress.version|e }}</dd>
+    <dt>Persistent Environment</dt>
+    <dd>{{ 'yes' if hosting_env.persistent else 'no' }}</dd>
+    <dt>Multithreaded</dt>
+    <dd>
+    {%- if hosting_env.multithreaded -%}
+      {% trans count=hosting_env.thread_count %}yes ({{ count }} active threads){% endtrans %}
+    {%- else -%}
+      no
+    {%- endif -%}
+    </dd>
+    <dt>Multiprocess</dt>
+    <dd>{{ 'yes' if hosting_env.multiprocess else 'no' }}</dd>
+    <dt>WSGI Version</dt>
+    <dd>{{ hosting_env.wsgi_version|e }}</dd>
+  </dl>
+  <h3>{% trans "URL Endpoints" %}</h3>
+  <p>{% trans count=endpoints|count %}
+    The following {{ count }} endpoints are registered on this instance:
+  {% endtrans %}</p>
+  <ul>
+  {%- for endpoint in endpoints %}
+    <li><strong>{{ endpoint.name|e }}</strong> -&gt; <small>{{ endpoint.rule|e }}</small></li>
+  {%- endfor %}
+  </ul>
+  <h3>{% trans "Services" %}</h3>
+  <p>{% trans %}
+    The following servicepoints are registered on this instance to be callable
+    via one of the available services.
+    {% endtrans %}</p>
+  <ul>
+  {%- for service in servicepoints %}
+    <li><strong>{{ service|e }}</strong></li>
+  {%- endfor %}
+  </ul>
+  <h3>{% trans "Installed APIs" %}</h3>
+  <p>{% trans %}
+    The following APIs are installed on this blog instance. APIs marked with
+    a star (*) are preferred.
+  {% endtrans %}</p>
+  <ul>
+  {%- for api in apis %}
+    <li><strong>{{ api.name|e }}</strong>
+      <small>(provided by {{ api.endpoint|e }})</small> {% if api.preferred %}*{% endif %}
+    </li>
+  {%- endfor %}
+  </ul>
+  <h3>{% trans "Plugins" %}</h3>
+  <ul class="plugin-table">
+  {%- for plugin in plugins %}
+    <li><dl>
+      <dt>{% trans "Name" %}</dt>
+      <dd>{{ plugin.metadata.name|e }}</dd>
+      <dt>{% trans "Author" %}</dt>
+      <dd>{{ plugin.metadata.author|e }}</dd>
+      <dt>{% trans "Location" %}</dt>
+      <dd>{{ plugin.path|e }}</dd>
+      <dt>{% trans "UID" %}</dt>
+      <dd>{{ plugin.name }}</dd>
+    </dl></li>
+  {%- endfor %}
+  </ul>
+  <h3>{% trans "Configuration Variables" %}</h3>
+  <table>
+    <tr>
+      <th>{% trans "Key" %}</th>
+      <th>{% trans "Value" %}</th>
+      <th>{% trans "Default" %}</th>
+    </tr>
+  {%- for item in configuration %}
+    <tr>
+      <td><strong>{{ item.key|e }}</strong></td>
+      <td>{{ item.value|pprint|e }}</td>
+      <td><small>{{ item.default|pprint|e }}</small></td>
+    </tr>
+  {%- endfor %}
+  </table>
+{% endblock %}

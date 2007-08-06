@@ -12,7 +12,8 @@
 from textpress.api import *
 from textpress.models import Post, Tag, User, Comment, get_post_list, \
      get_tag_cloud, ROLE_AUTHOR
-from textpress.utils import is_valid_email, is_valid_url, generate_rsd
+from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
+     dump_json
 from textpress.feedbuilder import AtomFeed
 
 
@@ -211,7 +212,7 @@ def do_show_post(req, year, month, day, slug):
 
     # handle comment posting (TODO: parent)
     errors = []
-    form = {'name': '', 'email': '', 'www': '', 'body': ''}
+    form = {'name': '', 'email': '', 'www': '', 'body': '', 'parent': ''}
     if req.method == 'POST' and post.comments_enabled:
         form['name'] = name = req.form.get('name')
         if not name:
@@ -227,6 +228,11 @@ def do_show_post(req, year, month, day, slug):
             errors.append(_('Your comment is too short.'))
         elif len(body) > 6000:
             errors.append(_('Your comment is too long.'))
+        form['parent'] = parent = req.form.get('parent')
+        if parent:
+            parent = Comment.get(parent)
+        else:
+            parent = None
 
         # allow plugins to do additional comment validation
         data = {'form': form, 'request': req}
@@ -237,9 +243,9 @@ def do_show_post(req, year, month, day, slug):
         # `before-comment-saved` event so that plugins can do
         # block comments so that administrators have to approve it
         if not errors:
-            data = {'comment': comment, 'request': req}
             ip = req.environ.get('REMOTE_ADDR') or '0.0.0.0'
-            comment = Comment(post, name, email, www, body, submitter_ip=ip)
+            comment = Comment(post, name, email, www, body, parent, submitter_ip=ip)
+            data = {'comment': comment, 'request': req}
             emit_event('before-comment-saved', data)
             db.flush()
             emit_event('after-comment-saved', data)
@@ -260,6 +266,16 @@ def do_service_rsd(req):
     :URL endpoint: ``blog/service_rsd``
     """
     return Response(generate_rsd(req.app), mimetype='application/xml')
+
+
+def do_json_service(req, identifier):
+    """
+    Handle a JSON service request.
+    """
+    handler = req.app._services.get(identifier)
+    if handler is None:
+        abort(404)
+    return Response(dump_json(handler(req)), mimetype='text/javascript')
 
 
 def do_atom_feed(req, author=None, year=None, month=None, day=None,
