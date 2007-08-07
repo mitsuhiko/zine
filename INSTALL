@@ -1,0 +1,25 @@
+TextPress 0.1 Alpha Installation Instructions
+=============================================
+
+For a working TextPress instance you need to have the following libraries
+installed:
+
+  - Werkzeug from http://trac.pocoo.org/repos/werkzeug/trunk
+  - Jinja newparser branch from http://trac.pocoo.org/repos/jinja/branches/new-parser
+  - SQLAlchemy*
+  - simplejson*
+  - BeautifulSoup*
+  - Python2.5 (for now)
+  - mysql, sqlite or postgres
+
+libraries marked with * are installable from the cheeseshop via easy_install or
+might be available in debian already.
+
+For a quickstart with the development server do this:
+
+    $ mkdir instance
+    $ python textpress-management.py -dr instance/ serve
+
+To get access to a python console with the textpress instance context do this:
+
+    $ python textpress-management.py instance/ shell

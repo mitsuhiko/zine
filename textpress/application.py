@@ -427,8 +427,7 @@ class TextPress(object):
         self._shared_exports = {}
         self._template_globals = {}
         self._template_filters = {}
-        self.themes = {'default': path.join(path.dirname(textpress.__file__),
-                                            'templates')}
+        self.themes = {'default': BUILTIN_TEMPLATE_PATH}
         self.apis = {}
 
         # load plugins

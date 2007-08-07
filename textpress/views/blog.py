@@ -210,7 +210,7 @@ def do_show_post(req, year, month, day, slug):
     elif not post.can_access():
         abort(403)
 
-    # handle comment posting (TODO: parent)
+    # handle comment posting
     errors = []
     form = {'name': '', 'email': '', 'www': '', 'body': '', 'parent': ''}
     if req.method == 'POST' and post.comments_enabled:

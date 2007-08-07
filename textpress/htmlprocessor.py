@@ -629,4 +629,3 @@ _node_types = {
     Fragment:       3,
 }
 _node_types_reverse = [Node, TextNode, DataNode, Fragment]
-_slot_type = type(Node.children)
