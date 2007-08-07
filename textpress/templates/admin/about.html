@@ -65,6 +65,8 @@
       <dd>{{ plugin.path|e }}</dd>
       <dt>{% trans "UID" %}</dt>
       <dd>{{ plugin.name }}</dd>
+      <dt>{% trans "Active" %}</dt>
+      <dd>{{ "yes" if plugin.active else "no" }}</dd>
     </dl></li>
   {%- endfor %}
   </ul>

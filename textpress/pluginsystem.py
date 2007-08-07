@@ -33,6 +33,8 @@ def find_plugins(app):
             disabled_plugins.add(row.name)
 
     for folder in app.plugin_searchpath + [GLOBAL_PLUGIN_FOLDER]:
+        if not path.exists(folder):
+            continue
         if folder not in global_searchpath:
             global_searchpath.append(folder)
         for filename in listdir(folder):
