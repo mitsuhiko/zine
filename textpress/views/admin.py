@@ -625,6 +625,31 @@ def do_about_textpress(req):
     return render_admin_response('admin/about_textpress.html')
 
 
+@require_role(ROLE_AUTHOR)
+def do_change_password(req):
+    errors = []
+    if req.method == 'POST':
+        if req.form.get('cancel'):
+            redirect(url_for('admin/index'))
+        old_password = req.form.get('old_password')
+        if not old_password:
+            errors.append(_('You have to enter your old password.'))
+        if not req.user.check_password(old_password):
+            errors.append(_('Your old password is wrong.'))
+        new_password = req.form.get('new_password')
+        if not new_password:
+            errors.append(_('Your new password cannot be empty.'))
+        check_password = req.form.get('check_password')
+        if new_password != check_password:
+            errors.append(_('The passwords do not match.'))
+        if not errors:
+            req.user.set_password(new_password)
+            req.user.save()
+            db.flush()
+            redirect(url_for('admin/index'))
+    return render_admin_response('admin/change_password.html', errors=errors)
+
+
 def do_login(req):
     """Show a login page."""
     error = None

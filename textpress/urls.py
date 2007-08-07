@@ -51,7 +51,8 @@ all_urls = [
         Rule('/options/', endpoint='admin/options'),
         Rule('/options/configuration', endpoint='admin/configuration'),
         Rule('/about/', endpoint='admin/about'),
-        Rule('/about/textpress', endpoint='admin/about_textpress')
+        Rule('/about/textpress', endpoint='admin/about_textpress'),
+        Rule('/change_password', endpoint='admin/change_password')
     ])
 ]
 

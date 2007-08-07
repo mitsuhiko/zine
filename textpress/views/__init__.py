@@ -46,6 +46,7 @@ all_views = {
     'admin/configuration':      admin.do_configuration,
     'admin/about':              admin.do_about,
     'admin/about_textpress':    admin.do_about_textpress,
+    'admin/change_password':    admin.do_change_password,
     'admin/login':              admin.do_login,
     'admin/logout':             admin.do_logout
 }

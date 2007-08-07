@@ -10,6 +10,7 @@
     <h1>{{ cfg.blog_title|e }} {% trans "Administration" %}</h1>
     <div class="metanav">
       <a href="{{ url_for('blog/index')|e }}">{% trans "View Blog" %}</a> |
+      <a href="{{ url_for('admin/change_password')|e }}">{% trans "Change Password" %}</a> |
       <a href="{{ url_for('admin/logout') }}">{% trans "Logout" %}</a>
     </div>
   </div>
