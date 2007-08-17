@@ -27,7 +27,10 @@ def send_request(apikey, key_root, data, endpoint):
         AKISMET_VERSION,
         endpoint
     )
-    f = urlopen(url, urlencode(data))
+    try:
+        f = urlopen(url, urlencode(data))
+    except:
+        return ''
     try:
         return f.read().strip()
     finally:
@@ -53,7 +56,7 @@ def get_verified_key():
     return apikey, blogurl
 
 
-def do_spamcheck(event, req, comment):
+def do_spamcheck(req, comment):
     """Do spamchecking for all new comments."""
     # something blocked the comment already. no need to check for
     # spam then.

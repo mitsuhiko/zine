@@ -348,6 +348,40 @@ def generate_rsd(app):
     return document.toxml('utf-8')
 
 
+def dump_xml(obj):
+    """
+    Dump an JSON dumpable structure as simple XML.
+    """
+    from cgi import escape
+    def _inner_dump(obj):
+        if obj is None:
+            return '<null/>'
+        elif obj is True:
+            return '<true/>'
+        elif obj is False:
+            return '<false/>'
+        elif isinstance(obj, basestring):
+            if isinstance(obj, str):
+                obj = obj.decode('utf-8', 'ignore')
+            return u'<string value="%s"/>' % (escape(obj, True))
+        elif isinstance(obj, (int, long)):
+            return '<integer value="%s"/>' % str(obj)
+        elif isinstance(obj, float):
+            return '<float value="%s"/>' % str(obj)
+        elif isinstance(obj, dict):
+            return u'<dict>%s</dict>' % ''.join(u'<item><key>%s</key>'
+                                                u'<value>%s</value></item>'
+                                                % (_inner_dump(key),
+                                                   _inner_dump(value)) for
+                                                key, value in obj.iteritems())
+        elif hasattr(obj, '__iter__'):
+            return u'<list>%s</list>' % u''.join(map(obj, _inner_dump))
+        else:
+            return u'<invalid/>'
+    return (u'<?xml version="1.0" encoding="utf-8"?>\n'
+            u'<envelope>%s</envelope>' % _inner_dump(obj)).encode('utf-8')
+
+
 class Pagination(object):
     """Pagination helper."""
 

@@ -50,6 +50,7 @@ def render_admin_response(template_name, **values):
             ]),
             ('options', url_for('admin/options'), _('Options'), [
                 ('overview', url_for('admin/options'), _('Overview')),
+                ('basic', url_for('admin/basic_options'), _('Basic')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
                 ('configuration', url_for('admin/configuration'),
                  _('Configuration Editor'))
@@ -561,7 +562,29 @@ def do_delete_user(req, user_id):
 
 @require_role(ROLE_ADMIN)
 def do_options(req):
-    redirect(url_for('admin/configuration'))
+    redirect(url_for('admin/basic_options'))
+
+
+@require_role(ROLE_ADMIN)
+def do_basic_options(req):
+    cfg = req.app.cfg
+    form = {
+        'blog_title':           cfg['blog_title'],
+        'blog_tagline':         cfg['blog_tagline'],
+        'timezone':             cfg['timezone'],
+        'datetime_format':      cfg['datetime_format'],
+        'date_format':          cfg['date_format'],
+        'sid_cookie_name':      cfg['sid_cookie_name'],
+        'comments_enabled':     cfg['comments_enabled'],
+        'pings_enabled':        cfg['pings_enabled'],
+        'posts_per_page':       cfg['posts_per_page'],
+        'use_flat_comments':    cfg['use_flat_comments'],
+        'theme':                cfg['theme']
+    }
+    return render_admin_response('admin/basic_options.html',
+        form=form,
+        themes=sorted(req.app.themes)
+    )
 
 
 @require_role(ROLE_ADMIN)

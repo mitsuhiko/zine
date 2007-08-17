@@ -23,10 +23,21 @@ var TextPress = {
     this.callJSONService('get_comment', {comment_id: parent_id}, function(c) {
       $('#comment-message')
         .addClass('info')
-        .text('Replying to comment by ' + c.author + '.');
+        .text(_('Replying to comment by %s. ').replace('%s', c.author))
+        .append($('<a href="#">')
+          .text(_('(Create as top level comment)'))
+          .click(function() {
+            TextPress.replyToNothing();
+            return false;
+          }))
       document.location = '#leave-reply';
       $('#comment-message').fadeIn();
     });
+  },
+
+  replyToNothing : function() {
+    $('form.comments input[@name="parent"]').val('');
+    $('#comment-message').fadeOut();
   },
 
   gettext : function(string) {

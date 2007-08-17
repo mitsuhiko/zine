@@ -28,6 +28,7 @@ all_urls = [
     ]),
     Rule('/_services/', endpoint='blog/service_rsd'),
     Rule('/_services/json/<identifier>', endpoint='blog/json_service'),
+    Rule('/_services/xml/<identifier>', endpoint='blog/xml_service'),
     Submount('/admin', [
         Rule('/', endpoint='admin/index'),
         Rule('/login', endpoint='admin/login'),
@@ -49,6 +50,7 @@ all_urls = [
         Rule('/users/<int:user_id>', endpoint='admin/edit_user'),
         Rule('/users/<int:user_id>/delete', endpoint='admin/delete_user'),
         Rule('/options/', endpoint='admin/options'),
+        Rule('/options/basic', endpoint='admin/basic_options'),
         Rule('/options/plugins', endpoint='admin/plugins'),
         Rule('/options/configuration', endpoint='admin/configuration'),
         Rule('/about/', endpoint='admin/about'),

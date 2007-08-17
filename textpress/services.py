@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 from textpress.api import *
-from textpress.models import Comment
+from textpress.models import Comment, ROLE_AUTHOR
 
 
 def do_get_comment(req):
@@ -25,11 +25,15 @@ def do_get_comment(req):
         parent_id = comment.parent.comment_id
     else:
         parent_id = None
+    email = None
+    if req.user.role >= ROLE_AUTHOR:
+        email = comment.email
     return {
         'id':           comment.comment_id,
         'parent':       parent_id,
         'body':         comment.body,
         'author':       comment.author,
+        'email':        email,
         'pub_date':     int(comment.pub_date.strftime('%s')),
     }
 

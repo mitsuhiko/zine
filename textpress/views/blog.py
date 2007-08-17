@@ -13,7 +13,7 @@ from textpress.api import *
 from textpress.models import Post, Tag, User, Comment, get_post_list, \
      get_tag_cloud, ROLE_AUTHOR
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
-     dump_json
+     dump_json, dump_xml
 from textpress.feedbuilder import AtomFeed
 
 
@@ -274,6 +274,16 @@ def do_json_service(req, identifier):
     if handler is None:
         abort(404)
     return Response(dump_json(handler(req)), mimetype='text/javascript')
+
+
+def do_xml_service(req, identifier):
+    """
+    Handle a XML service request.
+    """
+    handler = req.app._services.get(identifier)
+    if handler is None:
+        abort(404)
+    return Response(dump_xml(handler(req)), mimetype='text/xml')
 
 
 def do_atom_feed(req, author=None, year=None, month=None, day=None,
