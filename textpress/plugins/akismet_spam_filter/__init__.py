@@ -53,11 +53,14 @@ def get_verified_key():
     return apikey, blogurl
 
 
-def do_spamcheck(event):
+def do_spamcheck(event, req, comment):
     """Do spamchecking for all new comments."""
+    # something blocked the comment already. no need to check for
+    # spam then.
+    if comment.blocked:
+        return
+
     apikey, blog = get_verified_key()
-    comment = event.data['comment']
-    req = event.data['request']
 
     # if we cannot verify the key we just fail silently.
     # we don't want that the blog users sees a stupid error

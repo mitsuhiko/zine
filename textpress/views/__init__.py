@@ -43,6 +43,7 @@ all_views = {
     'admin/edit_user':          admin.do_edit_user,
     'admin/delete_user':        admin.do_delete_user,
     'admin/options':            admin.do_options,
+    'admin/plugins':            admin.do_plugins,
     'admin/configuration':      admin.do_configuration,
     'admin/about':              admin.do_about,
     'admin/about_textpress':    admin.do_about_textpress,

@@ -54,6 +54,12 @@
     attributes from the node they control to make sure the output isn't
     that bad. The preferred prefix for plugins is "tp:".
 
+    Alternative Parsers
+    ~~~~~~~~~~~~~~~~~~~
+
+    Plugins may change the parser for some input data or reasons. Parsers
+    should be subclasses of `textpress.htmlprocessor.BaseParser`
+
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
@@ -71,7 +77,7 @@ from textpress.application import emit_event, get_request, get_application
 SELF_CLOSING_TAGS = ['br', 'img', 'area', 'hr', 'param', 'meta',
                      'link', 'base', 'input', 'embed', 'col']
 
-#: cache for the parser
+#: cache for the default markup parser
 _parser_cache = WeakKeyDictionary()
 
 
@@ -85,11 +91,17 @@ def parse(input_data, reason='unknown'):
 
     The resulting tree structure is safe for pickeling.
     """
-    app = get_application()
-    if app not in _parser_cache:
-        _parser_cache[app] = parser = MarkupParser()
+    # give plugins the possiblity to switch the parser
+    for parser in emit_event('switch-markup-parser', input_data, reason):
+        if parser is not None:
+            break
+    # or go with the default parser
     else:
-        parser = _parser_cache[app]
+        app = get_application()
+        if app not in _parser_cache:
+            _parser_cache[app] = parser = MarkupParser()
+        else:
+            parser = _parser_cache[app]
     return parser.parse(input_data, reason)
 
 
@@ -215,7 +227,19 @@ def _iter_all(nodes):
                     yield n
 
 
-class MarkupParser(object):
+class BaseParser(object):
+    """
+    Baseclass for all kinds of parsers.
+    """
+
+    def __init__(self):
+        pass
+
+    def parse(self, input_data, reaons):
+        """Return a fragment."""
+
+
+class MarkupParser(BaseParser):
     """
     Special class that emits an `setup-markup-parser` event when setting up
     itself so that plugins can change the way elements are processed.
@@ -233,7 +257,7 @@ class MarkupParser(object):
         self.non_nestable_block_tags = ['address', 'form', 'p']
         self.nestable_inline_tags = ['span', 'font', 'q', 'object', 'bdo',
                                      'sub', 'sup', 'center']
-        emit_event('setup-markup-parser', self)
+        emit_event('setup-markup-parser', self, buffered=True)
 
         # rather bizarre way to subclass beautiful soup but since the library
         # itself isn't less bizarre...
@@ -271,12 +295,7 @@ class MarkupParser(object):
         bt_tree = self._parser(input_data, convertEntities=
                                self._parser.HTML_ENTITIES)
         tree = convert_tree(bt_tree, True)
-        data = {
-            'doctree':      tree,
-            'raw_data':     input_data,
-            'reason':       reason
-        }
-        for item in emit_event('process-doc-tree', data):
+        for item in emit_event('process-doc-tree', tree, input_data, reason):
             if item is not None:
                 return item
         return tree
@@ -336,13 +355,8 @@ class Node(object):
         """Helper frunction for render() and .text"""
         if self.callback_data:
             for identifier, data in self.callback_data:
-                d = {
-                    'identifier':       identifier,
-                    'callback_data':    data,
-                    'node':             self,
-                    'text_only':        text_only
-                }
-                for item in emit_event('process-node-callback', d, False):
+                for item in emit_event('process-node-callback', identifier,
+                                       data, self, text_only):
                     if item is not None:
                         return item
 

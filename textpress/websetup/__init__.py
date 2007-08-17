@@ -61,10 +61,10 @@ class WebSetup(object):
         db_error = None
         severe = False
         database_uri = req.form.get('database_uri')
-        email = req.form.get('email')
-        if not is_valid_email:
-            email_error = 'You have to provide a valid email address.'
-        if database_uri:
+        email = req.form.get('admin_email')
+        if req.method == 'POST':
+            if not is_valid_email(email):
+                email_error = 'You have to provide a valid email address.'
             try:
                 self.app.connect_to_database(database_uri, perform_test=True)
             except Exception, e:

@@ -23,7 +23,7 @@ DEFAULT_VARS = {
     'maintenance_mode':     (bool, False),
     'sid_cookie_name':      (unicode, u'textpress_sid'),
     'automatic_db_upgrade': (bool, True),
-    'theme':                (unicode, u'myrtle'),
+    'theme':                (unicode, u'default'),
 
     # comments and traceback defaults
     'comments_enabled':     (bool, True),

@@ -235,8 +235,7 @@ def do_show_post(req, year, month, day, slug):
             parent = None
 
         # allow plugins to do additional comment validation
-        data = {'form': form, 'request': req}
-        for result in emit_event('before-comment-created', data):
+        for result in emit_event('before-comment-created', req, form):
             errors.extend(result or ())
 
         # if we don't have errors let's save it and emit an
@@ -245,10 +244,9 @@ def do_show_post(req, year, month, day, slug):
         if not errors:
             ip = req.environ.get('REMOTE_ADDR') or '0.0.0.0'
             comment = Comment(post, name, email, www, body, parent, submitter_ip=ip)
-            data = {'comment': comment, 'request': req}
-            emit_event('before-comment-saved', data)
+            emit_event('before-comment-saved', req, comment, buffered=True)
             db.flush()
-            emit_event('after-comment-saved', data)
+            emit_event('after-comment-saved', req, comment, buffered=True)
             redirect(url_for(post))
 
     return render_response('show_post.html',

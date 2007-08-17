@@ -15,7 +15,7 @@ from collections import defaultdict
 from textpress.database import users, tags, posts, post_tags, comments, db
 from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug, \
      markup
-from textpress.application import get_application, get_request, emit_event
+from textpress.application import get_application, get_request
 
 
 #: user rules

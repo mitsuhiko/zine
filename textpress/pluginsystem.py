@@ -27,10 +27,10 @@ GLOBAL_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
 
 def find_plugins(app):
     """Return an iterator over all plugins available."""
-    disabled_plugins = set()
+    enabled_plugins = set()
     for row in app.database_engine.execute(plugins.select()):
-        if not row.active:
-            disabled_plugins.add(row.name)
+        if row.active:
+            enabled_plugins.add(row.name)
 
     for folder in app.plugin_searchpath + [GLOBAL_PLUGIN_FOLDER]:
         if not path.exists(folder):
@@ -42,7 +42,7 @@ def find_plugins(app):
             if path.isdir(full_name) and \
                path.exists(path.join(full_name, 'metadata.txt')):
                 yield Plugin(app, filename, path.abspath(full_name),
-                             filename not in disabled_plugins)
+                             filename in enabled_plugins)
 
 
 class Plugin(object):

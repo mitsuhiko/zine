@@ -53,14 +53,19 @@ _setup_lock = Lock()
 #: because events are not application bound we keep them
 #: unique by sharing them. For better performance we don't
 #: lock the access to this variable, it's unlikely that
-#: two applications connect a new request in the same millisecond
+#: two applications connect a new event in the same millisecond
+#: because connecting happens during application startup and
+#: there is a global application setup lock.
 _next_listener_id = 0
 
 
-def emit_event(event, data=None, buffered=True):
+def emit_event(event, *args, **kw):
     """Emit an event and return a `EventResult` instance."""
+    buffered = kw.pop('buffered', False)
+    if kw:
+        raise TypeError('got invalid keyword argument %r' % iter(kw).next())
     mgr = _locals.app._event_manager
-    return EventResult(mgr, mgr.emit(event, data), buffered)
+    return EventResult(mgr.emit(event, args), buffered)
 
 
 def abort(code=404):
@@ -251,27 +256,6 @@ class DirectResponse(Exception):
         Exception.__init__(self, response)
 
 
-class Event(object):
-    """
-    Represents one event that is passed around. Because it would be possible
-    to emit an event for a different application (unlikely that it happens
-    tough) each event knows about the application that sent the event.
-    """
-    __slots__ = ('app', 'name', 'data')
-
-    def __init__(self, app, name, data):
-        self.app = app
-        self.name = name
-        self.data = data
-
-    def __repr__(self):
-        return '<%s %s: %r>' % (
-            self.__class__.__name__,
-            self.name,
-            self.data
-        )
-
-
 class EventManager(object):
     """
     Helper class that handles event listeners and events.
@@ -296,22 +280,18 @@ class EventManager(object):
         for event in self._listeners:
             event.pop(listener_id, None)
 
-    def emit(self, name, data):
-        event = Event(self.app, name, data)
+    def emit(self, name, args):
         if name in self._listeners:
             for listener_id, cb in self._listeners[name].iteritems():
-                yield listener_id, cb(event)
+                yield listener_id, cb(*args)
 
 
 class EventResult(object):
     """Wraps a generator for the emit_event() function."""
 
-    __slots__ = ('_event_manager', '_participated_listeners',
-                 '_results', '_gen', 'buffered')
+    __slots__ = ('_participated_listeners', '_results', '_gen', 'buffered')
 
-    def __init__(self, event_manager, gen, buffered):
-        self._event_manager = event_manager
-
+    def __init__(self, gen, buffered):
         if buffered:
             items = list(gen)
             self._participated_listeners = set(x[0] for x in items)
@@ -646,9 +626,10 @@ class TextPress(object):
         _locals.page_metadata = []
 
         # the after-request-setup event can return a response
+
         # or modify the request object in place. If we have a
         # response we just send it
-        for result in emit_event('after-request-setup', req, buffered=False):
+        for result in emit_event('after-request-setup', req):
             if result is not None:
                 return result(environ, start_response)
 
@@ -666,8 +647,7 @@ class TextPress(object):
             resp = e.response
 
         # allow plugins to change the response object
-        for result in emit_event('before-response-processed', resp,
-                                 buffered=False):
+        for result in emit_event('before-response-processed', resp):
             if result is not None:
                 resp = result
                 break

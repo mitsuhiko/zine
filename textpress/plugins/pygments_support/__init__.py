@@ -24,16 +24,19 @@ class PygmentsHighlighter(object):
     def __init__(self, style):
         self.formatter = HtmlFormatter(style=style)
 
-    def process_doc_tree(self, event):
-        for node in event.data['doctree'].query('pre[@tp:lang]'):
-            lexer = get_lexer_by_name(node.attributes.pop('tp:lang'))
+    def process_doc_tree(self, doctree, input_data, reason):
+        for node in doctree.query('pre[@syntax]'):
+            try:
+                lexer = get_lexer_by_name(node.attributes.pop('syntax'))
+            except ValueError:
+                return
             output = highlight(node.text, lexer, self.formatter)
             node.parent.children.replace(node, DataNode(output))
 
     def get_style(self, req):
         return Response(self.formatter.get_style_defs(), mimetype='text/css')
 
-    def inject_style(self, event):
+    def inject_style(self, req):
         add_link('stylesheet', url_for('pygments_support/style'), 'text/css')
 
 

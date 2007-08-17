@@ -11,6 +11,7 @@
     :license: GNU GPL.
 """
 from datetime import datetime
+from weakref import WeakKeyDictionary
 from textpress.api import *
 from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
@@ -49,6 +50,7 @@ def render_admin_response(template_name, **values):
             ]),
             ('options', url_for('admin/options'), _('Options'), [
                 ('overview', url_for('admin/options'), _('Overview')),
+                ('plugins', url_for('admin/plugins'), _('Plugins')),
                 ('configuration', url_for('admin/configuration'),
                  _('Configuration Editor'))
             ])
@@ -560,6 +562,32 @@ def do_delete_user(req, user_id):
 @require_role(ROLE_ADMIN)
 def do_options(req):
     redirect(url_for('admin/configuration'))
+
+
+@require_role(ROLE_ADMIN)
+def do_plugins(req):
+    changes = _outstanding_plugin_changes.setdefault(req.app, set())
+    old_changes = list(changes)
+    if req.method == 'POST':
+        for name, plugin in req.app.plugins.iteritems():
+            active = req.form.get(name) == 'yes'
+            if active and not plugin.active:
+                plugin.activate()
+            elif not active and plugin.active:
+                plugin.deactivate()
+            else:
+                continue
+            changes.add(name)
+    return render_admin_response('admin/plugins.html',
+        plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
+        outstanding_changes=old_changes
+    )
+
+#: helper variable for `do_plugins`. In persistent environments this
+#: weak dictionary holds plugin changes for the applications so that
+#: the user is informed about outstanding changes that take effect
+#: once the application is restarted.
+_outstanding_plugin_changes = WeakKeyDictionary()
 
 
 @require_role(ROLE_ADMIN)
