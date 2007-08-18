@@ -105,7 +105,7 @@ class Plugin(object):
     def module(self):
         """The module of the plugin. The first access imports it."""
         from textpress import plugins
-        return __import__('textpress.plugins.' + self.name, None, None, [''])
+        return __import__('textpress.plugins.' + self.name, None, None, ['setup'])
 
     def setup(self):
         """Setup the plugin."""

@@ -10,7 +10,6 @@
 """
 from math import ceil, log
 from datetime import date, datetime, timedelta
-from collections import defaultdict
 
 from textpress.database import users, tags, posts, post_tags, comments, db
 from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug, \

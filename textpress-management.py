@@ -33,6 +33,7 @@ def main(argv):
         print 'usage: %s [-d] [-r] <instance> <action>' % sys.argv[0]
         print 'use -d for debugging'
         print 'use -r for automatic reloading'
+        print 'actions: shell | serve | eventmap'
         return 2
 
     instance, action = args
@@ -46,8 +47,7 @@ def main(argv):
         if '-d' in opts:
             app = DebuggedApplication(app, True)
         run_simple('localhost', 4000, app, '-r' in opts)
-        #from paste import httpserver
-        #httpserver.serve(app, 'localhost', 4000)
+
     elif action == 'shell':
         del sys.argv[1:]
         app.bind_to_thread()
@@ -60,6 +60,21 @@ def main(argv):
         sh = IPython.Shell.IPShellEmbed(banner=BANNER)
         sh(global_ns=globals, local_ns={})
         return
+
+    elif action == 'eventmap':
+        from textpress.utils import build_eventmap
+        print '=' * 80
+        print 'EVENT MAP'.center(80)
+        print '=' * 80
+        sys.stdout.write('Building eventmap...')
+        sys.stdout.flush()
+        map_ = build_eventmap(app)
+        sys.stdout.write('\r')
+        for event, places in map_.iteritems():
+            print '`%s`' % event
+            for location, filename, lineno in places:
+                print '    %-46s%10s%20s' % (filename, lineno, location)
+
     else:
         print 'Error: Unknown action %s' % action
         return 3

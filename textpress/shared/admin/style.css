@@ -310,6 +310,67 @@ p.preview {
     text-align: right;
 }
 
+/* :::: THEME SELECTION :::: */
+div.themes {
+    margin: 20px 0 0 0;
+}
+
+div.themes div.themewrapper {
+    width: 33%;
+    height: 350px;
+    float: left;
+}
+
+div.themes div.theme {
+    margin: 0;
+    padding: 10px;
+    overflow: hidden;
+}
+
+div.themes div.current h3 a {
+    color: #ff7200;
+}
+
+div.themes div.current {
+    border: 1px solid #aaa;
+    background-color: #f2f2f2;
+    padding: 9px;
+}
+
+div.themes div.theme h3 {
+    margin: 0;
+    padding: 2px 0 10px 0;
+    text-align: center;
+}
+
+div.themes div.theme h3 a {
+    text-decoration: none;
+}
+
+div.themes div.theme div.detail {
+    margin: 0;
+    padding: 5px;
+}
+
+div.themes div.theme img.preview {
+    display: block;
+    margin: auto;
+}
+
+div.themes div.theme div.detail blockquote {
+    margin: 0;
+    padding: 5px;
+    text-align: center;
+    color: #333;
+}
+
+div.themes div.theme div.detail p.author {
+    margin: 0;
+    padding: 0;
+    font-size: 90%;
+    text-align: center;
+}
+
 /* :::: CONFIG EDITOR :::: */
 table.config-table tr.user-defined {
     background: #eee;

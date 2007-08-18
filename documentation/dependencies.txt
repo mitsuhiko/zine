@@ -1,0 +1,4 @@
+SQLAlchemy
+BautifulSoup
+Werkzeug
+Jinja

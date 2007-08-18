@@ -10,8 +10,7 @@
 """
 from os import path
 from threading import local, Lock
-from collections import defaultdict
-from itertools import izip
+from itertools import izip, chain
 from datetime import datetime
 
 from textpress.database import sessions, db, upgrade_database
@@ -267,12 +266,16 @@ class EventManager(object):
 
     def __init__(self, app):
         self.app = app
-        self._listeners = defaultdict(dict)
+        self._listeners = {}
 
     def connect(self, event, callback):
         global _next_listener_id
         listener_id = _next_listener_id
-        self._listeners[intern(event)][listener_id] = callback
+        event = intern(event)
+        if event not in self._listeners:
+            self._listeners[event] = {listener_id: callback}
+        else:
+            self._listeners[event][listener_id] = callback
         _next_listener_id += 1
         return listener_id
 
@@ -324,6 +327,41 @@ class EventResult(object):
                 self._participated_listeners.append(listener_id)
                 yield result
 
+    def __repr__(self):
+        if self.buffered:
+            detail = '- buffered [%d participants]' % len(self.results)
+        else:
+            detail = '(dynamic)'
+        return '<EventResult %s>' % detail
+
+
+class Theme(object):
+    """
+    Represents a theme and is created automaticall by `add_theme`
+    """
+
+    __slots__ = ('app', 'name', 'template_path', 'metadata')
+
+    def __init__(self, app, name, template_path, metadata=None):
+        self.app = app
+        self.name = name
+        self.template_path = template_path
+        self.metadata = metadata or {}
+
+    @property
+    def preview_url(self):
+        if self.metadata.get('preview'):
+            endpoint, filename = self.metadata['preview'].split('::')
+            return url_for(endpoint + '/shared', filename=filename)
+
+    @property
+    def has_preview(self):
+        return bool(self.metadata.get('preview'))
+
+    @property
+    def detail_name(self):
+        return self.metadata.get('name') or self.name.title()
+
 
 class ThemeLoader(BaseLoader, CachedLoaderMixin):
     """
@@ -344,15 +382,43 @@ class ThemeLoader(BaseLoader, CachedLoaderMixin):
         )
 
     def get_source(self, environment, name, parent):
+        searchpath = []
+
+        # if someone disabled the plugin that provided the current theme
+        # we reset the config to "default"
+        theme = self.app.cfg['theme']
+        if theme not in self.app.themes:
+            self.app.cfg['theme'] = theme = 'default'
+        else:
+            searchpath.append(self.app.themes[theme].template_path)
+
+        # add the builtin templates as default search path
+        searchpath.append(BUILTIN_TEMPLATE_PATH)
+
+        def _event_searchpaths():
+            for rv in emit_event('add-template-searchpath', name):
+                for path in rv or ():
+                    yield path
+
+        # now load the template from a searchpath or an event
+        # provided searchpath. The events for the searchpath are
+        # only fired if non of the builtin paths matched.
         parts = [x for x in name.split('/') if not x == '..']
-        for fn in [path.join(self.app.themes[self.app.cfg['theme']], *parts),
-                   path.join(BUILTIN_TEMPLATE_PATH, *parts)]:
+        for fn in chain(searchpath, _event_searchpaths()):
+            fn = path.join(fn, *parts)
             if path.exists(fn):
                 f = file(fn)
                 try:
                     return f.read().decode(environment.template_charset)
                 finally:
                     f.close()
+
+        # still not found, then try to load from an event string
+        for rv in emit_event('load-template-from-string', name):
+            if rv is not None:
+                return rv
+
+        # if still nothing, raise an error
         raise TemplateNotFound(name)
 
 
@@ -364,6 +430,7 @@ class TextPress(object):
         if getattr(_locals, 'app', None) is not self:
             raise TypeError('cannot create %r instances. use the make_app '
                             'factory function.' % self.__class__.__name__)
+
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup
         self._setup_finished = False
@@ -398,6 +465,7 @@ class TextPress(object):
 
         # setup core package urls and shared stuff
         import textpress
+        from textpress.api import _
         from textpress.urls import all_urls
         from textpress.views import all_views
         from textpress.services import all_services
@@ -407,7 +475,13 @@ class TextPress(object):
         self._shared_exports = {}
         self._template_globals = {}
         self._template_filters = {}
-        self.themes = {'default': BUILTIN_TEMPLATE_PATH}
+
+        default_theme = Theme(self, 'default', BUILTIN_TEMPLATE_PATH, {
+            'name':         _('Default Theme'),
+            'summary':      _('Simple default theme that doesn\'t '
+                              'contain any style information.')
+        })
+        self.themes = {'default': default_theme}
         self.apis = {}
 
         # load plugins
@@ -480,10 +554,9 @@ class TextPress(object):
             return
         f = file(self.database_uri_filename)
         try:
-            database_uri = f.read().strip()
+            return f.read().strip()
         finally:
             f.close()
-        return database_uri
 
     def set_database_uri(self, database_uri):
         """Store the database URI."""
@@ -531,11 +604,19 @@ class TextPress(object):
         self.add_url_rule('/_services/' + name, endpoint=endpoint)
         self.add_view(endpoint, callback)
 
-    def add_theme(self, name, template_path):
-        """Add a theme."""
+    def add_theme(self, name, template_path, metadata=None):
+        """
+        Add a theme. You have to provide the shortname for the theme
+        which will be used in the admin panel etc. Then you have to provide
+        the path for the templates. Usually this path is relative to the
+        `__file__` directory.
+
+        The metadata can be ommited but in that case some information in
+        the admin panel is not available.
+        """
         if self._setup_finished:
             raise RuntimeError('cannot add themes after application setup')
-        self.themes[name] = template_path
+        self.themes[name] = Theme(self, name, template_path, metadata)
 
     def add_shared_exports(self, name, path):
         """
@@ -548,7 +629,7 @@ class TextPress(object):
                                'application setup')
         self._shared_exports['/_shared/' + name] = path
         self.add_url_rule('/_shared/%s/<string:filename>' % name,
-                          endpoint=name + '/shared')
+                          endpoint=name + '/shared', build_only=True)
 
     def add_middleware(self, middleware_factory, *args, **kwargs):
         """Add a middleware to the application."""
@@ -560,6 +641,9 @@ class TextPress(object):
 
     def add_config_var(self, key, type, default):
         """Add a configuration variable to the application."""
+        if self._setup_finished:
+            raise RuntimeError('cannot add configuration values after '
+                               'application setup')
         self.cfg.config_vars[key] = (type, default)
 
     def add_database_integrity_check(self, callback):
@@ -626,7 +710,6 @@ class TextPress(object):
         _locals.page_metadata = []
 
         # the after-request-setup event can return a response
-
         # or modify the request object in place. If we have a
         # response we just send it
         for result in emit_event('after-request-setup', req):

@@ -17,6 +17,11 @@ docstring_re = re.compile(r'^"""$.*?^"""$(?sm)')
 
 
 def selfupdate(data):
+    """
+    Call this from a global frame with a source string that will become
+    the new source code for this module. The docstring and "__main__"
+    code is extracted and reinserted first.
+    """
     filename = os.path.realpath(sys._getframe(1).f_globals['__file__'])
 
     f = file(filename)
@@ -30,8 +35,8 @@ def selfupdate(data):
 
     header = old_data[:start_pos]
     code = old_data[end_pos:]
-
     new_code = '%s\n\n%s\n\n%s' % (header, data, code)
+
     f = file(filename, 'w')
     try:
         f.write(new_code)

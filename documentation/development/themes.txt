@@ -1,0 +1,176 @@
+=================
+Theme Development
+=================
+
+If you want to give your TextPress installation a custom look and feel themes
+are the way to go.  Creating your own theme is a simple process, all you have
+to do is to create a new plugin with the template files and shared data such
+as javascript or css files in.
+
+
+Step 1: Creating a new Plugin
+=============================
+
+The first thing is creating a new plugin.  The easiest way is creating a new
+empty folder in the instance's plugin folder with the short name of your
+theme plus the "_theme" suffix.  The latter is optional but avoides name
+clashes with other plugins.
+
+So if for example your theme is called "myrtle" you should create a folder
+called "myrtle_theme".
+
+The next step is adding the metadata.  The metadata is located in a file
+called `metadata.txt` and contains some key, value pairs delimited by colons.
+It should at least provide the `Name`, `Author`, `License` and `Summary` of
+the theme::
+
+    Name: Myrtle Theme
+    Author: Armin Ronacher <armin.ronacher@active-4.com>
+    License: GPL
+    Summary: A brownish theme called "myrtle".
+
+
+Step 2: Creating the Driver Code
+================================
+
+Plugins can provide more than just a theme.  So the first thing we have to
+do is to add some code that provides a theme. If you have a theme and you
+want to provide multiple colorschemes you can also add more than one theme
+to a plugin, the process is the same.
+
+All the code that controls the plugin instanciation goes into a file called
+`__init__.py` inside the plugin folder.  The minimal code you have to provide
+looks like this:
+
+.. source:: python
+
+    from os.path import join, dirname
+
+    TEMPLATE_FILES = join(dirname(__file__), 'templates')
+    SHARED_FILES = join(dirname(__file__), 'shared')
+
+    def setup(app, plugin):
+        app.add_theme('<theme_name>', TEMPLATE_FILES, plugin.metadata)
+        app.add_shared_exports('<theme_name>_theme', SHARED_FILES)
+
+Don't forget to replace `<theme_name>` with the name of your theme!  Now what
+this code does is pretty simple.  Whenever TextPress loads the plugin it calls
+the `setup` function.  From there we add a new theme to the application and
+tell it the location of the template files (they are located in the
+`templates` folder in your plugin directory) and give it the metadata of the
+theme.  Because a plugin can ship more than just one theme we could provide a
+dictionary with the metadata here, but because here we have just one theme we
+just pass it the plugin metadata.
+
+The next step is optional but probably required for many themes.  It adds a
+new shared export location to textpress.  If you for example want to serve
+some css or javascript files you can add a shared folder and add a shared
+export.  Shared exports are available at `/_shared/<plugin_name>/<filename>`.
+
+To get a link to such an exported file you can use the `url_for` function but
+we will cover that later.
+
+
+Step 3: Overriding Templates
+============================
+
+If we would enable our plugin right away it would look exactly like the
+`default` theme.  That's because if TextPress cannot find a template in the
+template path of the theme it falls back to the default templates.  Most
+themes will just use CSS and the layout template so let's start with that.
+
+All templates inherit from the `layout.html` template.  So if we add such a
+file we can add our own content and css files to the layout template.
+A simple layout template could look like this:
+
+.. source:: html+jinja
+
+    <!DOCTYPE HTML>
+    <html>
+    <head>
+      <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
+      <link rel="stylesheet" type="text/css" href="{{
+        url_for('<plugin_name>/shared', filename='style.css') }}">
+      {{ get_page_metadata() }}
+    </head>
+    <body>
+      <div class="header">
+        <h1>{{ cfg.blog_title|e }}</h1>
+        <p class="description">{{ cfg.blog_tagline }}</p>
+      </div>
+      {% block contents %}{% endblock %}
+    </body>
+    </html>
+
+The templates are normal `Jinja`_ templates and the two blocks you have to
+provide are called `contents` and `title`.  Because some plugins and even
+TextPress itself adds some page metadata to all files in order to work
+correctly you *have* to call `get_page_metadata` somewhere in the `head`
+section.  The `cfg` object allows you to access the configuration.  So if you
+don't want to hardcode the blogname in the template you can do
+``{{ cfg.blog_title|e }}`` (the `|e` filter escapes the title).
+
+Because we want to use our own css file for style informations we add a link
+tag that points to the `style.css` file of our plugin.  (Don't forget to
+replace `<plugin_name>` with the name of your plugin!)
+
+.. _Jinja: http://jinja.pocoo.org/
+
+
+Step 4: Adding CSS Files
+========================
+
+So TextPress will now look for your css file called `style.css` inside the
+`shared` folder we provided in the driver code.
+
+So just add a `shared/style.css` file and add your content there. Also check
+out already existing themes for inspiration.
+
+
+Step 5: Adding Sidebar Elements
+===============================
+
+This step is optional but a good idea.  Basically if you have now a styled
+TextPress you still miss the sidebar or related information etc.  To add this
+you just have to call some functions to get more stuff into your template
+context you can mess around with.  For example if you want a tag cloud you
+can call the `get_tag_cloud()` function which returns a list of tags.
+
+To get a full tag cloud you can for example do this:
+
+.. source:: html+jinja
+
+    {%- set tag_cloud = get_tag_cloud() %}
+    {%- if tag_cloud %}
+      <h3>{% trans "Tags" %}</h3>
+      <div class="tag-cloud">
+      {%- for tag in tag_cloud -%}
+        <a href="{{ url_for('blog/show_tag', slug=tag.slug)|e }}" style="font-size: {{
+           tag.size }}%" title="{% trans count=tag.count, tag=(tag.name|e)
+           %}1 post tagged {{ tag }}{% pluralize %}{{ count }} posts tagged {{ tag
+           }}{% endtrans %}">{{ tag.name|e }}</a>
+      {% endfor %}
+      </div>
+    {%- endif %}
+
+As you can see the `get_tag_cloud()` function does *not* return HTML code but
+a datastructure you can render on your own.  This gives you more control over
+the resulting HTML.
+
+The availability of helper functions such as `get_tag_cloud()` varies.  Some
+are included in the TextPress core distribution (such as `get_tag_cloud()`),
+others are provided by plugins.
+
+
+Step 6: Adding a Preview Image
+==============================
+
+If you want to share your theme with the TextPress community it's a good idea
+to add a `preview` image to the theme.  The rules for such a preview image are
+simple: It must be a valid image with the dimension 240x170 pixel.  Save your
+preview image in the `shared` folder as `preview.png` and add a new line to the
+`metadata.txt`::
+
+    Preview: <plugin_name>::preview.png
+
+And once again replace `<plugin_name>` with the name of your plugin.

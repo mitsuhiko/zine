@@ -51,6 +51,7 @@ all_urls = [
         Rule('/users/<int:user_id>/delete', endpoint='admin/delete_user'),
         Rule('/options/', endpoint='admin/options'),
         Rule('/options/basic', endpoint='admin/basic_options'),
+        Rule('/options/theme', endpoint='admin/theme'),
         Rule('/options/plugins', endpoint='admin/plugins'),
         Rule('/options/configuration', endpoint='admin/configuration'),
         Rule('/about/', endpoint='admin/about'),

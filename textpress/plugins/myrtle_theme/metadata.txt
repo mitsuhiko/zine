@@ -1,4 +1,5 @@
 Name: Myrtle Theme
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 License: GPL
-Summary: Provides a brownish theme called "myrtle".
+Summary: A brownish theme called "myrtle".
+Preview: myrtle_theme::preview.png

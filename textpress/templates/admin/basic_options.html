@@ -1,0 +1,50 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['options', 'basic'] %}
+{% block title %}{% trans "Basic Options" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Basic Options" %}</h2>
+  <p>{% trans %}
+    From here you can configure the basic blog settings like the blog
+    title and tagline, date format, theme etc.
+  {% endtrans %}</p>
+  {%- if errors %}
+    <div class="error message">
+      <h3>{% trans "Error when processing the Data" %}</h3>
+      {%- for error in errors %}
+        <p>{{ error|e }}</p>
+      {%- endfor %}
+      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
+    </div>
+  {%- endif %}
+  <form action="" method="post">
+    <dl>
+      <dt>{% trans "Blog Title" %}</dt>
+      <dd>{{ h.input_field('blog_title', form.blog_title, size="40") }}</dd>
+      <dt>{% trans "Blog Tagline" %}</dt>
+      <dd>{{ h.input_field('blog_tagline', form.blog_tagline, size="40") }}</dd>
+      <dt>{% trans "Timezone" %}</dt>
+      <dd><select name="timezone">
+      {%- for timezone in timezones %}
+        <option{% if timezone == form.timezone %} selected{% endif %}>{{ timezone|e }}</option>
+      {%- endfor %}
+      </select></dd>
+      <dt>{% trans "Date/Time Format" %}</dt>
+      <dd>{{ h.input_field('datetime_format', form.datetime_format, size="20") }}</dd>
+      <dt>{% trans "Date Format" %}</dt>
+      <dd>{{ h.input_field('date_format', form.date_format, size="20") }}</dd>
+      <dt>{% trans "Cookie Name" %}</dt>
+      <dd>{{ h.input_field('sid_cookie_name', form.sid_cookie_name, size="20") }}</dd>
+      <dt>{% trans "Comments Enabled" %}</dt>
+      <dd>{{ h.checkbox('comments_enabled', 'yes', form.comments_enabled) }}
+          <label for="comments_enabled">{% trans "enable comments per default" %}</label></dd>
+      <dt>{% trans "Pingbacks Enabled" %}</dt>
+      <dd>{{ h.checkbox('pings_enabled', 'yes', form.pings_enabled) }}
+           <label for="pings_enabled">{% trans "enable pingbacks per default" %}</label></dd>
+      <dt>{% trans "Posts Per Page" %}</dt>
+      <dd>{{ h.input_field('posts_per_page', form.posts_per_page) }}</dd>
+    </dl>
+    <div class="actions">
+      <input type="submit" value="Save"/>
+    </div>
+  </form>
+{% endblock %}

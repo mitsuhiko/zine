@@ -17,7 +17,7 @@ from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED, get_post_list
 from textpress.utils import parse_datetime, format_datetime, \
-     is_valid_email, is_valid_url
+     is_valid_email, is_valid_url, TIMEZONES
 
 
 def render_admin_response(template_name, **values):
@@ -49,8 +49,8 @@ def render_admin_response(template_name, **values):
                 ('edit', url_for('admin/new_user'), _('Edit User'))
             ]),
             ('options', url_for('admin/options'), _('Options'), [
-                ('overview', url_for('admin/options'), _('Overview')),
                 ('basic', url_for('admin/basic_options'), _('Basic')),
+                ('theme', url_for('admin/theme'), _('Theme')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
                 ('configuration', url_for('admin/configuration'),
                  _('Configuration Editor'))
@@ -229,7 +229,6 @@ def do_edit_post(req, post_id=None):
         form=form,
         tags=Tag.select(),
         created=created,
-        new_post=new_post,
         post=post,
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
@@ -578,12 +577,74 @@ def do_basic_options(req):
         'comments_enabled':     cfg['comments_enabled'],
         'pings_enabled':        cfg['pings_enabled'],
         'posts_per_page':       cfg['posts_per_page'],
-        'use_flat_comments':    cfg['use_flat_comments'],
-        'theme':                cfg['theme']
+        'use_flat_comments':    cfg['use_flat_comments']
     }
+    errors = []
+
+    if req.method == 'POST':
+        form['blog_title'] = blog_title = req.form.get('blog_title')
+        if not blog_title:
+            errors.append(_('You have to provide a blog title'))
+        form['blog_tagline'] = blog_tagline = req.form.get('blog_tagline')
+        form['timezone'] = timezone = req.form.get('timezone')
+        if timezone not in TIMEZONES:
+            errors.append(_('Unknown timezone "%s"') % timezone)
+        form['datetime_format'] = datetime_format = \
+            req.form.get('datetime_format')
+        form['date_format'] = date_format = \
+            req.form.get('date_format')
+        form['sid_cookie_name'] = sid_cookie_name = \
+            req.form.get('sid_cookie_name')
+        form['comments_enabled'] = comments_enabled = \
+            req.form.get('comments_enabled') == 'yes'
+        form['pings_enabled'] = pings_enabled = \
+            req.form.get('pings_enabled') == 'yes'
+        form['posts_per_page'] = req.form.get('posts_per_page', '')
+        try:
+            posts_per_page = int(form['posts_per_page'])
+            if posts_per_page < 1:
+                errors.append(_('Posts per page must be at least 1'))
+        except ValueError:
+            errors.append(_('Posts per page must be a valid integer'))
+        form['use_flat_comments'] = use_flat_comments = \
+            req.form.get('use_flat_comments') == 'yes'
+        if not errors:
+            cfg['blog_title'] = blog_title
+            cfg['blog_tagline'] = blog_tagline
+            cfg['timezone'] = timezone
+            cfg['datetime_format'] = datetime_format
+            cfg['date_format'] = date_format
+            cfg['sid_cookie_name'] = sid_cookie_name
+            cfg['comments_enabled'] = comments_enabled
+            cfg['pings_enabled'] = pings_enabled
+            cfg['posts_per_page'] = posts_per_page
+            cfg['use_flat_comments'] = use_flat_comments
+
     return render_admin_response('admin/basic_options.html',
         form=form,
-        themes=sorted(req.app.themes)
+        errors=errors,
+        timezones=TIMEZONES
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_theme(req):
+    new_theme = req.args.get('select')
+    if new_theme in req.app.themes:
+        req.app.cfg['theme'] = new_theme
+        redirect(url_for('admin/theme'))
+
+    current = req.app.cfg['theme']
+    return render_admin_response('admin/theme.html',
+        themes=[{
+            'uid':          theme.name,
+            'name':         theme.detail_name,
+            'author':       theme.metadata.get('author'),
+            'description':  theme.metadata.get('summary'),
+            'has_preview':  theme.has_preview,
+            'preview_url':  theme.preview_url,
+            'current':      name == current
+        } for name, theme in sorted(req.app.themes.items())]
     )
 
 

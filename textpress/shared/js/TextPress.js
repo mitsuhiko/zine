@@ -4,6 +4,9 @@
  *
  * Part of the TextPress core framework. Provides default script
  * functions for the base templates.
+ *
+ * :copyright: 2007 by Armin Ronacher.
+ * :license: GNU GPL.
  */
 
 var TextPress = {
@@ -23,7 +26,7 @@ var TextPress = {
     this.callJSONService('get_comment', {comment_id: parent_id}, function(c) {
       $('#comment-message')
         .addClass('info')
-        .text(_('Replying to comment by %s. ').replace('%s', c.author))
+        .text(_('Replying to comment by %s.').replace('%s', c.author) + ' ')
         .append($('<a href="#">')
           .text(_('(Create as top level comment)'))
           .click(function() {
