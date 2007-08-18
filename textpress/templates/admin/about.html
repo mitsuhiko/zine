@@ -6,7 +6,12 @@
   <h3>{% trans "Hosting Environment" %}</h3>
   <dl>
     <dt>TextPress Version</dt>
-    <dd>{{ textpress.version|e }}</dd>
+    <dd>{{ textpress_version|e }} {{ textpress_tag }}</dd>
+    {%- if textpress_hg_checkout %}
+      <dt>TextPress HG Node</dt>
+      <dd>{{ textpress_hg_node|e }} <small>[this textpress installation runs
+          on hg checkout of textpress]</small></dd>
+    {%- endif %}
     <dt>Persistent Environment</dt>
     <dd>{{ 'yes' if hosting_env.persistent else 'no' }}</dd>
     <dt>Multithreaded</dt>

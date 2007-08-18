@@ -17,7 +17,8 @@ from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED, get_post_list
 from textpress.utils import parse_datetime, format_datetime, \
-     is_valid_email, is_valid_url, TIMEZONES
+     is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
+     build_eventmap, TIMEZONES
 
 
 def render_admin_response(template_name, **values):
@@ -60,10 +61,15 @@ def render_admin_response(template_name, **values):
     for result in emit_event('collect-admin-navigation-links'):
         navigation_bar.extend(result or ())
 
-    navigation_bar.append(('about', url_for('admin/about'), _('About'), [
+    about_items = [
         ('system', url_for('admin/about'), _('System')),
         ('textpress', url_for('admin/about_textpress'), _('TextPress'))
-    ]))
+    ]
+    if can_build_eventmap:
+        about_items.insert(1, ('eventmap', url_for('admin/eventmap'),
+                               _('Event Map')))
+    navigation_bar.append(('about', url_for('admin/about'), _('About'),
+                          about_items))
 
     values['admin'] = {
         'navigation':   [{
@@ -702,6 +708,7 @@ def do_configuration(req):
 def do_about(req):
     from threading import activeCount
     thread_count = activeCount()
+    version_info = get_version_info()
     multithreaded = thread_count > 1 and req.environ['wsgi.multithread']
 
     return render_admin_response('admin/about.html',
@@ -728,7 +735,25 @@ def do_about(req):
             'multiprocess':     req.environ['wsgi.multiprocess'],
             'wsgi_version':     '.'.join(map(str, req.environ['wsgi.version']))
         },
-        plugins=sorted(req.app.plugins.values(), key=lambda x: x.name)
+        plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
+        textpress_version='.'.join(map(str, version_info[0:3])),
+        textpress_tag=version_info[3],
+        textpress_hg_node=version_info[4],
+        textpress_hg_checkout=version_info[4] is not None,
+        can_build_eventmap=can_build_eventmap
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_eventmap(req):
+    if not can_build_eventmap:
+        abort(404)
+    return render_admin_response('admin/eventmap.html',
+        get_map=lambda: sorted(build_eventmap(req.app).items()),
+        # walking the tree can take some time, so better use stream
+        # processing for this template. that's also the reason why
+        # the building process is triggered from inside the template.
+        _stream=True
     )
 
 

@@ -63,6 +63,39 @@ _iso8601_re = re.compile(
 from textpress._dynamic import *
 
 
+_version_info = None
+
+def get_version_info():
+    """Get the TextPress version info tuple."""
+    global _version_info
+    if _version_info is None:
+        import textpress
+        p = textpress.__version__.split()
+        version = map(int, p.pop(0).split('.'))
+        while len(version) < 3:
+            version.append(0)
+
+        if p:
+            tag = p.pop(0)
+            assert not p
+        else:
+            tag = 'release'
+
+        from subprocess import Popen, PIPE
+        hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, close_fds=True,
+                   cwd=os.path.dirname(textpress.__file__))
+        rv = hg.stdout.read()
+        hg_node = None
+        if hg.wait() == 0:
+            for line in rv.splitlines():
+                p = line.split(':', 1)
+                if len(p) == 2 and p[0].lower().strip() == 'changeset':
+                    hg_node = p[1].strip()
+                    break
+        _version_info = tuple(version) + (tag, hg_node)
+    return _version_info
+
+
 def gettext(string, plural=None, n=1):
     """Translate something. XXX: add real translation here"""
     if plural is not None and n != 1:
@@ -387,6 +420,14 @@ def dump_xml(obj):
             u'<envelope>%s</envelope>' % _inner_dump(obj)).encode('utf-8')
 
 
+try:
+    import _ast
+except ImportError:
+    can_build_eventmap = False
+else:
+    can_build_eventmap = True
+
+
 def build_eventmap(app):
     """
     Walk through all the builtins and plugins for an application and
@@ -395,9 +436,7 @@ def build_eventmap(app):
     missing documentation. Speaking of documentation: This could help for
     that too.
     """
-    try:
-        import _ast
-    except ImportError:
+    if not can_build_eventmap:
         raise RuntimeError('this feature requires python 2.5')
     import textpress
 

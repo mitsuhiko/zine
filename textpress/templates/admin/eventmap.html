@@ -1,0 +1,18 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['about', 'eventmap'] %}
+{% block title %}{% trans "Event Map" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Event Map" %}</h2>
+  <p>{% trans %}
+    Here you can find all emitted events in the TextPress system.
+  {% endtrans %}</p>
+  <ul>
+  {%- for event, places in get_map() %}
+    <li><tt>{{ event|e }}</tt><ul>
+    {%- for location, filename, lineno in places %}
+      <li>{{ filename|e }}:{{ lineno }} <small>[{{ location }}]</small></li>
+    {%- endfor %}
+    </ul></li>
+  {%- endfor %}
+  </ul>
+{% endblock %}

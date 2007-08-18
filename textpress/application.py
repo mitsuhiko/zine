@@ -131,9 +131,11 @@ def add_script(href, type='application/x-javascript'):
     _locals.page_metadata.append(('script', locals()))
 
 
-def render_template(template_name, **context):
+def render_template(template_name, _stream=False, **context):
     """Renders a template."""
     tmpl = _locals.app.template_env.get_template(template_name)
+    if _stream:
+        return tmpl.stream(context)
     return tmpl.render(context)
 
 
@@ -741,7 +743,8 @@ class TextPress(object):
         """Make the application object a WSGI application."""
         remove_app = getattr(_locals, 'app', None) is None
         try:
-            return self.dispatch_request(environ, start_response)
+            for item in self.dispatch_request(environ, start_response):
+                yield item
         finally:
             try:
                 del _locals.req, _locals.page_metadata
