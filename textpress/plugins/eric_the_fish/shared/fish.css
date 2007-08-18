@@ -1,0 +1,32 @@
+/**
+ * Style a Fish!!! (and a bubble)
+ */
+
+div.eric-the-fish {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 128px;
+    height: 128px;
+    background: url(fish.png);
+    cursor: pointer;
+}
+
+div.erics-bubble {
+    position: fixed;
+    right: 130px;
+    bottom: 50px;
+    width: 256px;
+    height: 256px;
+    background: url(bubble.png);
+}
+
+div.erics-bubble div.bubble-data {
+    margin: 30px 23px 0 25px;
+    height: 160px;
+    font-family: 'Comic Sans MS', fantasy;
+    font-size: 20px;
+    text-align: center;
+    color: #000020;
+    overflow: auto;
+}

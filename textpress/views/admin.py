@@ -84,6 +84,7 @@ def render_admin_response(template_name, **values):
         } for id, url, title, children in navigation_bar]
     }
 
+    emit_event('before-admin-response-rendered', req, values, buffered=True)
     return render_response(template_name, **values)
 
 

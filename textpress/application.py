@@ -126,7 +126,7 @@ def add_meta(http_equiv=None, name=None, content=None):
     _locals.page_metadata.append(('meta', locals()))
 
 
-def add_script(href, type='application/x-javascript'):
+def add_script(src, type='text/javascript'):
     """Load a script."""
     _locals.page_metadata.append(('script', locals()))
 

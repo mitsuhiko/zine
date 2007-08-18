@@ -412,6 +412,7 @@ ul.plugin-table dl dd {
 
 div.text {
     max-width: 40em;
+    text-align: justify;
 }
 
 /* :::: LOGIN BOX :::: */

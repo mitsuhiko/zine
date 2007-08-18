@@ -27,8 +27,8 @@ all_urls = [
         Rule('/<string:tag>/feed.atom', endpoint='blog/atom_feed'),
     ]),
     Rule('/_services/', endpoint='blog/service_rsd'),
-    Rule('/_services/json/<identifier>', endpoint='blog/json_service'),
-    Rule('/_services/xml/<identifier>', endpoint='blog/xml_service'),
+    Rule('/_services/json/<path:identifier>', endpoint='blog/json_service'),
+    Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service'),
     Submount('/admin', [
         Rule('/', endpoint='admin/index'),
         Rule('/login', endpoint='admin/login'),

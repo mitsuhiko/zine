@@ -10,7 +10,7 @@
     {%- if textpress_hg_checkout %}
       <dt>TextPress HG Node</dt>
       <dd>{{ textpress_hg_node|e }} <small>[this textpress installation runs
-          on hg checkout of textpress]</small></dd>
+          a mercurial checkout of textpress]</small></dd>
     {%- endif %}
     <dt>Persistent Environment</dt>
     <dd>{{ 'yes' if hosting_env.persistent else 'no' }}</dd>
@@ -103,18 +103,20 @@
   {%- endfor %}
   </ul>
   <h3>{% trans "Events" %}</h3>
-  <p>{% trans %}
-    TextPress uses an event system for intercomponent communication. Because
-    the event system does not keep track of the events that are passed around
-    there is no central index of all the event names.
-  {% endtrans %}</p>
-  {%- if can_build_eventmap %}
+  <div class="text">
     <p>{% trans %}
-      Your python version however supports the new AST compile mode which
-      TextPress can use to build an event map based on the TextPress core and
-      plugin sourcecode. This building process can take some time depending on
-      the number of installed plugins.
+      TextPress uses an event system for intercomponent communication. Because
+      the event system does not keep track of the events that are passed around
+      there is no central index of all the event names.
     {% endtrans %}</p>
-    <p><a href="{{ url_for('admin/eventmap') }}">{% trans "Build Event Map" %}</a></p>
-  {%- endif %}
+    {%- if can_build_eventmap %}
+      <p>{% trans %}
+        Your python version however supports the new AST compile mode which
+        TextPress can use to build an event map based on the TextPress core and
+        plugin sourcecode. This building process can take some time depending on
+        the number of installed plugins.
+      {% endtrans %}</p>
+      <p><a href="{{ url_for('admin/eventmap') }}">{% trans "Build Event Map" %}</a></p>
+    {%- endif %}
+  </div>
 {% endblock %}

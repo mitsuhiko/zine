@@ -1,0 +1,4 @@
+Name: Eric The Fish
+Author: Armin Ronacher <armin.ronacher@active-4.com>
+License: GPL
+Summary: Adds an annoying fish to the admin panel. Click it to get a random fortune quote (example plugin)
