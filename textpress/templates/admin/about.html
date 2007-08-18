@@ -90,4 +90,31 @@
     </tr>
   {%- endfor %}
   </table>
+  <h3>{% trans "Template Globals" %}</h3>
+  <ul>
+  {%- for global in template_globals %}
+    <li><strong>{{ global|e }}</strong></li>
+  {%- endfor %}
+  </ul>
+  <h3>{% trans "Template Filters" %}</h3>
+  <ul>
+  {%- for filter_ in template_filters %}
+    <li><strong>{{ filter_|e }}</strong></li>
+  {%- endfor %}
+  </ul>
+  <h3>{% trans "Events" %}</h3>
+  <p>{% trans %}
+    TextPress uses an event system for intercomponent communication. Because
+    the event system does not keep track of the events that are passed around
+    there is no central index of all the event names.
+  {% endtrans %}</p>
+  {%- if can_build_eventmap %}
+    <p>{% trans %}
+      Your python version however supports the new AST compile mode which
+      TextPress can use to build an event map based on the TextPress core and
+      plugin sourcecode. This building process can take some time depending on
+      the number of installed plugins.
+    {% endtrans %}</p>
+    <p><a href="{{ url_for('admin/eventmap') }}">{% trans "Build Event Map" %}</a></p>
+  {%- endif %}
 {% endblock %}

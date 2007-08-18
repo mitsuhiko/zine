@@ -707,6 +707,8 @@ def do_configuration(req):
 @require_role(ROLE_AUTHOR)
 def do_about(req):
     from threading import activeCount
+    from jinja.defaults import DEFAULT_NAMESPACE, DEFAULT_FILTERS
+
     thread_count = activeCount()
     version_info = get_version_info()
     multithreaded = thread_count > 1 and req.environ['wsgi.multithread']
@@ -740,6 +742,12 @@ def do_about(req):
         textpress_tag=version_info[3],
         textpress_hg_node=version_info[4],
         textpress_hg_checkout=version_info[4] is not None,
+        template_globals=[name for name, obj in
+                          sorted(req.app.template_env.globals.items())
+                          if name not in DEFAULT_NAMESPACE],
+        template_filters=[name for name, obj in
+                          sorted(req.app.template_env.filters.items())
+                          if name not in DEFAULT_FILTERS],
         can_build_eventmap=can_build_eventmap
     )
 
@@ -753,6 +761,7 @@ def do_eventmap(req):
         # walking the tree can take some time, so better use stream
         # processing for this template. that's also the reason why
         # the building process is triggered from inside the template.
+        # stream rendering however is buggy in wsgiref :-/
         _stream=True
     )
 

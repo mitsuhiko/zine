@@ -132,7 +132,11 @@ def add_script(href, type='application/x-javascript'):
 
 
 def render_template(template_name, _stream=False, **context):
-    """Renders a template."""
+    """
+    Renders a template. If `_stream` is ``True`` the return value will be
+    a Jinja template stream and not an unicode object.
+    This is used by `render_response`.
+    """
     tmpl = _locals.app.template_env.get_template(template_name)
     if _stream:
         return tmpl.stream(context)
@@ -140,7 +144,13 @@ def render_template(template_name, _stream=False, **context):
 
 
 def render_response(template_name, **context):
-    """Like render_template but returns a response."""
+    """
+    Like render_template but returns a response. If `_stream` is ``True``
+    the response returned uses the Jinja stream processing. This is useful
+    for pages with lazy generated content or huge output where you don't
+    want the users to wait until the calculation ended. Use streaming only
+    in those situations because it's usually slower than bunch processing.
+    """
     return Response(render_template(template_name, **context))
 
 
@@ -481,7 +491,8 @@ class TextPress(object):
         default_theme = Theme(self, 'default', BUILTIN_TEMPLATE_PATH, {
             'name':         _('Default Theme'),
             'summary':      _('Simple default theme that doesn\'t '
-                              'contain any style information.')
+                              'contain any style information.'),
+            'preview':      'core::default_preview.png'
         })
         self.themes = {'default': default_theme}
         self.apis = {}
