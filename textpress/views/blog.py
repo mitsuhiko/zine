@@ -273,7 +273,13 @@ def do_json_service(req, identifier):
     handler = req.app._services.get(identifier)
     if handler is None:
         abort(404)
-    return Response(dump_json(handler(req)), mimetype='text/javascript')
+    for rv in emit_event('before-json-service-called', identifier, handler):
+        if rv is not None:
+            handler = rv
+    result = handler(req)
+    for result in emit_event('after-json-service-called', identifier, result):
+        pass
+    return Response(dump_json(result), mimetype='text/javascript')
 
 
 def do_xml_service(req, identifier):
@@ -283,7 +289,13 @@ def do_xml_service(req, identifier):
     handler = req.app._services.get(identifier)
     if handler is None:
         abort(404)
-    return Response(dump_xml(handler(req)), mimetype='text/xml')
+    for rv in emit_event('before-xml-service-called', identifier, handler):
+        if rv is not None:
+            handler = rv
+    result = handler(req)
+    for result in emit_event('after-xml-service-called', identifier, result):
+        pass
+    return Response(dump_xml(result), mimetype='text/xml')
 
 
 def do_atom_feed(req, author=None, year=None, month=None, day=None,

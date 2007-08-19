@@ -26,6 +26,10 @@
     <dd>{{ 'yes' if hosting_env.multiprocess else 'no' }}</dd>
     <dt>WSGI Version</dt>
     <dd>{{ hosting_env.wsgi_version|e }}</dd>
+    <dt>Database URI</dt>
+    <dd>{{ database_uri|e }}</dd>
+    <dt>Instance Path</dt>
+    <dd>{{ instance_path|e }}</dd>
   </dl>
   <h3>{% trans "URL Endpoints" %}</h3>
   <p>{% trans count=endpoints|count %}

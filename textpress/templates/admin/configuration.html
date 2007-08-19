@@ -12,6 +12,7 @@
     page (yet).
   {% endtrans %}</p>
   <form action="" method="post">
+  {{ csrf_protector }}
   {% if editor_enabled %}
       <table class="config-table">
       {%- for category in categories %}

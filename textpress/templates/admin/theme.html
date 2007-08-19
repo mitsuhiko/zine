@@ -3,32 +3,31 @@
 {% block title %}{% trans "Theme Manager" %}{% endblock %}
 {% block contents %}
   <h2>{% trans "Theme Manager" %}</h2>
-  <form action="" method="post">
-    <div class="themes">
-    {%- for theme in themes %}
-      <div class="themewrapper">
-        <div class="theme{% if theme.current %} current{% endif %}">
-          <h3><a href="?select={{ theme.uid|e }}">{{ theme.name }}</a></h3>
-          {%- if theme.has_preview %}
-            <img src="{{ theme.preview_url|e }}" alt="preview image" class="preview">
+  <div class="themes">
+  {%- for theme in themes %}
+    <div class="themewrapper">
+      <div class="theme{% if theme.current %} current{% endif %}">
+        <h3><a href="?select={{ theme.uid|e }}&amp;{{ csrf_protector.url_value|e
+          }}">{{ theme.name }}</a></h3>
+        {%- if theme.has_preview %}
+          <img src="{{ theme.preview_url|e }}" alt="preview image" class="preview">
+        {%- endif %}
+        <div class="detail">
+          <blockquote>{{ theme.description|e }}</blockquote>
+          {%- if theme.author %}
+            <p class="author">{% trans author=theme.author|e %}by {{ author }}{% endtrans %}</p>
           {%- endif %}
-          <div class="detail">
-            <blockquote>{{ theme.description|e }}</blockquote>
-            {%- if theme.author %}
-              <p class="author">{% trans author=theme.author|e %}by {{ author }}{% endtrans %}</p>
-            {%- endif %}
-          </div>
         </div>
       </div>
-    {%- endfor %}
-    <br style="clear:both">
     </div>
-    <p>{% trans %}
-      You can find additional themes for your site in the
-      <a href="http://textpress.pocoo.org/themes/">TextPress theme directory</a>.
-      To install a theme you generally just need to copy the plugin that provides
-      the theme into your plugin directory and enable that plugin. Once a plugin is
-      enabled you should see the theme on this page.
-    {% endtrans %}</p>
-  </form>
+  {%- endfor %}
+  <br style="clear:both">
+  </div>
+  <p>{% trans %}
+    You can find additional themes for your site in the
+    <a href="http://textpress.pocoo.org/themes/">TextPress theme directory</a>.
+    To install a theme you generally just need to copy the plugin that provides
+    the theme into your plugin directory and enable that plugin. Once a plugin is
+    enabled you should see the theme on this page.
+  {% endtrans %}</p>
 {% endblock %}

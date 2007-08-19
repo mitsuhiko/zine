@@ -18,7 +18,7 @@ from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      STATUS_DRAFT, STATUS_PUBLISHED, get_post_list
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
-     build_eventmap, TIMEZONES
+     build_eventmap, CSRFProtector, TIMEZONES
 
 
 def render_admin_response(template_name, **values):
@@ -58,9 +58,6 @@ def render_admin_response(template_name, **values):
             ])
         ]
 
-    for result in emit_event('collect-admin-navigation-links'):
-        navigation_bar.extend(result or ())
-
     about_items = [
         ('system', url_for('admin/about'), _('System')),
         ('textpress', url_for('admin/about_textpress'), _('TextPress'))
@@ -70,6 +67,9 @@ def render_admin_response(template_name, **values):
                                _('Event Map')))
     navigation_bar.append(('about', url_for('admin/about'), _('About'),
                           about_items))
+
+    # allow plugins to modify the navigation bar
+    emit_event('modify-admin-navigation-bar', navigation_bar, buffered=True)
 
     values['admin'] = {
         'navigation':   [{
@@ -103,7 +103,8 @@ def do_edit_post(req, post_id=None):
     tags = []
     errors = []
     form = {}
-    post=None
+    post = None
+    csrf_protector = CSRFProtector(req)
 
     # edit existing post
     if post_id is not None:
@@ -141,6 +142,9 @@ def do_edit_post(req, post_id=None):
 
     # handle incoming data and create/update the post
     if req.method == 'POST':
+        # make sure we don't have an CSRF attack
+        csrf_protector.assert_safe()
+
         # handle cancel
         if req.form.get('cancel'):
             redirect(url_for('admin/show_posts'))
@@ -241,7 +245,8 @@ def do_edit_post(req, post_id=None):
             (STATUS_PUBLISHED, _('Published')),
             (STATUS_DRAFT, _('Draft')),
             (STATUS_PRIVATE, _('Private'))
-        ]
+        ],
+        csrf_protector=csrf_protector
     )
 
 
@@ -250,8 +255,12 @@ def do_delete_post(req, post_id):
     post = Post.get(post_id)
     if post is None:
         redirect(url_for('admin/show_posts'))
+    csrf_protector = CSRFProtector(req)
 
     if req.method == 'POST':
+        # make sure the request is safe
+        csrf_protector.assert_safe()
+
         if req.form.get('cancel'):
             redirect(url_for('admin/edit_post', post_id=post.post_id))
         elif req.form.get('confirm'):
@@ -259,7 +268,10 @@ def do_delete_post(req, post_id):
             db.flush()
             redirect(url_for('admin/show_posts'))
 
-    return render_admin_response('admin/delete_post.html', post=post)
+    return render_admin_response('admin/delete_post.html',
+        post=post,
+        csrf_protector=csrf_protector
+    )
 
 
 @require_role(ROLE_AUTHOR)
@@ -281,11 +293,11 @@ def do_show_comments(req, post_id=None):
 @require_role(ROLE_AUTHOR)
 def do_edit_comment(req, comment_id):
     """Edit a comment."""
-    errors = []
-
     comment = Comment.get(comment_id)
     if comment is None:
         abort(404)
+
+    errors = []
     form = {
         'author':       comment.author,
         'email':        comment.email,
@@ -294,8 +306,12 @@ def do_edit_comment(req, comment_id):
         'pub_date':     format_datetime(comment.pub_date),
         'blocked':      comment.blocked
     }
+    csrf_protector = CSRFProtector(req)
 
     if req.method == 'POST':
+        # make sure there is not csrf attack
+        csrf_protector.assert_safe()
+
         # cancel
         if req.form.get('cancel'):
             redirect(url_for('admin/show_comments'))
@@ -350,8 +366,12 @@ def do_delete_comment(req, comment_id):
     comment = Comment.get(comment_id)
     if comment is None:
         redirect(url_for('admin/show_comments'))
+    csrf_protector = CSRFProtector(req)
 
     if req.method == 'POST':
+        # make sure there is no CSRF attack
+        csrf_protector.assert_safe()
+
         if req.form.get('cancel'):
             redirect(url_for('admin/edit_comment', comment_id=comment.comment_id))
         elif req.form.get('confirm'):
@@ -359,7 +379,10 @@ def do_delete_comment(req, comment_id):
             db.flush()
             redirect(url_for('admin/show_comments'))
 
-    return render_admin_response('admin/delete_comment.html', comment=comment)
+    return render_admin_response('admin/delete_comment.html',
+        comment=comment,
+        csrf_protector=csrf_protector
+    )
 
 
 @require_role(ROLE_AUTHOR)
@@ -372,6 +395,7 @@ def do_edit_tag(req, tag_id=None):
     """Edit a tag."""
     errors = []
     form = dict.fromkeys(['slug', 'name', 'description'], u'')
+    csrf_protector = CSRFProtector(req)
     new_tag = True
 
     if tag_id is not None:
@@ -388,6 +412,9 @@ def do_edit_tag(req, tag_id=None):
     old_slug = form['slug']
 
     if req.method == 'POST':
+        # make sure the request is from a user not an attacker
+        csrf_protector.assert_safe()
+
         # cancel
         if req.form.get('cancel'):
             redirect(url_for('admin/show_tags'))
@@ -418,7 +445,8 @@ def do_edit_tag(req, tag_id=None):
 
     return render_admin_response('admin/edit_tag.html',
         errors=errors,
-        form=form
+        form=form,
+        csrf_protector=csrf_protector
     )
 
 
@@ -427,8 +455,12 @@ def do_delete_tag(req, tag_id):
     tag = Tag.get(tag_id)
     if tag is None:
         redirect(url_for('admin/show_tags'))
+    csrf_protector = CSRFProtector(req)
 
     if req.method == 'POST':
+        # check for possible CSRF attacks
+        csrf_protector.assert_safe()
+
         if req.form.get('cancel'):
             redirect(url_for('admin/edit_tag', tag_id=tag.tag_id))
         elif req.form.get('confirm'):
@@ -436,7 +468,10 @@ def do_delete_tag(req, tag_id):
             db.flush()
             redirect(url_for('admin/show_tags'))
 
-    return render_admin_response('admin/delete_tag.html', tag=tag)
+    return render_admin_response('admin/delete_tag.html',
+        tag=tag,
+        csrf_protector=csrf_protector
+    )
 
 
 @require_role(ROLE_ADMIN)
@@ -453,6 +488,7 @@ def do_edit_user(req, user_id=None):
     form = dict.fromkeys(['username', 'first_name', 'last_name',
                           'display_name', 'description', 'email'], u'')
     form['role'] = ROLE_AUTHOR
+    csrf_protector = CSRFProtector(req)
 
     if user_id is not None:
         user = User.get(user_id)
@@ -470,6 +506,7 @@ def do_edit_user(req, user_id=None):
     new_user = user is None
 
     if req.method == 'POST':
+        csrf_protector.assert_safe()
         if req.form.get('cancel'):
             redirect(url_for('admin/show_users'))
         elif req.form.get('delete') and user:
@@ -545,7 +582,8 @@ def do_edit_user(req, user_id=None):
             (ROLE_EDITOR, _('Editor')),
             (ROLE_AUTHOR, _('Author')),
             (ROLE_SUBSCRIBER, _('Subscriber'))
-        ]
+        ],
+        csrf_protector=csrf_protector
     )
 
 
@@ -554,8 +592,10 @@ def do_delete_user(req, user_id):
     user = User.get(user_id)
     if user is None:
         redirect(url_for('admin/show_users'))
+    csrf_protector = CSRFProtector(req)
 
     if req.method == 'POST':
+        csrf_protector.assert_safe()
         if req.form.get('cancel'):
             redirect(url_for('admin/edit_user', user_id=user.user_id))
         elif req.form.get('confirm'):
@@ -563,7 +603,10 @@ def do_delete_user(req, user_id):
             db.flush()
             redirect(url_for('admin/show_users'))
 
-    return render_admin_response('admin/delete_user.html', user=user)
+    return render_admin_response('admin/delete_user.html',
+        user=user,
+        csrf_protector=csrf_protector
+    )
 
 
 @require_role(ROLE_ADMIN)
@@ -587,8 +630,10 @@ def do_basic_options(req):
         'use_flat_comments':    cfg['use_flat_comments']
     }
     errors = []
+    csrf_protector = CSRFProtector(req)
 
     if req.method == 'POST':
+        csrf_protector.assert_safe()
         form['blog_title'] = blog_title = req.form.get('blog_title')
         if not blog_title:
             errors.append(_('You have to provide a blog title'))
@@ -616,28 +661,41 @@ def do_basic_options(req):
         form['use_flat_comments'] = use_flat_comments = \
             req.form.get('use_flat_comments') == 'yes'
         if not errors:
-            cfg['blog_title'] = blog_title
-            cfg['blog_tagline'] = blog_tagline
-            cfg['timezone'] = timezone
-            cfg['datetime_format'] = datetime_format
-            cfg['date_format'] = date_format
-            cfg['sid_cookie_name'] = sid_cookie_name
-            cfg['comments_enabled'] = comments_enabled
-            cfg['pings_enabled'] = pings_enabled
-            cfg['posts_per_page'] = posts_per_page
-            cfg['use_flat_comments'] = use_flat_comments
+            if blog_title != cfg['blog_title']:
+                cfg['blog_title'] = blog_title
+            if blog_tagline != cfg['blog_tagline']:
+                cfg['blog_tagline'] = blog_tagline
+            if timezone != cfg['timezone']:
+                cfg['timezone'] = timezone
+            if datetime_format != cfg['datetime_format']:
+                cfg['datetime_format'] = datetime_format
+            if date_format != cfg['date_format']:
+                cfg['date_format'] = date_format
+            if sid_cookie_name != cfg['sid_cookie_name']:
+                cfg['sid_cookie_name'] = sid_cookie_name
+            if comments_enabled != cfg['comments_enabled']:
+                cfg['comments_enabled'] = comments_enabled
+            if pings_enabled != cfg['pings_enabled']:
+                cfg['pings_enabled'] = pings_enabled
+            if posts_per_page != cfg['posts_per_page']:
+                cfg['posts_per_page'] = posts_per_page
+            if use_flat_comments != cfg['use_flat_comments']:
+                cfg['use_flat_comments'] = use_flat_comments
 
     return render_admin_response('admin/basic_options.html',
         form=form,
         errors=errors,
-        timezones=TIMEZONES
+        timezones=TIMEZONES,
+        csrf_protector=csrf_protector
     )
 
 
 @require_role(ROLE_ADMIN)
 def do_theme(req):
+    csrf_protector = CSRFProtector(req)
     new_theme = req.args.get('select')
     if new_theme in req.app.themes:
+        csrf_protector.assert_safe()
         req.app.cfg['theme'] = new_theme
         redirect(url_for('admin/theme'))
 
@@ -651,7 +709,8 @@ def do_theme(req):
             'has_preview':  theme.has_preview,
             'preview_url':  theme.preview_url,
             'current':      name == current
-        } for name, theme in sorted(req.app.themes.items())]
+        } for name, theme in sorted(req.app.themes.items())],
+        csrf_protector=csrf_protector
     )
 
 
@@ -659,7 +718,9 @@ def do_theme(req):
 def do_plugins(req):
     changes = _outstanding_plugin_changes.setdefault(req.app, set())
     old_changes = list(changes)
+    csrf_protector = CSRFProtector(req)
     if req.method == 'POST':
+        csrf_protector.assert_safe()
         for name, plugin in req.app.plugins.iteritems():
             active = req.form.get(name) == 'yes'
             if active and not plugin.active:
@@ -671,7 +732,8 @@ def do_plugins(req):
             changes.add(name)
     return render_admin_response('admin/plugins.html',
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
-        outstanding_changes=old_changes
+        outstanding_changes=old_changes,
+        csrf_protector=csrf_protector
     )
 
 #: helper variable for `do_plugins`. In persistent environments this
@@ -683,7 +745,9 @@ _outstanding_plugin_changes = WeakKeyDictionary()
 
 @require_role(ROLE_ADMIN)
 def do_configuration(req):
+    csrf_protector = CSRFProtector(req)
     if req.method == 'POST':
+        csrf_protector.assert_safe()
         if req.form.get('enable_editor'):
             req.session['configuration_editor_enabled'] = True
         elif req.form.get('disable_editor'):
@@ -701,7 +765,8 @@ def do_configuration(req):
 
     return render_admin_response('admin/configuration.html',
         categories=req.app.cfg.get_detail_list(),
-        editor_enabled=req.session.get('configuration_editor_enabled', False)
+        editor_enabled=req.session.get('configuration_editor_enabled', False),
+        csrf_protector=csrf_protector
     )
 
 
@@ -749,7 +814,9 @@ def do_about(req):
         template_filters=[name for name, obj in
                           sorted(req.app.template_env.filters.items())
                           if name not in DEFAULT_FILTERS],
-        can_build_eventmap=can_build_eventmap
+        can_build_eventmap=can_build_eventmap,
+        instance_path=req.app.instance_folder,
+        database_uri=str(req.app.database_engine.url)
     )
 
 
@@ -775,7 +842,9 @@ def do_about_textpress(req):
 @require_role(ROLE_AUTHOR)
 def do_change_password(req):
     errors = []
+    csrf_protector = CSRFProtector(req)
     if req.method == 'POST':
+        csrf_protector.assert_safe()
         if req.form.get('cancel'):
             redirect(url_for('admin/index'))
         old_password = req.form.get('old_password')
@@ -794,7 +863,10 @@ def do_change_password(req):
             req.user.save()
             db.flush()
             redirect(url_for('admin/index'))
-    return render_admin_response('admin/change_password.html', errors=errors)
+    return render_admin_response('admin/change_password.html',
+        errors=errors,
+        csrf_protector=csrf_protector
+    )
 
 
 def do_login(req):

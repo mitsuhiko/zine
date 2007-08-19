@@ -10,7 +10,7 @@
 """
 from os import path
 from threading import local, Lock
-from itertools import izip, chain
+from itertools import izip
 from datetime import datetime
 
 from textpress.database import sessions, db, upgrade_database
@@ -131,12 +131,19 @@ def add_script(src, type='text/javascript'):
     _locals.page_metadata.append(('script', locals()))
 
 
+def add_header_snippet(html):
+    """Add some HTML as header snippet."""
+    _locals.page_metadata.append(('snippet', {'html': html}))
+
+
 def render_template(template_name, _stream=False, **context):
     """
     Renders a template. If `_stream` is ``True`` the return value will be
     a Jinja template stream and not an unicode object.
     This is used by `render_response`.
     """
+    emit_event('before-render-template', template_name, _stream, context,
+               buffered=True)
     tmpl = _locals.app.template_env.get_template(template_name)
     if _stream:
         return tmpl.stream(context)
@@ -208,12 +215,15 @@ class Request(BaseRequest):
         if user is None:
             raise RuntimeError('User does not exist')
         self.user = user
+        emit_event('after-user-login', user, buffered=True)
 
     def logout(self):
         """Log the current user out."""
         from textpress.models import User
+        user = self.user
         self.user = User.get_nobody()
         self.session.clear()
+        emit_event('after-user-logout', user, buffered=True)
 
     def save_session(self):
         """Save the session if required. Return True if it was saved."""
@@ -401,22 +411,23 @@ class ThemeLoader(BaseLoader, CachedLoaderMixin):
         theme = self.app.cfg['theme']
         if theme not in self.app.themes:
             self.app.cfg['theme'] = theme = 'default'
-        else:
+
+        # if we have a real theme add the template path to the searchpath
+        # on the highest position
+        elif theme != 'default':
             searchpath.append(self.app.themes[theme].template_path)
 
-        # add the builtin templates as default search path
-        searchpath.append(BUILTIN_TEMPLATE_PATH)
+        # add the template locations of the plugins
+        searchpath.extend(self.app._template_searchpath)
 
-        def _event_searchpaths():
-            for rv in emit_event('add-template-searchpath', name):
-                for path in rv or ():
-                    yield path
+        # now after the plugin searchpaths add the builtin one
+        searchpath.append(BUILTIN_TEMPLATE_PATH)
 
         # now load the template from a searchpath or an event
         # provided searchpath. The events for the searchpath are
         # only fired if non of the builtin paths matched.
         parts = [x for x in name.split('/') if not x == '..']
-        for fn in chain(searchpath, _event_searchpaths()):
+        for fn in searchpath:
             fn = path.join(fn, *parts)
             if path.exists(fn):
                 f = file(fn)
@@ -424,11 +435,6 @@ class ThemeLoader(BaseLoader, CachedLoaderMixin):
                     return f.read().decode(environment.template_charset)
                 finally:
                     f.close()
-
-        # still not found, then try to load from an event string
-        for rv in emit_event('load-template-from-string', name):
-            if rv is not None:
-                return rv
 
         # if still nothing, raise an error
         raise TemplateNotFound(name)
@@ -450,7 +456,7 @@ class TextPress(object):
 
         # copy the dispatcher over so that we can apply middlewares
         self.dispatch_request = self._dispatch_request
-        self.instance_folder = instance_folder
+        self.instance_folder = path.realpath(instance_folder)
 
         # config is in the database, but the config file that
         # points to the database is called "database.uri"
@@ -487,6 +493,7 @@ class TextPress(object):
         self._shared_exports = {}
         self._template_globals = {}
         self._template_filters = {}
+        self._template_searchpath = []
 
         default_theme = Theme(self, 'default', BUILTIN_TEMPLATE_PATH, {
             'name':         _('Default Theme'),
@@ -607,6 +614,15 @@ class TextPress(object):
             value = Deferred(value)
         self._template_globals[name] = value
 
+    def add_template_searchpath(self, path):
+        """Add a new template searchpath to the application.
+        This searchpath is queried *after* the themes but
+        *before* the builtin templates are looked up."""
+        if self._setup_finished:
+            raise RuntimeError('cannot add template filters '
+                               'after application setup')
+        self._template_searchpath.append(path)
+
     def add_api(self, name, blog_id, preferred, callback):
         """Add a new API to the blog."""
         if self._setup_finished:
@@ -700,7 +716,8 @@ class TextPress(object):
         """Return the metadata as HTML part for templates."""
         from textpress.htmlhelpers import script, meta, link
         from textpress.utils import dump_json
-        generators = {'script': script, 'meta': meta, 'link': link}
+        generators = {'script': script, 'meta': meta, 'link': link,
+                      'snippet': lambda html: html}
         result = [
             meta(name='generator', content='TextPress'),
             link('pingback', url_for('blog/service_rsd')),
@@ -714,6 +731,7 @@ class TextPress(object):
         )
         for type, attr in _locals.page_metadata:
             result.append(generators[type](**attr))
+        emit_event('before-metadata-assambled', result, buffered=True)
         return u'\n'.join(result)
 
     def _dispatch_request(self, environ, start_response):

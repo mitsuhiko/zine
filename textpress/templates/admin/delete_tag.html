@@ -4,6 +4,7 @@
 {% block contents %}
   <h2>{% trans "Delete Tag" %}</h2>
   <form action="" method="post">
+    {{ csrf_protector }}
     <p>{% trans tag_name=tag.name|e %}
       Do you really want to delete tag "{{ tag_name }}"?.
     {% endtrans %}</p>

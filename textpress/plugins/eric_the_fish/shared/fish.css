@@ -8,14 +8,13 @@ div.eric-the-fish {
     bottom: 20px;
     width: 128px;
     height: 128px;
-    background: url(fish.png);
     cursor: pointer;
 }
 
 div.erics-bubble {
     position: fixed;
-    right: 130px;
-    bottom: 50px;
+    right: 140px;
+    bottom: 90px;
     width: 256px;
     height: 256px;
     background: url(bubble.png);
@@ -30,3 +29,30 @@ div.erics-bubble div.bubble-data {
     color: #000020;
     overflow: auto;
 }
+
+div.erics-fish-selection a {
+    display: block;
+    float: left;
+    border: none;
+    margin: 5px;
+    width: 128px;
+    height: 128px;
+}
+
+div.erics-fish-selection a span {
+    display: none;
+}
+
+div.erics-fish-selection a:hover {
+    background-color: #c2e5e5;
+}
+
+div.erics-fish-selection a.active {
+    background-color: #f9ff8f;
+}
+
+.eric-in-blue { background: url(eric-blue.png); }
+.eric-in-green { background: url(eric-green.png); }
+.eric-in-pink { background: url(eric-pink.png); }
+.eric-in-red { background: url(eric-red.png); }
+.eric-in-yellow { background: url(eric-yellow.png); }

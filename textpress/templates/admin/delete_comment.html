@@ -4,6 +4,7 @@
 {% block contents %}
   <h2>{% trans "Delete Comment" %}</h2>
   <form action="" method="post">
+    {{ csrf_protector }}
     <p>{% trans comment_title=comment.title|e, comment_author=comment.author|e %}
       Do you really want to delete comment "{{ comment_title }}"
       by {{ comment_author }}?.

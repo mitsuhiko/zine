@@ -4,6 +4,7 @@
 {% block contents %}
   <h2>{% trans "Delete Post" %}</h2>
   <form action="" method="post">
+    {{ csrf_protector }}
     <p>{% trans post_title=post.title|e %}
       Do you really want to delete post "{{ post_title }}"?.
     {% endtrans %}</p>

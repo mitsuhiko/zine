@@ -3,14 +3,27 @@
 {% block title %}{% trans "Dashboard" %}{% endblock %}
 {% block contents %}
   <h2>{% trans "Dashboard" %}</h2>
-  <p>
-    {% trans user=req.user.username|e %}Welcome in the admin interface {{ user }}{% endtrans %}.
-  </p>
-  <p>
-    {% trans "Use one of the following links to get started quickly:" %}
-  </p>
+  <div class="text">
+    <p>{% trans user=req.user.username|e %}
+      Welcome in the admin interface {{ user }}.
+      Looks like you somehow managed it to get access to one of those rare early
+      developer previews of TextPress. Don't expect too much, it's a private alpha
+      or whatever.
+    {% endtrans %}</p>
+    <p>{% trans %}
+      However. If you encounter a bug or have a good idea regarding the interface
+      (which is somewhat bad at the moment), feel free to mail me at
+      <a href="mailto:armin.ronacher@active-4.com">armin.ronacher@active-4.com</a>.
+    {% endtrans %}</p>
+    <p>{% trans %}
+      Use one of the following links to get started quickly:
+    {% endtrans %}</p>
+  </div>
   <ul>
     <li><a href="{{ url_for('admin/new_post')|e }}">{% trans "New Post" %}</a></li>
     <li><a href="{{ url_for('admin/show_posts')|e }}">{% trans "Manage Posts" %}</a></li>
+    <li><a href="{{ url_for('admin/options')|e }}">{% trans "Configure TextPress" %}</a></li>
+    <li><a href="{{ url_for('admin/plugins')|e }}">{% trans "Manage Plugins" %}</a></li>
+    <li><a href="{{ url_for('admin/show_users')|e }}">{% trans "Manage Users" %}</a></li>
   </ul>
 {% endblock %}

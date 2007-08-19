@@ -17,6 +17,7 @@
     </div>
   {%- endif %}
   <form action="" method="post">
+    {{ csrf_protector }}
     <dl>
       <dt>{% trans "Blog Title" %}</dt>
       <dd>{{ h.input_field('blog_title', form.blog_title, size="40") }}</dd>

@@ -4,6 +4,7 @@
 {% block contents %}
   <h2>{% trans "Plugin Management" %}</h2>
   <form action="" method="post">
+    {{ csrf_protector }}
     <p>{% trans %}
       Plugins extend the functionality of the TextPress system. Because of
       security and convinience reasons you have to enable plugins by hand.

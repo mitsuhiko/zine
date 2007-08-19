@@ -22,9 +22,10 @@ from time import time, strptime
 from datetime import datetime, timedelta
 from random import choice, randrange, random
 from urlparse import urlparse
+from urllib import quote
 from simplejson import dumps as dump_json, loads as load_json
 
-from werkzeug.utils import lazy_property
+from werkzeug.utils import lazy_property, escape
 
 DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
                 '%m/%d/%y', '%d/%m/%y', '%d%m%y', '%m%d%y', '%y%m%d']
@@ -546,3 +547,44 @@ class Pagination(object):
                 result.insert(0, u'<span class="disabled">&laquo; Prev</span> ')
 
         return u''.join(result)
+
+
+class CSRFProtector(object):
+    """
+    This class is used in the admin panel to avoid CSRF attacks.
+
+    In the controller code just create a new instance of the CSRFProtector
+    and pass it the request object. The instance then provides a method
+    called `assert_safe` that must be called before the action takes place.
+
+    Example::
+
+        protector = CSRFProtector(req)
+        if req.method == 'POST':
+            protector.assert_safe()
+            ...
+
+    Additionally you have to add some small code to the templates. If you
+    want to protect POST requests it's enough to do ``{{ protector }}``
+    (assuming protector is the CSRFProtector object from the controller
+    function) or ``<a href="...?{{ protector.url_value|e }}">`` if you want
+    to protect a GET request.
+    """
+
+    def __init__(self, req):
+        self.req = req
+        self.token = sha.new('%s|%s' % (req.path, req.sid)).hexdigest()
+
+    @property
+    def url_value(self):
+        return '_csrf_check_token=%s' % quote(self.token)
+
+    def assert_safe(self):
+        if self.req.values.get('_csrf_check_token') != self.token:
+            from textpress.application import DirectResponse, Response
+            raise DirectResponse(Response('CSRF Attack detected', status=403,
+                                          mimetype='text/plain'))
+
+    def __unicode__(self):
+        return u'<input type="hidden" name="_csrf_check_token" value="%s">' % \
+            escape(self.token)

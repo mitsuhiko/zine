@@ -21,6 +21,7 @@
     </div>
   {%- endif %}
   <form action="" method="post">
+    {{ csrf_protector }}
     <fieldset>
       <legend>{% trans "Username" %}</legend>
       {{ h.input_field('username', form.username, size=30) }}

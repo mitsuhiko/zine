@@ -252,6 +252,13 @@ div.contents fieldset ul {
     padding: 0;
 }
 
+div.contents pre {
+    font-family: monospace;
+    font-size: 0.9em;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+
 div.contents div.error {
     margin: 10px 0 10px 0;
     padding: 10px;

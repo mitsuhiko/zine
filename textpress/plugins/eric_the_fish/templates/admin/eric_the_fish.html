@@ -1,0 +1,18 @@
+{% extends "admin/layout.html" %}
+{% set active_menu_item = ['options', 'eric_the_fish'] %}
+{% block title %}{% trans "Eric The Fish" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Eric The Fish" %}</h2>
+  <p>{% trans %}
+    This is Eric's configuration page. From here you can configure what
+    Eric looks like.
+  {% endtrans %}</p>
+  <div class="erics-fish-selection">
+  {%- for skin in skins %}
+    <a href="?select={{ skin.name }}&amp;{{ csrf_protector.url_value|e
+      }}" class="eric-in-{{ skin.name}}{%
+      if skin.active %} active{% endif %}"><span>{{ skin.name }}</span></a>
+  {%- endfor %}
+    <br style="clear: both">
+  </div>
+{% endblock %}

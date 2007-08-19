@@ -4,6 +4,7 @@
 {% block contents %}
   <h2>{% trans "Delete User" %}</h2>
   <form action="" method="post">
+    {{ csrf_protector }}
     <p>{% trans username=user.username|e %}
       Do you really want to delete the user "{{ username }}"?.
     {% endtrans %}</p>

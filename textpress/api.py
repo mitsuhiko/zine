@@ -16,7 +16,7 @@ from textpress.application import (
 
     # Request/Response
     Response, DirectResponse, abort, redirect, get_request, url_for,
-    add_link, add_meta, add_script,
+    add_link, add_meta, add_script, add_header_snippet,
 
     # View helpers
     require_role,
