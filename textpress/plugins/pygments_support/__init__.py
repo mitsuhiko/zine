@@ -32,7 +32,7 @@ EXAMPLE = '''\
 <!DOCTYPE HTML>
 <html>
   <head>
-    <title>Sourcecode Example</title>
+    <title>{% block title %}Untitled{% endblock %}</title>
     <style type="text/css">
       body {
         background-color: #333;
@@ -46,8 +46,7 @@ EXAMPLE = '''\
     </script>
   </head>
   <body onload="fun()">
-    <h1>Sourcecode Example</h1>
-    <p>This is just an example for selecting the style.</p>
+    {% block body %}{% endblock %}
   </body>
 </html>\
 '''
@@ -94,6 +93,11 @@ def get_style(req, style):
 
 
 def show_config(req):
+    if not have_pygments:
+        return render_admin_response('admin/pygments_support.html',
+            pygments_installed=False
+        )
+
     csrf_protector = CSRFProtector(req)
     all_styles = set(get_all_styles())
     active_style = req.form.get('style')
@@ -114,9 +118,10 @@ def show_config(req):
             'name':         style,
             'active':       style == active_style
         } for style in sorted(all_styles)],
-        example=highlight(EXAMPLE, get_lexer_by_name('html'),
+        example=highlight(EXAMPLE, get_lexer_by_name('html+jinja'),
                           preview_formatter),
-        csrf_protector=csrf_protector
+        csrf_protector=csrf_protector,
+        pygments_installed=True
     )
 
 
@@ -135,17 +140,16 @@ def add_pygments_link(navigation_bar):
 
 
 def setup(app, plugin):
-    if not have_pygments:
-        return
-
-    app.connect_event('process-doc-tree', process_doc_tree)
-    app.connect_event('after-request-setup', inject_style)
     app.connect_event('modify-admin-navigation-bar', add_pygments_link)
-    app.add_config_var('pygments_support/style', unicode, u'default')
-    app.add_url_rule('/_shared/pygments_support/<style>.css',
-                     endpoint='pygments_support/style')
     app.add_url_rule('/admin/options/pygments',
                      endpoint='pygments_support/config')
-    app.add_view('pygments_support/style', get_style)
     app.add_view('pygments_support/config', show_config)
     app.add_template_searchpath(TEMPLATES)
+
+    if have_pygments:
+        app.connect_event('process-doc-tree', process_doc_tree)
+        app.connect_event('after-request-setup', inject_style)
+        app.add_config_var('pygments_support/style', unicode, u'default')
+        app.add_url_rule('/_shared/pygments_support/<style>.css',
+                         endpoint='pygments_support/style')
+        app.add_view('pygments_support/style', get_style)

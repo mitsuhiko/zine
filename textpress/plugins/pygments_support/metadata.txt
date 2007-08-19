@@ -1,4 +1,4 @@
 Name: Pygments Support
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 License: GPL
-Summary: Adds support for pygments to pre code blocks.
+Summary: Adds support for pygments to pre code blocks. Codeblocks marked with <pre syntax="language"> are highlighted with the language specified.
