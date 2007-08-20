@@ -1,17 +1,7 @@
 {% extends "admin/layout.html" %}
-{% set active_menu_item = ['comments', 'edit'] %}
 {% block title %}{% trans "Edit Comment" %}{% endblock %}
 {% block contents %}
   <h2>{% trans "Edit Comment" %}</h2>
-  {%- if errors %}
-    <div class="error message">
-      <h3>{% trans "Error when processing the Data" %}</h3>
-      {%- for error in errors %}
-        <p>{{ error|e }}</p>
-      {%- endfor %}
-      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
-    </div>
-  {%- endif %}
   <form action="" method="post">
     {{ hidden_form_data }}
     <fieldset>

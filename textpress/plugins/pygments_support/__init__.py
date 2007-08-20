@@ -12,7 +12,7 @@ from os.path import join, dirname
 from werkzeug.utils import escape
 from textpress.api import *
 from textpress.utils import CSRFProtector
-from textpress.views.admin import render_admin_response
+from textpress.views.admin import render_admin_response, flash
 from textpress.htmlprocessor import DataNode
 try:
     from pygments import highlight
@@ -95,6 +95,7 @@ def get_style(req, style):
 def show_config(req):
     if not have_pygments:
         return render_admin_response('admin/pygments_support.html',
+                                     'options.pygments_support',
             pygments_installed=False
         )
 
@@ -107,6 +108,7 @@ def show_config(req):
     if req.form.get('apply'):
         csrf_protector.assert_safe()
         req.app.cfg['pygments_support/style'] = active_style
+        flash(_('Pygments theme changed successfully.'), 'configure')
         redirect(url_for('pygments_support/config'))
 
     preview_formatter = get_formatter(active_style, preview=True)
@@ -114,6 +116,7 @@ def show_config(req):
                        escape(preview_formatter.get_style_defs()))
 
     return render_admin_response('admin/pygments_support.html',
+                                 'options.pygments_support',
         styles=[{
             'name':         style,
             'active':       style == active_style

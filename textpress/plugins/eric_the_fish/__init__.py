@@ -21,7 +21,7 @@ from textpress.api import *
 # because we want to add an admin panel page for our fish we need the
 # render_admin_response function that works like the normal render_response
 # function, but it assembles a navigation bar for the admin layout template
-# and emits the `modify-admin-navigation-sublinks` event also use here.
+# and emits the `modify-admin-navigation-bar` event also use here.
 from textpress.views.admin import render_admin_response
 
 # Because our fish uses JSON and JavaScript we use the dump_json function
@@ -89,6 +89,7 @@ def show_eric_options(req):
         redirect(url_for('eric_the_fish/config'))
 
     return render_admin_response('admin/eric_the_fish.html',
+                                 'options.eric_the_fish',
         skins=[{
             'name':     skin,
             'active':   skin == req.app.cfg['eric_the_fish/skin']

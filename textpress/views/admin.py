@@ -30,18 +30,29 @@ def simple_redirect(*args, **kwargs):
 
 
 def flash(msg, type='info'):
-    """Add a message to the message flash buffer."""
+    """
+    Add a message to the message flash buffer.
+
+    The default message type is "info", other possible values are
+    "add", "remove", "error", "ok" and "configure". The message type affects
+    the icon and visual appearance.
+    """
+    assert type in ('info', 'add', 'remove', 'error', 'ok', 'configure')
+    if type == 'error':
+        msg = (u'<strong>%s:</strong> ' % _('Error')) + msg
     get_request().session.setdefault('admin/flashed_messages', []).\
             append((type, msg))
 
 
-def render_admin_response(template_name, **values):
+def render_admin_response(template_name, _active_menu_item=None, **values):
     """
     Works pretty much like the normal `render_response` function but
     it emits some events to collect navigation items and injects that
     into the template context.
     """
     req = get_request()
+
+    # set up the core navigation bar
     navigation_bar = [
         ('dashboard', url_for('admin/index'), _('Dashboard'), []),
         ('posts', url_for('admin/show_posts'), _('Posts'), [
@@ -57,6 +68,7 @@ def render_admin_response(template_name, **values):
         ])
     ]
 
+    # set up the administration menu bar
     if req.user.role == ROLE_ADMIN:
         navigation_bar += [
             ('users', url_for('admin/show_users'), _('Users'), [
@@ -72,6 +84,7 @@ def render_admin_response(template_name, **values):
             ])
         ]
 
+    # add the about items to the navigation bar
     about_items = [
         ('system', url_for('admin/about'), _('System')),
         ('textpress', url_for('admin/about_textpress'), _('TextPress'))
@@ -82,21 +95,37 @@ def render_admin_response(template_name, **values):
     navigation_bar.append(('about', url_for('admin/about'), _('About'),
                           about_items))
 
-    # allow plugins to modify the navigation bar
+    # allow plugins to extend the navigation bar
     emit_event('modify-admin-navigation-bar', navigation_bar, buffered=True)
 
+    # find out which is the correct submenu menubar
+    active_menu = active_submenu = None
+    if _active_menu_item is not None:
+        p = _active_menu_item.split('.')
+        if len(p) == 1:
+            active_menu = p[0]
+        else:
+            active_menu, active_submenu = p
+    for id, url, title, subnavigation_bar in navigation_bar:
+        if id == active_menu:
+            break
+    else:
+        subnavigation_bar = []
+
     values['admin'] = {
-        'navigation':   [{
+        'navbar': [{
             'id':       id,
             'url':      url,
             'title':    title,
-            'children': [{
-                'id':       id,
-                'url':      url,
-                'title':    title
-            } for id, url, title in children or ()]
+            'active':   active_menu == id
         } for id, url, title, children in navigation_bar],
-        'messages':     [{
+        'ctxnavbar': [{
+            'id':       id,
+            'url':      url,
+            'title':    title,
+            'active':   active_submenu == id
+        } for id, url, title in subnavigation_bar],
+        'messages': [{
             'type':     type,
             'msg':      msg
         } for type, msg in req.session.pop('admin/flashed_messages', [])]
@@ -108,12 +137,13 @@ def render_admin_response(template_name, **values):
 
 @require_role(ROLE_AUTHOR)
 def do_index(req):
-    return render_admin_response('admin/index.html')
+    return render_admin_response('admin/index.html', 'dashboard')
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_posts(req):
-    return render_admin_response('admin/show_posts.html', **get_post_list())
+    return render_admin_response('admin/show_posts.html', 'posts.overview',
+                                 **get_post_list())
 
 
 @require_role(ROLE_AUTHOR)
@@ -237,18 +267,26 @@ def do_edit_post(req, post_id=None):
             post.last_update = max(datetime.utcnow(), pub_date)
             db.flush()
 
+            html_post_detail = u'<a href="%s">%s</a>' % (
+                escape(url_for(post)),
+                escape(post.title)
+            )
             if new_post:
-                flash(_('The post %s was created successfully') % (
-                        u'<a href="%s">%s</a>' % (escape(url_for(post)),
-                                                  escape(post.title))))
+                flash(_('The post %s was created successfully.') %
+                      html_post_detail, 'add')
+            else:
+                flash(_('The post %s was updated successfully.') %
+                      html_post_detail)
 
             if req.form.get('save'):
                 redirect('admin/new_post')
             else:
                 simple_redirect('admin/edit_post', post_id=post.post_id)
 
-    return render_admin_response('admin/edit_post.html',
-        errors=errors,
+    for error in errors:
+        flash(error, 'error')
+
+    return render_admin_response('admin/edit_post.html', 'posts.write',
         new_post=new_post,
         form=form,
         tags=Tag.select(),
@@ -278,13 +316,12 @@ def do_delete_post(req, post_id):
         elif req.form.get('confirm'):
             redirect.add_invalid('admin/edit_post', post_id=post.post_id)
             post.delete()
+            flash(_('The post %s was deleted successfully.') %
+                  escape(post.title), 'remove')
             db.flush()
-            flash(_('The post %s was deleted successfully.') % (
-                    u'<a href="%s">%s</a>' % (escape(url_for(post)),
-                                              escape(post.title))))
             redirect('admin/show_posts')
 
-    return render_admin_response('admin/delete_post.html',
+    return render_admin_response('admin/delete_post.html', 'posts.write',
         post=post,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -301,6 +338,7 @@ def do_show_comments(req, post_id=None):
             abort(404)
         comments = Comment.select(Comment.c.post_id == post_id)
     return render_admin_response('admin/show_comments.html',
+                                 'comments.overview',
         post=post,
         comments=comments
     )
@@ -368,13 +406,17 @@ def do_edit_comment(req, comment_id):
                 comment.blocked_msg = _('blocked by %s') % req.user.display_name
             comment.save()
             db.flush()
-            flash(_('Comment by %s moderated') % escape(comment.author))
+            flash(_('Comment by %s moderated successfully.') %
+                  escape(comment.author))
             redirect('admin/show_comments')
 
+    for error in errors:
+        flash(error, 'error')
+
     return render_admin_response('admin/edit_comment.html',
+                                 'comments.overview',
         comment=comment,
         form=form,
-        errors=errors,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
@@ -397,11 +439,12 @@ def do_delete_comment(req, comment_id):
                                  comment_id=comment.comment_id)
             comment.delete()
             flash(_('Comment by %s deleted successfully.' %
-                    escape(comment.author)))
+                    escape(comment.author)), 'remove')
             db.flush()
             redirect('admin/show_comments')
 
     return render_admin_response('admin/delete_comment.html',
+                                 'comments.overview',
         comment=comment,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -422,10 +465,11 @@ def do_unblock_comment(req, comment_id):
             comment.blocked_msg = ''
             db.flush()
             flash(_('Comment by %s unblocked successfully.') %
-                  escape(comment.author))
+                  escape(comment.author), 'configure')
         redirect('admin/show_comments')
 
     return render_admin_response('admin/unblock_comment.html',
+                                 'comments.overview',
         comment=comment,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -433,7 +477,8 @@ def do_unblock_comment(req, comment_id):
 
 @require_role(ROLE_AUTHOR)
 def do_show_tags(req):
-    return render_admin_response('admin/show_tags.html', tags=Tag.select())
+    return render_admin_response('admin/show_tags.html', 'tags.overview',
+                                 tags=Tag.select())
 
 
 @require_role(ROLE_AUTHOR)
@@ -479,19 +524,28 @@ def do_edit_tag(req, tag_id=None):
             errors.append(_('The slug "%s" is not unique.') % slug)
 
         if not errors:
+            html_tag_detail = u'<a href="%s">%s</a>' % (
+                escape(url_for(tag)),
+                escape(tag.name)
+            )
             if new_tag:
                 Tag(name, description, slug or None)
-                flash(_('Tag %s created successfully.') % escape(name))
+                flash(_('Tag %s created successfully.') %
+                      html_tag_detail, 'add')
             else:
                 if tag.slug is not None:
                     tag.slug = slug
                 tag.name = name
                 tag.description = description
+                flash(_('Tag %s updated successfully.') %
+                      html_tag_detail)
             db.flush()
             redirect('admin/show_tags')
 
-    return render_admin_response('admin/edit_tag.html',
-        errors=errors,
+    for error in errors:
+        flash(error, 'error')
+
+    return render_admin_response('admin/edit_tag.html', 'tags.edit',
         form=form,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -517,7 +571,7 @@ def do_delete_tag(req, tag_id):
             db.flush()
             redirect('admin/show_tags')
 
-    return render_admin_response('admin/delete_tag.html',
+    return render_admin_response('admin/delete_tag.html', 'tags.edit',
         tag=tag,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -525,7 +579,7 @@ def do_delete_tag(req, tag_id):
 
 @require_role(ROLE_ADMIN)
 def do_show_users(req):
-    return render_admin_response('admin/show_users.html',
+    return render_admin_response('admin/show_users.html', 'users.overview',
         users=User.get_all_but_nobody()
     )
 
@@ -585,12 +639,16 @@ def do_edit_user(req, user_id=None):
             errors.append(_('Invalid user role.'))
 
         if not errors:
+            html_user_detail = u'<a href="%s">%s</a>' % (
+                escape(url_for(user)),
+                escape(user.username)
+            )
             if new_user:
                 user = User(username, password, email, first_name,
                             last_name, description, role)
                 user.display_name = display_name or '$username'
                 flash(_('User %s created successfully.') %
-                      escape(user.username))
+                      html_user_detail, 'add')
             else:
                 user.username = username
                 if password:
@@ -601,6 +659,8 @@ def do_edit_user(req, user_id=None):
                 user.display_name = display_name or '$username'
                 user.description = description
                 user.role = role
+                flash(_('User %s administrated successfully.') %
+                      html_user_detail)
             db.flush()
             if req.form.get('save'):
                 redirect('admin/show_users')
@@ -623,11 +683,13 @@ def do_edit_user(req, user_id=None):
     else:
         display_names = None
 
-    return render_admin_response('admin/edit_user.html',
+    for error in errors:
+        flash(error, 'error')
+
+    return render_admin_response('admin/edit_user.html', 'users.edit',
         new_user=user is None,
         user=user,
         form=form,
-        errors=errors,
         display_names=display_names,
         roles=[
             (ROLE_ADMIN, _('Administrator')),
@@ -655,11 +717,11 @@ def do_delete_user(req, user_id):
             redirect.add_invalid('admin/edit_user', user_id=user.user_id)
             user.delete()
             flash(_('User %s deleted successfully.') %
-                  escape(user.username))
+                  escape(user.username), 'remove')
             db.flush()
             redirect('admin/show_users')
 
-    return render_admin_response('admin/delete_user.html',
+    return render_admin_response('admin/delete_user.html', 'users.edit',
         user=user,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -737,9 +799,10 @@ def do_basic_options(req):
                 cfg['posts_per_page'] = posts_per_page
             if use_flat_comments != cfg['use_flat_comments']:
                 cfg['use_flat_comments'] = use_flat_comments
+        flash(_('Configuration altered successfully.'), 'configure')
         simple_redirect('admin/basic_options')
 
-    return render_admin_response('admin/basic_options.html',
+    return render_admin_response('admin/basic_options.html', 'options.basic',
         form=form,
         errors=errors,
         timezones=TIMEZONES,
@@ -754,10 +817,11 @@ def do_theme(req):
     if new_theme in req.app.themes:
         csrf_protector.assert_safe()
         req.app.cfg['theme'] = new_theme
+        flash(_('Theme changed successfully.'), 'configure')
         simple_redirect('admin/theme')
 
     current = req.app.cfg['theme']
-    return render_admin_response('admin/theme.html',
+    return render_admin_response('admin/theme.html', 'options.theme',
         themes=[{
             'uid':          theme.name,
             'name':         theme.detail_name,
@@ -783,10 +847,12 @@ def do_plugins(req):
             plugin_name = plugin.metadata.get('name', plugin.name)
             if active and not plugin.active:
                 plugin.activate()
-                flash(_('Plugin %s activated.') % escape(plugin_name))
+                flash(_('Plugin %s activated.') % escape(plugin_name),
+                      'configure')
             elif not active and plugin.active:
                 plugin.deactivate()
-                flash(_('Plugin %s deactivated.') % escape(plugin_name))
+                flash(_('Plugin %s deactivated.') % escape(plugin_name),
+                      'configure')
             else:
                 continue
             changes.add(name)
@@ -796,7 +862,7 @@ def do_plugins(req):
         # is only necessary once they refreshed to check why it doesn't work
         # (at least i guess that's less annoying)
 
-    return render_admin_response('admin/plugins.html',
+    return render_admin_response('admin/plugins.html', 'options.plugins',
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
         outstanding_changes=old_changes,
         csrf_protector=csrf_protector
@@ -830,6 +896,7 @@ def do_configuration(req):
         simple_redirect('admin/configuration')
 
     return render_admin_response('admin/configuration.html',
+                                 'options.configuration',
         categories=req.app.cfg.get_detail_list(),
         editor_enabled=req.session.get('configuration_editor_enabled', False),
         csrf_protector=csrf_protector
@@ -845,7 +912,7 @@ def do_about(req):
     version_info = get_version_info()
     multithreaded = thread_count > 1 and req.environ['wsgi.multithread']
 
-    return render_admin_response('admin/about.html',
+    return render_admin_response('admin/about.html', 'about.system',
         apis=[{
             'name':         name,
             'blog_id':      blog_id,
@@ -890,7 +957,7 @@ def do_about(req):
 def do_eventmap(req):
     if not can_build_eventmap:
         abort(404)
-    return render_admin_response('admin/eventmap.html',
+    return render_admin_response('admin/eventmap.html', 'about.eventmap',
         get_map=lambda: sorted(build_eventmap(req.app).items()),
         # walking the tree can take some time, so better use stream
         # processing for this template. that's also the reason why
@@ -902,7 +969,8 @@ def do_eventmap(req):
 
 @require_role(ROLE_AUTHOR)
 def do_about_textpress(req):
-    return render_admin_response('admin/about_textpress.html')
+    return render_admin_response('admin/about_textpress.html',
+                                 'about.textpress')
 
 
 @require_role(ROLE_AUTHOR)
@@ -930,7 +998,7 @@ def do_change_password(req):
             req.user.set_password(new_password)
             req.user.save()
             db.flush()
-            flash(_('Password changed successfully.'))
+            flash(_('Password changed successfully.'), 'configure')
             redirect('admin/index')
     return render_admin_response('admin/change_password.html',
         errors=errors,
@@ -961,9 +1029,9 @@ def do_login(req):
         else:
             error = _('You have to enter a username.')
 
-    return render_admin_response('admin/login.html', error=error,
-                                 username=username,
-                                 logged_out=req.values.get('logout') == 'yes')
+    return render_response('admin/login.html', error=error,
+                           username=username,
+                           logged_out=req.values.get('logout') == 'yes')
 
 
 def do_logout(req):

@@ -4,6 +4,7 @@
   <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }} {% trans "Administration" %}</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='admin/style.css') }}">
   {{ get_page_metadata() }}
+  <script type="text/javascript" src="{{ url_for('core/shared', filename='js/Admin.js') }}"></script>
 </head>
 <body>
   <div class="header">
@@ -15,18 +16,20 @@
     </div>
   </div>
   <div class="body">
-    <ul class="navbar">
-    {%- for item in admin.navigation %}
-      <li{% if active_menu_item[0] == item.id%} class="active"{% endif
-        %}><a href="{{ item.url|e(true) }}">{{ item.title|e }}</a>
-      {%- if item.children and active_menu_item[0] == item.id %}<ul>
-        {%- for child in item.children %}
-        <li{% if active_menu_item == [item.id, child.id] %} class="active"{% endif
-          %}><a href="{{ child.url|e(true) }}">{{ child.title|e }}</a></li>
-        {%- endfor %}
-      </ul>{% endif %}</li>
+    <ul class="navbar{% if not admin.ctxnavbar %} standalonebar{% endif %}">
+    {%- for item in admin.navbar %}
+      <li{% if item.active %} class="active"{% endif
+        %}><a href="{{ item.url|e(true) }}">{{ item.title|e }}</a></li>
     {%- endfor %}
     </ul>
+    {%- if admin.ctxnavbar %}
+    <ul class="ctxnavbar">
+    {%- for item in admin.ctxnavbar %}
+      <li{% if item.active %} class="active"{% endif
+        %}><a href="{{ item.url|e(true) }}">{{ item.title|e }}</a></li>
+    {%- endfor %}
+    </ul>
+    {%- endif %}
     <div class="contents">
       {%- for message in admin.messages %}
         <div class="message message-{{ message.type }}">{{ message.msg }}</div>
