@@ -19,7 +19,7 @@ def do_get_comment(req):
     comment = Comment.get(comment_id)
     if comment is None:
         abort(404)
-    if comment.blocked:
+    if comment.blocked and req.user.role < ROLE_AUTHOR:
         abort(403)
     if comment.parent is not None:
         parent_id = comment.parent.comment_id

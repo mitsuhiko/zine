@@ -26,19 +26,15 @@
     {%- if cfg.use_flat_comments %}
       <ol id="comments">
       {%- for comment in post.comments %}
-        {%- if not comment.blocked %}
         <li>{{ render_comment(comment) }}</li>
-        {%- endif %}
       {%- endfor %}
       </ol>
     {%- else %}
       <ul id="comments">
       {%- for comment in post.root_comments recursive %}
-        {%- if not comment.blocked %}
         <li>{{ render_comment(comment, post.comments_enabled
           and not cfg.use_flat_comments) }}{% if
           comment.children %}<ul>{{ loop(comment.children) }}</ul>{% endif %}</li>
-        {%- endif %}
       {%- endfor %}
       </ul>
     {%- endif %}

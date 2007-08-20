@@ -18,7 +18,21 @@ from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      STATUS_DRAFT, STATUS_PUBLISHED, get_post_list
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
-     build_eventmap, CSRFProtector, TIMEZONES
+     escape, build_eventmap, make_hidden_fields, CSRFProtector, \
+     IntelligentRedirect, TIMEZONES
+
+
+# create a function "simple redirect" that works like the redirect
+# function in the views, just that it doesn't use the `IntelligentRedirect`
+# which sometimes doesn't do what we want
+def simple_redirect(*args, **kwargs):
+    redirect(url_for(*args, **kwargs))
+
+
+def flash(msg, type='info'):
+    """Add a message to the message flash buffer."""
+    get_request().session.setdefault('admin/flashed_messages', []).\
+            append((type, msg))
 
 
 def render_admin_response(template_name, **values):
@@ -81,7 +95,11 @@ def render_admin_response(template_name, **values):
                 'url':      url,
                 'title':    title
             } for id, url, title in children or ()]
-        } for id, url, title, children in navigation_bar]
+        } for id, url, title, children in navigation_bar],
+        'messages':     [{
+            'type':     type,
+            'msg':      msg
+        } for type, msg in req.session.pop('admin/flashed_messages', [])]
     }
 
     emit_event('before-admin-response-rendered', req, values, buffered=True)
@@ -104,7 +122,8 @@ def do_edit_post(req, post_id=None):
     errors = []
     form = {}
     post = None
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
 
     # edit existing post
     if post_id is not None:
@@ -142,16 +161,15 @@ def do_edit_post(req, post_id=None):
 
     # handle incoming data and create/update the post
     if req.method == 'POST':
-        # make sure we don't have an CSRF attack
         csrf_protector.assert_safe()
 
         # handle cancel
         if req.form.get('cancel'):
-            redirect(url_for('admin/show_posts'))
+            redirect('admin/show_posts')
 
         # handle delete, redirect to confirmation page
         if req.form.get('delete') and post_id is not None:
-            redirect(url_for('admin/delete_post', post_id=post_id))
+            simple_redirect('admin/delete_post', post_id=post_id)
 
         form['title'] = title = req.form.get('title')
         if not title:
@@ -219,34 +237,28 @@ def do_edit_post(req, post_id=None):
             post.last_update = max(datetime.utcnow(), pub_date)
             db.flush()
 
-            # show new post editor or the same again
-            if req.form.get('save_and_new'):
-                if new_post:
-                    url = url_for('admin/new_post', created=post.post_id)
-                else:
-                    url = url_for('admin/new_post')
-            else:
-                url = url_for('admin/edit_post', post_id=post.post_id)
-            redirect(url)
+            if new_post:
+                flash(_('The post %s was created successfully') % (
+                        u'<a href="%s">%s</a>' % (escape(url_for(post)),
+                                                  escape(post.title))))
 
-    # if there is a "created" parameter, show post details
-    created = req.args.get('created')
-    if created:
-        created = Post.get(created)
+            if req.form.get('save'):
+                redirect('admin/new_post')
+            else:
+                simple_redirect('admin/edit_post', post_id=post.post_id)
 
     return render_admin_response('admin/edit_post.html',
         errors=errors,
         new_post=new_post,
         form=form,
         tags=Tag.select(),
-        created=created,
         post=post,
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
             (STATUS_DRAFT, _('Draft')),
             (STATUS_PRIVATE, _('Private'))
         ],
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
@@ -254,23 +266,26 @@ def do_edit_post(req, post_id=None):
 def do_delete_post(req, post_id):
     post = Post.get(post_id)
     if post is None:
-        redirect(url_for('admin/show_posts'))
-    csrf_protector = CSRFProtector(req)
+        abort(404)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
 
     if req.method == 'POST':
-        # make sure the request is safe
         csrf_protector.assert_safe()
 
         if req.form.get('cancel'):
-            redirect(url_for('admin/edit_post', post_id=post.post_id))
+            redirect('admin/edit_post', post_id=post.post_id)
         elif req.form.get('confirm'):
             post.delete()
             db.flush()
-            redirect(url_for('admin/show_posts'))
+            flash(_('The post %s was deleted successfully.') % (
+                    u'<a href="%s">%s</a>' % (escape(url_for(post)),
+                                              escape(post.title))))
+            redirect('admin/show_posts')
 
     return render_admin_response('admin/delete_post.html',
         post=post,
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
@@ -306,19 +321,19 @@ def do_edit_comment(req, comment_id):
         'pub_date':     format_datetime(comment.pub_date),
         'blocked':      comment.blocked
     }
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
 
     if req.method == 'POST':
-        # make sure there is not csrf attack
         csrf_protector.assert_safe()
 
         # cancel
         if req.form.get('cancel'):
-            redirect(url_for('admin/show_comments'))
+            redirect('admin/show_comments')
 
         # delete
         if req.form.get('delete'):
-            redirect(url_for('admin/delete_comment', comment_id=comment_id))
+            simple_redirect('admin/delete_comment', comment_id=comment_id)
 
         form['author'] = author = req.form.get('author')
         if not author:
@@ -349,15 +364,17 @@ def do_edit_comment(req, comment_id):
             if not blocked:
                 comment.blocked_msg = ''
             elif not comment.blocked_msg:
-                comment.blocked_msg = _('blocked by user')
+                comment.blocked_msg = _('blocked by %s') % req.user.display_name
             comment.save()
             db.flush()
-            redirect(url_for('admin/show_comments'))
+            flash(_('Comment by %s moderated') % escape(comment.author))
+            redirect('admin/show_comments')
 
     return render_admin_response('admin/edit_comment.html',
         comment=comment,
         form=form,
-        errors=errors
+        errors=errors,
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
@@ -366,22 +383,48 @@ def do_delete_comment(req, comment_id):
     comment = Comment.get(comment_id)
     if comment is None:
         redirect(url_for('admin/show_comments'))
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
 
     if req.method == 'POST':
-        # make sure there is no CSRF attack
         csrf_protector.assert_safe()
 
         if req.form.get('cancel'):
-            redirect(url_for('admin/edit_comment', comment_id=comment.comment_id))
+            redirect('admin/edit_comment', comment_id=comment.comment_id)
         elif req.form.get('confirm'):
             comment.delete()
+            flash(_('Comment by %s deleted successfully.' %
+                    escape(comment.author)))
             db.flush()
-            redirect(url_for('admin/show_comments'))
+            redirect('admin/show_comments')
 
     return render_admin_response('admin/delete_comment.html',
         comment=comment,
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_unblock_comment(req, comment_id):
+    comment = Comment.get(comment_id)
+    if comment is None:
+        redirect(url_for('admin/show_comments'))
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+
+    if req.method == 'POST':
+        csrf_protector.assert_safe()
+        if req.form.get('confirm'):
+            comment.blocked = False
+            comment.blocked_msg = ''
+            db.flush()
+            flash(_('Comment by %s unblocked successfully.') %
+                  escape(comment.author))
+        redirect('admin/show_comments')
+
+    return render_admin_response('admin/unblock_comment.html',
+        comment=comment,
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
@@ -395,8 +438,9 @@ def do_edit_tag(req, tag_id=None):
     """Edit a tag."""
     errors = []
     form = dict.fromkeys(['slug', 'name', 'description'], u'')
-    csrf_protector = CSRFProtector(req)
     new_tag = True
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
 
     if tag_id is not None:
         tag = Tag.get(tag_id)
@@ -412,16 +456,15 @@ def do_edit_tag(req, tag_id=None):
     old_slug = form['slug']
 
     if req.method == 'POST':
-        # make sure the request is from a user not an attacker
         csrf_protector.assert_safe()
 
         # cancel
         if req.form.get('cancel'):
-            redirect(url_for('admin/show_tags'))
+            redirect('admin/show_tags')
 
         # delete
         if req.form.get('delete'):
-            redirect(url_for('admin/delete_tag', tag_id=tag.tag_id))
+            simple_redirect('admin/delete_tag', tag_id=tag.tag_id)
 
         form['slug'] = slug = req.form.get('slug')
         form['name'] = name = req.form.get('name')
@@ -435,18 +478,19 @@ def do_edit_tag(req, tag_id=None):
         if not errors:
             if new_tag:
                 Tag(name, description, slug or None)
+                flash(_('Tag %s created successfully.') % escape(name))
             else:
                 if tag.slug is not None:
                     tag.slug = slug
                 tag.name = name
                 tag.description = description
             db.flush()
-            redirect(url_for('admin/show_tags'))
+            redirect('admin/show_tags')
 
     return render_admin_response('admin/edit_tag.html',
         errors=errors,
         form=form,
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
@@ -455,22 +499,23 @@ def do_delete_tag(req, tag_id):
     tag = Tag.get(tag_id)
     if tag is None:
         redirect(url_for('admin/show_tags'))
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
 
     if req.method == 'POST':
-        # check for possible CSRF attacks
         csrf_protector.assert_safe()
 
         if req.form.get('cancel'):
-            redirect(url_for('admin/edit_tag', tag_id=tag.tag_id))
+            redirect('admin/edit_tag', tag_id=tag.tag_id)
         elif req.form.get('confirm'):
             tag.delete()
+            flash(_('Tag %s deleted successfully.') % escape(tag.name))
             db.flush()
-            redirect(url_for('admin/show_tags'))
+            redirect('admin/show_tags')
 
     return render_admin_response('admin/delete_tag.html',
         tag=tag,
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
@@ -488,7 +533,8 @@ def do_edit_user(req, user_id=None):
     form = dict.fromkeys(['username', 'first_name', 'last_name',
                           'display_name', 'description', 'email'], u'')
     form['role'] = ROLE_AUTHOR
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
 
     if user_id is not None:
         user = User.get(user_id)
@@ -508,9 +554,9 @@ def do_edit_user(req, user_id=None):
     if req.method == 'POST':
         csrf_protector.assert_safe()
         if req.form.get('cancel'):
-            redirect(url_for('admin/show_users'))
+            redirect('admin/show_users')
         elif req.form.get('delete') and user:
-            redirect(url_for('admin/delete_user', user_id=user.user_id))
+            simple_redirect('admin/delete_user', user_id=user.user_id)
 
         username = form['username'] = req.form.get('username')
         if not username:
@@ -539,6 +585,8 @@ def do_edit_user(req, user_id=None):
                 user = User(username, password, email, first_name,
                             last_name, description, role)
                 user.display_name = display_name or '$username'
+                flash(_('User %s created successfully.') %
+                      escape(user.username))
             else:
                 user.username = username
                 if password:
@@ -550,10 +598,10 @@ def do_edit_user(req, user_id=None):
                 user.description = description
                 user.role = role
             db.flush()
-            if req.form.get('save_and_new'):
-                redirect(url_for('admin/new_user'))
+            if req.form.get('save'):
+                redirect('admin/show_users')
             else:
-                redirect(url_for('admin/edit_user', user_id=user.user_id))
+                redirect('admin/edit_user', user_id=user.user_id)
 
     if not new_user:
         display_names = [
@@ -583,7 +631,7 @@ def do_edit_user(req, user_id=None):
             (ROLE_AUTHOR, _('Author')),
             (ROLE_SUBSCRIBER, _('Subscriber'))
         ],
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
@@ -592,26 +640,29 @@ def do_delete_user(req, user_id):
     user = User.get(user_id)
     if user is None:
         redirect(url_for('admin/show_users'))
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
 
     if req.method == 'POST':
         csrf_protector.assert_safe()
         if req.form.get('cancel'):
-            redirect(url_for('admin/edit_user', user_id=user.user_id))
+            redirect('admin/edit_user', user_id=user.user_id)
         elif req.form.get('confirm'):
             user.delete()
+            flash(_('User %s deleted successfully.') %
+                  escape(user.username))
             db.flush()
-            redirect(url_for('admin/show_users'))
+            redirect('admin/show_users')
 
     return render_admin_response('admin/delete_user.html',
         user=user,
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
 @require_role(ROLE_ADMIN)
 def do_options(req):
-    redirect(url_for('admin/basic_options'))
+    simple_redirect('admin/basic_options')
 
 
 @require_role(ROLE_ADMIN)
@@ -630,7 +681,7 @@ def do_basic_options(req):
         'use_flat_comments':    cfg['use_flat_comments']
     }
     errors = []
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
 
     if req.method == 'POST':
         csrf_protector.assert_safe()
@@ -681,23 +732,24 @@ def do_basic_options(req):
                 cfg['posts_per_page'] = posts_per_page
             if use_flat_comments != cfg['use_flat_comments']:
                 cfg['use_flat_comments'] = use_flat_comments
+        simple_redirect('admin/basic_options')
 
     return render_admin_response('admin/basic_options.html',
         form=form,
         errors=errors,
         timezones=TIMEZONES,
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector)
     )
 
 
 @require_role(ROLE_ADMIN)
 def do_theme(req):
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
     new_theme = req.args.get('select')
     if new_theme in req.app.themes:
         csrf_protector.assert_safe()
         req.app.cfg['theme'] = new_theme
-        redirect(url_for('admin/theme'))
+        simple_redirect('admin/theme')
 
     current = req.app.cfg['theme']
     return render_admin_response('admin/theme.html',
@@ -718,18 +770,27 @@ def do_theme(req):
 def do_plugins(req):
     changes = _outstanding_plugin_changes.setdefault(req.app, set())
     old_changes = list(changes)
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
     if req.method == 'POST':
         csrf_protector.assert_safe()
         for name, plugin in req.app.plugins.iteritems():
             active = req.form.get(name) == 'yes'
+            plugin_name = plugin.metadata.get('name', plugin.name)
             if active and not plugin.active:
                 plugin.activate()
+                flash(_('Plugin %s activated.') % escape(plugin_name))
             elif not active and plugin.active:
                 plugin.deactivate()
+                flash(_('Plugin %s deactivated.') % escape(plugin_name))
             else:
                 continue
             changes.add(name)
+        # no redirect here so that the old_changes are displayed only the
+        # next time someone visits the plugin page. We don't have to tell
+        # users to restart the server every time they change a setting. This
+        # is only necessary once they refreshed to check why it doesn't work
+        # (at least i guess that's less annoying)
+
     return render_admin_response('admin/plugins.html',
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
         outstanding_changes=old_changes,
@@ -745,7 +806,7 @@ _outstanding_plugin_changes = WeakKeyDictionary()
 
 @require_role(ROLE_ADMIN)
 def do_configuration(req):
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
     if req.method == 'POST':
         csrf_protector.assert_safe()
         if req.form.get('enable_editor'):
@@ -761,7 +822,7 @@ def do_configuration(req):
                     already_default.add(key)
                 elif key in req.app.cfg and key not in already_default:
                     req.app.cfg.set_from_string(key, value)
-        redirect(url_for('admin/configuration'))
+        simple_redirect('admin/configuration')
 
     return render_admin_response('admin/configuration.html',
         categories=req.app.cfg.get_detail_list(),
@@ -842,11 +903,13 @@ def do_about_textpress(req):
 @require_role(ROLE_AUTHOR)
 def do_change_password(req):
     errors = []
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+
     if req.method == 'POST':
         csrf_protector.assert_safe()
         if req.form.get('cancel'):
-            redirect(url_for('admin/index'))
+            redirect('admin/index')
         old_password = req.form.get('old_password')
         if not old_password:
             errors.append(_('You have to enter your old password.'))
@@ -862,10 +925,11 @@ def do_change_password(req):
             req.user.set_password(new_password)
             req.user.save()
             db.flush()
-            redirect(url_for('admin/index'))
+            flash(_('Password changed successfully.'))
+            redirect('admin/index')
     return render_admin_response('admin/change_password.html',
         errors=errors,
-        csrf_protector=csrf_protector
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
@@ -899,4 +963,4 @@ def do_login(req):
 
 def do_logout(req):
     req.logout()
-    redirect(url_for('admin/login', logout='yes'))
+    simple_redirect('admin/login', logout='yes')

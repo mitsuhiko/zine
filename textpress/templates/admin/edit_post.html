@@ -9,20 +9,10 @@
       {%- for error in errors %}
         <p>{{ error|e }}</p>
       {%- endfor %}
-      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
-    </div>
-  {%- endif %}
-  {%- if created %}
-    <div class="information message">
-      <h3>{% trans "Post created successfully" %}</h3>
-      <p>{% trans post_title=created.title|e, post_link=url_for(created)
-        %}Your post <a href="{{ post_link }}">{{ post_title
-          }}</a> was created successfully.{% endtrans %}</p>
-      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
     </div>
   {%- endif %}
   <form action="" method="post">
-    {{ csrf_protector }}
+    {{ hidden_form_data }}
     <fieldset>
       <legend>{% trans "Title" %}</legend>
       {{ h.input_field('title', form.title, size=36) }}
@@ -86,7 +76,7 @@
       </p>
     {% endif %}
     <div class="actions">
-      <input type="submit" name="save_and_new" value="{% trans 'Save' %}">
+      <input type="submit" name="save" value="{% trans 'Save' %}">
       <input type="submit" name="save_and_continue" value="{% trans 'Save and continue editing' %}">
       {%- if not new_post %}
         <input type="submit" name="delete" value="{% trans 'Delete' %}">

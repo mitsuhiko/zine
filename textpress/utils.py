@@ -21,7 +21,7 @@ import logging
 from time import time, strptime
 from datetime import datetime, timedelta
 from random import choice, randrange, random
-from urlparse import urlparse
+from urlparse import urlparse, urljoin
 from urllib import quote
 from simplejson import dumps as dump_json, loads as load_json
 
@@ -490,6 +490,17 @@ def build_eventmap(app):
     return result
 
 
+def make_hidden_fields(*fields):
+    """Create some hidden form data for fields."""
+    buf = []
+    for field in fields:
+        args = field.get_hidden_field()
+        if args is not None:
+            buf.append(u'<input type="hidden" name="%s" value="%s">' %
+                       (escape(args[0]), escape(args[1])))
+    return u'\n'.join(buf)
+
+
 class Pagination(object):
     """Pagination helper."""
 
@@ -549,30 +560,158 @@ class Pagination(object):
         return u''.join(result)
 
 
-class CSRFProtector(object):
+class RequestLocal(object):
+    """
+    All attributes on this object are request local and deleted after the
+    request finished. The request local object itself must be stored somewhere
+    in a global context and never deleted.
+    """
+
+    def __init__(self, **vars):
+        from textpress.application import _locals
+        self._locals = _locals
+        self._vars = {}
+        for key, value in vars.iteritems():
+            if value is None:
+                value = lambda: None
+            self._vars[key] = value
+
+    @property
+    def _storage(self):
+        if not hasattr(self._locals, 'request_locals'):
+            raise AttributeError('no request context')
+        return self._locals.request_locals.setdefault(id(self), {})
+
+    def __getattr__(self, name):
+        if name not in self._vars:
+            raise AttributeError(name)
+        if name not in self._storage:
+            self._storage[name] = self._vars[name]()
+        return self._storage[name]
+
+    def __setattr__(self, name, value):
+        if name not in self._vars:
+            raise AttributeError(name)
+        self._storage[name] = value
+
+
+class HiddenFormField(object):
+    """
+    Baseclass for special hidden fields.
+    """
+
+    def get_hidden_field(self):
+        pass
+
+    def __unicode__(self):
+        return make_hidden_fields(self)
+
+
+class IntelligentRedirect(HiddenFormField):
+    """
+    An intelligent redirect tries to go back to the page the user
+    is comming from or redirects to the url rule provided when called.
+
+    Like the `CSRFProtector` it uses hidden form information.
+
+    Example usage::
+
+        redirect = IntelligentRedirect()
+        if req.method == 'POST':
+            ...
+            redirect('admin/index') # go back to the admin index or the
+                                    # page we're comming from.
+        return render_response(..., hidden_data=make_hidden_fields(redirect))
+
+    If you don't want to combine it with other hidden fields you can ignore
+    the `make_hidden_fields` call and pass the intelligent redirect instance
+    directly to the template.  Rendering it results in a hidden form field.
+    """
+
+    def __init__(self):
+        from textpress.application import get_request
+        self.req = req = get_request()
+
+    def get_redirect_target(self):
+        """
+        Check the request and get the redirect target if possible.
+        If not this function returns just `None`.
+        """
+        check_target = self.req.values.get('_redirect_target')
+        if not check_target:
+            check_target = self.req.environ.get('HTTP_REFERER')
+            # if there is no information in either the form data
+            # or the wsgi environment about a jump target we have
+            # to use the target url
+            if not check_target:
+                return
+
+        blog_url = self.req.app.cfg['blog_url']
+        blog_parts = urlparse(blog_url)
+        check_parts = urlparse(urljoin(blog_url, check_target))
+
+        # if the jump target is on a different server we probably have
+        # a security problem and better try to use the target url.
+        if blog_parts[:2] != check_parts[:2]:
+            return
+
+        # if the jump url is the same url as the current url we've had
+        # a bad redirect before and use the target url to not create a
+        # infinite redirect.
+        current_parts = urlparse(urljoin(blog_url, self.req.path))
+        if check_parts[:5] == current_parts[:5]:
+            return
+
+        return check_target
+
+    def __call__(self, *args, **kwargs):
+        """Trigger the redirect."""
+        from textpress.application import redirect, url_for
+        target = self.get_redirect_target()
+        if target is None:
+            target = url_for(*args, **kwargs)
+        redirect(target)
+
+    def get_hidden_field(self):
+        target = self.get_redirect_target()
+        if target is None:
+            return
+        return '_redirect_target', target
+
+
+class CSRFProtector(HiddenFormField):
     """
     This class is used in the admin panel to avoid CSRF attacks.
 
     In the controller code just create a new instance of the CSRFProtector
-    and pass it the request object. The instance then provides a method
+    and pass it the request object.  The instance then provides a method
     called `assert_safe` that must be called before the action takes place.
 
     Example::
 
-        protector = CSRFProtector(req)
+        protector = CSRFProtector()
         if req.method == 'POST':
             protector.assert_safe()
             ...
 
-    Additionally you have to add some small code to the templates. If you
+        return render_response(..., hidden_data=make_hidden_fields(protector))
+
+    Additionally you have to add some small code to the templates.  If you
     want to protect POST requests it's enough to do ``{{ protector }}``
     (assuming protector is the CSRFProtector object from the controller
     function) or ``<a href="...?{{ protector.url_value|e }}">`` if you want
     to protect a GET request.
+
+    If you don't want or have to combine it with other hidden fields
+    such as the intelligent redirect stuff you can also pass the protector
+    instance to the template directly, rendering it prints out the hidden
+    field automatically. This also allows you to access the `url_value`
+    attribute that allows CSRF protection for GET requests.
     """
 
-    def __init__(self, req):
-        self.req = req
+    def __init__(self):
+        from textpress.application import get_request
+        self.req = req = get_request()
         self.token = sha.new('%s|%s' % (req.path, req.sid)).hexdigest()
 
     @property
@@ -585,6 +724,5 @@ class CSRFProtector(object):
             raise DirectResponse(Response('CSRF Attack detected', status=403,
                                           mimetype='text/plain'))
 
-    def __unicode__(self):
-        return u'<input type="hidden" name="_csrf_check_token" value="%s">' % \
-            escape(self.token)
+    def get_hidden_field(self):
+        return '_csrf_check_token', self.token

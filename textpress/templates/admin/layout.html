@@ -27,7 +27,12 @@
       </ul>{% endif %}</li>
     {%- endfor %}
     </ul>
-    <div class="contents">{% block contents %}{% endblock %}</div>
+    <div class="contents">
+      {%- for message in admin.messages %}
+        <div class="message message-{{ message.type }}">{{ message.msg }}</div>
+      {%- endfor %}
+      {% block contents %}{% endblock %}
+    </div>
   </div>
   <div class="footer">
     <p>Powered by <a href="http://textpress.pocoo.org/">TextPress</a> {{

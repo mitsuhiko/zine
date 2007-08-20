@@ -388,6 +388,14 @@ class Post(object):
         """Return only the comments for this post that don't have a parent."""
         return [x for x in self.comments if x.parent is None]
 
+    @property
+    def comment_count(self):
+        """The number of visible comments."""
+        req = get_request()
+        if req.user.role >= ROLE_AUTHOR:
+            return len(self.comments)
+        return len([x for x in self.comments if not x.blocked])
+
     def _get_raw_intro(self):
         return self._raw_intro
 
@@ -553,11 +561,16 @@ class Comment(object):
         self.submitter_ip = submitter_ip
 
     @staticmethod
-    def get_blocked(self):
+    def get_blocked():
         """Get all blocked comments."""
         return Comment.select(Comment.c.blocked == True)
 
-    def can_see(self, user=None):
+    @staticmethod
+    def get_block_count():
+        """Get the number of blocked comments."""
+        return Comment.count(Comment.c.blocked == True)
+
+    def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""
         if not self.blocked:
             return True
@@ -565,7 +578,9 @@ class Comment(object):
             user = get_request().user
         elif isinstance(user, (int, long)):
             user = User.get(user)
-        return user.role >= ROLE_EDITOR
+        return user.role >= ROLE_AUTHOR
+
+    visible = property(visible_for_user)
 
     def __repr__(self):
         return '<%s %r>' % (

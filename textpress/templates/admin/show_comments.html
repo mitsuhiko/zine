@@ -13,23 +13,32 @@
   {% else %}
     <h2>{% trans "Manage Comments" %}</h2>
   {% endif %}
-  <table>
-    <tr>
-      <th>{% trans "ID" %}</th>
-      <th>{% trans "Author" %}</th>
-      <th>{% trans "Date" %}</th>
-      {% if not post %}<th>{% trans "Post" %}</th>{% endif %}
-    </tr>
+  <ul class="comments">
   {%- for comment in comments %}
-    <tr class="{% cycle 'odd', 'even' %}">
-      <td>{{ comment.comment_id }}</td>
-      <td><a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e }}">{{
-          comment.author|e }}</a> &lt;{{ comment.email|e }}&gt;</td>
-      <td>{{ comment.pub_date|datetimeformat|e }}</td>
-      {% if not post %}<td><a href="{{ url_for(comment.post)|e }}">{{ comment.post.title|e }}</a></td>{% endif %}
-    </tr>
+    <li class="comment {% cycle 'odd', 'even' %}{% if comment.blocked %} blocked{% endif %}">
+      <p><strong>{{ comment.author }}</strong> |
+         <a href="mailto:{{ comment.email|e(true) }}">{{ comment.email|e }}</a> |
+         {% if comment.www %}<a href="{{ comment.www|e(true) }}">{{ comment.www|e
+           }}</a> |{% endif %}
+         IP: {{ comment.submitter_ip }}
+         {%- if comment.blocked %}
+           | {{ comment.blocked_msg }}
+         {%- endif %}
+         </p>
+      {{ comment.body }}
+      <p>{{ comment.pub_date|datetimeformat|e }}
+         [ <a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e
+             }}">{% trans "Edit" %}</a> |
+           <a href="{{ url_for('admin/delete_comment', comment_id=comment.comment_id)|e
+             }}">{% trans "Delete" %}</a>
+           {%- if comment.blocked %} | <a href="{{ url_for('admin/unblock_comment',
+             comment_id=comment.comment_id)|e }}">{% trans "Unblock" %}</a>{% endif %}
+         ]
+         {% if not post %}&mdash; <a href="{{ url_for(comment.post)|e }}">{{
+           comment.post.title|e }}</a>{% endif %}</p>
+    </li>
   {%- else %}
-    <tr><td colspan="4">{% trans "No comments." %}</td></tr>
+    <li>{% trans "No comments." %}</li>
   {%- endfor %}
-  </table>
+  </ul>
 {% endblock %}

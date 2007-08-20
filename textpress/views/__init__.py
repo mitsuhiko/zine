@@ -35,6 +35,7 @@ all_views = {
     'admin/show_comments':      admin.do_show_comments,
     'admin/edit_comment':       admin.do_edit_comment,
     'admin/delete_comment':     admin.do_delete_comment,
+    'admin/unblock_comment':    admin.do_unblock_comment,
     'admin/show_tags':          admin.do_show_tags,
     'admin/new_tag':            admin.do_edit_tag,
     'admin/edit_tag':           admin.do_edit_tag,

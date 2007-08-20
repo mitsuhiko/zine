@@ -41,6 +41,7 @@ all_urls = [
         Rule('/comments/', endpoint='admin/show_comments'),
         Rule('/comments/<int:comment_id>', endpoint='admin/edit_comment'),
         Rule('/comments/<int:comment_id>/delete', endpoint='admin/delete_comment'),
+        Rule('/comments/<int:comment_id>/unblock', endpoint='admin/unblock_comment'),
         Rule('/tags/', endpoint='admin/show_tags'),
         Rule('/tags/new', endpoint='admin/new_tag'),
         Rule('/tags/<int:tag_id>', endpoint='admin/edit_tag'),

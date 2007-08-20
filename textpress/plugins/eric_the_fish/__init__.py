@@ -82,7 +82,7 @@ def show_eric_options(req):
     This renders the eric admin panel. Allow switching the skin and show
     the available skins.
     """
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
     new_skin = req.args.get('select')
     if new_skin in SKINS:
         req.app.cfg['eric_the_fish/skin'] = new_skin

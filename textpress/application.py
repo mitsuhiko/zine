@@ -44,6 +44,8 @@ BUILTIN_TEMPLATE_PATH = path.join(path.dirname(__file__), 'templates')
 #: `page_metadata`:
 #:      list of tuples containing the metadata for the page.
 #:      this is only set if there is an request processed.
+#: `request_locals`:
+#:      used by the `RequestLocal` class from the utils module.
 _locals = local()
 
 #: the lock for the application setup
@@ -227,7 +229,7 @@ class Request(BaseRequest):
 
     def save_session(self):
         """Save the session if required. Return True if it was saved."""
-        if self.user != self._old_user or self.session:
+        if self.user != self._old_user or self.user.is_somebody:
             just_update = self.last_session_update is not None
             last_change = self.last_session_update = datetime.utcnow()
             if just_update:
@@ -739,6 +741,7 @@ class TextPress(object):
         _locals.app = self
         _locals.req = req = Request(self, environ)
         _locals.page_metadata = []
+        _locals.request_locals = {}
 
         # the after-request-setup event can return a response
         # or modify the request object in place. If we have a
@@ -776,7 +779,8 @@ class TextPress(object):
                 yield item
         finally:
             try:
-                del _locals.req, _locals.page_metadata
+                # clean up the request locals to avoid memory leakage
+                del _locals.req, _locals.page_metadata, _locals.request_locals
                 if remove_app:
                     del _locals.app
             except:

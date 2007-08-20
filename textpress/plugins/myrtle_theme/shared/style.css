@@ -381,6 +381,18 @@ ul#comments p.meta, ol#comments p.meta {
     color: #555;
 }
 
+#comments div.blocked,
+#comments div.blocked p.meta,
+#comments div.blocked a {
+    color: #aaa;
+    background-color: #eee;
+}
+
+#comments div.blocked {
+    border: 1px solid #ccc;
+    padding: 3px 8px 3px 3px;
+}
+
 /* :::: TAG CLOUD :::: */
 div.tag-cloud {
     padding: 10px;

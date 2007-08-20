@@ -1,12 +1,14 @@
 {% extends "admin/layout.html" %}
 {% set active_menu_item = ['comments', 'edit'] %}
-{% block title %}{% trans "Delete Comment" %}{% endblock %}
+{% block title %}{% trans "Unblock Comment" %}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Delete Comment" %}</h2>
+  <h2>{% trans "Unblock Comment" %}</h2>
   <form action="" method="post">
     {{ hidden_form_data }}
-    <p>{% trans comment_author=comment.author|e %}
-      Do you really want to delete the comment by {{ comment_author }}?.
+    <p>{% trans comment_author=comment.author|e,
+                reason=comment.blocked_msg|e %}
+      Do you really want to unblock the comment by {{ comment_author }}
+      which was blocked with the following reason: {{ reason }}?
     {% endtrans %}</p>
     <input type="submit" name="cancel" value="{% trans 'No' %}">
     <input type="submit" name="confirm" value="{% trans 'Yes' %}">

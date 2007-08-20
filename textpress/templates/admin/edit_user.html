@@ -21,7 +21,7 @@
     </div>
   {%- endif %}
   <form action="" method="post">
-    {{ csrf_protector }}
+    {{ hidden_form_data }}
     <fieldset>
       <legend>{% trans "Username" %}</legend>
       {{ h.input_field('username', form.username, size=30) }}
@@ -69,7 +69,7 @@
       </ul>
     </fieldset>
     <div class="actions">
-      <input type="submit" name="save_and_new" value="{% trans 'Save' %}">
+      <input type="submit" name="save" value="{% trans 'Save' %}">
       <input type="submit" name="save_and_continue" value="{% trans 'Save and continue editing' %}">
       {%- if not new_post %}
         <input type="submit" name="delete" value="{% trans 'Delete' %}">

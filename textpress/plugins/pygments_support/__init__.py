@@ -98,7 +98,7 @@ def show_config(req):
             pygments_installed=False
         )
 
-    csrf_protector = CSRFProtector(req)
+    csrf_protector = CSRFProtector()
     all_styles = set(get_all_styles())
     active_style = req.form.get('style')
     if not active_style or active_style not in all_styles:
