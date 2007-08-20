@@ -626,11 +626,25 @@ class IntelligentRedirect(HiddenFormField):
     If you don't want to combine it with other hidden fields you can ignore
     the `make_hidden_fields` call and pass the intelligent redirect instance
     directly to the template.  Rendering it results in a hidden form field.
+
+    The intelligent redirect is much slower than a normal redirect because
+    it tests for quite a few things. Don't use it if you don't have to.
     """
 
     def __init__(self):
         from textpress.application import get_request
         self.req = req = get_request()
+        self.invalid_targets = []
+
+    def add_invalid(self, *args, **kwargs):
+        """
+        Add an invalid target. Invalid targets are URLs we don't want to visit
+        again. For example if a post is deleted from the post edit page it's
+        a bad idea to redirect back to the edit page because in that situation
+        the edit page would return a page not found.
+        """
+        from textpress.application import url_for
+        self.invalid_targets.append(url_for(*args, **kwargs))
 
     def get_redirect_target(self):
         """
@@ -661,6 +675,12 @@ class IntelligentRedirect(HiddenFormField):
         current_parts = urlparse(urljoin(blog_url, self.req.path))
         if check_parts[:5] == current_parts[:5]:
             return
+
+        # if the `check_target` is one of the invalid targets we also
+        # fall back.
+        for invalid in self.invalid_targets:
+            if check_parts[:5] == urlparse(urljoin(blog_url, invalid))[:5]:
+                return
 
         return check_target
 

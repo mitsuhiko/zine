@@ -276,6 +276,7 @@ def do_delete_post(req, post_id):
         if req.form.get('cancel'):
             redirect('admin/edit_post', post_id=post.post_id)
         elif req.form.get('confirm'):
+            redirect.add_invalid('admin/edit_post', post_id=post.post_id)
             post.delete()
             db.flush()
             flash(_('The post %s was deleted successfully.') % (
@@ -392,6 +393,8 @@ def do_delete_comment(req, comment_id):
         if req.form.get('cancel'):
             redirect('admin/edit_comment', comment_id=comment.comment_id)
         elif req.form.get('confirm'):
+            redirect.add_invalid('admin/edit_comment',
+                                 comment_id=comment.comment_id)
             comment.delete()
             flash(_('Comment by %s deleted successfully.' %
                     escape(comment.author)))
@@ -508,6 +511,7 @@ def do_delete_tag(req, tag_id):
         if req.form.get('cancel'):
             redirect('admin/edit_tag', tag_id=tag.tag_id)
         elif req.form.get('confirm'):
+            redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
             tag.delete()
             flash(_('Tag %s deleted successfully.') % escape(tag.name))
             db.flush()
@@ -648,6 +652,7 @@ def do_delete_user(req, user_id):
         if req.form.get('cancel'):
             redirect('admin/edit_user', user_id=user.user_id)
         elif req.form.get('confirm'):
+            redirect.add_invalid('admin/edit_user', user_id=user.user_id)
             user.delete()
             flash(_('User %s deleted successfully.') %
                   escape(user.username))

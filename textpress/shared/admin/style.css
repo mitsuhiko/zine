@@ -159,6 +159,12 @@ div.body div.contents {
     padding: 10px;
 }
 
+div.contents div.message {
+    border: 1px solid #2580B2;
+    padding: 8px 8px 8px 32px;
+    background: #CFEBF7 url(img/info.png) no-repeat 8px center;
+}
+
 div.contents h2 {
     color: #222e4b;
     margin: 0;
