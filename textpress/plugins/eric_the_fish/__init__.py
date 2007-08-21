@@ -29,6 +29,10 @@ from textpress.views.admin import render_admin_response
 # avoid CSRF attacks.
 from textpress.utils import dump_json, CSRFProtector
 
+# we only want the admin to be able to configure eric. so we need the
+# admin role
+from textpress.models import ROLE_ADMIN
+
 # the last thing is importing the FORTUNES list from the fortunes.py file
 # from the same folder. It's just a long list with quotes.
 from textpress.plugins.eric_the_fish.fortunes import FORTUNES
@@ -64,19 +68,22 @@ def inject_fish(req, context):
     )
 
 
-def add_eric_link(navigation_bar):
+def add_eric_link(req, navigation_bar):
     """
     Called during the admin navigation bar setup. When the options menu is
     traversed we insert our eric the fish link before the plugins link.
     The outermost is the configuration editor, the next one the plugins
     link and then we add our fish link.
     """
+    if req.user.role < ROLE_ADMIN:
+        return
     for link_id, url, title, children in navigation_bar:
         if link_id == 'options':
             children.insert(-2, ('eric_the_fish', url_for('eric_the_fish/config'),
                                  _('Eric The Fish')))
 
 
+@require_role(ROLE_ADMIN)
 def show_eric_options(req):
     """
     This renders the eric admin panel. Allow switching the skin and show

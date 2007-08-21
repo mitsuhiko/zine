@@ -1,0 +1,10 @@
+Name: File Uploads
+Plugin URL: http://textpress.pocoo.org/plugins/file_uploads
+Author: Armin Ronacher <armin.ronacher@active-4.com>
+Author URL: http://lucumr.pocoo.org/
+License: GPL
+Version: 0.1
+Description: The "File Uploads" plugin adds a button to the administration\
+ panel that allows you to upload files of many types into a folder that is\
+ visible from the web. This is useful if you want to upload pictures or other\
+ multimedia content into your blog.

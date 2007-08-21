@@ -13,6 +13,7 @@ from werkzeug.utils import escape
 from textpress.api import *
 from textpress.utils import CSRFProtector
 from textpress.views.admin import render_admin_response, flash
+from textpress.models import ROLE_ADMIN
 from textpress.htmlprocessor import DataNode
 try:
     from pygments import highlight
@@ -92,6 +93,7 @@ def get_style(req, style):
                     mimetype='text/css')
 
 
+@require_role(ROLE_ADMIN)
 def show_config(req):
     if not have_pygments:
         return render_admin_response('admin/pygments_support.html',
@@ -134,12 +136,13 @@ def inject_style(req):
              'text/css')
 
 
-def add_pygments_link(navigation_bar):
-    for link_id, url, title, children in navigation_bar:
-        if link_id == 'options':
-            children.insert(-2, ('pygments_support',
-                                 url_for('pygments_support/config'),
-                                 'Pygments'))
+def add_pygments_link(req, navigation_bar):
+    if req.user.role >= ROLE_ADMIN:
+        for link_id, url, title, children in navigation_bar:
+            if link_id == 'options':
+                children.insert(-2, ('pygments_support',
+                                     url_for('pygments_support/config'),
+                                     'Pygments'))
 
 
 def setup(app, plugin):

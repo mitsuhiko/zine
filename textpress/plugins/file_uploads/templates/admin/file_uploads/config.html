@@ -1,0 +1,24 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Configure Uploads" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Configure Uploads" %}</h2>
+  <div class="text">
+    <p>{% trans %}
+      From here you can configure the upload system.
+    {% endtrans %}</p>
+    <p>{% trans %}
+      If you set the upload destination to a relative path it's
+      expanded for the instance folder. If the folder does not
+      exist TextPress will create a new one the first time you
+      upload something into that folder.
+    {% endtrans %}</p>
+  </div>
+  <form action="" method="post">
+    {{ csrf_protector }}
+    <div class="actions">
+      {% trans "Upload files to" %}:
+      {{ h.input_field('upload_dest', upload_dest) }}
+      <input type="submit" value="{% trans 'Save' %}">
+    </div>
+  </form>
+{% endblock %}

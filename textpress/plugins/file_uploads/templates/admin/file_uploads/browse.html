@@ -1,0 +1,35 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Browse Uploads" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Browse Uploads" %}</h2>
+  <p>{% trans %}
+    Here you can find all the files you've uploaded so far.
+  {% endtrans %}</p>
+  <table>
+    <tr>
+      <th>{% trans "Filename" %}</th>
+      <th>{% trans "Size" %}</th>
+      <th>{% trans "Mimetype" %}</th>
+      <th>{% trans "Actions" %}</th>
+    </tr>
+  {%- for file in files %}
+    <tr>
+      <td><a href="{{ url_for('file_uploads/get_file', filename=file.filename)|e
+          }}">{{ file.filename|e }}</a></td>
+      <td>{{ file.size|filesizeformat }}</td>
+      <td>{{ file.mimetype|e }}</td>
+      <td><a href="{{ url_for('file_uploads/delete', filename=file.filename)
+          }}">{% trans 'Delete' %}</a></td>
+    </tr>
+  {%- else %}
+    <tr>
+      <td colspan="4">{% trans "No files uploaded so far." %}</td>
+    </tr>
+  {%- endfor %}
+  </table>
+  <div class="actions">
+    <form action="{{ url_for('file_uploads/upload') }}" method="get">
+      <input type="submit" value="{% trans 'Upload New File' %}">
+    </form>
+  </div>
+{% endblock %}

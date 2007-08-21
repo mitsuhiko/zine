@@ -12,6 +12,7 @@ import textpress
 from os.path import dirname, join
 from textpress.api import *
 from textpress.views.admin import flash, render_admin_response
+from textpress.models import ROLE_ADMIN
 from textpress.utils import escape, CSRFProtector, RequestLocal
 from urllib import urlencode, urlopen
 
@@ -138,15 +139,17 @@ def do_spamcheck(req, comment):
         comment.blocked_msg = 'blocked by akismet'
 
 
-def add_akismet_link(navigation_bar):
+def add_akismet_link(req, navigation_bar):
     """Add a button for akismet to the comments page."""
-    for link_id, url, title, children in navigation_bar:
-        if link_id == 'comments':
-            children.append(('akismet_spam_filter',
-                             url_for('akismet_spam_filter/config'),
-                             _('Akismet Configuration')))
+    if req.user.role >= ROLE_ADMIN:
+        for link_id, url, title, children in navigation_bar:
+            if link_id == 'comments':
+                children.append(('akismet_spam_filter',
+                                 url_for('akismet_spam_filter/config'),
+                                 _('Akismet Configuration')))
 
 
+@require_role(ROLE_ADMIN)
 def show_akismet_config(req):
     """Show the akismet control panel."""
     _locals.on_akismet_page = True

@@ -1,0 +1,16 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Upload File" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Upload File" %}</h2>
+  <p>{% trans %}
+    Select a file you want to upload.
+  {% endtrans %}</p>
+  <form action="" method="post" enctype="multipart/form-data">
+    {{ csrf_protector }}
+    <div class="actions">
+      {% trans "Upload File" %}:
+      <input type="file" name="file">
+      <input type="submit" value="{% trans 'Upload' %}">
+    </div>
+  </form>
+{% endblock %}

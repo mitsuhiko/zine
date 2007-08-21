@@ -119,7 +119,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                           about_items))
 
     # allow plugins to extend the navigation bar
-    emit_event('modify-admin-navigation-bar', navigation_bar, buffered=True)
+    emit_event('modify-admin-navigation-bar', req, navigation_bar,
+               buffered=True)
 
     # find out which is the correct menu and submenu bar
     active_menu = active_submenu = None
