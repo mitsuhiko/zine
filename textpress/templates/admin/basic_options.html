@@ -6,15 +6,6 @@
     From here you can configure the basic blog settings like the blog
     title and tagline, date format, theme etc.
   {% endtrans %}</p>
-  {%- if errors %}
-    <div class="error message">
-      <h3>{% trans "Error when processing the Data" %}</h3>
-      {%- for error in errors %}
-        <p>{{ error|e }}</p>
-      {%- endfor %}
-      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
-    </div>
-  {%- endif %}
   <form action="" method="post">
     {{ hidden_form_data }}
     <dl>

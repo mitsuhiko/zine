@@ -14,12 +14,15 @@
       <div class="error">{{ error|e }}</div>
     {%- endif %}
     <form action="{{ url_for('admin/login') }}" method="post">
+      {{ hidden_redirect_field }}
       <dl>
         <dt>{% trans "Username" %}</dt>
         <dd>{{ h.input_field('username', username) }}</dd>
         <dt>{% trans "Password" %}</dt>
         <dd>{{ h.input_field('password', '', 'password') }}</dd>
       </dl>
+      <!-- {{ h.checkbox('remember', 'yes') }}
+      <label for="remember">{% trans "Remember me" %}</label> -->
       <input type="submit" value="{% trans 'Login' %}">
     </form>
   </div>

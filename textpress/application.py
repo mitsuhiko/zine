@@ -11,13 +11,13 @@
 from os import path
 from threading import local, Lock
 from itertools import izip
-from datetime import datetime
+from datetime import datetime, timedelta
 from weakref import WeakKeyDictionary
 
 from textpress.database import sessions, db, upgrade_database
 from textpress.config import Configuration
 from textpress.utils import gen_sid, format_datetime, format_date, \
-     format_month
+     format_month, gen_psid
 
 from werkzeug.utils import SharedDataMiddleware
 from werkzeug.wrappers import BaseRequest, BaseResponse
@@ -188,6 +188,7 @@ class Request(BaseRequest):
         super(Request, self).__init__(environ)
         self.app = app
         self.urls = app.url_map.bind_to_environ(environ)
+        engine = self.app.database_engine
 
         # get the session
         from textpress.models import User
@@ -197,14 +198,16 @@ class Request(BaseRequest):
             sid = gen_sid()
         else:
             query = sessions.select(sessions.c.sid == sid)
-            row = app.database_engine.execute(query).fetchone()
+            row = engine.execute(query).fetchone()
             if row is not None:
                 session = row.data
                 if row.user_id:
                     user = User.get(row.user_id)
                 last_change = row.last_change
+
         if user is None:
             user = User.get_nobody()
+
         self.sid = sid
         self.user = self._old_user = user
         self.session = session or {}

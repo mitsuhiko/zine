@@ -125,6 +125,11 @@ def gen_activation_key(length=8):
     return ''.join(choice(KEY_CHARS) for _ in xrange(length))
 
 
+def gen_psid():
+    """Generate a new permantent sid hash."""
+    return sha.new('%s|%s' % (random(), time())).hexdigest()
+
+
 def gen_password(length=8, add_numbers=True, mix_case=True,
                  add_special_char=True):
     """
@@ -503,16 +508,15 @@ def make_hidden_fields(*fields):
 
 def reload_textpress():
     """
-    This function tries to reload TextPress while running and to
-    reinstanciate all the applications. This does nothing for detected run
-    once environments.
+    This function tries to reload TextPress while running and to reinstanciate
+    all the applications. This does nothing for detected run once environments
+    such as CGI.
 
     Note that due to technical limitations textpress is left in an
     inconsistent state until the next request is triggered because the
-    current request data still uses objects from the old modules.
-
-    This also means that until the request finishes you have two independent
-    sets of textpress modules loaded.
+    current request data still uses objects from the old modules.  This also
+    means that until the request finishes you have two independent sets of
+    textpress modules loaded.
 
     This limitations makes it impossible to use the reload function in the
     websetup which depends on a working textpress instance for finishing
@@ -524,13 +528,9 @@ def reload_textpress():
     if req and req.environ.get('wsgi.run_once'):
         return
 
-    # check if an application was bound
+    # copy all the stuff we need.
     bound = getattr(_locals, 'app', None)
-
-    # don't let the refcount go to null!
-    sys.modules['__textpress'] = rc = new.module('reload_copy')
-    rc.reload_textpress = reload_textpress
-    rc.instances = dict(_instances)
+    instances = dict(_instances)
 
     # but here we want to clean up soon
     del _instances, _locals, req
@@ -542,24 +542,25 @@ def reload_textpress():
             del sys.modules[key]
             reload.add(key)
 
-    # time to reimport the new factory function and setup all
-    # the applications
+    # time to reimport the new factory function and setup all the applications
     __import__('textpress')
     from textpress.application import make_app, _instances, _locals
-
-    for app, path in rc.instances.iteritems():
+    for app, path in instances.iteritems():
         app.__dict__.clear()
         app.__dict__.update(make_app(path).__dict__)
 
     # copy the old instances registry over.
     _instances.clear()
-    _instances.update(rc.instances)
+    _instances.update(instances)
 
-    # set up the bound application
-    _locals.app = bound
+    # set up the bound application again.
+    if bound is not None:
+        _locals.app = bound
 
-    # remove our temporary module
-    del sys.modules['__textpress']
+    # run the garbage collector now to clean up stuff we don't need any
+    # more before the request ends
+    import gc
+    gc.collect()
 
 
 class Pagination(object):
@@ -630,12 +631,14 @@ class RequestLocal(object):
 
     def __init__(self, **vars):
         from textpress.application import _locals
-        self._locals = _locals
-        self._vars = {}
+        self.__dict__.update(
+            _locals=_locals,
+            _vars = vars
+        )
         for key, value in vars.iteritems():
             if value is None:
                 value = lambda: None
-            self._vars[key] = value
+            vars[key] = value
 
     @property
     def _storage(self):

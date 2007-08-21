@@ -9,15 +9,26 @@
     :license: GNU GPL.
 """
 import textpress
+from os.path import dirname, join
 from textpress.api import *
-from textpress.views.admin import flash
+from textpress.views.admin import flash, render_admin_response
+from textpress.utils import escape, CSRFProtector, RequestLocal
 from urllib import urlencode, urlopen
 
 USER_AGENT = 'TextPress /%s | Akismet/1.11' % textpress.__version__
 AKISMET_URL_BASE = 'rest.akismet.com'
 AKISMET_VERSION = '1.1'
+TEMPLATES = join(dirname(__file__), 'templates')
 
+#: because we need the information about verified keys on every
+#: admin page and after every tested comment it's a bad idea to
+#: check for a valid key all the time. Once a key is approved it's
+#: stored here to skip the testing.
 _verified_keys = set()
+
+#: the admin global flash message needs to know if it's on the
+#: akismet configuration page to hide unneeded information
+_locals = RequestLocal(on_akismet_page=bool)
 
 
 class InvalidKey(ValueError):
@@ -77,8 +88,14 @@ def test_apikey(req, context):
     try:
         get_verified_key()
     except InvalidKey, e:
-        flash(_('<strong>Akismet is not active!</strong>') + ' ' +
-              e.message, 'error')
+        msg = _('<strong>Akismet is not active!</strong>')
+        msg += ' ' + e.message
+        if not _locals.on_akismet_page:
+            msg += u' <a href="%s">%s</a>' % (
+                escape(url_for('akismet_spam_filter/config')),
+                _('Edit key')
+            )
+        flash(msg, 'error')
 
 
 def do_spamcheck(req, comment):
@@ -121,7 +138,47 @@ def do_spamcheck(req, comment):
         comment.blocked_msg = 'blocked by akismet'
 
 
+def add_akismet_link(navigation_bar):
+    """Add a button for akismet to the comments page."""
+    for link_id, url, title, children in navigation_bar:
+        if link_id == 'comments':
+            children.append(('akismet_spam_filter',
+                             url_for('akismet_spam_filter/config'),
+                             _('Akismet Configuration')))
+
+
+def show_akismet_config(req):
+    """Show the akismet control panel."""
+    _locals.on_akismet_page = True
+    csrf_protector = CSRFProtector()
+
+    if req.method == 'POST':
+        req.app.cfg['akismet_spam_filter/apikey'] = \
+            req.form.get('api_key', '')
+        try:
+            get_verified_key()
+        except InvalidKey:
+            # do nothing if the key is broken, there is already a admin
+            # panel global alert box provided by `test_apikey`
+            pass
+        else:
+            # the key is valid, show a box
+            flash(_('Akismet enabled successfully. The API key provided '
+                    'is valid'), 'ok')
+        redirect(url_for('akismet_spam_filter/config'))
+    return render_admin_response('admin/akismet_spam_filter.html',
+                                 'comments.akismet_spam_filter',
+        api_key=req.app.cfg['akismet_spam_filter/apikey'],
+        csrf_protector=csrf_protector
+    )
+
+
 def setup(app, plugin):
     app.add_config_var('akismet_spam_filter/apikey', unicode, u'')
+    app.add_url_rule('/admin/comments/akismet',
+                     endpoint='akismet_spam_filter/config')
+    app.add_view('akismet_spam_filter/config', show_akismet_config)
     app.connect_event('before-comment-saved', do_spamcheck)
     app.connect_event('before-admin-response-rendered', test_apikey)
+    app.connect_event('modify-admin-navigation-bar', add_akismet_link)
+    app.add_template_searchpath(TEMPLATES)

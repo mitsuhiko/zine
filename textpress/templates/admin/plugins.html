@@ -16,7 +16,7 @@
         <th class="plugin">{% trans "Plugin" %}</th>
         <th class="version">{% trans "Version" %}</th>
         <th class="description">{% trans "Description" %}</th>
-        <th class="active">{% trans "Active" %}</th>
+        <th class="active">{% trans "Activate" %}</th>
       </tr>
     {%- for plugin in plugins %}
       <tr class="plugin-{{ 'active' if plugin.active else 'inactive' }}">

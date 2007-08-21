@@ -802,12 +802,14 @@ def do_basic_options(req):
                 cfg['posts_per_page'] = posts_per_page
             if use_flat_comments != cfg['use_flat_comments']:
                 cfg['use_flat_comments'] = use_flat_comments
-        flash(_('Configuration altered successfully.'), 'configure')
-        simple_redirect('admin/basic_options')
+            flash(_('Configuration altered successfully.'), 'configure')
+            simple_redirect('admin/basic_options')
+
+        for error in errors:
+            flash(error, 'error')
 
     return render_admin_response('admin/basic_options.html', 'options.basic',
         form=form,
-        errors=errors,
         timezones=TIMEZONES,
         hidden_form_data=make_hidden_fields(csrf_protector)
     )
@@ -1003,16 +1005,23 @@ def do_change_password(req):
             db.flush()
             flash(_('Password changed successfully.'), 'configure')
             redirect('admin/index')
+
+    # just flash the first error, that's enough for the user
+    if errors:
+        flash(errors[0], 'error')
+
     return render_admin_response('admin/change_password.html',
-        errors=errors,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
 def do_login(req):
     """Show a login page."""
+    if req.user.is_somebody:
+        simple_redirect('admin/index')
     error = None
     username = ''
+    redirect = IntelligentRedirect()
 
     if req.method == 'POST':
         username = req.form.get('username')
@@ -1023,10 +1032,7 @@ def do_login(req):
                 error = _('User %s does not exist.') % username
             elif user.check_password(password):
                 req.login(user)
-                next = req.values.get('next')
-                if next is None:
-                    next = url_for('admin/index')
-                redirect(next)
+                redirect('admin/index')
             else:
                 error = _('Incorrect password.')
         else:
@@ -1034,7 +1040,8 @@ def do_login(req):
 
     return render_response('admin/login.html', error=error,
                            username=username,
-                           logged_out=req.values.get('logout') == 'yes')
+                           logged_out=req.values.get('logout') == 'yes',
+                           hidden_redirect_field=redirect)
 
 
 def do_logout(req):

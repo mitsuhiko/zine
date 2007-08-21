@@ -214,11 +214,18 @@ div.contents div.message-configure {
 
 div.contents h2 {
     color: #222e4b;
-    margin: 0;
+    margin: 0 0 0.8em 0;
     padding: 0;
     font-family: 'Georgia', serif;
     font-size: 1.8em;
     border-bottom: 1px solid #ccc;
+}
+
+div.contents h3 {
+    color: #222e4b;
+    margin: 0;
+    padding: 0.5em 0 0.3em 0;
+    font-size: 1.5em;
 }
 
 div.contents input,
@@ -305,9 +312,14 @@ div.contents fieldset ul {
     padding: 0;
 }
 
-div.contents pre {
+div.contents pre,
+div.contents tt,
+div.contents code {
     font-family: monospace;
     font-size: 0.9em;
+}
+
+div.contents pre {
     padding: 5px;
     border: 1px solid #ccc;
 }
@@ -321,7 +333,7 @@ div.contents div.actions {
 }
 
 div.contents table {
-    margin: 20px 0 10px 0;
+    margin: 0.4em 0 0.2em 0;
     border: 1px solid #ccc;
     border-collapse: collapse;
     width: 100%;
@@ -340,6 +352,23 @@ div.contents table td {
 
 div.contents table tr.even {
     background-color: #f2f2f2;
+}
+
+div.contents dl {
+    margin: 0.2em 0 0.2em 1.2em;
+    padding: 0;
+}
+
+div.contents dl dt {
+    font-weight: bold;
+    margin: 0;
+    padding: 0.5em 0 0.2em 0;
+    color: #222e4b;
+}
+
+div.contents dl dd {
+    margin: 0 0 0 2.4em;
+    padding: 0;
 }
 
 p.preview {
@@ -598,7 +627,18 @@ div.login-box input {
     padding: 3px;
 }
 
+div.login-box input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+div.login-box label {
+    color: white;
+}
+
 div.login-box input[type="submit"] {
+    display: block;
+    margin: 20px auto 0 auto;
     background-color: #ebf0f3;
     width: 130px;
     border-color: #bbb #aaa #aaa #bbb;
