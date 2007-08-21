@@ -62,7 +62,6 @@ class Configuration(object):
         self.app = app
         self.config_vars = DEFAULT_VARS.copy()
         self._cache = {}
-
         self.clear_cache = self._cache.clear
 
     def __getitem__(self, key):
@@ -90,10 +89,14 @@ class Configuration(object):
         result = self.app.database_engine.execute(configuration.select(c.key == key))
         row = result.fetchone()
         if row is None:
-            self.app.database_engine.execute(configuration.insert(), key=key, value=svalue)
+            self.app.database_engine.execute(configuration.insert(),
+                                             key=key, value=svalue)
         else:
             self.app.database_engine.execute(configuration.update(c.key == key),
-                                 value=svalue)
+                                             value=svalue)
+
+        from textpress.application import emit_event
+        emit_event('after-configuration-key-updated', key, value)
         self._cache[key] = value
 
     def set_from_string(self, key, value, override=False):

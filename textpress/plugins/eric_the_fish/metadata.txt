@@ -1,4 +1,8 @@
 Name: Eric The Fish
+Plugin URL: http://textpress.pocoo.org/plugins/eric_the_fish
 Author: Armin Ronacher <armin.ronacher@active-4.com>
+Author URL: http://lucumr.pocoo.org/
 License: GPL
-Summary: Adds an annoying fish to the admin panel. Click it to get a random fortune quote (documented example plugin)
+Version: 0.1
+Description: Adds Eric The Fish, an annoying fish to the admin panel. Clicking\
+ it shows a random fortune quote. This is an documented example plugin.

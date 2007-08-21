@@ -14,15 +14,19 @@
 """
 import sys
 import new
+import re
 from os import path, listdir
 
 import textpress
+from urllib import quote
 from textpress.application import get_application
 from textpress.database import plugins, db
-from textpress.utils import lazy_property
+from textpress.utils import lazy_property, escape
 
 
 GLOBAL_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
+
+_author_mail_re = re.compile(r'^(.*?)(?:\s+<(.+)>)?$')
 
 
 def find_plugins(app):
@@ -90,13 +94,19 @@ class Plugin(object):
     def metadata(self):
         result = {}
         f = file(path.join(self.path, 'metadata.txt'))
+        fileiter = iter(f)
         try:
-            for line in f:
-                line = line.strip()
+            for line in fileiter:
+                line = line.strip().decode('utf-8')
                 if not line or line.startswith('#'):
                     continue
                 key, value = line.split(':', 1)
-                result[key.rstrip().lower()] = value.lstrip()
+                while value.endswith('\\'):
+                    try:
+                        value = value[:-1] + fileiter.next().rstrip('\n')
+                    except StopIteration:
+                        pass
+                result[u'_'.join(key.lower().split())] = value.lstrip()
         finally:
             f.close()
         return result
@@ -106,6 +116,72 @@ class Plugin(object):
         """The module of the plugin. The first access imports it."""
         from textpress import plugins
         return __import__('textpress.plugins.' + self.name, None, None, ['setup'])
+
+    @property
+    def display_name(self):
+        """The full name from the metadata."""
+        return self.metadata.get('name', self.name)
+
+    @property
+    def html_display_name(self):
+        """The display name as HTML link."""
+        link = self.plugin_url
+        if link:
+            return u'<a href="%s">%s</a>' % (
+                escape(link),
+                escape(self.display_name)
+            )
+        return escape(self.display_name)
+
+    @property
+    def plugin_url(self):
+        """Return the URL of the plugin."""
+        return self.metadata.get('plugin_url')
+
+    @property
+    def description(self):
+        """Return the description of the plugin."""
+        return self.metadata.get('description', u'')
+
+    @property
+    def author_info(self):
+        """The author, mail and author URL of the plugin."""
+        return _author_mail_re.search(self.metadata.get(
+            'author', u'Nobody')).groups() + \
+            (self.metadata.get('author_url'),)
+
+    @property
+    def html_author_info(self):
+        """Return the author info as html link."""
+        name, email, url = self.author_info
+        if not url:
+            if not email:
+                return escape(name)
+            url = 'mailto:%s' % quote(email)
+        return u'<a href="%s">%s</a>' % (
+            escape(url),
+            escape(name)
+        )
+
+    @property
+    def author(self):
+        """Return the author of the plugin."""
+        return self.author_info[0]
+
+    @property
+    def author_email(self):
+        """Return the author email address of the plugin."""
+        return self.author_info[1]
+
+    @property
+    def author_url(self):
+        """Return the URL of the author of the plugin."""
+        return self.author_info[2]
+
+    @property
+    def version(self):
+        """The version of the plugin."""
+        return self.metadata.get('version')
 
     def setup(self):
         """Setup the plugin."""

@@ -11,21 +11,30 @@
       decide which plugins you want to enable. In case of doubt have a look
       into the installation instructions of the plugin you've added.
     {% endtrans %}</p>
-    <ul class="plugin-table">
+    <table class="plugins">
+      <tr>
+        <th class="plugin">{% trans "Plugin" %}</th>
+        <th class="version">{% trans "Version" %}</th>
+        <th class="description">{% trans "Description" %}</th>
+        <th class="active">{% trans "Active" %}</th>
+      </tr>
     {%- for plugin in plugins %}
-      <li><h3>{{ plugin.metadata.name|e }}</h3><dl>
-        <dt>{% trans "Author" %}</dt>
-        <dd>{{ plugin.metadata.author|e }}</dd>
-        <dt>{% trans "Summary" %}</dt>
-        <dd>{{ plugin.metadata.summary|e }}</dd>
-        <dt>{% trans "Active" %}</dt>
-        <dd>{{ h.checkbox(plugin.name, 'yes', plugin.active) }}
-            <label for="{{ plugin.name }}">{% trans "activate plugin" %}</label></dd>
-      </dl></li>
+      <tr class="plugin-{{ 'active' if plugin.active else 'inactive' }}">
+        <td class="plugin">{{ plugin.html_display_name }}</td>
+        <td class="version">{{ (plugin.version or '?')|e }}</td>
+        <td class="description">{{ plugin.description }}
+          <span class="author">{% trans author=plugin.html_author_info %}By {{
+            author }}{% endtrans %}</span></td>
+        <td class="active">{{ h.checkbox('plugin_' + plugin.name, 'yes', plugin.active) }}
+            <label for="plugin_{{ plugin.name }}"></label></td>
+      </tr>
     {%- endfor %}
-    </ul>
+    </table>
     <div class="actions">
-      <input type="submit" value="Update Plugin Configuration">
+      <input type="submit" value="{% trans 'Update Plugin Configuration' %}">
+      {%- if show_reload_button %}
+      <input type="submit" name="trigger_reload" value="{% trans 'Reload Plugins' %}">
+      {%- endif %}
     </div>
   </form>
 {% endblock %}

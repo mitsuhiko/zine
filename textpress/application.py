@@ -506,7 +506,7 @@ class TextPress(object):
 
         default_theme = Theme(self, 'default', BUILTIN_TEMPLATE_PATH, {
             'name':         _('Default Theme'),
-            'summary':      _('Simple default theme that doesn\'t '
+            'description':  _('Simple default theme that doesn\'t '
                               'contain any style information.'),
             'preview':      'core::default_preview.png'
         })

@@ -1,4 +1,10 @@
 Name: Akismet Spam Filter
+Plugin URL: http://textpress.pocoo.org/plugins/akismet_spam_filter
 Author: Armin Ronacher <armin.ronacher@active-4.com>
+Author URL: http://lucumr.pocoo.org/
 License: GPL
-Summary: Filters Spam using the Akismet System
+Version: 0.1
+Description: Akismet checks your comments against the Akismet web service to\
+ see if they look like spam or not. You need a <a\
+ href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You\
+ can review the spam it catches under "Comments" after configuring it.

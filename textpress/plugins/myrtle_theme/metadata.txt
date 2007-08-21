@@ -1,5 +1,8 @@
 Name: Myrtle Theme
+Plugin URL: http://textpress.pocoo.org/plugins/myrtle_theme
 Author: Armin Ronacher <armin.ronacher@active-4.com>
+Author URL: http://lucumr.pocoo.org/
 License: GPL
-Summary: A brownish theme called "myrtle".
+Version: 0.1
+Description: A brownish theme called "myrtle".
 Preview: myrtle_theme::preview.png

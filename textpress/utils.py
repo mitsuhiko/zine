@@ -504,14 +504,24 @@ def make_hidden_fields(*fields):
 def reload_textpress():
     """
     This function tries to reload TextPress while running and to
-    reinstanciate all the applications.
+    reinstanciate all the applications. This does nothing for detected run
+    once environments.
 
-    This does nothing for detected run once environments.
+    Note that due to technical limitations textpress is left in an
+    inconsistent state until the next request is triggered because the
+    current request data still uses objects from the old modules.
+
+    This also means that until the request finishes you have two independent
+    sets of textpress modules loaded.
+
+    This limitations makes it impossible to use the reload function in the
+    websetup which depends on a working textpress instance for finishing
+    the admin user creation.
     """
     from textpress.application import _instances, _locals, get_request
 
     req = get_request()
-    if req.environ.get('wsgi.run_once'):
+    if req and req.environ.get('wsgi.run_once'):
         return
 
     # check if an application was bound

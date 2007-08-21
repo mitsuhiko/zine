@@ -1,4 +1,10 @@
 Name: Pygments Support
+Plugin URL: http://textpress.pocoo.org/plugins/pygments_support
 Author: Armin Ronacher <armin.ronacher@active-4.com>
+Author URL: http://lucumr.pocoo.org/
 License: GPL
-Summary: Adds support for pygments to pre code blocks. Codeblocks marked with <pre syntax="language"> are highlighted with the language specified.
+Version: 0.1
+Description: Adds support for <a href="http://pygments.org/">pygments</a>\
+ to pre code blocks. Blocks marked with <tt>&lt;pre syntax="language"&gt;</tt>\
+ are highlighted using the pygments lexer defined in the <tt>syntax</tt>\
+ attribute.

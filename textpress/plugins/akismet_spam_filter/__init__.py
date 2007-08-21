@@ -10,6 +10,7 @@
 """
 import textpress
 from textpress.api import *
+from textpress.views.admin import flash
 from urllib import urlencode, urlopen
 
 USER_AGENT = 'TextPress /%s | Akismet/1.11' % textpress.__version__
@@ -17,6 +18,14 @@ AKISMET_URL_BASE = 'rest.akismet.com'
 AKISMET_VERSION = '1.1'
 
 _verified_keys = set()
+
+
+class InvalidKey(ValueError):
+    """Raised with a message if the key is invalid."""
+
+    def __init__(self, message):
+        self.message = message
+        ValueError.__init__(self, message)
 
 
 def send_request(apikey, key_root, data, endpoint):
@@ -30,7 +39,7 @@ def send_request(apikey, key_root, data, endpoint):
     try:
         f = urlopen(url, urlencode(data))
     except:
-        return ''
+        return
     try:
         return f.read().strip()
     finally:
@@ -45,15 +54,31 @@ def get_verified_key():
     """
     app = get_application()
     apikey = app.cfg['akismet_spam_filter/apikey'].encode('utf-8')
+    if not apikey:
+        raise InvalidKey(_('No Akismet key provided.'))
     blogurl = app.cfg['blog_url'].encode('utf-8')
     cachekey = (apikey, blogurl)
     if cachekey not in _verified_keys:
         data = {'key': apikey, 'blog': blogurl}
         resp = send_request(apikey, False, data, 'verify-key')
-        if resp != 'valid':
-            return None, None
+        if resp is None:
+            raise InvalidKey(_('Could not verfiy key because of a '
+                               'server to server connection error.'))
+        elif resp != 'valid':
+            raise InvalidKey(_('The key you have entered is not valid.'))
         _verified_keys.add(cachekey)
     return apikey, blogurl
+
+
+def test_apikey(req, context):
+    """
+    If the key is invalid we better inform the admin about it.
+    """
+    try:
+        get_verified_key()
+    except InvalidKey, e:
+        flash(_('<strong>Akismet is not active!</strong>') + ' ' +
+              e.message, 'error')
 
 
 def do_spamcheck(req, comment):
@@ -63,13 +88,11 @@ def do_spamcheck(req, comment):
     if comment.blocked:
         return
 
-    apikey, blog = get_verified_key()
-
-    # if we cannot verify the key we just fail silently.
-    # we don't want that the blog users sees a stupid error
-    # message. but it would make sense to show an entry in
-    # an error log.
-    if apikey is blog is None:
+    try:
+        apikey, blog = get_verified_key()
+    except InvalidKey:
+        # if we cannot verify the key we just fail silently.
+        # we don't want that the blog users sees a stupid error
         return
 
     data = {
@@ -101,3 +124,4 @@ def do_spamcheck(req, comment):
 def setup(app, plugin):
     app.add_config_var('akismet_spam_filter/apikey', unicode, u'')
     app.connect_event('before-comment-saved', do_spamcheck)
+    app.connect_event('before-admin-response-rendered', test_apikey)

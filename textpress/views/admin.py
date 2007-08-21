@@ -124,14 +124,17 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             'url':      url,
             'title':    title,
             'active':   active_submenu == id
-        } for id, url, title in subnavigation_bar],
-        'messages': [{
-            'type':     type,
-            'msg':      msg
-        } for type, msg in req.session.pop('admin/flashed_messages', [])]
+        } for id, url, title in subnavigation_bar]
     }
-
     emit_event('before-admin-response-rendered', req, values, buffered=True)
+
+    # add the flashes after the event so that plugins can flash on their
+    # own for the current request
+    values['admin']['messages'] = [{
+        'type':     type,
+        'msg':      msg
+    } for type, msg in req.session.pop('admin/flashed_messages', [])]
+
     return render_response(template_name, **values)
 
 
@@ -826,7 +829,7 @@ def do_theme(req):
             'uid':          theme.name,
             'name':         theme.detail_name,
             'author':       theme.metadata.get('author'),
-            'description':  theme.metadata.get('summary'),
+            'description':  theme.metadata.get('description'),
             'has_preview':  theme.has_preview,
             'preview_url':  theme.preview_url,
             'current':      name == current
@@ -838,11 +841,18 @@ def do_theme(req):
 @require_role(ROLE_ADMIN)
 def do_plugins(req):
     csrf_protector = CSRFProtector()
+    want_reload = False
     if req.method == 'POST':
         csrf_protector.assert_safe()
-        want_reload = False
+
+        if req.form.get('trigger_reload'):
+            flash(_('Plugins reloaded successfully.'))
+            want_reload = True
+        else:
+            want_reload = False
+
         for name, plugin in req.app.plugins.iteritems():
-            active = req.form.get(name) == 'yes'
+            active = req.form.get('plugin_' + name) == 'yes'
             plugin_name = plugin.metadata.get('name', plugin.name)
             if active and not plugin.active:
                 plugin.activate()
@@ -863,7 +873,8 @@ def do_plugins(req):
 
     return render_admin_response('admin/plugins.html', 'options.plugins',
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
-        csrf_protector=csrf_protector
+        csrf_protector=csrf_protector,
+        show_reload_button=not req.environ.get('wsgi.run_once')
     )
 
 

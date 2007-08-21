@@ -187,7 +187,7 @@ div.contents div.message {
     border: 1px solid #2580B2;
     margin: 0 0 10px 0;
     padding: 8px 8px 8px 32px;
-    background: #CFEBF7 url(img/info.png) no-repeat 8px center;
+    background: #CFEBF7 url(img/info.png) no-repeat 9px 9px;
 }
 
 div.contents div.message-add {
@@ -335,7 +335,7 @@ div.contents table th {
 
 div.contents table td {
     border-bottom: 1px dotted #ccc;
-    padding: 3px;
+    padding: 5px;
 }
 
 div.contents table tr.even {
@@ -446,6 +446,31 @@ div.themes div.theme div.detail p.author {
     padding: 0;
     font-size: 90%;
     text-align: center;
+}
+
+/* :::: PLUGIN PAGE :::: */
+table.plugins td.active {
+    text-align: right;
+}
+
+table.plugins td.description span.author {
+    font-style: italic;
+}
+
+table.plugins td.plugin {
+    font-weight: bold;
+}
+
+table.plugins td.version {
+    text-align: center;
+}
+
+table.plugins td {
+    vertical-align: middle;
+}
+
+table.plugins tr.plugin-active td {
+    background-color: #def1e2;
 }
 
 /* :::: CONFIG EDITOR :::: */
