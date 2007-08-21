@@ -2,7 +2,7 @@
 {% block title %}{% trans "Plugin Management" %}{% endblock %}
 {% block contents %}
   <h2>{% trans "Plugin Management" %}</h2>
-  <form action="" method="post">
+  <form action="" method="post" enctype="multipart/form-data">
     {{ csrf_protector }}
     <p>{% trans %}
       Plugins extend the functionality of the TextPress system. Because of
@@ -24,16 +24,33 @@
         <td class="version">{{ (plugin.version or '?')|e }}</td>
         <td class="description">{{ plugin.description }}
           <span class="author">{% trans author=plugin.html_author_info %}By {{
-            author }}{% endtrans %}</span></td>
+            author }}{% endtrans %}</span>
+          {%- if not plugin.builtin_plugin and not plugin.active %}
+            [<a href="{{ url_for('admin/remove_plugin', plugin=plugin.name)
+              }}">{% trans "Remove plugin" %}</a>]
+          {% endif -%}
+        </td>
         <td class="active">{{ h.checkbox('plugin_' + plugin.name, 'yes', plugin.active) }}
             <label for="plugin_{{ plugin.name }}"></label></td>
       </tr>
     {%- endfor %}
     </table>
+    <h3>{% trans "Add New Plugin" %}</h3>
+    <p>{% trans %}
+      If you have a plugin as TextPress <tt>.plugin</tt> file you can upload it
+      to your TextPress instance using the following form. Plugins added this way
+      also can be removed completely again.
+    {% endtrans %}</p>
+    <input type="file" name="new_plugin">
+    <p>{% trans %}
+      If you have added a plugin into the instance plugin folder yourself and it
+      doesn't appear in the list here then the cached information is outdated. In
+      that case you have to trigger a reload using the "Reload" button below.
+    {% endtrans %}</p>
     <div class="actions">
-      <input type="submit" value="{% trans 'Update Plugin Configuration' %}">
+      <input type="submit" value="{% trans 'Update' %}">
       {%- if show_reload_button %}
-      <input type="submit" name="trigger_reload" value="{% trans 'Reload Plugins' %}">
+      <input type="submit" name="trigger_reload" value="{% trans 'Reload' %}">
       {%- endif %}
     </div>
   </form>

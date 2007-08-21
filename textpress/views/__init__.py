@@ -48,6 +48,7 @@ all_views = {
     'admin/basic_options':      admin.do_basic_options,
     'admin/theme':              admin.do_theme,
     'admin/plugins':            admin.do_plugins,
+    'admin/remove_plugin':      admin.do_remove_plugin,
     'admin/configuration':      admin.do_configuration,
     'admin/about':              admin.do_about,
     'admin/eventmap':           admin.do_eventmap,

@@ -32,6 +32,7 @@ from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      escape, build_eventmap, make_hidden_fields, reload_textpress, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
+from textpress.pluginsystem import install_package, InstallationError
 
 
 def simple_redirect(*args, **kwargs):
@@ -973,6 +974,33 @@ def do_plugins(req):
             else:
                 continue
 
+        new_plugin = req.files.get('new_plugin')
+        if new_plugin.filename and new_plugin.content_length:
+            try:
+                plugin = install_package(req.app, new_plugin)
+            except InstallationError, e:
+                if e.code == 'invalid':
+                    flash(_('Could not install the plugin because the '
+                            'file uploaded is not a valid plugin file.'),
+                          'error')
+                elif e.code == 'version':
+                    flash(_('The plugin uploaded has a newer package '
+                            'version than this TextPress installation '
+                            'can handle.'), 'error')
+                elif e.code == 'exists':
+                    flash(_('A plugin with the same UID is already '
+                            'installed. Aborted.'), 'error')
+                elif e.code == 'ioerror':
+                    flash(_('Could not install the package because the '
+                            'installer wasn\'t able to write the package '
+                            'information. Wrong permissions?'), 'error')
+                else:
+                    flash(_('An unknown error occoured'), 'error')
+            else:
+                flash(_('Plugin "%s" added succesfully. You can now '
+                        'enable it in the plugin list.') %
+                      plugin.html_display_name, 'add')
+
         if want_reload:
             reload_textpress()
         simple_redirect('admin/plugins')
@@ -981,6 +1009,35 @@ def do_plugins(req):
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
         csrf_protector=csrf_protector,
         show_reload_button=not req.environ.get('wsgi.run_once')
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_remove_plugin(req, plugin):
+    plugin = req.app.plugins.get(plugin)
+    if plugin is None or \
+       plugin.builtin_plugin or \
+       plugin.active:
+        abort(404)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+
+    if req.method == 'POST':
+        csrf_protector.assert_safe()
+        if req.form.get('confirm'):
+            try:
+                plugin.remove()
+            except IOError:
+                flash(_('Could not remove the plugin %s because an '
+                        'IO error occoured. Wrong permissions?') %
+                      plugin.html_display_name)
+            flash(_('The plugin "%s" was removed from the instance '
+                    'successfully.') % escape(plugin.display_name), 'remove')
+        redirect('admin/plugins')
+
+    return render_admin_response('admin/remove_plugin.html', 'options.plugins',
+        plugin=plugin,
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 

@@ -5,9 +5,26 @@
 
     This module implements the plugin system.
 
-    Limitations: all applications share the load path. So strange things could
-    occour if someone has the same plugins in different locations. We should
+    Limitations: all applications share the load path.  So strange things could
+    occour if someone has the same plugins in different locations.  We should
     fix that somewhere in the future.
+
+
+    Plugin Distribution
+    ===================
+
+    The best way to distribute plugins are `.plugin` files.  Those files are
+    simple zip files that are uncompressed when installed from the plugin
+    admin panel.  You can easily create .plugin files yourself.  Just finish
+    the plugin and open the textpress shell::
+
+        >>> app.plugins['<name of the plugin>'].dump('/target/filename.plugin')
+
+    This will save the plugin as `.plugin` package.
+
+    It's only possible to create packages of plugins that are bound to an
+    application so just create a development instance for plugin development.
+
 
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
@@ -15,7 +32,9 @@
 import sys
 import new
 import re
-from os import path, listdir
+from os import path, listdir, walk, makedirs
+from shutil import rmtree
+from time import localtime, time
 
 import textpress
 from urllib import quote
@@ -24,7 +43,8 @@ from textpress.database import plugins, db
 from textpress.utils import lazy_property, escape
 
 
-GLOBAL_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
+BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
+PACKAGE_VERSION = 1
 
 _author_mail_re = re.compile(r'^(.*?)(?:\s+<(.+)>)?$')
 
@@ -36,7 +56,7 @@ def find_plugins(app):
         if row.active:
             enabled_plugins.add(row.name)
 
-    for folder in app.plugin_searchpath + [GLOBAL_PLUGIN_FOLDER]:
+    for folder in app.plugin_searchpath + [BUILTIN_PLUGIN_FOLDER]:
         if not path.exists(folder):
             continue
         if folder not in global_searchpath:
@@ -49,14 +69,85 @@ def find_plugins(app):
                              filename in enabled_plugins)
 
 
+def install_package(app, package):
+    """Install a plugin from a package to the instance plugin folder."""
+    from zipfile import ZipFile, ZipInfo
+    import py_compile
+    try:
+        f = ZipFile(package)
+    except IOError:
+        raise InstallationError('invalid')
+
+    # get the package version
+    try:
+        package_version = int(f.read('TEXTPRESS_PACKAGE'))
+        plugin_name = f.read('TEXTPRESS_PLUGIN')
+    except (KeyError, ValueError), e:
+        print '>>>', e
+        raise InstallationError('invalid')
+
+    # check if the package version is handleable
+    if package_version > PACKAGE_VERSION:
+        raise InstallationError('version')
+
+    # check if there is already a plugin with the same name
+    plugin_path = path.join(app.instance_folder, 'plugins', plugin_name)
+    if path.exists(plugin_path):
+        raise InstallationError('exists')
+
+    # make sure that we have a folder
+    try:
+        makedirs(plugin_path)
+    except (IOError, OSError):
+        pass
+
+    # now read all the files and write them to the folder
+    for filename in f.namelist():
+        if not filename.startswith('pdata/'):
+            continue
+        dst_filename = path.join(plugin_path, *filename[6:].split('/'))
+        try:
+            makedirs(path.dirname(dst_filename))
+        except (IOError, OSError):
+            pass
+        try:
+            dst = file(dst_filename, 'wb')
+        except IOError:
+            raise InstallationError('ioerror')
+        try:
+            dst.write(f.read(filename))
+        finally:
+            dst.close()
+
+        if filename.endswith('.py'):
+            py_compile.compile(dst_filename)
+
+    plugin = Plugin(app, plugin_name, plugin_path, False)
+    app.plugins[plugin_name] = plugin
+    return plugin
+
+
+class InstallationError(ValueError):
+    """
+    Raised during plugin installation.
+    """
+
+    def __init__(self, code):
+        self.code = code
+        ValueError.__init__(self, code)
+
+
 class Plugin(object):
     """Wraps a plugin module."""
 
-    def __init__(self, app, name, path, active):
+    def __init__(self, app, name, path_, active):
         self.app = app
         self.name = name
-        self.path = path
+        self.path = path_
         self.active = active
+        self.builtin_plugin = path.commonprefix([
+            path.realpath(path_), path.realpath(BUILTIN_PLUGIN_FOLDER)]) == \
+            BUILTIN_PLUGIN_FOLDER
 
     def activate(self):
         """Activate the plugin."""
@@ -89,6 +180,40 @@ class Plugin(object):
                 con.execute(plugins.insert(), name=self.name, active=False)
             self.active = False
         self.app.database_engine.transaction(do)
+
+    def remove(self):
+        """Remove the plugin from the instance folder."""
+        if self.builtin_plugin:
+            raise ValueError('cannot remove builtin plugins')
+        if self.active:
+            raise ValueError('cannot remove active plugin')
+        rmtree(self.path)
+        del self.app.plugins[self.name]
+
+    def dump(self, fp):
+        """Dump the plugin as package into the filepointer or file."""
+        from zipfile import ZipFile, ZipInfo
+        f = ZipFile(fp, 'w')
+
+        # write all files into a "pdata/" folder
+        offset = len(self.path) + 1
+        for dirpath, dirnames, filenames in walk(self.path):
+            for filename in filenames:
+                if filename.endswith('.pyc') or \
+                   filename.endswith('.pyo'):
+                    continue
+                f.write(path.join(dirpath, filename),
+                        path.join('pdata', dirpath[offset:], filename))
+
+        # add the package information files
+        for name, data in [('TEXTPRESS_PLUGIN', self.name),
+                           ('TEXTPRESS_PACKAGE', PACKAGE_VERSION)]:
+            zinfo = ZipInfo(name, localtime(time()))
+            zinfo.compress_type = f.compression
+            zinfo.external_attr = (33188 & 0xFFFF) << 16L
+            f.writestr(zinfo, str(data))
+
+        f.close()
 
     @lazy_property
     def metadata(self):
