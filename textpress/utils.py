@@ -715,14 +715,17 @@ class IntelligentRedirect(HiddenFormField):
         Check the request and get the redirect target if possible.
         If not this function returns just `None`.
         """
-        check_target = self.req.values.get('_redirect_target')
+        check_target = self.req.values.get('_redirect_target') or \
+                       self.req.args.get('next') or \
+                       self.req.environ.get('HTTP_REFERER')
+
+        # if there is no information in either the form data
+        # or the wsgi environment about a jump target we have
+        # to use the target url
         if not check_target:
-            check_target = self.req.environ.get('HTTP_REFERER')
-            # if there is no information in either the form data
-            # or the wsgi environment about a jump target we have
-            # to use the target url
-            if not check_target:
-                return
+            return
+
+        print check_target
 
         blog_url = self.req.app.cfg['blog_url']
         blog_parts = urlparse(blog_url)

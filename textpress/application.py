@@ -86,7 +86,8 @@ def abort(code=404):
             resp = Response('You have to login before accessing '
                             'this resource.', mimetype='text/plain',
                             status=302)
-            resp.headers['Location'] = url_for('admin/login')
+            resp.headers['Location'] = url_for('admin/login',
+                                               next=_locals.req.path)
     else:
         msg = Response('Error %d' % code, mimetype='text/plain', status=code)
     raise DirectResponse(resp)

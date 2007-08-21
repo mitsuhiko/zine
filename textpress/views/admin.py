@@ -960,17 +960,16 @@ def do_plugins(req):
 
         for name, plugin in req.app.plugins.iteritems():
             active = req.form.get('plugin_' + name) == 'yes'
-            plugin_name = plugin.metadata.get('name', plugin.name)
             if active and not plugin.active:
                 plugin.activate()
                 want_reload = True
-                flash(_('Plugin "%s" activated.') % escape(plugin_name),
+                flash(_('Plugin "%s" activated.') % plugin.html_display_name,
                       'configure')
             elif not active and plugin.active:
                 plugin.deactivate()
                 want_reload = True
-                flash(_('Plugin "%s" deactivated.') % escape(plugin_name),
-                      'configure')
+                flash(_('Plugin "%s" deactivated.') %
+                      plugin.html_display_name, 'configure')
             else:
                 continue
 
@@ -1159,7 +1158,7 @@ def do_login(req):
         if username:
             user = User.get_by(username=username)
             if user is None:
-                error = _('User %s does not exist.') % username
+                error = _('User %s does not exist.') % escape(username)
             elif user.check_password(password):
                 req.login(user)
                 redirect('admin/index')
