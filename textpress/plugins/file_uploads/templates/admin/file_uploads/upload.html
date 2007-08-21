@@ -7,9 +7,17 @@
   {% endtrans %}</p>
   <form action="" method="post" enctype="multipart/form-data">
     {{ csrf_protector }}
+    <dl>
+      <dt>{% trans "File to upload" %}</dt>
+      <dd><input type="file" name="file"></dd>
+      <dt>{% trans "Rename to" %}</dt>
+      <dd><input type="text" name="filename" size="30"></dd>
+      <dt>{% trans "Overwrite" %}</dt>
+      <dd><input type="checkbox" id="overwrite" name="overwrite" value="yes">
+          <label for="overwrite">{% trans
+            "Overwrite an already uploaded file with the same name." %}</label></dd>
+    </dl>
     <div class="actions">
-      {% trans "Upload File" %}:
-      <input type="file" name="file">
       <input type="submit" value="{% trans 'Upload' %}">
     </div>
   </form>

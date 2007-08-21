@@ -75,20 +75,31 @@ def upload_file(req):
                       escape(folder), 'error')
                 redirect(url_for('file_uploads/upload'))
 
+        filename = req.form.get('filename') or f.filename
+        dst_filename = join(folder, filename)
+
         if not f.filename or not f.content_length:
             flash(_('No file uploaded.'))
-            redirect(url_for('file_uploads/upload'))
-
-        dst = file(join(folder, f.filename), 'wb')
-        try:
-            copyfileobj(f, dst)
-        finally:
-            dst.close()
-        flash(_('File %s uploaded successfully.') %
-              u'<a href="%s">%s</a>' % (
-                  escape(url_for('file_uploads/get_file',
-                                 filename=f.filename)),
-                  escape(f.filename)))
+        elif pathsep in filename:
+            flash(_('Invalid filename requested.'))
+        elif exists(dst_filename) and not req.form.get('overwrite'):
+            flash(_('A file with the filename %s exists already.') % (
+                u'<a href="%s">%s</a>' % (
+                    escape(url_for('file_uploads/get_file',
+                                   filename=filename)),
+                    escape(filename)
+                )))
+        else:
+            dst = file(dst_filename, 'wb')
+            try:
+                copyfileobj(f, dst)
+            finally:
+                dst.close()
+            flash(_('File %s uploaded successfully.') % (
+                  u'<a href="%s">%s</a>' % (
+                      escape(url_for('file_uploads/get_file',
+                                     filename=filename)),
+                      escape(filename))))
         redirect(url_for('file_uploads/upload'))
 
     return render_admin_response('admin/file_uploads/upload.html',
