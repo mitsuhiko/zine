@@ -20,7 +20,15 @@
 
         >>> app.plugins['<name of the plugin>'].dump('/target/filename.plugin')
 
-    This will save the plugin as `.plugin` package.
+    This will save the plugin as `.plugin` package. The preferred filename
+    for templates is `<DISPLAY_NAME>-<VERSION>.plugin`. So if you want to
+    dump all the plugins you have into plugin files you can use this snippet::
+
+        for plugin in app.plugins.itervalues():
+            plugin.dump('%s-%s.plugin' % (
+                plugin.display_name,
+                plugin.version
+            ))
 
     It's only possible to create packages of plugins that are bound to an
     application so just create a development instance for plugin development.
@@ -71,11 +79,11 @@ def find_plugins(app):
 
 def install_package(app, package):
     """Install a plugin from a package to the instance plugin folder."""
-    from zipfile import ZipFile, ZipInfo
+    from zipfile import ZipFile, ZipInfo, error as BadZipFile
     import py_compile
     try:
         f = ZipFile(package)
-    except IOError:
+    except (IOError, BadZipFile):
         raise InstallationError('invalid')
 
     # get the package version
