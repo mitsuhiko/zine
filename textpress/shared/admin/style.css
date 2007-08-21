@@ -168,7 +168,8 @@ div.body ul.ctxnavbar li a:hover {
 }
 
 div.body ul.ctxnavbar li.active a,
-div.body ul.standalonebar li.active a {
+div.body ul.standalonebar li.active a,
+div.body ul.standalonebar li.active a:hover {
     background: white;
     color: #316182;
 }

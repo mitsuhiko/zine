@@ -11,24 +11,6 @@
       decide which plugins you want to enable. In case of doubt have a look
       into the installation instructions of the plugin you've added.
     {% endtrans %}</p>
-    <p>{% trans %}
-      Changes will only take effect after application restart. In CGI
-      environments this happens on the next request automatically, in
-      standalone mode, FastCGI you have to restart the application or
-      server by hand.
-    {% endtrans %}</p>
-    {%- if outstanding_changes %}
-      <div class="information message">
-        <h3>{% trans "Restart required" %}</h3>
-        <p>{% trans count=outstanding_changes|count %}The following
-        plugin was activated or deactivated without server reload:{%
-        pluralize %}The following {{ count }} plugins were activated or
-        deactivated without server reload:{% endtrans %}</p>
-        <p>{{ outstanding_changes|join(", ") }}</p>
-        <p>{% trans %}Restart the application or server so that those
-        changes take effect.{% endtrans %}</p>
-      </div>
-    {%- endif %}
     <ul class="plugin-table">
     {%- for plugin in plugins %}
       <li><h3>{{ plugin.metadata.name|e }}</h3><dl>

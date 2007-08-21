@@ -501,6 +501,57 @@ def make_hidden_fields(*fields):
     return u'\n'.join(buf)
 
 
+def reload_textpress():
+    """
+    This function tries to reload TextPress while running and to
+    reinstanciate all the applications.
+
+    This does nothing for detected run once environments.
+    """
+    from textpress.application import _instances, _locals, get_request
+
+    req = get_request()
+    if req.environ.get('wsgi.run_once'):
+        return
+
+    # check if an application was bound
+    bound = getattr(_locals, 'app', None)
+
+    # don't let the refcount go to null!
+    sys.modules['__textpress'] = rc = new.module('reload_copy')
+    rc.reload_textpress = reload_textpress
+    rc.instances = dict(_instances)
+
+    # but here we want to clean up soon
+    del _instances, _locals, req
+
+    # now remove all the textpress stuff
+    reload = set()
+    for key in sys.modules.keys():
+        if key == 'textpress' or key.startswith('textpress.'):
+            del sys.modules[key]
+            reload.add(key)
+
+    # time to reimport the new factory function and setup all
+    # the applications
+    __import__('textpress')
+    from textpress.application import make_app, _instances, _locals
+
+    for app, path in rc.instances.iteritems():
+        app.__dict__.clear()
+        app.__dict__.update(make_app(path).__dict__)
+
+    # copy the old instances registry over.
+    _instances.clear()
+    _instances.update(rc.instances)
+
+    # set up the bound application
+    _locals.app = bound
+
+    # remove our temporary module
+    del sys.modules['__textpress']
+
+
 class Pagination(object):
     """Pagination helper."""
 

@@ -12,6 +12,7 @@ from os import path
 from threading import local, Lock
 from itertools import izip
 from datetime import datetime
+from weakref import WeakKeyDictionary
 
 from textpress.database import sessions, db, upgrade_database
 from textpress.config import Configuration
@@ -58,6 +59,9 @@ _setup_lock = Lock()
 #: because connecting happens during application startup and
 #: there is a global application setup lock.
 _next_listener_id = 0
+
+#: holds references to all the active textpress instances
+_instances = WeakKeyDictionary()
 
 
 def emit_event(event, *args, **kw):
@@ -450,6 +454,9 @@ class TextPress(object):
         if getattr(_locals, 'app', None) is not self:
             raise TypeError('cannot create %r instances. use the make_app '
                             'factory function.' % self.__class__.__name__)
+
+        # register the application instance
+        _instances[self] = instance_folder
 
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup

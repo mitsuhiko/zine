@@ -18,8 +18,8 @@ from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      STATUS_DRAFT, STATUS_PUBLISHED, get_post_list
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
-     escape, build_eventmap, make_hidden_fields, CSRFProtector, \
-     IntelligentRedirect, TIMEZONES
+     escape, build_eventmap, make_hidden_fields, reload_textpress, \
+     CSRFProtector, IntelligentRedirect, TIMEZONES
 
 
 # create a function "simple redirect" that works like the redirect
@@ -837,42 +837,34 @@ def do_theme(req):
 
 @require_role(ROLE_ADMIN)
 def do_plugins(req):
-    changes = _outstanding_plugin_changes.setdefault(req.app, set())
-    old_changes = list(changes)
     csrf_protector = CSRFProtector()
     if req.method == 'POST':
         csrf_protector.assert_safe()
+        want_reload = False
         for name, plugin in req.app.plugins.iteritems():
             active = req.form.get(name) == 'yes'
             plugin_name = plugin.metadata.get('name', plugin.name)
             if active and not plugin.active:
                 plugin.activate()
-                flash(_('Plugin %s activated.') % escape(plugin_name),
+                want_reload = True
+                flash(_('Plugin "%s" activated.') % escape(plugin_name),
                       'configure')
             elif not active and plugin.active:
                 plugin.deactivate()
-                flash(_('Plugin %s deactivated.') % escape(plugin_name),
+                want_reload = True
+                flash(_('Plugin "%s" deactivated.') % escape(plugin_name),
                       'configure')
             else:
                 continue
-            changes.add(name)
-        # no redirect here so that the old_changes are displayed only the
-        # next time someone visits the plugin page. We don't have to tell
-        # users to restart the server every time they change a setting. This
-        # is only necessary once they refreshed to check why it doesn't work
-        # (at least i guess that's less annoying)
+
+        if want_reload:
+            reload_textpress()
+        simple_redirect('admin/plugins')
 
     return render_admin_response('admin/plugins.html', 'options.plugins',
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
-        outstanding_changes=old_changes,
         csrf_protector=csrf_protector
     )
-
-#: helper variable for `do_plugins`. In persistent environments this
-#: weak dictionary holds plugin changes for the applications so that
-#: the user is informed about outstanding changes that take effect
-#: once the application is restarted.
-_outstanding_plugin_changes = WeakKeyDictionary()
 
 
 @require_role(ROLE_ADMIN)
