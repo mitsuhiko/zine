@@ -7,11 +7,23 @@
     available for admins, editors and authors but not for subscribers. For
     subscribers a simplified account management system exists at /account.
 
+    The admin panel tries it's best to avoid CSRF attacks and some similar
+    problems by using the hidden form fields from the utils package.  For
+    more details see the docstrings of the `CSRFProtector` and
+    `IntelligentRedirect` classes located there.  Do this before you try to
+    add your own admin panel pages!
+
+    Todo:
+
+    -   Dashboard
+    -   Sane Deletes (deleting a tag with associated pages makes problems,
+                      same for users and similar stuff. This shouldn't happen)
+    -   Permanent Login
+
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
 from datetime import datetime
-from weakref import WeakKeyDictionary
 from textpress.api import *
 from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
@@ -22,10 +34,13 @@ from textpress.utils import parse_datetime, format_datetime, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
 
 
-# create a function "simple redirect" that works like the redirect
-# function in the views, just that it doesn't use the `IntelligentRedirect`
-# which sometimes doesn't do what we want
 def simple_redirect(*args, **kwargs):
+    """
+    A function "simple redirect" that works like the redirect function in
+    the views, just that it doesn't use the `IntelligentRedirect` which
+    sometimes doesn't do what we want. (like redirecting to target pages
+    and not using backredirects)
+    """
     redirect(url_for(*args, **kwargs))
 
 
@@ -48,7 +63,15 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     """
     Works pretty much like the normal `render_response` function but
     it emits some events to collect navigation items and injects that
-    into the template context.
+    into the template context. This also gets the flashes messages from
+    the user session and injects them into the template context after the
+    plugins have provided theirs in the `before-admin-response-rendered`
+    event.
+
+    The second parameter can be the active menu item if wanted. For example
+    ``'options.overview'`` would show the overview button in the options
+    submenu. If the menu is a standalone menu like the dashboard (no
+    child items) you can also just use ``'dashboard'`` to highlight that.
     """
     req = get_request()
 
@@ -98,7 +121,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # allow plugins to extend the navigation bar
     emit_event('modify-admin-navigation-bar', navigation_bar, buffered=True)
 
-    # find out which is the correct submenu menubar
+    # find out which is the correct menu and submenu bar
     active_menu = active_submenu = None
     if _active_menu_item is not None:
         p = _active_menu_item.split('.')
@@ -112,6 +135,14 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     else:
         subnavigation_bar = []
 
+    # used to flash messages, add links to stylesheets, modify the admin
+    # context etc.
+    emit_event('before-admin-response-rendered', req, values, buffered=True)
+
+    # the admin variables is pushed into the context after the event was
+    # sent so that plugins can flash their messages. If we would emit the
+    # event afterwards all flashes messages would appear in the request
+    # after the current request.
     values['admin'] = {
         'navbar': [{
             'id':       id,
@@ -124,33 +155,45 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             'url':      url,
             'title':    title,
             'active':   active_submenu == id
-        } for id, url, title in subnavigation_bar]
+        } for id, url, title in subnavigation_bar],
+        'messages': [{
+            'type':     type,
+            'msg':      msg
+        } for type, msg in req.session.pop('admin/flashed_messages', [])]
     }
-    emit_event('before-admin-response-rendered', req, values, buffered=True)
-
-    # add the flashes after the event so that plugins can flash on their
-    # own for the current request
-    values['admin']['messages'] = [{
-        'type':     type,
-        'msg':      msg
-    } for type, msg in req.session.pop('admin/flashed_messages', [])]
-
     return render_response(template_name, **values)
 
 
 @require_role(ROLE_AUTHOR)
 def do_index(req):
+    """
+    Show the admin interface index page which is a wordpress inspired
+    dashboard (doesn't exist right now).
+
+    Once it's finished it should show the links to the most useful pages
+    such as "new post", etc. and the recent blog activity (unmoderated
+    comments etc.)
+    """
     return render_admin_response('admin/index.html', 'dashboard')
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_posts(req):
+    """
+    Show a list of posts for post moderation.  So far the output is not
+    paginated which makes it hard to manage if you have more posts.
+    """
     return render_admin_response('admin/show_posts.html', 'posts.overview',
                                  **get_post_list())
 
 
 @require_role(ROLE_AUTHOR)
 def do_edit_post(req, post_id=None):
+    """
+    Edit or create a new post.  So far this dialog doesn't emit any events
+    although it would be a good idea to allow plugins to add custom fields
+    into the template.
+    """
     tags = []
     errors = []
     form = {}
@@ -176,6 +219,7 @@ def do_edit_post(req, post_id=None):
             slug=post.slug,
             author=post.author.username
         )
+
     # create new post
     else:
         new_post = True
@@ -305,6 +349,14 @@ def do_edit_post(req, post_id=None):
 
 @require_role(ROLE_AUTHOR)
 def do_delete_post(req, post_id):
+    """
+    This dialog delets a post.  Usually users are redirected here from the
+    edit post view or the post index page.  If the post was not deleted the
+    user is taken back to the page he's coming from or back to the edit
+    page if the information is invalid.  The same happens if the post was
+    deleted but if the referrer is the edit page. Then the user is taken back to
+    the index so that he doesn't end up an a "page not found" error page.
+    """
     post = Post.get(post_id)
     if post is None:
         abort(404)
@@ -332,6 +384,10 @@ def do_delete_post(req, post_id):
 
 @require_role(ROLE_AUTHOR)
 def do_show_comments(req, post_id=None):
+    """
+    Show all the comments for one post or all comments. This could use
+    some pagination.
+    """
     post = None
     if post_id is None:
         comments = Comment.select()
@@ -349,7 +405,10 @@ def do_show_comments(req, post_id=None):
 
 @require_role(ROLE_AUTHOR)
 def do_edit_comment(req, comment_id):
-    """Edit a comment."""
+    """
+    Edit a comment.  Unlike the post edit screen it's not possible to create
+    new comments from here, that has to happen from the post page.
+    """
     comment = Comment.get(comment_id)
     if comment is None:
         abort(404)
@@ -426,6 +485,14 @@ def do_edit_comment(req, comment_id):
 
 @require_role(ROLE_AUTHOR)
 def do_delete_comment(req, comment_id):
+    """
+    This dialog delets a comment.  Usually users are redirected here from the
+    comment moderation page or the comment edit page.  If the comment was not
+    deleted, the user is taken back to the page he's coming from or back to
+    the edit page if the information is invalid.  The same happens if the post
+    was deleted but if the referrer is the edit page. Then the user is taken
+    back to the index so that he doesn't end up an a "page not found" error page.
+    """
     comment = Comment.get(comment_id)
     if comment is None:
         redirect(url_for('admin/show_comments'))
@@ -455,6 +522,11 @@ def do_delete_comment(req, comment_id):
 
 @require_role(ROLE_AUTHOR)
 def do_unblock_comment(req, comment_id):
+    """
+    Unblock a comment which was blocked by an antispam plugin or a user.
+    Redirect rules are identical to the delete page, just that the exception
+    for deleted comments is left out.
+    """
     comment = Comment.get(comment_id)
     if comment is None:
         redirect(url_for('admin/show_comments'))
@@ -480,6 +552,10 @@ def do_unblock_comment(req, comment_id):
 
 @require_role(ROLE_AUTHOR)
 def do_show_tags(req):
+    """
+    Show a list of used post tag.  Tags can be used as web2.0 like tags or
+    normal comments.
+    """
     return render_admin_response('admin/show_tags.html', 'tags.overview',
                                  tags=Tag.select())
 
@@ -556,6 +632,9 @@ def do_edit_tag(req, tag_id=None):
 
 @require_role(ROLE_AUTHOR)
 def do_delete_tag(req, tag_id):
+    """
+    Works like the other delete pages, just that it deletes tags.
+    """
     tag = Tag.get(tag_id)
     if tag is None:
         redirect(url_for('admin/show_tags'))
@@ -582,6 +661,10 @@ def do_delete_tag(req, tag_id):
 
 @require_role(ROLE_ADMIN)
 def do_show_users(req):
+    """
+    Show all users in a list except of the nobody user that is used for
+    anonymous visitor requests.
+    """
     return render_admin_response('admin/show_users.html', 'users.overview',
         users=User.get_all_but_nobody()
     )
@@ -589,6 +672,10 @@ def do_show_users(req):
 
 @require_role(ROLE_ADMIN)
 def do_edit_user(req, user_id=None):
+    """
+    Edit a user.  This can also create a user.  If a new user is created the
+    dialog is simplified, some unimportant details are left out.
+    """
     user = None
     errors = []
     form = dict.fromkeys(['username', 'first_name', 'last_name',
@@ -706,6 +793,9 @@ def do_edit_user(req, user_id=None):
 
 @require_role(ROLE_ADMIN)
 def do_delete_user(req, user_id):
+    """
+    Like all other delete screens just that it deletes a user.
+    """
     user = User.get(user_id)
     if user is None:
         redirect(url_for('admin/show_users'))
@@ -732,11 +822,19 @@ def do_delete_user(req, user_id):
 
 @require_role(ROLE_ADMIN)
 def do_options(req):
+    """
+    So far just a redirect page, later it would be a good idea to have
+    a page that shows all the links to configuration things in form of
+    a simple table.
+    """
     simple_redirect('admin/basic_options')
 
 
 @require_role(ROLE_ADMIN)
 def do_basic_options(req):
+    """
+    The dialog for basic options such as the blog title etc.
+    """
     cfg = req.app.cfg
     form = {
         'blog_title':           cfg['blog_title'],
@@ -817,6 +915,9 @@ def do_basic_options(req):
 
 @require_role(ROLE_ADMIN)
 def do_theme(req):
+    """
+    Allow the user to select one of the themes that are available.
+    """
     csrf_protector = CSRFProtector()
     new_theme = req.args.get('select')
     if new_theme in req.app.themes:
@@ -842,6 +943,9 @@ def do_theme(req):
 
 @require_role(ROLE_ADMIN)
 def do_plugins(req):
+    """
+    Load and unload plugins and reload TextPress if required.
+    """
     csrf_protector = CSRFProtector()
     want_reload = False
     if req.method == 'POST':
@@ -882,6 +986,13 @@ def do_plugins(req):
 
 @require_role(ROLE_ADMIN)
 def do_configuration(req):
+    """
+    Advanced configuration editor.  This is useful for development or if a
+    plugin doesn't ship an editor for the configuration values.  Because all
+    the values are not further checked it could easily be that TextPress is
+    left in an unusable state if a variable is set to something bad.  Because
+    of this the editor shows a warning and must be enabled by hand.
+    """
     csrf_protector = CSRFProtector()
     if req.method == 'POST':
         csrf_protector.assert_safe()
@@ -910,6 +1021,12 @@ def do_configuration(req):
 
 @require_role(ROLE_AUTHOR)
 def do_about(req):
+    """
+    Shows some details about this TextPress installation.  It's useful for
+    debugging and checking configurations.  If severe errors in a TextPress
+    installation occour it's a good idea to dump this page and attach it to
+    a bug report mail.
+    """
     from threading import activeCount
     from jinja.defaults import DEFAULT_NAMESPACE, DEFAULT_FILTERS
 
@@ -960,6 +1077,12 @@ def do_about(req):
 
 @require_role(ROLE_AUTHOR)
 def do_eventmap(req):
+    """
+    The GUI version of the `textpress-management.py eventmap` command.
+    Traverses the sourcecode for emit_event calls using the python2.5
+    ast compiler.  Because of that it raises an page not found exception
+    for python2.4.
+    """
     if not can_build_eventmap:
         abort(404)
     return render_admin_response('admin/eventmap.html', 'about.eventmap',
@@ -974,12 +1097,18 @@ def do_eventmap(req):
 
 @require_role(ROLE_AUTHOR)
 def do_about_textpress(req):
+    """
+    Just show the textpress license and some other legal stuff.
+    """
     return render_admin_response('admin/about_textpress.html',
                                  'about.textpress')
 
 
 @require_role(ROLE_AUTHOR)
 def do_change_password(req):
+    """
+    Allow the current user to change his password.
+    """
     errors = []
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
@@ -1045,5 +1174,6 @@ def do_login(req):
 
 
 def do_logout(req):
+    """Just logout and redirect to the login screen."""
     req.logout()
     simple_redirect('admin/login', logout='yes')

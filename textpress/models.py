@@ -276,7 +276,7 @@ class User(object):
         self.last_name = last_name
         self.description = description
         self.extra = {}
-        self.display_name = self.username
+        self.display_name = '$nick'
         self.role = role
 
     @staticmethod
