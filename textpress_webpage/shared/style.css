@@ -32,6 +32,7 @@ div.header h2 {
     color: white;
     font-style: italic;
     font-size: 20px;
+    font-variant: normal;
 }
 
 div.navigation {
@@ -114,14 +115,10 @@ dl dt {
     margin: 5px 0 4px 0;
     font-size: 0.9em;
     color: #333;
-    float: left;
-    clear: both;
-    width: 10em;
 }
 
 dl dd {
-    margin: 3px 0 3px 40px;
-    float: left;
+    margin: 3px 0 9px 40px;
 }
 
 input, textarea {
@@ -210,18 +207,22 @@ h2 {
     font-size: 2.5em;
     font-weight: normal;
     border-bottom: 1px solid #ccc;
-    padding: 1px 5px 2px 5px;
+    margin: 0 0 0 -0.2em;
+    padding: 0 0 0.05em 0.2em;
+    font-variant: small-caps;
 }
 
 h3 {
-    font-size: 1.8em;
+    font-size: 1.7em;
+    margin: 0.7em 0 0 -0.08em;
+    font-weight: normal;
 }
 
 div.post h4 {
-    font-size: 2.2em;
+    font-size: 2em;
     font-weight: normal;
-    margin: 0.6em 0 0 0;
-    padding: 0;
+    margin: 0.6em 0 0 -0.2em;
+    padding: 0 0 0 0;
     border-bottom: 1px solid #ccc;
     letter-spacing: 0.02em;
     font-variant: small-caps;
@@ -230,7 +231,7 @@ div.post h4 {
 
 div.post h4 a {
     display: block;
-    padding: 1px 5px 2px 5px;
+    padding: 1px 5px 2px 0.3em;
     color: #194c4e;
     text-decoration: none;
 }
@@ -242,12 +243,12 @@ div.post h4 a:hover {
 
 div.post p.meta {
     margin: 0;
-    padding: 0.2em 0 0.4em 0.4em;
+    padding: 0.2em 0 0.4em 0;
     font-size: 0.9em;
 }
 
 div.post div.text {
-    padding: 0.4em;
+    padding: 0.4em 0 0.4em 0;
 }
 
 div.post p.related {
@@ -286,7 +287,7 @@ div.post p.related {
 
 #comments p.meta {
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 1em;
     font-size: 0.9em;
     color: #555;
 }

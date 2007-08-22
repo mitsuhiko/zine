@@ -91,7 +91,6 @@ def install_package(app, package):
         package_version = int(f.read('TEXTPRESS_PACKAGE'))
         plugin_name = f.read('TEXTPRESS_PLUGIN')
     except (KeyError, ValueError), e:
-        print '>>>', e
         raise InstallationError('invalid')
 
     # check if the package version is handleable
@@ -133,6 +132,60 @@ def install_package(app, package):
     plugin = Plugin(app, plugin_name, plugin_path, False)
     app.plugins[plugin_name] = plugin
     return plugin
+
+
+def get_package_metadata(package):
+    """
+    Get the metadata of a plugin in a package. Pass it a filepointer or
+    filename. Raises a `ValueError` if the package is not valid.
+    """
+    from zipfile import ZipFile, ZipInfo, error as BadZipFile
+    try:
+        f = ZipFile(package)
+    except (IOError, BadZipFile):
+        raise ValueError('not a valid package')
+
+    # get the package version
+    try:
+        package_version = int(f.read('TEXTPRESS_PACKAGE'))
+        plugin_name = f.read('TEXTPRESS_PLUGIN')
+    except (KeyError, ValueError), e:
+        raise ValueError('not a valid package')
+    if package_version > PACKAGE_VERSION:
+        raise ValueError('incompatible package version')
+
+    try:
+        metadata = parse_metadata(f.read('pdata/metadata.txt'))
+    except KeyError:
+        metadata = {}
+    metadata['uid'] = plugin_name
+    return metadata
+
+
+def parse_metadata(string_or_fp):
+    """
+    Parse the metadata and return it as dict.
+    """
+    result = {}
+    if isinstance(string_or_fp, basestring):
+        fileiter = iter(string_or_fp.splitlines(True))
+    else:
+        fileiter = iter(string_or_fp.readline, '')
+    for line in fileiter:
+        line = line.strip().decode('utf-8')
+        if not line or line.startswith('#'):
+            continue
+        key, value = line.split(':', 1)
+        while value.endswith('\\'):
+            try:
+                value = value[:-1] + fileiter.next().rstrip('\n')
+            except StopIteration:
+                pass
+        try:
+            result[str('_'.join(key.lower().split()))] = value.lstrip()
+        except UnicodeError:
+            continue
+    return result
 
 
 class InstallationError(ValueError):
@@ -225,24 +278,14 @@ class Plugin(object):
 
     @lazy_property
     def metadata(self):
-        result = {}
-        f = file(path.join(self.path, 'metadata.txt'))
-        fileiter = iter(f)
         try:
-            for line in fileiter:
-                line = line.strip().decode('utf-8')
-                if not line or line.startswith('#'):
-                    continue
-                key, value = line.split(':', 1)
-                while value.endswith('\\'):
-                    try:
-                        value = value[:-1] + fileiter.next().rstrip('\n')
-                    except StopIteration:
-                        pass
-                result[u'_'.join(key.lower().split())] = value.lstrip()
+            f = file(path.join(self.path, 'metadata.txt'))
+        except IOError:
+            return {}
+        try:
+            return parse_metadata(f)
         finally:
             f.close()
-        return result
 
     @lazy_property
     def module(self):

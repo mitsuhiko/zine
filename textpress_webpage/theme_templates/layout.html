@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>{% block title %}{% endblock %} &mdash; TextPress</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('textpress_webpage_plugin/shared', filename='style.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('textpress_webpage/shared', filename='style.css') }}">
   {{ get_page_metadata() }}
 </head>
 <body>
@@ -17,7 +17,7 @@
           <li><a href="{{ url_for('blog/index') }}">News</a></li>
           <li><a href="#">About</a></li>
           <li><a href="#">Download</a></li>
-          <li><a href="{{ url_for('textpress_webpage_plugin/plugin_index') }}">Plugin Repository</a></li>
+          <li><a href="{{ url_for('textpress_webpage/plugin_index') }}">Plugin Repository</a></li>
         </ul>
       </div>
       <div class="contents">

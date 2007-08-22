@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}{% trans "Plugin Repository" %}{% endblock %}
+{% block contents %}
+  <h2>Plugin Repository</h2>
+  <p>
+    Welcome in the plugin repository. Here you can find all the plugins
+    that are currently available for TextPress. You can also publish your
+    own plugins here if you want.
+  </p>
+  <h3>Uploading Plugins</h3>
+  <p>
+    If you want to upload your plugin and register it in the TextPress
+    plugin repository you have to have a developer login. If don't have one you
+    can get one in <a href="{{ url_for('textpress_webpage/register_developer')
+      }}">a few seconds</a>.
+  </p>
+{% endblock %}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    textpress.plugins.textpress_webpage_plugin.pluginrepo
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    textpress.plugins.textpress_webpage.pluginrepo
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This module provides a plugin repository for the textpress webpage.
     Users can upload their modules which then are registered automatically
@@ -14,4 +14,4 @@ from textpress.api import *
 
 
 def do_index(req):
-    return Response("Plugin Repository")
+    return render_response('textpress_webpage/plugins.html')
