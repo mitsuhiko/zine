@@ -15,12 +15,14 @@ from time import asctime, gmtime, time
 from mimetypes import guess_type
 from textpress.api import *
 from textpress.utils import CSRFProtector, IntelligentRedirect, \
-     make_hidden_fields, escape
+     make_hidden_fields, escape, dump_json
 from textpress.models import ROLE_AUTHOR, ROLE_ADMIN
 from textpress.views.admin import render_admin_response, flash
+from textpress.utils import StreamReporter
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
+SHARED = join(dirname(__file__), 'shared')
 
 
 def get_upload_folder():
@@ -63,8 +65,19 @@ def add_links(req, navigation_bar):
 @require_role(ROLE_AUTHOR)
 def upload_file(req):
     csrf_protector = CSRFProtector()
+    reporter = StreamReporter()
+    add_script(url_for('file_uploads/shared', filename='uploads.js'))
+    add_link('stylesheet', url_for('file_uploads/shared', filename='style.css'),
+             'text/css')
+    add_header_snippet(
+        '<script type="text/javascript">'
+            '$TRANSPORT_ID = %s'
+        '</script>' % escape(dump_json(reporter.transport_id))
+    )
+
     if req.method == 'POST':
         csrf_protector.assert_safe()
+
         f = req.files['file']
         folder = get_upload_folder()
         if not exists(folder):
@@ -78,7 +91,7 @@ def upload_file(req):
         filename = req.form.get('filename') or f.filename
         dst_filename = join(folder, filename)
 
-        if not f.filename or not f.content_length:
+        if not f:
             flash(_('No file uploaded.'))
         elif pathsep in filename:
             flash(_('Invalid filename requested.'))
@@ -104,7 +117,8 @@ def upload_file(req):
 
     return render_admin_response('admin/file_uploads/upload.html',
                                  'file_uploads.upload',
-        csrf_protector=csrf_protector
+        csrf_protector=csrf_protector,
+        reporter=reporter
     )
 
 
@@ -138,10 +152,16 @@ def get_file(req, filename):
         abort(404)
     guessed_type = guess_type(filename)
     fp = file(filename, 'rb')
-    try:
-        resp = Response(fp.read(), mimetype=guessed_type[0] or 'text/plain')
-    finally:
-        fp.close()
+    def stream():
+        try:
+            while True:
+                chunk = fp.read(1024 * 512)
+                if not chunk:
+                    break
+                yield chunk
+        finally:
+            fp.close()
+    resp = Response(stream(), mimetype=guessed_type[0] or 'text/plain')
     resp.headers['Cache-Control'] = 'public'
     resp.headers['Expires'] = asctime(gmtime(time() + 3600))
     return resp
@@ -191,3 +211,4 @@ def setup(app, plugin):
     app.add_view('file_uploads/get_file', get_file)
     app.add_view('file_uploads/delete', delete_file)
     app.add_template_searchpath(TEMPLATES)
+    app.add_shared_exports('file_uploads', SHARED)

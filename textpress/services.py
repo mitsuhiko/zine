@@ -10,10 +10,11 @@
 """
 from textpress.api import *
 from textpress.models import Comment, ROLE_AUTHOR
+from textpress.utils import StreamReporter
 
 
 def do_get_comment(req):
-    comment_id = req.args.get('comment_id')
+    comment_id = req.values.get('comment_id')
     if comment_id is None:
         abort(404)
     comment = Comment.get(comment_id)
@@ -38,6 +39,28 @@ def do_get_comment(req):
     }
 
 
+def do_get_upload_info(req):
+    upload_id = req.values.get('upload_id', '')
+    upload_info = StreamReporter.get_stream_info(upload_id)
+    if upload_info is None:
+        error = True
+        pos = length = start = cur = 0
+    else:
+        start, cur, pos, length = upload_info
+        error = False
+
+    return {
+        'upload_id':    upload_id,
+        'error':        error,
+        'pos':          pos,
+        'length':       length,
+        'start_time':   start,
+        'last_update':  cur,
+        'duration':     cur - start
+    }
+
+
 all_services = {
-    'get_comment':          do_get_comment
+    'get_comment':          do_get_comment,
+    'get_upload_info':      do_get_upload_info
 }

@@ -18,14 +18,16 @@ import new
 import sys
 import os
 import logging
-from time import time, strptime
+from time import time, strptime, sleep
 from datetime import datetime, timedelta
 from random import choice, randrange, random
 from urlparse import urlparse, urljoin
 from urllib import quote
+from tempfile import NamedTemporaryFile
 from simplejson import dumps as dump_json, loads as load_json
 
 from werkzeug.utils import lazy_property, escape
+from werkzeug.wrappers import BaseReporterStream
 
 DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
                 '%m/%d/%y', '%d/%m/%y', '%d%m%y', '%m%d%y', '%y%m%d']
@@ -813,3 +815,156 @@ class CSRFProtector(HiddenFormField):
 
     def get_hidden_field(self):
         return '_csrf_check_token', self.token
+
+
+class StreamReporter(HiddenFormField, BaseReporterStream):
+    """
+    This class can wrap `wsgi.input` so that we get upload notifications
+    during uploading.
+
+    TextPress also provides a service called `get_upload_info` that returns
+    the information for AJAX scripts.
+
+    This class doesn't work with wsgiref because it can only handle one
+    request at the time.  If you want to test this with the standalone server
+    you have to use paste or others.
+
+    The stream reporter uses a file in the instance folder to map all uploads
+    from the ids to their temporary files with the stream status.  For
+    performance reasons we do not use the database.
+
+    Note that you have to instanciate this reporter before any component
+    read anything from the request object regarding post data (.files, .post,
+    .values) or the instanciation won't have an effect.  This is especially
+    problematic if you emit an event before instanciating the reporter and
+    plugins might access form data.
+
+    XXX: no locking and no cleanup in some situations.
+    XXX: validation for transport id that came from a URL variable
+    """
+    FILENAME = '_active_uploads.dat'
+
+    def __init__(self, transport_id=None):
+        from textpress.application import get_request
+        self.req = req = get_request()
+
+        if transport_id is None:
+            transport_id = req.args.get('_transport_id')
+        if transport_id is None:
+            transport_id = StreamReporter.generate_id()
+        self.transport_id = transport_id
+        self.start_time = int(time())
+
+        self._fp = NamedTemporaryFile(prefix='tp_upload__')
+        BaseReporterStream.__init__(self, req.environ, 1024 * 50)
+        req.environ['wsgi.input'] = self
+
+        self._stream_registered = False
+
+    generate_id = staticmethod(gen_sid)
+
+    @staticmethod
+    def add_active_stream(stream):
+        """Add a new stream to the stream index."""
+        from textpress.application import get_application
+        app = get_application()
+        filename = os.path.join(app.instance_folder, StreamReporter.FILENAME)
+        f = file(filename, 'a')
+        try:
+            f.write('%s:%s\n' % (
+                stream.transport_id,
+                stream._fp.name
+            ))
+        finally:
+            f.close()
+
+    @staticmethod
+    def remove_active_stream(stream):
+        """Remove a stream from the stream index."""
+        from textpress.application import get_application
+        app = get_application()
+        filename = os.path.join(app.instance_folder, StreamReporter.FILENAME)
+
+        if not os.path.exists(filename):
+            return
+
+        f = file(filename, 'r+')
+        try:
+            lines = [x.strip() for x in f]
+        finally:
+            f.close()
+
+        for idx, line in enumerate(lines):
+            if line.startswith(stream.transport_id + ':'):
+                del lines[idx]
+
+        if not lines:
+            os.remove(filename)
+        else:
+            f = file(filename, 'w')
+            try:
+                for line in lines:
+                    f.write(line + '\n')
+            finally:
+                f.close()
+
+    @staticmethod
+    def get_stream_info(transport_id):
+        """Get all the stream info for the given transport or return
+        `None` if the stream does not exist."""
+        from textpress.application import get_application
+        app = get_application()
+        filename = os.path.join(app.instance_folder, StreamReporter.FILENAME)
+        transport_id = transport_id.splitlines()[0]
+
+        if not os.path.exists(filename):
+            return
+
+        f = file(filename)
+        try:
+            for line in f:
+                if line.startswith(transport_id + ':'):
+                    _, transport_filename = line.strip().split(':', 1)
+                    break
+            else:
+                return
+        finally:
+            f.close()
+
+        f = None
+        for _ in xrange(40):
+            try:
+                f = file(transport_filename)
+            except IOError:
+                sleep(0.001)
+        if f is None:
+            return
+
+        try:
+            return tuple(map(int, f.read().split(';')[0].split(':')[:4]))
+        finally:
+            f.close()
+
+    def processed(self):
+        if self.pos >= self.length:
+            self._fp.close()
+            StreamReporter.remove_active_stream(self)
+        elif not self._stream_registered:
+            StreamReporter.add_active_stream(self)
+            self._stream_registered = True
+        else:
+            self._fp.seek(0)
+            self._fp.write('%d:%d:%d:%d;' % (
+                self.start_time,
+                int(time()),
+                self.pos,
+                self.length
+            ))
+            self._fp.flush()
+
+    @property
+    def url_value(self):
+        return '_transport_id=%s' % quote(self.transport_id)
+
+    def get_hidden_field(self):
+        return '_transport_id', self.transport_id

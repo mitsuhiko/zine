@@ -975,7 +975,7 @@ def do_plugins(req):
                 continue
 
         new_plugin = req.files.get('new_plugin')
-        if new_plugin.filename and new_plugin.content_length:
+        if new_plugin:
             try:
                 plugin = install_package(req.app, new_plugin)
             except InstallationError, e:
@@ -1014,6 +1014,9 @@ def do_plugins(req):
 
 @require_role(ROLE_ADMIN)
 def do_remove_plugin(req, plugin):
+    """
+    Remove an inactive, instance installed plugin completely.
+    """
     plugin = req.app.plugins.get(plugin)
     if plugin is None or \
        plugin.builtin_plugin or \

@@ -235,25 +235,29 @@ class Request(BaseRequest):
         self.session.clear()
         emit_event('after-user-logout', user, buffered=True)
 
+    def flush_session(self):
+        """Send the session to the database early."""
+        just_update = self.last_session_update is not None
+        last_change = self.last_session_update = datetime.utcnow()
+        if just_update:
+            q = sessions.c.sid == self.sid
+            self.app.database_engine.execute(sessions.update(q),
+                user_id=self.user.user_id,
+                data=self.session,
+                last_change=last_change
+            )
+        else:
+            self.app.database_engine.execute(sessions.insert(),
+                sid=self.sid,
+                user_id=self.user.user_id,
+                last_change=last_change,
+                data=self.session
+            )
+
     def save_session(self):
         """Save the session if required. Return True if it was saved."""
         if self.user != self._old_user or self.user.is_somebody:
-            just_update = self.last_session_update is not None
-            last_change = self.last_session_update = datetime.utcnow()
-            if just_update:
-                q = sessions.c.sid == self.sid
-                self.app.database_engine.execute(sessions.update(q),
-                    user_id=self.user.user_id,
-                    data=self.session,
-                    last_change=last_change
-                )
-            else:
-                self.app.database_engine.execute(sessions.insert(),
-                    sid=self.sid,
-                    user_id=self.user.user_id,
-                    last_change=last_change,
-                    data=self.session
-                )
+            self.flush_session()
             self._old_user = self.user
             return True
         return False
