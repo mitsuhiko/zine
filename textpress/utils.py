@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from random import choice, randrange, random
 from urlparse import urlparse, urljoin
 from urllib import quote
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, gettempdir
 from simplejson import dumps as dump_json, loads as load_json
 
 from werkzeug.utils import lazy_property, escape
@@ -727,8 +727,6 @@ class IntelligentRedirect(HiddenFormField):
         if not check_target:
             return
 
-        print check_target
-
         blog_url = self.req.app.cfg['blog_url']
         blog_parts = urlparse(blog_url)
         check_parts = urlparse(urljoin(blog_url, check_target))
@@ -842,7 +840,6 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
     XXX: no locking and no cleanup in some situations.
     XXX: validation for transport id that came from a URL variable
     """
-    FILENAME = '_active_uploads.dat'
 
     def __init__(self, transport_id=None):
         from textpress.application import get_request
@@ -855,21 +852,24 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
         self.transport_id = transport_id
         self.start_time = int(time())
 
-        self._fp = NamedTemporaryFile(prefix='tp_upload__')
+        self._fp = NamedTemporaryFile(prefix='_textpress_upload_')
         BaseReporterStream.__init__(self, req.environ, 1024 * 50)
         req.environ['wsgi.input'] = self
-
         self._stream_registered = False
 
     generate_id = staticmethod(gen_sid)
 
     @staticmethod
-    def add_active_stream(stream):
-        """Add a new stream to the stream index."""
+    def _get_manager():
         from textpress.application import get_application
         app = get_application()
-        filename = os.path.join(app.instance_folder, StreamReporter.FILENAME)
-        f = file(filename, 'a')
+        return os.path.join(gettempdir(), '_textpress_streams_' +
+                            sha.new(app.instance_folder).hexdigest()[2:10])
+
+    @staticmethod
+    def add_active_stream(stream):
+        """Add a new stream to the stream index."""
+        f = file(StreamReporter._get_manager(), 'a')
         try:
             f.write('%s:%s\n' % (
                 stream.transport_id,
@@ -881,14 +881,11 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
     @staticmethod
     def remove_active_stream(stream):
         """Remove a stream from the stream index."""
-        from textpress.application import get_application
-        app = get_application()
-        filename = os.path.join(app.instance_folder, StreamReporter.FILENAME)
-
+        filename = StreamReporter._get_manager()
         if not os.path.exists(filename):
             return
 
-        f = file(filename, 'r+')
+        f = file(filename, 'r')
         try:
             lines = [x.strip() for x in f]
         finally:
@@ -912,9 +909,7 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
     def get_stream_info(transport_id):
         """Get all the stream info for the given transport or return
         `None` if the stream does not exist."""
-        from textpress.application import get_application
-        app = get_application()
-        filename = os.path.join(app.instance_folder, StreamReporter.FILENAME)
+        filename = StreamReporter._get_manager()
         transport_id = transport_id.splitlines()[0]
 
         if not os.path.exists(filename):
@@ -954,7 +949,7 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
             self._stream_registered = True
         else:
             self._fp.seek(0)
-            self._fp.write('%d:%d:%d:%d;' % (
+            self._fp.write('%d:%d:%d:%d;\n' % (
                 self.start_time,
                 int(time()),
                 self.pos,

@@ -531,8 +531,7 @@ class TextPress(object):
             self.plugins[plugin.name] = plugin
 
         # check database integrity by performing the database checks
-        if self.cfg['automatic_db_upgrade']:
-            self.perform_database_upgrade()
+        self.perform_database_upgrade()
 
         # init the template system with the core stuff
         from textpress import htmlhelpers, models
