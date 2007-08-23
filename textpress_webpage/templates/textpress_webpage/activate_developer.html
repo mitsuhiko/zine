@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}{% trans "Activate Developer Account" %}{% endblock %}
+{% block contents %}
+  <h2>Activate Developer Account</h2>
+  {% if not error %}
+    <p>
+      Your developer account was created successfully. You can now
+      start uploading plugins
+    </p>
+  {% else %}
+    <p>
+      Could not activate your account because the activation key is invalid.
+      Check if you have copied the whole URL into the browser or if you have
+      typed the URL by hand if you typed everything correct.
+    </p>
+  {% endif %}
+{% endblock %}

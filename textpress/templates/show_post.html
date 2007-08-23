@@ -60,7 +60,7 @@
         <div class="error">
           <h3>{% trans 'Could not Post Comment' %}</h3>
           {%- for error in errors %}
-            <p>{{ error|e }}</p>
+            <p>{{ error }}</p>
           {%- endfor %}
         </div>
       {%- endif %}

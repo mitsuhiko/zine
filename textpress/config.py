@@ -19,6 +19,7 @@ DEFAULT_VARS = {
     'blog_title':           (unicode, u'My TextPress Blog'),
     'blog_tagline':         (unicode, u'just another textpress blog'),
     'blog_url':             (unicode, u''),
+    'blog_email':           (unicode, u''),
     'timezone':             (unicode, u'Europe/Vienna'),
     'maintenance_mode':     (bool, False),
     'sid_cookie_name':      (unicode, u'textpress_sid'),
@@ -32,7 +33,12 @@ DEFAULT_VARS = {
     'posts_per_page':       (int, 10),
     'datetime_format':      (unicode, u'%Y-%m-%d %H:%M'),
     'date_format':          (unicode, u'%Y-%m-%d'),
-    'use_flat_comments':    (bool, False)
+    'use_flat_comments':    (bool, False),
+
+    # email settings
+    'smtp_host':            (unicode, u'localhost'),
+    'smtp_user':            (unicode, u''),
+    'smtp_password':        (unicode, u'')
 }
 
 

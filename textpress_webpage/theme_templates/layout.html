@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>{% block title %}{% endblock %} &mdash; TextPress</title>
+  <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('textpress_webpage/shared', filename='style.css') }}">
   {{ get_page_metadata() }}
 </head>
@@ -9,14 +9,13 @@
   <div class="pagewrapper">
     <div class="page">
       <div class="header">
-        <h1><a href="{{ url_for('blog/index')|e }}">TextPress</a></h1>
-        <h2>open source content publishing platform</h2>
+        <h1><a href="{{ url_for('blog/index')|e }}">{{ cfg.blog_title|e }}</a></h1>
+        <h2>{{ cfg.blog_tagline }}</h2>
       </div>
       <div class="navigation">
         <ul>
           <li><a href="{{ url_for('blog/index') }}">News</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Download</a></li>
+          <li><a href="{{ url_for('textpress_webpage/download') }}">Download</a></li>
           <li><a href="{{ url_for('textpress_webpage/plugin_index') }}">Plugin Repository</a></li>
         </ul>
       </div>

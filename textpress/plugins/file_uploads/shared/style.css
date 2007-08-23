@@ -1,0 +1,23 @@
+div.uploadstatus {
+    display: none;
+    width: 500px;
+    height: 30px;
+    border: 1px solid #ccc;
+    padding: 2px;
+    margin: 20px 0 20px 10px;
+}
+
+div.uploadstatus div.bar {
+    float: left;
+    height: 30px;
+    background-color: #c1edef;
+}
+
+div.uploadstatus div.label {
+    position: absolute;
+    display: block;
+    color: #0c3c50;
+    line-height: 30px;
+    width: 500px;
+    text-align: center;
+}

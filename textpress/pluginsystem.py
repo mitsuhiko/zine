@@ -43,18 +43,18 @@ import re
 from os import path, listdir, walk, makedirs
 from shutil import rmtree
 from time import localtime, time
+from cStringIO import StringIO
+from base64 import b64encode
 
 import textpress
-from urllib import quote
+from urllib import quote, urlencode, FancyURLopener
 from textpress.application import get_application
 from textpress.database import plugins, db
-from textpress.utils import lazy_property, escape
+from textpress.utils import lazy_property, escape, split_email
 
 
 BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
 PACKAGE_VERSION = 1
-
-_author_mail_re = re.compile(r'^(.*?)(?:\s+<(.+)>)?$')
 
 
 def find_plugins(app):
@@ -175,7 +175,11 @@ def parse_metadata(string_or_fp):
         line = line.strip().decode('utf-8')
         if not line or line.startswith('#'):
             continue
-        key, value = line.split(':', 1)
+        if not ':' in line:
+            key = line.strip()
+            value = ''
+        else:
+            key, value = line.split(':', 1)
         while value.endswith('\\'):
             try:
                 value = value[:-1] + fileiter.next().rstrip('\n')
@@ -196,6 +200,32 @@ class InstallationError(ValueError):
     def __init__(self, code):
         self.code = code
         ValueError.__init__(self, code)
+
+
+class PackageUploader(FancyURLopener, object):
+    """
+    Helper class for uploading packages. This is not a public
+    interface, always use the Plugin upload function.
+    """
+
+    version = 'TextPress Package Uploader/%s' % textpress.__version__
+    upload_url = 'http://localhost:4000/developers/upload_plugin'
+
+    def __init__(self, plugin, email, password):
+        FancyURLopener.__init__(self)
+        self.plugin = plugin
+        self.email = email
+        self.password = password
+
+    def upload(self):
+        stream = StringIO()
+        self.plugin.dump(stream)
+        fp = self.open(self.upload_url, urlencode({
+            'package_data':     b64encode(stream.getvalue()),
+            'email':            self.email,
+            'password':         self.password
+        }))
+        return fp.read().strip()
 
 
 class Plugin(object):
@@ -276,6 +306,10 @@ class Plugin(object):
 
         f.close()
 
+    def upload(self, email, password):
+        """Upload the plugin to the textpress server."""
+        return PackageUploader(self, email, password).upload()
+
     @lazy_property
     def metadata(self):
         try:
@@ -322,9 +356,8 @@ class Plugin(object):
     @property
     def author_info(self):
         """The author, mail and author URL of the plugin."""
-        return _author_mail_re.search(self.metadata.get(
-            'author', u'Nobody')).groups() + \
-            (self.metadata.get('author_url'),)
+        return split_email(self.metadata.get('author', u'Nobody')) + \
+               (self.metadata.get('author_url'),)
 
     @property
     def html_author_info(self):
@@ -342,7 +375,8 @@ class Plugin(object):
     @property
     def author(self):
         """Return the author of the plugin."""
-        return self.author_info[0]
+        x = self.author_info
+        return x[0] or x[1]
 
     @property
     def author_email(self):

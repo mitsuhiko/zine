@@ -13,6 +13,8 @@
       <dd>{{ h.input_field('blog_title', form.blog_title, size="40") }}</dd>
       <dt>{% trans "Blog Tagline" %}</dt>
       <dd>{{ h.input_field('blog_tagline', form.blog_tagline, size="40") }}</dd>
+      <dt>{% trans "Blog E-Mail" %}</dt>
+      <dd>{{ h.input_field('blog_email', form.blog_email, size="40") }}</dd>
       <dt>{% trans "Timezone" %}</dt>
       <dd><select name="timezone">
       {%- for timezone in timezones %}

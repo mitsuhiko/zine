@@ -841,6 +841,7 @@ def do_basic_options(req):
     form = {
         'blog_title':           cfg['blog_title'],
         'blog_tagline':         cfg['blog_tagline'],
+        'blog_email':           cfg['blog_email'],
         'timezone':             cfg['timezone'],
         'datetime_format':      cfg['datetime_format'],
         'date_format':          cfg['date_format'],
@@ -859,6 +860,10 @@ def do_basic_options(req):
         if not blog_title:
             errors.append(_('You have to provide a blog title'))
         form['blog_tagline'] = blog_tagline = req.form.get('blog_tagline')
+        form['blog_email'] = blog_email = req.form.get('blog_email', '')
+        if blog_email and not is_valid_email(blog_email):
+            errors.append(_('You have to provide a valid e-mail address '
+                            'for the blog e-mail field.'))
         form['timezone'] = timezone = req.form.get('timezone')
         if timezone not in TIMEZONES:
             errors.append(_('Unknown timezone "%s"') % timezone)

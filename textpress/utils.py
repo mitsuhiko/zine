@@ -5,7 +5,7 @@
 
     This module implements various functions used all over the code.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007 by Armin Ronacher, Georg Brandl.
     :license: GNU GPL.
 """
 import re
@@ -24,6 +24,8 @@ from random import choice, randrange, random
 from urlparse import urlparse, urljoin
 from urllib import quote
 from tempfile import NamedTemporaryFile, gettempdir
+from smtplib import SMTP, SMTPException
+from email.MIMEText import MIMEText
 from simplejson import dumps as dump_json, loads as load_json
 
 from werkzeug.utils import lazy_property, escape
@@ -52,6 +54,8 @@ _mail_re = re.compile(
     r'([a-zA-Z0-9_\.\-])+'
     r'\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,})+$'
 )
+
+_mail_split_re = re.compile(r'^(.*?)(?:\s+<(.+)>)?$')
 
 # this regexp also matches incompatible dates like 20070101 because
 # some libraries (like the python xmlrpclib modules is crap)
@@ -563,6 +567,112 @@ def reload_textpress():
     # more before the request ends
     import gc
     gc.collect()
+
+
+def split_email(s):
+    """
+    Split a mail address:
+
+        >>> split_email("John Doe")
+        ('John Doe', None)
+        >>> split_email("John Doe <john@doe.com>")
+        ('John Doe', 'john@doe.com')
+        >>> split_email("john@doe.com")
+        (None, 'john@doe.com')
+    """
+    p1, p2 = _mail_split_re.search(s).groups()
+    if p2:
+        return p1, p2
+    elif is_valid_email(p1):
+        return None, p1
+    return p1, None
+
+
+def send_email(subject, text, to_addrs, quiet=True):
+    """Send a mail using the `EMail` class."""
+    e = EMail(subject, text, to_addrs)
+    if quiet:
+        return e.send_quiet()
+    return e.send()
+
+
+class EMail(object):
+    """
+    Represents one E-Mail message that can be sent.
+    """
+
+    def __init__(self, subject=None, text='', to_addrs=None):
+        from textpress.application import get_application
+        self.app = app = get_application()
+        self.subject = u' '.join(subject.splitlines())
+        self.text = text
+        from_addr = app.cfg['blog_email']
+        if not from_addr:
+            from_addr = 'noreply@' + urlparse(app.cfg['blog_url'])\
+                    [1].split(':')[0]
+        self.from_addr = u'%s <%s>' % (
+            app.cfg['blog_title'],
+            from_addr
+        )
+        self.to_addrs = []
+        if isinstance(to_addrs, basestring):
+            self.add_addr(to_addrs)
+        else:
+            for addr in to_addrs:
+                self.add_addr(addr)
+
+    def add_addr(self, addr):
+        """
+        Add an mail address to the list of recipients
+        """
+        lines = addr.splitlines()
+        if len(lines) != 1:
+            raise ValueError('invalid value for email address')
+        self.to_addrs.append(lines[0])
+
+    def send(self):
+        """
+        Send the message.
+        """
+        if not self.subject or not self.text or not self.to_addrs:
+            raise RuntimeError("Not all mailing parameters filled in")
+        try:
+            smtp = SMTP(self.app.cfg['smtp_host'])
+        except SMTPException, e:
+            raise RuntimeError(str(e))
+
+        if self.app.cfg['smtp_user']:
+            try:
+                try:
+                    smtp.login(self.app.cfg['smtp_user'],
+                               self.app.cfg['smtp_password'])
+                except SMTPException, e:
+                    raise RuntimeError(str(e))
+            finally:
+                smtp.quit()
+
+        msg = MIMEText(self.text)
+        msg['From'] = self.from_addr
+        msg['To'] = ', '.join(self.to_addrs)
+        msg['Subject'] = self.subject
+
+        try:
+            try:
+                return smtp.sendmail(self.from_addr, self.to_addrs,
+                                     msg.as_string())
+            except SMTPException, e:
+                raise RuntimeError(str(e))
+        finally:
+            smtp.quit()
+
+    def send_quiet(self):
+        """
+        Send the message, swallowing exceptions.
+        """
+        try:
+            return self.send()
+        except Exception:
+            return
 
 
 class Pagination(object):

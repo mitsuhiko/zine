@@ -1,0 +1,11 @@
+Hi,
+
+Your developer account for the email {{ developer.email }} was created
+successfully. If you want to enable this account all you have to do is
+to visit the following URL to finish your activation process:
+
+    {{ url_for('textpress_webpage/register_developer',
+               email=developer.email,
+               key=developer.activation_key) }}
+
+Have fun!

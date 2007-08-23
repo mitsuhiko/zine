@@ -12,12 +12,24 @@
       exist TextPress will create a new one the first time you
       upload something into that folder.
     {% endtrans %}</p>
+    <p>{% trans %}
+      The mimetype mapping is useful if you want to upload files
+      that have extensions that are unknown to the system TextPress
+      is running on. The format for a rule is <code>pattern:mimetype</code>,
+      each rule must be on it's own line or separated by semicolons.
+      Patterns might use the asterisk for variable parts. Example:
+      <code>*.plugin:application/x-textpress-plugin</code>.
+    {% endtrans %}</p>
   </div>
   <form action="" method="post">
     {{ csrf_protector }}
+    <dl>
+      <dt>{% trans "Upload files to" %}</dt>
+      <dd>{{ h.input_field('upload_dest', form.upload_dest) }}</dd>
+      <dt>{% trans "Mimetype Mapping" %}</dt>
+      <dd>{{ h.textarea('mimetypes', form.mimetypes, rows=5) }}</dd>
+    </dl>
     <div class="actions">
-      {% trans "Upload files to" %}:
-      {{ h.input_field('upload_dest', upload_dest) }}
       <input type="submit" value="{% trans 'Save' %}">
     </div>
   </form>

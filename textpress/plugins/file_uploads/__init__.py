@@ -8,11 +8,14 @@
     :copyright: Copyright 2007 by Armin Ronacher
     :license: GNU GPL.
 """
+import re
 from os import listdir, makedirs, remove
 from os.path import dirname, join, exists, getsize, sep as pathsep
 from shutil import copyfileobj
 from time import asctime, gmtime, time
 from mimetypes import guess_type
+from fnmatch import fnmatch
+from weakref import WeakKeyDictionary
 from textpress.api import *
 from textpress.utils import CSRFProtector, IntelligentRedirect, \
      make_hidden_fields, escape, dump_json
@@ -23,6 +26,17 @@ from textpress.utils import StreamReporter
 
 TEMPLATES = join(dirname(__file__), 'templates')
 SHARED = join(dirname(__file__), 'shared')
+
+
+def guess_mimetype(s):
+    app = get_application()
+    for item in app.cfg['file_uploads/mimetypes'].split(';'):
+        print repr(item)
+        if ':' in item:
+            pattern, mimetype = item.split(':', 1)
+            if fnmatch(s, pattern):
+                return mimetype
+    return guess_type(s)[0] or 'text/plain'
 
 
 def get_upload_folder():
@@ -42,7 +56,7 @@ def list_files():
     return [{
         'filename':     file,
         'size':         getsize(join(folder, file)),
-        'mimetype':     guess_type(file)[0] or 'text/plain'
+        'mimetype':     guess_mimetype(file)
     } for file in sorted(listdir(folder))]
 
 
@@ -133,15 +147,29 @@ def browse_uploads(req):
 @require_role(ROLE_ADMIN)
 def configure(req):
     csrf_protector = CSRFProtector()
+    form = {
+        'upload_dest':  req.app.cfg['file_uploads/upload_folder'],
+        'mimetypes':    u'\n'.join(req.app.cfg['file_uploads/mimetypes'].
+                                   split(';'))
+    }
     if req.method == 'POST':
         csrf_protector.assert_safe()
-        req.app.cfg['file_uploads/upload_folder'] = \
-                req.args.get('upload_dest', '')
-        flash(_('Upload folder changed successfully.'))
+        upload_dest = form['upload_dest'] = req.form.get('upload_dest', '')
+        if upload_dest != req.app.cfg['file_uploads/upload_folder']:
+            req.app.cfg['file_uploads/upload_folder'] = upload_dest
+            flash(_('Upload folder changed successfully.'))
+        mimetypes = form['mimetypes'] = req.form.get('mimetypes', '')
+        mimetypes = ';'.join(mimetypes.splitlines())
+        if mimetypes != req.app.cfg['file_uploads/mimetypes']:
+            req.app.cfg['file_uploads/mimetypes'] = mimetypes
+            if req.app in _mimetype_cache:
+                del _mimetype_cache[req.app][:]
+            flash(_('Upload mimetype mapping altered successfully.'))
         redirect(url_for('file_uploads/config'))
+
     return render_admin_response('admin/file_uploads/config.html',
                                  'file_uploads.config',
-        upload_dest=req.app.cfg['file_uploads/upload_folder'],
+        form=form,
         csrf_protector=csrf_protector
     )
 
@@ -150,7 +178,7 @@ def get_file(req, filename):
     filename = get_filename(filename)
     if not exists(filename):
         abort(404)
-    guessed_type = guess_type(filename)
+    guessed_type = guess_mimetype(filename)
     fp = file(filename, 'rb')
     def stream():
         try:
@@ -161,7 +189,7 @@ def get_file(req, filename):
                 yield chunk
         finally:
             fp.close()
-    resp = Response(stream(), mimetype=guessed_type[0] or 'text/plain')
+    resp = Response(stream(), mimetype=guessed_type or 'text/plain')
     resp.headers['Cache-Control'] = 'public'
     resp.headers['Expires'] = asctime(gmtime(time() + 3600))
     return resp
@@ -198,6 +226,8 @@ def delete_file(req, filename):
 
 def setup(app, plugin):
     app.add_config_var('file_uploads/upload_folder', unicode, 'uploads')
+    app.add_config_var('file_uploads/mimetypes', unicode,
+                       '*.plugin:application/x-textpress-plugin')
     app.connect_event('modify-admin-navigation-bar', add_links)
     app.add_url_rule('/admin/uploads/', endpoint='file_uploads/browse'),
     app.add_url_rule('/admin/uploads/new', endpoint='file_uploads/upload')

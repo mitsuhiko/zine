@@ -2,29 +2,43 @@
 {% block title %}{% trans "New Developer Account" %}{% endblock %}
 {% block contents %}
   <h2>New Developer Account</h2>
-  <p>
-    If you want to distribute your plugins on the TextPress webpage you
-    need a special developer account which you can acquire here. After
-    registering you can upload your plugins to the webpage and subscribe
-    to the security feeds of your own plugins. Whenever someone submits
-    a security related bug report in the TextPress tracker this item is
-    posted private and only visible by the TextPress developers and the
-    plugin developer.
-  </p>
-  <p>
-    To get started just fill out the following form:
-  </p>
-  <form action="" method="post">
-    <dl>
-      <dt>E-Mail</dt>
-      <dd>{{ h.input_field('email', size=40) }}</dd>
-      <dt>Repeat E-Mail</dt>
-      <dd>{{ h.input_field('email2', size=40) }}</dd>
-      <dt>Password</dt>
-      <dd>{{ h.input_field('password', type='password', size=40) }}</dd>
-      <dt>Repeat Password</dt>
-      <dd>{{ h.input_field('password2', type='password', size=40) }}</dd>
-    </dl>
-    <input type="submit" value="Create Account">
-  </form>
+  {% if not developer_created %}
+    <p>
+      If you want to distribute your plugins on the TextPress webpage you
+      need a special developer account which you can acquire here. After
+      registering you can upload your plugins to the webpage. Later this
+      developer account will also be used for security related informations.
+      This functionality however is not finished yet.
+    </p>
+    <p>
+      To get started just fill out the following form:
+    </p>
+    <form action="" method="post">
+      <dl>
+        <dt>E-Mail</dt>
+        <dd>{{ h.input_field('email', form.email, size=40) }}</dd>
+        <dt>Repeat E-Mail</dt>
+        <dd>{{ h.input_field('email2', size=40) }}</dd>
+        <dt>Password</dt>
+        <dd>{{ h.input_field('password', type='password', size=40) }}</dd>
+        <dt>Repeat Password</dt>
+        <dd>{{ h.input_field('password2', type='password', size=40) }}</dd>
+      </dl>
+      {%- if errors %}
+        <div class="error">
+          <h3>Could Not Create Account</h3>
+          {%- for error in errors %}
+          <p>{{ error }}</p>
+          {%- endfor %}
+        </div>
+      {%- endif %}
+      <input type="submit" value="Create Account">
+    </form>
+  {% else %}
+    <p>
+      Your account was created successfully. You should now receive a mail
+      to activate your account. In this mail there is a link you should
+      follow. After doing so you can then login into the developer panel.
+    </p>
+  {% endif %}
 {% endblock %}
