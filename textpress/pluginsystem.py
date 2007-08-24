@@ -239,6 +239,7 @@ class Plugin(object):
         self.builtin_plugin = path.commonprefix([
             path.realpath(path_), path.realpath(BUILTIN_PLUGIN_FOLDER)]) == \
             BUILTIN_PLUGIN_FOLDER
+        self.setup_error = None
 
     def activate(self):
         """Activate the plugin."""
@@ -325,7 +326,13 @@ class Plugin(object):
     def module(self):
         """The module of the plugin. The first access imports it."""
         from textpress import plugins
-        return __import__('textpress.plugins.' + self.name, None, None, ['setup'])
+        try:
+            return __import__('textpress.plugins.' + self.name,
+                              None, None, ['setup'])
+        except:
+            if not self.app.cfg['plugin_guard']:
+                raise
+            self.setup_error = sys.exc_info()
 
     @property
     def display_name(self):
@@ -395,7 +402,13 @@ class Plugin(object):
 
     def setup(self):
         """Setup the plugin."""
-        self.module.setup(self.app, self)
+        try:
+            self.module.setup(self.app, self)
+        except:
+            if not self.app.cfg['plugin_guard']:
+                raise
+            if self.setup_error is None:
+                self.setup_error = sys.exc_info()
 
     def __repr__(self):
         return '<%s %r>' % (

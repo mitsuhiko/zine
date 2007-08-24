@@ -137,6 +137,23 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     else:
         subnavigation_bar = []
 
+    # check for broken plugins if we have the plugin guard enabled
+    if req.app.cfg['plugin_guard']:
+        for plugin in req.app.plugins.itervalues():
+            if plugin.active and plugin.setup_error is not None:
+                plugin.deactivate()
+                flash(_('The plugin guard detected that the plugin "%s" '
+                        'causes problems (%s in %s, line %s) and deactivated '
+                        'it. If you want to debug it, disable the plugin '
+                        'guard and enable the debugger.') % (
+                            plugin.html_display_name,
+                            escape(str(plugin.setup_error[1]).
+                                   decode('utf-8', 'ignore')),
+                            plugin.setup_error[2].tb_frame.
+                                f_globals.get('__file__', _('unknown file')),
+                            plugin.setup_error[2].tb_lineno
+                        ), 'error')
+
     # used to flash messages, add links to stylesheets, modify the admin
     # context etc.
     emit_event('before-admin-response-rendered', req, values, buffered=True)
@@ -964,6 +981,14 @@ def do_plugins(req):
         else:
             want_reload = False
 
+        if req.form.get('enable_guard'):
+            req.app.cfg['plugin_guard'] = True
+            flash(_('Plugin guard enabled successfully. Errors '
+                    'occuring in plugins during setup are catched now.'))
+        elif req.form.get('disable_guard'):
+            req.app.cfg['plugin_guard'] = False
+            flash(_('Plugin guard disabled successfully.'))
+
         for name, plugin in req.app.plugins.iteritems():
             active = req.form.get('plugin_' + name) == 'yes'
             if active and not plugin.active:
@@ -1013,7 +1038,8 @@ def do_plugins(req):
     return render_admin_response('admin/plugins.html', 'options.plugins',
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
         csrf_protector=csrf_protector,
-        show_reload_button=not req.environ.get('wsgi.run_once')
+        show_reload_button=not req.environ.get('wsgi.run_once'),
+        guard_enabled=req.app.cfg['plugin_guard']
     )
 
 

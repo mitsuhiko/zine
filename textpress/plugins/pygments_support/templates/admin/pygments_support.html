@@ -2,35 +2,22 @@
 {% block title %}{% trans "Pygments" %}{% endblock %}
 {% block contents %}
   <h2>{% trans "Pygments" %}</h2>
-  {%- if pygments_installed %}
-    <p>{% trans %}
-      Pygments allows you to select one of many themes for your code tags.
-      You can preview and select one below.
-    {% endtrans %}</p>
-    {{ example }}
-    <div class="actions">
-      <form action="" method="post">
-        {{ csrf_protector }}
-        {% trans "Theme" %}:
-        <select name="style">
-      {%- for style in styles %}
-          <option{% if style.active %} selected{% endif %}>{{ style.name|e }}</option>
-      {%- endfor %}
-        </select>
-        <input type="submit" value="{% trans 'Preview' %}">
-        <input type="submit" name="apply" value="{% trans 'Select' %}">
-      </form>
-    </div>
-  {%- else %}
-    <div class="text">
-      <p>{% trans %}
-        The pygments support plugin was installed successfully but pygments
-        itself is not available on this system. You have to install pygments
-        0.7 or higher for this plugin.
-      {% endtrans %}</p>
-      <p>{% trans %}
-        Once pygments is installed you can configure pygments from this page.
-      {% endtrans %}</p>
-    </div>
-  {%- endif %}
+  <p>{% trans %}
+    Pygments allows you to select one of many themes for your code tags.
+    You can preview and select one below.
+  {% endtrans %}</p>
+  {{ example }}
+  <div class="actions">
+    <form action="" method="post">
+      {{ csrf_protector }}
+      {% trans "Theme" %}:
+      <select name="style">
+    {%- for style in styles %}
+        <option{% if style.active %} selected{% endif %}>{{ style.name|e }}</option>
+    {%- endfor %}
+      </select>
+      <input type="submit" value="{% trans 'Preview' %}">
+      <input type="submit" name="apply" value="{% trans 'Select' %}">
+    </form>
+  </div>
 {% endblock %}

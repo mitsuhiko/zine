@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 from os.path import join, dirname
+from time import time, asctime, gmtime
 from werkzeug.utils import escape
 from textpress.api import *
 from textpress.utils import CSRFProtector
@@ -29,6 +30,7 @@ _formatters = {}
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
+PYGMENTS_URL = 'http://pygments.org/'
 EXAMPLE = '''\
 <!DOCTYPE HTML>
 <html>
@@ -89,18 +91,15 @@ def get_style(req, style):
     formatter = get_formatter(style)
     if formatter is None:
         abort(404)
-    return Response(formatter.get_style_defs('div.syntax pre'),
+    resp = Response(formatter.get_style_defs('div.syntax pre'),
                     mimetype='text/css')
+    resp.headers['Cache-Control'] = 'public'
+    resp.headers['Expires'] = asctime(gmtime(time() + 3600))
+    return resp
 
 
 @require_role(ROLE_ADMIN)
 def show_config(req):
-    if not have_pygments:
-        return render_admin_response('admin/pygments_support.html',
-                                     'options.pygments_support',
-            pygments_installed=False
-        )
-
     csrf_protector = CSRFProtector()
     all_styles = set(get_all_styles())
     active_style = req.form.get('style')
@@ -116,6 +115,8 @@ def show_config(req):
     preview_formatter = get_formatter(active_style, preview=True)
     add_header_snippet('<style type="text/css">\n%s\n</style>' %
                        escape(preview_formatter.get_style_defs()))
+    example = highlight(EXAMPLE, get_lexer_by_name('html+jinja'),
+                        preview_formatter)
 
     return render_admin_response('admin/pygments_support.html',
                                  'options.pygments_support',
@@ -123,10 +124,9 @@ def show_config(req):
             'name':         style,
             'active':       style == active_style
         } for style in sorted(all_styles)],
-        example=highlight(EXAMPLE, get_lexer_by_name('html+jinja'),
-                          preview_formatter),
+        example=example,
         csrf_protector=csrf_protector,
-        pygments_installed=True
+        pygments_installed=have_pygments
     )
 
 
@@ -145,17 +145,27 @@ def add_pygments_link(req, navigation_bar):
                                      'Pygments'))
 
 
-def setup(app, plugin):
-    app.connect_event('modify-admin-navigation-bar', add_pygments_link)
-    app.add_url_rule('/admin/options/pygments',
-                     endpoint='pygments_support/config')
-    app.add_view('pygments_support/config', show_config)
-    app.add_template_searchpath(TEMPLATES)
+def show_error(req, context):
+    """This is only connected to the admin response rendering if
+    pygments is not available."""
+    flash(_('<strong>Pygments support is not active!</strong> '
+            'the %(pygments)s library is not installed.') % {
+        'pygments': u'<a href="%s">Pygments</a>' % PYGMENTS_URL
+    }, 'error')
 
+
+def setup(app, plugin):
     if have_pygments:
+        app.connect_event('modify-admin-navigation-bar', add_pygments_link)
+        app.add_url_rule('/admin/options/pygments',
+                         endpoint='pygments_support/config')
+        app.add_view('pygments_support/config', show_config)
         app.connect_event('process-doc-tree', process_doc_tree)
         app.connect_event('after-request-setup', inject_style)
         app.add_config_var('pygments_support/style', unicode, u'default')
         app.add_url_rule('/_shared/pygments_support/<style>.css',
                          endpoint='pygments_support/style')
         app.add_view('pygments_support/style', get_style)
+        app.add_template_searchpath(TEMPLATES)
+    else:
+        app.connect_event('before-admin-response-rendered', show_error)

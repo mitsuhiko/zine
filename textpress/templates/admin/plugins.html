@@ -52,6 +52,11 @@
       {%- if show_reload_button %}
       <input type="submit" name="trigger_reload" value="{% trans 'Reload' %}">
       {%- endif %}
+      {%- if guard_enabled %}
+      <input type="submit" name="disable_guard" value="{% trans 'Disable Plugin Guard' %}">
+      {%- else %}
+      <input type="submit" name="enable_guard" value="{% trans 'Enable Plugin Guard' %}">
+      {%- endif %}
     </div>
   </form>
 {% endblock %}

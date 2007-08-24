@@ -31,7 +31,6 @@ SHARED = join(dirname(__file__), 'shared')
 def guess_mimetype(s):
     app = get_application()
     for item in app.cfg['file_uploads/mimetypes'].split(';'):
-        print repr(item)
         if ':' in item:
             pattern, mimetype = item.split(':', 1)
             if fnmatch(s, pattern):

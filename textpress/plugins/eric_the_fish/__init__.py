@@ -118,6 +118,7 @@ def setup(app, plugin):
     phase. Here we connect to the events and register our template paths,
     url rules, views etc.
     """
+
     # we want our fish to appear in the admin panel, so hook into the
     # correct event.
     app.connect_event('before-admin-response-rendered', inject_fish)
