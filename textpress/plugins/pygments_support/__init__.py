@@ -56,10 +56,22 @@ EXAMPLE = '''\
 
 
 def get_current_style():
+    """
+    Helper function that returns the current style for the current
+    application.
+    """
     return get_application().cfg['pygments_support/style']
 
 
 def get_formatter(style=None, preview=False):
+    """
+    Helper function that returns a formatter in either preview or
+    normal mode for the style provided or the current style if not
+    further defined.
+
+    The formatter returned should be treated as immutable object
+    because it might be shared and cached.
+    """
     if style is None:
         style = get_current_style()
     if not preview and style in _formatters:
@@ -78,6 +90,10 @@ def get_formatter(style=None, preview=False):
 
 
 def process_doc_tree(doctree, input_data, reason):
+    """
+    Parse time callback function that replaces all pre blocks with a
+    'syntax' attribute the highlighted sourcecode.
+    """
     for node in doctree.query('pre[@syntax]'):
         try:
             lexer = get_lexer_by_name(node.attributes.pop('syntax'))
@@ -88,6 +104,11 @@ def process_doc_tree(doctree, input_data, reason):
 
 
 def get_style(req, style):
+    """
+    A request handler that returns the stylesheet for one of the
+    pygments styles. If a file does not exist it returns an
+    error 404.
+    """
     formatter = get_formatter(style)
     if formatter is None:
         abort(404)
@@ -100,6 +121,10 @@ def get_style(req, style):
 
 @require_role(ROLE_ADMIN)
 def show_config(req):
+    """
+    Request handler that provides an admin page with the configuration
+    for the pygments plugin. So far this only allows changing the style.
+    """
     csrf_protector = CSRFProtector()
     all_styles = set(get_all_styles())
     active_style = req.form.get('style')
@@ -131,12 +156,14 @@ def show_config(req):
 
 
 def inject_style(req):
+    """Add a link for the current pygments stylesheet to each page."""
     add_link('stylesheet', url_for('pygments_support/style',
                                    style=get_current_style()),
              'text/css')
 
 
 def add_pygments_link(req, navigation_bar):
+    """Add a link for the pygments configuration page to the admin panel."""
     if req.user.role >= ROLE_ADMIN:
         for link_id, url, title, children in navigation_bar:
             if link_id == 'options':

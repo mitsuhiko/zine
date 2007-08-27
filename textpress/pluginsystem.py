@@ -209,7 +209,7 @@ class PackageUploader(FancyURLopener, object):
     """
 
     version = 'TextPress Package Uploader/%s' % textpress.__version__
-    upload_url = 'http://localhost:4000/developers/upload_plugin'
+    upload_url = 'http://textpress.pocoo.org/developers/upload_plugin'
 
     def __init__(self, plugin, email, password):
         FancyURLopener.__init__(self)

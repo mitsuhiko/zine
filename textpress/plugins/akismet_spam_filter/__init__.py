@@ -74,7 +74,7 @@ def get_verified_key():
         data = {'key': apikey, 'blog': blogurl}
         resp = send_request(apikey, False, data, 'verify-key')
         if resp is None:
-            raise InvalidKey(_('Could not verfiy key because of a '
+            raise InvalidKey(_('Could not verify key because of a '
                                'server to server connection error.'))
         elif resp != 'valid':
             raise InvalidKey(_('The key you have entered is not valid.'))

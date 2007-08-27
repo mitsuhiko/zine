@@ -81,7 +81,7 @@ SELF_CLOSING_TAGS = ['br', 'img', 'area', 'hr', 'param', 'meta',
 _parser_cache = WeakKeyDictionary()
 
 
-def parse(input_data, reason='unknown'):
+def parse(input_data, reason='unknown', optimize=True):
     """
     Generate a doc tree out of the data provided. If we are not in unbound
     mode the `process-doc-tree` event is sent so that plugins can modify
@@ -102,7 +102,12 @@ def parse(input_data, reason='unknown'):
             _parser_cache[app] = parser = MarkupParser()
         else:
             parser = _parser_cache[app]
-    return parser.parse(input_data, reason)
+    rv = parser.parse(input_data, reason)
+
+    # if we want a optimized nodetree, we do so
+    if optimize:
+        rv = rv.optimize()
+    return rv
 
 
 def dump_tree(tree):
@@ -121,7 +126,7 @@ def load_tree(data):
     """Load a doctree from a string."""
     # special case: empty data, return empty fragment
     if not data:
-        return Fragment()
+        return StaticFragment()
     def walk(node_type, children, attr, parent=None):
         node = object.__new__(_node_types_reverse[node_type])
         node.parent = parent
@@ -338,17 +343,17 @@ class Node(object):
                 return rv
         attributes = u' '.join(u'%s=%s' % (key, quoteattr(value)) for
                                key, value in self.attributes.iteritems())
-        buf = ['<%s' % self.name]
+        buf = [u'<%s' % self.name]
         if attributes:
-            buf.append(' ' + attributes)
-        buf.append('>')
+            buf.append(u' ' + attributes)
+        buf.append(u'>')
         if self.name not in SELF_CLOSING_TAGS:
             if inject is not None:
                 buf.append(inject)
             else:
                 for child in self.children:
                     buf.append(child.render())
-            buf.append('</%s>' % self.name)
+            buf.append(u'</%s>' % self.name)
         return u''.join(buf)
 
     def _render_callback(self, text_only):
@@ -375,6 +380,25 @@ class Node(object):
         if self.name == 'p':
             rv += u'\n\n'
         return rv
+
+    @property
+    def dynamic_node(self):
+        """Return `True` if this node is a dynamic one."""
+        if self.callback_data:
+            return True
+        for node in self.children:
+            if node.dynamic_node:
+                return True
+        return False
+
+    def optimize(self):
+        """
+        Simplify the node. This is an irreversible process and
+        might change semantics. Do this only after a tree was created
+        and you're sure that you don't need any of the special behaviour
+        and more.
+        """
+        return self
 
     def add_render_callback(self, identifier, data=None):
         """Add a new callback to this node."""
@@ -631,7 +655,41 @@ class Fragment(Node):
         Node.__init__(self, None)
 
     def render(self, inject=None):
-        return ''.join(n.render() for n in self.children)
+        return u''.join(n.render() for n in self.children)
+
+    def optimize(self):
+        """
+        If this fragment is the fragment of a non dynamic node
+        collection we can safely replace it with a `StaticFragment`.
+        """
+        if not self.dynamic_node:
+            return StaticFragment(self)
+        return self
+
+
+class StaticFragment(Fragment):
+    """An alternative to the normal fragment which is completely static."""
+
+    def __init__(self, base=None):
+        Fragment.__init__(self)
+        if base is None:
+            self.value = u''
+        elif isinstance(base, basestring):
+            self.value = unicode(base)
+        elif isinstance(base, Node):
+            self.value = base.render()
+        else:
+            raise TypeError('unicode or node required.')
+
+    @property
+    def text(self):
+        return u''
+
+    def render(self, inject=None):
+        return self.value
+
+    def optimize(self):
+        return self
 
 
 # helpers for the dumping system
@@ -641,5 +699,6 @@ _node_types = {
     TextNode:       1,
     DataNode:       2,
     Fragment:       3,
+    StaticFragment: 4
 }
-_node_types_reverse = [Node, TextNode, DataNode, Fragment]
+_node_types_reverse = [Node, TextNode, DataNode, Fragment, StaticFragment]
