@@ -5,6 +5,10 @@
 
     This module installs textpress automatically if the app is not ready.
 
+    XXX: replace this module with a less hackish one.  We now have the
+    abbility to reload textpress at the end of a request.  This could work
+    for a websetup environment too if we split up the request into two.
+
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
@@ -94,13 +98,7 @@ class WebSetup(object):
                                admin_email=email)
 
     def __call__(self, environ, start_response):
-        req = Request(environ)
-
-        # for persistent setups we might still have the web setup
-        # as dispatcher. In that case tell the user to reload the server
-        if self.app.get_database_uri() is not None:
-            return self.setup_done(req, start_response)
-        return self.do_setup(req, start_response)
+        return self.do_setup(Request(environ), start_response)
 
 
 def make_setup(app):

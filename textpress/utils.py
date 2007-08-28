@@ -1073,3 +1073,11 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
 
     def get_hidden_field(self):
         return '_transport_id', self.transport_id
+
+    def __del__(self):
+        try:
+            # we cannot access globals any more in some situations
+            # so we call the cleanup function from the self object.
+            self.remove_active_stream(self)
+        except:
+            pass

@@ -60,7 +60,10 @@ _setup_lock = Lock()
 #: there is a global application setup lock.
 _next_listener_id = 0
 
-#: holds references to all the active textpress instances
+#: holds references to all the active textpress instances. This is
+#: used by the reloader function in the utils module. Some other
+#: modules might want to use this too if they want to modify application
+#: independent settings and have to access application objects.
 _instances = WeakKeyDictionary()
 
 

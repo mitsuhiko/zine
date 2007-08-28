@@ -8,8 +8,7 @@ installed:
   - Jinja newparser branch from http://trac.pocoo.org/repos/jinja/branches/new-parser
   - SQLAlchemy*
   - simplejson*
-  - BeautifulSoup*
-  - Python2.5 (for now)
+  - Python 2.4 or higher
   - mysql, sqlite or postgres
 
 libraries marked with * are installable from the cheeseshop via easy_install or
@@ -19,6 +18,9 @@ For a quickstart with the development server do this:
 
     $ mkdir instance
     $ python textpress-management.py -dr instance/ serve
+
+After the first start you will find yourself in a installation wizzard that
+helps you create the database tables and administrator account.
 
 To get access to a python console with the textpress instance context do this:
 
