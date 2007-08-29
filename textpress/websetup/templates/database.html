@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>Database</h2>
+  <p>
+    TextPress uses a database to store blog posts and other information. The
+    only information it requires therefore is a database URI. Depending on your
+    database this URI looks different. Have a look at the following table for
+    examples of database URIs.
+  </p>
+  <dl>
+    <dt>SQLite</dt>
+    <dd><code>sqlite:////path/to/database.db</code> &mdash;
+        connect to a database that is located at a specific absolute path
+        on the file system of the server. Note the four slashes on Mac OS X
+        or Linux systems. On Windows you have to use three slashes and a
+        drive letter.</dd>
+    <dt>MySQL</dt>
+    <dd><code>mysql://username:password@host/database_name</code></dd>
+    <dt>Postgres</dt>
+    <dd><code>postgres://username:password@host/database_name</code></dd>
+  </dl>
+  <input type="text" name="database_uri" value="{{ values.database_uri|e(true) }}" size="40">
+  {% if error %}
+    <div class="error">
+      <h3>An Error Occoured</h3>
+      <p>{{ error|e }}</p>
+    </div>
+  {% endif %}
+{% endblock %}

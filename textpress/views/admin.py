@@ -866,7 +866,8 @@ def do_basic_options(req):
         'comments_enabled':     cfg['comments_enabled'],
         'pings_enabled':        cfg['pings_enabled'],
         'posts_per_page':       cfg['posts_per_page'],
-        'use_flat_comments':    cfg['use_flat_comments']
+        'use_flat_comments':    cfg['use_flat_comments'],
+        'maintenance_mode':     cfg['maintenance_mode']
     }
     errors = []
     csrf_protector = CSRFProtector()
@@ -903,6 +904,8 @@ def do_basic_options(req):
             errors.append(_('Posts per page must be a valid integer'))
         form['use_flat_comments'] = use_flat_comments = \
             req.form.get('use_flat_comments') == 'yes'
+        form['maintenance_mode'] = maintenance_mode = \
+            req.form.get('maintenance_mode') == 'yes'
         if not errors:
             if blog_title != cfg['blog_title']:
                 cfg['blog_title'] = blog_title
@@ -924,6 +927,8 @@ def do_basic_options(req):
                 cfg['posts_per_page'] = posts_per_page
             if use_flat_comments != cfg['use_flat_comments']:
                 cfg['use_flat_comments'] = use_flat_comments
+            if maintenance_mode != cfg['maintenance_mode']:
+                cfg['maintenance_mode'] = maintenance_mode
             flash(_('Configuration altered successfully.'), 'configure')
             simple_redirect('admin/basic_options')
 

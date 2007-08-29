@@ -32,12 +32,15 @@
           <label for="comments_enabled">{% trans "enable comments per default" %}</label></dd>
       <dt>{% trans "Pingbacks Enabled" %}</dt>
       <dd>{{ h.checkbox('pings_enabled', 'yes', form.pings_enabled) }}
-           <label for="pings_enabled">{% trans "enable pingbacks per default" %}</label></dd>
+          <label for="pings_enabled">{% trans "enable pingbacks per default" %}</label></dd>
       <dt>{% trans "Posts Per Page" %}</dt>
       <dd>{{ h.input_field('posts_per_page', form.posts_per_page) }}</dd>
+      <dt>{% trans "Maintenance Mode" %}</dt>
+      <dd>{{ h.checkbox('maintenance_mode', 'yes', form.maintenance_mode) }}
+          <label for="maintenance_mode">{% trans "enable maintenance mode" %}</label></dd>
     </dl>
     <div class="actions">
-      <input type="submit" value="Save"/>
+      <input type="submit" value="Save">
     </div>
   </form>
 {% endblock %}

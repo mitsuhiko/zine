@@ -3,12 +3,32 @@
     textpress.application
     ~~~~~~~~~~~~~~~~~~~~~
 
-    The main application.
+    The main application.  This module uses some pretty weird thread local
+    stuff.  Basically at least an application is bound to the current thread
+    which you can get by calling `get_application`.  The same things happens
+    with user requests.  This means that it's impossible to use textpress in
+    enviornments where you have multiple requests in one thread (servers that
+    use greenlets).
+
+    Once there is a WSGI server that uses greenlets one could add support for
+    that here.  So far this limitation is not a real world problem.
+
+    The other important thing is that some code in this module is not a public
+    interface (variables prefixed with an underscore) but also modified from
+    outside of this module, especially from the `reload_textpress` function
+    from the utils module.  That's the case because textpress can reload
+    ifself while the server is running.  In order to keep the problems that
+    could occour while reloading as small as possible there is a lock that
+    is acquire during reloading.  The message that is displayed in maintenance
+    mode or while something is reloaded does not access any global variables
+    that might disappear during reloading.
+
 
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
 from os import path
+from time import sleep
 from threading import local, Lock
 from itertools import izip
 from datetime import datetime, timedelta
@@ -49,8 +69,12 @@ BUILTIN_TEMPLATE_PATH = path.join(path.dirname(__file__), 'templates')
 #:      used by the `RequestLocal` class from the utils module.
 _locals = local()
 
-#: the lock for the application setup
+#: the lock for the application setup.
 _setup_lock = Lock()
+
+#: this lock is used for the reloading process. During reloading
+#: it's shared among the two application modules.
+_reload_lock = Lock()
 
 #: because events are not application bound we keep them
 #: unique by sharing them. For better performance we don't
@@ -466,8 +490,10 @@ class TextPress(object):
             raise TypeError('cannot create %r instances. use the make_app '
                             'factory function.' % self.__class__.__name__)
 
-        # register the application instance
+        # register the application instance and get a reference
+        # to the reload lock
         _instances[self] = instance_folder
+        self._reload_lock = _reload_lock
 
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup
@@ -491,7 +517,10 @@ class TextPress(object):
         self.cfg = Configuration(self)
 
         # if the application is not installed we replace the
-        # dispatcher with a setup application
+        # dispatcher with a setup application. it's important
+        # to know that at this point there is no database connection
+        # at all. the whole websetup has to care about the database
+        # itself.
         database_uri = self.get_database_uri()
         if database_uri is None:
             from textpress.websetup import make_setup
@@ -576,12 +605,6 @@ class TextPress(object):
         # mark the app as finished and send an event
         self._setup_finished = True
         emit_event('application-setup-done')
-
-    def _reinit(self):
-        """Calls init again. Dangerous. Don't do that! It's only used
-        in the websetup and it's only save from there."""
-        self.bind_to_thread()
-        self.__init__(self.instance_folder)
 
     def bind_to_thread(self):
         """Bind the application to the current thread."""
@@ -753,6 +776,61 @@ class TextPress(object):
         emit_event('before-metadata-assambled', result, buffered=True)
         return u'\n'.join(result)
 
+    def maintenance_mode_message(self, environ, start_response):
+        """
+        This will handle the requests if the application is in maintenance
+        mode. Because the application might reload in the meantime this
+        function does not access *any* global varibles.
+        """
+        start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+        yield '''
+            <!DOCTYPE HTML>
+            <html>
+              <head>
+                <title>Maintenance Mode</title>
+                <style type="text/css">
+                  body {
+                    font-family: 'Times New Roman', sans-serif;
+                    font-size: 1.1em;
+                    background-color: #eee;
+                    padding: 2em 0 2em 0;
+                    margin: 0;
+                    text-align: justify;
+                  }
+
+                  div.msg {
+                    width: 20em;
+                    margin: 0 auto 0 auto;
+                    padding: 20px;
+                    background-color: white;
+                    border: 1px solid #22314e;
+                  }
+
+                  h1 {
+                    background-color: #316081;
+                    color: white;
+                    margin: -20px -20px 20px -20px;
+                    padding: 10px 20px 10px 20px;
+                  }
+
+                  p {
+                    margin: 0;
+                    padding: 0;
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="msg">
+                  <h1>Maintenance Mode</h1>
+                  <p>
+                    This TextPress instance is right now in maintenance mode.
+                    Plase wait until the administrator reopened the blog.
+                  </p>
+                </div>
+              </body>
+            </html>
+        '''
+
     def _dispatch_request(self, environ, start_response):
         """Handle the incoming request."""
         _locals.app = self
@@ -760,9 +838,21 @@ class TextPress(object):
         _locals.page_metadata = []
         _locals.request_locals = {}
 
+        # check if the blog is in maintenance_mode and the user is
+        # not an administrator. in that case just show a message that
+        # the user is not privileged to view the blog right now. Exception:
+        # the page is the login page for the blog.
+        if req.path not in ('/admin', '/admin/', '/admin/login') \
+           and self.cfg['maintenance_mode']:
+            from textpress.models import ROLE_ADMIN
+            if req.user.role < ROLE_ADMIN:
+                return self.maintenance_mode_message(environ, start_response)
+
         # the after-request-setup event can return a response
         # or modify the request object in place. If we have a
-        # response we just send it
+        # response we just send it. Plugins that inject something
+        # into the request setup have to check if they are in
+        # maintenance mode themselves.
         for result in emit_event('after-request-setup', req):
             if result is not None:
                 return result(environ, start_response)
@@ -790,10 +880,22 @@ class TextPress(object):
 
     def __call__(self, environ, start_response):
         """Make the application object a WSGI application."""
+        # if the reload lock is locked we make sure that everbody
+        # ends up on the maintenance_mode page. There could be a
+        # situation where the dict does not contain a reference to
+        # the reload lock, but the global namespace does. So we
+        # check for that here.
+        lock = getattr(self, '_reload_lock', None) or _reload_lock
+        if lock.locked():
+            for c in self.maintenance_mode_message(environ, start_response):
+                yield c
+            return
+
+        # the normal request dispatching
         remove_app = getattr(_locals, 'app', None) is None
         try:
-            for item in self.dispatch_request(environ, start_response):
-                yield item
+            for c in self.dispatch_request(environ, start_response):
+                yield c
         finally:
             try:
                 # clean up the request locals to avoid memory leakage

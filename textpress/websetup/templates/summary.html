@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>Setup Starting</h2>
+  <p>
+    TextPress knows now about all the information it needs to setup your
+    instance. After you click on the install button TextPress will create
+    the database tables and insert the defaul information. Right after that
+    TextPress will be online in maintenance mode which means that it's only
+    visible to the administrator, all other users will get a message that
+    shows that the blog is in maintenance mode right now.
+  </p>
+  <input type="hidden" name="_startsetup" value="yes">
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>Administrator Account</h2>
+  <p>
+    In order to log into your TextPress installation you have to provide a
+    login name for the administration user. You can later rename or delete
+    that user if you want.
+  </p>
+  <dl>
+    <dt>Username</dt>
+    <dd><input type="text" name="admin_username" value="{{ values.admin_username|e(true) }}"></dd>
+    <dt>Password</dt>
+    <dd><input type="password" name="admin_password"></dd>
+    <dt>Password (repeat)</dt>
+    <dd><input type="password" name="admin_password2"></dd>
+    <dt>E-Mail</dt>
+    <dd><input type="text" name="admin_email" value="{{ values.admin_email|e(true) }}"></dd>
+  </dl>
+  {% if errors %}
+    <div class="error">
+      <h3>Error While Processing</h3>
+      <ul>
+      {% for error in errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endblock %}

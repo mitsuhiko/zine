@@ -129,13 +129,12 @@ comments = db.Table('comments', metadata,
 )
 
 
-def upgrade_database(app):
+def init_database(engine):
     """
-    Check if the tables are up to date and perform an upgrade.
-    Currently creating is enough. Once there are release verisons
-    this function will upgrade the database structure too.
+    This is also called form the upgrade database function but especially from
+    the websetup. That's also why it takes an engine and not a textpress
+    application.
     """
-    engine = app.database_engine
     metadata.create_all(engine)
 
     # create the nobody user if it's missing
@@ -148,3 +147,12 @@ def upgrade_database(app):
             user_id=NOBODY_USER_ID,
             role=ROLE_NOBODY
         )
+
+
+def upgrade_database(app):
+    """
+    Check if the tables are up to date and perform an upgrade.
+    Currently creating is enough. Once there are release verisons
+    this function will upgrade the database structure too.
+    """
+    init_database(app.database_engine)

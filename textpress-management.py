@@ -46,9 +46,8 @@ def main(argv):
     if action == 'serve':
         if '-d' in opts:
             app = DebuggedApplication(app, True)
-        run_simple('', 4000, app, '-r' in opts)
-        #from paste.httpserver import serve
-        #serve(app, 'localhost', 4000)
+        run_simple('', 4000, app, '-r' in opts,
+                   threaded=True)
 
     elif action == 'shell':
         del sys.argv[1:]

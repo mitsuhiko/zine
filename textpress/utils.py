@@ -523,50 +523,59 @@ def reload_textpress():
     current request data still uses objects from the old modules.  This also
     means that until the request finishes you have two independent sets of
     textpress modules loaded.
-
-    This limitations makes it impossible to use the reload function in the
-    websetup which depends on a working textpress instance for finishing
-    the admin user creation.
     """
-    from textpress.application import _instances, _locals, get_request
+    from textpress.application import _instances, _locals, get_request, \
+         _reload_lock
+    _reload_lock.acquire()
+    try:
+        req = get_request()
+        if req and req.environ.get('wsgi.run_once'):
+            return
 
-    req = get_request()
-    if req and req.environ.get('wsgi.run_once'):
-        return
+        # copy all the stuff we need.
+        bound = getattr(_locals, 'app', None)
+        instances = dict(_instances)
 
-    # copy all the stuff we need.
-    bound = getattr(_locals, 'app', None)
-    instances = dict(_instances)
+        # but here we want to clean up soon
+        del _instances, _locals, req
 
-    # but here we want to clean up soon
-    del _instances, _locals, req
+        # now remove all the textpress stuff. it's important that we
+        # import the sys module into the local namespace so that we can
+        # access it, even if the module this file is living in is already
+        # gone.
+        reload = set()
+        import sys
+        for key in sys.modules.keys():
+            if key == 'textpress' or key.startswith('textpress.'):
+                del sys.modules[key]
+                reload.add(key)
 
-    # now remove all the textpress stuff
-    reload = set()
-    for key in sys.modules.keys():
-        if key == 'textpress' or key.startswith('textpress.'):
-            del sys.modules[key]
-            reload.add(key)
+        # time to reimport the new factory function and setup all the applications
+        __import__('textpress')
+        from textpress import application
 
-    # time to reimport the new factory function and setup all the applications
-    __import__('textpress')
-    from textpress.application import make_app, _instances, _locals
-    for app, path in instances.iteritems():
-        app.__dict__.clear()
-        app.__dict__.update(make_app(path).__dict__)
+        # copy the lock over to the new application module.
+        application._reload_lock = _reload_lock
+        for app, path in instances.iteritems():
+            app.__dict__.clear()
+            app.__dict__.update(application.make_app(path).__dict__)
 
-    # copy the old instances registry over.
-    _instances.clear()
-    _instances.update(instances)
+        # copy the old instances registry over.
+        application._instances.clear()
+        application._instances.update(instances)
 
-    # set up the bound application again.
-    if bound is not None:
-        _locals.app = bound
+        # set up the bound application again.
+        if bound is not None:
+            application._locals.app = bound
 
-    # run the garbage collector now to clean up stuff we don't need any
-    # more before the request ends
-    import gc
-    gc.collect()
+        # run the garbage collector now to clean up stuff we don't need any
+        # more before the request ends
+        import gc
+        gc.collect()
+
+    finally:
+        # release the lock in the end
+        _reload_lock.release()
 
 
 def split_email(s):

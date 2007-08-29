@@ -265,7 +265,14 @@ def get_post_archive_summary(detail='months', limit=None, ignore_role=False):
 
 
 class User(object):
-    """Pepresents an user."""
+    """
+    Represents an user.
+
+    If you change something on this model, even default values, keep in mind
+    that the websetup does not use this model to create the admin account
+    because at that time the TextPress system is not yet ready. Also update
+    the code in `textpress.websetup.WebSetup.start_setup`.
+    """
 
     def __init__(self, username, password, email, first_name='',
                  last_name='', description='', role=ROLE_SUBSCRIBER):

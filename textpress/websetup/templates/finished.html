@@ -1,16 +1,9 @@
 {% extends "layout.html" %}
-{% block contents %}
-  <h2>Installation Finished</h2>
+{% block body %}
+  <h2>Setup Finished</h2>
   <p>
-    TextPress is now installed on your server. You can now log into your
-    blog with the following credentials. You can change them from the
-    administrator interface later.:
+    The setup was finished successfully. You can now go to the
+    <a href="admin/">admin panel</a> and start configuring your blog. Don't forget
+    to disable the maintenance mode after you finished your configuration.
   </p>
-  <dl>
-    <dt>Username</dt>
-    <dd>{{ admin.username|e }}</dd>
-    <dt>Password</dt>
-    <dd>{{ admin.password|e }}</dd>
-  </dl>
-  <p><a href="{{ admin_url|e }}">Go to the Admin Interface &raquo;</a></p>
 {% endblock %}

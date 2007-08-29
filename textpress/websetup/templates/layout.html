@@ -1,16 +1,167 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>TextPress Websetup</title>
-  <link rel="stylesheet" type="text/css" href="shared/style.css">
+  <title>TextPress Setup</title>
+  <style type="text/css">
+    body {
+        font-family: 'Times New Roman', sans-serif;
+        font-size: 1.1em;
+        letter-spacing: 0.04em;
+        background-color: #eee;
+        padding: 2em 0 2em 0;
+        margin: 0;
+        text-align: justify;
+    }
+
+    div.page {
+        height: 100%;
+        background-color: white;
+        border: 1px solid #22314e;
+        width: 45em;
+        padding: 0 0 0.5em 0;
+        margin: 0 auto 0 auto;
+    }
+
+    div.header {
+        background-color: #22314e;
+        margin: 0;
+        padding: 0;
+    }
+
+    div.header h1 {
+        font-family: 'Gill Sans MT', 'Gill Sans', 'Luxi Sans', 'Trebuchet MS', sans-serif;
+        font-size: 50px;
+        color: white;
+        margin: 0;
+        padding: 10px;
+    }
+
+    h2, a {
+        color: #316081;
+        font-weight: bold;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #143f47;
+        border-bottom: 1px solid #ccc;
+        background-color: #f2f2f2;
+    }
+
+    h2 {
+        color: #222e4b;
+        margin: 0.6em 0 0.9em -1em;
+        padding: 0;
+        font-family: 'Georgia', serif;
+        font-size: 1.8em;
+        border-bottom: 1px solid #ccc;
+    }
+
+    p {
+        margin: 0 0 0.2em 0;
+    }
+
+    div.contents {
+        margin: 0 2em 2em 3em;
+    }
+
+    dl dt {
+        font-weight: bold;
+    }
+
+    input {
+        font-family: 'Georgia', sans-serif;
+        font-size: 1em;
+        font-weight: bold;
+        border-color: #999 #ccc #ccc #999;
+        border-style: solid;
+        border-width: 1px;
+        padding: 3px;
+    }
+
+    input:focus {
+        border: 1px solid #ffa800;
+        outline: 1px solid #ff7200;
+    }
+
+    input[type="submit"] {
+        padding: 0.2em 0.7em;
+        background-color: #fefefe;
+        border-color: #bbb #aaa #aaa #bbb;
+        border-style: double;
+        border-width: 3px;
+        color: #333;
+        cursor: pointer;
+    }
+
+    input[type="submit"]:active {
+        border-color: #aaa #ccc #ccc #aaa;
+        background-color: #f2f2f2;
+        outline: none;
+    }
+
+    input[type="submit"]:hover {
+        border-color: #999 #aaa #999 #aaa;
+        background-color: #fff;
+    }
+
+    form {
+        padding: 10px;
+    }
+
+    div.actions {
+        height: 1em;
+    }
+
+    div.actions input {
+        cursor: pointer;
+        float: right;
+        margin: 3px;
+    }
+
+    div.error {
+        border: 1px solid #982a2a;
+        background-color: #da7a7a;
+        padding: 0.5em;
+        margin: 1em 0 1em 0;
+    }
+
+    div.error h3 {
+        margin: 0;
+        padding: 0;
+        color: #802424;
+        font-family: 'Georgia', serif;
+        font-size: 1.4em;
+    }
+
+    div.error p {
+        padding: 0.3em 1em 0 1em;
+    }
+  </style>
 </head>
 <body>
   <div class="page">
     <div class="header">
-      <h1>TextPress</h1>
+      <h1>TextPress Setup</h1>
     </div>
     <div class="contents">
-      {% block contents %}{% endblock %}
+      <form action="" method="post">
+        {% block body %}{% endblock %}
+        {% if not finished %}
+          <div class="actions">
+            <input type="submit" name="_next" value="{% if next %}Next &raquo;{% else %}Install{% endif %}">
+            {% if prev %}<input type="submit" name="_prev" value="&laquo; Back">{% endif %}
+          </div>
+        {% endif %}
+
+        {%- for key, value in values|dictsort %}
+        <input type="hidden" name="{{ key|e(true) }}" value="{{ value|e(true) }}">
+        {%- endfor %}
+        <input type="hidden" name="_current" value="{{ current|e(true) }}">
+      </form>
     </div>
   </div>
 </body>
