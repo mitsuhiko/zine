@@ -29,7 +29,7 @@
 """
 from os import path
 from time import sleep
-from threading import local, Lock
+from thread import allocate_lock, get_ident as get_thread_ident
 from itertools import izip
 from datetime import datetime, timedelta
 from weakref import WeakKeyDictionary
@@ -55,8 +55,8 @@ SHARED_DATA = path.join(path.dirname(__file__), 'shared')
 #: path to the builtin templates (admin panel and page defaults)
 BUILTIN_TEMPLATE_PATH = path.join(path.dirname(__file__), 'templates')
 
-#: helds all the thread local variables
-#: currently those are:
+#: This variable stores some dicts for thread idents. These keys
+#: are in the dicts:
 #:
 #: `app`:
 #:      reference to the application in the current thread
@@ -67,14 +67,14 @@ BUILTIN_TEMPLATE_PATH = path.join(path.dirname(__file__), 'templates')
 #:      this is only set if there is an request processed.
 #: `request_locals`:
 #:      used by the `RequestLocal` class from the utils module.
-_locals = local()
+_threads = {}
 
 #: the lock for the application setup.
-_setup_lock = Lock()
+_setup_lock = allocate_lock()
 
 #: this lock is used for the reloading process. During reloading
 #: it's shared among the two application modules.
-_reload_lock = Lock()
+_reload_lock = allocate_lock()
 
 #: because events are not application bound we keep them
 #: unique by sharing them. For better performance we don't
@@ -96,8 +96,8 @@ def emit_event(event, *args, **kw):
     buffered = kw.pop('buffered', False)
     if kw:
         raise TypeError('got invalid keyword argument %r' % iter(kw).next())
-    mgr = _locals.app._event_manager
-    return EventResult(mgr.emit(event, args), buffered)
+    return EventResult(_threads[get_thread_ident()]['app']._event_manager.
+                       emit(event, args), buffered)
 
 
 def abort(code=404):
@@ -106,7 +106,8 @@ def abort(code=404):
         resp = render_response('404.html')
         resp.status = 404
     elif code == 403:
-        if _locals.req.user.is_somebody:
+        req = get_request()
+        if req.user.is_somebody:
             resp = render_response('403.html')
             resp.status = 403
         else:
@@ -114,7 +115,7 @@ def abort(code=404):
                             'this resource.', mimetype='text/plain',
                             status=302)
             resp.headers['Location'] = url_for('admin/login',
-                                               next=_locals.req.path)
+                                               next=req.path)
     else:
         msg = Response('Error %d' % code, mimetype='text/plain', status=code)
     raise DirectResponse(resp)
@@ -137,37 +138,65 @@ def url_for(endpoint, _external=False, **args):
         if rv is not None:
             endpoint, updated_args = rv
             args.update(updated_args)
-    return _locals.req.urls.build(endpoint, args, _external)
+    return get_request().urls.build(endpoint, args, _external)
 
 
 def get_request():
     """Get the current request."""
-    return getattr(_locals, 'req', None)
+    thread = _threads.get(get_thread_ident())
+    if thread is not None:
+        return thread['req']
 
 
 def get_application():
     """Get the current application."""
-    return getattr(_locals, 'app', None)
+    thread = _threads.get(get_thread_ident())
+    if thread is not None:
+        return thread['app']
 
 
 def add_link(rel, href, type, title=None, charset=None, media=None):
     """Add a new link to the metadata of the current page being processed."""
-    _locals.page_metadata.append(('link', locals()))
+    thread = _threads.get(get_thread_ident())
+    if thread is not None:
+        thread['page_metadata'].append(('link', {
+            'rel':      rel,
+            'href':     href,
+            'type':     type,
+            'title':    title,
+            'charset':  charset,
+            'media':    media
+        }))
 
 
 def add_meta(http_equiv=None, name=None, content=None):
     """Add a new meta element to the metadata of the current page."""
-    _locals.page_metadata.append(('meta', locals()))
+    thread = _threads.get(get_thread_ident())
+    if thread is not None:
+        thread['page_metadata'].append(('meta', {
+            'http_equiv':   http_equiv,
+            'name':         name,
+            'content':      content
+        }))
 
 
 def add_script(src, type='text/javascript'):
     """Load a script."""
-    _locals.page_metadata.append(('script', locals()))
+    thread = _threads.get(get_thread_ident())
+    if thread is not None:
+        thread['page_metadata'].append(('script', {
+            'src':      src,
+            'type':     type
+        }))
 
 
 def add_header_snippet(html):
     """Add some HTML as header snippet."""
-    _locals.page_metadata.append(('snippet', {'html': html}))
+    thread = _threads.get(get_thread_ident())
+    if thread is not None:
+        thread['page_metadata'].append(('snippet', {
+            'html':     html
+        }))
 
 
 def render_template(template_name, _stream=False, **context):
@@ -178,7 +207,7 @@ def render_template(template_name, _stream=False, **context):
     """
     emit_event('before-render-template', template_name, _stream, context,
                buffered=True)
-    tmpl = _locals.app.template_env.get_template(template_name)
+    tmpl = get_application().template_env.get_template(template_name)
     if _stream:
         return tmpl.stream(context)
     return tmpl.render(context)
@@ -206,6 +235,46 @@ def require_role(role):
         decorated.__doc__ = f.__doc__
         return decorated
     return wrapped
+
+
+def set_thread_data(key, value):
+    """Set some data for the current thread."""
+    ident = get_thread_ident()
+    if ident in _threads:
+        _threads[ident][key] = value
+    else:
+        _threads[ident] = {key: value}
+
+
+def get_thread_data(key, default=None):
+    """Get some data back for the current thread."""
+    try:
+        return _threads[get_thread_ident()][key]
+    except KeyError:
+        return default
+
+
+def clean_thread_data(unbind_app=False):
+    """Clean up unused thread data."""
+    ident = get_thread_ident()
+    thread = _threads.get(ident)
+    if thread is not None:
+        for key in thread.keys():
+            if key == 'app' and not unbind_app:
+                continue
+            del thread[key]
+        if not thread:
+            del _threads[ident]
+
+
+def get_active_requests():
+    """Return a set of all active requests."""
+    rv = set()
+    for thread in _threads.itervalues():
+        req = thread.get('req')
+        if req is not None:
+            rv.add(req)
+    return rv
 
 
 class Request(BaseRequest):
@@ -486,7 +555,7 @@ class TextPress(object):
 
     def __init__(self, instance_folder):
         # this check ensures that only make_app can create TextPress instances
-        if getattr(_locals, 'app', None) is not self:
+        if (_threads.get(get_thread_ident()) or {}).get('app') is not self:
             raise TypeError('cannot create %r instances. use the make_app '
                             'factory function.' % self.__class__.__name__)
 
@@ -608,7 +677,7 @@ class TextPress(object):
 
     def bind_to_thread(self):
         """Bind the application to the current thread."""
-        _locals.app = self
+        set_thread_data('app', self)
 
     def get_database_uri(self):
         """Get the database uri from the instance folder or return None."""
@@ -771,7 +840,7 @@ class TextPress(object):
                 u'TextPress.BLOG_URL = %s;'
             u'</script>' % dump_json(self.cfg['blog_url'].rstrip('/'))
         )
-        for type, attr in _locals.page_metadata:
+        for type, attr in get_thread_data('page_metadata'):
             result.append(generators[type](**attr))
         emit_event('before-metadata-assambled', result, buffered=True)
         return u'\n'.join(result)
@@ -833,10 +902,18 @@ class TextPress(object):
 
     def _dispatch_request(self, environ, start_response):
         """Handle the incoming request."""
-        _locals.app = self
-        _locals.req = req = Request(self, environ)
-        _locals.page_metadata = []
-        _locals.request_locals = {}
+        # Create a new request object, register it with the application
+        # and all the other stuff on the current thread but initialize
+        # it afterwards.  We do this so that the request object can query
+        # the database in the initialization method.
+        req = object.__new__(Request)
+        _threads.setdefault(get_thread_ident(), {}).update(
+            app=self,
+            req=req,
+            page_metadata=[],
+            request_locals={}
+        )
+        req.__init__(self, environ)
 
         # check if the blog is in maintenance_mode and the user is
         # not an administrator. in that case just show a message that
@@ -892,16 +969,14 @@ class TextPress(object):
             return
 
         # the normal request dispatching
-        remove_app = getattr(_locals, 'app', None) is None
+        remove_app = get_thread_data('app') is not None
         try:
             for c in self.dispatch_request(environ, start_response):
                 yield c
         finally:
             try:
                 # clean up the request locals to avoid memory leakage
-                del _locals.req, _locals.page_metadata, _locals.request_locals
-                if remove_app:
-                    del _locals.app
+                clean_thread_data(remove_app)
             except:
                 pass
 
@@ -918,13 +993,15 @@ def make_app(instance_folder, bind_to_thread=False):
     try:
         # make sure this thread has access to the variable so just set
         # up a partial class and call __init__ later.
-        _locals.app = app = object.__new__(TextPress)
+        app = object.__new__(TextPress)
+        set_thread_data('app', app)
         app.__init__(instance_folder)
     finally:
         # if there was no error when setting up the TextPress instance
         # we should now have an attribute here to delete
-        if hasattr(_locals, 'app') and not bind_to_thread:
-            del _locals.app
+        app = get_thread_data('app')
+        if app is not None and not bind_to_thread:
+            clean_thread_data(True)
         _setup_lock.release()
 
     return app

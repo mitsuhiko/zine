@@ -524,39 +524,62 @@ def reload_textpress():
     means that until the request finishes you have two independent sets of
     textpress modules loaded.
     """
-    from textpress.application import _instances, _locals, get_request, \
-         _reload_lock
+    from textpress.application import _instances, get_request, \
+         _reload_lock, _setup_lock, get_thread_data, set_thread_data, \
+         get_active_requests
+
     _reload_lock.acquire()
     try:
         req = get_request()
         if req and req.environ.get('wsgi.run_once'):
             return
 
+        # wait until the current application is ready if there is on
+        # in the setup process (unlikely but it could happen)
+        _setup_lock.acquire()
+        _setup_lock.release()
+
+        # wait until all the active requests have finished, except
+        # of the request that triggered this call. If we have requests
+        # left after 5 seconds we break the loop.  This could be the
+        # case when there is an active download or whatever. It could
+        # be that an user is presented an internal server error in that
+        # case but the chance that this happens is very small.
+        start = time()
+        while True:
+            requests = get_active_requests()
+            if req is not None:
+                requests.discard(req)
+            if not requests or time() - start > 5:
+                break
+            sleep(0.1)
+
         # copy all the stuff we need.
-        bound = getattr(_locals, 'app', None)
+        bound = get_thread_data('app')
         instances = dict(_instances)
 
         # but here we want to clean up soon
-        del _instances, _locals, req
+        del _instances, req
 
         # now remove all the textpress stuff. it's important that we
         # import the sys module into the local namespace so that we can
         # access it, even if the module this file is living in is already
         # gone.
-        reload = set()
         import sys
         for key in sys.modules.keys():
             if key == 'textpress' or key.startswith('textpress.'):
                 del sys.modules[key]
-                reload.add(key)
 
-        # time to reimport the new factory function and setup all the applications
+        # time to reimport the new factory function and setup all the
+        # applications. But before we do so we have to copy the old reload
+        # lock into the new module. This is required so that we don't have
+        # conflicting locks.
         __import__('textpress')
         from textpress import application
-
-        # copy the lock over to the new application module.
         application._reload_lock = _reload_lock
+
         for app, path in instances.iteritems():
+            app.__class__ = application.TextPress
             app.__dict__.clear()
             app.__dict__.update(application.make_app(path).__dict__)
 
@@ -566,7 +589,7 @@ def reload_textpress():
 
         # set up the bound application again.
         if bound is not None:
-            application._locals.app = bound
+            set_thread_data('app', bound)
 
         # run the garbage collector now to clean up stuff we don't need any
         # more before the request ends
@@ -751,10 +774,10 @@ class RequestLocal(object):
     """
 
     def __init__(self, **vars):
-        from textpress.application import _locals
+        from textpress.application import get_thread_data
         self.__dict__.update(
-            _locals=_locals,
-            _vars = vars
+            _get_thread_data=get_thread_data,
+            _vars=vars
         )
         for key, value in vars.iteritems():
             if value is None:
@@ -763,9 +786,8 @@ class RequestLocal(object):
 
     @property
     def _storage(self):
-        if not hasattr(self._locals, 'request_locals'):
-            raise AttributeError('no request context')
-        return self._locals.request_locals.setdefault(id(self), {})
+        loc = self._get_thread_data('request_locals')
+        return loc.setdefault(id(self), {})
 
     def __getattr__(self, name):
         if name not in self._vars:
