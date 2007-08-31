@@ -256,15 +256,15 @@ def get_thread_data(key, default=None):
 
 def clean_thread_data(unbind_app=False):
     """Clean up unused thread data."""
-    ident = get_thread_ident()
-    thread = _threads.get(ident)
+    thread = _threads.get(get_thread_ident())
     if thread is not None:
         for key in thread.keys():
             if key == 'app' and not unbind_app:
                 continue
             del thread[key]
-        if not thread:
-            del _threads[ident]
+    for thread, data in _threads.items():
+        if not data:
+            del _threads[thread]
 
 
 def get_active_requests():
@@ -275,6 +275,11 @@ def get_active_requests():
         if req is not None:
             rv.add(req)
     return rv
+
+
+def get_active_applications():
+    """Return a set of all active applications."""
+    return set(_instances)
 
 
 class Request(BaseRequest):
@@ -969,7 +974,7 @@ class TextPress(object):
             return
 
         # the normal request dispatching
-        remove_app = get_thread_data('app') is not None
+        remove_app = get_thread_data('app') is None
         try:
             for c in self.dispatch_request(environ, start_response):
                 yield c
@@ -979,6 +984,25 @@ class TextPress(object):
                 clean_thread_data(remove_app)
             except:
                 pass
+
+            import gc, collections
+            instances = collections.defaultdict(int)
+            for obj in gc.get_objects():
+                try:
+                    cls = obj.__class__
+                except:
+                    cls = type(obj)
+                instances[cls] += 1
+
+            instances = instances.items()
+            instances.sort(key=lambda x: x[1])
+
+            print _threads
+            print _instances.keys()
+            for cls, count in instances:
+                print '      %s -> %s' % (cls, count)
+            print
+            print
 
 
 def make_app(instance_folder, bind_to_thread=False):

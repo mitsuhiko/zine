@@ -524,13 +524,14 @@ def reload_textpress():
     means that until the request finishes you have two independent sets of
     textpress modules loaded.
     """
-    from textpress.application import _instances, get_request, \
-         _reload_lock, _setup_lock, get_thread_data, set_thread_data, \
-         get_active_requests
+    from textpress.application import _instances, _threads, \
+         _reload_lock, _setup_lock
+    from thread import get_ident
 
+    ident = get_ident()
     _reload_lock.acquire()
     try:
-        req = get_request()
+        req = (_threads.get(ident) or {}).get('req')
         if req and req.environ.get('wsgi.run_once'):
             return
 
@@ -546,20 +547,24 @@ def reload_textpress():
         # be that an user is presented an internal server error in that
         # case but the chance that this happens is very small.
         start = time()
+        thread_req = None
         while True:
-            requests = get_active_requests()
-            if req is not None:
-                requests.discard(req)
-            if not requests or time() - start > 5:
+            for thread in _threads.itervalues():
+                thread_req = thread.get('req')
+                if thread_req and thread_req != req:
+                    sleep(0.1)
+                    break
+            else:
                 break
-            sleep(0.1)
+            if time() - start > 5:
+                break
 
         # copy all the stuff we need.
-        bound = get_thread_data('app')
+        threads = dict(_threads)
         instances = dict(_instances)
 
         # but here we want to clean up soon
-        del _instances, req
+        del _instances, _threads, req, thread_req
 
         # now remove all the textpress stuff. it's important that we
         # import the sys module into the local namespace so that we can
@@ -579,17 +584,17 @@ def reload_textpress():
         application._reload_lock = _reload_lock
 
         for app, path in instances.iteritems():
-            app.__class__ = application.TextPress
+            new_app = application.make_app(path)
             app.__dict__.clear()
-            app.__dict__.update(application.make_app(path).__dict__)
+            app.__dict__.update(new_app.__dict__)
+            app.__class__ = new_app.__class__
+            del new_app
 
         # copy the old instances registry over.
         application._instances.clear()
         application._instances.update(instances)
-
-        # set up the bound application again.
-        if bound is not None:
-            set_thread_data('app', bound)
+        application._threads.clear()
+        application._threads.update(threads)
 
         # run the garbage collector now to clean up stuff we don't need any
         # more before the request ends
