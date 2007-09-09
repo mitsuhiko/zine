@@ -985,25 +985,6 @@ class TextPress(object):
             except:
                 pass
 
-            import gc, collections
-            instances = collections.defaultdict(int)
-            for obj in gc.get_objects():
-                try:
-                    cls = obj.__class__
-                except:
-                    cls = type(obj)
-                instances[cls] += 1
-
-            instances = instances.items()
-            instances.sort(key=lambda x: x[1])
-
-            print _threads
-            print _instances.keys()
-            for cls, count in instances:
-                print '      %s -> %s' % (cls, count)
-            print
-            print
-
 
 def make_app(instance_folder, bind_to_thread=False):
     """
