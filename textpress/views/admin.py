@@ -1278,4 +1278,10 @@ def do_login(req):
 def do_logout(req):
     """Just logout and redirect to the login screen."""
     req.logout()
-    simple_redirect('admin/login', logout='yes')
+    pth = req.path
+    if (pth.startswith(url_for('admin/index')) and 
+            not pth == url_for('admin/logout')):
+        # can't redirect to the admin area wihout logged in
+        simple_redirect('admin/login')
+    else:
+        redirect(last_visited())
