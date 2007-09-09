@@ -152,6 +152,7 @@ class WebSetup(object):
         })
 
     def __call__(self, environ, start_response):
+        self.app.bind_to_thread()
         req = Request(environ)
         resp = None
 
