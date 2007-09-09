@@ -102,7 +102,7 @@ class WebSetup(object):
         """
         value = req.values.get
         error = None
-        database_uri = value('database_uri', '')
+        database_uri = value('database_uri', '').strip()
 
         try:
             from textpress.database import init_database
