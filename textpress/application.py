@@ -141,10 +141,6 @@ def url_for(endpoint, _external=False, **args):
     return get_request().urls.build(endpoint, args, _external)
 
 
-def last_visited():
-    return get_request().environ.get('HTTP_REFERER', '')
-
-
 def get_request():
     """Get the current request."""
     thread = _threads.get(get_thread_ident())
