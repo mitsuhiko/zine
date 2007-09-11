@@ -1,0 +1,12 @@
+{%- if not widget.empty %}
+  <ul>
+  {%- for item in widget.months %}
+    <li><a href="{{ url_for('blog/archive', year=item.year,
+      month=item.month)|e }}">{{ item|monthformat }}</a></li>
+  {%- endfor %}
+  {%- if widget.more %}
+    <li><a href="{{ url_for('blog/archive')|e }}">{% trans
+      "Complete archive" %}</a></li>
+  {%- endif %}
+  </ul>
+{%- endif %}

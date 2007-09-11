@@ -945,7 +945,12 @@ class CSRFProtector(HiddenFormField):
     def __init__(self):
         from textpress.application import get_request
         self.req = req = get_request()
-        self.token = sha.new('%s|%s' % (req.path, req.sid)).hexdigest()
+        self.token = sha.new('%s|%s|%s|%s' % (
+            req.path,
+            req.sid,
+            req.user.user_id,
+            req.user.is_somebody
+        )).hexdigest()
 
     @property
     def url_value(self):

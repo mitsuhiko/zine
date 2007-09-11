@@ -1277,8 +1277,5 @@ def do_login(req):
 
 def do_logout(req):
     """Just logout and redirect to the login screen."""
-    # backredirects are not possible right now because the logout link
-    # is triggered without either the ?next or ?_csrf_token.  Don't touch
-    # that for now :-)
     req.logout()
-    simple_redirect('admin/login')
+    IntelligentRedirect()('admin/login', logout='yes')

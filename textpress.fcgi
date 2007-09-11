@@ -16,7 +16,8 @@ INSTANCE_FOLDER = '/path/to/instance/folder'
 # but usually you don't have to touch them
 from textpress import make_app
 from flup.server.fcgi import WSGIServer
-srv = WSGIServer(make_app(INSTANCE_FOLDER))
+app = make_app(INSTANCE_FOLDER)
+srv = WSGIServer(app)
 
 if __name__ == '__main__':
     srv.run()

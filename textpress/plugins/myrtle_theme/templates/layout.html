@@ -16,41 +16,10 @@
         {% block contents %}{% endblock %}
       </div>
       <div class="sidebar">
-        {%- if blogroll %}
-          <h3>{% trans "Blogroll" %}</h3>
-          <ul>
-          {%- for blog in blogroll %}
-            <li><a href="{{ blog.href|e }}">{{ blog.name|e }}</a></li>
-          {%- endfor %}
-          </ul>
-        {%- endif %}
+        {{ get_tag_cloud() }}
 
-        {%- set tag_cloud = get_tag_cloud() %}
-        {%- if tag_cloud %}
-          <div class="tag-cloud">
-          {%- for tag in tag_cloud -%}
-            <a href="{{ url_for('blog/show_tag', slug=tag.slug)|e }}" style="font-size: {{
-               tag.size }}%" title="{% trans count=tag.count, tag=(tag.name|e)
-               %}One post tagged {{ tag }}{% pluralize %}{{ count }} posts tagged {{ tag
-               }}{% endtrans %}">{{ tag.name|e }}</a>
-          {% endfor %}
-          </div>
-        {%- endif %}
-
-        {%- set archive = get_post_archive_summary('months', 6) %}
-        {%- if not archive.empty %}
-          <h3>{% trans "Archive" %}</h3>
-          <ul>
-          {%- for item in archive.months %}
-            <li><a href="{{ url_for('blog/archive', year=item.year,
-              month=item.month)|e }}">{{ item|monthformat }}</a></li>
-          {%- endfor %}
-          {%- if archive.more %}
-            <li><a href="{{ url_for('blog/archive')|e }}">{% trans
-              "Complete archive" %}</a></li>
-          {%- endif %}
-          </ul>
-        {%- endif %}
+        <h3>{% trans 'Archive' %}</h3>
+        {{ get_post_archive_summary('months', 6) }}
       </div>
     </div>
     <div class="footer">
@@ -61,6 +30,7 @@
         by <a href="http://lucumr.pocoo.org/">Armin Ronacher</a>.
         {%- if req.user.is_manager %}
           | <a href="{{ url_for('admin/index')|e }}">{% trans 'Admin Panel' %}</a>
+          | <a href="{{ url_for('admin/login')|e }}">{% trans 'Logout' %}</a>
         {%- endif %}
       </p>
     </div>

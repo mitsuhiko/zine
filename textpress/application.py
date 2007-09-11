@@ -647,15 +647,17 @@ class TextPress(object):
             cfg=self.cfg,
             h=htmlhelpers,
             url_for=url_for,
-            get_post_archive_summary=models.get_post_archive_summary,
-            get_post_list=models.get_post_list,
-            get_tag_cloud=models.get_tag_cloud,
             get_page_metadata=self.get_page_metadata,
             textpress={
                 'version':      textpress.__version__,
                 'copyright':    '2007 by the Pocoo Team'
             }
         )
+
+        # install all the default widgets as globals
+        from textpress.widgets import all_widgets
+        env.globals.update(all_widgets)
+
         env.filters.update(
             datetimeformat=lambda:lambda e, c, v: format_datetime(v),
             dateformat=lambda:lambda e, c, v: format_date(v),
