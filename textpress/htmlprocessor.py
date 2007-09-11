@@ -68,7 +68,10 @@ from itertools import izip
 from weakref import WeakKeyDictionary
 from xml.sax.saxutils import quoteattr, escape
 
-from textpress._ext import beautifulsoup as bt
+try:
+    import BautifulSoup as bt
+except ImportError:
+    from textpress._ext import beautifulsoup as bt
 
 from textpress.application import emit_event, get_request, get_application
 
