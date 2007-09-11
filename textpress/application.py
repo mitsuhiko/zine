@@ -658,6 +658,7 @@ class TextPress(object):
         from textpress.widgets import all_widgets
         env.globals.update(all_widgets)
 
+        # XXX: l10n :-)
         env.filters.update(
             datetimeformat=lambda:lambda e, c, v: format_datetime(v),
             dateformat=lambda:lambda e, c, v: format_date(v),

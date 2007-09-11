@@ -19,7 +19,9 @@ import sys
 import os
 import logging
 from time import time, strptime, sleep
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
+from pytz import timezone, common_timezones_set as TIMEZONES, \
+     country_timezones as get_timezones_for_country
 from random import choice, randrange, random
 from urlparse import urlparse, urljoin
 from urllib import quote
@@ -245,22 +247,29 @@ def gen_slug(text):
     return u'-'.join(result)
 
 
-def format_datetime(obj):
+def format_datetime(obj, format=None):
     """Format a datetime object. Later with i18n"""
     from textpress.application import get_application
-    return obj.strftime(str(get_application().cfg['datetime_format']))
+    cfg = get_application().cfg
+    tzinfo = timezone(cfg['timezone'])
+    if type(obj) is date:
+        obj = datetime(obj.year, obj.day, obj.month, tzinfo=tzinfo)
+    else:
+        obj = obj.replace(tzinfo=tzinfo)
+    if format is None:
+        format = cfg['datetime_format']
+    return obj.strftime(str(format))
 
 
 def format_date(obj):
     """Format a date or datetime object so that it's displays the date."""
-    from textpress.application import get_application
-    return obj.strftime(str(get_application().cfg['date_format']))
+    return format_datetime(obj, get_application().cfg['date_format'])
 
 
 def format_month(obj):
     """Formats a month."""
     # XXX: l10n!!!
-    return obj.strftime('%B %Y')
+    return format_datetime(obj, '%B %Y')
 
 
 def parse_datetime(string):
