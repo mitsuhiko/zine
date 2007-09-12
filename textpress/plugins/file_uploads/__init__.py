@@ -154,6 +154,8 @@ def do_thumbnailer(req):
                             'thumbnail.'))
         elif pathsep in thumb_filename:
             errors.append(_('Invalid filename for thumbnail.'))
+        elif file_exists(thumb_filename):
+            errors.append(_('An file with this name exists already.'))
         if errors:
             flash(errors[0], 'error')
         else:
