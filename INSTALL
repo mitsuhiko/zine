@@ -10,6 +10,7 @@ installed:
   - simplejson*
   - Python 2.4 or higher
   - mysql, sqlite or postgres
+  - pytz*
 
 libraries marked with * are installable from the cheeseshop via easy_install or
 might be available in debian already.

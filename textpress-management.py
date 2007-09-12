@@ -57,7 +57,11 @@ def main(argv):
         for key in api.__all__:
             globals[key] = getattr(api, key)
 
-        import IPython
+        try:
+            import IPython
+        except ImportError:
+            sys.stderr.write('IPython has to be installed for the shell!\n')
+            return
         sh = IPython.Shell.IPShellEmbed(banner=BANNER)
         sh(global_ns=globals, local_ns={})
         return

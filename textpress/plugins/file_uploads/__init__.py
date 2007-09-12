@@ -9,60 +9,31 @@
     :license: GNU GPL.
 """
 import re
-from os import listdir, makedirs, remove
-from os.path import dirname, join, exists, getsize, sep as pathsep
-from shutil import copyfileobj
+from os import makedirs, remove, sep as pathsep
+from os.path import dirname, join, exists
 from time import asctime, gmtime, time
-from mimetypes import guess_type
-from fnmatch import fnmatch
-from weakref import WeakKeyDictionary
 from textpress.api import *
 from textpress.utils import CSRFProtector, IntelligentRedirect, \
      make_hidden_fields, escape, dump_json
 from textpress.models import ROLE_AUTHOR, ROLE_ADMIN
 from textpress.views.admin import render_admin_response, flash
 from textpress.utils import StreamReporter
+from textpress.plugins.file_uploads.utils import guess_mimetype, \
+     get_upload_folder, list_files, list_images, get_im_version, \
+     get_im_path, touch_upload_folder, upload_file, create_thumbnail, \
+     file_exists, get_filename
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
 SHARED = join(dirname(__file__), 'shared')
 
 
-def guess_mimetype(s):
-    app = get_application()
-    for item in app.cfg['file_uploads/mimetypes'].split(';'):
-        if ':' in item:
-            pattern, mimetype = item.split(':', 1)
-            if fnmatch(s, pattern):
-                return mimetype
-    return guess_type(s)[0] or 'text/plain'
-
-
-def get_upload_folder():
-    app = get_application()
-    return join(app.instance_folder, app.cfg['file_uploads/upload_folder'])
-
-
-def get_filename(s):
-    return pathsep.join(x for x in [get_upload_folder()] + s.split('/')
-                        if x not in ('.', '..'))
-
-
-def list_files():
-    folder = get_upload_folder()
-    if not exists(folder):
-        return []
-    return [{
-        'filename':     file,
-        'size':         getsize(join(folder, file)),
-        'mimetype':     guess_mimetype(file)
-    } for file in sorted(listdir(folder))]
-
-
 def add_links(req, navigation_bar):
     items =  [
         ('browse', url_for('file_uploads/browse'), _('Browse')),
-        ('upload', url_for('file_uploads/upload'), _('Upload'))
+        ('upload', url_for('file_uploads/upload'), _('Upload')),
+        ('thumbnailer', url_for('file_uploads/thumbnailer'),
+         _('Create Thumbnails'))
     ]
     if req.user.role >= ROLE_ADMIN:
         items.append(('config', url_for('file_uploads/config'),
@@ -76,7 +47,7 @@ def add_links(req, navigation_bar):
 
 
 @require_role(ROLE_AUTHOR)
-def upload_file(req):
+def do_upload(req):
     csrf_protector = CSRFProtector()
     reporter = StreamReporter()
     add_script(url_for('file_uploads/shared', filename='uploads.js'))
@@ -92,23 +63,18 @@ def upload_file(req):
         csrf_protector.assert_safe()
 
         f = req.files['file']
-        folder = get_upload_folder()
-        if not exists(folder):
-            try:
-                makedirs(folder)
-            except (OSError, IOError):
-                flash(_('Could not create upload target folder %s.') %
-                      escape(folder), 'error')
-                redirect(url_for('file_uploads/upload'))
+        if not touch_upload_folder():
+            flash(_('Could not create upload target folder %s.') %
+                  escape(get_upload_folder()), 'error')
+            redirect(url_for('file_uploads/upload'))
 
         filename = req.form.get('filename') or f.filename
-        dst_filename = join(folder, filename)
 
         if not f:
             flash(_('No file uploaded.'))
         elif pathsep in filename:
             flash(_('Invalid filename requested.'))
-        elif exists(dst_filename) and not req.form.get('overwrite'):
+        elif file_exists(filename) and not req.form.get('overwrite'):
             flash(_('A file with the filename %s exists already.') % (
                 u'<a href="%s">%s</a>' % (
                     escape(url_for('file_uploads/get_file',
@@ -116,11 +82,7 @@ def upload_file(req):
                     escape(filename)
                 )))
         else:
-            dst = file(dst_filename, 'wb')
-            try:
-                copyfileobj(f, dst)
-            finally:
-                dst.close()
+            upload_file(f, filename)
             flash(_('File %s uploaded successfully.') % (
                   u'<a href="%s">%s</a>' % (
                       escape(url_for('file_uploads/get_file',
@@ -136,7 +98,93 @@ def upload_file(req):
 
 
 @require_role(ROLE_AUTHOR)
-def browse_uploads(req):
+def do_thumbnailer(req):
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+    form = {
+        'src_image':            '',
+        'thumb_width':          '320',
+        'thumb_height':         '240',
+        'keep_aspect_ratio':    True,
+        'thumb_filename':       ''
+    }
+
+    im_version = get_im_version()
+    if im_version is None:
+        path = get_im_path()
+        if not path:
+            extra = _('If you don\'t have ImageMagick installed system wide '
+                      'but in a different folder, you can defined that in '
+                      'the <a href="%(config)s">configuration</a>.')
+        else:
+            extra = _('There is no ImageMagick in the path defined '
+                      'installed. (<a href="%(config)s">check the '
+                      'configuration</a>)')
+        flash((_('Cannot find <a href="%(im)s">ImageMagick</a>.') + ' ' +
+               extra) % {
+                   'im':        'http://www.imagemagick.org/',
+                   'config':    url_for('file_uploads/config')
+               }, 'error')
+
+    elif req.method == 'POST':
+        errors = []
+        csrf_protector.assert_safe()
+        form['src_image'] = src_image = req.form.get('src_image')
+        if not src_image:
+            errors.append(_('You have to specify a source image'))
+        try:
+            src = file(get_filename(src_image), 'rb')
+        except IOError:
+            errors.append(_('The image %s does not exist.') %
+                          escape(src_image))
+        form['thumb_width'] = thumb_width = req.form.get('thumb_width', '')
+        form['thumb_height'] = thumb_height = req.form.get('thumb_height', '')
+        if not thumb_width:
+            errors.append(_('You have to define at least the width of the '
+                            'thumbnail.'))
+        elif not thumb_width.isdigit() or \
+                (thumb_height and not thumb_height.isdigit()):
+            errors.append(_('Thumbnail dimensions must be integers.'))
+        form['keep_aspect_ratio'] = keep_aspect_ratio = \
+                req.form.get('keep_aspect_ratio') == 'yes'
+        form['thumb_filename'] = thumb_filename = \
+                req.form.get('thumb_filename')
+        if not thumb_filename:
+            errors.append(_('You have to specify a filename for the '
+                            'thumbnail.'))
+        elif pathsep in thumb_filename:
+            errors.append(_('Invalid filename for thumbnail.'))
+        if errors:
+            flash(errors[0], 'error')
+        else:
+            if guess_mimetype(thumb_filename) != 'image/jpeg':
+                thumb_filename += '.jpg'
+            dst = file(get_filename(thumb_filename), 'wb')
+            try:
+                dst.write(create_thumbnail(src, thumb_width,
+                                           thumb_height or None,
+                                           keep_aspect_ratio and 'normal'
+                                           or 'force', 90, True))
+            finally:
+                dst.close()
+            flash(_('Thumbnail %s was created successfully.') % (
+                  u'<a href="%s">%s</a>' % (
+                      escape(url_for('file_uploads/get_file',
+                                     filename=thumb_filename)),
+                      escape(thumb_filename))))
+            redirect('file_uploads/browse')
+
+    return render_admin_response('admin/file_uploads/thumbnailer.html',
+                                 'file_uploads.thumbnailer',
+        im_version=im_version,
+        images=list_images(),
+        form=form,
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_browse(req):
     return render_admin_response('admin/file_uploads/browse.html',
                                  'file_uploads.browse',
         files=list_files()
@@ -144,10 +192,11 @@ def browse_uploads(req):
 
 
 @require_role(ROLE_ADMIN)
-def configure(req):
+def do_config(req):
     csrf_protector = CSRFProtector()
     form = {
         'upload_dest':  req.app.cfg['file_uploads/upload_folder'],
+        'im_path':      req.app.cfg['file_uploads/im_path'],
         'mimetypes':    u'\n'.join(req.app.cfg['file_uploads/mimetypes'].
                                    split(';'))
     }
@@ -157,6 +206,13 @@ def configure(req):
         if upload_dest != req.app.cfg['file_uploads/upload_folder']:
             req.app.cfg['file_uploads/upload_folder'] = upload_dest
             flash(_('Upload folder changed successfully.'))
+        im_path = form['im_path'] = req.form.get('im_path', '')
+        if im_path != req.app.cfg['file_uploads/im_path']:
+            req.app.cfg['file_uploads/im_path'] = im_path
+            if im_path:
+                flash(_('Changed path to ImageMagick'))
+            else:
+                flash(_('ImageMagick is searched on the system path now.'))
         mimetypes = form['mimetypes'] = req.form.get('mimetypes', '')
         mimetypes = ';'.join(mimetypes.splitlines())
         if mimetypes != req.app.cfg['file_uploads/mimetypes']:
@@ -168,12 +224,13 @@ def configure(req):
 
     return render_admin_response('admin/file_uploads/config.html',
                                  'file_uploads.config',
+        im_version=get_im_version(),
         form=form,
         csrf_protector=csrf_protector
     )
 
 
-def get_file(req, filename):
+def do_get_file(req, filename):
     filename = get_filename(filename)
     if not exists(filename):
         abort(404)
@@ -195,7 +252,7 @@ def get_file(req, filename):
 
 
 @require_role(ROLE_AUTHOR)
-def delete_file(req, filename):
+def do_delete(req, filename):
     fs_filename = get_filename(filename)
     if not exists(fs_filename):
         abort(404)
@@ -227,17 +284,21 @@ def setup(app, plugin):
     app.add_config_var('file_uploads/upload_folder', unicode, 'uploads')
     app.add_config_var('file_uploads/mimetypes', unicode,
                        '*.plugin:application/x-textpress-plugin')
+    app.add_config_var('file_uploads/im_path', unicode, '')
     app.connect_event('modify-admin-navigation-bar', add_links)
     app.add_url_rule('/admin/uploads/', endpoint='file_uploads/browse'),
     app.add_url_rule('/admin/uploads/new', endpoint='file_uploads/upload')
+    app.add_url_rule('/admin/uploads/thumbnailer',
+                     endpoint='file_uploads/thumbnailer')
     app.add_url_rule('/admin/uploads/config', endpoint='file_uploads/config')
     app.add_url_rule('/_uploads/<filename>', endpoint='file_uploads/get_file')
     app.add_url_rule('/_uploads/<filename>/delete',
                      endpoint='file_uploads/delete')
-    app.add_view('file_uploads/browse', browse_uploads)
-    app.add_view('file_uploads/upload', upload_file)
-    app.add_view('file_uploads/config', configure)
-    app.add_view('file_uploads/get_file', get_file)
-    app.add_view('file_uploads/delete', delete_file)
+    app.add_view('file_uploads/browse', do_browse)
+    app.add_view('file_uploads/upload', do_upload)
+    app.add_view('file_uploads/thumbnailer', do_thumbnailer)
+    app.add_view('file_uploads/config', do_config)
+    app.add_view('file_uploads/get_file', do_get_file)
+    app.add_view('file_uploads/delete', do_delete)
     app.add_template_searchpath(TEMPLATES)
     app.add_shared_exports('file_uploads', SHARED)

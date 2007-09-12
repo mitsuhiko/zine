@@ -30,7 +30,7 @@
         by <a href="http://lucumr.pocoo.org/">Armin Ronacher</a>.
         {%- if req.user.is_manager %}
           | <a href="{{ url_for('admin/index')|e }}">{% trans 'Admin Panel' %}</a>
-          | <a href="{{ url_for('admin/login')|e }}">{% trans 'Logout' %}</a>
+          | <a href="{{ url_for('admin/logout')|e }}">{% trans 'Logout' %}</a>
         {%- endif %}
       </p>
     </div>

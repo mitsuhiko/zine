@@ -40,3 +40,7 @@ def redirect(environ, target):
                     status=302)
     resp.headers['Location'] = url
     return resp
+
+
+def get_blog_url(req):
+    return get_current_url(req.environ, root_only=True)

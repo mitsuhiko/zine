@@ -20,6 +20,13 @@
       Patterns might use the asterisk for variable parts. Example:
       <code>*.plugin:application/x-textpress-plugin</code>.
     {% endtrans %}</p>
+    <p>{% trans %}
+      If you want to create thumbnails you have to have ImageMagick
+      installed. Per default TextPress checks for ImageMagick on the
+      system searchpath. If you don't have it installed there (for
+      example if you are on a Windows Server) you have to defined the
+      path to the executables below.
+    {% endtrans %}</p>
   </div>
   <form action="" method="post">
     {{ csrf_protector }}
@@ -28,6 +35,14 @@
       <dd>{{ h.input_field('upload_dest', form.upload_dest) }}</dd>
       <dt>{% trans "Mimetype Mapping" %}</dt>
       <dd>{{ h.textarea('mimetypes', form.mimetypes, rows=5) }}</dd>
+      <dt>{% trans "Path to ImageMagick" %}</dt>
+      <dd>{{ h.input_field('im_path', form.im_path, size=30) }}
+          {%- if im_version -%}
+          <p>Found ImageMagick version <code>{{ im_version|e }}</code></p>
+          {%- else -%}
+          <p><strong>Cannot find ImageMagick</strong></p>
+          {%- endif -%}
+      </dd>
     </dl>
     <div class="actions">
       <input type="submit" value="{% trans 'Save' %}">

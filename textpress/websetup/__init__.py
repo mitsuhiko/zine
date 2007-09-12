@@ -16,7 +16,8 @@
 """
 from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
-from textpress.utils import is_valid_email, gen_pwhash, reload_textpress
+from textpress.utils import is_valid_email, gen_pwhash, reload_textpress, \
+     get_blog_url
 from textpress.websetup.framework import render_response, redirect, Request
 
 
@@ -136,6 +137,12 @@ class WebSetup(object):
             e.execute(configuration.insert(),
                 key='maintenance_mode',
                 value='True'
+            )
+
+            # and set the blog url
+            e.execute(configuration.insert(),
+                key='blog_url',
+                value=get_blog_url(req)
             )
 
             # because we don't have the request bound to this
