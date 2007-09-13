@@ -780,7 +780,7 @@ def do_edit_user(req, user_id=None):
             if req.form.get('save'):
                 redirect('admin/show_users')
             else:
-                redirect('admin/edit_user', user_id=user.user_id)
+                simple_redirect('admin/edit_user', user_id=user.user_id)
 
     if not new_user:
         display_names = [
