@@ -91,10 +91,10 @@ def do_show_tag(req, slug, page=1):
     :Template name: ``show_tag.html``
     :URL endpoint: ``blog/show_tag``
     """
-    tag = Tag.objects.get_by(slug=slug)
     data = get_post_list(tag=slug, page=page)
     if data.pop('probably_404'):
         abort(404)
+    tag = Tag.objects.get_by(slug=slug)
 
     add_link('alternate', url_for('blog/atom_feed', tag=slug),
              'application/atom+xml', _('All posts tagged %s') % tag.name)
@@ -136,8 +136,8 @@ def do_show_author(req, username, page=1):
     :Template name: ``show_author.html``
     :URL endpoint: ``blog/show_author``
     """
-    user = User.objects.select_first((User.c.username == username) &
-                                     (User.c.role >= ROLE_AUTHOR))
+    user = User.objects.select_first((User.username == username) &
+                                     (User.role >= ROLE_AUTHOR))
     if user is None:
         abort(404)
     data = get_post_list(author=user)

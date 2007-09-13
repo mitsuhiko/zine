@@ -361,7 +361,7 @@ def do_edit_post(req, post_id=None):
     return render_admin_response('admin/edit_post.html', 'posts.write',
         new_post=new_post,
         form=form,
-        tags=Tag.objects.select(),
+        tags=Tag.objects.all(),
         post=post,
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
@@ -415,12 +415,12 @@ def do_show_comments(req, post_id=None):
     """
     post = None
     if post_id is None:
-        comments = Comment.objects.select()
+        comments = Comment.objects.all()
     else:
         post = Post.get(post_id)
         if post is None:
             abort(404)
-        comments = Comment.objects.select(Comment.c.post_id == post_id)
+        comments = Comment.objects.select(Comment.post_id == post_id)
     return render_admin_response('admin/show_comments.html',
                                  'comments.overview',
         post=post,
@@ -582,7 +582,7 @@ def do_show_tags(req):
     normal comments.
     """
     return render_admin_response('admin/show_tags.html', 'tags.overview',
-                                 tags=Tag.objecs.select())
+                                 tags=Tag.objects.all())
 
 
 @require_role(ROLE_AUTHOR)

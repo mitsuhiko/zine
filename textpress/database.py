@@ -49,7 +49,96 @@
 
     So let's get started quickly.  To defin tables all you have to do is to
     create a metadata instances for your table collection (so that you can
-    create them) and bind some tables to it.
+    create them) and bind some tables to it::
+
+        metadata = db.MetaData()
+
+        my_table = db.Table('my_plugin_my_table', metadata,
+            db.Column('my_table_id', db.Integer, primary_key=True),
+            ...
+        )
+
+
+    Creating a Upgrade Function
+    ---------------------------
+
+    If you want to use those tables in a TextPress plugin you have to create
+    them.  You have to register a database upgrade function (see the
+    docstrings on the application object regarding taht) which looks like
+    this::
+
+        def init_database(engine):
+            metadata.create_all(engine)
+
+
+    Writing Models
+    --------------
+
+    If you want to map your tables to classes you have to write some tables.
+    This works exactly like mentioned in the excellent SQLAlchemy
+    documentation, except that all the functions and objects you want to use
+    are stored in the `db` module.
+
+    For some example models have a look at the `textpress.models` module.
+
+    One difference to plain SQLAlchemy is that we don't use a normal session
+    context that sets a query object to models, but we use a technique similar
+    to django's models, which they call `DatabaseManagers`.
+
+    Basically what happens is that after the `mapper()` call, TextPress checks
+    your models and looks for `DatabaseManager` instances.  If it cannot find
+    at least one it will create a standard database managed on the attribute
+    called `objects`.  If that attribute is already in used it will complain
+    and raise an exception.
+
+    You can of course bind multiple database managers to one model.  But now
+    what are `DatabaseManagers`?
+
+    Say you have a model but the queries in the views are quite complex.  So
+    you can write functions that fire that requests somewhere else.  But where
+    to put those queries?  Per default all query methods are stored an a
+    database manager and it's a good idea to keep them there.  If you want to
+    add some more methods to a manager just subclass `db.DatabaseManager` and
+    instanciate them on your model::
+
+        class UserManager(db.DatabaseManager):
+
+            def get_authors(self):
+                return self.select(User.role >= ROLE_AUTHOR)
+
+        class User(object):
+            objects = UserManager()
+            ...
+
+    Now you can get all the authors by calling `User.objects.get_authors()`.
+    The object returned is a normal SQLAlchemy queryset so you can easily
+    filter that using the normal query methods.
+
+
+    Querying
+    --------
+
+    How to query? Just use the database manager and/or the methods on the
+    SQLAlchemy method those queries return.
+
+    The default methods on the `DatabaseManager` are `get`, `all`, `get_by`,
+    `select_first`, `select` and `count`. Except of `get` and `select_first`
+    all methods return `Query` objects.
+
+    They are documented in detail in the `DatabaseManger` docstring.  For
+    details about the `Query` object returned, have a look at the `SQLAlchemy`
+    documentation.
+
+    If you have to fire up some more raw and complex queries that don't use
+    the mapper, get yourself a engine object using `get_engine` and start
+    playing with it :-)
+
+
+    Final Words
+    -----------
+
+    If you're lost, check out existing modules. Especially the views and
+    the `models` modules of the core and existing plugins.
 
 
     :copyright: 2007 by Armin Ronacher.
@@ -103,6 +192,11 @@ class ManagerExtension(orm.MapperExtension):
             if isinstance(value, DatabaseManager):
                 managers.append(value)
         if not managers:
+            if hasattr(class_, 'objects'):
+                raise RuntimeError('The model %r already has an attribute '
+                                   'called "objects".  You have to either '
+                                   'rename this attribute or defined a '
+                                   'mapper yourself with a different name')
             class_.objects = mgr = DatabaseManager()
             managers.append(mgr)
         class_._tp_managers = managers
@@ -146,6 +240,12 @@ class DatabaseManager(object):
         """
         return session.registry().query(self.model).get(ident, **kw)
 
+    def get_by(self, **kw):
+        """
+        Get a query set by some rules.
+        """
+        return self.all().get_by(**kw)
+
     def all(self):
         """
         Return an SQLAlchemy query object and return it.
@@ -160,8 +260,12 @@ class DatabaseManager(object):
 
     def select(self, *args, **kw):
         """
-        Select multiple objects and return a `Query` object.
+        Select multiple objects and return a `Query` object. `select`
+        without arguments (also not keyword arguments!) is equivalent
+        to `all()` but not preferred.
         """
+        if not args and not kw:
+            return self.all()
         return self.all().filter(*args, **kw)
 
     def count(self, *args, **kw):

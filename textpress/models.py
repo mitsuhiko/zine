@@ -177,7 +177,7 @@ def get_tag_cloud(max=None, ignore_role=False):
         'name':     row.name,
         'count':    row.s_count,
         'size':     100 + log(row.s_count or 1) * 20
-    } for row in get_application().database_engine.execute(q)]
+    } for row in db.get_engine().execute(q)]
 
     items.sort(key=lambda x: x['name'].lower())
     return items
@@ -195,7 +195,7 @@ def get_post_archive_summary(detail='months', limit=None, ignore_role=False):
             role = req.user.role
         engine = req.app.database_engine
     else:
-        engine = get_application().database_engine
+        engine = db.get_engine()
 
     p = posts.c
     now = datetime.utcnow()
