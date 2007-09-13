@@ -91,7 +91,7 @@ def do_show_tag(req, slug, page=1):
     :Template name: ``show_tag.html``
     :URL endpoint: ``blog/show_tag``
     """
-    tag = Tag.get_by(slug=slug)
+    tag = Tag.objects.get_by(slug=slug)
     data = get_post_list(tag=slug, page=page)
     if data.pop('probably_404'):
         abort(404)
@@ -136,8 +136,8 @@ def do_show_author(req, username, page=1):
     :Template name: ``show_author.html``
     :URL endpoint: ``blog/show_author``
     """
-    user = User.selectfirst((User.c.username == username) &
-                            (User.c.role >= ROLE_AUTHOR))
+    user = User.objects.select_first((User.c.username == username) &
+                                     (User.c.role >= ROLE_AUTHOR))
     if user is None:
         abort(404)
     data = get_post_list(author=user)
@@ -163,7 +163,7 @@ def do_authors(req):
     :Template name: ``authors.html``
     :URL endpoint: ``blog/authors``
     """
-    return render_response('authors.html', authors=User.get_authors())
+    return render_response('authors.html', authors=User.objects.get_authors())
 
 
 def do_show_post(req, year, month, day, slug):
@@ -204,7 +204,7 @@ def do_show_post(req, year, month, day, slug):
     :Template name: ``show_post.html``
     :URL endpoint: ``blog/show_post``
     """
-    post = Post.by_timestamp_and_slug(year, month, day, slug)
+    post = Post.objects.get_by_timestamp_and_slug(year, month, day, slug)
     if post is None:
         abort(404)
     elif not post.can_access():

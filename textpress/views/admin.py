@@ -229,7 +229,7 @@ def do_edit_post(req, post_id=None):
     # edit existing post
     if post_id is not None:
         new_post = False
-        post = Post.get(post_id)
+        post = Post.objects.get(post_id)
         if post is None:
             abort(404)
         form.update(
@@ -298,7 +298,7 @@ def do_edit_post(req, post_id=None):
             author = req.user
             username = author.username
         else:
-            author = User.get_by(username=username)
+            author = User.objects.get_by(username=username)
             if author is None:
                 errors.append(_('Unknown author "%s".') % username)
         form['author'] = author
@@ -306,7 +306,7 @@ def do_edit_post(req, post_id=None):
         form['tags'] = []
         tags = []
         for tag in req.form.getlist('tags'):
-            t = Tag.get_by(slug=tag)
+            t = Tag.objects.get_by(slug=tag)
             if t is not None:
                 tags.append(t)
                 form['tags'].append(tag)
@@ -317,7 +317,7 @@ def do_edit_post(req, post_id=None):
         # a tag to the list and assign it to the post list.
         add_tag = req.form.get('add_tag')
         if add_tag:
-            form['tags'].append(Tag.get_or_create(add_tag).slug)
+            form['tags'].append(Tag.objects.get_or_create(add_tag).slug)
             db.flush()
             del errors[:]
 
@@ -361,7 +361,7 @@ def do_edit_post(req, post_id=None):
     return render_admin_response('admin/edit_post.html', 'posts.write',
         new_post=new_post,
         form=form,
-        tags=Tag.select(),
+        tags=Tag.objects.select(),
         post=post,
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
@@ -382,7 +382,7 @@ def do_delete_post(req, post_id):
     deleted but if the referrer is the edit page. Then the user is taken back to
     the index so that he doesn't end up an a "page not found" error page.
     """
-    post = Post.get(post_id)
+    post = Post.objects.get(post_id)
     if post is None:
         abort(404)
     csrf_protector = CSRFProtector()
@@ -415,12 +415,12 @@ def do_show_comments(req, post_id=None):
     """
     post = None
     if post_id is None:
-        comments = Comment.select()
+        comments = Comment.objects.select()
     else:
         post = Post.get(post_id)
         if post is None:
             abort(404)
-        comments = Comment.select(Comment.c.post_id == post_id)
+        comments = Comment.objects.select(Comment.c.post_id == post_id)
     return render_admin_response('admin/show_comments.html',
                                  'comments.overview',
         post=post,
@@ -434,7 +434,7 @@ def do_edit_comment(req, comment_id):
     Edit a comment.  Unlike the post edit screen it's not possible to create
     new comments from here, that has to happen from the post page.
     """
-    comment = Comment.get(comment_id)
+    comment = Comment.objects.get(comment_id)
     if comment is None:
         abort(404)
 
@@ -518,7 +518,7 @@ def do_delete_comment(req, comment_id):
     was deleted but if the referrer is the edit page. Then the user is taken
     back to the index so that he doesn't end up an a "page not found" error page.
     """
-    comment = Comment.get(comment_id)
+    comment = Comment.objects.get(comment_id)
     if comment is None:
         redirect(url_for('admin/show_comments'))
     csrf_protector = CSRFProtector()
@@ -552,7 +552,7 @@ def do_unblock_comment(req, comment_id):
     Redirect rules are identical to the delete page, just that the exception
     for deleted comments is left out.
     """
-    comment = Comment.get(comment_id)
+    comment = Comment.objects.get(comment_id)
     if comment is None:
         redirect(url_for('admin/show_comments'))
     csrf_protector = CSRFProtector()
@@ -582,7 +582,7 @@ def do_show_tags(req):
     normal comments.
     """
     return render_admin_response('admin/show_tags.html', 'tags.overview',
-                                 tags=Tag.select())
+                                 tags=Tag.objecs.select())
 
 
 @require_role(ROLE_AUTHOR)
@@ -595,7 +595,7 @@ def do_edit_tag(req, tag_id=None):
     redirect = IntelligentRedirect()
 
     if tag_id is not None:
-        tag = Tag.get(tag_id)
+        tag = Tag.objects.get(tag_id)
         if tag is None:
             abort(404)
         form.update(
@@ -660,7 +660,7 @@ def do_delete_tag(req, tag_id):
     """
     Works like the other delete pages, just that it deletes tags.
     """
-    tag = Tag.get(tag_id)
+    tag = Tag.objects.get(tag_id)
     if tag is None:
         redirect(url_for('admin/show_tags'))
     csrf_protector = CSRFProtector()
@@ -691,7 +691,7 @@ def do_show_users(req):
     anonymous visitor requests.
     """
     return render_admin_response('admin/show_users.html', 'users.overview',
-        users=User.get_all_but_nobody()
+        users=User.objects.get_all_but_nobody()
     )
 
 
@@ -710,7 +710,7 @@ def do_edit_user(req, user_id=None):
     redirect = IntelligentRedirect()
 
     if user_id is not None:
-        user = User.get(user_id)
+        user = User.objects.get(user_id)
         if user is None:
             abort(404)
         form.update(
@@ -821,7 +821,7 @@ def do_delete_user(req, user_id):
     """
     Like all other delete screens just that it deletes a user.
     """
-    user = User.get(user_id)
+    user = User.objects.get(user_id)
     if user is None:
         redirect(url_for('admin/show_users'))
     csrf_protector = CSRFProtector()
@@ -1258,7 +1258,7 @@ def do_login(req):
         username = req.form.get('username')
         password = req.form.get('password', '')
         if username:
-            user = User.get_by(username=username)
+            user = User.objects.get_by(username=username)
             if user is None:
                 error = _('User %s does not exist.') % escape(username)
             elif user.check_password(password):

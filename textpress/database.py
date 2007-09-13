@@ -3,18 +3,68 @@
     textpress.database
     ~~~~~~~~~~~~~~~~~~
 
-    This module implements the database helper functions and defines
-    the tables used in the core system.
+    This module is a rather complex layer on top of SQLAlchemy 0.4 or higher.
+    Basically you will never use the `textpress.database` module except you
+    are a core developer, but always use the high level `db` module which you
+    can import from the `textpress.api` module.
+
+    The following examples all assume that you have imported the db module.
+
+    Foreword
+    --------
+
+    One important thing is that this module does some things in the background
+    you don't have to care about in the modules.  For example it fetches a
+    database connection and session automatically.  There are also some
+    wrappers around the normal sqlalchemy module functions.
+
+    What you have to know is that the `textpress.api.db` module contains all
+    the public objects from `sqlalchemy` and `sqlalchemy.orm`.  Additionally
+    there are the following functions:
+
+    `db.get_engine`
+        return the engine object for the current application. This is
+        equivalent with `get_application().database_engine`.
+
+    `flush`
+        flush all outstanding database changes in the current session.
+
+    `mapper`
+        replacement for the normal SQLAlchemy mapper function. Works the
+        same but users our `ManagerExtension`.  See the notes below.
+
+    `save`
+        bind an unbound object to the session and mark it for saving.
+        Normally models you create by hand are automatically saved, unless
+        you create it with ``_tp_no_save=True``
+
+    `DatabaseManager`
+        baseclass for all the database managers.  If you don't set at least
+        one database manager to your model TextPress will create one for
+        you called `objects`.
+
+
+    Definiting Tables
+    -----------------
+
+    So let's get started quickly.  To defin tables all you have to do is to
+    create a metadata instances for your table collection (so that you can
+    create them) and bind some tables to it.
+
 
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
 from datetime import datetime, timedelta
+
+from types import ModuleType
 from thread import get_ident
 
 import sqlalchemy
-from sqlalchemy.ext.sessioncontext import SessionContext
-from sqlalchemy.ext.assignmapper import assign_mapper
+from sqlalchemy import orm
+from sqlalchemy.orm.scoping import ScopedSession
+from sqlalchemy.util import to_list
+
 
 
 def session_factory():
@@ -23,30 +73,122 @@ def session_factory():
     return db.create_session(get_application().database_engine)
 
 
-def mapper(cls, table, *args, **kwargs):
-    """Like the sqlalchemy mapper but it registers with the context."""
-    return assign_mapper(ctx, cls, table, *args, **kwargs)
+def get_engine():
+    """Return the database engine."""
+    from textpress.application import get_application
+    return get_application().database_engine
 
 
-def flush():
-    """Flush the current session."""
-    ctx.current.flush()
+def mapper(*args, **kwargs):
+    """
+    Add our own database mapper, not the new sqlalchemy 0.4
+    session aware mapper.
+    """
+    kwargs['extension'] = extensions = to_list(kwargs.get('extension', []))
+    extensions.append(ManagerExtension())
+    return orm.mapper(*args, **kwargs)
 
 
-ctx = SessionContext(session_factory, get_ident)
+class ManagerExtension(orm.MapperExtension):
+    """
+    Use django like database managers.
+    """
 
-# assemble the public database module. Just copy sqlalchemy
-# and inject custom stuff.
-db = type(sqlalchemy)('db')
-db.__dict__.update(sqlalchemy.__dict__)
-db.__dict__.update({
-    'ctx':              ctx,
-    'mapper':           mapper,
-    'flush':            flush
-})
-del db.__file__
+    def get_session(self):
+        return session.registry()
 
-#: metadata for the core tables
+    def instrument_class(self, mapper, class_):
+        managers = []
+        for key, value in class_.__dict__.iteritems():
+            if isinstance(value, DatabaseManager):
+                managers.append(value)
+        if not managers:
+            class_.objects = mgr = DatabaseManager()
+            managers.append(mgr)
+        class_._tp_managers = managers
+        for manager in managers:
+            manager.bind(class_)
+
+    def init_instance(self, mapper, class_, oldinit, instance, args, kwargs):
+        session = kwargs.pop('_sa_session', self.get_session())
+        if not kwargs.pop('_tp_no_save', False):
+            entity = kwargs.pop('_sa_entity_name', None)
+            session._save_impl(instance, entity_name=entity)
+        return orm.EXT_CONTINUE
+
+    def init_failed(self, mapper, class_, oldinit, instance, args, kwargs):
+        orm.object_session(instance).expugne(instance)
+        return orm.EXT_CONTINUE
+
+
+class DatabaseManager(object):
+    """
+    Baseclass for the database manager. One can extend that one.
+    """
+
+    def __init__(self):
+        self.model = None
+
+    def bind(self, model):
+        """Called automatically by the `ManagerExtension`."""
+        if self.model is not None:
+            raise RuntimeError('manager already bound to model')
+        self.model = model
+
+    def get(self, ident, **kw):
+        """
+        Return an instance of the object based on the given identifier
+        (primary key), or `None` if not found.
+
+        If you have more than one primary_key you can pass it a tuple
+        with the column values in the order of the table primary key
+        definitions.
+        """
+        return session.registry().query(self.model).get(ident, **kw)
+
+    def all(self):
+        """
+        Return an SQLAlchemy query object and return it.
+        """
+        return session.registry().query(self.model)
+
+    def select_first(self, *args, **kw):
+        """
+        Select the first and return a `Query` object.
+        """
+        return self.all().filter(*args, **kw).first()
+
+    def select(self, *args, **kw):
+        """
+        Select multiple objects and return a `Query` object.
+        """
+        return self.all().filter(*args, **kw)
+
+    def count(self, *args, **kw):
+        """
+        Count all objects matching an expression.
+        """
+        return self.all().count(*args, **kw)
+
+
+session = ScopedSession(session_factory, scopefunc=get_ident)
+db = ModuleType('db')
+key = value = mod = None
+for mod in sqlalchemy, orm:
+    for key, value in mod.__dict__.iteritems():
+        if key in mod.__all__:
+            setattr(db, key, value)
+del key, mod, value
+
+db.__doc__ = __doc__
+db.mapper = mapper
+db.save = session.save
+db.flush = session.flush
+db.get_engine = get_engine
+db.DatabaseManager = DatabaseManager
+
+
+#: metadata for the core tables and the core table definitions
 metadata = db.MetaData()
 
 

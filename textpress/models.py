@@ -125,8 +125,10 @@ def get_post_list(year=None, month=None, day=None, tag=None, author=None,
 
     # send the query
     q = db.and_(*conditions)
-    postlist = Post.select(q, limit=per_page, offset=per_page * (page - 1))
-    pagination = Pagination(endpoint, page, per_page, Post.count(q), url_args)
+    offset = per_page * (page - 1)
+    postlist = Post.objects.select(q)[offset:offset + per_page]
+    pagination = Pagination(endpoint, page, per_page,
+                            Post.objects.count(q), url_args)
 
     return {
         'pagination':       pagination,
@@ -264,6 +266,21 @@ def get_post_archive_summary(detail='months', limit=None, ignore_role=False):
     }
 
 
+class UserManager(db.DatabaseManager):
+    """
+    Add some extra query methods to the user object.
+    """
+
+    def get_nobody(self):
+        return self.get(NOBODY_USER_ID)
+
+    def get_authors(self):
+        return self.select(User.c.role >= ROLE_AUTHOR)
+
+    def get_all_but_nobody(self):
+        return self.select(User.c.user_id != NOBODY_USER_ID)
+
+
 class User(object):
     """
     Represents an user.
@@ -273,6 +290,8 @@ class User(object):
     because at that time the TextPress system is not yet ready. Also update
     the code in `textpress.websetup.WebSetup.start_setup`.
     """
+
+    objects = UserManager()
 
     def __init__(self, username, password, email, first_name='',
                  last_name='', description='', role=ROLE_SUBSCRIBER):
@@ -285,18 +304,6 @@ class User(object):
         self.extra = {}
         self.display_name = '$nick'
         self.role = role
-
-    @staticmethod
-    def get_nobody():
-        return User.get(NOBODY_USER_ID)
-
-    @staticmethod
-    def get_authors():
-        return User.select(User.c.role >= ROLE_AUTHOR)
-
-    @staticmethod
-    def get_all_but_nobody():
-        return User.select(User.c.user_id != NOBODY_USER_ID)
 
     @property
     def is_somebody(self):
@@ -352,8 +359,25 @@ class User(object):
         )
 
 
+class PostManager(db.DatabaseManager):
+    """
+    Add some extra methods to the post model.
+    """
+
+    def get_by_timestamp_and_slug(self, year, month, day, slug):
+        """Get an item by year, month, day, and the post slug."""
+        start = datetime(year, month, day)
+        return self.select_first(
+            (Post.c.pub_date >= start) &
+            (Post.c.pub_date < start + timedelta(days=1)) &
+            (Post.c.slug == slug)
+        )
+
+
 class Post(object):
     """Represents one blog post."""
+
+    objects = PostManager()
 
     def __init__(self, title, author, body, intro='', slug=None,
                  pub_date=None, last_update=None, comments_enabled=True,
@@ -379,16 +403,6 @@ class Post(object):
         self.comments_enabled = comments_enabled
         self.pings_enabled = pings_enabled
         self.status = status
-
-    @staticmethod
-    def by_timestamp_and_slug(year, month, day, slug):
-        """Get an item by year, month, day, and the post slug."""
-        start = datetime(year, month, day)
-        return Post.selectfirst(
-            (Post.c.pub_date >= start) &
-            (Post.c.pub_date < start + timedelta(days=1)) &
-            (Post.c.slug == slug)
-        )
 
     @property
     def root_comments(self):
@@ -506,8 +520,26 @@ class Post(object):
         )
 
 
+class TagManager(db.DatabaseManager):
+    """
+    Also tags have their own manager.
+    """
+
+    def get_or_create(self, slug, name=None):
+        """Get the tag for this slug or create it if it does not exist."""
+        tag = Tag.get_by(slug=slug)
+        if tag is None:
+            if name is None:
+                name = slug
+            tag = Tag(name, slug=slug)
+        return tag
+
+
+
 class Tag(object):
     """Represents a tag."""
+
+    objects = TagManager()
 
     def __init__(self, name, description='', slug=None):
         self.name = name
@@ -516,16 +548,6 @@ class Tag(object):
         else:
             self.slug = slug
         self.description = description
-
-    @staticmethod
-    def get_or_create(slug, name=None):
-        """Get the tag for this slug or create it if it does not exist."""
-        tag = Tag.get_by(slug=slug)
-        if tag is None:
-            if name is None:
-                name = slug
-            tag = Tag(name, slug=slug)
-        return tag
 
     def auto_slug(self):
         """Generate a slug for this tag."""
@@ -543,8 +565,24 @@ class Tag(object):
         )
 
 
+class CommentManager(db.DatabaseManager):
+    """
+    The manager for comments
+    """
+
+    def get_blocked(self):
+        """Get all blocked comments."""
+        return Comment.select(Comment.c.blocked == True)
+
+    def get_block_count(self):
+        """Get the number of blocked comments."""
+        return Comment.count(Comment.c.blocked == True)
+
+
 class Comment(object):
     """Represent one comment."""
+
+    objects = CommentManager()
 
     def __init__(self, post, author, email, www, body, parent=None, pub_date=None,
                  submitter_ip='0.0.0.0'):
@@ -566,16 +604,6 @@ class Comment(object):
         self.blocked = False
         self.blocked_msg = None
         self.submitter_ip = submitter_ip
-
-    @staticmethod
-    def get_blocked():
-        """Get all blocked comments."""
-        return Comment.select(Comment.c.blocked == True)
-
-    @staticmethod
-    def get_block_count():
-        """Get the number of blocked comments."""
-        return Comment.count(Comment.c.blocked == True)
 
     def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""

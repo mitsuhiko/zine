@@ -304,11 +304,11 @@ class Request(BaseRequest):
             if row is not None:
                 session = row.data
                 if row.user_id:
-                    user = User.get(row.user_id)
+                    user = User.objects.get(row.user_id)
                 last_change = row.last_change
 
         if user is None:
-            user = User.get_nobody()
+            user = User.objects.get_nobody()
 
         self.sid = sid
         self.user = self._old_user = user
@@ -320,9 +320,9 @@ class Request(BaseRequest):
         a full blown user object."""
         from textpress.models import User
         if isinstance(user, (int, long)):
-            user = User.get(user)
+            user = User.objects.get(user)
         elif isinstance(user, basestring):
-            user = User.get_by(username=user)
+            user = User.objects.get_by(username=user)
         if user is None:
             raise RuntimeError('User does not exist')
         self.user = user
@@ -332,7 +332,7 @@ class Request(BaseRequest):
         """Log the current user out."""
         from textpress.models import User
         user = self.user
-        self.user = User.get_nobody()
+        self.user = User.objects.get_nobody()
         self.session.clear()
         emit_event('after-user-logout', user, buffered=True)
 
