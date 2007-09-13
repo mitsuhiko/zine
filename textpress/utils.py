@@ -253,7 +253,7 @@ def format_datetime(obj, format=None):
     cfg = get_application().cfg
     tzinfo = timezone(cfg['timezone'])
     if type(obj) is date:
-        obj = datetime(obj.year, obj.day, obj.month, tzinfo=tzinfo)
+        obj = datetime(obj.year, obj.month, obj.day, tzinfo=tzinfo)
     else:
         obj = obj.replace(tzinfo=tzinfo)
     if format is None:
