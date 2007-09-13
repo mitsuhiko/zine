@@ -91,9 +91,13 @@ def get_version_info():
             tag = 'release'
 
         from subprocess import Popen, PIPE
-        hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, close_fds=True,
+        hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, stdin=PIPE,
                    cwd=os.path.dirname(textpress.__file__))
+        hg.stdin.close()
+        hg.stderr.close()
         rv = hg.stdout.read()
+        hg.stdout.close()
+        hg.wait()
         hg_node = None
         if hg.wait() == 0:
             for line in rv.splitlines():
