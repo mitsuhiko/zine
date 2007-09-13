@@ -16,9 +16,9 @@
 """
 from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
-from textpress.utils import is_valid_email, gen_pwhash, reload_textpress, \
-     get_blog_url
-from textpress.websetup.framework import render_response, redirect, Request
+from textpress.utils import is_valid_email, gen_pwhash, reload_textpress
+from textpress.websetup.framework import render_response, redirect, \
+     get_blog_url, Request
 
 
 class WebSetup(object):
