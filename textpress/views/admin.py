@@ -943,7 +943,7 @@ def do_basic_options(req):
 
     return render_admin_response('admin/basic_options.html', 'options.basic',
         form=form,
-        timezones=TIMEZONES,
+        timezones=sorted(TIMEZONES),
         hidden_form_data=make_hidden_fields(csrf_protector)
     )
 
