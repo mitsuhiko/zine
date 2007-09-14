@@ -67,8 +67,8 @@
     docstrings on the application object regarding taht) which looks like
     this::
 
-        def init_database(engine):
-            metadata.create_all(engine)
+        def upgrade_database(app):
+            metadata.create_all(app.database_engine)
 
 
     Writing Models
@@ -132,6 +132,12 @@
     If you have to fire up some more raw and complex queries that don't use
     the mapper, get yourself a engine object using `get_engine` and start
     playing with it :-)
+
+
+    Deleting Objects
+    ----------------
+
+    To delete objects you have to call `db.delete(obj)` and flush the session.
 
 
     Final Words
@@ -286,6 +292,7 @@ del key, mod, value
 
 db.__doc__ = __doc__
 db.mapper = mapper
+db.delete = session.delete
 db.save = session.save
 db.flush = session.flush
 db.get_engine = get_engine

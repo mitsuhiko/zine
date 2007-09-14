@@ -11,7 +11,7 @@
 
 
     Plugin Distribution
-    ===================
+    -------------------
 
     The best way to distribute plugins are `.plugin` files.  Those files are
     simple zip files that are uncompressed when installed from the plugin

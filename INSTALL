@@ -6,7 +6,7 @@ installed:
 
   - Werkzeug from http://trac.pocoo.org/repos/werkzeug/trunk
   - Jinja newparser branch from http://trac.pocoo.org/repos/jinja/branches/new-parser
-  - SQLAlchemy*
+  - SQLAlchemy 0.4 or higher*
   - simplejson*
   - Python 2.4 or higher
   - mysql, sqlite or postgres
