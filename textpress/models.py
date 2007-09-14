@@ -527,7 +527,7 @@ class TagManager(db.DatabaseManager):
 
     def get_or_create(self, slug, name=None):
         """Get the tag for this slug or create it if it does not exist."""
-        tag = Tag.get_by(slug=slug)
+        tag = self.get_by(slug=slug)
         if tag is None:
             if name is None:
                 name = slug
