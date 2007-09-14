@@ -244,7 +244,7 @@ class DatabaseManager(object):
         """
         Get a query set by some rules.
         """
-        return self.all().get_by(**kw)
+        return self.all().filter_by(**kw).first()
 
     def all(self):
         """

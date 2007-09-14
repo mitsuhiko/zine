@@ -628,22 +628,24 @@ def do_edit_tag(req, tag_id=None):
             errors.append(_('The slug "%s" is not unique.') % slug)
 
         if not errors:
-            html_tag_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(tag)),
-                escape(tag.name)
-            )
             if new_tag:
-                Tag(name, description, slug or None)
-                flash(_('Tag %s created successfully.') %
-                      html_tag_detail, 'add')
+                tag = Tag(name, description, slug or None)
+                msg = _('Tag %s created successfully.')
+                msg_type = 'add'
             else:
                 if tag.slug is not None:
                     tag.slug = slug
                 tag.name = name
                 tag.description = description
-                flash(_('Tag %s updated successfully.') %
-                      html_tag_detail)
+                msg = _('Tag %s updated successfully.')
+                msg_type = 'info'
+
             db.flush()
+            html_tag_detail = u'<a href="%s">%s</a>' % (
+                escape(url_for(tag)),
+                escape(tag.name)
+            )
+            flash(msg % html_tag_detail, msg_type)
             redirect('admin/show_tags')
 
     for error in errors:
