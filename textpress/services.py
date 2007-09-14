@@ -17,7 +17,7 @@ def do_get_comment(req):
     comment_id = req.values.get('comment_id')
     if comment_id is None:
         abort(404)
-    comment = Comment.get(comment_id)
+    comment = Comment.objects.get(comment_id)
     if comment is None:
         abort(404)
     if comment.blocked and req.user.role < ROLE_AUTHOR:
