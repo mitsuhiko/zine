@@ -491,7 +491,7 @@ def do_edit_comment(req, comment_id):
                 comment.blocked_msg = ''
             elif not comment.blocked_msg:
                 comment.blocked_msg = _('blocked by %s') % req.user.display_name
-            comment.save()
+            db.save(comment)
             db.flush()
             flash(_('Comment by %s moderated successfully.') %
                   escape(comment.author))
@@ -1234,7 +1234,7 @@ def do_change_password(req):
             errors.append(_('The passwords do not match.'))
         if not errors:
             req.user.set_password(new_password)
-            req.user.save()
+            db.save(req.user)
             db.flush()
             flash(_('Password changed successfully.'), 'configure')
             redirect('admin/index')
