@@ -492,7 +492,7 @@ class Post(object):
         if user is None:
             user = get_request().user
         elif isinstance(user, (int, long)):
-            user = User.get(user)
+            user = User.objects.get(user)
 
         # simple rule: admins and editors may always
         if user.role in (ROLE_ADMIN, ROLE_EDITOR):
@@ -612,7 +612,7 @@ class Comment(object):
         if user is None:
             user = get_request().user
         elif isinstance(user, (int, long)):
-            user = User.get(user)
+            user = User.objects.get(user)
         return user.role >= ROLE_AUTHOR
 
     visible = property(visible_for_user)

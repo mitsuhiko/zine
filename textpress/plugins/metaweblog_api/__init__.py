@@ -44,7 +44,7 @@ def export(name, fetch_user=True):
             # and transformed into an user object.
             if fetch_user:
                 username, password = args[1:3]
-                user = User.get_by(username=username)
+                user = User.objects.get_by(username=username)
                 if user is None:
                     raise APIError('user not found')
                 elif not user.check_password(password):
@@ -81,7 +81,7 @@ def new_post(blog_id, user, struct, publish):
                 pub_date=pub_date, status=status)
 
     for tag in struct.get('categories') or ():
-        post.tags.append(Tag.get_or_create(tag))
+        post.tags.append(Tag.objects.get_or_create(tag))
 
     db.flush()
     return post.post_id
@@ -89,7 +89,7 @@ def new_post(blog_id, user, struct, publish):
 
 @export('metaWeblog.getPost')
 def get_post(post_id, user):
-    post = Post.get(post_id)
+    post = Post.objects.get(post_id)
     if post is None:
         raise APIError('post does not exist')
     elif not post.can_access(user):

@@ -417,7 +417,7 @@ def do_show_comments(req, post_id=None):
     if post_id is None:
         comments = Comment.objects.all()
     else:
-        post = Post.get(post_id)
+        post = Post.objects.get(post_id)
         if post is None:
             abort(404)
         comments = Comment.objects.select(Comment.post_id == post_id)
@@ -736,7 +736,7 @@ def do_edit_user(req, user_id=None):
         username = form['username'] = req.form.get('username')
         if not username:
             errors.append(_('Username is required.'))
-        elif new_user and User.get_by(username=username) is not None:
+        elif new_user and User.objects.get_by(username=username) is not None:
             errors.append(_('Username "%s" is taken.') % username)
         password = form['password'] = req.form.get('password')
         if new_user and not password:
