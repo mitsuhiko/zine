@@ -4,8 +4,8 @@ TextPress 0.1 Alpha Installation Instructions
 For a working TextPress instance you need to have the following libraries
 installed:
 
-  - Werkzeug from http://trac.pocoo.org/repos/werkzeug/trunk
-  - Jinja newparser branch from http://trac.pocoo.org/repos/jinja/branches/new-parser
+  - Werkzeug from Mercurial: hg clone http://dev.pocoo.org/hg/werkzeug-main
+  - Jinja from Mercurial: hg clone http://dev.pocoo.org/hg/jinja-main
   - SQLAlchemy 0.4 or higher*
   - simplejson*
   - Python 2.4 or higher
