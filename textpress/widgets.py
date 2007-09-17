@@ -17,7 +17,7 @@
     :license: GNU GPL.
 """
 from textpress.application import render_template
-from textpress import models
+from textpress.models import Post, Tag
 
 
 class Widget(object):
@@ -45,7 +45,7 @@ class TagCloud(Widget):
     TEMPLATE = '_tagcloud.html'
 
     def __init__(self, max=None):
-        self.tags = models.get_tag_cloud(max)
+        self.tags = Tag.objects.get_cloud(max)
 
 
 class PostArchiveSummary(Widget):
@@ -56,7 +56,7 @@ class PostArchiveSummary(Widget):
     TEMPLATE = '_post_archive_summary.html'
 
     def __init__(self, detail='months', limit=6):
-        self.__dict__.update(models.get_post_archive_summary(detail, limit))
+        self.__dict__.update(Post.objects.get_archive_summary(detail, limit))
 
 
 all_widgets = {

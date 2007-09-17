@@ -2,7 +2,16 @@
 {% block title %}{% trans "Manage Posts" %}{% endblock %}
 {% block contents %}
   <h2>{% trans "Manage Posts" %}</h2>
-  <table>
+  {% if drafts %}
+  <div class="drafts-box">
+    <strong>{% trans "Your drafts" %}:</strong>
+    {%- for draft in drafts %}
+      <a href="{{ url_for('admin/edit_post', post_id=draft.post_id) }}">{{ draft.title|e }}</a>
+      {%- if not loop.last %},{% endif %}
+    {%- endfor %}
+  </div>
+  {% endif %}
+  <table class="postlist">
     <tr>
       <th>{% trans "ID" %}</th>
       <th>{% trans "Title" %}</th>
@@ -12,12 +21,14 @@
       <th>{% trans "Date" %}</th>
     </tr>
   {%- for post in posts %}
-    <tr class="{% cycle 'odd', 'even' %}">
+  <tr class="{% cycle 'odd', 'even' %}{% if post.is_draft %} draft{% endif %}">
       <td>{{ post.post_id }}</td>
       <td><a href="{{ url_for('admin/edit_post', post_id=post.post_id)|e }}">{{
           post.title|e }}</a></td>
       <td>{{ post.author.display_name|e }}</td>
-      <td>{% for tag in post.tags %}{{ tag.name|e }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+      <td>{% for tag in post.tags %}<a href="{{ url_for(tag)|e }}">{{ tag.name|e }}</a>
+          {%- if not loop.last %}, {% endif %}
+        {%- else %}{% trans "untagged" %}{% endfor %}</td>
       <td><a href="{{ url_for('admin/show_comments', post_id=post.post_id)|e }}">{{ post.comments|count }}</a></td>
       <td>{{ post.pub_date|datetimeformat|e }}</td>
     </tr>

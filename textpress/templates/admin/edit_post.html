@@ -2,6 +2,19 @@
 {% block title %}{% trans "Write Post" %}{% endblock %}
 {% block contents %}
   <h2>{% trans "Write Post" %}</h2>
+  {% if drafts %}
+  <div class="drafts-box">
+    <strong>{% if not post or post.draft %}
+      {%- trans "Your other drafts" -%}
+    {% else %}
+      {%- trans "Your drafts" -%}
+    {% endif %}:</strong>
+    {%- for draft in drafts %}
+      <a href="{{ url_for('admin/edit_post', post_id=draft.post_id) }}">{{ draft.title|e }}</a>
+      {%- if not loop.last %},{% endif %}
+    {%- endfor %}
+  </div>
+  {% endif %}
   <form action="" method="post">
     {{ hidden_form_data }}
     <fieldset>

@@ -183,6 +183,13 @@ div.body div.contents {
     padding: 10px;
 }
 
+div.contents div.drafts-box {
+    border: 1px solid #30C42B;
+    margin: -15px 0 15px 0;
+    padding: 8px 8px 8px 32px;
+    background: #C7F1C6 url(img/info.png) no-repeat 9px 9px;
+}
+
 div.contents div.message {
     border: 1px solid #2580B2;
     margin: 0 0 10px 0;
@@ -373,6 +380,15 @@ div.contents dl dd {
 
 p.preview {
     text-align: right;
+}
+
+/* :::: POST LIST :::: */
+table.postlist tr.draft {
+    background-color: #C7F1C6;
+}
+
+table.postlist tr.draft a {
+    color: #456F3D;
 }
 
 /* :::: COMMENTS :::: */

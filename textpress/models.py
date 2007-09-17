@@ -33,239 +33,6 @@ STATUS_PUBLISHED = 2
 NOBODY_USER_ID = 0
 
 
-def get_post_list(year=None, month=None, day=None, tag=None, author=None,
-                  page=1, ignore_role=False):
-    """
-    Return a dict with pagination, the current posts, number of pages, total
-    posts and all that stuff for further processing.
-
-    If the role is ignored only published items are returned, otherwise the
-    items the current user can see.
-    """
-    role = ROLE_NOBODY
-    if not ignore_role:
-        req = get_request()
-        if req is not None:
-            role = req.user.role
-    app = get_application()
-    per_page = app.cfg['posts_per_page']
-    url_args = {}
-    if year is not None:
-        endpoint = 'blog/archive'
-        url_args['year'] = year
-    elif tag is not None:
-        url_args['slug'] = tag
-        endpoint = 'blog/show_tag'
-    elif author is not None:
-        url_args['username'] = author
-        endpoint = 'blog/show_user'
-    else:
-        endpoint = 'blog/index'
-        if month is not None:
-            url_args['month'] = month
-        if day is not None:
-            url_args['day'] = day
-        if tag is not None:
-            url_args['slug'] = tag
-
-    conditions = []
-    p = Post.c
-
-    # subcribers and normal users can just view the page if it was published
-    if role <= ROLE_SUBSCRIBER:
-        conditions.append((p.status == STATUS_PUBLISHED) |
-                          (p.pub_date >= datetime.utcnow()))
-
-    # otherwise check if we are an author, in that case only show
-    # the own posts.
-    elif role == ROLE_AUTHOR:
-        # it's safe to access req here because we only have
-        # a non ROLE_NOBODY role if there was a request.
-        conditions.append((p.status == STATUS_PUBLISHED) |
-                          (p.author_id == req.user.user_id))
-
-    # limit the posts to match the criteria passed to the function
-    # if there is at least the year defined.
-    if year is not None:
-        # show a whole year
-        if month is None:
-            conditions.append((p.pub_date >= datetime(year, 1, 1)) &
-                              (p.pub_date < datetime(year + 1, 1, 1)))
-        # show one month
-        elif day is None:
-            conditions.append((p.pub_date >= datetime(year, month, 1)) &
-                              (p.pub_date < (month == 12 and
-                                             datetime(year + 1, 1, 1) or
-                                             datetime(year, month + 1, 1))))
-        # show one day
-        else:
-            conditions.append((p.pub_date >= datetime(year, month, day)) &
-                              (p.pub_date < datetime(year, month, day) +
-                                            timedelta(days=1)))
-    # all posts for a tag
-    elif tag is not None:
-        if isinstance(tag, (int, long)):
-            tag_join = tags.c.tag_id == tag
-        elif isinstance(tag, basestring):
-            tag_join = tags.c.slug == tag
-        else:
-            tag_join = tags.c.tag_id == tag.tag_id
-        conditions.append((post_tags.c.post_id == p.post_id) &
-                          (post_tags.c.tag_id == tags.c.tag_id) & tag_join)
-
-    # all posts for an author
-    elif author is not None:
-        if isinstance(author, (int, long)):
-            conditions.append(p.author_id == author)
-        elif isinstance(author, basestring):
-            conditions.append((p.author_id == users.c.user_id) &
-                              (users.c.username == author))
-        else:
-            conditions.append(p.author_id == author.user_id)
-
-    # send the query
-    q = db.and_(*conditions)
-    offset = per_page * (page - 1)
-    postlist = Post.objects.select(q)[offset:offset + per_page]
-    pagination = Pagination(endpoint, page, per_page,
-                            Post.objects.count(q), url_args)
-
-    return {
-        'pagination':       pagination,
-        'posts':            postlist,
-        'probably_404':     page != 1 and not postlist,
-    }
-
-
-def get_tag_cloud(max=None, ignore_role=False):
-    """Get a nifty tag cloud."""
-    role = ROLE_NOBODY
-    if ignore_role:
-        req = get_request()
-        if req is not None:
-            role = req.user.role
-
-    # get a query
-    p = post_tags.c
-    p2 = posts.c
-    t = tags.c
-
-    q = (p.tag_id == t.tag_id) & (p.post_id == p2.post_id)
-
-    # do the role checking
-    if role <= ROLE_SUBSCRIBER:
-        q &= ((p2.status == STATUS_PUBLISHED) |
-              (p2.pub_date >= datetime.utcnow()))
-
-    elif role == ROLE_AUTHOR:
-        # it's safe to access req here because we only have
-        # a non ROLE_NOBODY role if there was a request.
-        q &= ((p2.status == STATUS_PUBLISHED) |
-              (p2.author_id == req.user.user_id))
-
-    s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
-                  p.tag_id == t.tag_id,
-                  group_by=[t.slug, t.name]).alias('post_count_query').c
-
-    options = {'order_by': [db.asc(s.s_count)]}
-    if max is not None:
-        options['limit'] = max
-    q = db.select([s.slug, s.name, s.s_count], **options)
-
-    items = [{
-        'slug':     row.slug,
-        'name':     row.name,
-        'count':    row.s_count,
-        'size':     100 + log(row.s_count or 1) * 20
-    } for row in db.get_engine().execute(q)]
-
-    items.sort(key=lambda x: x['name'].lower())
-    return items
-
-
-def get_post_archive_summary(detail='months', limit=None, ignore_role=False):
-    """
-    Query function to get the archive of the blog. Usually used directly from
-    the templates to add some links to the sidebar.
-    """
-    role = ROLE_NOBODY
-    if not ignore_role:
-        req = get_request()
-        if req is not None:
-            role = req.user.role
-        engine = req.app.database_engine
-    else:
-        engine = db.get_engine()
-
-    p = posts.c
-    now = datetime.utcnow()
-
-    # do the role checking
-    if role <= ROLE_SUBSCRIBER:
-        q = ((p.status == STATUS_PUBLISHED) |
-             (p.pub_date >= now))
-    elif role == ROLE_AUTHOR:
-        # it's safe to access req here because we only have
-        # a non ROLE_NOBODY role if there was a request.
-        q = ((p.status == STATUS_PUBLISHED) |
-             (p.author_id == req.user.user_id))
-    else:
-        q = None
-
-    # XXX: currently we also return months without articles in it.
-    # other blog systems do not, but because we use sqlalchemy we have
-    # to go with the functionality provided. Currently there is no way
-    row = engine.execute(db.select([p.pub_date], q,
-            order_by=[db.asc(p.pub_date)], limit=1)).fetchone()
-
-    there_are_more = False
-    result = []
-
-    if row is not None:
-        now = date(now.year, now.month, now.day)
-        oldest = date(row.pub_date.year, row.pub_date.month, row.pub_date.day)
-        result = [now]
-
-        there_are_more = False
-        if detail == 'years':
-            now, oldest = [x.replace(month=1, day=1) for x in now, oldest]
-            while True:
-                now = now.replace(year=now.year - 1)
-                if now < oldest:
-                    break
-                result.append(now)
-            else:
-                there_are_more = True
-        elif detail == 'months':
-            now, oldest = [x.replace(day=1) for x in now, oldest]
-            while limit is None or len(result) < limit:
-                if not now.month - 1:
-                    now = now.replace(year=now.year - 1, month=1)
-                else:
-                    now = now.replace(month=now.month - 1)
-                if now < oldest:
-                    break
-                result.append(now)
-            else:
-                there_are_more = True
-        elif detail == 'days':
-            while limit is None or len(result) < limit:
-                now = now - timedelta(days=1)
-                if now < oldest:
-                    break
-                result.append(now)
-            else:
-                there_are_more = True
-        else:
-            raise ValueError('detail must be years, months, or days')
-
-    return {
-        detail:     result,
-        'more':     there_are_more,
-        'empty':    not result
-    }
-
-
 class UserManager(db.DatabaseManager):
     """
     Add some extra query methods to the user object.
@@ -275,10 +42,10 @@ class UserManager(db.DatabaseManager):
         return self.get(NOBODY_USER_ID)
 
     def get_authors(self):
-        return self.select(User.c.role >= ROLE_AUTHOR)
+        return self.select(User.role >= ROLE_AUTHOR)
 
     def get_all_but_nobody(self):
-        return self.select(User.c.user_id != NOBODY_USER_ID)
+        return self.select(User.user_id != NOBODY_USER_ID)
 
 
 class User(object):
@@ -368,10 +135,204 @@ class PostManager(db.DatabaseManager):
         """Get an item by year, month, day, and the post slug."""
         start = datetime(year, month, day)
         return self.select_first(
-            (Post.c.pub_date >= start) &
-            (Post.c.pub_date < start + timedelta(days=1)) &
-            (Post.c.slug == slug)
+            (Post.pub_date >= start) &
+            (Post.pub_date < start + timedelta(days=1)) &
+            (Post.slug == slug)
         )
+
+    def get_drafts(self, exclude=None, ignore_user=False):
+        """Get a list of drafts."""
+        req = get_request()
+        query = self.select(Post.status == STATUS_DRAFT)
+        if req and not ignore_user:
+            query = query.filter(Post.author_id == req.user.user_id)
+        if exclude is not None:
+            if isinstance(exclude, Post):
+                exclude = Post.post_id
+            query = query.filter(Post.post_id != exclude)
+        return list(query)
+
+    def get_list(self, year=None, month=None, day=None, tag=None, author=None,
+                 page=1, ignore_role=False):
+        """
+        Return a dict with pagination, the current posts, number of pages, total
+        posts and all that stuff for further processing.
+
+        If the role is ignored only published items are returned, otherwise the
+        items the current user can see.
+        """
+        role = ROLE_NOBODY
+        if not ignore_role:
+            req = get_request()
+            if req is not None:
+                role = req.user.role
+        app = get_application()
+        per_page = app.cfg['posts_per_page']
+        url_args = {}
+        if year is not None:
+            endpoint = 'blog/archive'
+            url_args['year'] = year
+        elif tag is not None:
+            url_args['slug'] = tag
+            endpoint = 'blog/show_tag'
+        elif author is not None:
+            url_args['username'] = author
+            endpoint = 'blog/show_user'
+        else:
+            endpoint = 'blog/index'
+            if month is not None:
+                url_args['month'] = month
+            if day is not None:
+                url_args['day'] = day
+            if tag is not None:
+                url_args['slug'] = tag
+
+        conditions = []
+        p = Post.c
+
+        # subcribers and normal users can just view the page if it was published
+        if role <= ROLE_SUBSCRIBER:
+            conditions.append((p.status == STATUS_PUBLISHED) |
+                              (p.pub_date >= datetime.utcnow()))
+
+        # otherwise check if we are an author, in that case only show
+        # the own posts.
+        elif role == ROLE_AUTHOR:
+            # it's safe to access req here because we only have
+            # a non ROLE_NOBODY role if there was a request.
+            conditions.append((p.status == STATUS_PUBLISHED) |
+                              (p.author_id == req.user.user_id))
+
+        # limit the posts to match the criteria passed to the function
+        # if there is at least the year defined.
+        if year is not None:
+            # show a whole year
+            if month is None:
+                conditions.append((p.pub_date >= datetime(year, 1, 1)) &
+                                  (p.pub_date < datetime(year + 1, 1, 1)))
+            # show one month
+            elif day is None:
+                conditions.append((p.pub_date >= datetime(year, month, 1)) &
+                                  (p.pub_date < (month == 12 and
+                                                 datetime(year + 1, 1, 1) or
+                                                 datetime(year, month + 1, 1))))
+            # show one day
+            else:
+                conditions.append((p.pub_date >= datetime(year, month, day)) &
+                                  (p.pub_date < datetime(year, month, day) +
+                                                timedelta(days=1)))
+        # all posts for a tag
+        elif tag is not None:
+            if isinstance(tag, (int, long)):
+                tag_join = tags.c.tag_id == tag
+            elif isinstance(tag, basestring):
+                tag_join = tags.c.slug == tag
+            else:
+                tag_join = tags.c.tag_id == tag.tag_id
+            conditions.append((post_tags.c.post_id == p.post_id) &
+                              (post_tags.c.tag_id == tags.c.tag_id) & tag_join)
+
+        # all posts for an author
+        elif author is not None:
+            if isinstance(author, (int, long)):
+                conditions.append(p.author_id == author)
+            elif isinstance(author, basestring):
+                conditions.append((p.author_id == users.c.user_id) &
+                                  (users.c.username == author))
+            else:
+                conditions.append(p.author_id == author.user_id)
+
+        # send the query
+        q = db.and_(*conditions)
+        offset = per_page * (page - 1)
+        postlist = Post.objects.select(q)[offset:offset + per_page]
+        pagination = Pagination(endpoint, page, per_page,
+                                Post.objects.count(q), url_args)
+
+        return {
+            'pagination':       pagination,
+            'posts':            postlist,
+            'probably_404':     page != 1 and not postlist,
+        }
+
+    def get_archive_summary(self, detail='months', limit=None, ignore_role=False):
+        """
+        Query function to get the archive of the blog. Usually used directly from
+        the templates to add some links to the sidebar.
+        """
+        role = ROLE_NOBODY
+        if not ignore_role:
+            req = get_request()
+            if req is not None:
+                role = req.user.role
+
+        p = posts.c
+        now = datetime.utcnow()
+
+        # do the role checking
+        if role <= ROLE_SUBSCRIBER:
+            q = ((p.status == STATUS_PUBLISHED) |
+                 (p.pub_date >= now))
+        elif role == ROLE_AUTHOR:
+            # it's safe to access req here because we only have
+            # a non ROLE_NOBODY role if there was a request.
+            q = ((p.status == STATUS_PUBLISHED) |
+                 (p.author_id == req.user.user_id))
+        else:
+            q = None
+
+        # XXX: currently we also return months without articles in it.
+        # other blog systems do not, but because we use sqlalchemy we have
+        # to go with the functionality provided. Currently there is no way
+        row = db.execute(db.select([p.pub_date], q,
+                order_by=[db.asc(p.pub_date)], limit=1)).fetchone()
+
+        there_are_more = False
+        result = []
+
+        if row is not None:
+            now = date(now.year, now.month, now.day)
+            oldest = date(row.pub_date.year, row.pub_date.month, row.pub_date.day)
+            result = [now]
+
+            there_are_more = False
+            if detail == 'years':
+                now, oldest = [x.replace(month=1, day=1) for x in now, oldest]
+                while True:
+                    now = now.replace(year=now.year - 1)
+                    if now < oldest:
+                        break
+                    result.append(now)
+                else:
+                    there_are_more = True
+            elif detail == 'months':
+                now, oldest = [x.replace(day=1) for x in now, oldest]
+                while limit is None or len(result) < limit:
+                    if not now.month - 1:
+                        now = now.replace(year=now.year - 1, month=1)
+                    else:
+                        now = now.replace(month=now.month - 1)
+                    if now < oldest:
+                        break
+                    result.append(now)
+                else:
+                    there_are_more = True
+            elif detail == 'days':
+                while limit is None or len(result) < limit:
+                    now = now - timedelta(days=1)
+                    if now < oldest:
+                        break
+                    result.append(now)
+                else:
+                    there_are_more = True
+            else:
+                raise ValueError('detail must be years, months, or days')
+
+        return {
+            detail:     result,
+            'more':     there_are_more,
+            'empty':    not result
+        }
 
 
 class Post(object):
@@ -416,6 +377,11 @@ class Post(object):
         if req.user.role >= ROLE_AUTHOR:
             return len(self.comments)
         return len([x for x in self.comments if not x.blocked])
+
+    @property
+    def is_draft(self):
+        """True if this post is unpublished."""
+        return self.status == STATUS_DRAFT
 
     def _get_raw_intro(self):
         return self._raw_intro
@@ -536,6 +502,50 @@ class TagManager(db.DatabaseManager):
             tag = Tag(name, slug=slug)
         return tag
 
+    def get_cloud(self, max=None, ignore_role=False):
+        """Get a tagcloud."""
+        role = ROLE_NOBODY
+        if ignore_role:
+            req = get_request()
+            if req is not None:
+                role = req.user.role
+
+        # get a query
+        p = post_tags.c
+        p2 = posts.c
+        t = tags.c
+
+        q = (p.tag_id == t.tag_id) & (p.post_id == p2.post_id)
+
+        # do the role checking
+        if role <= ROLE_SUBSCRIBER:
+            q &= ((p2.status == STATUS_PUBLISHED) |
+                  (p2.pub_date >= datetime.utcnow()))
+
+        elif role == ROLE_AUTHOR:
+            # it's safe to access req here because we only have
+            # a non ROLE_NOBODY role if there was a request.
+            q &= ((p2.status == STATUS_PUBLISHED) |
+                  (p2.author_id == req.user.user_id))
+
+        s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
+                      p.tag_id == t.tag_id,
+                      group_by=[t.slug, t.name]).alias('post_count_query').c
+
+        options = {'order_by': [db.asc(s.s_count)]}
+        if max is not None:
+            options['limit'] = max
+        q = db.select([s.slug, s.name, s.s_count], **options)
+
+        items = [{
+            'slug':     row.slug,
+            'name':     row.name,
+            'count':    row.s_count,
+            'size':     100 + log(row.s_count or 1) * 20
+        } for row in db.execute(q)]
+
+        items.sort(key=lambda x: x['name'].lower())
+        return items
 
 
 class Tag(object):
@@ -574,11 +584,11 @@ class CommentManager(db.DatabaseManager):
 
     def get_blocked(self):
         """Get all blocked comments."""
-        return Comment.select(Comment.c.blocked == True)
+        return Comment.select(Comment.blocked == True)
 
     def get_block_count(self):
         """Get the number of blocked comments."""
-        return Comment.count(Comment.c.blocked == True)
+        return Comment.count(Comment.blocked == True)
 
 
 class Comment(object):

@@ -10,8 +10,7 @@
     :license: GNU GPL.
 """
 from textpress.api import *
-from textpress.models import Post, Tag, User, Comment, get_post_list, \
-     get_tag_cloud, ROLE_AUTHOR
+from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
      dump_json, dump_xml
 from textpress.feedbuilder import AtomFeed
@@ -32,7 +31,7 @@ def do_index(req, page=1):
     :Template name: ``index.html``
     :URL endpoint: ``blog/index``
     """
-    data = get_post_list(page=page)
+    data = Post.objects.get_list(page=page)
     if data.pop('probably_404'):
         abort(404)
 
@@ -59,7 +58,7 @@ def do_archive(req, year=None, month=None, day=None, page=1):
     :Template name: ``archive.html``
     :URL endpoint: ``blog/archive``
     """
-    data = get_post_list(year, month, day, page)
+    data = Post.objects.get_list(year, month, day, page)
     if data.pop('probably_404'):
         abort(404)
 
@@ -91,7 +90,7 @@ def do_show_tag(req, slug, page=1):
     :Template name: ``show_tag.html``
     :URL endpoint: ``blog/show_tag``
     """
-    data = get_post_list(tag=slug, page=page)
+    data = Post.objects.get_list(tag=slug, page=page)
     if data.pop('probably_404'):
         abort(404)
     tag = Tag.objects.get_by(slug=slug)
@@ -114,7 +113,8 @@ def do_show_tag_cloud(req):
     :Template name: ``tag_cloud.html``
     :URL endpoint: ``blog/tag_cloud``
     """
-    return render_response('tag_cloud.html', tag_cloud=get_tag_cloud())
+    return render_response('tag_cloud.html',
+                           tag_cloud=Tag.objects.get_cloud())
 
 
 def do_show_author(req, username, page=1):
@@ -140,7 +140,7 @@ def do_show_author(req, username, page=1):
                                      (User.role >= ROLE_AUTHOR))
     if user is None:
         abort(404)
-    data = get_post_list(author=user)
+    data = Post.objects.get_list(author=user)
     if data.pop('probably_404'):
         abort(404)
 
@@ -310,7 +310,7 @@ def do_atom_feed(req, author=None, year=None, month=None, day=None,
         return Response('Not implemented', mimetype='text/plain')
 
     blog_link = url_for('blog/index', _external=True)
-    postlist = get_post_list(year, month, day, tag, author)
+    postlist = Post.objects.get_list(year, month, day, tag, author)
     feed = AtomFeed(_('Posts'), _('give me a description'), blog_link)
 
     for post in postlist['posts']:

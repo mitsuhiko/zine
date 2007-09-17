@@ -35,7 +35,8 @@ from datetime import datetime, timedelta
 from weakref import WeakKeyDictionary
 from urlparse import urlparse
 
-from textpress.database import sessions, db, upgrade_database
+from textpress.database import sessions, db, upgrade_database, \
+     cleanup_session
 from textpress.config import Configuration
 from textpress.utils import gen_sid, format_datetime, format_date, \
      format_month, gen_psid, ClosingIterator
@@ -255,7 +256,7 @@ def get_thread_data(key, default=None):
         return default
 
 
-def clean_thread_data(unbind_app=False):
+def cleanup_thread_data(unbind_app=False):
     """Clean up unused thread data."""
     thread = _threads.get(get_thread_ident())
     if thread is not None:
@@ -981,10 +982,14 @@ class TextPress(object):
         if lock.locked():
             return self.maintenance_mode_message(environ, start_response)
 
+        def close():
+            cleanup_thread_data(remove_app)
+            cleanup_session()
+
         # the normal request dispatching
         remove_app = get_thread_data('app') is None
         return ClosingIterator(self.dispatch_request(environ, start_response),
-                               lambda: clean_thread_data(remove_app))
+                               close)
 
 
 def make_app(instance_folder, bind_to_thread=False):
@@ -1007,7 +1012,7 @@ def make_app(instance_folder, bind_to_thread=False):
         # we should now have an attribute here to delete
         app = get_thread_data('app')
         if app is not None and not bind_to_thread:
-            clean_thread_data(True)
+            cleanup_thread_data(True)
         _setup_lock.release()
 
     return app

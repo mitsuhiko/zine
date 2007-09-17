@@ -131,7 +131,8 @@
 
     If you have to fire up some more raw and complex queries that don't use
     the mapper, get yourself a engine object using `get_engine` and start
-    playing with it :-)
+    playing with it :-)  For normal execution you however don't have to do
+    this, you can use `db.execute`, `db.begin` etc.
 
 
     Deleting Objects
@@ -165,7 +166,7 @@ from sqlalchemy.util import to_list
 def session_factory():
     """Function used by the session context to get a new session."""
     from textpress.application import get_application
-    return db.create_session(get_application().database_engine)
+    return db.create_session(bind=get_application().database_engine)
 
 
 def get_engine():
@@ -292,11 +293,16 @@ del key, mod, value
 
 db.__doc__ = __doc__
 db.mapper = mapper
-db.delete = session.delete
-db.save = session.save
-db.flush = session.flush
 db.get_engine = get_engine
+for name in 'delete', 'save', 'flush', 'execute', 'begin', \
+            'commit', 'rollback', 'clear', 'refresh', 'expire':
+    setattr(db, name, getattr(session, name))
+db.session = session
 db.DatabaseManager = DatabaseManager
+
+
+#: called at the end of a request
+cleanup_session = session.remove
 
 
 #: metadata for the core tables and the core table definitions

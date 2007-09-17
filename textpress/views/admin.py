@@ -27,7 +27,7 @@ from datetime import datetime
 from textpress.api import *
 from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
-     STATUS_DRAFT, STATUS_PUBLISHED, get_post_list
+     STATUS_DRAFT, STATUS_PUBLISHED
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      escape, build_eventmap, make_hidden_fields, reload_textpress, \
@@ -209,7 +209,8 @@ def do_show_posts(req):
     paginated which makes it hard to manage if you have more posts.
     """
     return render_admin_response('admin/show_posts.html', 'posts.overview',
-                                 **get_post_list())
+                                 drafts=Post.objects.get_drafts(),
+                                 **Post.objects.get_list())
 
 
 @require_role(ROLE_AUTHOR)
@@ -222,7 +223,7 @@ def do_edit_post(req, post_id=None):
     tags = []
     errors = []
     form = {}
-    post = None
+    post = exclude = None
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -230,6 +231,7 @@ def do_edit_post(req, post_id=None):
     if post_id is not None:
         new_post = False
         post = Post.objects.get(post_id)
+        exclude = post.post_id
         if post is None:
             abort(404)
         form.update(
@@ -363,6 +365,7 @@ def do_edit_post(req, post_id=None):
         form=form,
         tags=Tag.objects.all(),
         post=post,
+        drafts=Post.objects.get_drafts(exclude=exclude),
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
             (STATUS_DRAFT, _('Draft')),
