@@ -383,12 +383,16 @@ p.preview {
 }
 
 /* :::: POST LIST :::: */
-table.postlist tr.draft {
+table.postlist tr.draft td {
     background-color: #C7F1C6;
 }
 
 table.postlist tr.draft a {
     color: #456F3D;
+}
+
+table.postlist tr.draft a:hover {
+    color: #51AD3E;
 }
 
 /* :::: COMMENTS :::: */

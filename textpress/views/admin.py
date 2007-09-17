@@ -199,7 +199,8 @@ def do_index(req):
     such as "new post", etc. and the recent blog activity (unmoderated
     comments etc.)
     """
-    return render_admin_response('admin/index.html', 'dashboard')
+    return render_admin_response('admin/index.html', 'dashboard',
+                                 drafts=Post.objects.get_drafts())
 
 
 @require_role(ROLE_AUTHOR)
