@@ -390,7 +390,7 @@ class Post(object):
         self.cache = {}
         self.raw_intro = intro
         self.raw_body = body
-        if slug is None:
+        if not slug:
             self.auto_slug()
         else:
             self.slug = slug
@@ -472,6 +472,8 @@ class Post(object):
     def auto_slug(self):
         """Generate a slug for this post."""
         self.slug = gen_slug(self.title)
+        if not self.slug:
+            self.slug = '1'         # XXX: count this up in a save hook
 
     def refresh_cache(self):
         """Update the cache."""

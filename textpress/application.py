@@ -33,6 +33,7 @@ from thread import allocate_lock, get_ident as get_thread_ident
 from itertools import izip
 from datetime import datetime, timedelta
 from weakref import WeakKeyDictionary
+from urlparse import urlparse
 
 from textpress.database import sessions, db, upgrade_database
 from textpress.config import Configuration
@@ -289,7 +290,13 @@ class Request(BaseRequest):
     def __init__(self, app, environ):
         super(Request, self).__init__(environ)
         self.app = app
-        self.urls = app.url_map.bind_to_environ(environ)
+
+        scheme, netloc, script_name = urlparse(app.cfg['blog_url'])[:3]
+        if not (scheme and netloc and script_name):
+            self.urls = app.url_map.bind_to_environ(environ)
+        else:
+            self.urls = app.url_map.bind(netloc, script_name,
+                                         url_scheme=scheme)
         engine = self.app.database_engine
 
         # get the session
