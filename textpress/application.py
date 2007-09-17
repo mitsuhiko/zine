@@ -38,7 +38,7 @@ from urlparse import urlparse
 from textpress.database import sessions, db, upgrade_database
 from textpress.config import Configuration
 from textpress.utils import gen_sid, format_datetime, format_date, \
-     format_month, gen_psid
+     format_month, gen_psid, ClosingIterator
 
 from werkzeug.utils import SharedDataMiddleware
 from werkzeug.wrappers import BaseRequest, BaseResponse
@@ -979,21 +979,12 @@ class TextPress(object):
         # check for that here.
         lock = getattr(self, '_reload_lock', None) or _reload_lock
         if lock.locked():
-            for c in self.maintenance_mode_message(environ, start_response):
-                yield c
-            return
+            return self.maintenance_mode_message(environ, start_response)
 
         # the normal request dispatching
         remove_app = get_thread_data('app') is None
-        try:
-            for c in self.dispatch_request(environ, start_response):
-                yield c
-        finally:
-            try:
-                # clean up the request locals to avoid memory leakage
-                clean_thread_data(remove_app)
-            except:
-                pass
+        return ClosingIterator(self.dispatch_request(environ, start_response),
+                               lambda: clean_thread_data(remove_app))
 
 
 def make_app(instance_folder, bind_to_thread=False):
