@@ -52,6 +52,15 @@
       </ul>
     </fieldset>
     <fieldset>
+      <legend>{% trans "Parser" %}</legend>
+      <select name="parser">
+      {%- for parser_id, name in parsers %}
+        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.parser
+          %} selected{% endif %}>{{ name|e }}</option>
+      {%- endfor %}
+      </select>
+    </fieldset>
+    <fieldset>
       <legend>{% trans "Discussion" %}</legend>
       <ul>
         <li>{{ h.checkbox('comments_enabled', checked=form.comments_enabled)

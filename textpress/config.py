@@ -25,6 +25,12 @@ DEFAULT_VARS = {
     'sid_cookie_name':      (unicode, u'textpress_sid'),
     'theme':                (unicode, u'default'),
 
+    # the default markup parser. Don't ever change this value! The
+    # htmlprocessor module bypasses this test when falling back to
+    # the default parser. If there plans to change the default parser
+    # for future TextPress versions that code must be altered first.
+    'default_parser':       (unicode, u'default'),
+
     # comments and traceback defaults
     'comments_enabled':     (bool, True),
     'pings_enabled':        (bool, True),

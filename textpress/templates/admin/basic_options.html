@@ -33,6 +33,13 @@
       <dt>{% trans "Pingbacks Enabled" %}</dt>
       <dd>{{ h.checkbox('pings_enabled', 'yes', form.pings_enabled) }}
           <label for="pings_enabled">{% trans "enable pingbacks per default" %}</label></dd>
+      <dt>{% trans "Default Parser" %}</dt>
+      <dd><select name="default_parser">
+      {%- for parser_id, name in parsers %}
+        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.default_parser
+          %} selected{% endif %}>{{ name|e }}</option>
+      {%- endfor %}
+      </select></dd>
       <dt>{% trans "Posts Per Page" %}</dt>
       <dd>{{ h.input_field('posts_per_page', form.posts_per_page) }}</dd>
       <dt>{% trans "Maintenance Mode" %}</dt>

@@ -225,6 +225,9 @@ def do_edit_post(req, post_id=None):
     errors = []
     form = {}
     post = exclude = None
+    missing_parser = None
+    keep_post_texts = False
+    parsers = req.app.list_parsers()
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -245,8 +248,11 @@ def do_edit_post(req, post_id=None):
             pings_enabled=post.pings_enabled,
             pub_date=format_datetime(post.pub_date),
             slug=post.slug,
-            author=post.author.username
+            author=post.author.username,
+            parser=post.parser
         )
+        if post.parser_missing:
+            missing_parser = post.parser
 
     # create new post
     else:
@@ -259,10 +265,13 @@ def do_edit_post(req, post_id=None):
             post_status=STATUS_DRAFT,
             comments_enabled=req.app.cfg['comments_enabled'],
             pings_enabled=req.app.cfg['pings_enabled'],
-            pub_date='now',
+            pub_date='now', # XXX: i18n
             slug='',
-            author=req.user.username
+            author=req.user.username,
+            parser=req.app.cfg['default_parser']
         )
+
+    old_texts = (form['intro'], form['body'])
 
     # handle incoming data and create/update the post
     if req.method == 'POST':
@@ -291,6 +300,15 @@ def do_edit_post(req, post_id=None):
             errors.append(_('Invalid post status'))
         form['comments_enabled'] = bool(req.form.get('comments_enabled'))
         form['pings_enabled'] = bool(req.form.get('pings_enabled'))
+        form['parser'] = parser = req.form.get('parser')
+        if missing_parser and parser == post.parser:
+            if old_texts != (form['intro'], form['body']):
+                errors.append(_('You cannot change the text of a post which '
+                                'parser does not exist any longer.'))
+            else:
+                keep_post_texts = True
+        elif parser not in req.app.parsers:
+            errors.append(_('Unknown parser %s.') % parser)
         try:
             pub_date = parse_datetime(req.form.get('pub_date') or 'now')
         except ValueError:
@@ -327,12 +345,17 @@ def do_edit_post(req, post_id=None):
         # if there is no need tag and there are no errors we save the post
         elif not errors:
             if new_post:
-                post = Post(title, author.user_id, body, intro, slug, pub_date)
+                post = Post(title, author.user_id, body, intro, slug,
+                            pub_date, parser=parser)
             else:
                 post.title = title
                 post.author_id = author.user_id
-                post.raw_body = body
-                post.raw_intro = intro
+                if not keep_post_texts:
+                    # Always set parser before raw_bdoy and raw_intro because
+                    # those require the correct parser to be defined.
+                    post.parser = parser
+                    post.raw_body = body
+                    post.raw_intro = intro
                 if slug:
                     post.slug = slug
                 else:
@@ -364,6 +387,18 @@ def do_edit_post(req, post_id=None):
     for error in errors:
         flash(error, 'error')
 
+    # tell the user if the parser is missing and we reinsert the
+    # parser into the list.
+    if missing_parser:
+        parsers.insert(0, (missing_parser, _('Missing Parser "%s"') %
+                           missing_parser))
+        flash(_('This post was created with the parser "%(parser)s" that is '
+                'not installed any longer.  Because of that TextPress '
+                'doesn\'t allow modifcations on the text until you either '
+                'change the parser or reinstall/activate the plugin that '
+                'provided that parser.') % {'parser': escape(missing_parser)},
+              'error')
+
     return render_admin_response('admin/edit_post.html', 'posts.write',
         new_post=new_post,
         form=form,
@@ -375,6 +410,7 @@ def do_edit_post(req, post_id=None):
             (STATUS_DRAFT, _('Draft')),
             (STATUS_PRIVATE, _('Private'))
         ],
+        parsers=parsers,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
@@ -880,6 +916,7 @@ def do_basic_options(req):
         'sid_cookie_name':      cfg['sid_cookie_name'],
         'comments_enabled':     cfg['comments_enabled'],
         'pings_enabled':        cfg['pings_enabled'],
+        'default_parser':       cfg['default_parser'],
         'posts_per_page':       cfg['posts_per_page'],
         'use_flat_comments':    cfg['use_flat_comments'],
         'maintenance_mode':     cfg['maintenance_mode']
@@ -910,6 +947,10 @@ def do_basic_options(req):
             req.form.get('comments_enabled') == 'yes'
         form['pings_enabled'] = pings_enabled = \
             req.form.get('pings_enabled') == 'yes'
+        form['default_parser'] = default_parser = \
+            req.form.get('default_parser')
+        if default_parser not in req.app.parsers:
+            errors.append(_('Unknown parser %s.') % default_parser)
         form['posts_per_page'] = req.form.get('posts_per_page', '')
         try:
             posts_per_page = int(form['posts_per_page'])
@@ -938,6 +979,8 @@ def do_basic_options(req):
                 cfg['comments_enabled'] = comments_enabled
             if pings_enabled != cfg['pings_enabled']:
                 cfg['pings_enabled'] = pings_enabled
+            if default_parser != cfg['default_parser']:
+                cfg['default_parser'] = default_parser
             if posts_per_page != cfg['posts_per_page']:
                 cfg['posts_per_page'] = posts_per_page
             if use_flat_comments != cfg['use_flat_comments']:
@@ -953,6 +996,7 @@ def do_basic_options(req):
     return render_admin_response('admin/basic_options.html', 'options.basic',
         form=form,
         timezones=sorted(TIMEZONES),
+        parsers=req.app.list_parsers(),
         hidden_form_data=make_hidden_fields(csrf_protector)
     )
 

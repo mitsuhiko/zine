@@ -21,7 +21,6 @@ $(function() {
 });
 
 function insertChar(char) {
-  if ($active_field) {
+  if ($active_field)
     $active_field.val(char);
-  }
 }

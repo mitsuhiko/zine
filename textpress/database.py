@@ -362,7 +362,7 @@ posts = db.Table('posts', metadata,
     db.Column('author_id', db.Integer, db.ForeignKey('users.user_id')),
     db.Column('comments_enabled', db.Boolean),
     db.Column('pings_enabled', db.Boolean),
-    db.Column('cache', db.PickleType),
+    db.Column('parser_data', db.PickleType),
     db.Column('status', db.Integer)
 )
 

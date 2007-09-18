@@ -342,19 +342,24 @@ class Post(object):
 
     def __init__(self, title, author, body, intro='', slug=None,
                  pub_date=None, last_update=None, comments_enabled=True,
-                 pings_enabled=True, status=STATUS_PUBLISHED):
+                 pings_enabled=True, status=STATUS_PUBLISHED,
+                 parser=None):
         self.title = title
         if isinstance(author, (int, long)):
             self.author_id = author
         else:
             self.author = author
-        self.cache = {}
+        if parser is None:
+            parser = get_application().cfg['default_parser']
+
+        #: this holds the parsing cache and the name of the parser in use.
+        #: in fact the intro and body cached data is not assigned right here
+        #: but by the `raw_intro` and `raw_body` property callback a few lines
+        #: below.
+        self.parser_data = {'parser': parser}
         self.raw_intro = intro
         self.raw_body = body
-        if not slug:
-            self.auto_slug()
-        else:
-            self.slug = slug
+
         if pub_date is None:
             pub_date = datetime.utcnow()
         self.pub_date = pub_date
@@ -364,6 +369,14 @@ class Post(object):
         self.comments_enabled = comments_enabled
         self.pings_enabled = pings_enabled
         self.status = status
+
+        # always assign the slug at the very bottom because if it cannot
+        # calculate a slug it will fall back to the time of the post, and
+        # this requires pub_date to be assigned.
+        if not slug:
+            self.auto_slug()
+        else:
+            self.slug = slug
 
     @property
     def root_comments(self):
@@ -383,20 +396,42 @@ class Post(object):
         """True if this post is unpublished."""
         return self.status == STATUS_DRAFT
 
+    @property
+    def parser_missing(self):
+        """
+        If the parser for this post is not available this property will
+        be `True`.  If such as post is edited the text area is grayed out
+        and tells the user to reinstall the plugin that provides that
+        parser.  Because it doesn't know the name of the plugin, the
+        preferred was is telling it the parser which is available using
+        the `parser` property.
+        """
+        app = get_application()
+        return self.parser not in app.parsers
+
+    def _get_parser(self):
+        return self.parser_data['parser']
+
+    def _set_parser(self, value):
+        self.parser_data['parser'] = value
+
+    parser = property(_get_parser, _set_parser)
+    del _get_parser, _set_parser
+
     def _get_raw_intro(self):
         return self._raw_intro
 
     def _set_raw_intro(self, value):
         from textpress.htmlprocessor import parse, dump_tree
-        tree = parse(value)
+        tree = parse(value, self.parser, 'post-intro')
         self._raw_intro = value
         self._intro_cache = tree
-        self.cache['intro'] = dump_tree(tree)
+        self.parser_data['intro'] = dump_tree(tree)
 
     def _get_intro(self):
         if not hasattr(self, '_intro_cache'):
             from textpress.htmlprocessor import load_tree
-            self._intro_cache = load_tree(self.cache['intro'])
+            self._intro_cache = load_tree(self.parser_data['intro'])
         return self._intro_cache
 
     def _set_intro(self, value):
@@ -404,25 +439,26 @@ class Post(object):
         if not isinstance(value, Fragment):
             raise TypeError('fragment required, otherwise use raw_intro')
         self._intro_cache = value
-        self.cache['intro'] = dump_tree(value)
+        self.parser_data['intro'] = dump_tree(value)
 
     raw_intro = property(_get_raw_intro, _set_raw_intro)
     intro = property(_get_intro, _set_intro)
+    del _get_raw_intro, _set_raw_intro, _get_intro, _set_intro
 
     def _get_raw_body(self):
         return self._raw_body
 
     def _set_raw_body(self, value):
         from textpress.htmlprocessor import parse, dump_tree
-        tree = parse(value)
+        tree = parse(value, self.parser, 'post-body')
         self._raw_body = value
         self._body_cache = tree
-        self.cache['body'] = dump_tree(tree)
+        self.parser_data['body'] = dump_tree(tree)
 
     def _get_body(self):
         if not hasattr(self, '_body_cache'):
             from textpress.htmlprocessor import load_tree
-            self._body_cache = load_tree(self.cache['body'])
+            self._body_cache = load_tree(self.parser_data['body'])
         return self._body_cache
 
     def _set_body(self, value):
@@ -430,16 +466,17 @@ class Post(object):
         if not isinstance(value, Fragment):
             raise TypeError('fragment required, otherwise use raw_body')
         self._body_cache = value
-        self.cache['body'] = dump_tree(value)
+        self.parser_data['body'] = dump_tree(value)
 
     raw_body = property(_get_raw_body, _set_raw_body)
     body = property(_get_body, _set_body)
+    del _get_raw_body, _set_raw_body, _get_body, _set_body
 
     def auto_slug(self):
         """Generate a slug for this post."""
         self.slug = gen_slug(self.title)
         if not self.slug:
-            self.slug = '1'         # XXX: count this up in a save hook
+            self.slug = self.pub_date.strftime('%H:%M')
 
     def refresh_cache(self):
         """Update the cache."""

@@ -54,12 +54,6 @@
     attributes from the node they control to make sure the output isn't
     that bad. The preferred prefix for plugins is "tp:".
 
-    Alternative Parsers
-    ~~~~~~~~~~~~~~~~~~~
-
-    Plugins may change the parser for some input data or reasons. Parsers
-    should be subclasses of `textpress.htmlprocessor.BaseParser`
-
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
@@ -81,32 +75,37 @@ SELF_CLOSING_TAGS = ['br', 'img', 'area', 'hr', 'param', 'meta',
 _parser_cache = WeakKeyDictionary()
 
 
-def parse(input_data, reason='unknown', optimize=True):
+def parse(input_data, parser=None, reason='unknown', optimize=True):
     """
     Generate a doc tree out of the data provided. If we are not in unbound
     mode the `process-doc-tree` event is sent so that plugins can modify
     the tree in place. The reason is useful for plugins to find out if they
     want to render it or now. For example a normal blog post would have the
-    reason 'post', an isolated page from a plugin maybe 'page' etc.
+    reason 'post-body' or 'post-intro', an isolated page from a plugin maybe
+    'page' etc.
 
-    The resulting tree structure is safe for pickeling.
+    If optimize is enabled the return value might be a non queryable fragment.
     """
-    # give plugins the possiblity to switch the parser
-    for parser in emit_event('switch-markup-parser', input_data, reason):
-        if parser is not None:
-            break
-    # or go with the default parser
+    app = get_application()
+    if parser is None:
+        try:
+            parser_cls = app.parsers[app.cfg['default_parser']]
+        except KeyError:
+            # the plugin that provided the default parser is not
+            # longer available.  reset the config value to the builtin
+            # parser and parse afterwards.
+            app.cfg.revert_to_default('default_parser')
+            parser_cls = MarkupParser
     else:
-        app = get_application()
-        if app not in _parser_cache:
-            _parser_cache[app] = parser = MarkupParser()
-        else:
-            parser = _parser_cache[app]
-    rv = parser.parse(input_data, reason)
+        try:
+            parser_cls = app.parsers[parser]
+        except KeyError:
+            raise ValueError('parser %r does not exist' % (parser,))
 
-    # if we want a optimized nodetree, we do so
+    parser = parser_cls()
+    rv = parser.parse(input_data, reason)
     if optimize:
-        rv = rv.optimize()
+        return rv.optimize()
     return rv
 
 
@@ -234,6 +233,9 @@ class BaseParser(object):
     Baseclass for all kinds of parsers.
     """
 
+    #: the name of the parser
+    name = '?'
+
     def __init__(self):
         pass
 
@@ -249,6 +251,8 @@ class MarkupParser(BaseParser):
     Don't instanciate this parser yourself, better use the parse() method
     that caches parsers.
     """
+
+    name = 'Simple HTML'
 
     def __init__(self):
         self.isolated_tags = ['script', 'style', 'pre']
@@ -699,3 +703,8 @@ _node_types = {
     StaticFragment: 4
 }
 _node_types_reverse = [Node, TextNode, DataNode, Fragment, StaticFragment]
+
+
+all_parsers = {
+    'default':      MarkupParser
+}

@@ -27,7 +27,7 @@
     </dl>
     <div id="char-select" style="display: none">
       <strong>{% trans "Use Common Character" %}:</strong>
-    {%- for char in '‘’‚“”„«»‹›' %}
+    {%- for char in '‘’‚“”„«»‹›\u300c\u300d\u300e\u300f' %}
       <a href="javascript:insertChar('{{ char }}')">{{ char }}</a>
     {%- endfor %}
     </div>

@@ -618,7 +618,9 @@ class TextPress(object):
         from textpress.urls import all_urls
         from textpress.views import all_views
         from textpress.services import all_services
-        self._views = all_views.copy()
+        from textpress.htmlprocessor import all_parsers
+        self.views = all_views.copy()
+        self.parsers = all_parsers.copy()
         self._url_rules = all_urls[:]
         self._services = all_services.copy()
         self._shared_exports = {}
@@ -819,7 +821,18 @@ class TextPress(object):
         """Add a callback as view."""
         if self._setup_finished:
             raise RuntimeError('cannot add view after application setup')
-        self._views[endpoint] = callback
+        self.views[endpoint] = callback
+
+    def add_parser(self, name, class_):
+        """Add a new parser class."""
+        if self._setup_finished:
+            raise RuntimeError('cannot add parser after application setup')
+        self.parsers[name] = class_
+
+    def list_parsers(self):
+        """Return a sorted list of parsers (parser_id, parser_name)."""
+        return sorted([(k, p.name) for k, p in self.parsers.iteritems()],
+                      key=lambda x: x[1].lower())
 
     def add_servicepoint(self, identifier, callback):
         """Add a new function as servicepoint."""
@@ -834,10 +847,6 @@ class TextPress(object):
     def disconnect_event(self, listener_id):
         """Disconnect a given listener_id."""
         self._event_manager.remove(listener_id)
-
-    def get_view(self, endpoint):
-        """Get the view for a given endpoint."""
-        return self._views[endpoint]
 
     def get_page_metadata(self):
         """Return the metadata as HTML part for templates."""
@@ -959,7 +968,7 @@ class TextPress(object):
             except routing.RequestRedirect, e:
                 redirect(e.new_url)
             else:
-                resp = self.get_view(endpoint)(req, **args)
+                resp = self.views[endpoint](req, **args)
         except DirectResponse, e:
             resp = e.response
 
