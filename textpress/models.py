@@ -150,7 +150,7 @@ class PostManager(db.DatabaseManager):
             if isinstance(exclude, Post):
                 exclude = Post.post_id
             query = query.filter(Post.post_id != exclude)
-        return list(query)
+        return query
 
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
                  page=1, ignore_role=False):

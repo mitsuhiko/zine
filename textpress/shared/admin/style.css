@@ -358,7 +358,11 @@ div.contents table td {
 }
 
 div.contents table tr.even {
-    background-color: #f2f2f2;
+    background-color: #fbfbfb;
+}
+
+div.contents table tr.odd {
+    background-color: #fefefe;
 }
 
 div.contents dl {
@@ -519,7 +523,7 @@ table.plugins td {
 }
 
 table.plugins tr.plugin-active td {
-    background-color: #def1e2;
+    background-color: #98E8F0;
 }
 
 /* :::: CONFIG EDITOR :::: */

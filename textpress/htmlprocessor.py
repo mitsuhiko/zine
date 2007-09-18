@@ -221,15 +221,12 @@ def _query(nodes, rule):
 
 def _iter_all(nodes):
     """Iterate over all nodes and ignore double matches."""
-    seen_already = set()
-    for node in nodes:
-        if node not in seen_already:
-            seen_already.add(node)
+    def inner(nodes):
+        for node in nodes:
             yield node
-            for n in node.children:
-                if n not in seen_already:
-                    seen_already.add(n)
-                    yield n
+            for item in inner(node.children):
+                yield item
+    return inner(nodes)
 
 
 class BaseParser(object):

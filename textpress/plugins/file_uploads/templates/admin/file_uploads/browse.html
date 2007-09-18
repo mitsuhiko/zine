@@ -13,7 +13,7 @@
       <th>{% trans "Actions" %}</th>
     </tr>
   {%- for file in files %}
-    <tr>
+    <tr class="{% cycle 'even', 'odd' %}">
       <td><a href="{{ url_for('file_uploads/get_file', filename=file.filename)|e
           }}">{{ file.filename|e }}</a></td>
       <td>{{ file.size|filesizeformat }}</td>

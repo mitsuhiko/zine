@@ -200,7 +200,7 @@ def do_index(req):
     comments etc.)
     """
     return render_admin_response('admin/index.html', 'dashboard',
-                                 drafts=Post.objects.get_drafts())
+                                 drafts=list(Post.objects.get_drafts()))
 
 
 @require_role(ROLE_AUTHOR)
@@ -210,7 +210,7 @@ def do_show_posts(req):
     paginated which makes it hard to manage if you have more posts.
     """
     return render_admin_response('admin/show_posts.html', 'posts.overview',
-                                 drafts=Post.objects.get_drafts(),
+                                 drafts=list(Post.objects.get_drafts()),
                                  **Post.objects.get_list())
 
 
@@ -333,7 +333,10 @@ def do_edit_post(req, post_id=None):
                 post.author_id = author.user_id
                 post.raw_body = body
                 post.raw_intro = intro
-                post.slug = slug
+                if slug:
+                    post.slug = slug
+                else:
+                    post.auto_slug()
                 post.pub_date = pub_date
             post.tags[:] = tags
             post.comments_enabled = form['comments_enabled']
@@ -366,7 +369,7 @@ def do_edit_post(req, post_id=None):
         form=form,
         tags=Tag.objects.all(),
         post=post,
-        drafts=Post.objects.get_drafts(exclude=exclude),
+        drafts=list(Post.objects.get_drafts(exclude=exclude)),
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
             (STATUS_DRAFT, _('Draft')),
