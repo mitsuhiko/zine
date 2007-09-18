@@ -13,11 +13,18 @@
     :license: GNU GPL.
 """
 import re
+from os.path import dirname, join
 from textpress.api import *
+from textpress.models import ROLE_ADMIN
+from textpress.views.admin import require_role, render_admin_response, \
+     flash
+from textpress.utils import CSRFProtector
 
+
+TEMPLATES = join(dirname(__file__), 'templates')
+SHARED_FILES = join(dirname(__file__), 'shared')
 
 _ignored_nodes = set(['pre', 'code'])
-
 _rules = [
     (re.compile(r'(?:^|\s)(\')(?u)'), 'single_opening_quote', u'‘'),
     (re.compile(r'\S(\')(?u)'), 'single_closing_quote', u'’'),
@@ -39,17 +46,61 @@ def process_doc_tree(doctree, input_data, reason):
         if not m.groups():
             return used_signs[sign]
         offset = m.start()
-        return all[:m.start(1) - offset] + used_signs[sign] + all[m.end(1) - offset:]
+        return all[:m.start(1) - offset] + \
+               used_signs[sign] + \
+               all[m.end(1) - offset:]
 
     cfg = get_application().cfg
-    used_signs = dict((k, cfg['typography/' + k]) for _, k, _ in _rules)
+    used_signs = dict((k, cfg['typography/' + k]) for ignore, k, ignore in _rules)
     for node in doctree.query('#'):
         if node.parent and node.parent.name not in _ignored_nodes:
-            for regex, sign, _ in _rules:
+            for regex, sign, ignore in _rules:
                 node.value = regex.sub(handle_match, node.value)
+
+
+def add_config_link(req, navigation_bar):
+    """Add a link to the typography options page"""
+    if req.user.role >= ROLE_ADMIN:
+        for link_id, url, title, children in navigation_bar:
+            if link_id == 'options':
+                children.insert(1, ('typography',
+                                    url_for('typography/config'),
+                                    _('Typography')))
+
+
+def show_config(req):
+    add_script(url_for('typography/shared', filename='script.js'))
+    add_link('stylesheet', url_for('typography/shared',
+                                   filename='style.css'), 'text/css')
+    form = dict((k, req.app.cfg['typography/' + k])
+                for ignore, k, ignore in _rules)
+    csrf_protector = CSRFProtector()
+
+    if req.method == 'POST':
+        csrf_protector.assert_safe()
+        altered = False
+        for ignore, key, ignore in _rules:
+            value = req.form.get(key)
+            if value:
+                req.app.cfg['typography/' + key] = value
+                altered = True
+        if altered:
+            flash(_('Typography settings chaned.'), 'configure')
+        redirect(url_for('typography/config'))
+    return render_admin_response('admin/typography.html',
+                                 'options.typography',
+        form=form,
+        csrf_protector=csrf_protector
+    )
 
 
 def setup(app, plugin):
     app.connect_event('process-doc-tree', process_doc_tree)
-    for _, name, default in _rules:
+    app.connect_event('modify-admin-navigation-bar', add_config_link)
+    app.add_url_rule('/admin/options/typography',
+                     endpoint='typography/config')
+    app.add_view('typography/config', show_config)
+    app.add_template_searchpath(TEMPLATES)
+    app.add_shared_exports('typography', SHARED_FILES)
+    for ignore, name, default in _rules:
         app.add_config_var('typography/' + name, unicode, default)

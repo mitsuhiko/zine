@@ -1,0 +1,33 @@
+/**
+ * Typography Script
+ * ~~~~~~~~~~~~~~~~~
+ *
+ * The style for the typography script.
+ *
+ * :copyright: 2007 by Armin Ronacher.
+ * :license: GNU GPL.
+ */
+
+#char-select {
+    padding: 0 0 0 20px;
+}
+
+#char-select a {
+    padding: 0 10px 0 10px;
+    line-height: 40px;
+    color: #111;
+    font-weight: bold;
+    font-size: 32px;
+    text-decoration: none;
+}
+
+#char-select a:hover {
+    border: 1px solid #222;
+    padding: 0 9px 0 9px;
+    background-color: #eee;
+}
+
+form dd input {
+    text-align: center;
+    font-size: 2em!important;
+}
