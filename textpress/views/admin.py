@@ -230,6 +230,7 @@ def do_edit_post(req, post_id=None):
     parsers = req.app.list_parsers()
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
+    old_texts = None
 
     # edit existing post
     if post_id is not None:
@@ -251,6 +252,7 @@ def do_edit_post(req, post_id=None):
             author=post.author.username,
             parser=post.parser
         )
+        old_texts = (form['intro'], form['body'])
         if post.parser_missing:
             missing_parser = post.parser
 
@@ -271,7 +273,6 @@ def do_edit_post(req, post_id=None):
             parser=req.app.cfg['default_parser']
         )
 
-    old_texts = (form['intro'], form['body'])
 
     # handle incoming data and create/update the post
     if req.method == 'POST':
@@ -302,13 +303,13 @@ def do_edit_post(req, post_id=None):
         form['pings_enabled'] = bool(req.form.get('pings_enabled'))
         form['parser'] = parser = req.form.get('parser')
         if missing_parser and parser == post.parser:
-            if old_texts != (form['intro'], form['body']):
+            if old_texts != (intro, body):
                 errors.append(_('You cannot change the text of a post which '
                                 'parser does not exist any longer.'))
             else:
                 keep_post_texts = True
         elif parser not in req.app.parsers:
-            errors.append(_('Unknown parser %s.') % parser)
+            errors.append(_('Unknown parser "%s".') % parser)
         try:
             pub_date = parse_datetime(req.form.get('pub_date') or 'now')
         except ValueError:
@@ -351,7 +352,7 @@ def do_edit_post(req, post_id=None):
                 post.title = title
                 post.author_id = author.user_id
                 if not keep_post_texts:
-                    # Always set parser before raw_bdoy and raw_intro because
+                    # Always set parser before raw_body and raw_intro because
                     # those require the correct parser to be defined.
                     post.parser = parser
                     post.raw_body = body
@@ -489,11 +490,13 @@ def do_edit_comment(req, comment_id):
         'email':        comment.email,
         'www':          comment.www,
         'body':         comment.raw_body,
+        'parser':       comment.parser,
         'pub_date':     format_datetime(comment.pub_date),
         'blocked':      comment.blocked
     }
+    old_text = comment.raw_body
     missing_parser = None
-    old_body = form['body']
+    keep_comment_text = False
     if comment.parser_missing:
         missing_parser = post.parser
 
@@ -520,9 +523,15 @@ def do_edit_comment(req, comment_id):
                             'the author.'))
         form['www'] = www = req.form.get('www')
         form['body'] = body = req.form.get('body')
-        if missing_parser and body != old_body:
-            errors.append(_('You cannot change the text of a comment '
-                            'if the parser is missing.'))
+        form['parser'] = parser = req.form.get('parser')
+        if missing_parser and parser == comment.parser:
+            if old_text != body:
+                errors.append(_('You cannot change the text of a comment '
+                                'if the parser is missing.'))
+            else:
+                keep_comment_text = True
+        elif parser not in req.app.parsers:
+            errors.append(_('Unknown parser "%s".') % parser)
         if not body:
             errors.append(_('Need a text for this comment.'))
         if www and not is_valid_url(www):
@@ -540,7 +549,9 @@ def do_edit_comment(req, comment_id):
             comment.email = email
             comment.www = www
             comment.pub_date = pub_date
-            if not missing_parser:
+            if not keep_comment_text:
+                # always set parser before raw body because of callbacks.
+                comment.parser = parser
                 comment.raw_body = body
             comment.blocked = blocked
             if not blocked:
@@ -556,18 +567,21 @@ def do_edit_comment(req, comment_id):
     for error in errors:
         flash(error, 'error')
 
+    parsers = req.app.list_parsers()
     if missing_parser:
+        parsers.insert(0, (missing_parser, _('Missing Parser "%s"') %
+                           missing_parser))
         flash(_('This comment was submitted when the parser "%(parser)s" was '
                 'the comment parser. Because it is not available any longer '
                 'TextPress doesn\'t allow modifcations on the text until you '
                 'reinstall/activate the plugin that provided that parser.') %
               {'parser': escape(missing_parser)}, 'error')
 
-
     return render_admin_response('admin/edit_comment.html',
                                  'comments.overview',
         comment=comment,
         form=form,
+        parsers=parsers,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
