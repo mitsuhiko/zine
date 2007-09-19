@@ -12,8 +12,7 @@ from math import ceil, log
 from datetime import date, datetime, timedelta
 
 from textpress.database import users, tags, posts, post_tags, comments, db
-from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug, \
-     markup
+from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug
 from textpress.application import get_application, get_request
 
 
@@ -42,10 +41,10 @@ class UserManager(db.DatabaseManager):
         return self.get(NOBODY_USER_ID)
 
     def get_authors(self):
-        return self.select(User.role >= ROLE_AUTHOR)
+        return self.all(User.role >= ROLE_AUTHOR)
 
     def get_all_but_nobody(self):
-        return self.select(User.user_id != NOBODY_USER_ID)
+        return self.all(User.user_id != NOBODY_USER_ID)
 
 
 class User(object):
@@ -134,7 +133,7 @@ class PostManager(db.DatabaseManager):
     def get_by_timestamp_and_slug(self, year, month, day, slug):
         """Get an item by year, month, day, and the post slug."""
         start = datetime(year, month, day)
-        return self.select_first(
+        return self.first(
             (Post.pub_date >= start) &
             (Post.pub_date < start + timedelta(days=1)) &
             (Post.slug == slug)
@@ -143,14 +142,14 @@ class PostManager(db.DatabaseManager):
     def get_drafts(self, exclude=None, ignore_user=False):
         """Get a list of drafts."""
         req = get_request()
-        query = self.select(Post.status == STATUS_DRAFT)
+        query = self.query.filter(Post.status == STATUS_DRAFT)
         if req and not ignore_user:
             query = query.filter(Post.author_id == req.user.user_id)
         if exclude is not None:
             if isinstance(exclude, Post):
                 exclude = Post.post_id
             query = query.filter(Post.post_id != exclude)
-        return query
+        return query.all()
 
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
                  page=1, ignore_role=False):
@@ -245,20 +244,21 @@ class PostManager(db.DatabaseManager):
         # send the query
         q = db.and_(*conditions)
         offset = per_page * (page - 1)
-        postlist = Post.objects.select(q)[offset:offset + per_page]
+        postlist = Post.objects.query.filter(q)[offset:offset + per_page]
         pagination = Pagination(endpoint, page, per_page,
                                 Post.objects.count(q), url_args)
 
         return {
             'pagination':       pagination,
-            'posts':            postlist,
+            'posts':            postlist.all(),
             'probably_404':     page != 1 and not postlist,
         }
 
-    def get_archive_summary(self, detail='months', limit=None, ignore_role=False):
+    def get_archive_summary(self, detail='months', limit=None,
+                            ignore_role=False):
         """
-        Query function to get the archive of the blog. Usually used directly from
-        the templates to add some links to the sidebar.
+        Query function to get the archive of the blog. Usually used directly
+        from the templates to add some links to the sidebar.
         """
         role = ROLE_NOBODY
         if not ignore_role:
@@ -359,6 +359,7 @@ class Post(object):
         self.parser_data = {'parser': parser}
         self.raw_intro = intro
         self.raw_body = body
+        self.extra = {}
 
         if pub_date is None:
             pub_date = datetime.utcnow()
@@ -422,7 +423,8 @@ class Post(object):
         return self._raw_intro
 
     def _set_raw_intro(self, value):
-        from textpress.htmlprocessor import parse, dump_tree
+        from textpress.parsers import parse
+        from textpress.fragment import dump_tree
         tree = parse(value, self.parser, 'post-intro')
         self._raw_intro = value
         self._intro_cache = tree
@@ -430,12 +432,12 @@ class Post(object):
 
     def _get_intro(self):
         if not hasattr(self, '_intro_cache'):
-            from textpress.htmlprocessor import load_tree
+            from textpress.fragment import load_tree
             self._intro_cache = load_tree(self.parser_data['intro'])
         return self._intro_cache
 
     def _set_intro(self, value):
-        from textpress.htmlprocessor import Fragment, dump_tree
+        from textpress.fragment import Fragment, dump_tree
         if not isinstance(value, Fragment):
             raise TypeError('fragment required, otherwise use raw_intro')
         self._intro_cache = value
@@ -449,7 +451,8 @@ class Post(object):
         return self._raw_body
 
     def _set_raw_body(self, value):
-        from textpress.htmlprocessor import parse, dump_tree
+        from textpress.parsers import parse
+        from textpress.fragment import dump_tree
         tree = parse(value, self.parser, 'post-body')
         self._raw_body = value
         self._body_cache = tree
@@ -457,12 +460,12 @@ class Post(object):
 
     def _get_body(self):
         if not hasattr(self, '_body_cache'):
-            from textpress.htmlprocessor import load_tree
+            from textpress.fragment import load_tree
             self._body_cache = load_tree(self.parser_data['body'])
         return self._body_cache
 
     def _set_body(self, value):
-        from textpress.htmlprocessor import Fragment, dump_tree
+        from textpress.fragment import Fragment, dump_tree
         if not isinstance(value, Fragment):
             raise TypeError('fragment required, otherwise use raw_body')
         self._body_cache = value
@@ -621,11 +624,11 @@ class CommentManager(db.DatabaseManager):
 
     def get_blocked(self):
         """Get all blocked comments."""
-        return Comment.select(Comment.blocked == True)
+        return Comment.all(Comment.blocked == True)
 
     def get_block_count(self):
         """Get the number of blocked comments."""
-        return Comment.count(Comment.blocked == True)
+        return Comment.all(Comment.blocked == True)
 
 
 class Comment(object):
@@ -633,8 +636,8 @@ class Comment(object):
 
     objects = CommentManager()
 
-    def __init__(self, post, author, email, www, body, parent=None, pub_date=None,
-                 submitter_ip='0.0.0.0'):
+    def __init__(self, post, author, email, www, body, parent=None,
+                 pub_date=None, submitter_ip='0.0.0.0', parser=None):
         if isinstance(post, (int, long)):
             self.post_id = post
         else:
@@ -642,7 +645,11 @@ class Comment(object):
         self.author = author
         self.email = email
         self.www = www
-        self.body = markup(body)
+
+        if parser is None:
+            parser = get_application().cfg['comment_parser']
+        self.parser_data = {'parser': parser}
+        self.raw_body = body
         if isinstance(parent, (int, long)):
             self.parent_id = parent
         else:
@@ -666,6 +673,48 @@ class Comment(object):
 
     visible = property(visible_for_user)
 
+    @property
+    def parser_missing(self):
+        app = get_application()
+        return self.parser not in app.parsers
+
+    def _get_parser(self):
+        return self.parser_data['parser']
+
+    def _set_parser(self, value):
+        self.parser_data['parser'] = value
+
+    parser = property(_get_parser, _set_parser)
+    del _get_parser, _set_parser
+
+    def _get_raw_body(self):
+        return self._raw_body
+
+    def _set_raw_body(self, value):
+        from textpress.parsers import parse
+        from textpress.fragment import dump_tree
+        tree = parse(value, self.parser, 'comment')
+        self._raw_body = value
+        self._body_cache = tree
+        self.parser_data['body'] = dump_tree(tree)
+
+    def _get_body(self):
+        if not hasattr(self, '_body_cache'):
+            from textpress.fragment import load_tree
+            self._body_cache = load_tree(self.parser_data['body'])
+        return self._body_cache
+
+    def _set_body(self, value):
+        from textpress.fragment import Fragment, dump_tree
+        if not isinstance(value, Fragment):
+            raise TypeError('fragment required, otherwise use raw_body')
+        self._body_cache = value
+        self.parser_data['body'] = dump_tree(value)
+
+    raw_body = property(_get_raw_body, _set_raw_body)
+    body = property(_get_body, _set_body)
+    del _get_raw_body, _set_raw_body, _get_body, _set_body
+
     def __repr__(self):
         return '<%s %r>' % (
             self.__class__.__name__,
@@ -680,6 +729,7 @@ db.mapper(User, users, properties={
 })
 db.mapper(Tag, tags)
 db.mapper(Comment, comments, properties={
+    '_raw_body':    comments.c.body,
     'children': db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
         cascade='all', order_by=[db.asc(comments.c.pub_date)],

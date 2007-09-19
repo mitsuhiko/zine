@@ -46,8 +46,8 @@ def main(argv):
     if action == 'serve':
         if '-d' in opts:
             app = DebuggedApplication(app, True)
-        run_simple('localhost', 4000, app, '-r' in opts,
-                   threaded=True)
+        run_simple('localhost', 4000, app, '-r' in opts)
+                   #threaded=True)
 
     elif action == 'shell':
         del sys.argv[1:]

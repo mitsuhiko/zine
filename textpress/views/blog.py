@@ -230,7 +230,6 @@ def do_show_post(req, year, month, day, slug):
             errors.append(_('Your comment is too long.'))
         form['parent'] = parent = req.form.get('parent')
         if parent:
-
             parent = Comment.objects.get(parent)
         else:
             parent = None

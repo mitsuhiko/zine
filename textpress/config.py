@@ -30,6 +30,7 @@ DEFAULT_VARS = {
     # the default parser. If there plans to change the default parser
     # for future TextPress versions that code must be altered first.
     'default_parser':       (unicode, u'default'),
+    'comment_parser':       (unicode, u'comment'),
 
     # comments and traceback defaults
     'comments_enabled':     (bool, True),

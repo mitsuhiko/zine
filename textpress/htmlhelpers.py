@@ -10,7 +10,8 @@
     :license: GNU GPL.
 """
 from xml.sax.saxutils import escape, quoteattr
-from textpress.htmlprocessor import SELF_CLOSING_TAGS
+from textpress.fragment import SELF_CLOSING_TAGS
+
 
 jinja_allowed_attributes = __all__ = [
     'input_field', 'checkbox', 'radio_button', 'textarea'

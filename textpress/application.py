@@ -618,7 +618,7 @@ class TextPress(object):
         from textpress.urls import all_urls
         from textpress.views import all_views
         from textpress.services import all_services
-        from textpress.htmlprocessor import all_parsers
+        from textpress.parsers import all_parsers
         self.views = all_views.copy()
         self.parsers = all_parsers.copy()
         self._url_rules = all_urls[:]
@@ -831,8 +831,8 @@ class TextPress(object):
 
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""
-        return sorted([(k, p.name) for k, p in self.parsers.iteritems()],
-                      key=lambda x: x[1].lower())
+        return sorted([(key, parser.get_name()) for key, parser in
+                       self.parsers.iteritems()], key=lambda x: x[1].lower())
 
     def add_servicepoint(self, identifier, callback):
         """Add a new function as servicepoint."""

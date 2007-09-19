@@ -118,21 +118,16 @@
     Querying
     --------
 
-    How to query? Just use the database manager and/or the methods on the
-    SQLAlchemy method those queries return.
-
-    The default methods on the `DatabaseManager` are `get`, `all`, `get_by`,
-    `select_first`, `select` and `count`. Except of `get` and `select_first`
-    all methods return `Query` objects.
-
-    They are documented in detail in the `DatabaseManger` docstring.  For
-    details about the `Query` object returned, have a look at the `SQLAlchemy`
-    documentation.
+    How to query? Just use the database manager attached to an object.  If
+    you haven't attached on yourself the default `DatabaseManager` is mounted
+    on the model as `objects`.  See the `DatabaseManager` docstring for more
+    details.
 
     If you have to fire up some more raw and complex queries that don't use
     the mapper, get yourself a engine object using `get_engine` and start
     playing with it :-)  For normal execution you however don't have to do
-    this, you can use `db.execute`, `db.begin` etc.
+    this, you can use `db.execute`, `db.begin` etc. which is also the
+    preferred way since it takes place in the current session.
 
 
     Deleting Objects
@@ -224,7 +219,64 @@ class ManagerExtension(orm.MapperExtension):
 
 class DatabaseManager(object):
     """
-    Baseclass for the database manager. One can extend that one.
+    Baseclass for the database manager which you can also subclass to add
+    more methods to it and attach to models by hand.
+
+    We use the SQLAlchemy querysets to query the database. To get a raw
+    queryset, all you have to do is to access `Model.objects.query` and you
+    can fire up selects.  The default approach is this::
+
+        Model.objects.query.filter(Model.something == "blub").all()
+
+    You can chain as many calls as you want to further filter the objects
+    before sending the request to the database.  The following methods on
+    the queryset cause a select:
+
+    `all`
+        get all objects from the list.
+
+    `first`
+        get the first matching object.
+
+    `count`
+        just count all objects that would match.
+
+    Because you can end up with quite a lot of chained methodcalls which can
+    result in insanely long lines there are some methods that are useful
+    shortcuts:
+
+        Model.objects.all()
+            equivalent to Model.objects.query.all()
+
+        Model.objects.all(condition)
+            equivalent to Model.objects.query.filter(condition).all()
+
+        Model.objects.first()
+            equivalent to Model.object.query.first()
+
+        Model.objects.first(condition)
+            equivalent to Model.objects.query.filter(condition).first()
+
+        Model.objects.count()
+            equivalent to Model.objects.query.count()
+
+        Model.objects.count(condition)
+            equivalent to Model.objects.query.filter(condition).all()
+
+        Model.objects.get_by(condition)
+            equivalent to Model.objects.query.filter_by(condition).first()
+
+        Model.objects.get(ident)
+            equivalent to Model.objects.query.get(int(ident))
+            just that it eats up exceptions that can occour during integer
+            conversion and just return None.
+
+    If you want to add your own methods to the database manager keep in mind
+    that they should always return a list!  If they don't because you want
+    to further filter them in the view you have to prefix them with `filter_`
+    and document their behaviour.
+
+    Some of the methods of this class are aliases.
     """
 
     def __init__(self):
@@ -236,6 +288,11 @@ class DatabaseManager(object):
             raise RuntimeError('manager already bound to model')
         self.model = model
 
+    @property
+    def query(self):
+        """Return a new queryset."""
+        return session.registry().query(self.model)
+
     def get(self, ident, **kw):
         """
         Return an instance of the object based on the given identifier
@@ -245,41 +302,40 @@ class DatabaseManager(object):
         with the column values in the order of the table primary key
         definitions.
         """
-        return session.registry().query(self.model).get(ident, **kw)
+        if not isinstance(ident, tuple):
+            try:
+                ident = int(ident)
+            except (TypeError, ValueError):
+                return
+        return self.query.get(ident, **kw)
 
     def get_by(self, **kw):
         """
         Get a query set by some rules.
         """
-        return self.all().filter_by(**kw).first()
+        return self.query.filter_by(**kw).first()
 
-    def all(self):
+    def all(self, *args, **kw):
         """
-        Return an SQLAlchemy query object and return it.
-        """
-        return session.registry().query(self.model)
-
-    def select_first(self, *args, **kw):
-        """
-        Select the first and return a `Query` object.
-        """
-        return self.all().filter(*args, **kw).first()
-
-    def select(self, *args, **kw):
-        """
-        Select multiple objects and return a `Query` object. `select`
-        without arguments (also not keyword arguments!) is equivalent
-        to `all()` but not preferred.
+        Return a list of all objects. not queryable any further.
         """
         if not args and not kw:
-            return self.all()
-        return self.all().filter(*args, **kw)
+            return self.query.all()
+        return self.query.filter(*args, **kw).all()
+
+    def first(self, *args, **kw):
+        """
+        Return the first object that matches the query.
+        """
+        if not args and not kw:
+            return self.query.first()
+        return self.query.filter(*args, **kw).first()
 
     def count(self, *args, **kw):
         """
         Count all objects matching an expression.
         """
-        return self.all().count(*args, **kw)
+        return self.query.count(*args, **kw)
 
 
 session = ScopedSession(session_factory, scopefunc=get_ident)
@@ -363,6 +419,7 @@ posts = db.Table('posts', metadata,
     db.Column('comments_enabled', db.Boolean),
     db.Column('pings_enabled', db.Boolean),
     db.Column('parser_data', db.PickleType),
+    db.Column('extra', db.PickleType),
     db.Column('status', db.Integer)
 )
 
@@ -380,6 +437,7 @@ comments = db.Table('comments', metadata,
     db.Column('email', db.Unicode(250)),
     db.Column('www', db.Unicode(200)),
     db.Column('body', db.Unicode),
+    db.Column('parser_data', db.PickleType),
     db.Column('parent_id', db.Integer, db.ForeignKey('comments.comment_id')),
     db.Column('pub_date', db.DateTime),
     db.Column('blocked', db.Boolean),

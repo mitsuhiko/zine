@@ -32,7 +32,7 @@ def do_get_comment(req):
     return {
         'id':           comment.comment_id,
         'parent':       parent_id,
-        'body':         comment.body,
+        'body':         unicode(comment.body),
         'author':       comment.author,
         'email':        email,
         'pub_date':     int(comment.pub_date.strftime('%s')),

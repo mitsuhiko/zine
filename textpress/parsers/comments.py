@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    textpress.markup
-    ~~~~~~~~~~~~~~~~
+    textpress.parsers.markup
+    ~~~~~~~~~~~~~~~~~~~~~~~~
 
     This module implements a simple text formatting markup used for post
     comments. It does not allow HTML but some simple formattings like
@@ -10,9 +10,10 @@
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-import cgi
 import re
+from textpress.fragment import Fragment, Node, TextNode
 from textpress.utils import is_valid_url
+from textpress.parsers import BaseParser
 
 
 inline_formatting = {
@@ -28,7 +29,7 @@ inline_formatting = {
 }
 
 simple_formattings = {
-    'strong_begin':                 '<strong>',
+    'strong_begin':                 'strong',
     'strong_end':                   '</strong>',
     'emphasized_begin':             '<em>',
     'emphasized_end':               '</em>',
@@ -53,14 +54,16 @@ without_end_tag = set(name for name, (_, end) in inline_formatting.iteritems()
                       if end is None)
 
 
-class MarkupParser(object):
+class CommentParser(BaseParser):
     """This class tokenizes and translates the output to HTML."""
 
-    def __init__(self, text):
-        self.text = text
+    @staticmethod
+    def get_name():
+        from textpress.api import _
+        return _('Emphasized Text')
 
-    def tokenize(self):
-        text = '\n'.join(self.text.splitlines())
+    def tokenize(self, text):
+        text = u'\n'.join(text.splitlines())
         last_pos = 0
         pos = 0
         end = len(text)
@@ -72,7 +75,7 @@ class MarkupParser(object):
                 m = formatting_end_res[stack[-1]].match(text, pos)
                 if m is not None:
                     if text_buffer:
-                        yield 'text', ''.join(text_buffer)
+                        yield 'text', u''.join(text_buffer)
                         del text_buffer[:]
                     yield stack[-1] + '_end', None
                     stack.pop()
@@ -116,51 +119,52 @@ class MarkupParser(object):
         for token in reversed(stack):
             yield token + '_end', None
 
-    def stream_to_html(self):
-        """Tokenize a text and return a generator that yields HTML parts."""
-        paragraph = []
-        result = []
+    def parse(self, input_data, reason):
+        node = Node('p')
+        result = Fragment()
 
-        def new_paragraph():
-            result.append(paragraph[:])
-            del paragraph[:]
-
-        for token, data in self.tokenize():
-            if token in simple_formattings:
-                paragraph.append(simple_formattings[token])
-            elif token in ('text', 'escaped_code', 'code'):
-                if data:
-                    data = cgi.escape(data)
-                    if token in ('escaped_code', 'code'):
-                        data = '<code>%s</code>' % data
-                    paragraph.append(data)
+        for token, data in self.tokenize(input_data):
+            if token in ('strong_begin', 'emphasized_begin', 'quote_begin'):
+                new_node = Node(token[:-6])
+                node.children.append(new_node)
+                node = new_node
+            elif token in ('strong_end', 'emphasized_end', 'quote_end'):
+                assert node.name == token[:-4]
+                node = node.parent
+            elif token in 'text':
+                node.children.append(TextNode(data))
+            elif token in ('escaped_code', 'code'):
+                new_node = Node('code')
+                new_node.children.append(TextNode(data))
+                node.children.append(new_node)
             elif token == 'link':
                 if ' ' in data:
                     href, caption = data.split(' ', 1)
                 else:
                     href = caption = data
                 if is_valid_url(href):
-                    paragraph.append('<a href="%s" rel="nofollow">%s</a>' %
-                                     (cgi.escape(href), cgi.escape(caption)))
+                    new_node = Node('a', {
+                        'href':     href,
+                        'rel':      'nofollow',
+                    })
+                    new_node.children.append(TextNode(caption))
+                    node.children.append(new_node)
                 else:
-                    paragraph.append(data)
+                    node.children.append(TextNode(data))
             elif token == 'code_block':
-                result.append(cgi.escape(data))
-                new_paragraph()
+                if node:
+                    result.children.append(node)
+                    node = Node('p')
+                new_node = Node('pre')
+                new_node.children.append(TextNode(data))
+                result.children.append(new_node)
             elif token == 'paragraph':
-                new_paragraph()
+                if node:
+                    result.children.append(node)
+                    node = Node('p')
             elif token == 'newline':
-                paragraph.append('<br>')
+                node.children.append(Node('br'))
 
-        if paragraph:
-            result.append(paragraph)
-        for item in result:
-            if isinstance(item, list):
-                if item:
-                    yield '<p>%s</p>' % ''.join(item)
-            else:
-                yield item
-
-    def to_html(self):
-        """Convert the passed text to HTML."""
-        return ''.join(self.stream_to_html())
+        if node:
+            result.children.append(node)
+        return result

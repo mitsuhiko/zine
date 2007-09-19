@@ -15,7 +15,7 @@ from textpress.api import *
 from textpress.utils import CSRFProtector
 from textpress.views.admin import render_admin_response, flash
 from textpress.models import ROLE_ADMIN
-from textpress.htmlprocessor import DataNode
+from textpress.fragment import DataNode
 try:
     from pygments import highlight
     from pygments.lexers import get_lexer_by_name
@@ -27,6 +27,7 @@ except ImportError:
 
 
 _formatters = {}
+_disabled_for = set(['comment'])
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
@@ -94,6 +95,8 @@ def process_doc_tree(doctree, input_data, reason):
     Parse time callback function that replaces all pre blocks with a
     'syntax' attribute the highlighted sourcecode.
     """
+    if reason in _disabled_for:
+        return
     for node in doctree.query('pre[@syntax]'):
         try:
             lexer = get_lexer_by_name(node.attributes.pop('syntax'))

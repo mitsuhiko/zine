@@ -18,10 +18,9 @@ import new
 import sys
 import os
 import logging
+import pytz
 from time import time, strptime, sleep
 from datetime import datetime, date, timedelta
-from pytz import timezone, common_timezones_set as TIMEZONES, \
-     country_timezones as get_timezones_for_country
 from random import choice, randrange, random
 from urlparse import urlparse, urljoin
 from urllib import quote
@@ -67,6 +66,9 @@ _iso8601_re = re.compile(
     # time
     r'(?:T(\d{2}):(\d{2})(?::(\d{2}(?:\.\d+)?))?(Z|[+-]\d{2}:\d{2})?)?$'
 )
+
+TIMEZONES = set(pytz.common_timezones)
+get_timezones_for_country = pytz.country_timezones
 
 # load dynamic constants
 from textpress._dynamic import *
@@ -255,7 +257,7 @@ def format_datetime(obj, format=None):
     """Format a datetime object. Later with i18n"""
     from textpress.application import get_application
     cfg = get_application().cfg
-    tzinfo = timezone(cfg['timezone'])
+    tzinfo = pytz.timezone(cfg['timezone'])
     if type(obj) is date:
         obj = datetime(obj.year, obj.month, obj.day, tzinfo=tzinfo)
     else:
@@ -317,12 +319,6 @@ def parse_datetime(string):
     raise ValueError('invalid date format')
 
 
-def markup(text):
-    """Markup format a text. Used for comments."""
-    from textpress.markup import MarkupParser
-    return MarkupParser(text).to_html()
-
-
 def is_valid_email(mail):
     """Check if the string passed is a valid mail address."""
     return _mail_re.match(mail) is not None
@@ -347,7 +343,8 @@ def is_valid_ip(value):
 def parse_iso8601(value):
     """
     Parse an iso8601 date into a datetime object.
-    The timezone is normalized to UTC, we always use UTC objects internally.
+    The timezone is normalized to UTC, we always use UTC objects
+    internally.
     """
     m = _iso8601_re.match(value)
     if m is None:

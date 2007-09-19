@@ -1,27 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-    textpress.htmlprocessor
-    ~~~~~~~~~~~~~~~~~~~~~~~
+    textpress.fragment
+    ~~~~~~~~~~~~~~~~~~
 
-    We use plain old HTML as blog format so we use BeautifulSoup for
-    parsing that. The output from beautiful soup is converted into a
-    simplified doctree that is load and dumpable, and can emit events
-    on rendering. Plugins can hook in at various places:
+    This module implements the fragment system used by the parsers from
+    the `textpress.parsers` module.  All parsers have to return such
+    fragments so that the caching system can work properly, and more
+    important, that plugins can modify the dom tree.  Full plugin support
+    may only be possible for the simplehtml parser, but all other parsers
+    should try to do their best to provide a compatible interface.
 
-    `process-doc-tree`
-        Called after the doc tree was created, plugins may want to
-        traverse nodes, attach callbacks or replace child nodes.
+    What's guaranteed is that the `process-doc-tree` callback is called once
+    the node tree is assambled by the parser and that (if there are dynamic
+    nodes in the returned tree) the `process-node-callback` event is called
+    during rendering.
 
-    `setup-markup-parser`
-        Called with the markup parser, that's the last and only chance
-        for plugins to modify parsing rules.
-
-    `process-node-callback`
-        Called during rendering if there was a callback for a node.
-
-    Plugins can either modify the tree (preferred because cached) or
-    replace contents of a node at render time (just for dynamic content
-    because slower).
+    If the tree is completely static the optimizer will just store a static
+    fragment which you cannot query.  Thus if the returned node tree should
+    be queryable, it's important to disable the optimizer.
 
     Here a small example plugin that displays the current time in all
     nodes that have a tp:contents="clock" attribute::
@@ -62,51 +58,12 @@ from itertools import izip
 from weakref import WeakKeyDictionary
 from xml.sax.saxutils import quoteattr, escape
 
-from textpress._ext import beautifulsoup as bt
-
-from textpress.application import emit_event, get_request, get_application
+from textpress.application import emit_event
 
 
 #: list of self closing html tags for *rendering*
 SELF_CLOSING_TAGS = ['br', 'img', 'area', 'hr', 'param', 'meta',
                      'link', 'base', 'input', 'embed', 'col']
-
-#: cache for the default markup parser
-_parser_cache = WeakKeyDictionary()
-
-
-def parse(input_data, parser=None, reason='unknown', optimize=True):
-    """
-    Generate a doc tree out of the data provided. If we are not in unbound
-    mode the `process-doc-tree` event is sent so that plugins can modify
-    the tree in place. The reason is useful for plugins to find out if they
-    want to render it or now. For example a normal blog post would have the
-    reason 'post-body' or 'post-intro', an isolated page from a plugin maybe
-    'page' etc.
-
-    If optimize is enabled the return value might be a non queryable fragment.
-    """
-    app = get_application()
-    if parser is None:
-        try:
-            parser_cls = app.parsers[app.cfg['default_parser']]
-        except KeyError:
-            # the plugin that provided the default parser is not
-            # longer available.  reset the config value to the builtin
-            # parser and parse afterwards.
-            app.cfg.revert_to_default('default_parser')
-            parser_cls = MarkupParser
-    else:
-        try:
-            parser_cls = app.parsers[parser]
-        except KeyError:
-            raise ValueError('parser %r does not exist' % (parser,))
-
-    parser = parser_cls()
-    rv = parser.parse(input_data, reason)
-    if optimize:
-        return rv.optimize()
-    return rv
 
 
 def dump_tree(tree):
@@ -226,85 +183,6 @@ def _iter_all(nodes):
             for item in inner(node.children):
                 yield item
     return inner(nodes)
-
-
-class BaseParser(object):
-    """
-    Baseclass for all kinds of parsers.
-    """
-
-    #: the name of the parser
-    name = '?'
-
-    def __init__(self):
-        pass
-
-    def parse(self, input_data, reason):
-        """Return a fragment."""
-
-
-class MarkupParser(BaseParser):
-    """
-    Special class that emits an `setup-markup-parser` event when setting up
-    itself so that plugins can change the way elements are processed.
-
-    Don't instanciate this parser yourself, better use the parse() method
-    that caches parsers.
-    """
-
-    name = 'Simple HTML'
-
-    def __init__(self):
-        self.isolated_tags = ['script', 'style', 'pre']
-        self.self_closing_tags = ['br', 'img', 'area', 'hr', 'param', 'meta',
-                                  'link', 'base', 'input', 'embed', 'col']
-        self.nestable_block_tags = ['blockquote', 'div', 'fieldset', 'ins',
-                                    'del']
-        self.non_nestable_block_tags = ['address', 'form', 'p']
-        self.nestable_inline_tags = ['span', 'font', 'q', 'object', 'bdo',
-                                     'sub', 'sup', 'center']
-        emit_event('setup-markup-parser', self, buffered=True)
-
-        # rather bizarre way to subclass beautiful soup but since the library
-        # itself isn't less bizarre...
-        self._parser = p = type('_SoupParser', (bt.BeautifulSoup, object), {
-            'SELF_CLOSING_TAGS':        dict.fromkeys(self.self_closing_tags),
-            'QUOTE_TAGS':               self.isolated_tags,
-            'NESTABLE_BLOCK_TAGS':      self.nestable_block_tags,
-            'NON_NESTABLE_BLOCK_TAGS':  self.non_nestable_block_tags,
-            'NESTABLE_INLINE_TAGS':     self.nestable_inline_tags
-        })
-        p.RESET_NESTING_TAGS = bt.buildTagMap(None,
-            p.NESTABLE_BLOCK_TAGS, 'noscript', p.NON_NESTABLE_BLOCK_TAGS,
-            p.NESTABLE_LIST_TAGS, p.NESTABLE_TABLE_TAGS
-        )
-        p.NESTABLE_TAGS = bt.buildTagMap([],
-            p.NESTABLE_INLINE_TAGS, p.NESTABLE_BLOCK_TAGS,
-            p.NESTABLE_LIST_TAGS, p.NESTABLE_TABLE_TAGS
-        )
-
-    def parse(self, input_data, reason):
-        """Parse the data and convert it into a sane, processable format."""
-        def convert_tree(node, root):
-            if root:
-                result = Fragment()
-            else:
-                result = Node(node.name, node._getAttrMap())
-            add = result.children.append
-            for child in node.contents:
-                if isinstance(child, unicode):
-                    # get rid of the navigable string, it breaks dumping
-                    add(TextNode(child + ''))
-                else:
-                    add(convert_tree(child, False))
-            return result
-        bt_tree = self._parser(input_data, convertEntities=
-                               self._parser.HTML_ENTITIES)
-        tree = convert_tree(bt_tree, True)
-        for item in emit_event('process-doc-tree', tree, input_data, reason):
-            if item is not None:
-                return item
-        return tree
 
 
 class Node(object):
@@ -703,8 +581,3 @@ _node_types = {
     StaticFragment: 4
 }
 _node_types_reverse = [Node, TextNode, DataNode, Fragment, StaticFragment]
-
-
-all_parsers = {
-    'default':      MarkupParser
-}

@@ -463,7 +463,7 @@ def do_show_comments(req, post_id=None):
         post = Post.objects.get(post_id)
         if post is None:
             abort(404)
-        comments = Comment.objects.select(Comment.post_id == post_id)
+        comments = Comment.objects.all(Comment.post_id == post_id)
     return render_admin_response('admin/show_comments.html',
                                  'comments.overview',
         post=post,
@@ -477,6 +477,8 @@ def do_edit_comment(req, comment_id):
     Edit a comment.  Unlike the post edit screen it's not possible to create
     new comments from here, that has to happen from the post page.
     """
+    # XXX: maybe we should give administrators the possibility to change
+    # the parser associated with comments.
     comment = Comment.objects.get(comment_id)
     if comment is None:
         abort(404)
@@ -486,10 +488,15 @@ def do_edit_comment(req, comment_id):
         'author':       comment.author,
         'email':        comment.email,
         'www':          comment.www,
-        'body':         comment.body,
+        'body':         comment.raw_body,
         'pub_date':     format_datetime(comment.pub_date),
         'blocked':      comment.blocked
     }
+    missing_parser = None
+    old_body = form['body']
+    if comment.parser_missing:
+        missing_parser = post.parser
+
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -509,13 +516,18 @@ def do_edit_comment(req, comment_id):
             errors.append(_('You have to give the comment an author.'))
         form['email'] = email = req.form.get('email')
         if not email or not is_valid_email(email):
-            errors.append(_('You have to provide a valid mail address for the author.'))
+            errors.append(_('You have to provide a valid mail address for '
+                            'the author.'))
         form['www'] = www = req.form.get('www')
         form['body'] = body = req.form.get('body')
+        if missing_parser and body != old_body:
+            errors.append(_('You cannot change the text of a comment '
+                            'if the parser is missing.'))
         if not body:
             errors.append(_('Need a text for this comment.'))
         if www and not is_valid_url(www):
-            errors.append(_('You have to ommitt the url or provide a valid one.'))
+            errors.append(_('You have to ommitt the url or provide a '
+                            'valid one.'))
         form['pub_date'] = pub_date = req.form.get('pub_date')
         try:
             pub_date = parse_datetime(pub_date)
@@ -528,7 +540,8 @@ def do_edit_comment(req, comment_id):
             comment.email = email
             comment.www = www
             comment.pub_date = pub_date
-            comment.body = body
+            if not missing_parser:
+                comment.raw_body = body
             comment.blocked = blocked
             if not blocked:
                 comment.blocked_msg = ''
@@ -542,6 +555,14 @@ def do_edit_comment(req, comment_id):
 
     for error in errors:
         flash(error, 'error')
+
+    if missing_parser:
+        flash(_('This comment was submitted when the parser "%(parser)s" was '
+                'the comment parser. Because it is not available any longer '
+                'TextPress doesn\'t allow modifcations on the text until you '
+                'reinstall/activate the plugin that provided that parser.') %
+              {'parser': escape(missing_parser)}, 'error')
+
 
     return render_admin_response('admin/edit_comment.html',
                                  'comments.overview',
@@ -917,6 +938,7 @@ def do_basic_options(req):
         'comments_enabled':     cfg['comments_enabled'],
         'pings_enabled':        cfg['pings_enabled'],
         'default_parser':       cfg['default_parser'],
+        'comment_parser':       cfg['comment_parser'],
         'posts_per_page':       cfg['posts_per_page'],
         'use_flat_comments':    cfg['use_flat_comments'],
         'maintenance_mode':     cfg['maintenance_mode']
@@ -951,6 +973,10 @@ def do_basic_options(req):
             req.form.get('default_parser')
         if default_parser not in req.app.parsers:
             errors.append(_('Unknown parser %s.') % default_parser)
+        form['comment_parser'] = comment_parser = \
+            req.form.get('comment_parser')
+        if comment_parser not in req.app.parsers:
+            errors.append(_('Unknown parser %s.') % comment_parser)
         form['posts_per_page'] = req.form.get('posts_per_page', '')
         try:
             posts_per_page = int(form['posts_per_page'])
@@ -981,6 +1007,8 @@ def do_basic_options(req):
                 cfg['pings_enabled'] = pings_enabled
             if default_parser != cfg['default_parser']:
                 cfg['default_parser'] = default_parser
+            if comment_parser != cfg['comment_parser']:
+                cfg['comment_parser'] = comment_parser
             if posts_per_page != cfg['posts_per_page']:
                 cfg['posts_per_page'] = posts_per_page
             if use_flat_comments != cfg['use_flat_comments']:
