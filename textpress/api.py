@@ -34,7 +34,5 @@ from textpress.database import db
 # Gettext
 from textpress.utils import gettext as _
 
-# Utils
-from textpress import utils
 
 __all__ = list(x for x in locals() if x == '_' or not x.startswith('_'))
