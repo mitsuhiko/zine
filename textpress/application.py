@@ -207,6 +207,8 @@ def render_template(template_name, _stream=False, **context):
     a Jinja template stream and not an unicode object.
     This is used by `render_response`.
     """
+    #! called right before a template is rendered, the return value is
+    #! ignored but the context can be modified in place.
     emit_event('before-render-template', template_name, _stream, context,
                buffered=True)
     tmpl = get_application().template_env.get_template(template_name)
@@ -334,6 +336,7 @@ class Request(BaseRequest):
         if user is None:
             raise RuntimeError('User does not exist')
         self.user = user
+        #! called after a user was logged in successfully
         emit_event('after-user-login', user, buffered=True)
 
     def logout(self):
@@ -342,6 +345,7 @@ class Request(BaseRequest):
         user = self.user
         self.user = User.objects.get_nobody()
         self.session.clear()
+        #! called after a user was logged out and the session cleared.
         emit_event('after-user-logout', user, buffered=True)
 
     def flush_session(self):
@@ -691,6 +695,7 @@ class TextPress(object):
 
         # mark the app as finished and send an event
         self._setup_finished = True
+        #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
 
     def bind_to_thread(self):
@@ -867,6 +872,10 @@ class TextPress(object):
         )
         for type, attr in get_thread_data('page_metadata'):
             result.append(generators[type](**attr))
+
+        #! this is called before the page metadata is assambled with
+        #! the list of already collected metadata.  You can extend the
+        #! list in place to add some more html snippets to the page header.
         emit_event('before-metadata-assambled', result, buffered=True)
         return u'\n'.join(result)
 
@@ -950,11 +959,11 @@ class TextPress(object):
             if req.user.role < ROLE_ADMIN:
                 return self.maintenance_mode_message(environ, start_response)
 
-        # the after-request-setup event can return a response
-        # or modify the request object in place. If we have a
-        # response we just send it. Plugins that inject something
-        # into the request setup have to check if they are in
-        # maintenance mode themselves.
+        #! the after-request-setup event can return a response
+        #! or modify the request object in place. If we have a
+        #! response we just send it. Plugins that inject something
+        #! into the request setup have to check if they are in
+        #! maintenance mode themselves.
         for result in emit_event('after-request-setup', req):
             if result is not None:
                 return result(environ, start_response)
@@ -972,7 +981,7 @@ class TextPress(object):
         except DirectResponse, e:
             resp = e.response
 
-        # allow plugins to change the response object
+        #! allow plugins to change the response object
         for result in emit_event('before-response-processed', resp):
             if result is not None:
                 resp = result

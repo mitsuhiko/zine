@@ -234,7 +234,12 @@ def do_show_post(req, year, month, day, slug):
         else:
             parent = None
 
-        # allow plugins to do additional comment validation
+        #! allow plugins to do additional comment validation.
+        #! the return value should be an iterable with error strings that
+        #! are displayed below the comment form.  If an error ends up there
+        #! the post is not saved.  Do not use this for antispam, that should
+        #! accept the comment and just mark it as blocked.  For that have
+        #! a look at the `before-comment-saved` event.
         for result in emit_event('before-comment-created', req, form):
             errors.extend(result or ())
 
@@ -243,9 +248,16 @@ def do_show_post(req, year, month, day, slug):
         # block comments so that administrators have to approve it
         if not errors:
             ip = req.environ.get('REMOTE_ADDR') or '0.0.0.0'
-            comment = Comment(post, name, email, www, body, parent, submitter_ip=ip)
+            comment = Comment(post, name, email, www, body, parent,
+                              submitter_ip=ip)
+
+            #! use this event to block comments before they are saved.  This
+            #! is useful for antispam and other ways of moderation.
             emit_event('before-comment-saved', req, comment, buffered=True)
             db.flush()
+
+            #! this is sent directly after the comment was saved.  Useful if
+            #! you want to send mail notifications or whatever.
             emit_event('after-comment-saved', req, comment, buffered=True)
             redirect(url_for(post))
 
@@ -273,10 +285,18 @@ def do_json_service(req, identifier):
     handler = req.app._services.get(identifier)
     if handler is None:
         abort(404)
+
+    #! if this event returns a handler it is called instead of the default
+    #! handler.  Useful to intercept certain requests.
     for rv in emit_event('before-json-service-called', identifier, handler):
         if rv is not None:
             handler = rv
     result = handler(req)
+
+    #! called right after json callback returned some data with the identifier
+    #! of the request method and the result object.  Note that events *have*
+    #! to return an object, even if it's just changed in place, otherwise the
+    #! return value will be `null` (None).
     for result in emit_event('after-json-service-called', identifier, result):
         pass
     return Response(dump_json(result), mimetype='text/javascript')
@@ -289,10 +309,18 @@ def do_xml_service(req, identifier):
     handler = req.app._services.get(identifier)
     if handler is None:
         abort(404)
+
+    #! if this event returns a handler it is called instead of the default
+    #! handler.  Useful to intercept certain requests.
     for rv in emit_event('before-xml-service-called', identifier, handler):
         if rv is not None:
             handler = rv
     result = handler(req)
+
+    #! called right after xml callback returned some data with the identifier
+    #! of the request method and the result object.  Note that events *have*
+    #! to return an object, even if it's just changed in place, otherwise the
+    #! return value will be None.
     for result in emit_event('after-xml-service-called', identifier, result):
         pass
     return Response(dump_xml(result), mimetype='text/xml')

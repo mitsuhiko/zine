@@ -42,6 +42,7 @@ def parse(input_data, parser=None, reason='unknown', optimize=True):
     parser = parser_cls()
     tree = parser.parse(input_data, reason)
 
+    #! allow plugins to alter the doctree.
     for item in emit_event('process-doc-tree', tree, input_data, reason):
         if item is not None:
             tree = item

@@ -112,6 +112,10 @@ class Configuration(object):
                            value=svalue)
 
         from textpress.application import emit_event
+
+        #! whenver a configuration key is updated this is called.  Note
+        #! that you cannot chanve the value here, and that it also is not
+        #! called if data is reverted to the default value.
         emit_event('after-configuration-key-updated', key, value)
         self._cache[key] = value
 

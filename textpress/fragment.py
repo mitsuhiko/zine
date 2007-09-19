@@ -237,6 +237,11 @@ class Node(object):
 
     def _render_callback(self, text_only):
         """Helper frunction for render() and .text"""
+        #! the process-node-callback event is emitted for every node with
+        #! dynamic data.  If that returns an unicode object it is used
+        #! as replacement for the normal node HTML representation.  If you
+        #! only want to change the embedded contents of this node you can
+        #! call the `render` method with injection.  See the render docstring.
         if self.callback_data:
             for identifier, data in self.callback_data:
                 for item in emit_event('process-node-callback', identifier,
@@ -247,11 +252,11 @@ class Node(object):
     @property
     def text(self):
         """Return the joined values of all data nodes."""
-        #: if the callback wants something different do so.
+        # if the callback wants something different do so.
         rv = self._render_callback(True)
         if rv is not None:
             return rv
-        #: <br> thingies are linebreaks!
+        # <br> thingies are linebreaks!
         if self.name == 'br':
             return u'\n'
         rv = u''.join(x.text for x in self)
