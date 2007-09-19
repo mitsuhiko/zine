@@ -119,7 +119,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     navigation_bar.append(('about', url_for('admin/about'), _('About'),
                           about_items))
 
-    # allow plugins to extend the navigation bar
+    #! allow plugins to extend the navigation bar
     emit_event('modify-admin-navigation-bar', req, navigation_bar,
                buffered=True)
 
@@ -160,8 +160,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                             plugin.setup_error[2].tb_lineno
                         ), 'error')
 
-    # used to flash messages, add links to stylesheets, modify the admin
-    # context etc.
+    #! used to flash messages, add links to stylesheets, modify the admin
+    #! context etc.
     emit_event('before-admin-response-rendered', req, values, buffered=True)
 
     # the admin variables is pushed into the context after the event was
