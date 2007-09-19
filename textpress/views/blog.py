@@ -58,6 +58,9 @@ def do_archive(req, year=None, month=None, day=None, page=1):
     :Template name: ``archive.html``
     :URL endpoint: ``blog/archive``
     """
+    if not year:
+        return render_response('archive.html',
+                               **Post.objects.get_archive_summary())
     data = Post.objects.get_list(year, month, day, page)
     if data.pop('probably_404'):
         abort(404)

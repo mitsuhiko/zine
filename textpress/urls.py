@@ -14,6 +14,7 @@ all_urls = [
     Rule('/', defaults={'page': 1}, endpoint='blog/index'),
     Rule('/feed.atom', endpoint='blog/atom_feed'),
     Rule('/page/<int:page>', endpoint='blog/index'),
+    Rule('/archive', endpoint='blog/archive'),
     Submount('/authors', [
         Rule('/', endpoint='blog/authors'),
         Rule('/<string:username>', defaults={'page': 1}, endpoint='blog/show_author'),
