@@ -157,7 +157,7 @@ def _query(nodes, rule):
         test = None
 
     if part == '#':
-        nodes = (x for x in nodes if x.value is not None)
+        nodes = (x for x in nodes if isinstance(x, TextNode))
     elif part == '+':
         nodes = (x for x in nodes if x.value is None)
     elif part != '*':

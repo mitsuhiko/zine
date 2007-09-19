@@ -37,6 +37,7 @@ class SimpleHTMLParser(BaseParser):
         self.non_nestable_block_tags = ['address', 'form', 'p']
         self.nestable_inline_tags = ['span', 'font', 'q', 'object', 'bdo',
                                      'sub', 'sup', 'center']
+
         #! allow plugins to modify the semantic rules of tags etc...
         emit_event('setup-simplehtml-parser', self, buffered=True)
 
