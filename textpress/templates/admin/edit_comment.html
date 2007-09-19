@@ -21,6 +21,15 @@
       {{ h.textarea('body', form.body, rows=7) }}
     </fieldset>
     <fieldset>
+      <legend>{% trans "Parser" %}</legend>
+      <select name="parser">
+      {%- for parser_id, name in parsers %}
+        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.parser
+          %} selected{% endif %}>{{ name|e }}</option>
+      {%- endfor %}
+      </select>
+    </fieldset>
+    <fieldset>
       <legend>{% trans "Date" %}</legend>
       {{ h.input_field('pub_date', form.pub_date) }}
     </fieldset>
