@@ -200,7 +200,7 @@ def do_index(req):
     comments etc.)
     """
     return render_admin_response('admin/index.html', 'dashboard',
-                                 drafts=list(Post.objects.get_drafts()))
+                                 drafts=Post.objects.get_drafts())
 
 
 @require_role(ROLE_AUTHOR)
@@ -210,8 +210,8 @@ def do_show_posts(req):
     paginated which makes it hard to manage if you have more posts.
     """
     return render_admin_response('admin/show_posts.html', 'posts.overview',
-                                 drafts=list(Post.objects.get_drafts()),
-                                 **Post.objects.get_list())
+                                 drafts=Post.objects.get_drafts(),
+                                 posts=Post.objects.all())
 
 
 @require_role(ROLE_AUTHOR)

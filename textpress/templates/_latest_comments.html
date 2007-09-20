@@ -1,0 +1,9 @@
+{%- if widget.comments %}
+  <h4>{% trans 'Latest Comments' %}</h4>
+  <ul>
+  {%- for item in widget.comments %}
+    <li>{% trans "by" %} <a href="{{ url_for(item)|e }}">{{
+      item.author|e }}</a></li>
+  {%- endfor %}
+  </ul>
+{%- endif %}

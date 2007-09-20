@@ -17,7 +17,7 @@
     :license: GNU GPL.
 """
 from textpress.application import render_template
-from textpress.models import Post, Tag
+from textpress.models import Post, Tag, Comment
 
 
 class Widget(object):
@@ -59,7 +59,29 @@ class PostArchiveSummary(Widget):
         self.__dict__.update(Post.objects.get_archive_summary(detail, limit))
 
 
+class LatestPosts(Widget):
+    """
+    Show the latest n posts.
+    """
+    TEMPLATE = '_latest_posts.html'
+
+    def __init__(self, limit=5):
+        self.posts = Post.objects.get_latest(limit)
+
+
+class LatestComments(Widget):
+    """
+    Show the latest n comments.
+    """
+    TEMPLATE = '_latest_comments.html'
+
+    def __init__(self, limit=5):
+        self.comments = Comment.objects.get_latest(limit)
+
+
 all_widgets = {
     'get_tag_cloud':                TagCloud,
-    'get_post_archive_summary':     PostArchiveSummary
+    'get_post_archive_summary':     PostArchiveSummary,
+    'get_latest_posts':             LatestPosts,
+    'get_latest_comments':          LatestComments
 }

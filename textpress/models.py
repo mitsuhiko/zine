@@ -130,6 +130,35 @@ class PostManager(db.DatabaseManager):
     Add some extra methods to the post model.
     """
 
+    def filter_published(self, query=None, ignore_role=None):
+        """Return a queryset for only published posts."""
+        role = ROLE_NOBODY
+        if query is None:
+            query = self.query
+        if not ignore_role:
+            req = get_request()
+            if req is not None:
+                role = req.user.role
+        p = posts.c
+
+        if query is None:
+            query = self.query
+
+        if role <= ROLE_SUBSCRIBER:
+            return query.filter(
+                (p.status == STATUS_PUBLISHED) |
+                (p.pub_date >= now)
+            )
+        elif role == ROLE_AUTHOR:
+            # it's safe to access req here because we only have
+            # a non ROLE_NOBODY role if there was a request.
+            return query.filter(
+                (p.status == STATUS_PUBLISHED) |
+                (p.author_id == req.user.user_id)
+            )
+        else:
+            return query
+
     def get_by_timestamp_and_slug(self, year, month, day, slug):
         """Get an item by year, month, day, and the post slug."""
         start = datetime(year, month, day)
@@ -333,6 +362,13 @@ class PostManager(db.DatabaseManager):
             'more':     there_are_more,
             'empty':    not result
         }
+
+    def get_latest(self, limit=None, ignore_role=False):
+	"""Get the latest n posts."""
+        query = self.filter_published(ignore_role=ignore_role)
+        if limit is not None:
+            query = query[:limit]
+        return query.all()
 
 
 class Post(object):
@@ -629,6 +665,24 @@ class CommentManager(db.DatabaseManager):
     def get_block_count(self):
         """Get the number of blocked comments."""
         return Comment.all(Comment.blocked == True)
+
+    def get_latest(self, limit=None, ignore_role=False):
+        """
+        Get the list of non blocked comments for anonymous users or
+        all comments for admin users.
+        """
+        role = ROLE_NOBODY
+        if not ignore_role:
+            req = get_request()
+            if req is not None:
+                role = req.user.role
+
+        query = self.query
+        if role <= ROLE_SUBSCRIBER:
+            query = query.filter(Comment.blocked == False)
+        if limit is not None:
+            query = query[:limit]
+        return query.all()
 
 
 class Comment(object):

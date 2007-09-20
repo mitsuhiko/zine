@@ -1,0 +1,8 @@
+{%- if widget.posts %}
+  <h4>{% trans 'Latest Posts' %}</h4>
+  <ul>
+  {%- for item in widget.posts %}
+    <li><a href="{{ url_for(item)|e }}">{{ item.title|e }}</a></li>
+  {%- endfor %}
+  </ul>
+{%- endif %}
