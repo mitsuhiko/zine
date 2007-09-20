@@ -24,7 +24,7 @@ class MetaWeblogAPI(object, SimpleXMLRPCDispatcher):
     """Does the dispatching."""
 
     def __init__(self):
-        SimpleXMLRPCDispatcher.__init__(self, True, 'utf-8')
+        SimpleXMLRPCDispatcher.__init__(self)
         self.register_introspection_functions()
 
     def handle_request(self, req):
@@ -50,7 +50,10 @@ def export(name, fetch_user=True):
                 elif not user.check_password(password):
                     raise APIError('wrong password')
                 args = args[:1] + (user,) + args[3:]
-            return f(*args, **kwargs)
+            rv = f(*args, **kwargs)
+            if rv is None:
+                return False
+            return rv
         proxy.__name__ = f.__name__
         proxy.__doc__ = f.__doc__
         xmlrpc.register_function(proxy, name)

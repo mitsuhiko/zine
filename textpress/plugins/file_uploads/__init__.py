@@ -17,7 +17,7 @@ from textpress.utils import CSRFProtector, IntelligentRedirect, \
      make_hidden_fields, escape, dump_json
 from textpress.models import ROLE_AUTHOR, ROLE_ADMIN
 from textpress.views.admin import render_admin_response, flash
-from textpress.utils import StreamReporter
+from textpress.utils import StreamReporter, ClosingIterator
 from textpress.plugins.file_uploads.utils import guess_mimetype, \
      get_upload_folder, list_files, list_images, get_im_version, \
      get_im_path, touch_upload_folder, upload_file, create_thumbnail, \
@@ -239,15 +239,13 @@ def do_get_file(req, filename):
     guessed_type = guess_mimetype(filename)
     fp = file(filename, 'rb')
     def stream():
-        try:
-            while True:
-                chunk = fp.read(1024 * 512)
-                if not chunk:
-                    break
-                yield chunk
-        finally:
-            fp.close()
-    resp = Response(stream(), mimetype=guessed_type or 'text/plain')
+        while True:
+            chunk = fp.read(1024 * 512)
+            if not chunk:
+                break
+            yield chunk
+    resp = Response(ClosingIterator(stream(), fp.close),
+                    mimetype=guessed_type or 'text/plain')
     resp.headers['Cache-Control'] = 'public'
     resp.headers['Expires'] = asctime(gmtime(time() + 3600))
     return resp
