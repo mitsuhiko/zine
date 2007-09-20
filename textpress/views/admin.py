@@ -339,7 +339,7 @@ def do_edit_post(req, post_id=None):
         # a tag to the list and assign it to the post list.
         add_tag = req.form.get('add_tag')
         if add_tag:
-            form['tags'].append(Tag.objects.get_or_create(add_tag).slug)
+            form['tags'].append(Tag(add_tag).slug)
             db.flush()
             del errors[:]
 
