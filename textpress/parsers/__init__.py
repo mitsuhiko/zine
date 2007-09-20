@@ -68,7 +68,8 @@ class BaseParser(object):
         """Return a fragment."""
 
 
-from textpress.parsers.simplehtml import SimpleHTMLParser, AutoParagraphHTMLParser
+from textpress.parsers.simplehtml import SimpleHTMLParser, \
+     AutoParagraphHTMLParser
 from textpress.parsers.comments import CommentParser
 
 all_parsers = {

@@ -17,6 +17,14 @@ from textpress._ext import beautifulsoup as bt
 
 _paragraph_re = re.compile(r'\n{2,}')
 
+_unsave_attributes = set([
+    'onload', 'onunload', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup',
+    'onmouseover', 'onmousemove', 'onmouseout', 'onfocus', 'onblur',
+    'onkeypress', 'onkeydown', 'onkeyup', 'onsubmit', 'onreset', 'onselect',
+    'onchange', 'style', 'class'
+])
+_unsafe_tags = set(['style', 'script'])
+
 
 class SimpleHTMLParser(BaseParser):
     """
@@ -42,6 +50,13 @@ class SimpleHTMLParser(BaseParser):
         self.nestable_inline_tags = set(['span', 'font', 'q', 'object', 'bdo',
                                          'sub', 'sup', 'center', 'small'])
 
+        #: tags that are allowed in a paragraph (not necessariliy inline tags)
+        self.paragraph_tags = self.nestable_inline_tags | set([
+            'br', 'img', 'are', 'input', 'textarea', 'em', 'strong', 'b', 'i',
+            'cite', 'dfn', 'code', 'samp', 'kbd', 'var', 'abbr', 'acronym',
+            'big', 'small', 'tt', 'var'
+        ])
+
         #! allow plugins to modify the semantic rules of tags etc...
         emit_event('setup-simplehtml-parser', self, buffered=True)
 
@@ -65,11 +80,23 @@ class SimpleHTMLParser(BaseParser):
 
     def parse(self, input_data, reason):
         """Parse the data and convert it into a sane, processable format."""
+        restricted = reason == 'comment'
+
         def convert_tree(node, root):
             if root:
                 result = Fragment()
             else:
-                result = Node(node.name, node._getAttrMap())
+                attributes = node._getAttrMap()
+                node_name = node.name
+
+                # in restricted mode remove all scripts, styles and handlers
+                if restricted:
+                    if node.name in _unsafe_tags:
+                        node_name = 'pre'
+                    for attr in _unsave_attributes:
+                        attributes.pop(attr, None)
+                result = Node(node_name, attributes)
+
             add = result.children.append
             for child in node.contents:
                 if isinstance(child, unicode):
@@ -118,7 +145,7 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
                                 paragraphs.append([])
                             continue
                     if child.__class__ is Node and \
-                       child.name in self.blocks_with_paragraphs:
+                       child.name not in self.paragraph_tags:
                         paragraphs.extend([child, []])
                     else:
                         paragraphs[-1].append(child)
