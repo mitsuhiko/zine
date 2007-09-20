@@ -139,8 +139,8 @@ def do_show_author(req, username, page=1):
     :Template name: ``show_author.html``
     :URL endpoint: ``blog/show_author``
     """
-    user = User.objects.select_first((User.username == username) &
-                                     (User.role >= ROLE_AUTHOR))
+    user = User.objects.first((User.username == username) &
+                              (User.role >= ROLE_AUTHOR))
     if user is None:
         abort(404)
     data = Post.objects.get_list(author=user)

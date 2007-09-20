@@ -1,0 +1,7 @@
+Name: Blog Feed Importer
+Plugin URL: http://textpress.pocoo.org/plugins/feed_importer
+Author: Ali Afshar <aafshar@gmail.com>
+Author URL: http://pida.co.uk/
+License: GPL
+Version: 0.1
+Description: Allows importing of existing blogs using their feeds.

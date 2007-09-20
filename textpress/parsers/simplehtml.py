@@ -8,10 +8,14 @@
     :copyright: Copyright 2007 by Armin Ronacher
     :license: GNU GPL, see LICENSE for more details.
 """
+import re
 from textpress.application import emit_event
 from textpress.parsers import BaseParser
 from textpress.fragment import Node, TextNode, Fragment
 from textpress._ext import beautifulsoup as bt
+
+
+_paragraph_re = re.compile(r'\n{2,}')
 
 
 class SimpleHTMLParser(BaseParser):
@@ -29,14 +33,14 @@ class SimpleHTMLParser(BaseParser):
         return _('Simplified HTML')
 
     def __init__(self):
-        self.isolated_tags = ['script', 'style', 'pre']
-        self.self_closing_tags = ['br', 'img', 'area', 'hr', 'param', 'meta',
-                                  'link', 'base', 'input', 'embed', 'col']
-        self.nestable_block_tags = ['blockquote', 'div', 'fieldset', 'ins',
-                                    'del']
-        self.non_nestable_block_tags = ['address', 'form', 'p']
-        self.nestable_inline_tags = ['span', 'font', 'q', 'object', 'bdo',
-                                     'sub', 'sup', 'center']
+        self.isolated_tags = set(['script', 'style', 'pre'])
+        self.self_closing_tags = set(['br', 'img', 'area', 'hr', 'param',
+                                      'meta', 'link', 'base', 'input',
+                                      'embed', 'col'])
+        self.nestable_block_tags = set(['blockquote', 'div', 'fieldset'])
+        self.non_nestable_block_tags = set(['address', 'form', 'p'])
+        self.nestable_inline_tags = set(['span', 'font', 'q', 'object', 'bdo',
+                                         'sub', 'sup', 'center', 'small'])
 
         #! allow plugins to modify the semantic rules of tags etc...
         emit_event('setup-simplehtml-parser', self, buffered=True)
@@ -77,3 +81,46 @@ class SimpleHTMLParser(BaseParser):
         bt_tree = self._parser(input_data, convertEntities=
                                self._parser.HTML_ENTITIES)
         return convert_tree(bt_tree, True)
+
+
+class AutoParagraphHTMLParser(SimpleHTMLParser):
+    """
+    Non working parser that should one time automatically insert <p>
+    tags inside divs and blockquotes if there are lines divided by
+    multiple newlines
+    """
+
+    @staticmethod
+    def get_name():
+        from textpress.api import _
+        return _('HTML with automatic Paragraphs')
+
+    def __init__(self):
+        self.blocks_with_paragraphs = set(['div', 'blockquote'])
+        SimpleHTMLParser.__init__(self)
+
+    def parse(self, input_data, reason):
+        tree = SimpleHTMLParser.parse(self, input_data, reason)
+
+        def walk(parent):
+            for idx, node in enumerate(parent.children[:]):
+                if isinstance(node, TextNode) and (parent is tree or
+                   node.parent.name in self.blocks_with_paragraphs):
+                    paragraphs = _paragraph_re.split(node.value)
+                    if len(paragraphs) > 1:
+                        parent.children.pop()
+                        new_node = Node('p')
+                        for x in xrange(1, idx + 1):
+                            new_node.children.append(parent.children.pop(0))
+                        new_node.children.append(TextNode(paragraphs.pop(0)))
+                        parent.children.append(new_node)
+                        for paragraph in paragraphs:
+                            new_node = Node('p')
+                            new_node.children.append(TextNode(paragraph))
+                            parent.children.append(new_node)
+                        print parent
+                elif node.__class__ is Node:
+                    walk(node)
+        walk(tree)
+
+        return tree

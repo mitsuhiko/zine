@@ -23,6 +23,7 @@ def parse(input_data, parser=None, reason='unknown', optimize=True):
 
     If optimize is enabled the return value might be a non queryable fragment.
     """
+    input_data = u'\n'.join(input_data.splitlines())
     app = get_application()
     if parser is None:
         try:
@@ -67,10 +68,11 @@ class BaseParser(object):
         """Return a fragment."""
 
 
-from textpress.parsers.simplehtml import SimpleHTMLParser
+from textpress.parsers.simplehtml import SimpleHTMLParser, AutoParagraphHTMLParser
 from textpress.parsers.comments import CommentParser
 
 all_parsers = {
     'default':          SimpleHTMLParser,
+    'autop':            AutoParagraphHTMLParser,
     'comment':          CommentParser
 }
