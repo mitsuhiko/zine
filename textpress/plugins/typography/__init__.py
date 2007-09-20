@@ -26,13 +26,20 @@ SHARED_FILES = join(dirname(__file__), 'shared')
 
 _ignored_nodes = set(['pre', 'code'])
 _rules = [
+    (re.compile(r'(?<!\.)\.\.\.(?!\.)'), 'ellipsis', u'…'),
+    (re.compile(r'(?<!-)---(?!-)'), 'emdash', u'—'),
+    (re.compile(r'(?<!-)--(?!-)'), 'endash', u'–'),
+    (re.compile(r'\d(")(?u)'), 'inch', u'″'),
+    (re.compile(r'\d(\')(?u)'), 'foot', u'′'),
+    (re.compile(r'\+\-'), 'plus_minus_sign', u'±'),
+    (re.compile(r'\(c\)'), 'copyright', u'©'),
+    (re.compile(r'\(r\)'), 'registered', u'®'),
+    (re.compile(r'\(tm\)'), 'trademark', u'™'),
+    (re.compile(r'\d\s+(x)\s+\d(?u)'), 'multiplication_sign', u'×'),
     (re.compile(r'(?:^|\s)(\')(?u)'), 'single_opening_quote', u'‘'),
     (re.compile(r'\S(\')(?u)'), 'single_closing_quote', u'’'),
     (re.compile(r'(?:^|\s)(")(?u)'), 'double_opening_quote', u'“'),
-    (re.compile(r'\S(")(?u)'), 'double_closing_quote', u'”'),
-    (re.compile(r'(?<!\.)\.\.\.(?!\.)'), 'ellipsis', u'…'),
-    (re.compile(r'(?<!-)---(?!-)'), 'emdash', u'—'),
-    (re.compile(r'(?<!-)--(?!-)'), 'endash', u'–')
+    (re.compile(r'\S(")(?u)'), 'double_closing_quote', u'”')
 ]
 
 
@@ -53,7 +60,7 @@ def process_doc_tree(doctree, input_data, reason):
     cfg = get_application().cfg
     used_signs = dict((k, cfg['typography/' + k]) for ignore, k, ignore in _rules)
     for node in doctree.query('#'):
-        if node.parent and node.parent.name not in _ignored_nodes:
+        if not node.parent or node.parent.name not in _ignored_nodes:
             for regex, sign, ignore in _rules:
                 node.value = regex.sub(handle_match, node.value)
 

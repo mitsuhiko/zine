@@ -1,0 +1,10 @@
+Name: English Hyphenation
+Plugin URL: http://textpress.pocoo.org/plugins/hyphenation_en
+Author: Armin Ronacher <armin.ronacher@active-4.com>
+Author URL: http://lucumr.pocoo.org/
+License: GPL
+Version: 0.1
+Description: This plugin provides automatic hyphenation for the English\
+ language, based on the rules of the Knuth and Liang's original hyphenation\
+ patterns from classic TeX, implemented by Ned Batchelder. However, due to\
+ broken webbrowsers this is not supported by now.
