@@ -257,14 +257,14 @@ def format_datetime(obj, format=None):
     """Format a datetime object. Later with i18n"""
     from textpress.application import get_application
     cfg = get_application().cfg
-    tzinfo = pytz.timezone(cfg['timezone'])
+    tzinfo = pytz.timezone(str(cfg['timezone']))
     if type(obj) is date:
         obj = datetime(obj.year, obj.month, obj.day, tzinfo=tzinfo)
     else:
         obj = obj.replace(tzinfo=tzinfo)
     if format is None:
         format = cfg['datetime_format']
-    return obj.strftime(str(format))
+    return obj.strftime(format.encode('utf-8')).decode('utf-8')
 
 
 def format_date(obj):
