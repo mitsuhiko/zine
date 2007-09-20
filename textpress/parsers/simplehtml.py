@@ -15,7 +15,7 @@ from textpress.fragment import Node, TextNode, Fragment
 from textpress._ext import beautifulsoup as bt
 
 
-_paragraph_re = re.compile(r'(\s*\n){2,}')
+_paragraph_re = re.compile(r'(?:\s*\n){2,}')
 
 _unsave_attributes = set([
     'onload', 'onunload', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup',
