@@ -85,15 +85,15 @@ class SimpleHTMLParser(BaseParser):
 
 class AutoParagraphHTMLParser(SimpleHTMLParser):
     """
-    Non working parser that should one time automatically insert <p>
-    tags inside divs and blockquotes if there are lines divided by
-    multiple newlines
+    This parser replaces multiple newlines with paragraphs automatically if
+    the active element is either not present (top level), a div or a
+    blockquote tag.  There must be no unbalanced inline tags.
     """
 
     @staticmethod
     def get_name():
         from textpress.api import _
-        return _('HTML with automatic Paragraphs')
+        return _('Automatic Paragraphs')
 
     def __init__(self):
         self.blocks_with_paragraphs = set(['div', 'blockquote'])
@@ -102,25 +102,34 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
     def parse(self, input_data, reason):
         tree = SimpleHTMLParser.parse(self, input_data, reason)
 
-        def walk(parent):
-            for idx, node in enumerate(parent.children[:]):
-                if isinstance(node, TextNode) and (parent is tree or
-                   node.parent.name in self.blocks_with_paragraphs):
-                    paragraphs = _paragraph_re.split(node.value)
-                    if len(paragraphs) > 1:
-                        parent.children.pop()
+        def rewrite(parent):
+            for node in parent.children[:]:
+                rewrite(node)
+            if parent is tree or (parent.__class__ is Node and
+                                  parent.name in self.blocks_with_paragraphs):
+                paragraphs = [[]]
+                for child in parent.children:
+                    if child.__class__ is TextNode:
+                        blocks = _paragraph_re.split(child.value)
+                        if len(blocks) > 1:
+                            for block in blocks:
+                                if block:
+                                    paragraphs[-1].append(TextNode(block))
+                                paragraphs.append([])
+                            continue
+                    if child.__class__ is Node and \
+                       child.name in self.blocks_with_paragraphs:
+                        paragraphs.extend([child, []])
+                    else:
+                        paragraphs[-1].append(child)
+                del parent.children[:]
+                for paragraph in paragraphs:
+                    if isinstance(paragraph, Node):
+                        parent.children.append(paragraph)
+                    elif paragraph:
                         new_node = Node('p')
-                        for x in xrange(1, idx + 1):
-                            new_node.children.append(parent.children.pop(0))
-                        new_node.children.append(TextNode(paragraphs.pop(0)))
+                        new_node.children.extend(paragraph)
                         parent.children.append(new_node)
-                        for paragraph in paragraphs:
-                            new_node = Node('p')
-                            new_node.children.append(TextNode(paragraph))
-                            parent.children.append(new_node)
-                        print parent
-                elif node.__class__ is Node:
-                    walk(node)
-        walk(tree)
+        rewrite(tree)
 
         return tree
