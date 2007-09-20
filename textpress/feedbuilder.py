@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 from xml.dom.minidom import Document
+from datetime import datetime
 
 from textpress.application import Response
 from textpress.utils import format_iso8601
