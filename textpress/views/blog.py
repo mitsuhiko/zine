@@ -93,10 +93,13 @@ def do_show_tag(req, slug, page=1):
     :Template name: ``show_tag.html``
     :URL endpoint: ``blog/show_tag``
     """
+    tag = Tag.objects.get_by(slug=slug)
+    if not tag:
+        abort(404)
+
     data = Post.objects.get_list(tag=slug, page=page)
     if data.pop('probably_404'):
         abort(404)
-    tag = Tag.objects.get_by(slug=slug)
 
     add_link('alternate', url_for('blog/atom_feed', tag=slug),
              'application/atom+xml', _('All posts tagged %s') % tag.name)
