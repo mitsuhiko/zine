@@ -5,10 +5,12 @@
   {% if drafts %}
   <div class="drafts-box">
     <strong>{% if not post or post.is_draft %}
-      {%- trans "Your other drafts" -%}
+      {% trans count=drafts|length %}Your other draft:{% pluralize
+      %}Your other drafts:{% endtrans %}
     {% else %}
-      {%- trans "Your drafts" -%}
-    {% endif %}:</strong>
+      {% trans count=drafts|length %}Your draft:{% pluralize
+      %}Your drafts:{% endtrans %}
+    {% endif %}</strong>
     {%- for draft in drafts %}
       <a href="{{ url_for('admin/edit_post', post_id=draft.post_id) }}">{{ draft.title|e }}</a>
       {%- if not loop.last %},{% endif %}

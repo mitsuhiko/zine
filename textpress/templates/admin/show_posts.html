@@ -4,7 +4,8 @@
   <h2>{% trans "Manage Posts" %}</h2>
   {% if drafts %}
   <div class="drafts-box">
-    <strong>{% trans "Your drafts" %}:</strong>
+    <strong>{% trans count=drafts|length %}Your draft:{% pluralize
+      %}Your drafts:{% endtrans %}</strong>
     {%- for draft in drafts %}
       <a href="{{ url_for('admin/edit_post', post_id=draft.post_id) }}">{{ draft.title|e }}</a>
       {%- if not loop.last %},{% endif %}
