@@ -15,7 +15,7 @@ from textpress.fragment import Node, TextNode, Fragment
 from textpress._ext import beautifulsoup as bt
 
 
-_paragraph_re = re.compile(r'\n{2,}')
+_paragraph_re = re.compile(r'(\s*\n){2,}')
 
 _unsave_attributes = set([
     'onload', 'onunload', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup',
@@ -149,6 +149,9 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
                         paragraphs.extend([child, []])
                     else:
                         paragraphs[-1].append(child)
+
+                print paragraphs
+
                 del parent.children[:]
                 for paragraph in paragraphs:
                     if isinstance(paragraph, Node):
