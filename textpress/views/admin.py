@@ -339,6 +339,8 @@ def do_edit_post(req, post_id=None):
         # a tag to the list and assign it to the post list.
         add_tag = req.form.get('add_tag')
         if add_tag:
+            # XXX: what happens if the slug is empty or the slug
+            #      exists already?
             form['tags'].append(Tag(add_tag).slug)
             db.flush()
             del errors[:]

@@ -150,8 +150,6 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
                     else:
                         paragraphs[-1].append(child)
 
-                print paragraphs
-
                 del parent.children[:]
                 for paragraph in paragraphs:
                     if isinstance(paragraph, Node):

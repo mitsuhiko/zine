@@ -370,6 +370,18 @@ class PostManager(db.DatabaseManager):
             query = query[:limit]
         return query.all()
 
+    def search(self, query):
+        """Search for posts by a query."""
+        # XXX: use a sophisticated search
+        q = self.query
+        for word in query.split():
+            q = q.filter(
+                posts.c.body.like('%%%s%%' % word) |
+                posts.c.intro.like('%%%s%%' % word) |
+                posts.c.title.like('%%%s%%' % word)
+            )
+        return q.all()
+
 
 class Post(object):
     """Represents one blog post."""
