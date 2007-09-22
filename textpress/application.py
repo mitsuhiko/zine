@@ -668,9 +668,9 @@ class TextPress(object):
             }
         )
 
-        # install all the default widgets as globals
+        # insert list of widgets
         from textpress.widgets import all_widgets
-        env.globals.update(all_widgets)
+        self.widgets = dict((x.NAME, x) for x in all_widgets)
 
         # XXX: l10n :-)
         env.filters.update(
@@ -678,6 +678,9 @@ class TextPress(object):
             dateformat=lambda:lambda e, c, v: format_date(v),
             monthformat=lambda:lambda e, c, v: format_month(v)
         )
+
+        # copy the widgets into the global namespace
+        self._template_globals.update(self.widgets)
 
         # set up plugin template extensions
         env.globals.update(self._template_globals)
@@ -838,6 +841,12 @@ class TextPress(object):
         """Return a sorted list of parsers (parser_id, parser_name)."""
         return sorted([(key, parser.get_name()) for key, parser in
                        self.parsers.iteritems()], key=lambda x: x[1].lower())
+
+    def add_widget(self, widget):
+        """Add a widget."""
+        if self._setup_finished:
+            raise RuntimeError('cannot add widget after application setup')
+        self.widgets[widget.NAME] = widget
 
     def add_servicepoint(self, identifier, callback):
         """Add a new function as servicepoint."""

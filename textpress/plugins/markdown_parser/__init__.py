@@ -10,7 +10,7 @@
 """
 from textpress.api import *
 from textpress.parsers import BaseParser
-from textpress.parsers.simplehtml import SimpleHTMLParser, HTMLParser
+from textpress.parsers.simplehtml import HTMLParser
 from textpress.plugins.markdown_parser import markdown as md
 
 
@@ -20,16 +20,9 @@ class MarkdownParser(BaseParser):
 
     def parse(self, input_data, reason):
         parser = md.Markdown(safe_mode=reason == 'comment')
-        html_parser = get_parser()
+        html_parser = HTMLParser()
         return html_parser.parse(parser.convert(input_data), None)
-
-
-def get_parser():
-    app = get_application()
-    cls = app.cfg['markdown/isolate_pre'] and SimpleHTMLParser or HTMLParser
-    return cls()
 
 
 def setup(app, plugin):
     app.add_parser('markdown', MarkdownParser)
-    app.add_config_var('markdown/isolate_pre', bool, True)
