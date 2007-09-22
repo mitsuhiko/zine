@@ -26,39 +26,22 @@ _unsave_attributes = set([
 _unsafe_tags = set(['style', 'script'])
 
 
-class SimpleHTMLParser(BaseParser):
-    """
-    Special class that emits an `setup-markup-parser` event when setting up
-    itself so that plugins can change the way elements are processed.
 
-    Don't instanciate this parser yourself, better use the parse() method
-    that caches parsers.
+class HTMLParser(BaseParser):
+    """
+    A simple HTML Parser.
     """
 
     @staticmethod
     def get_name():
         from textpress.api import _
-        return _('Simplified HTML')
+        return _('Raw HTML')
 
     def __init__(self):
-        self.isolated_tags = set(['script', 'style', 'pre'])
-        self.self_closing_tags = set(['br', 'img', 'area', 'hr', 'param',
-                                      'meta', 'link', 'base', 'input',
-                                      'embed', 'col'])
-        self.nestable_block_tags = set(['blockquote', 'div', 'fieldset'])
-        self.non_nestable_block_tags = set(['address', 'form', 'p'])
-        self.nestable_inline_tags = set(['span', 'font', 'q', 'object', 'bdo',
-                                         'sub', 'sup', 'center', 'small'])
-
-        #: tags that are allowed in a paragraph (not necessariliy inline tags)
-        self.paragraph_tags = self.nestable_inline_tags | set([
-            'br', 'img', 'are', 'input', 'textarea', 'em', 'strong', 'b', 'i',
-            'cite', 'dfn', 'code', 'samp', 'kbd', 'var', 'abbr', 'acronym',
-            'big', 'small', 'tt', 'var'
-        ])
+        self._init_defs()
 
         #! allow plugins to modify the semantic rules of tags etc...
-        emit_event('setup-simplehtml-parser', self, buffered=True)
+        emit_event('setup-html-parser', self, buffered=True)
 
         # rather bizarre way to subclass beautiful soup but since the library
         # itself isn't less bizarre...
@@ -77,6 +60,21 @@ class SimpleHTMLParser(BaseParser):
             p.NESTABLE_INLINE_TAGS, p.NESTABLE_BLOCK_TAGS,
             p.NESTABLE_LIST_TAGS, p.NESTABLE_TABLE_TAGS
         )
+
+    def _init_defs(self):
+        self.isolated_tags = set(['script', 'style'])
+        self.self_closing_tags = set(['br', 'img', 'area', 'hr', 'param',
+                                      'meta', 'link', 'base', 'input',
+                                      'embed', 'col'])
+        self.nestable_block_tags = set(['blockquote', 'div', 'fieldset'])
+        self.non_nestable_block_tags = set(['address', 'form', 'p'])
+        self.nestable_inline_tags = set(['span', 'font', 'q', 'object', 'bdo',
+                                         'sub', 'sup', 'center', 'small'])
+        self.paragraph_tags = self.nestable_inline_tags | set([
+            'br', 'img', 'are', 'input', 'textarea', 'em', 'strong', 'b', 'i',
+            'cite', 'dfn', 'code', 'samp', 'kbd', 'var', 'abbr', 'acronym',
+            'big', 'small', 'tt', 'var'
+        ])
 
     def parse(self, input_data, reason):
         """Parse the data and convert it into a sane, processable format."""
@@ -110,11 +108,25 @@ class SimpleHTMLParser(BaseParser):
         return convert_tree(bt_tree, True)
 
 
+class SimpleHTMLParser(HTMLParser):
+    """
+    Like the HTML Parser but simplifies markup a bit.
+    """
+
+    @staticmethod
+    def get_name():
+        from textpress.api import _
+        return _('Simplified HTML')
+
+    def _init_defs(self):
+        HTMLParser._init_defs(self)
+        self.isolated_tags.add('pre')
+
+
 class AutoParagraphHTMLParser(SimpleHTMLParser):
     """
-    This parser replaces multiple newlines with paragraphs automatically if
-    the active element is either not present (top level), a div or a
-    blockquote tag.  There must be no unbalanced inline tags.
+    Like the Simple HTML parser, but it automatically adds paragraphs if it
+    finds multiple newlines.
     """
 
     @staticmethod
@@ -122,9 +134,9 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
         from textpress.api import _
         return _('Automatic Paragraphs')
 
-    def __init__(self):
+    def _init_defs(self):
+        SimpleHTMLParser._init_defs(self)
         self.blocks_with_paragraphs = set(['div', 'blockquote'])
-        SimpleHTMLParser.__init__(self)
 
     def parse(self, input_data, reason):
         tree = SimpleHTMLParser.parse(self, input_data, reason)

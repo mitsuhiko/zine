@@ -30,9 +30,6 @@ class Widget(object):
     #: in the template as `widget`.
     TEMPLATE = None
 
-    def get_widget_metadata(self):
-        """This function should return some metadata for the admin panel."""
-
     def __unicode__(self):
         return render_template(self.TEMPLATE, widget=self)
 

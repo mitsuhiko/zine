@@ -836,16 +836,12 @@ def do_edit_user(req, user_id=None):
             errors.append(_('Invalid user role.'))
 
         if not errors:
-            html_user_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(user)),
-                escape(user.username)
-            )
             if new_user:
                 user = User(username, password, email, first_name,
                             last_name, description, role)
                 user.display_name = display_name or '$username'
-                flash(_('User %s created successfully.') %
-                      html_user_detail, 'add')
+                msg = 'User %s created successfully.'
+                icon = 'add'
             else:
                 user.username = username
                 if password:
@@ -856,9 +852,13 @@ def do_edit_user(req, user_id=None):
                 user.display_name = display_name or '$username'
                 user.description = description
                 user.role = role
-                flash(_('User %s administrated successfully.') %
-                      html_user_detail)
+                icon = 'info'
             db.flush()
+            html_user_detail = u'<a href="%s">%s</a>' % (
+                escape(url_for(user)),
+                escape(user.username)
+            )
+            flash(msg % html_user_detail, icon)
             if req.form.get('save'):
                 redirect('admin/show_users')
             else:

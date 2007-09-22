@@ -372,6 +372,13 @@ class NodeList(list):
             self.append(item)
     __iadd__ = extend
 
+    def poplist(self):
+        """Remove all nodes from the list and return them."""
+        try:
+            return self[:]
+        finally:
+            del self[:]
+
     def append(self, item):
         """Append a node to the list."""
         if item.parent is not None:
