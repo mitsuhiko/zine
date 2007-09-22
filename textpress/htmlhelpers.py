@@ -61,7 +61,7 @@ def checkbox(name, value='yes', checked=False, **attr):
     """Render a checkbox."""
     attr.update(type='checkbox', name=name, value=value)
     if checked:
-        attr['checked'] = _binary
+        attr['checked'] = 'checked'
     return _generate_tag('input', attr)
 
 
@@ -69,7 +69,7 @@ def radio_button(name, value='yes', checked=False, **attr):
     """Render a radio button."""
     attr.update(type='radio', name=name, value=value)
     if checked:
-        attr['checked'] = _binary
+        attr['checked'] = 'checked'
     return _generate_tag('input', attr)
 
 
