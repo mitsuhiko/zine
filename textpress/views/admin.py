@@ -852,6 +852,7 @@ def do_edit_user(req, user_id=None):
                 user.display_name = display_name or '$username'
                 user.description = description
                 user.role = role
+                msg = 'User %s edited successfully.'
                 icon = 'info'
             db.flush()
             html_user_detail = u'<a href="%s">%s</a>' % (
@@ -866,17 +867,22 @@ def do_edit_user(req, user_id=None):
 
     if not new_user:
         display_names = [
-            ('$first $last', u'%s %s' % (user.first_name, user.last_name)),
-            ('$last $first', u'%s %s' % (user.last_name, user.first_name)),
             ('$nick', user.username),
-            ('$first', user.first_name),
-            ('$last', user.last_name),
-            ('$first "$nick" $last', u'%s "%s" %s' % (
-                user.first_name,
-                user.username,
-                user.last_name
-            ))
         ]
+        if user.first_name:
+            display_names.append(('$first', user.first_name))
+        if user.last_name:
+            display_names.append(('$last', user.last_name))
+        if user.first_name and user.last_name:
+            display_names.extend([
+                ('$first $last', u'%s %s' % (user.first_name, user.last_name)),
+                ('$last $first', u'%s %s' % (user.last_name, user.first_name)),
+                ('$first "$nick" $last', u'%s "%s" %s' % (
+                    user.first_name,
+                    user.username,
+                    user.last_name
+                ))
+            ])
     else:
         display_names = None
 
