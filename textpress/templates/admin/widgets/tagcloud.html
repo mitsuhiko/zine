@@ -1,0 +1,9 @@
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<form action="" method="post">
+  <dl>
+    <dt>{% trans "Maximum Tags" %}</dt>
+    <dd>{{ h.input_field('max', form.max) }}</dd>
+    <dt>{% trans "Show Title" %}</dt>
+    <dd>{{ h.checkbox('show_title', 'yes', form.show_title) }}</dd>
+  </dl>
+</form>

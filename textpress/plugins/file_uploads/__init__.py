@@ -132,11 +132,12 @@ def do_thumbnailer(req):
         form['src_image'] = src_image = req.form.get('src_image')
         if not src_image:
             errors.append(_('You have to specify a source image'))
-        try:
-            src = file(get_filename(src_image), 'rb')
-        except IOError:
-            errors.append(_('The image %s does not exist.') %
-                          escape(src_image))
+        else:
+            try:
+                src = file(get_filename(src_image), 'rb')
+            except IOError:
+                errors.append(_('The image %s does not exist.') %
+                              escape(src_image))
         form['thumb_width'] = thumb_width = req.form.get('thumb_width', '')
         form['thumb_height'] = thumb_height = req.form.get('thumb_height', '')
         if not thumb_width:

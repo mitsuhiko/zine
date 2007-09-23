@@ -140,17 +140,25 @@ class Widget(object):
     #: in the template as `widget`.
     TEMPLATE = None
 
+    #: This is true of the widget is configurable
+    CONFIGURABLE = False
+
     @classmethod
     def get_display_name(cls):
         return cls.__name__
 
     @classmethod
     def list_arguments(cls):
+        """Get a tuple of the arguments this widget uses."""
         try:
             init = cls.__init__.im_func
         except AttributeError:
             return ()
         return inspect.getargspec(init)[0][1:]
+
+    @staticmethod
+    def configure_widget(initial_args, req):
+        return initial_args, None
 
     def __unicode__(self):
         return render_template(self.TEMPLATE, widget=self)
@@ -163,6 +171,7 @@ class TagCloud(Widget):
 
     NAME = 'get_tag_cloud'
     TEMPLATE = 'widgets/tagcloud.html'
+    CONFIGURABLE = True
 
     def __init__(self, max=None, show_title=False):
         self.tags = Tag.objects.get_cloud(max)
@@ -171,6 +180,26 @@ class TagCloud(Widget):
     @staticmethod
     def get_display_name():
         return _('Tag Cloud')
+
+    @staticmethod
+    def configure_widget(initial_args, req):
+        args = initial_args.copy()
+        error = None
+        if req.method == 'POST':
+            args['max'] = max = req.form.get('max', '')
+            if not max:
+                max = None
+            elif not max.isdigit():
+                error = _('Maximum number of tags must be empty '
+                          'or a number.')
+            args['show_title'] = show_title = \
+                req.form.get('show_title') == 'yes'
+        if error is None:
+            return args
+        return render_response('admin/widgets/tagcloud.html',
+            error=error,
+            form=args
+        )
 
 
 class PostArchiveSummary(Widget):
