@@ -39,7 +39,7 @@ from textpress.database import sessions, db, upgrade_database, \
      cleanup_session
 from textpress.config import Configuration
 from textpress.utils import gen_sid, format_datetime, format_date, \
-     format_month, gen_psid, ClosingIterator
+     format_month, gen_psid, ClosingIterator, check_external_url
 
 from werkzeug.utils import SharedDataMiddleware
 from werkzeug.wrappers import BaseRequest, BaseResponse
@@ -125,8 +125,16 @@ def abort(code=404):
 
 def redirect(url, status=302, allow_external_redirect=False):
     """Return to the application with a redirect response."""
-    # XXX: make the url external and make sure that the redirects
-    # are only internal except allow_external_redirect is enabled
+    if not allow_external_redirect:
+        #: check if the url is on the same server
+        #: and make it an external one
+        try:
+            url = check_external_url(get_application(), url, True)
+        except ValueError:
+            abort(400)
+    else:
+        # We don't perform the check for an external url
+        url = check_external_url(get_application(), url, False)
     resp = Response('Moved to %s' % url, mimetype='text/plain',
                     status=status)
     resp.headers['Location'] = url

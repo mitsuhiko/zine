@@ -22,7 +22,7 @@ import pytz
 from time import time, strptime, sleep
 from datetime import datetime, date, timedelta
 from random import choice, randrange, random
-from urlparse import urlparse, urljoin
+from urlparse import urlparse, urljoin, urlsplit
 from urllib import quote
 from tempfile import NamedTemporaryFile, gettempdir
 from smtplib import SMTP, SMTPException
@@ -194,6 +194,22 @@ def gen_pwhash(password):
     h.update(salt)
     h.update(password)
     return 'sha$%s$%s' % (salt, h.hexdigest())
+
+
+def check_external_url(app, url, check=False):
+    blog_url = app.cfg['blog_url']
+    check = urljoin(blog_url, url)
+
+    if check:
+        # check if the url is on the same server
+        # as configured
+        c1 = urlsplit(blog_url)[:2]
+        c2 = urlsplit(check)[:2]
+        if c1 != c2:
+            raise ValueError('The url %s is not on the same server'
+                             'as configured. Please notify the administrator'
+                             % check)
+    return check
 
 
 def check_pwhash(pwhash, password):
