@@ -907,7 +907,6 @@ class IntelligentRedirect(HiddenFormField):
         check_target = self.req.values.get('_redirect_target') or \
                        self.req.args.get('next') or \
                        self.req.environ.get('HTTP_REFERER')
-        print check_target
 
         # if there is no information in either the form data
         # or the wsgi environment about a jump target we have

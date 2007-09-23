@@ -16,17 +16,113 @@
     :copyright: Copyright 2007 by Armin Ronacher
     :license: GNU GPL.
 """
-from textpress.application import render_template, render_response
-from textpress.api import _
+import re
+import inspect
+from os import path
+from textpress.api import *
 from textpress.models import Post, Tag, Comment
 from textpress.utils import CSRFProtector
 
+from jinja import nodes
 
-def render_widget_response(template, widget, **context):
+
+_format_re = re.compile(r'(?<!%)%s')
+_instruction_re = re.compile(r'\{\{|\}\}|\{%|%\}')
+
+
+def jinja_repr(obj):
+    if obj is None:
+        return 'none'
+    elif obj in (True, False):
+        return obj and 'true' or 'false'
+    elif isinstance(obj, basestring):
+        return repr(unicode(obj))[1:]
+    else:
+        return repr(obj)
+
+
+class WidgetManager(object):
     """
-    Like render response but especially for widgets.
+    Interface to the '_widgets.html' overlay.
     """
-    return render_response(template, widget=widget, **context)
+
+    def __init__(self, app, filename='_widgets.html'):
+        self.widgets = []
+        self.manageable = True
+        self.filename = filename
+        if not app.theme.overlay_exists(filename):
+            return
+        tree = app.theme.parse_overlay(filename)
+        if not tree.body:
+            return
+
+        def consume_data():
+            data = data_pieces.pop()
+            if data.strip():
+                data = data.replace('%%', '%').strip('\n')
+                if self.widgets and self.widgets[-1][0] is None:
+                    self.widgets[-1][1] += '\n' + data
+                else:
+                    self.widgets.append((None, {'text': data}))
+
+        for node in tree.body:
+            # with jinja 1.2 onwards all expressions are children
+            # of text nodes. In the worst case the text is just "%"
+            # and the only expression a child. but always a text node.
+            if not isinstance(node, nodes.Text):
+                self.manageable = False
+                return
+            data_pieces = _format_re.split(node.text)
+            consume_data()
+            for expr in node.variables:
+                if not isinstance(expr, nodes.CallExpression) or \
+                   not isinstance(expr.node, nodes.NameExpression) or \
+                   expr.dyn_args or expr.dyn_kwargs:
+                    self.manageable = False
+                    return
+
+                widget_name = expr.node.name
+                if widget_name not in app.widgets:
+                    continue
+                argnames = app.widgets[widget_name].list_arguments()
+                if len(argnames) < len(expr.args):
+                    continue
+
+                args = []
+                kwargs = {}
+                for name, arg in zip(argnames, expr.args):
+                    if not isinstance(arg, nodes.ConstantExpression):
+                        self.manageable = False
+                        return
+                    kwargs[name] = arg.value
+                for name, arg in expr.kwargs:
+                    if not isinstance(arg, nodes.ConstantExpression):
+                        self.manageable = False
+                        return
+                    kwargs[name] = arg.value
+                self.widgets.append((expr.node.name, kwargs))
+                consume_data()
+
+    def save(self):
+        """
+        Save the data as overlay.
+        """
+        buffer = []
+        for name, args in self.widgets:
+            if name is None:
+                data = args['text']
+                if _instruction_re.search(data) is not None:
+                    data = u'{% raw %}%s{% endraw %}' % data
+                buffer.append(data)
+            else:
+                buffer.append(u'{{ %s(%s) }}' % (
+                    name,
+                    u', '.join(u'%s=%s' % (
+                        name,
+                        jinja_repr(arg)
+                    ) for name, arg in sorted(args.items()))
+                ))
+        self.app.theme.set_overlay(self.filename, u'\n'.join(buffer))
 
 
 class Widget(object):
@@ -44,13 +140,17 @@ class Widget(object):
     #: in the template as `widget`.
     TEMPLATE = None
 
-    #: True if the widget is configurable
-    HAS_CONFIGURATION = False
+    @classmethod
+    def get_display_name(cls):
+        return cls.__name__
 
-    def configure_widget(self, req):
-        """
-        If the widget has a configuration and 
-        """
+    @classmethod
+    def list_arguments(cls):
+        try:
+            init = cls.__init__.im_func
+        except AttributeError:
+            return ()
+        return inspect.getargspec(init)[0][1:]
 
     def __unicode__(self):
         return render_template(self.TEMPLATE, widget=self)
@@ -62,24 +162,15 @@ class TagCloud(Widget):
     """
 
     NAME = 'get_tag_cloud'
-    TEMPLATE = '_tagcloud.html'
-    HAS_CONFIGURAION = True
+    TEMPLATE = 'widgets/tagcloud.html'
 
-    def __init__(self, max=None):
+    def __init__(self, max=None, show_title=False):
         self.tags = Tag.objects.get_cloud(max)
+        self.show_title = show_title
 
-    def configure_widget(self, req):
-        form = {'max': u''}
-        csrf_protector = CSRFProtector()
-        if req.method == 'POST':
-            form['max'] = max = req.form.get('max')
-            if not max or max.isdigit():
-                return (max,), {}
-            flash(_('Maximum number of tags must be numeric.'), 'error')
-        return render_widget_response('admin/widgets/tagcloud.html', self,
-            form=form,
-            csrf_protector=csrf_protector
-        )
+    @staticmethod
+    def get_display_name():
+        return _('Tag Cloud')
 
 
 class PostArchiveSummary(Widget):
@@ -88,10 +179,15 @@ class PostArchiveSummary(Widget):
     """
 
     NAME = 'get_post_archive_summary'
-    TEMPLATE = '_post_archive_summary.html'
+    TEMPLATE = 'widgets/post_archive_summary.html'
 
-    def __init__(self, detail='months', limit=6):
+    @staticmethod
+    def get_display_name():
+        return _('Post Archive Summary')
+
+    def __init__(self, detail='months', limit=6, show_title=False):
         self.__dict__.update(Post.objects.get_archive_summary(detail, limit))
+        self.show_title = show_title
 
 
 class LatestPosts(Widget):
@@ -100,10 +196,15 @@ class LatestPosts(Widget):
     """
 
     NAME = 'get_latest_posts'
-    TEMPLATE = '_latest_posts.html'
+    TEMPLATE = 'widgets/latest_posts.html'
 
-    def __init__(self, limit=5):
+    @staticmethod
+    def get_display_name():
+        return _('Latest Posts')
+
+    def __init__(self, limit=5, show_title=False):
         self.posts = Post.objects.get_latest(limit)
+        self.show_title = show_title
 
 
 class LatestComments(Widget):
@@ -112,10 +213,15 @@ class LatestComments(Widget):
     """
 
     NAME = 'get_latest_comments'
-    TEMPLATE = '_latest_comments.html'
+    TEMPLATE = 'widgets/latest_comments.html'
 
-    def __init__(self, limit=5):
+    @staticmethod
+    def get_latest_comments():
+        return _('Latest Comments')
+
+    def __init__(self, limit=5, show_title=False):
         self.comments = Comment.objects.get_latest(limit)
+        self.show_title = show_title
 
 
 all_widgets = [TagCloud, PostArchiveSummary, LatestPosts, LatestComments]

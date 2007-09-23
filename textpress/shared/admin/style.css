@@ -501,6 +501,56 @@ div.themes div.theme div.detail p.author {
     text-align: center;
 }
 
+/* :::: WIDGETS :::: */
+#sidebar {
+    border: 2px solid #267696;
+    background-color: #BCE2F1;
+    padding: 2px;
+    margin: 0 0 10px 0;
+    list-style: none;
+}
+
+div.inventory {
+    border: 2px solid #ccc;
+    background-color: #eee;
+    padding: 10px;
+}
+
+div.inventory h3 {
+    margin: 0;
+    padding: 0 0 10px 0;
+}
+
+#inventory {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+li.widget {
+    float: left;
+    cursor: pointer;
+    padding: 6px;
+    margin: 3px;
+    font-weight: bold;
+    border: 1px solid #FA9D23;
+    background-color: #FFEFDA;
+    color: #975325;
+}
+
+li.widget:hover {
+    color: black;
+}
+
+ul.droppable-active {
+    border: 2px solid #277391;
+    background-color: #77D4F8;
+}
+
+#sidebar li.widget {
+    float: none;
+}
+
 /* :::: PLUGIN PAGE :::: */
 table.plugins td.active {
     text-align: right;

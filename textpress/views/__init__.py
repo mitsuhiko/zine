@@ -47,6 +47,8 @@ all_views = {
     'admin/options':            admin.do_options,
     'admin/basic_options':      admin.do_basic_options,
     'admin/theme':              admin.do_theme,
+    'admin/overlays':           admin.do_overlays,
+    'admin/widgets':            admin.do_widgets,
     'admin/plugins':            admin.do_plugins,
     'admin/remove_plugin':      admin.do_remove_plugin,
     'admin/configuration':      admin.do_configuration,

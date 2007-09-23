@@ -1,3 +1,4 @@
+{% if widget.show_title %}<h4>{% trans 'Tagcloud' %}</h4>{% endif %}
 <div class="tag-cloud">
 {%- for tag in widget.tags %}
   <a href="{{ url_for('blog/show_tag', slug=tag.slug)|e }}" style="font-size: {{

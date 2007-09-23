@@ -27,7 +27,7 @@
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from os import path
+from os import path, remove, makedirs, walk
 from time import sleep
 from thread import allocate_lock, get_ident as get_thread_ident
 from itertools import izip
@@ -511,6 +511,102 @@ class Theme(object):
     def detail_name(self):
         return self.metadata.get('name') or self.name.title()
 
+    def get_source(self, name):
+        """Get the source of a template or `None`."""
+        parts = [x for x in name.split('/') if not x == '..']
+        for fn in self.get_searchpath():
+            fn = path.join(fn, *parts)
+            if path.exists(fn):
+                f = file(fn)
+                try:
+                    return f.read().decode('utf-8')
+                finally:
+                    f.close()
+
+    def get_overlay_path(self, template):
+        """Return the path to an overlay for a template."""
+        return path.join(self.app.instance_folder, 'overlays',
+                         self.name, template)
+
+    def overlay_exists(self, template):
+        """Check if an overlay for a given template exists."""
+        return path.exists(self.get_overlay_path(template))
+
+    def get_overlay(self, template):
+        """Return the source of an overlay."""
+        f = file(self.get_overlay_path(template))
+        try:
+            lines = f.read().decode('utf-8', 'ignore').splitlines()
+        finally:
+            f.close()
+        return u'\n'.join(lines)
+
+    def parse_overlay(self, template):
+        """Return the AST of an overlay."""
+        return self.app.template_env.parse(self.get_overlay(template))
+
+    def set_overlay(self, template, data):
+        """Set an overlay."""
+        filename = self.get_overlay_path(template)
+        try:
+            makedirs(path.dirname(filename))
+        except OSError:
+            pass
+        data = u'\n'.join(data.splitlines())
+        if not data.endswith('\n'):
+            data += '\n'
+        f = file(filename, 'w')
+        try:
+            f.write(data.encode('utf-8'))
+        finally:
+            f.close()
+
+    def remove_overlay(self, template, silent=False):
+        """Remove an overlay."""
+        try:
+            remove(self.get_overlay_path(template))
+        except OSError:
+            if not silent:
+                raise
+
+    def get_searchpath(self):
+        """
+        Get the searchpath for this theme including plugins and
+        all other template locations.
+        """
+        # before loading the normal template paths we check for overlays
+        # in the instance overlay folder
+        searchpath = [path.join(self.app.instance_folder, 'overlays',
+                                self.name)]
+
+        # if we have a real theme add the template path to the searchpath
+        # on the highest position
+        if self.name != 'default':
+            searchpath.append(self.template_path)
+
+        # add the template locations of the plugins
+        searchpath.extend(self.app._template_searchpath)
+
+        # now after the plugin searchpaths add the builtin one
+        searchpath.append(BUILTIN_TEMPLATE_PATH)
+
+        return searchpath
+
+    def list_templates(self):
+        """Return a sorted list of all templates."""
+        templates = set()
+        for p in self.get_searchpath():
+            for dirpath, dirnames, filenames in walk(p):
+                dirpath = dirpath[len(p) + 1:]
+                if dirpath.startswith('.'):
+                    continue
+                for filename in filenames:
+                    if filename.startswith('.'):
+                        continue
+                    templates.add(path.join(dirpath, filename).
+                                  replace(path.sep, '/'))
+        return sorted(templates)
+
 
 class ThemeLoader(BaseLoader, CachedLoaderMixin):
     """
@@ -531,40 +627,10 @@ class ThemeLoader(BaseLoader, CachedLoaderMixin):
         )
 
     def get_source(self, environment, name, parent):
-        searchpath = []
-
-        # if someone disabled the plugin that provided the current theme
-        # we reset the config to "default"
-        theme = self.app.cfg['theme']
-        if theme not in self.app.themes:
-            self.app.cfg['theme'] = theme = 'default'
-
-        # if we have a real theme add the template path to the searchpath
-        # on the highest position
-        elif theme != 'default':
-            searchpath.append(self.app.themes[theme].template_path)
-
-        # add the template locations of the plugins
-        searchpath.extend(self.app._template_searchpath)
-
-        # now after the plugin searchpaths add the builtin one
-        searchpath.append(BUILTIN_TEMPLATE_PATH)
-
-        # now load the template from a searchpath or an event
-        # provided searchpath. The events for the searchpath are
-        # only fired if non of the builtin paths matched.
-        parts = [x for x in name.split('/') if not x == '..']
-        for fn in searchpath:
-            fn = path.join(fn, *parts)
-            if path.exists(fn):
-                f = file(fn)
-                try:
-                    return f.read().decode(environment.template_charset)
-                finally:
-                    f.close()
-
-        # if still nothing, raise an error
-        raise TemplateNotFound(name)
+        rv = self.app.theme.get_source(name)
+        if rv is None:
+            raise TemplateNotFound(name)
+        return rv
 
 
 class TextPress(object):
@@ -661,6 +727,7 @@ class TextPress(object):
             cfg=self.cfg,
             h=htmlhelpers,
             url_for=url_for,
+            render_widgets=lambda: render_template('_widgets.html'),
             get_page_metadata=self.get_page_metadata,
             textpress={
                 'version':      textpress.__version__,
@@ -700,6 +767,14 @@ class TextPress(object):
         self._setup_finished = True
         #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
+
+    @property
+    def theme(self):
+        """Return the current theme."""
+        theme = self.cfg['theme']
+        if theme not in self.themes:
+            self.cfg['theme'] = theme = 'default'
+        return self.themes[theme]
 
     def bind_to_thread(self):
         """Bind the application to the current thread."""

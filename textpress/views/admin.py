@@ -32,6 +32,7 @@ from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      escape, build_eventmap, make_hidden_fields, reload_textpress, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
+from textpress.widgets import WidgetManager
 from textpress.pluginsystem import install_package, InstallationError
 
 
@@ -102,6 +103,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('options', url_for('admin/options'), _('Options'), [
                 ('basic', url_for('admin/basic_options'), _('Basic')),
                 ('theme', url_for('admin/theme'), _('Theme')),
+                ('widgets', url_for('admin/widgets'), _('Widgets')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
                 ('configuration', url_for('admin/configuration'),
                  _('Configuration Editor'))
@@ -1070,6 +1072,68 @@ def do_theme(req):
             'current':      name == current
         } for name, theme in sorted(req.app.themes.items())],
         csrf_protector=csrf_protector
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_overlays(req, template=None):
+    """
+    Edit the theme overlays.
+    """
+    if not template:
+        redirect(url_for('admin/overlays', template='layout.html'))
+    elif req.form.get('edit'):
+        redirect(url_for('admin/overlays',
+                         template=req.form.get('template', '')))
+    has_overlay=req.app.theme.overlay_exists(template)
+    source = req.app.theme.get_source(template)
+    if source is None:
+        abort(404)
+    elif source.endswith('\n'):
+        source = source[:-1]
+
+    if req.method == 'POST':
+        if req.form.get('delete'):
+            req.app.theme.remove_overlay(template)
+            flash(_('Overlay %s removed.') % escape(template),
+                  'remove')
+        else:
+            req.app.theme.set_overlay(template,
+                                      req.form.get('source', ''))
+            if has_overlay:
+                flash(_('Updated overlay %s.') % escape(template))
+            else:
+                flash(_('Created overlay %s.') % escape(template),
+                      'add')
+        redirect(url_for('admin/overlays', template=template))
+
+    templates = [x for x in req.app.theme.list_templates()
+                 if not x.startswith('admin/')]
+    return render_admin_response('admin/overlays.html', 'options.theme',
+        templates=templates,
+        active_template=template,
+        source=source,
+        has_overlay=has_overlay
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_widgets(req):
+    """
+    Configure the widgets.
+    """
+    all_widgets = dict((i, (w.get_display_name(), w.list_arguments()))
+                       for i, w in req.app.widgets.iteritems())
+    manager = WidgetManager(req.app, '_widgets.html')
+    if manager.manageable:
+        pass
+
+    add_script(url_for('core/shared', filename='js/UI.js'))
+    return render_admin_response('admin/widgets.html', 'options.widgets',
+        widgets=sorted(all_widgets, key=lambda x: x[1]),
+        manageable=manager.manageable,
+        all_widgets=all_widgets,
+        active_widgets=manager.widgets
     )
 
 

@@ -16,10 +16,7 @@
         {% block contents %}{% endblock %}
       </div>
       <div class="sidebar">
-        {{ get_tag_cloud() }}
-
-        <h3>{% trans 'Archive' %}</h3>
-        {{ get_post_archive_summary('months', 6) }}
+        {{ render_widgets() }}
       </div>
     </div>
     <div class="footer">
