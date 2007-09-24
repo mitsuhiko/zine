@@ -57,12 +57,12 @@ class WidgetManager(object):
         if not tree.body:
             return
 
-        def consume_data():
+        def consume_html():
             data = data_pieces.pop()
             if data.strip():
                 data = data.replace('%%', '%').strip('\n')
-                if self.widgets and self.widgets[-1][0] is None:
-                    self.widgets[-1][1] += '\n' + data
+                if self.widgets and self.widgets[-1][0] == 'HTML':
+                    self.widgets[-1][1]['html'] += '\n' + data
                 else:
                     self.widgets.append(('HTML', {'html': data}))
 
@@ -74,7 +74,8 @@ class WidgetManager(object):
                 self.manageable = False
                 return
             data_pieces = _format_re.split(node.text)
-            consume_data()
+            data_pieces.reverse()
+            consume_html()
             for expr in node.variables:
                 if not isinstance(expr, nodes.CallExpression) or \
                    not isinstance(expr.node, nodes.NameExpression) or \
@@ -102,7 +103,7 @@ class WidgetManager(object):
                         return
                     kwargs[name] = arg.value
                 self.widgets.append((expr.node.name, kwargs))
-                consume_data()
+                consume_html()
 
     def save(self):
         """
