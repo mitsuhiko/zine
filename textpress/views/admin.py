@@ -1128,48 +1128,54 @@ def do_widgets(req):
     """
     Configure the widgets.
     """
-    # configure one widget
-    configure = req.values.get('configure')
-    if configure in req.app.widgets:
-        widget = req.app.widgets[configure]
-        if widget.CONFIGURABLE:
-            args = widget.list_arguments(True)
-            old_args = req.values.get('old_args')
-            if old_args:
-                try:
-                    args.update(load_json(old_args))
-                except:
-                    pass
-            body = None
-            args, body = widget.configure_widget(args, req)
-            if args is body is None:
-                args = {}
-                body = ''
-            return Response(dump_json({
-                'body':     body,
-                'args':     args
-            }), mimetype='text/javascript')
+    manager = WidgetManager(req.app, '_widgets.html')
+    if not manager.manageable:
+        flash(_('The widget manager is disabled because the '
+                '"_widgets.html" template was altered by hand.'))
 
-    # or save all changes
-    if req.method == 'POST':
-        try:
-            widgets = load_json(req.value.get('widgets', ''))
-            if not isinstance(widgets, list):
-                raise TypeError()
-        except:
-            flash(_('invalid data submitted.'), 'error')
-        else:
-            manager.widgets[:] = widgets
-            manager.save()
-            flash(_('Widgets updated successfully.'))
-        redirect(url_for('admin/widgets'))
+    else:
+        # configure one widget
+        configure = req.values.get('configure')
+        if configure in req.app.widgets:
+            widget = req.app.widgets[configure]
+            if widget.CONFIGURABLE:
+                args = widget.list_arguments(True)
+                old_args = req.values.get('args')
+                if old_args:
+                    try:
+                        args.update(load_json(old_args))
+                    except Exception, e:
+                        pass
+                body = None
+                args, body = widget.configure_widget(args, req)
+                if args is body is None:
+                    args = {}
+                    body = ''
+                return Response(dump_json({
+                    'body':     body,
+                    'args':     args
+                }), mimetype='text/javascript')
+
+        # or save all changes
+        if req.method == 'POST':
+            try:
+                widgets = load_json(req.values.get('widgets', ''))
+                if not isinstance(widgets, list):
+                    raise TypeError()
+            except Exception, e:
+                flash(str(e))
+                flash(_('invalid data submitted.'), 'error')
+            else:
+                del manager.widgets[:]
+                for widget in widgets:
+                    manager.widgets.append(tuple(widget))
+                manager.save()
+                flash(_('Widgets updated successfully.'))
+            redirect(url_for('admin/widgets'))
 
     # display all widgets in the admin panel
     all_widgets = dict((i, w.get_display_name())
                        for i, w in req.app.widgets.iteritems())
-    manager = WidgetManager(req.app, '_widgets.html')
-    if manager.manageable:
-        pass
 
     add_script(url_for('core/shared', filename='js/Form.js'))
     add_script(url_for('core/shared', filename='js/JSON.js'))

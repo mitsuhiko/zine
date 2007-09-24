@@ -22,7 +22,14 @@
         var next_widget_id = 0;
 
         $(function() {
-          $('#config-panel').hide();  
+          $('#config-panel').hide();
+          $('#widget-form').submit(function() {
+            var active_widgets = [];
+            $.each(widget_positions, function() {
+              active_widgets.push(widget_map[this]);
+            });
+            $('#active-widgets').val($.dumpJSON(active_widgets));
+          });
 
           for (var type in $all_widgets) {
             $('<li class="widget"></li>')
@@ -98,7 +105,7 @@
                 return false;
               })
               .append($('<div class="actions">')
-                .append($('<input type="submit" value="Save">'))
+                .append($('<input type="submit" value="Update Settings">'))
                 .append(' ')
                 .append($('<input type="submit" name="cancel" value="Cancel">')
                   .click(function() {
@@ -134,8 +141,8 @@
         }
       })();
     </script>
-    <form action="" method="post" onsubmit="write_active_widgets()">
-      <input type="hidden" name="widgets" id="active_widgets" value="">
+    <form action="" method="post" id="widget-form">
+      <input type="hidden" name="widgets" id="active-widgets" value="">
       <ul id="sidebar" class="droppable"></ul>
       <div id="config-panel">
         <h3>{% trans "Configure Widget" %}</h3>
