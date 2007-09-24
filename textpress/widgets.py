@@ -162,7 +162,7 @@ class Widget(object):
 
     @staticmethod
     def configure_widget(initial_args, req):
-        return initial_args, None
+        pass
 
     def __unicode__(self):
         return render_template(self.TEMPLATE, widget=self)
@@ -201,7 +201,7 @@ class TagCloud(Widget):
             args['show_title'] = req.form.get('show_title') == 'yes'
         if error is None:
             return args
-        return render_response('admin/widgets/tagcloud.html',
+        return render_template('admin/widgets/tagcloud.html',
             error=error,
             form=args
         )
@@ -238,7 +238,7 @@ class PostArchiveSummary(Widget):
             args['show_title'] = req.form.get('show_title') == 'yes'
         if not errors:
             return args
-        return render_response('admin/widgets/post_archive_summary.html',
+        return render_template('admin/widgets/post_archive_summary.html',
             errors=errors,
             form=args
         )

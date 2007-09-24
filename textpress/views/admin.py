@@ -1140,13 +1140,21 @@ def do_widgets(req):
                     args.update(load_json(old_args))
                 except:
                     pass
-            args, response = widget.configure_widget(args, req)
-            result = {
-                'error':    response is not None,
-                'form':     response,
+            body = None
+            rv = widget.configure_widget(args, req)
+            if rv is None:
+                finished = True
+            elif isinstance(rv, basestring):
+                finished = False
+                body = rv
+            elif isinstance(rv, dict):
+                finished = True
+                args = rv
+            return Response(dump_json({
+                'finished': finished,
+                'body':     body,
                 'args':     args
-            }
-            return Response(dump_json(result), mimetype='text/javascript')
+            }), mimetype='text/javascript')
 
     # or save all changes
     if req.method == 'POST':
