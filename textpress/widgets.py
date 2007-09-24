@@ -63,7 +63,7 @@ class WidgetManager(object):
                 if self.widgets and self.widgets[-1][0] is None:
                     self.widgets[-1][1] += '\n' + data
                 else:
-                    self.widgets.append((None, {'text': data}))
+                    self.widgets.append(('TEXT', {'text': data}))
 
         for node in tree.body:
             # with jinja 1.2 onwards all expressions are children
