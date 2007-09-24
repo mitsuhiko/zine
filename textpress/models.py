@@ -205,7 +205,7 @@ class PostManager(db.DatabaseManager):
             endpoint = 'blog/show_tag'
         elif author is not None:
             url_args['username'] = author
-            endpoint = 'blog/show_user'
+            endpoint = 'blog/show_author'
         else:
             endpoint = 'blog/index'
             if month is not None:
