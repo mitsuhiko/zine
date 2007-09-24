@@ -186,14 +186,15 @@ class TagCloud(Widget):
         args = initial_args.copy()
         error = None
         if req.method == 'POST':
-            args['max'] = max = req.form.get('max', '')
+            max = req.form.get('max', '')
             if not max:
-                max = None
+                args['max'] = None
             elif not max.isdigit():
                 error = _('Maximum number of tags must be empty '
                           'or a number.')
-            args['show_title'] = show_title = \
-                req.form.get('show_title') == 'yes'
+            else:
+                args['max'] = int(max)
+            args['show_title'] = req.form.get('show_title') == 'yes'
         if error is None:
             return args
         return render_response('admin/widgets/tagcloud.html',
@@ -209,10 +210,34 @@ class PostArchiveSummary(Widget):
 
     NAME = 'get_post_archive_summary'
     TEMPLATE = 'widgets/post_archive_summary.html'
+    CONFIGURABLE = True
 
     @staticmethod
     def get_display_name():
         return _('Post Archive Summary')
+
+    @staticmethod
+    def configure_widget(initial_args, req):
+        args = initial_args.copy()
+        errors = []
+        if req.method == 'POST':
+            args['detail'] = detail = req.form.get('detail')
+            if detail not in ('years', 'months', 'days'):
+                errors.append(_('Detail must be years, months or days.'))
+            limit = req.form.get('limit')
+            if not limit:
+                args['limit'] = None
+            elif not limit.isdigit():
+                errors.append(_('Limit must be omited or a valid number.'))
+            else:
+                args['limit'] = int(limit)
+            args['show_title'] = req.form.get('show_title') == 'yes'
+        if not errors:
+            return args
+        return render_response('admin/widgets/post_archive_summary.html',
+            errors=errors,
+            form=args
+        )
 
     def __init__(self, detail='months', limit=6, show_title=False):
         self.__dict__.update(Post.objects.get_archive_summary(detail, limit))

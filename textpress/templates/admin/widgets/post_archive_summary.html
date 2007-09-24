@@ -1,0 +1,20 @@
+{% for error in errors %}<div class="error">{{ error }}</div>{% endfor %}
+<form action="" method="post">
+  <dl>
+    <dt>{% trans "Detail" %}</dt>
+    <dd><select name="detail">
+    {%- for detail, caption in [
+      ('days', _('Days')),
+      ('months', _('Months')),
+      ('years', _('Years'))
+    ] %}
+      <option value="{{ detail }}"{% if detail == form.detail
+        %} selected{% endif %}>{{ caption }}</option>
+    {%- endfor %}
+    </select></dd>
+    <dt>{% trans "Limit" %}</dt>
+    <dd>{{ h.input_field('limit', form.limit) }}</dd>
+    <dt>{% trans "Show Title" %}</dt>
+    <dd>{{ h.checkbox('show_title', 'yes', form.show_title) }}</dd>
+  </dl>
+</form>
