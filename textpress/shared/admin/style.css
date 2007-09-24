@@ -542,13 +542,12 @@ li.widget:hover {
     color: black;
 }
 
-ul.droppable-active {
-    border: 2px solid #277391;
-    background-color: #77D4F8;
-}
-
 #sidebar li.widget {
     float: none;
+}
+
+#sidebar li.widget div.buttons {
+  float: right;
 }
 
 /* :::: PLUGIN PAGE :::: */

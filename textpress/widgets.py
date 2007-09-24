@@ -50,6 +50,7 @@ class WidgetManager(object):
         self.widgets = []
         self.manageable = True
         self.filename = filename
+        self.app = app
         if not app.theme.overlay_exists(filename):
             return
         tree = app.theme.parse_overlay(filename)

@@ -23,22 +23,81 @@
           $('<li class="widget"></li>')
             .attr('id', id)
             .text(name)
-            .draggable({helper: 'clone'})
-            .appendTo('#inventory');
+            .appendTo('#inventory')
+            .click(closure(add_widget, id))
         };
-        $('#sidebar').droppable({
-          accept:       '.widget',
-          tolerance:    'touch',
-          hoverClass:   '.droppable-active',
-          drop: function(ev, ui) {
-            $('#sidebar').append($(ui.element).clone());
-          }
-        });
       });
+
+      function closure() {
+        var args = $.makeArray(arguments);
+        return function() {
+          args[0].apply(this, args.slice(1));
+        };
+      }
+
+      function add_widget(widget_id) {
+        // register widget in $active_widgets
+        var idx = $active_widgets.push([widget_id, {}]) - 1;
+
+        // append a visible element in the widget list
+        var up = $('<span>up</span>')
+              .click(widget_up);
+        var down = $('<span>down</span>')
+                .click(widget_down);
+        var buttons = $('<div class="buttons"></div>')
+                   .append(up)
+                   .append(down)
+        //           .append(manage)
+        var elm = $(this).clone()
+               .prepend(buttons)
+        elm[0].idx = idx
+
+        $('#sidebar').append(elm);
+      }
+
+      function widget_up() {
+        widget = $(this).parent().parent();
+        idx = widget.idx;
+        // widget is already the first one
+        if (widget.prev().length == 0) return;
+
+        $active_widgets.splice(
+          idx - 1,
+          2,
+          $active_widgets[idx],
+          $active_widgets[idx - 1]
+        );
+
+        widget.idx = idx - 1;
+        widget.prev()[0].idx = idx;
+        widget.insertBefore(widget.prev());
+      }
+
+      function widget_down() {
+        widget = $(this).parent().parent();   
+        idx = widget[0].idx;             
+        // widget is already the last one
+        if (widget.next().length == 0) return;
+
+        $active_widgets.splice(
+          idx,
+          2,
+          $active_widgets[idx + 1],
+          $active_widgets[idx]
+        );
+
+        widget.idx = idx + 1;
+        widget.next()[0].idx = idx;
+        widget.insertAfter(widget.next());
+      }
+
+      function write_active_widgets() {
+        $('#active_widgets').attr('value', $.dumpJSON($active_widgets));
+      }
     </script>
-    <form action="" method="post">
-      <input type="hidden" name="widgets" value="">
-      <ul id="sidebar"></ul>
+    <form action="" method="post" onsubmit="write_active_widgets()">
+      <input type="hidden" name="widgets" id="active_widgets" value="">
+      <ul id="sidebar" class="droppable"></ul>
       <div class="inventory">
         <h3>{% trans "Available Widgets" %}</h3>
         <ul id="inventory"></ul>
