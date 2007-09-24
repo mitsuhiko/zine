@@ -1148,6 +1148,20 @@ def do_widgets(req):
             }
             return Response(dump_json(result), mimetype='text/javascript')
 
+    # or save all changes
+    if req.method == 'POST':
+        try:
+            widgets = load_json(req.value.get('widgets', ''))
+            if not isinstance(widgets, list):
+                raise TypeError()
+        except:
+            flash(_('invalid data submitted.'), 'error')
+        else:
+            manager.widgets[:] = widgets
+            manager.save()
+            flash(_('Widgets updated successfully.'))
+        redirect(url_for('admin/widgets'))
+
     # display all widgets in the admin panel
     all_widgets = dict((i, (w.get_display_name(), w.list_arguments()))
                        for i, w in req.app.widgets.iteritems())
