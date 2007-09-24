@@ -1155,7 +1155,7 @@ def do_widgets(req):
     if manager.manageable:
         pass
 
-    add_script(url_for('core/shared', filename='js/UI.js'))
+    add_script(url_for('core/shared', filename='js/JSON.js'))
     return render_admin_response('admin/widgets.html', 'options.widgets',
         widgets=sorted(all_widgets, key=lambda x: x[1]),
         manageable=manager.manageable,
