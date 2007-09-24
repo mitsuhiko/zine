@@ -148,13 +148,17 @@ class Widget(object):
         return cls.__name__
 
     @classmethod
-    def list_arguments(cls):
+    def list_arguments(cls, extended=False):
         """Get a tuple of the arguments this widget uses."""
         try:
             init = cls.__init__.im_func
         except AttributeError:
             return ()
-        return inspect.getargspec(init)[0][1:]
+        rv = inspect.getargspec(init)
+        args = rv[0][1:]
+        if not extended:
+            return args
+        return dict(zip(args, (None,) * (len(rv[3]) - len(args) - 1) + rv[3]))
 
     @staticmethod
     def configure_widget(initial_args, req):

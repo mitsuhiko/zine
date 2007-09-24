@@ -31,7 +31,7 @@ from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      escape, build_eventmap, make_hidden_fields, reload_textpress, \
-     CSRFProtector, IntelligentRedirect, TIMEZONES
+     dump_json, load_json, CSRFProtector, IntelligentRedirect, TIMEZONES
 from textpress.widgets import WidgetManager
 from textpress.pluginsystem import install_package, InstallationError
 
@@ -1128,6 +1128,27 @@ def do_widgets(req):
     """
     Configure the widgets.
     """
+    # configure one widget
+    configure = req.args.get('configure')
+    if configure in req.app.widgets:
+        widget = req.app.widgets[configure]
+        if widget.CONFIGURABLE:
+            args = widget.list_arguments(True)
+            old_args = req.value.get('old_args')
+            if old_args:
+                try:
+                    args.update(load_json(old_args))
+                except:
+                    pass
+            args, response = widget.configure_widget(args, req)
+            result = {
+                'error':    response is not None,
+                'form':     response,
+                'args':     args
+            }
+            return Response(dump_json(result), mimetype='text/javascript')
+
+    # display all widgets in the admin panel
     all_widgets = dict((i, (w.get_display_name(), w.list_arguments()))
                        for i, w in req.app.widgets.iteritems())
     manager = WidgetManager(req.app, '_widgets.html')
