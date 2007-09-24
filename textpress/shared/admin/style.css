@@ -521,6 +521,17 @@ div.inventory h3 {
     padding: 0 0 10px 0;
 }
 
+#config-panel {
+    margin: 0 0 10px 0;
+    padding: 10px;
+    border: 2px solid #ccc;
+}
+
+#config-panel h3 {
+    margin: 0;
+    padding: 0 0 10px 0;
+}
+
 #inventory {
     margin: 0;
     padding: 0;
@@ -538,16 +549,31 @@ li.widget {
     color: #975325;
 }
 
-li.widget:hover {
-    color: black;
+#inventory li.widget:hover {
+    border: 1px solid #E76F2A;
+    background-color: #ECD8CD;
 }
 
 #sidebar li.widget {
     float: none;
 }
 
-#sidebar li.widget div.buttons {
-  float: right;
+#sidebar li.widget .buttons {
+    float: right;
+    display: none;
+}
+
+#sidebar li.widget:hover .buttons {
+    display: block;
+}
+
+#sidebar li.widget .buttons span.button {
+    padding: 0 0 0 8px;
+    font-size: 0.9em;
+}
+
+#sidebar li.widget .buttons span.button:hover {
+    color: black;
 }
 
 /* :::: PLUGIN PAGE :::: */

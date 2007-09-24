@@ -163,7 +163,7 @@ class Widget(object):
 
     @staticmethod
     def configure_widget(initial_args, req):
-        pass
+        return None, None
 
     def __unicode__(self):
         return render_template(self.TEMPLATE, widget=self)
@@ -188,10 +188,10 @@ class TagCloud(Widget):
 
     @staticmethod
     def configure_widget(initial_args, req):
-        args = initial_args.copy()
+        args = form = initial_args.copy()
         error = None
         if req.method == 'POST':
-            max = req.form.get('max', '')
+            args['max'] = max = req.form.get('max', '')
             if not max:
                 args['max'] = None
             elif not max.isdigit():
@@ -200,11 +200,11 @@ class TagCloud(Widget):
             else:
                 args['max'] = int(max)
             args['show_title'] = req.form.get('show_title') == 'yes'
-        if error is None:
-            return args
-        return render_template('admin/widgets/tagcloud.html',
+        if error is not None:
+            args = None
+        return args, render_template('admin/widgets/tagcloud.html',
             error=error,
-            form=args
+            form=form
         )
 
 
@@ -223,13 +223,13 @@ class PostArchiveSummary(Widget):
 
     @staticmethod
     def configure_widget(initial_args, req):
-        args = initial_args.copy()
+        args = form = initial_args.copy()
         errors = []
         if req.method == 'POST':
             args['detail'] = detail = req.form.get('detail')
             if detail not in ('years', 'months', 'days'):
                 errors.append(_('Detail must be years, months or days.'))
-            limit = req.form.get('limit')
+            args['limit'] = limit = req.form.get('limit')
             if not limit:
                 args['limit'] = None
             elif not limit.isdigit():
@@ -237,11 +237,11 @@ class PostArchiveSummary(Widget):
             else:
                 args['limit'] = int(limit)
             args['show_title'] = req.form.get('show_title') == 'yes'
-        if not errors:
-            return args
-        return render_template('admin/widgets/post_archive_summary.html',
+        if errors:
+            args = None
+        return args, render_template('admin/widgets/post_archive_summary.html',
             errors=errors,
-            form=args
+            form=form
         )
 
     def __init__(self, detail='months', limit=6, show_title=False):
@@ -275,7 +275,7 @@ class LatestComments(Widget):
     TEMPLATE = 'widgets/latest_comments.html'
 
     @staticmethod
-    def get_latest_comments():
+    def get_display_name():
         return _('Latest Comments')
 
     def __init__(self, limit=5, show_title=False):

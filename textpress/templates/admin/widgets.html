@@ -16,88 +16,131 @@
       var $all_widgets = {{ all_widgets|jsonencode }};
       var $active_widgets = {{ active_widgets|jsonencode }};
 
-      $(function() {
-        for (var id in $all_widgets) {
-          var name = $all_widgets[id][0];
-          var options = $all_widgets[id][1];
-          $('<li class="widget"></li>')
-            .attr('id', id)
-            .text(name)
-            .appendTo('#inventory')
-            .click(closure(add_widget, id))
-        };
-      });
+      (function() {
+        var widget_map = {};
+        var widget_positions = []; 
+        var next_widget_id = 0;
 
-      function closure() {
-        var args = $.makeArray(arguments);
-        return function() {
-          args[0].apply(this, args.slice(1));
-        };
-      }
+        $(function() {
+          $('#config-panel').hide();  
 
-      function add_widget(widget_id) {
-        // register widget in $active_widgets
-        var idx = $active_widgets.push([widget_id, {}]) - 1;
+          for (var type in $all_widgets) {
+            $('<li class="widget"></li>')
+              .attr('id', 'widget_' + type)
+              .text($all_widgets[type])
+              .appendTo('#inventory')
+              .click(closure(addWidget, type, {}, true))
+            };
+        
+          $.each($active_widgets, function() {
+            addWidget(this[0], this[1], false);
+          });
+        });
 
-        // append a visible element in the widget list
-        var up = $('<span>up</span>')
-              .click(widget_up);
-        var down = $('<span>down</span>')
-                .click(widget_down);
-        var buttons = $('<div class="buttons"></div>')
-                   .append(up)
-                   .append(down)
-        //           .append(manage)
-        var elm = $(this).clone()
-               .prepend(buttons)
-        elm[0].idx = idx
+        function closure(func) {
+          var args = $.makeArray(arguments);
+          return function() {
+            args[0].apply(this, args.slice(1));
+          }
+        }
 
-        $('#sidebar').append(elm);
-      }
+        function addWidget(widget_type, args, animate) {
+          var widget_id = next_widget_id++;
+          widget_positions.push(widget_id);
+          widget_map[widget_id] = [widget_type, args];
+          var el = $('#widget_' + widget_type)
+            .clone()
+            .attr('id', 'w_' + widget_id)
+            .prepend($('<div class="buttons">')
+              .append($('<span class="button">up</span>')
+                       .click(closure(moveWidgetUp, widget_id)))
+              .append($('<span class="button">down</span>')
+                       .click(closure(moveWidgetDown, widget_id)))
+              .append($('<span class="button">remove</span>')
+                       .click(closure(removeWidget, widget_id)))
+              .append($('<span class="button">configure</span>')
+                       .click(closure(configureWidget, widget_id))))
+          if (animate)
+            el.hide().fadeIn('slow');
+          el.appendTo('#sidebar');
+        }
 
-      function widget_up() {
-        widget = $(this).parent().parent();
-        idx = widget.idx;
-        // widget is already the first one
-        if (widget.prev().length == 0) return;
+        function configureWidget(widget_id) {
+          $('#config-panel div.pane').empty();
+          $('#config-panel').fadeIn('slow');
 
-        $active_widgets.splice(
-          idx - 1,
-          2,
-          $active_widgets[idx],
-          $active_widgets[idx - 1]
-        );
+          var widget = widget_map[widget_id];
+          var submit_url = TextPress.BLOG_URL + '/admin/options/widgets';
+          var url_args = {
+            configure:  widget[0],
+            args:       $.dumpJSON(widget[1]),
+            initial:    'yes'
+          }
+          $.getJSON(submit_url, url_args, updateView);
 
-        widget.idx = idx - 1;
-        widget.prev()[0].idx = idx;
-        widget.insertBefore(widget.prev());
-      }
+          function updateView(data) {
+            $('#config-panel div.pane').html(data.body);
+            $('#config-panel div.pane form')
+              .submit(function() {
+                $(this).ajaxSubmit({
+                  url:      submit_url,
+                  data:     url_args,
+                  dataType: 'json',
+                  success: function(data) {
+                    if (data.args !== null) {
+                      widget_map[widget_id][1] = data.args;
+                      $('#config-panel').fadeOut('fast');
+                    }
+                    else
+                      updateView(data);
+                  }
+                });
+                return false;
+              })
+              .append($('<div class="actions">')
+                .append($('<input type="submit" value="Save">'))
+                .append(' ')
+                .append($('<input type="submit" name="cancel" value="Cancel">')
+                  .click(function() {
+                    $('#config-panel').fadeOut('slow');
+                    return false;
+                  })));
+          }
+        }
 
-      function widget_down() {
-        widget = $(this).parent().parent();   
-        idx = widget[0].idx;             
-        // widget is already the last one
-        if (widget.next().length == 0) return;
+        function removeWidget(widget_id) {
+          widget_positions.splice(widget_positions.indexOf(widget_id), 1);
+          $('#w_' + widget_id).slideUp('fast', function() {
+            $(this).remove();
+          });
+        }
 
-        $active_widgets.splice(
-          idx,
-          2,
-          $active_widgets[idx + 1],
-          $active_widgets[idx]
-        );
+        function moveWidgetUp(widget_id) {
+          moveWidgetInQueue(widget_id, -1);
+          var el = $('#w_' + widget_id);
+          el.hide().insertBefore(el.prev()).fadeIn();
+        }
 
-        widget.idx = idx + 1;
-        widget.next()[0].idx = idx;
-        widget.insertAfter(widget.next());
-      }
+        function moveWidgetDown(widget_id) {
+          moveWidgetInQueue(widget_id, 1);
+          var el = $('#w_' + widget_id);
+          el.hide().insertAfter(el.next()).fadeIn();
+        }
 
-      function write_active_widgets() {
-        $('#active_widgets').attr('value', $.dumpJSON($active_widgets));
-      }
+        function moveWidgetInQueue(widget_id, change) {
+          var idx = widget_positions.indexOf(widget_id);
+          widget_positions.splice(idx, 1);
+          widget_positions.splice(idx + change, 0, widget_id);
+        }
+      })();
     </script>
     <form action="" method="post" onsubmit="write_active_widgets()">
       <input type="hidden" name="widgets" id="active_widgets" value="">
       <ul id="sidebar" class="droppable"></ul>
+      <div id="config-panel">
+        <h3>{% trans "Configure Widget" %}</h3>
+        <div class="pane"></div>
+      </div>
       <div class="inventory">
         <h3>{% trans "Available Widgets" %}</h3>
         <ul id="inventory"></ul>

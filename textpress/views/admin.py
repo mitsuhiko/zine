@@ -1129,29 +1129,23 @@ def do_widgets(req):
     Configure the widgets.
     """
     # configure one widget
-    configure = req.args.get('configure')
+    configure = req.values.get('configure')
     if configure in req.app.widgets:
         widget = req.app.widgets[configure]
         if widget.CONFIGURABLE:
             args = widget.list_arguments(True)
-            old_args = req.value.get('old_args')
+            old_args = req.values.get('old_args')
             if old_args:
                 try:
                     args.update(load_json(old_args))
                 except:
                     pass
             body = None
-            rv = widget.configure_widget(args, req)
-            if rv is None:
-                finished = True
-            elif isinstance(rv, basestring):
-                finished = False
-                body = rv
-            elif isinstance(rv, dict):
-                finished = True
-                args = rv
+            args, body = widget.configure_widget(args, req)
+            if args is body is None:
+                args = {}
+                body = ''
             return Response(dump_json({
-                'finished': finished,
                 'body':     body,
                 'args':     args
             }), mimetype='text/javascript')
@@ -1171,12 +1165,13 @@ def do_widgets(req):
         redirect(url_for('admin/widgets'))
 
     # display all widgets in the admin panel
-    all_widgets = dict((i, (w.get_display_name(), w.list_arguments()))
+    all_widgets = dict((i, w.get_display_name())
                        for i, w in req.app.widgets.iteritems())
     manager = WidgetManager(req.app, '_widgets.html')
     if manager.manageable:
         pass
 
+    add_script(url_for('core/shared', filename='js/Form.js'))
     add_script(url_for('core/shared', filename='js/JSON.js'))
 
     return render_admin_response('admin/widgets.html', 'options.widgets',
