@@ -64,7 +64,7 @@ class WidgetManager(object):
                 if self.widgets and self.widgets[-1][0] is None:
                     self.widgets[-1][1] += '\n' + data
                 else:
-                    self.widgets.append(('TEXT', {'text': data}))
+                    self.widgets.append(('HTML', {'html': data}))
 
         for node in tree.body:
             # with jinja 1.2 onwards all expressions are children
@@ -110,8 +110,8 @@ class WidgetManager(object):
         """
         buffer = []
         for name, args in self.widgets:
-            if name is None:
-                data = args['text']
+            if name == 'HTML':
+                data = args['html']
                 if _instruction_re.search(data) is not None:
                     data = u'{% raw %}%s{% endraw %}' % data
                 buffer.append(data)
@@ -141,9 +141,6 @@ class Widget(object):
     #: in the template as `widget`.
     TEMPLATE = None
 
-    #: This is true of the widget is configurable
-    CONFIGURABLE = False
-
     @classmethod
     def get_display_name(cls):
         return cls.__name__
@@ -169,6 +166,32 @@ class Widget(object):
         return render_template(self.TEMPLATE, widget=self)
 
 
+class HTMLWidget(Widget):
+    """
+    Special widge for normal HTML data.
+    """
+
+    NAME = 'HTML'
+
+    @staticmethod
+    def get_display_name():
+        return _('HTML')
+
+    @staticmethod
+    def configure_widget(initial_args, req):
+        error = None
+        args = initial_args.copy()
+        if req.method == 'POST':
+            args['html'] = req.form.get('html', '')
+        return args, render_template('/admin/widgets/html.html', form=args)
+
+    def __init__(self, html=u''):
+        self.html = html
+
+    def __unicode__(self):
+        return self.html
+
+
 class TagCloud(Widget):
     """
     A tag cloud. What else?
@@ -176,7 +199,6 @@ class TagCloud(Widget):
 
     NAME = 'get_tag_cloud'
     TEMPLATE = 'widgets/tagcloud.html'
-    CONFIGURABLE = True
 
     def __init__(self, max=None, show_title=False):
         self.tags = Tag.objects.get_cloud(max)
@@ -215,7 +237,6 @@ class PostArchiveSummary(Widget):
 
     NAME = 'get_post_archive_summary'
     TEMPLATE = 'widgets/post_archive_summary.html'
-    CONFIGURABLE = True
 
     @staticmethod
     def get_display_name():
@@ -283,4 +304,5 @@ class LatestComments(Widget):
         self.show_title = show_title
 
 
-all_widgets = [TagCloud, PostArchiveSummary, LatestPosts, LatestComments]
+all_widgets = [HTMLWidget, TagCloud, PostArchiveSummary, LatestPosts,
+               LatestComments]

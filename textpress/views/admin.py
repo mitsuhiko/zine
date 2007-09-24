@@ -1138,23 +1138,22 @@ def do_widgets(req):
         configure = req.values.get('configure')
         if configure in req.app.widgets:
             widget = req.app.widgets[configure]
-            if widget.CONFIGURABLE:
-                args = widget.list_arguments(True)
-                old_args = req.values.get('args')
-                if old_args:
-                    try:
-                        args.update(load_json(old_args))
-                    except Exception, e:
-                        pass
-                body = None
-                args, body = widget.configure_widget(args, req)
-                if args is body is None:
-                    args = {}
-                    body = ''
-                return Response(dump_json({
-                    'body':     body,
-                    'args':     args
-                }), mimetype='text/javascript')
+            args = widget.list_arguments(True)
+            old_args = req.values.get('args')
+            if old_args:
+                try:
+                    args.update(load_json(old_args))
+                except Exception, e:
+                    pass
+            body = None
+            args, body = widget.configure_widget(args, req)
+            if args is body is None:
+                args = {}
+                body = ''
+            return Response(dump_json({
+                'body':     body,
+                'args':     args
+            }), mimetype='text/javascript')
 
         # or save all changes
         if req.method == 'POST':
@@ -1163,7 +1162,6 @@ def do_widgets(req):
                 if not isinstance(widgets, list):
                     raise TypeError()
             except Exception, e:
-                flash(str(e))
                 flash(_('invalid data submitted.'), 'error')
             else:
                 del manager.widgets[:]
