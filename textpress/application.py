@@ -41,7 +41,7 @@ from textpress.config import Configuration
 from textpress.utils import gen_sid, format_datetime, format_date, \
      format_month, gen_psid, ClosingIterator, check_external_url
 
-from werkzeug.utils import SharedDataMiddleware
+from werkzeug.utils import SharedDataMiddleware, url_quote
 from werkzeug.wrappers import BaseRequest, BaseResponse
 from werkzeug import routing
 
@@ -152,7 +152,7 @@ def url_for(endpoint, **args):
     external = args.pop('_external', False)
     rv = get_request().urls.build(endpoint, args, external)
     if anchor is not None:
-        rv += '#' + anchor
+        rv += '#' + url_quote(anchor)
     return rv
 
 
