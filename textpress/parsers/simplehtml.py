@@ -15,7 +15,7 @@ from textpress.fragment import Node, TextNode, Fragment
 from textpress._ext import beautifulsoup as bt
 
 
-_paragraph_re = re.compile(r'(?:\s*\n){2,}')
+_paragraph_re = re.compile(r'(\s*\n){2,}')
 
 _unsave_attributes = set([
     'onload', 'onunload', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup',
@@ -144,21 +144,26 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
         def rewrite(parent):
             for node in parent.children[:]:
                 rewrite(node)
+
+            paragraphs = [[]]
+
             if parent is tree or (parent.__class__ is Node and
                                   parent.name in self.blocks_with_paragraphs):
-                paragraphs = [[]]
                 for child in parent.children:
                     if child.__class__ is TextNode:
-                        blocks = _paragraph_re.split(child.value)
-                        if len(blocks) > 1:
-                            for block in blocks:
-                                if block:
-                                    paragraphs[-1].append(TextNode(block))
+                        blockiter = iter(_paragraph_re.split(child.value))
+                        for block in blockiter:
+                            try:
+                                is_paragraph = bool(blockiter.next())
+                            except StopIteration:
+                                is_paragraph = False
+                            if block:
+                                paragraphs[-1].append(TextNode(block))
+                            if is_paragraph:
                                 paragraphs.append([])
-                            continue
-                    if child.__class__ is Node and \
-                       child.name not in self.paragraph_tags:
-                        paragraphs.extend([child, []])
+                    elif child.__class__ is Node and \
+                         child.name not in self.paragraph_tags:
+                        paragraphs.extend((child, []))
                     else:
                         paragraphs[-1].append(child)
 
