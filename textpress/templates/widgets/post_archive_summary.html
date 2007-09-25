@@ -1,5 +1,7 @@
-{% if widget.show_title %}<h3>{% trans 'Archive' %}</h3>{% endif %}
-{%- if not widget.empty %}
+{% extends 'widgets/base.html' %}
+{% block title %}{% trans 'Archive' %}{% endblock %}
+{% block body %}
+  {%- if not widget.empty %}
   <ul>
   {%- for item in widget.months %}
     <li><a href="{{ url_for('blog/archive', year=item.year,
@@ -10,4 +12,5 @@
       "Complete archive" %}</a></li>
   {%- endif %}
   </ul>
-{%- endif %}
+  {%- endif %}
+{% endblock %}
