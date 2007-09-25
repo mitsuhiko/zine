@@ -141,14 +141,17 @@ def redirect(url, status=302, allow_external_redirect=False):
     raise DirectResponse(resp)
 
 
-def url_for(endpoint, _external=False, **args):
+def url_for(endpoint, _external=False, _anchor=None, **args):
     """Get the url to an endpoint."""
     if hasattr(endpoint, 'get_url_values'):
         rv = endpoint.get_url_values()
         if rv is not None:
             endpoint, updated_args = rv
             args.update(updated_args)
-    return get_request().urls.build(endpoint, args, _external)
+    rv = get_request().urls.build(endpoint, args, _external)
+    if _anchor is not None:
+        rv += '#' + _anchor
+    return rv
 
 
 def get_request():

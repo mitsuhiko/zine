@@ -781,6 +781,11 @@ class Comment(object):
     body = property(_get_body, _set_body)
     del _get_raw_body, _set_raw_body, _get_body, _set_body
 
+    def get_url_values(self):
+        endpoint, args = self.post.get_url_values()
+        args['_anchor'] = '#comment-%d' % self.comment_id
+        return endpoint, args
+
     def __repr__(self):
         return '<%s %r>' % (
             self.__class__.__name__,
