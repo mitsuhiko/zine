@@ -121,6 +121,8 @@ class WidgetManager(object):
         buffer = []
         for name, args in self.widgets:
             if name == 'HTML':
+                if not args or not args['html'].strip():
+                    continue
                 data = args['html']
                 if _instruction_re.search(data) is not None:
                     data = u'{%% raw %%}%s{%% endraw %%}' % data
