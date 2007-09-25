@@ -123,7 +123,7 @@ class WidgetManager(object):
             if name == 'HTML':
                 data = args['html']
                 if _instruction_re.search(data) is not None:
-                    data = u'{% raw %}%s{% endraw %}' % data
+                    data = u'{%% raw %%}%s{%% endraw %%}' % data
                 buffer.append(data)
             else:
                 buffer.append(u'{{ %s(%s) }}' % (
