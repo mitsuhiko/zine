@@ -147,7 +147,7 @@ class PostManager(db.DatabaseManager):
         if role <= ROLE_SUBSCRIBER:
             return query.filter(
                 (p.status == STATUS_PUBLISHED) |
-                (p.pub_date >= now)
+                (p.pub_date >= datetime.utcnow())
             )
         elif role == ROLE_AUTHOR:
             # it's safe to access req here because we only have
