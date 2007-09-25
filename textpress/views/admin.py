@@ -1129,11 +1129,7 @@ def do_widgets(req):
     Configure the widgets.
     """
     manager = WidgetManager(req.app, '_widgets.html')
-    if not manager.manageable:
-        flash(_('The widget manager is disabled because the '
-                '"_widgets.html" template was altered by hand.'))
-
-    else:
+    if manager.manageable:
         # configure one widget
         configure = req.values.get('configure')
         if configure in req.app.widgets:
@@ -1157,30 +1153,37 @@ def do_widgets(req):
 
         # or save all changes
         if req.method == 'POST':
-            try:
-                widgets = load_json(req.values.get('widgets', ''))
-                if not isinstance(widgets, list):
-                    raise TypeError()
-            except Exception, e:
-                flash(_('invalid data submitted.'), 'error')
+            if req.values.get('revert'):
+                manager.revert_to_default()
+                flash(_('Removed personal widget set. Will use the '
+                        'theme defaults now'))
             else:
-                del manager.widgets[:]
-                for widget in widgets:
-                    manager.widgets.append(tuple(widget))
-                manager.save()
-                flash(_('Widgets updated successfully.'))
+                try:
+                    widgets = load_json(req.values.get('widgets', ''))
+                    if not isinstance(widgets, list):
+                        raise TypeError()
+                except Exception, e:
+                    flash(_('invalid data submitted.'), 'error')
+                else:
+                    del manager.widgets[:]
+                    for widget in widgets:
+                        manager.widgets.append(tuple(widget))
+                    manager.save()
+                    flash(_('Widgets updated successfully.'))
             redirect(url_for('admin/widgets'))
 
     # display all widgets in the admin panel
     all_widgets = dict((i, w.get_display_name())
                        for i, w in req.app.widgets.iteritems())
 
-    add_script(url_for('core/shared', filename='js/Form.js'))
-    add_script(url_for('core/shared', filename='js/JSON.js'))
+    # add all the widgets we use
+    for script in 'Form.js', 'JSON.js', 'WidgetManager.js':
+        add_script(url_for('core/shared', filename='js/' + script))
 
     return render_admin_response('admin/widgets.html', 'options.widgets',
         widgets=sorted(all_widgets, key=lambda x: x[1]),
         manageable=manager.manageable,
+        default=manager.default,
         all_widgets=all_widgets,
         active_widgets=manager.widgets
     )

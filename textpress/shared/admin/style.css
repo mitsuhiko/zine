@@ -556,11 +556,16 @@ li.widget {
 
 #sidebar li.widget {
     float: none;
+    background-color: #D4ECF5;
+    border: 1px solid #3FA9D3;
+    color: #1F6885;
+    cursor: default;
 }
 
 #sidebar li.widget .buttons {
     float: right;
     display: none;
+    cursor: pointer;
 }
 
 #sidebar li.widget:hover .buttons {

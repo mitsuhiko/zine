@@ -49,9 +49,11 @@ class WidgetManager(object):
     def __init__(self, app, filename='_widgets.html'):
         self.widgets = []
         self.manageable = True
+        self.default = False
         self.filename = filename
         self.app = app
         if not app.theme.overlay_exists(filename):
+            self.default = True
             return
         tree = app.theme.parse_overlay(filename)
         if not tree.body:
@@ -104,6 +106,13 @@ class WidgetManager(object):
                     kwargs[name] = arg.value
                 self.widgets.append((expr.node.name, kwargs))
                 consume_html()
+
+
+    def revert_to_default(self):
+        """
+        Revert to the theme defaults (removes overlay)
+        """
+        self.app.theme.remove_overlay(self.filename)
 
     def save(self):
         """

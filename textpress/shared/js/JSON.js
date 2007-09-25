@@ -11,7 +11,7 @@
 (function($) {
   function escapeString(s) {
     return '"' + (s.replace(/\\/g, '\\\\').
-                    replace(/\n/g, '\\\n').
+                    replace(/\r?\n/g, '\\n').
                     replace(/"/g, '\\"')) + '"';
   }
 
