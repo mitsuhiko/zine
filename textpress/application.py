@@ -720,6 +720,10 @@ class TextPress(object):
         self.themes = {'default': default_theme}
         self.apis = {}
 
+        # insert list of widgets
+        from textpress.widgets import all_widgets
+        self.widgets = dict((x.NAME, x) for x in all_widgets)
+
         # load plugins
         from textpress.pluginsystem import find_plugins
         self.plugin_searchpath = [path.join(instance_folder, 'plugins')]
@@ -747,10 +751,6 @@ class TextPress(object):
                 'copyright':    '2007 by the Pocoo Team'
             }
         )
-
-        # insert list of widgets
-        from textpress.widgets import all_widgets
-        self.widgets = dict((x.NAME, x) for x in all_widgets)
 
         # XXX: l10n :-)
         env.filters.update(
