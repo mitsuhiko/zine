@@ -970,10 +970,10 @@ class TextPress(object):
         for type, attr in get_thread_data('page_metadata'):
             result.append(generators[type](**attr))
 
-        #! this is called before the page metadata is assambled with
+        #! this is called before the page metadata is assembled with
         #! the list of already collected metadata.  You can extend the
         #! list in place to add some more html snippets to the page header.
-        emit_event('before-metadata-assambled', result, buffered=True)
+        emit_event('before-metadata-assembled', result, buffered=True)
         return u'\n'.join(result)
 
     def maintenance_mode_message(self, environ, start_response):
