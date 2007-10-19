@@ -28,15 +28,6 @@ inline_formatting = {
     'newline':      (r'\\$',      None)
 }
 
-simple_formattings = {
-    'strong_begin':                 'strong',
-    'strong_end':                   '</strong>',
-    'emphasized_begin':             '<em>',
-    'emphasized_end':               '</em>',
-    'quote_begin':                  '<blockquote>',
-    'quote_end':                    '</blockquote>'
-}
-
 raw_formatting = set(['link', 'code', 'escaped_code', 'code_block'])
 
 formatting_start_re = re.compile('|'.join(

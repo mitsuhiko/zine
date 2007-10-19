@@ -42,7 +42,7 @@ def touch_upload_folder():
         return True
     try:
         makedirs(folder)
-    except (IOError, OSError):
+    except (IOError, OSError), e:
         return False
 
 

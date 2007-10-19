@@ -442,7 +442,9 @@ comments = db.Table('comments', metadata,
     db.Column('pub_date', db.DateTime),
     db.Column('blocked', db.Boolean),
     db.Column('blocked_msg', db.Unicode(250)),
-    db.Column('submitter_ip', db.Unicode(100))
+    db.Column('submitter_ip', db.Unicode(100)),
+    db.ForeignKeyConstraint(['post_id'], ['posts.post_id'], ondelete='CASCADE'),
+    db.ForeignKeyConstraint(['parent_id'], ['comments.comment_id'], ondelete='CASCADE')
 )
 
 

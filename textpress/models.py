@@ -803,15 +803,17 @@ db.mapper(Comment, comments, properties={
     '_raw_body':    comments.c.body,
     'children': db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
-        cascade='all', order_by=[db.asc(comments.c.pub_date)],
+        cascade='all, delete-orphan', order_by=[db.asc(comments.c.pub_date)],
         backref=db.backref('parent', remote_side=[comments.c.comment_id]),
-        lazy=True
+        passive_deletes=True, lazy=True
     )
 }, order_by=[db.desc(comments.c.pub_date)])
 db.mapper(Post, posts, properties={
     '_raw_body':    posts.c.body,
     '_raw_intro':   posts.c.intro,
     'comments':     db.relation(Comment, backref='post',
+                                cascade='all, delete-orphan',
+                                passive_deletes=True,
                                 order_by=[db.asc(comments.c.pub_date)]),
     'tags':         db.relation(Tag, secondary=post_tags, lazy=False,
                                 order_by=[db.asc(tags.c.name)],
