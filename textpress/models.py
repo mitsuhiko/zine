@@ -803,8 +803,9 @@ db.mapper(Comment, comments, properties={
     '_raw_body':    comments.c.body,
     'children': db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
-        cascade='all, delete-orphan', order_by=[db.asc(comments.c.pub_date)],
-        backref=db.backref('parent', remote_side=[comments.c.comment_id]),
+        cascade='all', order_by=[db.asc(comments.c.pub_date)],
+        backref=db.backref('parent', remote_side=[comments.c.comment_id],
+                           primaryjoin=comments.c.parent_id == comments.c.comment_id),
         passive_deletes=True, lazy=True
     )
 }, order_by=[db.desc(comments.c.pub_date)])
@@ -812,6 +813,7 @@ db.mapper(Post, posts, properties={
     '_raw_body':    posts.c.body,
     '_raw_intro':   posts.c.intro,
     'comments':     db.relation(Comment, backref='post',
+                                primaryjoin=posts.c.post_id == comments.c.post_id,
                                 cascade='all, delete-orphan',
                                 passive_deletes=True,
                                 order_by=[db.asc(comments.c.pub_date)]),
