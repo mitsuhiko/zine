@@ -29,7 +29,7 @@ from smtplib import SMTP, SMTPException
 from email.MIMEText import MIMEText
 from simplejson import dumps as dump_json, loads as load_json
 
-from werkzeug.utils import lazy_property, escape
+from werkzeug.utils import lazy_property, escape, ClosingIterator
 from werkzeug.wrappers import BaseReporterStream
 
 DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
@@ -843,37 +843,6 @@ class HiddenFormField(object):
 
     def __unicode__(self):
         return make_hidden_fields(self)
-
-
-class ClosingIterator(object):
-    """
-    A class that wraps an iterator (which can have a close method) and
-    adds a close method for the callback and the iterator.
-    """
-
-    def __init__(self, iterable, callback=None):
-        iterator = iter(iterable)
-        self._next = iterator.next
-        self._close = getattr(iterator, 'close', None)
-        self._callback = callback
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        return self._next()
-
-    def close(self):
-        if self._close:
-            try:
-                self._close()
-            except:
-                pass
-        if self._callback:
-            try:
-                self._callback()
-            except:
-                pass
 
 
 class IntelligentRedirect(HiddenFormField):
