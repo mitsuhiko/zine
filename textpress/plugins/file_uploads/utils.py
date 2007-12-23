@@ -44,6 +44,7 @@ def touch_upload_folder():
         makedirs(folder)
     except (IOError, OSError), e:
         return False
+    return True
 
 
 def get_filename(s):
