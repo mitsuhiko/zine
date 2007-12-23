@@ -19,7 +19,7 @@ class MarkdownParser(BaseParser):
     get_name = staticmethod(lambda: u'Markdown')
 
     def parse(self, input_data, reason):
-        parser = md.Markdown(safe_mode=reason == 'comment')
+        parser = md.Markdown(safe_mode=reason == 'comment' and 'escape')
         html_parser = HTMLParser()
         return html_parser.parse(parser.convert(input_data), None)
 
