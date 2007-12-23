@@ -9,20 +9,20 @@ installed:
   - SQLAlchemy 0.4 or higher*
   - simplejson*
   - Python 2.4 or higher
-  - mysql, sqlite or postgres
+  - MySQL, SQLite or Postgres
   - pytz*
 
-libraries marked with * are installable from the cheeseshop via easy_install or
+Libraries marked with * are installable from the cheeseshop via easy_install or
 might be available in debian already.
 
 For a quickstart with the development server do this:
 
     $ mkdir instance
-    $ python textpress-management.py -dr instance/ serve
+    $ python textpress-management.py runserver 
 
-After the first start you will find yourself in a installation wizzard that
-helps you create the database tables and administrator account.
+After the first start you will find yourself in an installation wizard that
+helps you to create the database tables and anan  administrator account.
 
 To get access to a python console with the textpress instance context do this:
 
-    $ python textpress-management.py instance/ shell
+    $ python textpress-management.py shell
