@@ -45,7 +45,6 @@
   {%- if post.comments_enabled %}
     <h3 id="leave-reply">{% trans "Leave a Reply" %}</h3>
     <form action="#leave-reply" class="comments" method="post">
-      {{ h.input_field('parent', form.parent, 'hidden') }}
       <dl>
         <dt><label for="name">{% trans "Name*" %}</label></dt>
         <dd>{{ h.input_field('name', form.name) }}</dd>
@@ -54,7 +53,8 @@
         <dt><label for="www">{% trans "Website" %}</label></dt>
         <dd>{{ h.input_field('www', form.www) }}</dd>
       </dl>
-      {{ h.textarea('body', form.body) }}
+      <div>{{ h.textarea('body', form.body) }}
+           {{ h.input_field('parent', form.parent, 'hidden') }}</div>
       <div id="comment-message">{# used for the reply callback #}</div>
       {%- if errors %}
         <div class="error">

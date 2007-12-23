@@ -21,9 +21,9 @@
     <tr><td colspan="4">{% trans "No tags." %}</td></tr>
   {%- endfor %}
   </table>
-  <div class="actions">
-    <form action="{{ url_for('admin/new_tag')|e(true) }}" method="get">
+  <form action="{{ url_for('admin/new_tag')|e(true) }}" method="get">
+    <div class="actions">
       <input type="submit" value="{% trans 'New Tag' %}">
-    </form>
-  </div>
+    </div>
+  </form>
 {% endblock %}

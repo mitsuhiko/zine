@@ -7,17 +7,17 @@
     You can preview and select one below.
   {% endtrans %}</p>
   {{ example }}
-  <div class="actions">
-    <form action="" method="post">
-      {{ csrf_protector }}
+  <form action="" method="post">
+    <div class="actions">
       {% trans "Theme" %}:
       <select name="style">
     {%- for style in styles %}
         <option{% if style.active %} selected{% endif %}>{{ style.name|e }}</option>
     {%- endfor %}
       </select>
+      {{ csrf_protector }}
       <input type="submit" value="{% trans 'Preview' %}">
       <input type="submit" name="apply" value="{% trans 'Select' %}">
-    </form>
-  </div>
+    </div>
+  </form>
 {% endblock %}

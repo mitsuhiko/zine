@@ -18,7 +18,6 @@
   </div>
   {% endif %}
   <form action="" method="post">
-    {{ hidden_form_data }}
     <fieldset>
       <legend>{% trans "Title" %}</legend>
       {{ h.input_field('title', form.title, size=36) }}
@@ -40,6 +39,8 @@
         <li>{{ h.checkbox('tags', tag.slug, tag.slug in form.tags,
                id='tags_' + tag.slug) }} <label for="tags_{{
           tag.slug }}">{{ tag.name|e }}</label></li>
+      {%- else %}
+        <li><em>no tags created yet</em></li>
       {%- endfor %}
       </ul>
     </fieldset>
@@ -49,7 +50,7 @@
       {%- for state, caption in post_status_choices %}
         <li>{{ h.radio_button('post_status', state, form.post_status == state,
                id='post_status_' + (state|string)) }} <label for="post_status_{{
-               state }}">{{ caption|e }}</li>
+               state }}">{{ caption|e }}</label></li>
       {%- endfor %}
       </ul>
     </fieldset>
@@ -73,7 +74,7 @@
     </fieldset>
     <fieldset>
       <legend>{% trans "Publication Date" %}</legend>
-      {{ h.input_field('pub_date', form.pub_date, 'datetime') }}
+      {{ h.input_field('pub_date', form.pub_date) }}
     </fieldset>
     <fieldset>
       <legend>{% trans "Post Slug" %}</legend>
@@ -91,6 +92,7 @@
       </p>
     {% endif %}
     <div class="actions">
+      {{ hidden_form_data }}
       <input type="submit" name="save" value="{% trans 'Save' %}">
       <input type="submit" name="save_and_continue" value="{% trans 'Save and continue editing' %}">
       {%- if not new_post %}

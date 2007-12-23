@@ -7,7 +7,6 @@
     title and tagline, date format, theme etc.
   {% endtrans %}</p>
   <form action="" method="post">
-    {{ hidden_form_data }}
     <dl>
       <dt>{% trans "Blog Title" %}</dt>
       <dd>{{ h.input_field('blog_title', form.blog_title, size="40") }}</dd>
@@ -55,6 +54,7 @@
     </dl>
     <div class="actions">
       <input type="submit" value="Save">
+      {{ hidden_form_data }}
     </div>
   </form>
 {% endblock %}

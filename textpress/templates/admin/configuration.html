@@ -11,7 +11,6 @@
     page (yet).
   {% endtrans %}</p>
   <form action="" method="post">
-  {{ csrf_protector }}
   {% if editor_enabled %}
       <table class="config-table">
       {%- for category in categories %}
@@ -39,6 +38,7 @@
       {%- endfor %}
       </table>
       <div class="actions">
+        {{ csrf_protector }}
         <input type="submit" value="{% trans 'Save' %}">
         <input type="submit" name="disable_editor" value="{% trans 'Disable Editor' %}">
       </div>
@@ -48,6 +48,7 @@
       to use it, click the button to proceed.
     {% endtrans %}</p>
     <div class="actions">
+      {{ csrf_protector }}
       <input type="submit" name="enable_editor" value="{% trans 'Enable Editor' %}">
     </div>
   {% endif %}

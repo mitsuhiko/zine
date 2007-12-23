@@ -12,7 +12,7 @@
           <img src="{{ theme.preview_url|e }}" alt="preview image" class="preview">
         {%- endif %}
         <div class="detail">
-          <blockquote>{{ theme.description|e }}</blockquote>
+          <blockquote><p>{{ theme.description|e }}</p></blockquote>
           {%- if theme.author %}
             <p class="author">{% trans author=theme.author|e %}by {{ author }}{% endtrans %}</p>
           {%- endif %}
@@ -30,9 +30,9 @@
     if you for example want to modify the sidebar, the page not found template
     or other parts.
   {% endtrans %}</p>
-  <div class="actions">
-    <form action="{{ url_for('admin/overlays') }}" method="get">
+  <form action="{{ url_for('admin/overlays') }}" method="get">
+    <div class="actions">
       <input type="submit" value="{% trans 'Edit Overlays' %}">
-    </form>
-  </div>
+    </div>
+  </form>
 {% endblock %}

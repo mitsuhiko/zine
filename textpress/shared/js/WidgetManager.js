@@ -15,6 +15,7 @@
 
   $(function() {
     $('#config-panel').hide();
+    $('#sidebar').empty();
     $('#widget-form').submit(function() {
       var active_widgets = [];
       $.each(widget_positions, function() {
@@ -23,6 +24,7 @@
       $('#active-widgets').val($.dumpJSON(active_widgets));
     });
 
+    $('#inventory').empty();
     for (var type in $all_widgets) {
       $('<li class="widget"></li>')
         .attr('id', 'widget_' + type)

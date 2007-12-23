@@ -24,18 +24,22 @@
       {% endtrans %}</p>
     {% endif %}
     <form action="" method="post" id="widget-form">
-      <input type="hidden" name="widgets" id="active-widgets" value="">
-      <ul id="sidebar" class="droppable"></ul>
+      <ul id="sidebar" class="droppable">
+        <li>{% trans "No Widgets" %}</li>
+      </ul>
       <div id="config-panel">
         <h3>{% trans "Configure Widget" %}</h3>
         <div class="pane"></div>
       </div>
       <div class="inventory">
         <h3>{% trans "Available Widgets" %}</h3>
-        <ul id="inventory"></ul>
+        <ul id="inventory">
+          <li>{% trans "No Widgets" %}</li>
+        </ul>
         <br style="clear: both">
       </div>
       <div class="actions">
+        <input type="hidden" name="widgets" id="active-widgets" value="">
         <input type="submit" value="{% trans 'Save' %}">
         {%- if not default %}
         <input type="submit" name="revert" value="{% trans 'Use Theme Defaults' %}">

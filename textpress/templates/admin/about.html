@@ -59,6 +59,8 @@
     <li><strong>{{ api.name|e }}</strong>
       <small>(provided by {{ api.endpoint|e }})</small> {% if api.preferred %}*{% endif %}
     </li>
+  {%- else %}
+    <li><em>no APIs installed</em></li>
   {%- endfor %}
   </ul>
   <h3>{% trans "Plugins" %}</h3>

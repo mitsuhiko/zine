@@ -3,11 +3,13 @@
 {% block contents %}
   <h2>{% trans "Delete Comment" %}</h2>
   <form action="" method="post">
-    {{ hidden_form_data }}
-    <p>{% trans comment_author=comment.author|e %}
-      Do you really want to delete the comment by {{ comment_author }}?.
-    {% endtrans %}</p>
-    <input type="submit" name="cancel" value="{% trans 'No' %}">
-    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    <div>
+      {{ hidden_form_data }}
+      <p>{% trans comment_author=comment.author|e %}
+        Do you really want to delete the comment by {{ comment_author }}?.
+      {% endtrans %}</p>
+      <input type="submit" name="cancel" value="{% trans 'No' %}">
+      <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    </div>
   </form>
 {% endblock %}

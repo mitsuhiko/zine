@@ -1320,6 +1320,7 @@ def do_configuration(request):
         else:
             already_default = set()
             for key, value in request.form.iteritems():
+                key = key.replace('____', '/')
                 if key.endswith('__DEFAULT'):
                     key = key[:-9]
                     request.app.cfg.revert_to_default(key)
@@ -1330,9 +1331,16 @@ def do_configuration(request):
             request.app.request_reload()
         return simple_redirect('admin/configuration')
 
+    # html does not allow slashes.  Convert them to four underscores
+    categories = []
+    for category in request.app.cfg.get_detail_list():
+        for item in category['items']:
+            item['key'] = item['key'].replace('/', '____')
+        categories.append(category)
+
     return render_admin_response('admin/configuration.html',
                                  'options.configuration',
-        categories=request.app.cfg.get_detail_list(),
+        categories=categories,
         editor_enabled=request.session.get('ace_on', False),
         csrf_protector=csrf_protector
     )
@@ -1495,4 +1503,4 @@ def do_login(request):
 def do_logout(request):
     """Just logout and redirect to the login screen."""
     request.logout()
-    IntelligentRedirect()('admin/login', logout='yes')
+    return IntelligentRedirect()('admin/login', logout='yes')

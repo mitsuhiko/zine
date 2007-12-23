@@ -31,7 +31,8 @@ from textpress.utils import format_datetime, format_date, format_month, \
 
 from werkzeug import BaseRequest, BaseResponse, SharedDataMiddleware, \
      url_quote, routing, redirect as simple_redirect
-from werkzeug.exceptions import HTTPException, BadRequest, Forbidden
+from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
+     NotFound
 from werkzeug.contrib.securecookie import SecureCookie
 
 from jinja import Environment
@@ -265,11 +266,6 @@ class Response(BaseResponse):
     """
     charset = 'utf-8'
     default_mimetype = 'text/html'
-
-
-class NotFound(Exception):
-    """Special exception that is raised to notify the app about a
-    missing resource or page."""
 
 
 class EventManager(object):
@@ -829,61 +825,6 @@ class TextPress(object):
         emit_event('before-metadata-assembled', result, buffered=True)
         return u'\n'.join(result)
 
-    def maintenance_mode_message(self, environ, start_response):
-        """
-        This will handle the requests if the application is in maintenance
-        mode. Because the application might reload in the meantime this
-        function does not access *any* global varibles.
-        """
-        start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
-        yield '''
-            <!DOCTYPE HTML>
-            <html>
-              <head>
-                <title>Maintenance Mode</title>
-                <style type="text/css">
-                  body {
-                    font-family: 'Times New Roman', sans-serif;
-                    font-size: 1.1em;
-                    background-color: #eee;
-                    padding: 2em 0 2em 0;
-                    margin: 0;
-                    text-align: justify;
-                  }
-
-                  div.msg {
-                    width: 20em;
-                    margin: 0 auto 0 auto;
-                    padding: 20px;
-                    background-color: white;
-                    border: 1px solid #22314e;
-                  }
-
-                  h1 {
-                    background-color: #316081;
-                    color: white;
-                    margin: -20px -20px 20px -20px;
-                    padding: 10px 20px 10px 20px;
-                  }
-
-                  p {
-                    margin: 0;
-                    padding: 0;
-                  }
-                </style>
-              </head>
-              <body>
-                <div class="msg">
-                  <h1>Maintenance Mode</h1>
-                  <p>
-                    This TextPress instance is right now in maintenance mode.
-                    Plase wait until the administrator reopened the blog.
-                  </p>
-                </div>
-              </body>
-            </html>
-        '''
-
     def _dispatch_request(self, environ, start_response):
         """Handle the incoming request."""
         # Create a new request object, register it with the application
@@ -905,7 +846,9 @@ class TextPress(object):
            and self.cfg['maintenance_mode']:
             from textpress.models import ROLE_ADMIN
             if request.user.role < ROLE_ADMIN:
-                return self.maintenance_mode_message(environ, start_response)
+                response = render_response('maintenance.html')
+                response.status_code = 503
+                return response(environ, start_response)
 
         #! the after-request-setup event can return a response
         #! or modify the request object in place. If we have a
@@ -922,11 +865,11 @@ class TextPress(object):
             response = self.views[endpoint](request, **args)
         except NotFound, e:
             response = render_response('404.html')
-            response.status = 404
+            response.status_code = 404
         except Forbidden, e:
             if request.user.is_somebody:
                 response = render_response('403.html')
-                response.status = 403
+                response.status_code = 403
             else:
                 response = simple_redirect(url_for('admin/login',
                                                    next=request.path))

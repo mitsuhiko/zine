@@ -11,7 +11,6 @@
     </div>
   {%- endif %}
   <form action="" method="post">
-    {{ hidden_form_data }}
     <fieldset>
       <legend>{% trans "Username" %}</legend>
       {{ h.input_field('username', form.username, size=30) }}
@@ -39,7 +38,7 @@
       {%- for tmpl, value in display_names %}
         <li>{{ h.radio_button('display_name', tmpl, form.display_name == tmpl,
           id='display_name_' + (loop.index|string)) }} <label for="display_name_{{
-            loop.index }}">{{ value|e }}</li>
+            loop.index }}">{{ value|e }}</label></li>
       {%- endfor %}
       </ul>
     </fieldset>
@@ -54,11 +53,12 @@
       {%- for role_id, caption in roles %}
         <li>{{ h.radio_button('role', role_id, form.role == role_id,
           id='role_' + (role_id|string)) }} <label for="role_{{
-            role_id }}">{{ caption|e }}</li>
+            role_id }}">{{ caption|e }}</label></li>
       {%- endfor %}
       </ul>
     </fieldset>
     <div class="actions">
+      {{ hidden_form_data }}
       <input type="submit" name="save" value="{% trans 'Save' %}">
       <input type="submit" name="save_and_continue" value="{% trans 'Save and continue editing' %}">
       {%- if not new_post %}

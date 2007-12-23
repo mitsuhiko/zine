@@ -1,4 +1,5 @@
-<!DOCTYPE HTML>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
   <title>{% trans 'Login' %} &mdash; {{ cfg.blog_title|e }} {% trans "Administration" %}</title>
@@ -14,16 +15,16 @@
       <div class="error">{{ error|e }}</div>
     {%- endif %}
     <form action="{{ url_for('admin/login') }}" method="post">
-      {{ hidden_redirect_field }}
       <dl>
         <dt>{% trans "Username" %}</dt>
         <dd>{{ h.input_field('username', username) }}</dd>
         <dt>{% trans "Password" %}</dt>
         <dd>{{ h.input_field('password', '', 'password') }}</dd>
       </dl>
-      <!-- {{ h.checkbox('remember', 'yes') }}
-      <label for="remember">{% trans "Remember me" %}</label> -->
-      <input type="submit" value="{% trans 'Login' %}">
+      <div class="actions">
+        {{ hidden_redirect_field }}
+        <input type="submit" value="{% trans 'Login' %}">
+      </div>
     </form>
   </div>
 </body>
