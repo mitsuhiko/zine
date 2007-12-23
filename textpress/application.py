@@ -472,7 +472,7 @@ class Theme(object):
         return sorted(templates)
 
 
-class ThemeLoader(BaseLoader, CachedLoaderMixin):
+class ThemeLoader(CachedLoaderMixin, BaseLoader):
     """
     Loads the templates. First it tries to load the templates of the
     current theme, if that doesn't work it loads the templates from the
@@ -483,7 +483,7 @@ class ThemeLoader(BaseLoader, CachedLoaderMixin):
     def __init__(self, app):
         self.app = app
         CachedLoaderMixin.__init__(self,
-            False,      # don't use memory caching
+            False,      # don't use memory caching for the moment
             40,         # for up to 40 templates
             None,       # path to disk cache
             False,      # don't reload templates
@@ -665,7 +665,8 @@ class TextPress(object):
             database_uri = f.read().strip()
         finally:
             f.close()
-        self.database_engine = db.create_engine(database_uri)
+        self.database_engine = db.create_engine(database_uri,
+                                                convert_unicode=True)
 
     def perform_database_upgrade(self):
         """Do the database upgrade."""

@@ -434,17 +434,6 @@ def init_database(engine):
     """
     metadata.create_all(engine)
 
-    # create the nobody user if it's missing
-    from textpress.models import NOBODY_USER_ID, ROLE_NOBODY
-    nobody = engine.execute(db.select([users.c.user_id], users.c.user_id
-                                      == NOBODY_USER_ID)).fetchone()
-    if nobody is None:
-        engine.execute(users.insert(),
-            username='Nobody',
-            user_id=NOBODY_USER_ID,
-            role=ROLE_NOBODY
-        )
-
 
 def upgrade_database(app):
     """

@@ -70,7 +70,7 @@ class WebSetup(object):
             error = 'You have to provide a database URI.'
         else:
             try:
-                db.create_engine(database_uri)
+                db.create_engine(database_uri, convert_unicode=True)
             except Exception, e:
                 error = str(e)
         if error is not None:

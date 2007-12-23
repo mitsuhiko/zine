@@ -771,12 +771,9 @@ def do_delete_tag(request, tag_id):
 
 @require_role(ROLE_ADMIN)
 def do_show_users(request):
-    """
-    Show all users in a list except of the nobody user that is used for
-    anonymous visitor requests.
-    """
+    """Show all users in a list."""
     return render_admin_response('admin/show_users.html', 'users.overview',
-        users=User.objects.get_all_but_nobody()
+        users=User.objects.all()
     )
 
 

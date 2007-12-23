@@ -20,6 +20,8 @@ if not INSTANCE_FOLDER:
 
 def make_app():
     from textpress import make_app
+    #from werkzeug.contrib.profiler import ProfilerMiddleware
+    #return ProfilerMiddleware(make_app(INSTANCE_FOLDER))
     return make_app(INSTANCE_FOLDER)
 
 def make_shell():

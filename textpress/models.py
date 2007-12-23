@@ -28,9 +28,6 @@ STATUS_PRIVATE = 0
 STATUS_DRAFT = 1
 STATUS_PUBLISHED = 2
 
-#: user id of the nobody user
-NOBODY_USER_ID = 0
-
 
 class UserManager(db.DatabaseManager):
     """
@@ -38,13 +35,10 @@ class UserManager(db.DatabaseManager):
     """
 
     def get_nobody(self):
-        return self.get(NOBODY_USER_ID)
+        return AnonymousUser()
 
     def get_authors(self):
         return self.all(User.role >= ROLE_AUTHOR)
-
-    def get_all_but_nobody(self):
-        return self.all(User.user_id != NOBODY_USER_ID)
 
 
 class User(object):
@@ -58,6 +52,7 @@ class User(object):
     """
 
     objects = UserManager()
+    is_somebody = True
 
     def __init__(self, username, password, email, first_name='',
                  last_name='', description='', role=ROLE_SUBSCRIBER):
@@ -70,10 +65,6 @@ class User(object):
         self.extra = {}
         self.display_name = '$nick'
         self.role = role
-
-    @property
-    def is_somebody(self):
-        return self.user_id != NOBODY_USER_ID
 
     @property
     def is_manager(self):
@@ -123,6 +114,19 @@ class User(object):
             self.__class__.__name__,
             self.username
         )
+
+
+class AnonymousUser(User):
+    is_somebody = False
+    display_name = 'Nobody'
+    first_name = last_name = description = username = ''
+    role = ROLE_NOBODY
+
+    def __init__(self):
+        pass
+
+    def check_password(self, password):
+        return False
 
 
 class PostManager(db.DatabaseManager):
