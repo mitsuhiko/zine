@@ -137,6 +137,26 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
         SimpleHTMLParser._init_defs(self)
         self.blocks_with_paragraphs = set(['div', 'blockquote'])
 
+    def joined_text_iter(self, node):
+        text_buf = []
+
+        def flush_text_buf():
+            if text_buf:
+                text = u''.join(text_buf)
+                if text:
+                    yield TextNode(text)
+                del text_buf[:]
+
+        for child in node.children:
+            if child.__class__ is TextNode:
+                text_buf.append(child.value)
+            else:
+                for item in flush_text_buf():
+                    yield item
+                yield child
+        for item in flush_text_buf():
+            yield item
+
     def parse(self, input_data, reason):
         tree = SimpleHTMLParser.parse(self, input_data, reason)
 
@@ -144,11 +164,10 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
             for node in parent.children[:]:
                 rewrite(node)
 
-            paragraphs = [[]]
-
             if parent is tree or (parent.__class__ is Node and
                                   parent.name in self.blocks_with_paragraphs):
-                for child in parent.children:
+                paragraphs = [[]]
+                for child in self.joined_text_iter(parent):
                     if child.__class__ is TextNode:
                         blockiter = iter(_paragraph_re.split(child.value))
                         for block in blockiter:
@@ -170,10 +189,12 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
                 for paragraph in paragraphs:
                     if isinstance(paragraph, Node):
                         parent.children.append(paragraph)
-                    elif paragraph:
-                        new_node = Node('p')
-                        new_node.children.extend(paragraph)
-                        parent.children.append(new_node)
+                    else:
+                        for node in paragraph:
+                            if node.__class__ is TextNode or node.text:
+                                new_node = Node('p')
+                                new_node.children.extend(paragraph)
+                                parent.children.append(new_node)
         rewrite(tree)
 
         return tree
