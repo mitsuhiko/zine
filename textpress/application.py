@@ -190,19 +190,18 @@ def require_role(role):
     return wrapped
 
 
-def get_active_requests():
-    """Return a set of all active requests."""
-    rv = set()
-    for thread in _threads.itervalues():
-        request = thread.get('request')
-        if request is not None:
-            rv.add(request)
-    return rv
-
-
 def get_active_applications():
     """Return a set of all active applications."""
     return set(_instances.values())
+
+
+def clear_application_cache():
+    """
+    Applications are cached for performance reasons.  If you create a bunch
+    of application objects for some scripted tasks it's a good idea to clear
+    the application cache afterwards.
+    """
+    _instances.clear()
 
 
 class Request(BaseRequest):

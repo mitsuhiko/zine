@@ -17,7 +17,7 @@ from textpress.feedbuilder import AtomFeed
 from werkzeug.exceptions import NotFound, Forbidden
 
 
-def do_index(req, page=1):
+def do_index(request, page=1):
     """
     Render the most recent posts.
 
@@ -41,7 +41,7 @@ def do_index(req, page=1):
     return render_response('index.html', **data)
 
 
-def do_archive(req, year=None, month=None, day=None, page=1):
+def do_archive(request, year=None, month=None, day=None, page=1):
     """
     Render the monthly archives.
 
@@ -76,7 +76,7 @@ def do_archive(req, year=None, month=None, day=None, page=1):
                            **data)
 
 
-def do_show_tag(req, slug, page=1):
+def do_show_tag(request, slug, page=1):
     """
     Show all posts tagged with a given tag slug.
 
@@ -107,7 +107,7 @@ def do_show_tag(req, slug, page=1):
     return render_response('show_tag.html', tag=tag, **data)
 
 
-def do_show_tag_cloud(req):
+def do_show_tag_cloud(request):
     """
     Show all posts tagged with a given tag slug.
 
@@ -124,7 +124,7 @@ def do_show_tag_cloud(req):
                            tag_cloud=Tag.objects.get_cloud())
 
 
-def do_show_author(req, username, page=1):
+def do_show_author(request, username, page=1):
     """
     Show the user profile of an author / editor or administrator.
 
@@ -158,7 +158,7 @@ def do_show_author(req, username, page=1):
     return render_response('show_author.html', user=user, **data)
 
 
-def do_authors(req):
+def do_authors(request):
     """
     Show a list of authors.
 
@@ -173,7 +173,7 @@ def do_authors(req):
     return render_response('authors.html', authors=User.objects.get_authors())
 
 
-def do_show_post(req, year, month, day, slug):
+def do_show_post(request, year, month, day, slug):
     """
     Show as post and give users the possibility to comment to this
     story if comments are enabled.
@@ -220,22 +220,22 @@ def do_show_post(req, year, month, day, slug):
     # handle comment posting
     errors = []
     form = {'name': '', 'email': '', 'www': '', 'body': '', 'parent': ''}
-    if req.method == 'POST' and post.comments_enabled:
-        form['name'] = name = req.form.get('name')
+    if request.method == 'POST' and post.comments_enabled:
+        form['name'] = name = request.form.get('name')
         if not name:
             errors.append(_('You have to enter your name.'))
-        form['email'] = email = req.form.get('email')
+        form['email'] = email = request.form.get('email')
         if not (email and is_valid_email(email)):
             errors.append(_('You have to enter a valid mail address.'))
-        form['www'] = www = req.form.get('www')
+        form['www'] = www = request.form.get('www')
         if www and not is_valid_url(www):
             errors.append(_('You have to enter a valid URL or omit the field.'))
-        form['body'] = body = req.form.get('body')
+        form['body'] = body = request.form.get('body')
         if not body or len(body) < 10:
             errors.append(_('Your comment is too short.'))
         elif len(body) > 6000:
             errors.append(_('Your comment is too long.'))
-        form['parent'] = parent = req.form.get('parent')
+        form['parent'] = parent = request.form.get('parent')
         if parent:
             parent = Comment.objects.get(parent)
         else:
@@ -247,25 +247,25 @@ def do_show_post(req, year, month, day, slug):
         #! the post is not saved.  Do not use this for antispam, that should
         #! accept the comment and just mark it as blocked.  For that have
         #! a look at the `before-comment-saved` event.
-        for result in emit_event('before-comment-created', req, form):
+        for result in emit_event('before-comment-created', request, form):
             errors.extend(result or ())
 
         # if we don't have errors let's save it and emit an
         # `before-comment-saved` event so that plugins can do
         # block comments so that administrators have to approve it
         if not errors:
-            ip = req.environ.get('REMOTE_ADDR') or '0.0.0.0'
+            ip = request.environ.get('REMOTE_ADDR') or '0.0.0.0'
             comment = Comment(post, name, email, www, body, parent,
                               submitter_ip=ip)
 
             #! use this event to block comments before they are saved.  This
             #! is useful for antispam and other ways of moderation.
-            emit_event('before-comment-saved', req, comment, buffered=True)
+            emit_event('before-comment-saved', request, comment, buffered=True)
             db.commit()
 
             #! this is sent directly after the comment was saved.  Useful if
             #! you want to send mail notifications or whatever.
-            emit_event('after-comment-saved', req, comment, buffered=True)
+            emit_event('after-comment-saved', request, comment, buffered=True)
             return redirect(url_for(post))
 
     return render_response('show_post.html',
@@ -275,21 +275,21 @@ def do_show_post(req, year, month, day, slug):
     )
 
 
-def do_service_rsd(req):
+def do_service_rsd(request):
     """
     Serves and RSD definition (really simple discovery) so that blog frontends
     can query the apis that are available.
 
     :URL endpoint: ``blog/service_rsd``
     """
-    return Response(generate_rsd(req.app), mimetype='application/xml')
+    return Response(generate_rsd(request.app), mimetype='application/xml')
 
 
-def do_json_service(req, identifier):
+def do_json_service(request, identifier):
     """
     Handle a JSON service request.
     """
-    handler = req.app._services.get(identifier)
+    handler = request.app._services.get(identifier)
     if handler is None:
         raise NotFound()
 
@@ -298,7 +298,7 @@ def do_json_service(req, identifier):
     for rv in emit_event('before-json-service-called', identifier, handler):
         if rv is not None:
             handler = rv
-    result = handler(req)
+    result = handler(request)
 
     #! called right after json callback returned some data with the identifier
     #! of the request method and the result object.  Note that events *have*
@@ -309,11 +309,11 @@ def do_json_service(req, identifier):
     return Response(dump_json(result), mimetype='text/javascript')
 
 
-def do_xml_service(req, identifier):
+def do_xml_service(request, identifier):
     """
     Handle a XML service request.
     """
-    handler = req.app._services.get(identifier)
+    handler = request.app._services.get(identifier)
     if handler is None:
         raise NotFound()
 
@@ -322,7 +322,7 @@ def do_xml_service(req, identifier):
     for rv in emit_event('before-xml-service-called', identifier, handler):
         if rv is not None:
             handler = rv
-    result = handler(req)
+    result = handler(request)
 
     #! called right after xml callback returned some data with the identifier
     #! of the request method and the result object.  Note that events *have*
@@ -333,8 +333,8 @@ def do_xml_service(req, identifier):
     return Response(dump_xml(result), mimetype='text/xml')
 
 
-def do_atom_feed(req, author=None, year=None, month=None, day=None,
-                      tag=None, post_slug=None):
+def do_atom_feed(request, author=None, year=None, month=None, day=None,
+                 tag=None, post_slug=None):
     """
     Renders an atom feed requested.
 

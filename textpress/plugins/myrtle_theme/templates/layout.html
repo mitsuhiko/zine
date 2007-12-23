@@ -25,7 +25,7 @@
         Proudly powered by <a href="http://textpress.pocoo.org/">TextPress</a>,
         <a href="http://textpress.pocoo.org/themes/myrtle/">Myrtle theme</a> designed
         by <a href="http://lucumr.pocoo.org/">Armin Ronacher</a>.
-        {%- if req.user.is_manager %}
+        {%- if request.user.is_manager %}
           | <a href="{{ url_for('admin/index')|e }}">{% trans 'Admin Panel' %}</a>
           | <a href="{{ url_for('admin/logout')|e }}">{% trans 'Logout' %}</a>
         {%- endif %}

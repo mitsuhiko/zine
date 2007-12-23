@@ -38,6 +38,7 @@ TIME_FORMATS = ['%H:%M', '%H:%M:%S', '%I:%M %p', '%I:%M:%S %p']
 
 KEY_CHARS = string.ascii_letters + string.digits
 SALT_CHARS = string.ascii_lowercase + string.digits
+SECRET_KEY_CHARS = string.ascii_letters + string.digits + string.punctuation
 
 _tagify_replacement_table = {
     u'\xdf': 'ss',
@@ -142,7 +143,7 @@ def gen_activation_key(length=8):
 
 def gen_secret_key():
     """Generate a new secret key."""
-    return ''.join(choice(SALT_CHARS) for _ in xrange(200))
+    return ''.join(choice(SECRET_KEY_CHARS) for _ in xrange(64))
 
 
 def gen_password(length=8, add_numbers=True, mix_case=True,
