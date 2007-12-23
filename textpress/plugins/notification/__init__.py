@@ -12,25 +12,26 @@
 from textpress.api import *
 from textpress.utils import send_email, format_datetime
 
+SIGNATURE = '''
+-- Mail delivered from your TextPress blog.
+To stop mailing when new comments are posted, just disable the
+"notification" plugin.
+'''
+
 def notify(request, comment):
     to_addr = comment.post.author.email
     subject = _('New comment on your blog to "%s" by %s' % (
-            comment.post.title, 
-            comment.author
-            )
-        )
+        comment.post.title,
+        comment.author
+    ))
     pub_date = format_datetime(comment.pub_date, '%d.%m %H:%M')
-    sig = _('-- Mail delivered from your TextPress blog.\nTo stop mailing \
-when new comments are posted, just disable the "notification" \
-plugin.')
-    msg = _('%s (%s) wrote at %s:\n\n%s\n\n%s' % (
-            comment.author,
-            comment.email,
-            pub_date,
-            comment.raw_body,
-            sig
-            )
-        )
+    msg = _('%s (%s) wrote at %s:\n\n%s\n%s' % (
+        comment.author,
+        comment.email,
+        pub_date,
+        comment.raw_body,
+        SIGNATURE
+    ))
     send_email(subject, msg, to_addr)
 
 def setup(app, plugin):
