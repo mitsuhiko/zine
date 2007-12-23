@@ -914,14 +914,17 @@ def get_dispatcher(instance_folder):
     _instance_lock.acquire()
     try:
         application = _instances.get(instance_folder)
-        if application is None or application.wants_reload:
-            try:
-                application = make_textpress(instance_folder)
-            except InstanceNotInitialized:
-                from textpress.websetup import WebSetup
-                application = WebSetup(instance_folder)
-            else:
-                _instances[instance_folder] = application
+        if application and not application.wants_reload:
+            return application
+        elif application:
+            del _instances[instance_folder]
+        try:
+            application = make_textpress(instance_folder)
+        except InstanceNotInitialized:
+            from textpress.websetup import WebSetup
+            application = WebSetup(instance_folder)
+        else:
+            _instances[instance_folder] = application
         return application
     finally:
         _instance_lock.release()

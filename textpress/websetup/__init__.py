@@ -18,8 +18,22 @@ from os import path
 from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
 from textpress.utils import is_valid_email, gen_pwhash, gen_secret_key
-from textpress.websetup.framework import render_response, redirect, \
-     get_blog_url, Request
+from werkzeug import BaseRequest as Request, BaseResponse as Response, \
+     get_current_url, redirect
+from jinja import Environment, FileSystemLoader
+
+
+template_path = path.join(path.dirname(__file__), 'templates')
+jinja_env = Environment(loader=FileSystemLoader(template_path))
+
+
+def render_response(template_name, context):
+    tmpl = jinja_env.get_template(template_name)
+    return Response(tmpl.render(context), mimetype='text/html')
+
+
+def get_blog_url(req):
+    return get_current_url(req.environ, root_only=True)
 
 
 class WebSetup(object):
@@ -54,11 +68,11 @@ class WebSetup(object):
         handler = self.views[name]
         ctx = ctx or {}
         ctx.update({
-            'current':          name,
-            'prev':             self.prev[name],
-            'next':             self.next[name],
-            'values':           dict((k, v) for k, v in req.values.items()
-                                     if not k.startswith('_'))
+            'current': name,
+            'prev':    self.prev[name],
+            'next':    self.next[name],
+            'values':  dict((k, v) for k, v in req.values.iteritems()
+                            if not k.startswith('_'))
         })
         return render_response(name + '.html', ctx)
 
@@ -157,7 +171,6 @@ class WebSetup(object):
                 f.write(database_uri + '\n')
             finally:
                 f.close()
-
 
         # use a local variable, the global render_response could
         # be None because we reloaded textpress and this module.
