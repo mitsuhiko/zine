@@ -1,0 +1,7 @@
+Name: Notification
+Plugin URL: http://textpress.pocoo.org/plugins/notification
+Author: Rafael Weber
+License: GPL
+Version: 0.1
+Description: Sends a mail to the author of the post when new comments are
+posted.
