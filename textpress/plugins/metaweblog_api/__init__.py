@@ -8,6 +8,7 @@
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+import sys
 from textpress.api import *
 from textpress.models import User, Post, Tag, ROLE_AUTHOR, STATUS_DRAFT, \
      STATUS_PUBLISHED
@@ -24,7 +25,11 @@ class MetaWeblogAPI(object, SimpleXMLRPCDispatcher):
     """Does the dispatching."""
 
     def __init__(self):
-        SimpleXMLRPCDispatcher.__init__(self)
+        # python 2.5 requires two arguments
+        if sys.version_info[:2] < (2, 5):
+            SimpleXMLRPCDispatcher.__init__(self)
+        else:
+            SimpleXMLRPCDispatcher.__init__(self, False, 'utf-8')
         self.register_introspection_functions()
 
     def handle_request(self, req):
