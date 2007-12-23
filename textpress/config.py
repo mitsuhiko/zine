@@ -22,8 +22,10 @@ DEFAULT_VARS = {
     'blog_email':           (unicode, u''),
     'timezone':             (unicode, u'Europe/Vienna'),
     'maintenance_mode':     (bool, False),
-    'sid_cookie_name':      (unicode, u'textpress_sid'),
+    'session_cookie_name':  (unicode, u'textpress_session'),
     'theme':                (unicode, u'default'),
+    'secret_key':           (unicode, u''),
+    'blog_url_prefix':      (unicode, u''),
 
     # the default markup parser. Don't ever change this value! The
     # htmlprocessor module bypasses this test when falling back to

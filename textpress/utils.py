@@ -23,14 +23,14 @@ from time import time, strptime, sleep
 from datetime import datetime, date, timedelta
 from random import choice, randrange, random
 from urlparse import urlparse, urljoin, urlsplit
-from urllib import quote
 from tempfile import NamedTemporaryFile, gettempdir
 from smtplib import SMTP, SMTPException
 from email.MIMEText import MIMEText
 from simplejson import dumps as dump_json, loads as load_json
 
-from werkzeug.utils import lazy_property, escape, ClosingIterator
-from werkzeug.wrappers import BaseReporterStream
+from werkzeug import cached_property, escape, url_quote, Local, \
+     LocalManager, ClosingIterator
+from werkzeug.contrib.reporterstream import BaseReporterStream
 
 DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
                 '%m/%d/%y', '%d/%m/%y', '%d%m%y', '%m%d%y', '%y%m%d']
@@ -73,6 +73,9 @@ get_timezones_for_country = pytz.country_timezones
 # load dynamic constants
 from textpress._dynamic import *
 
+# our local stuff
+local = Local()
+local_manager = LocalManager([local])
 
 _version_info = None
 
@@ -121,9 +124,7 @@ _ = gettext
 
 
 def gen_salt(length=6):
-    """
-    Generate a random string of SALT_CHARS with specified ``length``.
-    """
+    """Generate a random string of SALT_CHARS with specified ``length``."""
     if length <= 0:
         raise ValueError('requested salt of length <= 0')
     return ''.join(choice(SALT_CHARS) for _ in xrange(length))
@@ -139,16 +140,14 @@ def gen_activation_key(length=8):
     return ''.join(choice(KEY_CHARS) for _ in xrange(length))
 
 
-def gen_psid():
-    """Generate a new permantent sid hash."""
-    return sha.new('%s|%s' % (random(), time())).hexdigest()
+def gen_secret_key():
+    """Generate a new secret key."""
+    return ''.join(choice(SALT_CHARS) for _ in xrange(200))
 
 
 def gen_password(length=8, add_numbers=True, mix_case=True,
                  add_special_char=True):
-    """
-    Generate a pronounceable password.
-    """
+    """Generate a pronounceable password."""
     if length <= 0:
         raise ValueError('requested password of length <= 0')
     consonants = 'bcdfghjklmnprstvwz'
@@ -178,15 +177,8 @@ def gen_password(length=8, add_numbers=True, mix_case=True,
     return pw
 
 
-def gen_sid():
-    """Generate a session id."""
-    return md5.new('%s|%s' % (time(), random())).hexdigest()
-
-
 def gen_pwhash(password):
-    """
-    Return a the password encrypted in sha format with a random salt.
-    """
+    """Return a the password encrypted in sha format with a random salt."""
     if isinstance(password, unicode):
         password = password.encode('utf-8')
     salt = gen_salt(6)
@@ -271,8 +263,7 @@ def gen_slug(text):
 
 def format_datetime(obj, format=None):
     """Format a datetime object. Later with i18n"""
-    from textpress.application import get_application
-    cfg = get_application().cfg
+    cfg = local.application.cfg
     tzinfo = pytz.timezone(str(cfg['timezone']))
     if type(obj) is date:
         obj = datetime(obj.year, obj.month, obj.day, tzinfo=tzinfo)
@@ -285,7 +276,7 @@ def format_datetime(obj, format=None):
 
 def format_date(obj):
     """Format a date or datetime object so that it's displays the date."""
-    return format_datetime(obj, get_application().cfg['date_format'])
+    return format_datetime(obj, local.application.cfg['date_format'])
 
 
 def format_month(obj):
@@ -298,9 +289,8 @@ def parse_datetime(string):
     """Do all you can do to parse the string into a datetime object."""
     if string.lower() == _('now'):
         return datetime.utcnow()
-    from textpress.application import get_application
     convert = lambda fmt: datetime(*strptime(string, fmt)[:7])
-    cfg = get_application().cfg
+    cfg = local.application.cfg
 
     # first of all try the datetime_format because it's likely that
     # the users inputs the date like chosen in the config
@@ -428,7 +418,6 @@ def generate_rsd(app):
 
 def dump_xml(obj):
     """Dump an JSON dumpable structure as simple XML."""
-    from cgi import escape
     def _inner_dump(obj):
         if obj is None:
             return '<null/>'
@@ -538,100 +527,6 @@ def make_hidden_fields(*fields):
     return u'\n'.join(buf)
 
 
-def reload_textpress():
-    """
-    This function tries to reload TextPress while running and to reinstanciate
-    all the applications. This does nothing for detected run once environments
-    such as CGI.
-
-    Note that due to technical limitations textpress is left in an
-    inconsistent state until the next request is triggered because the
-    current request data still uses objects from the old modules.  This also
-    means that until the request finishes you have two independent sets of
-    textpress modules loaded.
-    """
-    from textpress.application import _instances, _threads, \
-         _reload_lock, _setup_lock
-    from thread import get_ident
-
-    ident = get_ident()
-    _reload_lock.acquire()
-    try:
-        req = (_threads.get(ident) or {}).get('req')
-        if req and req.environ.get('wsgi.run_once'):
-            return
-
-        # wait until the current application is ready if there is on
-        # in the setup process (unlikely but it could happen)
-        _setup_lock.acquire()
-        _setup_lock.release()
-
-        # wait until all the active requests have finished, except
-        # of the request that triggered this call. If we have requests
-        # left after 5 seconds we break the loop.  This could be the
-        # case when there is an active download or whatever. It could
-        # be that an user is presented an internal server error in that
-        # case but the chance that this happens is very small.
-        start = time()
-        thread_req = None
-        while True:
-            for thread in _threads.itervalues():
-                thread_req = thread.get('req')
-                if thread_req and thread_req != req:
-                    sleep(0.1)
-                    break
-            else:
-                break
-            if time() - start > 5:
-                break
-
-        # copy all the stuff we need.
-        threads = dict(_threads)
-        instances = dict(_instances)
-
-        # but here we want to clean up soon
-        del _instances, _threads, req, thread_req
-
-        # now remove all the textpress stuff. it's important that we
-        # import the sys module into the local namespace so that we can
-        # access it, even if the module this file is living in is already
-        # gone.
-        import sys
-        for key in sys.modules.keys():
-            if key == 'textpress' or key.startswith('textpress.'):
-                del sys.modules[key]
-
-        # time to reimport the new factory function and setup all the
-        # applications. But before we do so we have to copy the old reload
-        # lock into the new module. This is required so that we don't have
-        # conflicting locks.
-        __import__('textpress')
-        from textpress import application
-        application._reload_lock = _reload_lock
-
-        for app, path in instances.iteritems():
-            new_app = application.make_app(path)
-            app.__dict__.clear()
-            app.__dict__.update(new_app.__dict__)
-            app.__class__ = new_app.__class__
-            del new_app
-
-        # copy the old instances registry over.
-        application._instances.clear()
-        application._instances.update(instances)
-        application._threads.clear()
-        application._threads.update(threads)
-
-        # run the garbage collector now to clean up stuff we don't need any
-        # more before the request ends
-        import gc
-        gc.collect()
-
-    finally:
-        # release the lock in the end
-        _reload_lock.release()
-
-
 def split_email(s):
     """
     Split a mail address:
@@ -665,8 +560,7 @@ class EMail(object):
     """
 
     def __init__(self, subject=None, text='', to_addrs=None):
-        from textpress.application import get_application
-        self.app = app = get_application()
+        self.app = app = local.application
         self.subject = u' '.join(subject.splitlines())
         self.text = text
         from_addr = app.cfg['blog_email']
@@ -805,11 +699,7 @@ class RequestLocal(object):
     """
 
     def __init__(self, **vars):
-        from textpress.application import get_thread_data
-        self.__dict__.update(
-            _get_thread_data=get_thread_data,
-            _vars=vars
-        )
+        self.__dict__.update(_vars=vars)
         for key, value in vars.iteritems():
             if value is None:
                 value = lambda: None
@@ -817,8 +707,7 @@ class RequestLocal(object):
 
     @property
     def _storage(self):
-        loc = self._get_thread_data('request_locals')
-        return loc.setdefault(id(self), {})
+        return local.request_locals.setdefault(id(self), {})
 
     def __getattr__(self, name):
         if name not in self._vars:
@@ -855,10 +744,10 @@ class IntelligentRedirect(HiddenFormField):
     Example usage::
 
         redirect = IntelligentRedirect()
-        if req.method == 'POST':
+        if request.method == 'POST':
             ...
-            redirect('admin/index') # go back to the admin index or the
-                                    # page we're comming from.
+            return redirect('admin/index') # go back to the admin index or the
+                                           # page we're comming from.
         return render_response(..., hidden_data=make_hidden_fields(redirect))
 
     If you don't want to combine it with other hidden fields you can ignore
@@ -870,8 +759,7 @@ class IntelligentRedirect(HiddenFormField):
     """
 
     def __init__(self):
-        from textpress.application import get_request
-        self.req = get_request()
+        self.request = local.request
         self.invalid_targets = []
 
     def add_invalid(self, *args, **kwargs):
@@ -889,9 +777,9 @@ class IntelligentRedirect(HiddenFormField):
         Check the request and get the redirect target if possible.
         If not this function returns just `None`.
         """
-        check_target = self.req.values.get('_redirect_target') or \
-                       self.req.args.get('next') or \
-                       self.req.environ.get('HTTP_REFERER')
+        check_target = self.request.values.get('_redirect_target') or \
+                       self.request.args.get('next') or \
+                       self.request.environ.get('HTTP_REFERER')
 
         # if there is no information in either the form data
         # or the wsgi environment about a jump target we have
@@ -899,7 +787,7 @@ class IntelligentRedirect(HiddenFormField):
         if not check_target:
             return
 
-        blog_url = self.req.app.cfg['blog_url']
+        blog_url = self.request.app.cfg['blog_url']
         blog_parts = urlparse(blog_url)
         check_parts = urlparse(urljoin(blog_url, check_target))
 
@@ -911,7 +799,7 @@ class IntelligentRedirect(HiddenFormField):
         # if the jump url is the same url as the current url we've had
         # a bad redirect before and use the target url to not create a
         # infinite redirect.
-        current_parts = urlparse(urljoin(blog_url, self.req.path))
+        current_parts = urlparse(urljoin(blog_url, self.request.path))
         if check_parts[:5] == current_parts[:5]:
             return
 
@@ -929,7 +817,7 @@ class IntelligentRedirect(HiddenFormField):
         target = self.get_redirect_target()
         if target is None:
             target = url_for(*args, **kwargs)
-        redirect(target)
+        return redirect(target)
 
     def get_hidden_field(self):
         target = self.get_redirect_target()
@@ -949,7 +837,7 @@ class CSRFProtector(HiddenFormField):
     Example::
 
         protector = CSRFProtector()
-        if req.method == 'POST':
+        if request.method == 'POST':
             protector.assert_safe()
             ...
 
@@ -969,21 +857,20 @@ class CSRFProtector(HiddenFormField):
     """
 
     def __init__(self):
-        from textpress.application import get_request
-        self.req = req = get_request()
+        self.request = request = local.request
         self.token = sha.new('%s|%s|%s|%s' % (
-            req.path,
-            req.sid,
-            req.user.user_id,
-            req.user.is_somebody
+            request.path,
+            local.application.cfg['secret_key'],
+            request.user.user_id,
+            request.user.is_somebody
         )).hexdigest()
 
     @property
     def url_value(self):
-        return '_csrf_check_token=%s' % quote(self.token)
+        return '_csrf_check_token=%s' % url_quote(self.token)
 
     def assert_safe(self):
-        if self.req.values.get('_csrf_check_token') != self.token:
+        if self.request.values.get('_csrf_check_token') != self.token:
             from textpress.application import DirectResponse, Response
             raise DirectResponse(Response('CSRF Attack detected', status=403,
                                           mimetype='text/plain'))
@@ -1019,27 +906,27 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
     """
 
     def __init__(self, transport_id=None):
-        from textpress.application import get_request
-        self.req = req = get_request()
+        self.request = request = local.request
 
         if transport_id is None:
-            transport_id = req.args.get('_transport_id')
+            transport_id = request.args.get('_transport_id')
         if transport_id is None:
             transport_id = StreamReporter.generate_id()
         self.transport_id = transport_id
         self.start_time = int(time())
 
         self._fp = NamedTemporaryFile(prefix='_textpress_upload_')
-        BaseReporterStream.__init__(self, req.environ, 1024 * 50)
-        req.environ['wsgi.input'] = self
+        BaseReporterStream.__init__(self, request.environ, 1024 * 50)
+        request.environ['wsgi.input'] = self
         self._stream_registered = False
 
-    generate_id = staticmethod(gen_sid)
+    @staticmethod
+    def generate_id():
+        return md5.new('%s|%s' % (time(), random())).hexdigest()
 
     @staticmethod
     def _get_manager():
-        from textpress.application import get_application
-        app = get_application()
+        app = local.application
         return os.path.join(gettempdir(), '_textpress_streams_' +
                             sha.new(app.instance_folder).hexdigest()[2:10])
 
@@ -1136,7 +1023,7 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
 
     @property
     def url_value(self):
-        return '_transport_id=%s' % quote(self.transport_id)
+        return '_transport_id=%s' % url_quote(self.transport_id)
 
     def get_hidden_field(self):
         return '_transport_id', self.transport_id

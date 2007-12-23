@@ -50,7 +50,8 @@ import textpress
 from urllib import quote, urlencode, FancyURLopener
 from textpress.application import get_application
 from textpress.database import plugins, db
-from textpress.utils import lazy_property, escape, split_email
+from textpress.utils import split_email
+from werkzeug import cached_property, escape
 
 
 BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
@@ -311,7 +312,7 @@ class Plugin(object):
         """Upload the plugin to the textpress server."""
         return PackageUploader(self, email, password).upload()
 
-    @lazy_property
+    @cached_property
     def metadata(self):
         try:
             f = file(path.join(self.path, 'metadata.txt'))
@@ -322,7 +323,7 @@ class Plugin(object):
         finally:
             f.close()
 
-    @lazy_property
+    @cached_property
     def module(self):
         """The module of the plugin. The first access imports it."""
         from textpress import plugins

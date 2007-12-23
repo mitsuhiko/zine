@@ -14,7 +14,7 @@ from os.path import dirname, join, exists
 from time import asctime, gmtime, time
 from textpress.api import *
 from textpress.utils import CSRFProtector, IntelligentRedirect, \
-     make_hidden_fields, escape, dump_json
+     make_hidden_fields, dump_json
 from textpress.models import ROLE_AUTHOR, ROLE_ADMIN
 from textpress.views.admin import render_admin_response, flash
 from textpress.utils import StreamReporter, ClosingIterator
@@ -22,6 +22,8 @@ from textpress.plugins.file_uploads.utils import guess_mimetype, \
      get_upload_folder, list_files, list_images, get_im_version, \
      get_im_path, touch_upload_folder, upload_file, create_thumbnail, \
      file_exists, get_filename
+from werkzeug import escape
+from werkzeug.exceptions import NotFound
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
@@ -66,7 +68,7 @@ def do_upload(req):
         if not touch_upload_folder():
             flash(_('Could not create upload target folder %s.') %
                   escape(get_upload_folder()), 'error')
-            redirect(url_for('file_uploads/upload'))
+            return redirect(url_for('file_uploads/upload'))
 
         filename = req.form.get('filename') or f.filename
 
@@ -88,7 +90,7 @@ def do_upload(req):
                       escape(url_for('file_uploads/get_file',
                                      filename=filename)),
                       escape(filename))))
-        redirect(url_for('file_uploads/upload'))
+        return redirect(url_for('file_uploads/upload'))
 
     return render_admin_response('admin/file_uploads/upload.html',
                                  'file_uploads.upload',
@@ -175,7 +177,7 @@ def do_thumbnailer(req):
                       escape(url_for('file_uploads/get_file',
                                      filename=thumb_filename)),
                       escape(thumb_filename))))
-            redirect('file_uploads/browse')
+            return redirect('file_uploads/browse')
 
     return render_admin_response('admin/file_uploads/thumbnailer.html',
                                  'file_uploads.thumbnailer',
@@ -223,7 +225,7 @@ def do_config(req):
             if req.app in _mimetype_cache:
                 del _mimetype_cache[req.app][:]
             flash(_('Upload mimetype mapping altered successfully.'))
-        redirect(url_for('file_uploads/config'))
+        return redirect(url_for('file_uploads/config'))
 
     return render_admin_response('admin/file_uploads/config.html',
                                  'file_uploads.config',
@@ -236,7 +238,7 @@ def do_config(req):
 def do_get_file(req, filename):
     filename = get_filename(filename)
     if not exists(filename):
-        abort(404)
+        raise NotFound()
     guessed_type = guess_mimetype(filename)
     fp = file(filename, 'rb')
     def stream():
@@ -256,7 +258,7 @@ def do_get_file(req, filename):
 def do_delete(req, filename):
     fs_filename = get_filename(filename)
     if not exists(fs_filename):
-        abort(404)
+        raise NotFound()
 
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
@@ -272,7 +274,7 @@ def do_delete(req, filename):
             else:
                 flash(_('File %s deleted successfully.') %
                       escape(filename), 'remove')
-        redirect('file_uploads/browse')
+        return redirect('file_uploads/browse')
 
     return render_admin_response('admin/file_uploads/delete.html',
                                  'file_uploads.browse',

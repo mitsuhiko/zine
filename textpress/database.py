@@ -149,25 +149,12 @@
 from datetime import datetime, timedelta
 
 from types import ModuleType
-from thread import get_ident
 
 import sqlalchemy
 from sqlalchemy import orm
-from sqlalchemy.orm.scoping import ScopedSession
 from sqlalchemy.util import to_list
 
-
-
-def session_factory():
-    """Function used by the session context to get a new session."""
-    from textpress.application import get_application
-    return db.create_session(bind=get_application().database_engine)
-
-
-def get_engine():
-    """Return the database engine."""
-    from textpress.application import get_application
-    return get_application().database_engine
+from textpress.utils import local, local_manager
 
 
 def mapper(*args, **kwargs):
@@ -338,7 +325,11 @@ class DatabaseManager(object):
         return self.query.count(*args, **kw)
 
 
-session = ScopedSession(session_factory, scopefunc=get_ident)
+
+session = orm.scoped_session(lambda: orm.create_session(
+                             local.application.database_engine,
+                             autoflush=True, transactional=True),
+                             local_manager.get_ident)
 db = ModuleType('db')
 key = value = mod = None
 for mod in sqlalchemy, orm:
@@ -349,21 +340,18 @@ del key, mod, value
 
 db.__doc__ = __doc__
 db.mapper = mapper
-db.get_engine = get_engine
+db.get_engine = lambda: local.application.database_engine
 for name in 'delete', 'save', 'flush', 'execute', 'begin', \
             'commit', 'rollback', 'clear', 'refresh', 'expire':
     setattr(db, name, getattr(session, name))
 db.session = session
 db.DatabaseManager = DatabaseManager
 
-
 #: called at the end of a request
 cleanup_session = session.remove
 
-
 #: metadata for the core tables and the core table definitions
 metadata = db.MetaData()
-
 
 configuration = db.Table('configuration', metadata,
     db.Column('key', db.Unicode(100), primary_key=True),
@@ -388,14 +376,6 @@ users = db.Table('users', metadata,
     db.Column('pw_hash', db.String(70)),
     db.Column('email', db.Unicode(250)),
     db.Column('role', db.Integer)
-)
-
-
-sessions = db.Table('sessions', metadata,
-    db.Column('sid', db.Unicode(32), primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id')),
-    db.Column('data', db.PickleType),
-    db.Column('last_change', db.DateTime)
 )
 
 
@@ -442,9 +422,7 @@ comments = db.Table('comments', metadata,
     db.Column('pub_date', db.DateTime),
     db.Column('blocked', db.Boolean),
     db.Column('blocked_msg', db.Unicode(250)),
-    db.Column('submitter_ip', db.Unicode(100)),
-    db.ForeignKeyConstraint(['post_id'], ['posts.post_id'], ondelete='CASCADE'),
-    db.ForeignKeyConstraint(['parent_id'], ['comments.comment_id'], ondelete='CASCADE')
+    db.Column('submitter_ip', db.Unicode(100))
 )
 
 

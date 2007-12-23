@@ -30,10 +30,12 @@ from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      STATUS_DRAFT, STATUS_PUBLISHED
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
-     escape, build_eventmap, make_hidden_fields, reload_textpress, \
-     dump_json, load_json, CSRFProtector, IntelligentRedirect, TIMEZONES
+     build_eventmap, make_hidden_fields, dump_json, load_json, \
+     CSRFProtector, IntelligentRedirect, TIMEZONES
 from textpress.widgets import WidgetManager
 from textpress.pluginsystem import install_package, InstallationError
+from werkzeug import escape
+from werkzeug.exceptions import NotFound
 
 
 def simple_redirect(*args, **kwargs):
@@ -43,7 +45,7 @@ def simple_redirect(*args, **kwargs):
     sometimes doesn't do what we want. (like redirecting to target pages
     and not using backredirects)
     """
-    redirect(url_for(*args, **kwargs))
+    return redirect(url_for(*args, **kwargs))
 
 
 def flash(msg, type='info'):
@@ -240,7 +242,7 @@ def do_edit_post(req, post_id=None):
         post = Post.objects.get(post_id)
         exclude = post.post_id
         if post is None:
-            abort(404)
+            raise NotFound()
         form.update(
             title=post.title,
             body=post.raw_body,
@@ -282,11 +284,11 @@ def do_edit_post(req, post_id=None):
 
         # handle cancel
         if req.form.get('cancel'):
-            redirect('admin/show_posts')
+            return redirect('admin/show_posts')
 
         # handle delete, redirect to confirmation page
         if req.form.get('delete') and post_id is not None:
-            simple_redirect('admin/delete_post', post_id=post_id)
+            return simple_redirect('admin/delete_post', post_id=post_id)
 
         form['title'] = title = req.form.get('title')
         if not title:
@@ -385,9 +387,8 @@ def do_edit_post(req, post_id=None):
                       html_post_detail)
 
             if req.form.get('save'):
-                redirect('admin/new_post')
-            else:
-                simple_redirect('admin/edit_post', post_id=post.post_id)
+                return redirect('admin/new_post')
+            return simple_redirect('admin/edit_post', post_id=post.post_id)
 
     for error in errors:
         flash(error, 'error')
@@ -432,7 +433,7 @@ def do_delete_post(req, post_id):
     """
     post = Post.objects.get(post_id)
     if post is None:
-        abort(404)
+        raise NotFound()
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -440,14 +441,14 @@ def do_delete_post(req, post_id):
         csrf_protector.assert_safe()
 
         if req.form.get('cancel'):
-            redirect('admin/edit_post', post_id=post.post_id)
+            return redirect('admin/edit_post', post_id=post.post_id)
         elif req.form.get('confirm'):
             redirect.add_invalid('admin/edit_post', post_id=post.post_id)
             db.delete(post)
             flash(_('The post %s was deleted successfully.') %
                   escape(post.title), 'remove')
             db.flush()
-            redirect('admin/show_posts')
+            return redirect('admin/show_posts')
 
     return render_admin_response('admin/delete_post.html', 'posts.write',
         post=post,
@@ -467,7 +468,7 @@ def do_show_comments(req, post_id=None):
     else:
         post = Post.objects.get(post_id)
         if post is None:
-            abort(404)
+            raise NotFound()
         comments = Comment.objects.all(Comment.post_id == post_id)
     return render_admin_response('admin/show_comments.html',
                                  'comments.overview',
@@ -486,7 +487,7 @@ def do_edit_comment(req, comment_id):
     # the parser associated with comments.
     comment = Comment.objects.get(comment_id)
     if comment is None:
-        abort(404)
+        raise NotFound()
 
     errors = []
     form = {
@@ -512,11 +513,11 @@ def do_edit_comment(req, comment_id):
 
         # cancel
         if req.form.get('cancel'):
-            redirect('admin/show_comments')
+            return redirect('admin/show_comments')
 
         # delete
         if req.form.get('delete'):
-            simple_redirect('admin/delete_comment', comment_id=comment_id)
+            return simple_redirect('admin/delete_comment', comment_id=comment_id)
 
         form['author'] = author = req.form.get('author')
         if not author:
@@ -566,7 +567,7 @@ def do_edit_comment(req, comment_id):
             db.flush()
             flash(_('Comment by %s moderated successfully.') %
                   escape(comment.author))
-            redirect('admin/show_comments')
+            return redirect('admin/show_comments')
 
     for error in errors:
         flash(error, 'error')
@@ -602,7 +603,7 @@ def do_delete_comment(req, comment_id):
     """
     comment = Comment.objects.get(comment_id)
     if comment is None:
-        redirect(url_for('admin/show_comments'))
+        return redirect(url_for('admin/show_comments'))
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -610,15 +611,15 @@ def do_delete_comment(req, comment_id):
         csrf_protector.assert_safe()
 
         if req.form.get('cancel'):
-            redirect('admin/edit_comment', comment_id=comment.comment_id)
+            return redirect('admin/edit_comment', comment_id=comment.comment_id)
         elif req.form.get('confirm'):
-            redirect.add_invalid('admin/edit_comment',
-                                 comment_id=comment.comment_id)
+            return redirect.add_invalid('admin/edit_comment',
+                                        comment_id=comment.comment_id)
             db.delete(comment)
             flash(_('Comment by %s deleted successfully.' %
                     escape(comment.author)), 'remove')
             db.flush()
-            redirect('admin/show_comments')
+            return redirect('admin/show_comments')
 
     return render_admin_response('admin/delete_comment.html',
                                  'comments.overview',
@@ -636,7 +637,7 @@ def do_unblock_comment(req, comment_id):
     """
     comment = Comment.objects.get(comment_id)
     if comment is None:
-        redirect(url_for('admin/show_comments'))
+        return redirect(url_for('admin/show_comments'))
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -648,7 +649,7 @@ def do_unblock_comment(req, comment_id):
             db.flush()
             flash(_('Comment by %s unblocked successfully.') %
                   escape(comment.author), 'configure')
-        redirect('admin/show_comments')
+        return redirect('admin/show_comments')
 
     return render_admin_response('admin/unblock_comment.html',
                                  'comments.overview',
@@ -679,7 +680,7 @@ def do_edit_tag(req, tag_id=None):
     if tag_id is not None:
         tag = Tag.objects.get(tag_id)
         if tag is None:
-            abort(404)
+            raise NotFound()
         form.update(
             slug=tag.slug,
             name=tag.name,
@@ -694,11 +695,11 @@ def do_edit_tag(req, tag_id=None):
 
         # cancel
         if req.form.get('cancel'):
-            redirect('admin/show_tags')
+            return redirect('admin/show_tags')
 
         # delete
         if req.form.get('delete'):
-            simple_redirect('admin/delete_tag', tag_id=tag.tag_id)
+            return simple_redirect('admin/delete_tag', tag_id=tag.tag_id)
 
         form['slug'] = slug = req.form.get('slug')
         form['name'] = name = req.form.get('name')
@@ -728,7 +729,7 @@ def do_edit_tag(req, tag_id=None):
                 escape(tag.name)
             )
             flash(msg % html_tag_detail, msg_type)
-            redirect('admin/show_tags')
+            return redirect('admin/show_tags')
 
     for error in errors:
         flash(error, 'error')
@@ -746,7 +747,7 @@ def do_delete_tag(req, tag_id):
     """
     tag = Tag.objects.get(tag_id)
     if tag is None:
-        redirect(url_for('admin/show_tags'))
+        return redirect(url_for('admin/show_tags'))
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -754,13 +755,13 @@ def do_delete_tag(req, tag_id):
         csrf_protector.assert_safe()
 
         if req.form.get('cancel'):
-            redirect('admin/edit_tag', tag_id=tag.tag_id)
+            return redirect('admin/edit_tag', tag_id=tag.tag_id)
         elif req.form.get('confirm'):
-            redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
+            return redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
             db.delete(tag)
             flash(_('Tag %s deleted successfully.') % escape(tag.name))
             db.flush()
-            redirect('admin/show_tags')
+            return redirect('admin/show_tags')
 
     return render_admin_response('admin/delete_tag.html', 'tags.edit',
         tag=tag,
@@ -796,7 +797,7 @@ def do_edit_user(req, user_id=None):
     if user_id is not None:
         user = User.objects.get(user_id)
         if user is None:
-            abort(404)
+            raise NotFound()
         form.update(
             username=user.username,
             first_name=user.first_name,
@@ -811,9 +812,9 @@ def do_edit_user(req, user_id=None):
     if req.method == 'POST':
         csrf_protector.assert_safe()
         if req.form.get('cancel'):
-            redirect('admin/show_users')
+            return redirect('admin/show_users')
         elif req.form.get('delete') and user:
-            simple_redirect('admin/delete_user', user_id=user.user_id)
+            return simple_redirect('admin/delete_user', user_id=user.user_id)
 
         username = form['username'] = req.form.get('username')
         if not username:
@@ -863,9 +864,8 @@ def do_edit_user(req, user_id=None):
             )
             flash(msg % html_user_detail, icon)
             if req.form.get('save'):
-                redirect('admin/show_users')
-            else:
-                simple_redirect('admin/edit_user', user_id=user.user_id)
+                return redirect('admin/show_users')
+            return simple_redirect('admin/edit_user', user_id=user.user_id)
 
     if not new_user:
         display_names = [
@@ -913,21 +913,21 @@ def do_delete_user(req, user_id):
     """
     user = User.objects.get(user_id)
     if user is None:
-        redirect(url_for('admin/show_users'))
+        return redirect(url_for('admin/show_users'))
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
     if req.method == 'POST':
         csrf_protector.assert_safe()
         if req.form.get('cancel'):
-            redirect('admin/edit_user', user_id=user.user_id)
+            return redirect('admin/edit_user', user_id=user.user_id)
         elif req.form.get('confirm'):
-            redirect.add_invalid('admin/edit_user', user_id=user.user_id)
+            return redirect.add_invalid('admin/edit_user', user_id=user.user_id)
             db.delete(user)
             flash(_('User %s deleted successfully.') %
                   escape(user.username), 'remove')
             db.flush()
-            redirect('admin/show_users')
+            return redirect('admin/show_users')
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
         user=user,
@@ -942,7 +942,7 @@ def do_options(req):
     a page that shows all the links to configuration things in form of
     a simple table.
     """
-    simple_redirect('admin/basic_options')
+    return simple_redirect('admin/basic_options')
 
 
 @require_role(ROLE_ADMIN)
@@ -958,7 +958,7 @@ def do_basic_options(req):
         'timezone':             cfg['timezone'],
         'datetime_format':      cfg['datetime_format'],
         'date_format':          cfg['date_format'],
-        'sid_cookie_name':      cfg['sid_cookie_name'],
+        'session_cookie_name':  cfg['session_cookie_name'],
         'comments_enabled':     cfg['comments_enabled'],
         'pings_enabled':        cfg['pings_enabled'],
         'default_parser':       cfg['default_parser'],
@@ -987,8 +987,8 @@ def do_basic_options(req):
             req.form.get('datetime_format')
         form['date_format'] = date_format = \
             req.form.get('date_format')
-        form['sid_cookie_name'] = sid_cookie_name = \
-            req.form.get('sid_cookie_name')
+        form['session_cookie_name'] = session_cookie_name = \
+            req.form.get('session_cookie_name')
         form['comments_enabled'] = comments_enabled = \
             req.form.get('comments_enabled') == 'yes'
         form['pings_enabled'] = pings_enabled = \
@@ -1023,8 +1023,8 @@ def do_basic_options(req):
                 cfg['datetime_format'] = datetime_format
             if date_format != cfg['date_format']:
                 cfg['date_format'] = date_format
-            if sid_cookie_name != cfg['sid_cookie_name']:
-                cfg['sid_cookie_name'] = sid_cookie_name
+            if session_cookie_name != cfg['session_cookie_name']:
+                cfg['session_cookie_name'] = session_cookie_name
             if comments_enabled != cfg['comments_enabled']:
                 cfg['comments_enabled'] = comments_enabled
             if pings_enabled != cfg['pings_enabled']:
@@ -1040,7 +1040,9 @@ def do_basic_options(req):
             if maintenance_mode != cfg['maintenance_mode']:
                 cfg['maintenance_mode'] = maintenance_mode
             flash(_('Configuration altered successfully.'), 'configure')
-            simple_redirect('admin/basic_options')
+            if not req.is_run_once:
+                req.app.request_reload()
+            return simple_redirect('admin/basic_options')
 
         for error in errors:
             flash(error, 'error')
@@ -1064,7 +1066,7 @@ def do_theme(req):
         csrf_protector.assert_safe()
         req.app.cfg['theme'] = new_theme
         flash(_('Theme changed successfully.'), 'configure')
-        simple_redirect('admin/theme')
+        return simple_redirect('admin/theme')
 
     current = req.app.cfg['theme']
     return render_admin_response('admin/theme.html', 'options.theme',
@@ -1087,14 +1089,14 @@ def do_overlays(req, template=None):
     Edit the theme overlays.
     """
     if not template:
-        redirect(url_for('admin/overlays', template='layout.html'))
+        return redirect(url_for('admin/overlays', template='layout.html'))
     elif req.form.get('edit'):
-        redirect(url_for('admin/overlays',
-                         template=req.form.get('template', '')))
+        return redirect(url_for('admin/overlays',
+                                template=req.form.get('template', '')))
     has_overlay=req.app.theme.overlay_exists(template)
     source = req.app.theme.get_source(template)
     if source is None:
-        abort(404)
+        raise NotFound()
     elif source.endswith('\n'):
         source = source[:-1]
 
@@ -1111,7 +1113,7 @@ def do_overlays(req, template=None):
             else:
                 flash(_('Created overlay %s.') % escape(template),
                       'add')
-        redirect(url_for('admin/overlays', template=template))
+        return redirect(url_for('admin/overlays', template=template))
 
     templates = [x for x in req.app.theme.list_templates()
                  if not x.startswith('admin/')]
@@ -1170,7 +1172,7 @@ def do_widgets(req):
                         manager.widgets.append(tuple(widget))
                     manager.save()
                     flash(_('Widgets updated successfully.'))
-            redirect(url_for('admin/widgets'))
+            return redirect(url_for('admin/widgets'))
 
     # display all widgets in the admin panel
     all_widgets = dict((i, w.get_display_name())
@@ -1255,14 +1257,14 @@ def do_plugins(req):
                         'enable it in the plugin list.') %
                       plugin.html_display_name, 'add')
 
-        if want_reload:
-            reload_textpress()
-        simple_redirect('admin/plugins')
+        if not req.is_run_once:
+            req.app.request_reload()
+        return simple_redirect('admin/plugins')
 
     return render_admin_response('admin/plugins.html', 'options.plugins',
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
         csrf_protector=csrf_protector,
-        show_reload_button=not req.environ.get('wsgi.run_once'),
+        show_reload_button=not req.is_run_once,
         guard_enabled=req.app.cfg['plugin_guard']
     )
 
@@ -1276,7 +1278,7 @@ def do_remove_plugin(req, plugin):
     if plugin is None or \
        plugin.builtin_plugin or \
        plugin.active:
-        abort(404)
+        raise NotFound()
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -1291,7 +1293,7 @@ def do_remove_plugin(req, plugin):
                       plugin.html_display_name)
             flash(_('The plugin "%s" was removed from the instance '
                     'successfully.') % escape(plugin.display_name), 'remove')
-        redirect('admin/plugins')
+        return redirect('admin/plugins')
 
     return render_admin_response('admin/remove_plugin.html', 'options.plugins',
         plugin=plugin,
@@ -1324,7 +1326,9 @@ def do_configuration(req):
                     already_default.add(key)
                 elif key in req.app.cfg and key not in already_default:
                     req.app.cfg.set_from_string(key, value)
-        simple_redirect('admin/configuration')
+        if not req.is_run_once:
+            req.app.request_reload()
+        return simple_redirect('admin/configuration')
 
     return render_admin_response('admin/configuration.html',
                                  'options.configuration',
@@ -1347,7 +1351,7 @@ def do_about(req):
 
     thread_count = activeCount()
     version_info = get_version_info()
-    multithreaded = thread_count > 1 and req.environ['wsgi.multithread']
+    multithreaded = thread_count > 1 and req.is_multithread
 
     return render_admin_response('admin/about.html', 'about.system',
         apis=[{
@@ -1367,10 +1371,10 @@ def do_about(req):
             'value':        req.app.cfg[key]
         } for key, (_, default) in req.app.cfg.config_vars.iteritems()],
         hosting_env={
-            'persistent':       not req.environ['wsgi.run_once'],
+            'persistent':       not req.is_run_once,
             'multithreaded':    multithreaded,
             'thread_count':     thread_count,
-            'multiprocess':     req.environ['wsgi.multiprocess'],
+            'multiprocess':     req.is_multiprocess,
             'wsgi_version':     '.'.join(map(str, req.environ['wsgi.version']))
         },
         plugins=sorted(req.app.plugins.values(), key=lambda x: x.name),
@@ -1399,7 +1403,7 @@ def do_eventmap(req):
     for python2.4.
     """
     if not can_build_eventmap:
-        abort(404)
+        raise NotFound()
     return render_admin_response('admin/eventmap.html', 'about.eventmap',
         get_map=lambda: sorted(build_eventmap(req.app).items()),
         # walking the tree can take some time, so better use stream
@@ -1431,7 +1435,7 @@ def do_change_password(req):
     if req.method == 'POST':
         csrf_protector.assert_safe()
         if req.form.get('cancel'):
-            redirect('admin/index')
+            return redirect('admin/index')
         old_password = req.form.get('old_password')
         if not old_password:
             errors.append(_('You have to enter your old password.'))
@@ -1448,7 +1452,7 @@ def do_change_password(req):
             db.save(req.user)
             db.flush()
             flash(_('Password changed successfully.'), 'configure')
-            redirect('admin/index')
+            return redirect('admin/index')
 
     # just flash the first error, that's enough for the user
     if errors:
@@ -1462,7 +1466,7 @@ def do_change_password(req):
 def do_login(req):
     """Show a login page."""
     if req.user.is_somebody:
-        simple_redirect('admin/index')
+        return simple_redirect('admin/index')
     error = None
     username = ''
     redirect = IntelligentRedirect()
@@ -1476,7 +1480,7 @@ def do_login(req):
                 error = _('User %s does not exist.') % escape(username)
             elif user.check_password(password):
                 req.login(user)
-                redirect('admin/index')
+                return redirect('admin/index')
             else:
                 error = _('Incorrect password.')
         else:

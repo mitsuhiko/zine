@@ -15,8 +15,8 @@ from textpress.application import (
     emit_event,
 
     # Request/Response
-    Response, DirectResponse, abort, redirect, get_request, url_for,
-    add_link, add_meta, add_script, add_header_snippet,
+    Response, redirect, get_request, url_for, add_link, add_meta,
+    add_script, add_header_snippet,
 
     # View helpers
     require_role,

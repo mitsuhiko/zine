@@ -14,6 +14,7 @@ from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
      dump_json, dump_xml
 from textpress.feedbuilder import AtomFeed
+from werkzeug.exceptions import NotFound, Forbidden
 
 
 def do_index(req, page=1):
@@ -33,7 +34,7 @@ def do_index(req, page=1):
     """
     data = Post.objects.get_list(page=page)
     if data.pop('probably_404'):
-        abort(404)
+        raise NotFound()
 
     add_link('alternate', url_for('blog/atom_feed'), 'application/atom+xml',
              _('Recent Posts Feed'))
@@ -63,7 +64,7 @@ def do_archive(req, year=None, month=None, day=None, page=1):
                                **Post.objects.get_archive_summary())
     data = Post.objects.get_list(year, month, day, page)
     if data.pop('probably_404'):
-        abort(404)
+        raise NotFound()
 
     feed_parameters = {}
     for name, value in [('year', year), ('month', month), ('day', day)]:
@@ -95,11 +96,11 @@ def do_show_tag(req, slug, page=1):
     """
     tag = Tag.objects.get_by(slug=slug)
     if not tag:
-        abort(404)
+        raise NotFound()
 
     data = Post.objects.get_list(tag=slug, page=page)
     if data.pop('probably_404'):
-        abort(404)
+        raise NotFound()
 
     add_link('alternate', url_for('blog/atom_feed', tag=slug),
              'application/atom+xml', _('All posts tagged %s') % tag.name)
@@ -145,10 +146,10 @@ def do_show_author(req, username, page=1):
     user = User.objects.first((User.username == username) &
                               (User.role >= ROLE_AUTHOR))
     if user is None:
-        abort(404)
+        raise NotFound()
     data = Post.objects.get_list(author=user)
     if data.pop('probably_404'):
-        abort(404)
+        raise NotFound()
 
     add_link('alternate', url_for('blog/atom_feed', author=username),
              'application/atom+xml', _('All posts written by %s') %
@@ -212,9 +213,9 @@ def do_show_post(req, year, month, day, slug):
     """
     post = Post.objects.get_by_timestamp_and_slug(year, month, day, slug)
     if post is None:
-        abort(404)
+        raise NotFound()
     elif not post.can_access():
-        abort(403)
+        raise Forbidden()
 
     # handle comment posting
     errors = []
@@ -265,7 +266,7 @@ def do_show_post(req, year, month, day, slug):
             #! this is sent directly after the comment was saved.  Useful if
             #! you want to send mail notifications or whatever.
             emit_event('after-comment-saved', req, comment, buffered=True)
-            redirect(url_for(post))
+            return redirect(url_for(post))
 
     return render_response('show_post.html',
         post=post,
@@ -290,7 +291,7 @@ def do_json_service(req, identifier):
     """
     handler = req.app._services.get(identifier)
     if handler is None:
-        abort(404)
+        raise NotFound()
 
     #! if this event returns a handler it is called instead of the default
     #! handler.  Useful to intercept certain requests.
@@ -314,7 +315,7 @@ def do_xml_service(req, identifier):
     """
     handler = req.app._services.get(identifier)
     if handler is None:
-        abort(404)
+        raise NotFound()
 
     #! if this event returns a handler it is called instead of the default
     #! handler.  Useful to intercept certain requests.

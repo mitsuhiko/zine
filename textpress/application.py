@@ -13,37 +13,26 @@
     Once there is a WSGI server that uses greenlets one could add support for
     that here.  So far this limitation is not a real world problem.
 
-    The other important thing is that some code in this module is not a public
-    interface (variables prefixed with an underscore) but also modified from
-    outside of this module, especially from the `reload_textpress` function
-    from the utils module.  That's the case because textpress can reload
-    ifself while the server is running.  In order to keep the problems that
-    could occour while reloading as small as possible there is a lock that
-    is acquire during reloading.  The message that is displayed in maintenance
-    mode or while something is reloaded does not access any global variables
-    that might disappear during reloading.
-
 
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
 from os import path, remove, makedirs, walk
-from time import sleep
-from thread import allocate_lock, get_ident as get_thread_ident
+from time import time
+from thread import allocate_lock
 from itertools import izip
 from datetime import datetime, timedelta
-from weakref import WeakKeyDictionary
 from urlparse import urlparse
 
-from textpress.database import sessions, db, upgrade_database, \
-     cleanup_session
+from textpress.database import db, upgrade_database, cleanup_session
 from textpress.config import Configuration
-from textpress.utils import gen_sid, format_datetime, format_date, \
-     format_month, gen_psid, ClosingIterator, check_external_url
+from textpress.utils import format_datetime, format_date, format_month, \
+     ClosingIterator, check_external_url, local, local_manager
 
-from werkzeug.utils import SharedDataMiddleware, url_quote
-from werkzeug.wrappers import BaseRequest, BaseResponse
-from werkzeug import routing
+from werkzeug import BaseRequest, BaseResponse, SharedDataMiddleware, \
+     url_quote, routing, redirect as simple_redirect
+from werkzeug.exceptions import HTTPException, BadRequest, Forbidden
+from werkzeug.contrib.securecookie import SecureCookie
 
 from jinja import Environment
 from jinja.loaders import BaseLoader, CachedLoaderMixin
@@ -57,26 +46,8 @@ SHARED_DATA = path.join(path.dirname(__file__), 'shared')
 #: path to the builtin templates (admin panel and page defaults)
 BUILTIN_TEMPLATE_PATH = path.join(path.dirname(__file__), 'templates')
 
-#: This variable stores some dicts for thread idents. These keys
-#: are in the dicts:
-#:
-#: `app`:
-#:      reference to the application in the current thread
-#: `req`:
-#:      references to the current request if there is one
-#: `page_metadata`:
-#:      list of tuples containing the metadata for the page.
-#:      this is only set if there is an request processed.
-#: `request_locals`:
-#:      used by the `RequestLocal` class from the utils module.
-_threads = {}
-
 #: the lock for the application setup.
 _setup_lock = allocate_lock()
-
-#: this lock is used for the reloading process. During reloading
-#: it's shared among the two application modules.
-_reload_lock = allocate_lock()
 
 #: because events are not application bound we keep them
 #: unique by sharing them. For better performance we don't
@@ -90,55 +61,18 @@ _next_listener_id = 0
 #: used by the reloader function in the utils module. Some other
 #: modules might want to use this too if they want to modify application
 #: independent settings and have to access application objects.
-_instances = WeakKeyDictionary()
+_instances = {}
+_instance_lock = allocate_lock()
 
 
-def emit_event(event, *args, **kw):
-    """Emit an event and return a `EventResult` instance."""
-    buffered = kw.pop('buffered', False)
-    if kw:
-        raise TypeError('got invalid keyword argument %r' % iter(kw).next())
-    return EventResult(_threads[get_thread_ident()]['app']._event_manager.
-                       emit(event, args), buffered)
+def get_request():
+    """Get the current request."""
+    return getattr(local, 'request', None)
 
 
-def abort(code=404):
-    """Return to the application with a not found response."""
-    if code == 404:
-        resp = render_response('404.html')
-        resp.status = 404
-    elif code == 403:
-        req = get_request()
-        if req.user.is_somebody:
-            resp = render_response('403.html')
-            resp.status = 403
-        else:
-            resp = Response('You have to login before accessing '
-                            'this resource.', mimetype='text/plain',
-                            status=302)
-            resp.headers['Location'] = url_for('admin/login',
-                                               next=req.path)
-    else:
-        msg = Response('Error %d' % code, mimetype='text/plain', status=code)
-    raise DirectResponse(resp)
-
-
-def redirect(url, status=302, allow_external_redirect=False):
-    """Return to the application with a redirect response."""
-    if not allow_external_redirect:
-        #: check if the url is on the same server
-        #: and make it an external one
-        try:
-            url = check_external_url(get_application(), url, True)
-        except ValueError:
-            abort(400)
-    else:
-        # We don't perform the check for an external url
-        url = check_external_url(get_application(), url, False)
-    resp = Response('Moved to %s' % url, mimetype='text/plain',
-                    status=status)
-    resp.headers['Location'] = url
-    raise DirectResponse(resp)
+def get_application():
+    """Get the current application."""
+    return getattr(local, 'application', None)
 
 
 def url_for(endpoint, **args):
@@ -150,56 +84,60 @@ def url_for(endpoint, **args):
             args.update(updated_args)
     anchor = args.pop('_anchor', None)
     external = args.pop('_external', False)
-    rv = get_request().urls.build(endpoint, args, external)
+    rv = local.request.urls.build(endpoint, args, force_external=external)
     if anchor is not None:
         rv += '#' + url_quote(anchor)
     return rv
 
 
-def get_request():
-    """Get the current request."""
-    thread = _threads.get(get_thread_ident())
-    if thread is not None:
-        return thread['req']
+def redirect(url, code=302, allow_external_redirect=False):
+    """
+    Return a redirect response.  Like Werkzeug's redirect but this
+    one checks for external redirects too.
+    """
+    if not allow_external_redirect:
+        #: check if the url is on the same server
+        #: and make it an external one
+        try:
+            url = check_external_url(local.application, url, True)
+        except ValueError:
+            raise BadRequest()
+    return simple_redirect(url, code)
 
 
-def get_application():
-    """Get the current application."""
-    thread = _threads.get(get_thread_ident())
-    if thread is not None:
-        return thread['app']
+def emit_event(event, *args, **kw):
+    """Emit an event and return a `EventResult` instance."""
+    buffered = kw.pop('buffered', False)
+    if kw:
+        raise TypeError('got invalid keyword argument %r' % iter(kw).next())
+    return EventResult(local.application._event_manager.
+                       emit(event, args), buffered)
 
 
 def add_link(rel, href, type, title=None, charset=None, media=None):
     """Add a new link to the metadata of the current page being processed."""
-    thread = _threads.get(get_thread_ident())
-    if thread is not None:
-        thread['page_metadata'].append(('link', {
-            'rel':      rel,
-            'href':     href,
-            'type':     type,
-            'title':    title,
-            'charset':  charset,
-            'media':    media
-        }))
+    local.page_metadata.append(('link', {
+        'rel':      rel,
+        'href':     href,
+        'type':     type,
+        'title':    title,
+        'charset':  charset,
+        'media':    media
+    }))
 
 
 def add_meta(http_equiv=None, name=None, content=None):
     """Add a new meta element to the metadata of the current page."""
-    thread = _threads.get(get_thread_ident())
-    if thread is not None:
-        thread['page_metadata'].append(('meta', {
-            'http_equiv':   http_equiv,
-            'name':         name,
-            'content':      content
-        }))
+    local.page_metadata.append(('meta', {
+        'http_equiv':   http_equiv,
+        'name':         name,
+        'content':      content
+    }))
 
 
 def add_script(src, type='text/javascript'):
     """Load a script."""
-    thread = _threads.get(get_thread_ident())
-    if thread is not None:
-        thread['page_metadata'].append(('script', {
+    local.page_metadata.append(('script', {
             'src':      src,
             'type':     type
         }))
@@ -207,11 +145,9 @@ def add_script(src, type='text/javascript'):
 
 def add_header_snippet(html):
     """Add some HTML as header snippet."""
-    thread = _threads.get(get_thread_ident())
-    if thread is not None:
-        thread['page_metadata'].append(('snippet', {
-            'html':     html
-        }))
+    local.page_metadata.append(('snippet', {
+        'html':     html
+    }))
 
 
 def render_template(template_name, _stream=False, **context):
@@ -224,7 +160,7 @@ def render_template(template_name, _stream=False, **context):
     #! ignored but the context can be modified in place.
     emit_event('before-render-template', template_name, _stream, context,
                buffered=True)
-    tmpl = get_application().template_env.get_template(template_name)
+    tmpl = local.application.template_env.get_template(template_name)
     if _stream:
         return tmpl.stream(context)
     return tmpl.render(context)
@@ -244,59 +180,29 @@ def render_response(template_name, **context):
 def require_role(role):
     """Wrap a view so that it requires a given role to access."""
     def wrapped(f):
-        def decorated(req, **kwargs):
-            if req.user.role >= role:
-                return f(req, **kwargs)
-            abort(403)
+        def decorated(request, **kwargs):
+            if request.user.role >= role:
+                return f(request, **kwargs)
+            raise Forbidden()
         decorated.__name__ = f.__name__
         decorated.__doc__ = f.__doc__
         return decorated
     return wrapped
 
 
-def set_thread_data(key, value):
-    """Set some data for the current thread."""
-    ident = get_thread_ident()
-    if ident in _threads:
-        _threads[ident][key] = value
-    else:
-        _threads[ident] = {key: value}
-
-
-def get_thread_data(key, default=None):
-    """Get some data back for the current thread."""
-    try:
-        return _threads[get_thread_ident()][key]
-    except KeyError:
-        return default
-
-
-def cleanup_thread_data(unbind_app=False):
-    """Clean up unused thread data."""
-    thread = _threads.get(get_thread_ident())
-    if thread is not None:
-        for key in thread.keys():
-            if key == 'app' and not unbind_app:
-                continue
-            del thread[key]
-    for thread, data in _threads.items():
-        if not data:
-            del _threads[thread]
-
-
 def get_active_requests():
     """Return a set of all active requests."""
     rv = set()
     for thread in _threads.itervalues():
-        req = thread.get('req')
-        if req is not None:
-            rv.add(req)
+        request = thread.get('request')
+        if request is not None:
+            rv.add(request)
     return rv
 
 
 def get_active_applications():
     """Return a set of all active applications."""
-    return set(_instances)
+    return set(_instances.values())
 
 
 class Request(BaseRequest):
@@ -304,7 +210,7 @@ class Request(BaseRequest):
     charset = 'utf-8'
 
     def __init__(self, app, environ):
-        super(Request, self).__init__(environ)
+        BaseRequest.__init__(self, environ)
         self.app = app
 
         scheme, netloc, script_name = urlparse(app.cfg['blog_url'])[:3]
@@ -317,26 +223,17 @@ class Request(BaseRequest):
 
         # get the session
         from textpress.models import User
-        user = session = last_change = None
-        sid = self.cookies.get(app.cfg['sid_cookie_name'])
-        if sid is None:
-            sid = gen_sid()
-        else:
-            query = sessions.select(sessions.c.sid == sid)
-            row = engine.execute(query).fetchone()
-            if row is not None:
-                session = row.data
-                if row.user_id:
-                    user = User.objects.get(row.user_id)
-                last_change = row.last_change
-
+        user = None
+        session = SecureCookie.load_cookie(self, app.cfg['session_cookie_name'],
+                                           app.cfg['secret_key'])
+        user_id = session.get('uid')
+        if user_id:
+            user = User.objects.get(user_id)
         if user is None:
             user = User.objects.get_nobody()
 
-        self.sid = sid
         self.user = self._old_user = user
-        self.session = session or {}
-        self.last_session_update = last_change
+        self.session = session
 
     def login(self, user):
         """Log the given user in. Can be user_id, username or
@@ -351,6 +248,7 @@ class Request(BaseRequest):
         self.user = user
         #! called after a user was logged in successfully
         emit_event('after-user-login', user, buffered=True)
+        self.session['uid'] = user.user_id
 
     def logout(self):
         """Log the current user out."""
@@ -361,60 +259,18 @@ class Request(BaseRequest):
         #! called after a user was logged out and the session cleared.
         emit_event('after-user-logout', user, buffered=True)
 
-    def flush_session(self):
-        """Send the session to the database early."""
-        just_update = self.last_session_update is not None
-        last_change = self.last_session_update = datetime.utcnow()
-        if just_update:
-            q = sessions.c.sid == self.sid
-            self.app.database_engine.execute(sessions.update(q),
-                user_id=self.user.user_id,
-                data=self.session,
-                last_change=last_change
-            )
-        else:
-            self.app.database_engine.execute(sessions.insert(),
-                sid=self.sid,
-                user_id=self.user.user_id,
-                last_change=last_change,
-                data=self.session
-            )
-
-    def save_session(self):
-        """Save the session if required. Return True if it was saved."""
-        if self.user != self._old_user or self.user.is_somebody:
-            self.flush_session()
-            self._old_user = self.user
-            return True
-        return False
-
 
 class Response(BaseResponse):
     """
     An utf-8 response, with text/html as default mimetype.
-    Makes sure that the session is saved on request end.
     """
     charset = 'utf-8'
     default_mimetype = 'text/html'
-
-    def __call__(self, environ, start_response):
-        req = environ['werkzeug.request']
-        if req.save_session():
-            self.set_cookie(req.app.cfg['sid_cookie_name'], req.sid)
-        return super(Response, self).__call__(environ, start_response)
 
 
 class NotFound(Exception):
     """Special exception that is raised to notify the app about a
     missing resource or page."""
-
-
-class DirectResponse(Exception):
-    """Raise this with a response as first argument to send a response."""
-
-    def __init__(self, response):
-        self.response = response
-        Exception.__init__(self, response)
 
 
 class EventManager(object):
@@ -646,33 +502,31 @@ class ThemeLoader(BaseLoader, CachedLoaderMixin):
         return rv
 
 
+class InstanceNotInitialized(RuntimeError):
+    """
+    Raised if an application was created for a not yet initialized instance
+    folder.
+    """
+
+
 class TextPress(object):
     """The WSGI application."""
 
     def __init__(self, instance_folder):
         # this check ensures that only make_app can create TextPress instances
-        if (_threads.get(get_thread_ident()) or {}).get('app') is not self:
-            raise TypeError('cannot create %r instances. use the make_app '
-                            'factory function.' % self.__class__.__name__)
-
-        # register the application instance and get a reference
-        # to the reload lock
-        _instances[self] = instance_folder
-        self._reload_lock = _reload_lock
+        if get_application() is not self:
+            raise TypeError('cannot create %r instances. use the '
+                            'make_textpress factory function.' %
+                            self.__class__.__name__)
 
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup
-        self._setup_finished = False
+        self.initialized = None
         self._event_manager = EventManager(self)
 
         # copy the dispatcher over so that we can apply middlewares
         self.dispatch_request = self._dispatch_request
         self.instance_folder = path.realpath(instance_folder)
-
-        # config is in the database, but the config file that
-        # points to the database is called "database.uri"
-        self.database_uri_filename = path.join(instance_folder,
-                                               'database.uri')
 
         # add a list for database checks
         self._database_checks = [upgrade_database]
@@ -681,30 +535,19 @@ class TextPress(object):
         # even if the database is not connected.
         self.cfg = Configuration(self)
 
-        # if the application is not installed we replace the
-        # dispatcher with a setup application. it's important
-        # to know that at this point there is no database connection
-        # at all. the whole websetup has to care about the database
-        # itself.
-        database_uri = self.get_database_uri()
-        if database_uri is None:
-            from textpress.websetup import make_setup
-            self.dispatch_request = make_setup(self)
-            return
-
         # connect to the database, ignore errors for now
-        self.connect_to_database(database_uri)
+        self.connect_to_database()
 
         # setup core package urls and shared stuff
         import textpress
         from textpress.api import _
-        from textpress.urls import all_urls
+        from textpress.urls import make_urls
         from textpress.views import all_views
         from textpress.services import all_services
         from textpress.parsers import all_parsers
         self.views = all_views.copy()
         self.parsers = all_parsers.copy()
-        self._url_rules = all_urls[:]
+        self._url_rules = make_urls(self)
         self._services = all_services.copy()
         self._shared_exports = {}
         self._template_globals = {}
@@ -740,7 +583,7 @@ class TextPress(object):
         from textpress import htmlhelpers, models
         env = Environment(loader=ThemeLoader(self))
         env.globals.update(
-            req=Deferred(lambda *a: get_request()),
+            request=Deferred(lambda *a: get_request()),
             cfg=self.cfg,
             h=htmlhelpers,
             url_for=url_for,
@@ -777,9 +620,33 @@ class TextPress(object):
         del self._url_rules
 
         # mark the app as finished and send an event
-        self._setup_finished = True
+        self.initialized = int(time())
+
         #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
+
+    def request_reload(self):
+        f = file(path.join(self.instance_folder, 'last_reload'), 'w')
+        try:
+            f.write('%d\n' % time())
+        finally:
+            f.close()
+
+    @property
+    def wants_reload(self):
+        """True if the application requests a reload."""
+        reload_path = path.join(self.instance_folder, 'last_reload')
+        if not path.exists(reload_path):
+            return False
+        f = file(reload_path, 'r')
+        try:
+            try:
+                last_reload = int(f.read().strip())
+            except ValueError:
+                return False
+        finally:
+            f.close()
+        return last_reload > self.initialized
 
     @property
     def theme(self):
@@ -791,32 +658,19 @@ class TextPress(object):
 
     def bind_to_thread(self):
         """Bind the application to the current thread."""
-        set_thread_data('app', self)
+        local.application = self
 
-    def get_database_uri(self):
-        """Get the database uri from the instance folder or return None."""
-        if not path.exists(self.database_uri_filename):
-            return
-        f = file(self.database_uri_filename)
-        try:
-            return f.read().strip()
-        finally:
-            f.close()
-
-    def set_database_uri(self, database_uri):
-        """Store the database URI."""
-        f = file(self.database_uri_filename, 'w')
-        try:
-            f.write(database_uri + '\n')
-        finally:
-            f.close()
-
-    def connect_to_database(self, database_uri, perform_test=False):
+    def connect_to_database(self):
         """Connect the app to the database defined."""
-        self.database_engine = e = db.create_engine(database_uri)
-        if perform_test:
-            from sqlalchemy import select, literal
-            e.execute(select([literal('foo')]))
+        database_uri_path = path.join(self.instance_folder, 'database.uri')
+        if not path.exists(database_uri_path):
+            raise InstanceNotInitialized()
+        f = file(database_uri_path)
+        try:
+            database_uri = f.read().strip()
+        finally:
+            f.close()
+        self.database_engine = db.create_engine(database_uri)
 
     def perform_database_upgrade(self):
         """Do the database upgrade."""
@@ -825,14 +679,14 @@ class TextPress(object):
 
     def add_template_filter(self, name, callback):
         """Add a template filter."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add template filters '
                                'after application setup')
         self._template_filters[name] = callback
 
     def add_template_global(self, name, value, deferred=False):
         """Add a template global (or deferred factory function)."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add template filters '
                                'after application setup')
         if deferred:
@@ -843,14 +697,14 @@ class TextPress(object):
         """Add a new template searchpath to the application.
         This searchpath is queried *after* the themes but
         *before* the builtin templates are looked up."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add template filters '
                                'after application setup')
         self._template_searchpath.append(path)
 
     def add_api(self, name, blog_id, preferred, callback):
         """Add a new API to the blog."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add template filters '
                                'after application setup')
         endpoint = 'services/' + name
@@ -868,7 +722,7 @@ class TextPress(object):
         The metadata can be ommited but in that case some information in
         the admin panel is not available.
         """
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add themes after application setup')
         self.themes[name] = Theme(self, name, template_path, metadata)
 
@@ -878,7 +732,7 @@ class TextPress(object):
         creates an url rule for <name>/shared that takes a filename
         parameter.
         """
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add middlewares after '
                                'application setup')
         self._shared_exports['/_shared/' + name] = path
@@ -887,7 +741,7 @@ class TextPress(object):
 
     def add_middleware(self, middleware_factory, *args, **kwargs):
         """Add a middleware to the application."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add middlewares after '
                                'application setup')
         self.dispatch_request = middleware_factory(self.dispatch_request,
@@ -895,33 +749,33 @@ class TextPress(object):
 
     def add_config_var(self, key, type, default):
         """Add a configuration variable to the application."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add configuration values after '
                                'application setup')
         self.cfg.config_vars[key] = (type, default)
 
     def add_database_integrity_check(self, callback):
         """Allows plugins to perform database upgrades."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add database integrity checks '
                                'after application setup')
         self._database_checks.append(callback)
 
     def add_url_rule(self, *args, **kwargs):
         """Add a new URL rule to the url map."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add url rule after application setup')
         self._url_rules.append(routing.Rule(*args, **kwargs))
 
     def add_view(self, endpoint, callback):
         """Add a callback as view."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add view after application setup')
         self.views[endpoint] = callback
 
     def add_parser(self, name, class_):
         """Add a new parser class."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add parser after application setup')
         self.parsers[name] = class_
 
@@ -932,13 +786,13 @@ class TextPress(object):
 
     def add_widget(self, widget):
         """Add a widget."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add widget after application setup')
         self.widgets[widget.NAME] = widget
 
     def add_servicepoint(self, identifier, callback):
         """Add a new function as servicepoint."""
-        if self._setup_finished:
+        if self.initialized is not None:
             raise RuntimeError('cannot add servicepoint after application setup')
         self._services[identifier] = callback
 
@@ -967,7 +821,7 @@ class TextPress(object):
                 u'TextPress.BLOG_URL = %s;'
             u'</script>' % dump_json(self.cfg['blog_url'].rstrip('/'))
         )
-        for type, attr in get_thread_data('page_metadata'):
+        for type, attr in local.page_metadata:
             result.append(generators[type](**attr))
 
         #! this is called before the page metadata is assembled with
@@ -1037,23 +891,21 @@ class TextPress(object):
         # and all the other stuff on the current thread but initialize
         # it afterwards.  We do this so that the request object can query
         # the database in the initialization method.
-        req = object.__new__(Request)
-        _threads.setdefault(get_thread_ident(), {}).update(
-            app=self,
-            req=req,
-            page_metadata=[],
-            request_locals={}
-        )
-        req.__init__(self, environ)
+        request = object.__new__(Request)
+        local.application = self
+        local.request = request
+        local.page_metadata = []
+        local.request_locals = {}
+        request.__init__(self, environ)
 
         # check if the blog is in maintenance_mode and the user is
         # not an administrator. in that case just show a message that
         # the user is not privileged to view the blog right now. Exception:
         # the page is the login page for the blog.
-        if req.path not in ('/admin', '/admin/', '/admin/login') \
+        if request.path not in ('/admin', '/admin/', '/admin/login') \
            and self.cfg['maintenance_mode']:
             from textpress.models import ROLE_ADMIN
-            if req.user.role < ROLE_ADMIN:
+            if request.user.role < ROLE_ADMIN:
                 return self.maintenance_mode_message(environ, start_response)
 
         #! the after-request-setup event can return a response
@@ -1061,73 +913,106 @@ class TextPress(object):
         #! response we just send it. Plugins that inject something
         #! into the request setup have to check if they are in
         #! maintenance mode themselves.
-        for result in emit_event('after-request-setup', req):
+        for result in emit_event('after-request-setup', request):
             if result is not None:
                 return result(environ, start_response)
 
         # normal request dispatching
         try:
-            try:
-                endpoint, args = req.urls.match(req.path)
-            except routing.NotFound:
-                abort(404)
-            except routing.RequestRedirect, e:
-                redirect(e.new_url)
+            endpoint, args = request.urls.match(request.path)
+            response = self.views[endpoint](request, **args)
+        except NotFound, e:
+            response = render_response('404.html')
+            response.status = 404
+        except Forbidden, e:
+            if request.user.is_somebody:
+                response = render_response('403.html')
+                response.status = 403
             else:
-                resp = self.views[endpoint](req, **args)
-        except DirectResponse, e:
-            resp = e.response
+                response = simple_redirect(url_for('admin/login',
+                                                   next=request.path))
+        except HTTPException, e:
+            response = e.get_response(environ)
 
         #! allow plugins to change the response object
-        for result in emit_event('before-response-processed', resp):
+        for result in emit_event('before-response-processed', response):
             if result is not None:
-                resp = result
+                response = result
                 break
 
-        return resp(environ, start_response)
+        if request.session.should_save:
+            cookie_name = self.cfg['session_cookie_name']
+            request.session.save_cookie(response, cookie_name)
+
+        return response(environ, start_response)
 
     def __call__(self, environ, start_response):
         """Make the application object a WSGI application."""
-        # if the reload lock is locked we make sure that everbody
-        # ends up on the maintenance_mode page. There could be a
-        # situation where the dict does not contain a reference to
-        # the reload lock, but the global namespace does. So we
-        # check for that here.
-        lock = getattr(self, '_reload_lock', None) or _reload_lock
-        if lock.locked():
-            return self.maintenance_mode_message(environ, start_response)
-
-        def close():
-            cleanup_thread_data(remove_app)
-            cleanup_session()
-
-        # the normal request dispatching
-        remove_app = get_thread_data('app') is None
         return ClosingIterator(self.dispatch_request(environ, start_response),
-                               close)
+                               [local_manager.cleanup, cleanup_session])
 
 
-def make_app(instance_folder, bind_to_thread=False):
+def get_dispatcher(instance_folder):
+    """
+    Pass it the path to the instance folder and it will return a WSGI
+    application for that instance.  This WSGI applicaiton will be either
+    a `TextPress` object or, if the instance is not yet existing, a
+    function that initializes the textpress instance.  Keep in mind that
+    you can't have more than one application in the same python interpreter
+    for the same instance folder.  A second call for this function with
+    the same instance folder will return the same application.
+    """
+    instance_folder = path.realpath(instance_folder)
+    _instance_lock.acquire()
+    try:
+        application = _instances.get(instance_folder)
+        if application is None or application.wants_reload:
+            try:
+                application = make_textpress(instance_folder)
+            except InstanceNotInitialized:
+                from textpress.websetup import WebSetup
+                application = WebSetup(instance_folder)
+            else:
+                _instances[instance_folder] = application
+        return application
+    finally:
+        _instance_lock.release()
+
+
+def make_app(instance_folder=None):
+    """
+    Return WSGI application for a given instance folder.  If no instance
+    folder is given the instance folder is loaded from the WSGI environment,
+    from the `textpress.instance_folder` key.
+    """
+    def application(environ, start_response):
+        path = instance_folder or environ['textpress.instance_folder']
+        return get_dispatcher(path)(environ, start_response)
+    return application
+
+
+def make_textpress(instance_folder, bind_to_thread=False):
     """
     Creates a new instance of the application. Always use this function to
     create an application because the process of setting the application up
-    requires locking which *only* happens in `make_app`.
+    requires locking which *only* happens in `make_textpress`.
 
     If bind_to_thread is true the application will be set for this thread.
+    For WSGI applications use the `make_app` or `get_dispatcher` functions
+    which return proper WSGI applications all the time.
     """
     _setup_lock.acquire()
     try:
         # make sure this thread has access to the variable so just set
         # up a partial class and call __init__ later.
-        app = object.__new__(TextPress)
-        set_thread_data('app', app)
+        local.application = app = object.__new__(TextPress)
         app.__init__(instance_folder)
     finally:
         # if there was no error when setting up the TextPress instance
         # we should now have an attribute here to delete
-        app = get_thread_data('app')
+        app = get_application()
         if app is not None and not bind_to_thread:
-            cleanup_thread_data(True)
+            local_manager.cleanup()
         _setup_lock.release()
 
     return app

@@ -93,7 +93,7 @@ def show_config(req):
                 altered = True
         if altered:
             flash(_('Typography settings chaned.'), 'configure')
-        redirect(url_for('typography/config'))
+        return redirect(url_for('typography/config'))
     return render_admin_response('admin/typography.html',
                                  'options.typography',
         form=form,

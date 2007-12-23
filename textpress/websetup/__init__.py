@@ -14,9 +14,10 @@
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+from os import path
 from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
-from textpress.utils import is_valid_email, gen_pwhash, reload_textpress
+from textpress.utils import is_valid_email, gen_pwhash, gen_secret_key
 from textpress.websetup.framework import render_response, redirect, \
      get_blog_url, Request
 
@@ -24,8 +25,8 @@ from textpress.websetup.framework import render_response, redirect, \
 class WebSetup(object):
     """Minimal WSGI application for installing textpress"""
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, instance_folder):
+        self.instance_folder = instance_folder
         views = [
             ('start', None),
             ('database', self.test_database),
@@ -114,9 +115,6 @@ class WebSetup(object):
         except Exception, e:
             error = str(e)
         else:
-            # if there was no error so far we store the database uri
-            self.app.set_database_uri(database_uri)
-
             from textpress.models import ROLE_ADMIN
             from textpress.database import users, configuration
 
@@ -145,11 +143,21 @@ class WebSetup(object):
                 value=get_blog_url(req)
             )
 
-            # because we don't have the request bound to this
-            # thread we have to check for cgi environments
-            # ourselves.
-            if not req.environ['wsgi.run_once']:
-                reload_textpress()
+            # and generate a random secret key
+            e.execute(configuration.insert(),
+                key='secret_key',
+                value=gen_secret_key()
+            )
+
+            # if there was no error so far we store the database uri
+            # from this moment on all requests will be handled by the
+            # normal textpress application
+            f = file(path.join(self.instance_folder, 'database.uri'), 'w')
+            try:
+                f.write(database_uri + '\n')
+            finally:
+                f.close()
+
 
         # use a local variable, the global render_response could
         # be None because we reloaded textpress and this module.
@@ -159,7 +167,6 @@ class WebSetup(object):
         })
 
     def __call__(self, environ, start_response):
-        self.app.bind_to_thread()
         req = Request(environ)
         resp = None
 
@@ -183,7 +190,7 @@ class WebSetup(object):
                     resp = self.handle_view(req, view)
 
         if resp is None:
-            resp = redirect(environ, '/')
+            resp = redirect('/')
         return resp(environ, start_response)
 
 

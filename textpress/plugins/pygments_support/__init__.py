@@ -10,12 +10,13 @@
 """
 from os.path import join, dirname
 from time import time, asctime, gmtime
-from werkzeug.utils import escape
 from textpress.api import *
 from textpress.utils import CSRFProtector
 from textpress.views.admin import render_admin_response, flash
 from textpress.models import ROLE_ADMIN
 from textpress.fragment import DataNode
+from werkzeug import escape
+from werkzeug.exceptions import NotFound
 try:
     from pygments import highlight
     from pygments.lexers import get_lexer_by_name
@@ -114,7 +115,7 @@ def get_style(req, style):
     """
     formatter = get_formatter(style)
     if formatter is None:
-        abort(404)
+        raise NotFound()
     resp = Response(formatter.get_style_defs('div.syntax pre'),
                     mimetype='text/css')
     resp.headers['Cache-Control'] = 'public'
@@ -138,7 +139,7 @@ def show_config(req):
         csrf_protector.assert_safe()
         req.app.cfg['pygments_support/style'] = active_style
         flash(_('Pygments theme changed successfully.'), 'configure')
-        redirect(url_for('pygments_support/config'))
+        return redirect(url_for('pygments_support/config'))
 
     preview_formatter = get_formatter(active_style, preview=True)
     add_header_snippet('<style type="text/css">\n%s\n</style>' %

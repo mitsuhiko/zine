@@ -93,7 +93,7 @@ def show_eric_options(req):
     new_skin = req.args.get('select')
     if new_skin in SKINS:
         req.app.cfg['eric_the_fish/skin'] = new_skin
-        redirect(url_for('eric_the_fish/config'))
+        return redirect(url_for('eric_the_fish/config'))
 
     return render_admin_response('admin/eric_the_fish.html',
                                  'options.eric_the_fish',

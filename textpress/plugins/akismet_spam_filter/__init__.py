@@ -13,8 +13,9 @@ from os.path import dirname, join
 from textpress.api import *
 from textpress.views.admin import flash, render_admin_response
 from textpress.models import ROLE_ADMIN
-from textpress.utils import escape, CSRFProtector, RequestLocal
-from urllib import urlencode, urlopen
+from textpress.utils import CSRFProtector, RequestLocal
+from urllib import urlopen
+from werkzeug import escape, url_encode
 
 USER_AGENT = 'TextPress /%s | Akismet/1.11' % textpress.__version__
 AKISMET_URL_BASE = 'rest.akismet.com'
@@ -49,7 +50,7 @@ def send_request(apikey, key_root, data, endpoint):
         endpoint
     )
     try:
-        f = urlopen(url, urlencode(data))
+        f = urlopen(url, url_encode(data))
     except:
         return
     try:
@@ -168,7 +169,7 @@ def show_akismet_config(req):
             # the key is valid, show a box
             flash(_('Akismet enabled successfully. The API key provided '
                     'is valid'), 'ok')
-        redirect(url_for('akismet_spam_filter/config'))
+        return redirect(url_for('akismet_spam_filter/config'))
     return render_admin_response('admin/akismet_spam_filter.html',
                                  'comments.akismet_spam_filter',
         api_key=req.app.cfg['akismet_spam_filter/apikey'],
