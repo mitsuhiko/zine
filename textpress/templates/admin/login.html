@@ -21,6 +21,10 @@
         <dt>{% trans "Password" %}</dt>
         <dd>{{ h.input_field('password', '', 'password') }}</dd>
       </dl>
+      <p>
+        {{ h.checkbox('permanent') }}
+        <label for="permanent">{% trans 'Remember me' %}</label>
+      </p>
       <div class="actions">
         {{ hidden_redirect_field }}
         <input type="submit" value="{% trans 'Login' %}">

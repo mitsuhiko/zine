@@ -37,8 +37,11 @@ class UserManager(db.DatabaseManager):
     def get_nobody(self):
         return AnonymousUser()
 
+    def filter_authors(self):
+        return self.filter(User.role >= ROLE_AUTHOR)
+
     def get_authors(self):
-        return self.all(User.role >= ROLE_AUTHOR)
+        return self.filter_authors().all()
 
 
 class User(object):
@@ -117,10 +120,12 @@ class User(object):
 
 
 class AnonymousUser(User):
+    """Fake model for anonymous users."""
     is_somebody = False
     display_name = 'Nobody'
     first_name = last_name = description = username = ''
     role = ROLE_NOBODY
+    objects = UserManager()
 
     def __init__(self):
         pass
@@ -163,17 +168,21 @@ class PostManager(db.DatabaseManager):
         else:
             return query
 
-    def get_by_timestamp_and_slug(self, year, month, day, slug):
-        """Get an item by year, month, day, and the post slug."""
+    def filter_by_timestamp_and_slug(self, year, month, day, slug):
+        """Filter by year, month, day, and the post slug."""
         start = datetime(year, month, day)
-        return self.first(
+        return self.filter(
             (Post.pub_date >= start) &
             (Post.pub_date < start + timedelta(days=1)) &
             (Post.slug == slug)
         )
 
-    def get_drafts(self, exclude=None, ignore_user=False):
-        """Get a list of drafts."""
+    def get_by_timestamp_and_slug(self, year, month, day, slug):
+        """Get an item by year, month, day, and the post slug."""
+        return self.filter_by_timestamp_and_slug(year, month, day, slug).first()
+
+    def filter_drafts(self, exclude=None, ignore_user=False):
+        """Return a query that returns all drafts."""
         req = get_request()
         query = self.query.filter(Post.status == STATUS_DRAFT)
         if req and not ignore_user:
@@ -182,7 +191,11 @@ class PostManager(db.DatabaseManager):
             if isinstance(exclude, Post):
                 exclude = Post.post_id
             query = query.filter(Post.post_id != exclude)
-        return query.all()
+        return query
+
+    def get_drafts(self, exclude=None, ignore_user=False):
+        """Return all drafts."""
+        return self.filter_drafts(exclude, ignore_user)
 
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
                  page=1, ignore_role=False):
@@ -277,9 +290,9 @@ class PostManager(db.DatabaseManager):
         # send the query
         q = db.and_(*conditions)
         offset = per_page * (page - 1)
-        postlist = Post.objects.query.filter(q)[offset:offset + per_page]
+        postlist = Post.objects.filter(q)[offset:offset + per_page]
         pagination = Pagination(endpoint, page, per_page,
-                                Post.objects.count(q), url_args)
+                                Post.objects.filter(q).count(), url_args)
 
         return {
             'pagination':       pagination,
@@ -367,12 +380,16 @@ class PostManager(db.DatabaseManager):
             'empty':    not result
         }
 
-    def get_latest(self, limit=None, ignore_role=False):
-	"""Get the latest n posts."""
+    def filter_latest(self, limit=None, ignore_role=False):
+	"""Filter for the latest n posts."""
         query = self.filter_published(ignore_role=ignore_role)
         if limit is not None:
             query = query[:limit]
-        return query.all()
+        return query
+
+    def get_latest(self, limit=None, ignore_role=False):
+        """Return the lastest n posts as list."""
+        return self.filter_latest(limit, ignore_role).all()
 
     def search(self, query):
         """Search for posts by a query."""
@@ -674,17 +691,21 @@ class CommentManager(db.DatabaseManager):
     The manager for comments
     """
 
+    def filter_blocked(self):
+        """Filter all blocked comments."""
+        return Comment.filter(Comment.blocked == True)
+
     def get_blocked(self):
-        """Get all blocked comments."""
-        return Comment.all(Comment.blocked == True)
+        """Get a list of all blocked comments."""
+        return self.filter_blocked().all()
 
     def get_block_count(self):
         """Get the number of blocked comments."""
-        return Comment.all(Comment.blocked == True)
+        return Comment.filter(Comment.blocked == True).count()
 
-    def get_latest(self, limit=None, ignore_role=False):
+    def filter_latest(self, limit=None, ignore_role=False):
         """
-        Get the list of non blocked comments for anonymous users or
+        Filter the list of non blocked comments for anonymous users or
         all comments for admin users.
         """
         role = ROLE_NOBODY
@@ -698,7 +719,14 @@ class CommentManager(db.DatabaseManager):
             query = query.filter(Comment.blocked == False)
         if limit is not None:
             query = query[:limit]
-        return query.all()
+        return query
+
+    def get_latest(self, limit=None, ignore_role=False):
+        """
+        Get the list of non blocked comments for anonymous users or
+        all comments for admin users.
+        """
+        return self.filter_latest(limit, ignore_role).all()
 
 
 class Comment(object):

@@ -16,9 +16,6 @@
     Todo:
 
     -   Dashboard
-    -   Sane Deletes (deleting a tag with associated pages makes problems,
-                      same for users and similar stuff. This shouldn't happen)
-    -   Permanent Login
 
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
@@ -28,6 +25,7 @@ from textpress.api import *
 from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED
+from textpress.database import comments, posts, post_tags
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      build_eventmap, make_hidden_fields, dump_json, load_json, \
@@ -324,7 +322,7 @@ def do_edit_post(request, post_id=None):
             author = request.user
             username = author.username
         else:
-            author = User.objects.get_by(username=username)
+            author = User.objects.filter_by(username=username).first()
             if author is None:
                 errors.append(_('Unknown author "%s".') % username)
         form['author'] = author
@@ -332,7 +330,7 @@ def do_edit_post(request, post_id=None):
         form['tags'] = []
         tags = []
         for tag in request.form.getlist('tags'):
-            t = Tag.objects.get_by(slug=tag)
+            t = Tag.objects.filter_by(slug=tag).first()
             if t is not None:
                 tags.append(t)
                 form['tags'].append(tag)
@@ -444,6 +442,8 @@ def do_delete_post(request, post_id):
             return redirect('admin/edit_post', post_id=post.post_id)
         elif request.form.get('confirm'):
             redirect.add_invalid('admin/edit_post', post_id=post.post_id)
+            db.execute(comments.delete(comments.c.post_id == post.post_id))
+            db.execute(post_tags.delete(post_tags.c.post_id == post.post_id))
             db.delete(post)
             flash(_('The post %s was deleted successfully.') %
                   escape(post.title), 'remove')
@@ -469,7 +469,7 @@ def do_show_comments(request, post_id=None):
         post = Post.objects.get(post_id)
         if post is None:
             raise NotFound()
-        comments = Comment.objects.all(Comment.post_id == post_id)
+        comments = Comment.objects.filter(Comment.post_id == post_id).all()
     return render_admin_response('admin/show_comments.html',
                                  'comments.overview',
         post=post,
@@ -757,7 +757,8 @@ def do_delete_tag(request, tag_id):
         if request.form.get('cancel'):
             return redirect('admin/edit_tag', tag_id=tag.tag_id)
         elif request.form.get('confirm'):
-            return redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
+            redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
+            db.execute(post_tags.delete(post_tags.c.tag_id == tag.tag_id))
             db.delete(tag)
             flash(_('Tag %s deleted successfully.') % escape(tag.name))
             db.commit()
@@ -816,7 +817,8 @@ def do_edit_user(request, user_id=None):
         username = form['username'] = request.form.get('username')
         if not username:
             errors.append(_('Username is required.'))
-        elif new_user and User.objects.get_by(username=username) is not None:
+        elif new_user and User.objects.filter_by(username=username).first() \
+             is not None:
             errors.append(_('Username "%s" is taken.') % username)
         password = form['password'] = request.form.get('password')
         if new_user and not password:
@@ -909,17 +911,28 @@ def do_delete_user(request, user_id):
     Like all other delete screens just that it deletes a user.
     """
     user = User.objects.get(user_id)
-    if user is None:
-        return redirect(url_for('admin/show_users'))
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
+
+    if user is None:
+        return redirect('admin/show_users')
+    elif user == request.user:
+        flash(_('You cannot delete yourself.'), 'error')
+        return redirect('admin/show_users')
 
     if request.method == 'POST':
         csrf_protector.assert_safe()
         if request.form.get('cancel'):
             return redirect('admin/edit_user', user_id=user.user_id)
         elif request.form.get('confirm'):
-            return redirect.add_invalid('admin/edit_user', user_id=user.user_id)
+            redirect.add_invalid('admin/edit_user', user_id=user.user_id)
+            action = request.form.get('action')
+            if action == 'reassign':
+                db.execute(posts.update(posts.c.author_id == user_id),
+                    author_id=request.form.get('reassign_user', type=int)
+                )
+            elif action == 'delete':
+                db.execute(posts.delete(posts.c.author_id == user_id))
             db.delete(user)
             flash(_('User %s deleted successfully.') %
                   escape(user.username), 'remove')
@@ -928,6 +941,7 @@ def do_delete_user(request, user_id):
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
         user=user,
+        other_users=User.objects.filter(User.user_id != user_id).all(),
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
@@ -1484,7 +1498,7 @@ def do_login(request):
             if user is None:
                 error = _('User %s does not exist.') % escape(username)
             elif user.check_password(password):
-                request.login(user)
+                request.login(user, 'permanent' in request.form)
                 return redirect('admin/index')
             else:
                 error = _('Incorrect password.')

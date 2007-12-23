@@ -6,7 +6,6 @@
     Select a file you want to upload.
   {% endtrans %}</p>
   <form action="?{{ reporter.url_value|e }}" method="post" enctype="multipart/form-data">
-    {{ csrf_protector }}
     <dl>
       <dt>{% trans "File to upload" %}</dt>
       <dd><input type="file" name="file"></dd>
@@ -22,6 +21,7 @@
       <div class="label"></div>
     </div>
     <div class="actions">
+      {{ csrf_protector }}
       <input type="submit" value="{% trans 'Upload' %}">
     </div>
   </form>

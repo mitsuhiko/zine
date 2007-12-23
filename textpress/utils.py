@@ -30,6 +30,7 @@ from simplejson import dumps as dump_json, loads as load_json
 
 from werkzeug import cached_property, escape, url_quote, Local, \
      LocalManager, ClosingIterator
+from werkzeug.exceptions import Forbidden
 from werkzeug.contrib.reporterstream import BaseReporterStream
 
 DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
@@ -872,9 +873,7 @@ class CSRFProtector(HiddenFormField):
 
     def assert_safe(self):
         if self.request.values.get('_csrf_check_token') != self.token:
-            from textpress.application import DirectResponse, Response
-            raise DirectResponse(Response('CSRF Attack detected', status=403,
-                                          mimetype='text/plain'))
+            raise Forbidden()
 
     def get_hidden_field(self):
         return '_csrf_check_token', self.token

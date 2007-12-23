@@ -27,9 +27,9 @@
     </tr>
   {%- endfor %}
   </table>
-  <div class="actions">
-    <form action="{{ url_for('file_uploads/upload') }}" method="get">
+  <form action="{{ url_for('file_uploads/upload') }}" method="get">
+    <div class="actions">
       <input type="submit" value="{% trans 'Upload New File' %}">
-    </form>
-  </div>
+    </div>
+  </form>
 {% endblock %}

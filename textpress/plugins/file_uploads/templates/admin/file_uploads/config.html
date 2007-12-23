@@ -29,7 +29,6 @@
     {% endtrans %}</p>
   </div>
   <form action="" method="post">
-    {{ csrf_protector }}
     <dl>
       <dt>{% trans "Upload files to" %}</dt>
       <dd>{{ h.input_field('upload_dest', form.upload_dest) }}</dd>
@@ -45,6 +44,7 @@
       </dd>
     </dl>
     <div class="actions">
+      {{ csrf_protector }}
       <input type="submit" value="{% trans 'Save' %}">
     </div>
   </form>

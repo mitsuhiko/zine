@@ -44,7 +44,7 @@ def export(name, fetch_user=True):
             # and transformed into an user object.
             if fetch_user:
                 username, password = args[1:3]
-                user = User.objects.get_by(username=username)
+                user = User.objects.filter_by(username=username).first()
                 if user is None:
                     raise APIError('user not found')
                 elif not user.check_password(password):

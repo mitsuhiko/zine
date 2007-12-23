@@ -5,8 +5,8 @@
   <p>{% trans %}
     Here you can create thumbnails for your uploaded pictures.
   {% endtrans %}</p>
+  {% if images %}
   <form action="" method="post">
-    {{ hidden_form_data }}
     <dl>
       <dt>{% trans "Create Thumbnail For" %}</dt>
       <dd><select name="src_image">
@@ -25,6 +25,7 @@
       <dd>{{ h.input_field('thumb_filename', form.thumb_filename, size=50) }}</dd>
     </dl>
     <div class="actions">
+      {{ hidden_form_data }}
       <input type="submit" value="{% trans 'Create Thumbnail' %}">
     </div>
   </form>
@@ -55,4 +56,7 @@
       updateThumbFilename();
     });
   </script>
+  {% else %}
+    <p>{% trans %}You haven't uploaded any images yet.{% endtrans %}</p>
+  {% endif %}
 {% endblock %}

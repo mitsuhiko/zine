@@ -209,61 +209,7 @@ class DatabaseManager(object):
     Baseclass for the database manager which you can also subclass to add
     more methods to it and attach to models by hand.
 
-    We use the SQLAlchemy querysets to query the database. To get a raw
-    queryset, all you have to do is to access `Model.objects.query` and you
-    can fire up selects.  The default approach is this::
-
-        Model.objects.query.filter(Model.something == "blub").all()
-
-    You can chain as many calls as you want to further filter the objects
-    before sending the request to the database.  The following methods on
-    the queryset cause a select:
-
-    `all`
-        get all objects from the list.
-
-    `first`
-        get the first matching object.
-
-    `count`
-        just count all objects that would match.
-
-    Because you can end up with quite a lot of chained methodcalls which can
-    result in insanely long lines there are some methods that are useful
-    shortcuts:
-
-        Model.objects.all()
-            equivalent to Model.objects.query.all()
-
-        Model.objects.all(condition)
-            equivalent to Model.objects.query.filter(condition).all()
-
-        Model.objects.first()
-            equivalent to Model.object.query.first()
-
-        Model.objects.first(condition)
-            equivalent to Model.objects.query.filter(condition).first()
-
-        Model.objects.count()
-            equivalent to Model.objects.query.count()
-
-        Model.objects.count(condition)
-            equivalent to Model.objects.query.filter(condition).all()
-
-        Model.objects.get_by(condition)
-            equivalent to Model.objects.query.filter_by(condition).first()
-
-        Model.objects.get(ident)
-            equivalent to Model.objects.query.get(int(ident))
-            just that it eats up exceptions that can occour during integer
-            conversion and just return None.
-
-    If you want to add your own methods to the database manager keep in mind
-    that they should always return a list!  If they don't because you want
-    to further filter them in the view you have to prefix them with `filter_`
-    and document their behaviour.
-
-    Some of the methods of this class are aliases.
+    A database manager works like a limited queryset.
     """
 
     def __init__(self):
@@ -280,56 +226,53 @@ class DatabaseManager(object):
         """Return a new queryset."""
         return session.registry().query(self.model)
 
-    def get(self, ident, **kw):
-        """
-        Return an instance of the object based on the given identifier
-        (primary key), or `None` if not found.
+    def all(self):
+        """Return all objects."""
+        return self.query.all()
 
-        If you have more than one primary_key you can pass it a tuple
-        with the column values in the order of the table primary key
-        definitions.
-        """
-        if not isinstance(ident, tuple):
-            try:
-                ident = int(ident)
-            except (TypeError, ValueError):
-                return
-        return self.query.get(ident, **kw)
+    def first(self):
+        """Return the first object."""
+        return self.query.first()
 
-    def get_by(self, **kw):
+    def one(self):
         """
-        Get a query set by some rules.
+        Return the first result of all objects, raising an exception if
+        more than one row exists.
         """
-        return self.query.filter_by(**kw).first()
+        return self.query.one()
 
-    def all(self, *args, **kw):
-        """
-        Return a list of all objects. not queryable any further.
-        """
-        if not args and not kw:
-            return self.query.all()
-        return self.query.filter(*args, **kw).all()
+    def get(self, *args, **kwargs):
+        """Look up an object by primary key."""
+        return self.query.get(*args, **kwargs)
 
-    def first(self, *args, **kw):
-        """
-        Return the first object that matches the query.
-        """
-        if not args and not kw:
-            return self.query.first()
-        return self.query.filter(*args, **kw).first()
+    def filter(self, arg):
+        """Filter all objects by the criteron provided and return a query."""
+        return self.query.filter(arg)
 
-    def count(self, *args, **kw):
-        """
-        Count all objects matching an expression.
-        """
-        return self.query.count(*args, **kw)
+    def filter_by(self, **kwargs):
+        """Filter by keyword arguments."""
+        return self.query.filter_by(**kwargs)
+
+    def order_by(self, arg):
+        """Order by something."""
+        return self.query.order_by(arg)
+
+    def limit(self, limit):
+        """Limit all objects."""
+        return self.query.limit(limit)
+
+    def offset(self, offset):
+        """Return a query with an offset."""
+        return self.query.offset(offset)
 
 
-
+#: a new scoped session
 session = orm.scoped_session(lambda: orm.create_session(
                              local.application.database_engine,
                              autoflush=True, transactional=True),
                              local_manager.get_ident)
+
+#: create a new module for all the database related functions and objects
 db = ModuleType('db')
 key = value = mod = None
 for mod in sqlalchemy, orm:
@@ -353,17 +296,16 @@ cleanup_session = session.remove
 #: metadata for the core tables and the core table definitions
 metadata = db.MetaData()
 
+
 configuration = db.Table('configuration', metadata,
     db.Column('key', db.Unicode(100), primary_key=True),
     db.Column('value', db.Unicode)
 )
 
-
 plugins = db.Table('plugins', metadata,
     db.Column('name', db.Unicode(200), primary_key=True),
     db.Column('active', db.Boolean)
 )
-
 
 users = db.Table('users', metadata,
     db.Column('user_id', db.Integer, primary_key=True),
@@ -378,14 +320,12 @@ users = db.Table('users', metadata,
     db.Column('role', db.Integer)
 )
 
-
 tags = db.Table('tags', metadata,
     db.Column('tag_id', db.Integer, primary_key=True),
     db.Column('slug', db.Unicode(50)),
     db.Column('name', db.Unicode(50)),
     db.Column('description', db.Unicode)
 )
-
 
 posts = db.Table('posts', metadata,
     db.Column('post_id', db.Integer, primary_key=True),
@@ -403,12 +343,10 @@ posts = db.Table('posts', metadata,
     db.Column('status', db.Integer)
 )
 
-
 post_tags = db.Table('post_tags', metadata,
     db.Column('post_id', db.Integer, db.ForeignKey('posts.post_id')),
     db.Column('tag_id', db.Integer, db.ForeignKey('tags.tag_id'))
 )
-
 
 comments = db.Table('comments', metadata,
     db.Column('comment_id', db.Integer, primary_key=True),

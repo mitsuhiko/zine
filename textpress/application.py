@@ -235,7 +235,7 @@ class Request(BaseRequest):
         self.user = self._old_user = user
         self.session = session
 
-    def login(self, user):
+    def login(self, user, permanent=False):
         """Log the given user in. Can be user_id, username or
         a full blown user object."""
         from textpress.models import User
@@ -249,6 +249,8 @@ class Request(BaseRequest):
         #! called after a user was logged in successfully
         emit_event('after-user-login', user, buffered=True)
         self.session['uid'] = user.user_id
+        if permanent:
+            self.session['pmt'] = True
 
     def logout(self):
         """Log the current user out."""
@@ -513,15 +515,12 @@ class TextPress(object):
             raise TypeError('cannot create %r instances. use the '
                             'make_textpress factory function.' %
                             self.__class__.__name__)
+        self.instance_folder = instance_folder
 
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup
         self.initialized = None
         self._event_manager = EventManager(self)
-
-        # copy the dispatcher over so that we can apply middlewares
-        self.dispatch_request = self._dispatch_request
-        self.instance_folder = path.realpath(instance_folder)
 
         # add a list for database checks
         self._database_checks = [upgrade_database]
@@ -826,7 +825,7 @@ class TextPress(object):
         emit_event('before-metadata-assembled', result, buffered=True)
         return u'\n'.join(result)
 
-    def _dispatch_request(self, environ, start_response):
+    def dispatch_request(self, environ, start_response):
         """Handle the incoming request."""
         # Create a new request object, register it with the application
         # and all the other stuff on the current thread but initialize
@@ -885,7 +884,13 @@ class TextPress(object):
 
         if request.session.should_save:
             cookie_name = self.cfg['session_cookie_name']
-            request.session.save_cookie(response, cookie_name)
+            if request.session.get('pmt'):
+                max_age = 60 * 60 * 24 * 31
+                expires = time() + max_age
+            else:
+                max_age = expires = None
+            request.session.save_cookie(response, cookie_name, max_age=max_age,
+                                        expires=expires, session_expires=expires)
 
         return response(environ, start_response)
 

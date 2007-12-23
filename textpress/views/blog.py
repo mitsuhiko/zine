@@ -143,8 +143,8 @@ def do_show_author(request, username, page=1):
     :Template name: ``show_author.html``
     :URL endpoint: ``blog/show_author``
     """
-    user = User.objects.first((User.username == username) &
-                              (User.role >= ROLE_AUTHOR))
+    user = User.objects.filter((User.username == username) &
+                               (User.role >= ROLE_AUTHOR)).first()
     if user is None:
         raise NotFound()
     data = Post.objects.get_list(author=user)
