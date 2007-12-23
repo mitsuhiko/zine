@@ -261,7 +261,7 @@ def do_show_post(req, year, month, day, slug):
             #! use this event to block comments before they are saved.  This
             #! is useful for antispam and other ways of moderation.
             emit_event('before-comment-saved', req, comment, buffered=True)
-            db.flush()
+            db.commit()
 
             #! this is sent directly after the comment was saved.  Useful if
             #! you want to send mail notifications or whatever.

@@ -346,7 +346,7 @@ def do_edit_post(req, post_id=None):
             # XXX: what happens if the slug is empty or the slug
             #      exists already?
             form['tags'].append(Tag(add_tag).slug)
-            db.flush()
+            db.commit()
             del errors[:]
 
         # if there is no need tag and there are no errors we save the post
@@ -373,7 +373,7 @@ def do_edit_post(req, post_id=None):
             post.pings_enabled = form['pings_enabled']
             post.status = post_status
             post.last_update = max(datetime.utcnow(), pub_date)
-            db.flush()
+            db.commit()
 
             html_post_detail = u'<a href="%s">%s</a>' % (
                 escape(url_for(post)),
@@ -447,7 +447,7 @@ def do_delete_post(req, post_id):
             db.delete(post)
             flash(_('The post %s was deleted successfully.') %
                   escape(post.title), 'remove')
-            db.flush()
+            db.commit()
             return redirect('admin/show_posts')
 
     return render_admin_response('admin/delete_post.html', 'posts.write',
@@ -564,7 +564,7 @@ def do_edit_comment(req, comment_id):
             elif not comment.blocked_msg:
                 comment.blocked_msg = _('blocked by %s') % req.user.display_name
             db.save(comment)
-            db.flush()
+            db.commit()
             flash(_('Comment by %s moderated successfully.') %
                   escape(comment.author))
             return redirect('admin/show_comments')
@@ -618,7 +618,7 @@ def do_delete_comment(req, comment_id):
             db.delete(comment)
             flash(_('Comment by %s deleted successfully.' %
                     escape(comment.author)), 'remove')
-            db.flush()
+            db.commit()
             return redirect('admin/show_comments')
 
     return render_admin_response('admin/delete_comment.html',
@@ -646,7 +646,7 @@ def do_unblock_comment(req, comment_id):
         if req.form.get('confirm'):
             comment.blocked = False
             comment.blocked_msg = ''
-            db.flush()
+            db.commit()
             flash(_('Comment by %s unblocked successfully.') %
                   escape(comment.author), 'configure')
         return redirect('admin/show_comments')
@@ -723,7 +723,7 @@ def do_edit_tag(req, tag_id=None):
                 msg = _('Tag %s updated successfully.')
                 msg_type = 'info'
 
-            db.flush()
+            db.commit()
             html_tag_detail = u'<a href="%s">%s</a>' % (
                 escape(url_for(tag)),
                 escape(tag.name)
@@ -760,7 +760,7 @@ def do_delete_tag(req, tag_id):
             return redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
             db.delete(tag)
             flash(_('Tag %s deleted successfully.') % escape(tag.name))
-            db.flush()
+            db.commit()
             return redirect('admin/show_tags')
 
     return render_admin_response('admin/delete_tag.html', 'tags.edit',
@@ -857,7 +857,7 @@ def do_edit_user(req, user_id=None):
                 user.role = role
                 msg = 'User %s edited successfully.'
                 icon = 'info'
-            db.flush()
+            db.commit()
             html_user_detail = u'<a href="%s">%s</a>' % (
                 escape(url_for(user)),
                 escape(user.username)
@@ -926,7 +926,7 @@ def do_delete_user(req, user_id):
             db.delete(user)
             flash(_('User %s deleted successfully.') %
                   escape(user.username), 'remove')
-            db.flush()
+            db.commit()
             return redirect('admin/show_users')
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
@@ -1450,7 +1450,7 @@ def do_change_password(req):
         if not errors:
             req.user.set_password(new_password)
             db.save(req.user)
-            db.flush()
+            db.commit()
             flash(_('Password changed successfully.'), 'configure')
             return redirect('admin/index')
 

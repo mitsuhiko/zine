@@ -26,7 +26,6 @@ _unsave_attributes = set([
 _unsafe_tags = set(['style', 'script'])
 
 
-
 class HTMLParser(BaseParser):
     """
     A simple HTML Parser.

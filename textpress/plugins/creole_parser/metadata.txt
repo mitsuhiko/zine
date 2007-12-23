@@ -1,0 +1,7 @@
+Name: Creole Parser
+Plugin URL: http://textpress.pocoo.org/plugins/creole_parser
+Author: Armin Ronacher <armin.ronacher@active-4.com>
+Author URL: http://lucumr.pocoo.org/
+License: GPL
+Version: 0.1
+Description: This plugin allows you to use the Creole Parser for your posts.
