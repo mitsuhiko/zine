@@ -1494,7 +1494,7 @@ def do_login(request):
         username = request.form.get('username')
         password = request.form.get('password', '')
         if username:
-            user = User.objects.get_by(username=username)
+            user = User.objects.filter_by(username=username).first()
             if user is None:
                 error = _('User %s does not exist.') % escape(username)
             elif user.check_password(password):

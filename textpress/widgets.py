@@ -180,7 +180,7 @@ class Widget(object):
 
 class HTMLWidget(Widget):
     """
-    Special widge for normal HTML data.
+    Special widget for normal HTML data.
     """
 
     NAME = 'HTML'
