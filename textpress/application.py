@@ -85,7 +85,8 @@ def url_for(endpoint, **args):
             args.update(updated_args)
     anchor = args.pop('_anchor', None)
     external = args.pop('_external', False)
-    rv = local.request.urls.build(endpoint, args, force_external=external)
+    rv = local.application.url_adapter.build(endpoint, args,
+                                             force_external=external)
     if anchor is not None:
         rv += '#' + url_quote(anchor)
     return rv
@@ -213,12 +214,6 @@ class Request(BaseRequest):
         BaseRequest.__init__(self, environ)
         self.app = app
 
-        scheme, netloc, script_name = urlparse(app.cfg['blog_url'])[:3]
-        if not (scheme and netloc and script_name):
-            self.urls = app.url_map.bind_to_environ(environ)
-        else:
-            self.urls = app.url_map.bind(netloc, script_name,
-                                         url_scheme=scheme)
         engine = self.app.database_engine
 
         # get the session
@@ -557,6 +552,11 @@ class TextPress(object):
         self.themes = {'default': default_theme}
         self.apis = {}
 
+        # register the pingback API.
+        from textpress import pingback
+        self.add_api('pingback', True, pingback.service)
+        self.pingback_endpoints = pingback.endpoints.copy()
+
         # insert list of widgets
         from textpress.widgets import all_widgets
         self.widgets = dict((x.NAME, x) for x in all_widgets)
@@ -612,6 +612,11 @@ class TextPress(object):
         # set up the urls
         self.url_map = routing.Map(self._url_rules)
         del self._url_rules
+
+        # and create a url adapter
+        scheme, netloc, script_name = urlparse(self.cfg['blog_url'])[:3]
+        self.url_adapter = self.url_map.bind(netloc, script_name,
+                                             url_scheme=scheme)
 
         # mark the app as finished and send an event
         self.initialized = int(time())
@@ -697,7 +702,7 @@ class TextPress(object):
                                'after application setup')
         self._template_searchpath.append(path)
 
-    def add_api(self, name, blog_id, preferred, callback):
+    def add_api(self, name, preferred, callback, blog_id=1):
         """Add a new API to the blog."""
         if self.initialized is not None:
             raise RuntimeError('cannot add template filters '
@@ -706,6 +711,17 @@ class TextPress(object):
         self.apis[name] = (blog_id, preferred, endpoint)
         self.add_url_rule('/_services/' + name, endpoint=endpoint)
         self.add_view(endpoint, callback)
+
+    def add_pingback_endpoint(self, endpoint, callback):
+        """
+        Notify the pingback service that the endpoint provided supports
+        pingbacks.  The second parameter must be the callback function
+        called on pingbacks.
+        """
+        if self.initialized is not None:
+            raise RuntimeError('cannot add pingbackable endpoints '
+                               'after application setup')
+        self.pingback_endpoints[endpoint] = callback
 
     def add_theme(self, name, template_path, metadata=None):
         """
@@ -807,7 +823,8 @@ class TextPress(object):
                       'snippet': lambda html: html}
         result = [
             meta(name='generator', content='TextPress'),
-            link('pingback', url_for('blog/service_rsd')),
+            link('EditURI', url_for('blog/service_rsd'),
+                 type='application/rsd+xml', title='RSD'),
             script(url_for('core/shared', filename='js/jQuery.js')),
             script(url_for('core/shared', filename='js/TextPress.js'))
         ]
@@ -861,7 +878,7 @@ class TextPress(object):
 
         # normal request dispatching
         try:
-            endpoint, args = request.urls.match(request.path)
+            endpoint, args = self.url_adapter.match(request.path)
             response = self.views[endpoint](request, **args)
         except NotFound, e:
             response = render_response('404.html')

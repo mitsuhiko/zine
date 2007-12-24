@@ -304,7 +304,7 @@ configuration = db.Table('configuration', metadata,
 
 plugins = db.Table('plugins', metadata,
     db.Column('name', db.Unicode(200), primary_key=True),
-    db.Column('active', db.Boolean)
+    db.Column('active', db.Boolean, nullable=False)
 )
 
 users = db.Table('users', metadata,
@@ -336,8 +336,8 @@ posts = db.Table('posts', metadata,
     db.Column('intro', db.Unicode),
     db.Column('body', db.Unicode),
     db.Column('author_id', db.Integer, db.ForeignKey('users.user_id')),
-    db.Column('comments_enabled', db.Boolean),
-    db.Column('pings_enabled', db.Boolean),
+    db.Column('comments_enabled', db.Boolean, nullable=False),
+    db.Column('pings_enabled', db.Boolean, nullable=False),
     db.Column('parser_data', db.PickleType),
     db.Column('extra', db.PickleType),
     db.Column('status', db.Integer)
@@ -355,10 +355,11 @@ comments = db.Table('comments', metadata,
     db.Column('email', db.Unicode(250)),
     db.Column('www', db.Unicode(200)),
     db.Column('body', db.Unicode),
+    db.Column('is_pingback', db.Boolean, nullable=False),
     db.Column('parser_data', db.PickleType),
     db.Column('parent_id', db.Integer, db.ForeignKey('comments.comment_id')),
     db.Column('pub_date', db.DateTime),
-    db.Column('blocked', db.Boolean),
+    db.Column('blocked', db.Boolean, nullable=False),
     db.Column('blocked_msg', db.Unicode(250)),
     db.Column('submitter_ip', db.Unicode(100))
 )
