@@ -9,11 +9,11 @@ installed:
   - SQLAlchemy 0.4 or higher*
   - simplejson*
   - Python 2.4 or higher
-  - MySQL, SQLite or Postgres
+  - A database (MySQL, SQLite or PostgreSQL and others are supported)
   - pytz*
 
 Libraries marked with * are installable from the cheeseshop via easy_install or
-might be available in debian already.
+might be available in Debian already.
 
 For a quickstart with the development server do this:
 
@@ -26,3 +26,6 @@ helps you to create the database tables and anan  administrator account.
 To get access to a python console with the textpress instance context do this:
 
     $ python textpress-management.py shell
+
+Note that if your instance folder is not named "instance" or is not stored in this directory
+you have to set the environment variable TEXTPRESS_INSTANCE to get TextPress working.

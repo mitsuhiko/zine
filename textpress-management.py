@@ -14,7 +14,7 @@ import os
 from werkzeug import script
 from werkzeug.contrib import profiler
 
-INSTANCE_FOLDER = os.environ.get('TEXTPRESS_INSTNACE')
+INSTANCE_FOLDER = os.environ.get('TEXTPRESS_INSTANCE')
 if not INSTANCE_FOLDER:
     INSTANCE_FOLDER = os.path.join(os.path.dirname(__file__), 'instance')
 
