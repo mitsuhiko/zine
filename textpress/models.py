@@ -195,7 +195,7 @@ class PostManager(db.DatabaseManager):
 
     def get_drafts(self, exclude=None, ignore_user=False):
         """Return all drafts."""
-        return self.filter_drafts(exclude, ignore_user)
+        return self.filter_drafts(exclude, ignore_user).all()
 
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
                  page=1, ignore_role=False):
@@ -735,7 +735,8 @@ class Comment(object):
     objects = CommentManager()
 
     def __init__(self, post, author, email, www, body, parent=None,
-                 pub_date=None, submitter_ip='0.0.0.0', parser=None):
+                 pub_date=None, submitter_ip='0.0.0.0', parser=None,
+                 is_pingback=False):
         if isinstance(post, (int, long)):
             self.post_id = post
         else:
@@ -758,6 +759,7 @@ class Comment(object):
         self.blocked = False
         self.blocked_msg = None
         self.submitter_ip = submitter_ip
+        self.is_pingback = is_pingback
 
     def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""

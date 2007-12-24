@@ -27,9 +27,11 @@ from tempfile import NamedTemporaryFile, gettempdir
 from smtplib import SMTP, SMTPException
 from email.MIMEText import MIMEText
 from simplejson import dumps as dump_json, loads as load_json
+from SimpleXMLRPCServer import SimpleXMLRPCDispatcher
+from htmlentitydefs import name2codepoint
 
 from werkzeug import cached_property, escape, url_quote, Local, \
-     LocalManager, ClosingIterator
+     LocalManager, ClosingIterator, BaseResponse
 from werkzeug.exceptions import Forbidden
 from werkzeug.contrib.reporterstream import BaseReporterStream
 
@@ -51,7 +53,9 @@ _tagify_replacement_table = {
     u'\xfe': 'th'
 }
 
+_entity_re = re.compile(r'&([^;]+);')
 _punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|}]+')
+_striptags_re = re.compile(r'(<!--.*?-->|<[^>]*>)')
 
 _mail_re = re.compile(
     r'([a-zA-Z0-9_\.\-])+'
@@ -59,6 +63,12 @@ _mail_re = re.compile(
 )
 
 _mail_split_re = re.compile(r'^(.*?)(?:\s+<(.+)>)?$')
+
+#: a dict of html entities to codepoints. This includes the problematic
+#: &apos; character.
+_html_entities = name2codepoint.copy()
+_html_entities['apos'] = 39
+del name2codepoint
 
 # this regexp also matches incompatible dates like 20070101 because
 # some libraries (like the python xmlrpclib modules is crap)
@@ -188,6 +198,40 @@ def gen_pwhash(password):
     h.update(salt)
     h.update(password)
     return 'sha$%s$%s' % (salt, h.hexdigest())
+
+
+def replace_entities(string):
+    """
+    Replace HTML entities in a string:
+
+    >>> replace_entities('foo &amp; bar &raquo; foo')
+    ...
+    """
+    def handle_match(m):
+        name = m.group(1)
+        if name in _html_entities:
+            return unichr(_html_entities[name])
+        if name[:2] in ('#x', '#X'):
+            try:
+                return unichr(int(name[2:], 16))
+            except ValueError:
+                return u''
+        elif name.startswith('#'):
+            try:
+                return unichr(int(name[1:]))
+            except ValueError:
+                return u''
+        return u''
+    return _entity_re.sub(handle_match, string)
+
+
+def strip_tags(s, normalize_whitespace=True):
+    """Remove HTML tags in a text.  This also resolves entities."""
+    s = _striptags_re.sub('', s)
+    s = replace_entities(s)
+    if normalize_whitespace:
+        s = ' '.join(s.split())
+    return s
 
 
 def check_external_url(app, url, check=False):
@@ -734,6 +778,37 @@ class HiddenFormField(object):
 
     def __unicode__(self):
         return make_hidden_fields(self)
+
+
+class XMLRPC(object, SimpleXMLRPCDispatcher):
+    """
+    A XMLRPC dispatcher that uses our request and response objects.  It
+    also works around a problem with Python 2.4 / 2.5 compatibility and
+    registers the introspection functions automatically.
+    """
+
+    def __init__(self, no_introspection=False):
+        if sys.version_info[:2] < (2, 5):
+            SimpleXMLRPCDispatcher.__init__(self)
+        else:
+            SimpleXMLRPCDispatcher.__init__(self, False, 'utf-8')
+        if not no_introspection:
+            self.register_introspection_functions()
+
+    def handle_request(self, request):
+        if request.method == 'POST':
+            response = self._marshaled_dispatch(request.data)
+            return BaseResponse(response, mimetype='application/xml')
+        return BaseResponse('\n'.join((
+            '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">',
+            '<title>XMLRPC Interface</title>',
+            '<h1>XMLRPC Interface</h1>',
+            '<p>This URL provides an XMLRPC interface.  You have to '
+            'connect to it using an XMLRPC client.</p>'
+        )), 405, [('Allow', 'POST'), ('Content-Type', 'text/html')])
+
+    def __call__(self, request):
+        return self.handle_request(request)
 
 
 class IntelligentRedirect(HiddenFormField):

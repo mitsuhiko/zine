@@ -351,19 +351,19 @@ ul#comments, ol#comments {
     padding: 0;
 }
 
-#comments ul, #comments ol {
+#comments ul.sub_comments {
     border-top: 1px solid #ccc;
     list-style: none;
     margin: 10px 0 10px 20px;
     padding: 0;
 }
 
-ul#comments li, ol#comments li {
+ul#comments li.comment, ol#comments li.comment {
     margin: 4px 0 4px 0;
     padding: 0;
 }
 
-ul#comments li + li, ol#comments li + li {
+ul#comments li.comment + li.comment, ol#comments li.comment + li.comment {
     border-top: 1px solid #ccc;
     padding-top: 5px;
 }

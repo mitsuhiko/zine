@@ -174,7 +174,6 @@ class WebSetup(object):
 
         # use a local variable, the global render_response could
         # be None because we reloaded textpress and this module.
-        from textpress.websetup.framework import render_response
         return render_response(error and 'error.html' or 'finished.html', {
             'finished': True
         })

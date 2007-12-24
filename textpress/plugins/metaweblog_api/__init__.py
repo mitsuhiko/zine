@@ -12,32 +12,12 @@ import sys
 from textpress.api import *
 from textpress.models import User, Post, Tag, ROLE_AUTHOR, STATUS_DRAFT, \
      STATUS_PUBLISHED
-from textpress.utils import format_iso8601, parse_iso8601
+from textpress.utils import format_iso8601, parse_iso8601, XMLRPC
 from datetime import datetime
-from SimpleXMLRPCServer import SimpleXMLRPCDispatcher
 
 
 class APIError(Exception):
     """Any errors occoured in the api."""
-
-
-class MetaWeblogAPI(object, SimpleXMLRPCDispatcher):
-    """Does the dispatching."""
-
-    def __init__(self):
-        # python 2.5 requires two arguments
-        if sys.version_info[:2] < (2, 5):
-            SimpleXMLRPCDispatcher.__init__(self)
-        else:
-            SimpleXMLRPCDispatcher.__init__(self, False, 'utf-8')
-        self.register_introspection_functions()
-
-    def handle_request(self, req):
-        if req.method == 'POST':
-            resp = self._marshaled_dispatch(req.data)
-            return Response(resp, mimetype='application/xml')
-        return Response('<h1>MetaWeblog API Entry Point</h1>'
-                        '<p>Connect with an XMLRPC client.</p>')
 
 
 def export(name, fetch_user=True):
@@ -66,7 +46,7 @@ def export(name, fetch_user=True):
     return wrapped
 
 
-xmlrpc = MetaWeblogAPI()
+xmlrpc = XMLRPC()
 
 
 @export('metaWeblog.newPost')
@@ -120,4 +100,4 @@ def get_post(post_id, user):
 
 
 def setup(app, plugin):
-    app.add_api('metaweblog', 1, True, xmlrpc.handle_request)
+    app.add_api('metaweblog', True, xmlrpc)

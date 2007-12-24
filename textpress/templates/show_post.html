@@ -29,15 +29,16 @@
     {%- if cfg.use_flat_comments %}
       <ol id="comments">
       {%- for comment in post.comments %}
-        <li>{{ render_comment(comment) }}</li>
+        <li class="comment">{{ render_comment(comment) }}</li>
       {%- endfor %}
       </ol>
     {%- else %}
       <ul id="comments">
       {%- for comment in post.root_comments recursive %}
-        <li>{{ render_comment(comment, post.comments_enabled
+        <li class="comment">{{ render_comment(comment, post.comments_enabled
           and not cfg.use_flat_comments) }}{% if
-          comment.children %}<ul>{{ loop(comment.children) }}</ul>{% endif %}</li>
+          comment.children %}<ul class="sub_comments">{{
+            loop(comment.children) }}</ul>{% endif %}</li>
       {%- endfor %}
       </ul>
     {%- endif %}

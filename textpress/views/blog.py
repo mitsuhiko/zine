@@ -13,6 +13,7 @@ from textpress.api import *
 from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
      dump_json, dump_xml
+from textpress import pingback
 from textpress.feedbuilder import AtomFeed
 from werkzeug.exceptions import NotFound, Forbidden
 
@@ -173,6 +174,7 @@ def do_authors(request):
     return render_response('authors.html', authors=User.objects.get_authors())
 
 
+@pingback.inject_header
 def do_show_post(request, year, month, day, slug):
     """
     Show as post and give users the possibility to comment to this
@@ -207,6 +209,8 @@ def do_show_post(request, year, month, day, slug):
         `after-comment-saved`:
             executed right after comment was saved to the database. Can be
             used to send mail notifications and stuff like that.
+
+    This view supports pingbacks via `textpress.pingback.pingback_post`
 
     :Template name: ``show_post.html``
     :URL endpoint: ``blog/show_post``

@@ -394,13 +394,13 @@ def do_edit_post(request, post_id=None):
     # tell the user if the parser is missing and we reinsert the
     # parser into the list.
     if missing_parser:
-        parsers.insert(0, (missing_parser, _('Missing Parser "%s"') %
+        parsers.insert(0, (missing_parser, _(u'Missing Parser “%s”') %
                            missing_parser))
-        flash(_('This post was created with the parser "%(parser)s" that is '
-                'not installed any longer.  Because of that TextPress '
-                'doesn\'t allow modifcations on the text until you either '
-                'change the parser or reinstall/activate the plugin that '
-                'provided that parser.') % {'parser': escape(missing_parser)},
+        flash(_(u'This post was created with the parser “%(parser)s” that is '
+                u'not installed any longer.  Because of that TextPress '
+                u'doesn\'t allow modifcations on the text until you either '
+                u'change the parser or reinstall/activate the plugin that '
+                u'provided that parser.') % {'parser': escape(missing_parser)},
               'error')
 
     return render_admin_response('admin/edit_post.html', 'posts.write',
@@ -503,7 +503,7 @@ def do_edit_comment(request, comment_id):
     missing_parser = None
     keep_comment_text = False
     if comment.parser_missing:
-        missing_parser = post.parser
+        missing_parser = comment.parser
 
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
@@ -574,12 +574,12 @@ def do_edit_comment(request, comment_id):
 
     parsers = request.app.list_parsers()
     if missing_parser:
-        parsers.insert(0, (missing_parser, _('Missing Parser "%s"') %
+        parsers.insert(0, (missing_parser, _(u'Missing Parser “%s”') %
                            missing_parser))
-        flash(_('This comment was submitted when the parser "%(parser)s" was '
-                'the comment parser. Because it is not available any longer '
-                'TextPress doesn\'t allow modifcations on the text until you '
-                'reinstall/activate the plugin that provided that parser.') %
+        flash(_(u'This comment was submitted when the parser “%(parser)s” was '
+                u'the comment parser. Because it is not available any longer '
+                u'TextPress doesn\'t allow modifcations on the text until you '
+                u'reinstall/activate the plugin that provided that parser.') %
               {'parser': escape(missing_parser)}, 'error')
 
     return render_admin_response('admin/edit_comment.html',
