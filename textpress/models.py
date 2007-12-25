@@ -198,7 +198,7 @@ class PostManager(db.DatabaseManager):
         return self.filter_drafts(exclude, ignore_user).all()
 
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
-                 page=1, ignore_role=False):
+                 page=1, per_page=None, ignore_role=False):
         """
         Return a dict with pagination, the current posts, number of pages, total
         posts and all that stuff for further processing.
@@ -212,7 +212,8 @@ class PostManager(db.DatabaseManager):
             if req is not None:
                 role = req.user.role
         app = get_application()
-        per_page = app.cfg['posts_per_page']
+        if per_page is None:
+            per_page = app.cfg['posts_per_page']
         url_args = {}
         if year is not None:
             endpoint = 'blog/archive'

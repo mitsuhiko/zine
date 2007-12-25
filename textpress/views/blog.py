@@ -148,7 +148,7 @@ def do_show_author(request, username, page=1):
                                (User.role >= ROLE_AUTHOR)).first()
     if user is None:
         raise NotFound()
-    data = Post.objects.get_list(author=user)
+    data = Post.objects.get_list(author=user, per_page=30)
     if data.pop('probably_404'):
         raise NotFound()
 
@@ -353,7 +353,8 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
     # if no post slug is given we filter the posts by the cretereons
     # provided and pass them to the feed builder
     if post_slug is None:
-        for post in Post.objects.get_list(year, month, day, tag, author):
+        for post in Post.objects.get_list(year, month, day, tag, author,
+                                          per_page=10):
             uid = build_tag_uri(request.app, post.pub_date, 'post',
                                 post.post_id)
             feed.add(post.title, unicode(post.body), content_type='html',

@@ -3,16 +3,21 @@
 {% include "_post.html" %}
 {% block contents %}
   <h2>{{ user.display_name|e }}</h2>
-  {%- if user.first_name and user.last_name %}
-    <p>{{ user.first_name }} {{ user.last_name }}</p>
+  {%- if user.real_name and user.real_name != user.display_name %}
+    <p>{{ user.real_name }}</p>
   {%- endif %}
   {%- if user.description %}
     <div class="description">{{ user.description }}</div>
   {%- endif %}
-  <h3>{% trans "Posts this user wrote" %}</h3>
-  {%- for post in posts %}
-    {{ render_post(post) }}
-  {%- endfor %}
+  {%- if posts %}
+    <h3>{% trans "Posts this user wrote" %}</h3>
+    <ul>
+    {%- for post in posts %}
+      <li><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a>, on
+          {{ post.pub_date|datetimeformat|e }}</li>
+    {%- endfor %}
+    </ul>
+  {%- endif %}
   {%- if pagination.necessary %}
   <div class="pagination">
     {{ pagination.generate() }}
