@@ -3,12 +3,14 @@
     textpress.urls
     ~~~~~~~~~~~~~~
 
-    The core url rules.
+    This module implements a function that creates a list of urls for all
+    the core components.
+
 
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from werkzeug.routing import Rule, Submount, RuleTemplate
+from werkzeug.routing import Rule, Submount
 
 
 def make_urls(app):

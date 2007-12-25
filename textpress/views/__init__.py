@@ -3,7 +3,9 @@
     textpress.views
     ~~~~~~~~~~~~~~~
 
-    Get all the core views into a list.
+    This module binds all the endpoints specified in `textpress.urls` to
+    python functions in the view modules.
+
 
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.

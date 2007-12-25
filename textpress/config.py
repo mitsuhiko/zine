@@ -129,10 +129,16 @@ class Configuration(object):
         self._converted_values = {}
         self.changed_local = False
 
+        # if the path does not exist yet set the existing flag to none and
+        # set the time timetamp for the filename to something in the past
         if not path.exists(self.filename):
             self.exists = False
             self._load_time = 0
             return
+
+        # otherwise parse the file and copy all values into the internal
+        # values dict.  Do that also for values not covered by the current
+        # `config_vars` dict to preserve variables of disabled plugins
         self.exists = True
         self._load_time = path.getmtime(self.filename)
         section = 'textpress'
@@ -325,4 +331,4 @@ class Configuration(object):
         return len(self.config_vars)
 
     def __repr__(self):
-        return '<Configuration %r>' % dict(self.items())
+        return '<%s %r>' % (self.__class__.__name__, dict(self.items()))

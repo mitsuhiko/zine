@@ -28,6 +28,8 @@
 """
 import re
 import urllib2
+import socket
+from thread import allocate_lock
 from xmlrpclib import ServerProxy, Fault
 from werkzeug.routing import RequestRedirect, NotFound
 from werkzeug import escape, unescape
@@ -39,6 +41,7 @@ from textpress.utils import XMLRPC, strip_tags
 _title_re = re.compile(r'<title>(.*?)</title>(?i)')
 _pingback_re = re.compile(r'<link rel="pingback" href="([^"]+)" ?/?>(?i)')
 _chunk_re = re.compile(r'\n\n|<(?:p|div|h\d)[^>]*>')
+_socket_patch_lock = allocate_lock()
 
 
 class PingbackError(Exception):
@@ -74,10 +77,22 @@ def pingback(source_uri, target_uri):
     Try to notify the server behind `target_uri` that `source_uri`
     points to `target_uri`.  If that fails an `PingbackError` is raised.
     """
+    # because urllib2 does not provide a way to specify the timeout
+    # we basically have to add a timeout here by hand.  Because this
+    # is everything but thread safe we try to lock at least this
+    # function.  have i ever mentioned that the stdlib sucks?
+    _socket_patch_lock.acquire()
+    old_timeout = socket.getdefaulttimeout()
     try:
-        url = urllib2.urlopen(target_uri)
-    except urllib2.HTTPError:
-        return False
+        socket.setdefaulttimeout(10)
+        try:
+            url = urllib2.urlopen(target_uri)
+        except urllib2.HTTPError:
+            return False
+    finally:
+        socket.setdefaulttimeout(old_timeout)
+        _socket_patch_lock.release()
+
     try:
         pingback_uri = url.info()['X-Pingback']
     except KeyError:

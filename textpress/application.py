@@ -3,15 +3,16 @@
     textpress.application
     ~~~~~~~~~~~~~~~~~~~~~
 
-    The main application.  This module uses some pretty weird thread local
-    stuff.  Basically at least an application is bound to the current thread
-    which you can get by calling `get_application`.  The same things happens
-    with user requests.  This means that it's impossible to use textpress in
-    enviornments where you have multiple requests in one thread (servers that
-    use greenlets).
+    This module implements the central application object called `TextPress`
+    and a couple of helper functions.  An important implementation detail is
+    that we use werkzeug's local objects for many operations like getting the
+    current active application object or request.
 
-    Once there is a WSGI server that uses greenlets one could add support for
-    that here.  So far this limitation is not a real world problem.
+    Every context can only have one application object or request at the same
+    time.
+
+    If you're looking for ways to get the WSGI application have a look at the
+    docstring of the `textpress` package.
 
 
     :copyright: 2007 by Armin Ronacher.
