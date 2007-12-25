@@ -16,7 +16,8 @@
   {%- for comment in comments %}
     <li class="comment {% cycle 'odd', 'even' %}{% if comment.blocked %} blocked{% endif %}">
       <p><strong>{{ comment.author }}</strong> |
-         <a href="mailto:{{ comment.email|e(true) }}">{{ comment.email|e }}</a> |
+         {% if comment.email %}<a href="mailto:{{ comment.email|e(true) }}">{{
+           comment.email|e }}</a>{% else %}<em>no email given</em>{% endif %} |
          {% if comment.www %}<a href="{{ comment.www|e(true) }}">{{ comment.www|e
            }}</a> |{% endif %}
          IP: {{ comment.submitter_ip }}

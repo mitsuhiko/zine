@@ -41,17 +41,9 @@
       also can be removed completely again.
     {% endtrans %}</p>
     <p><input type="file" name="new_plugin"></p>
-    <p>{% trans %}
-      If you have added a plugin into the instance plugin folder yourself and it
-      doesn't appear in the list here then the cached information is outdated. In
-      that case you have to trigger a reload using the "Reload" button below.
-    {% endtrans %}</p>
     <div class="actions">
       {{ csrf_protector }}
       <input type="submit" value="{% trans 'Update' %}">
-      {%- if show_reload_button %}
-      <input type="submit" name="trigger_reload" value="{% trans 'Reload' %}">
-      {%- endif %}
       {%- if guard_enabled %}
       <input type="submit" name="disable_guard" value="{% trans 'Disable Plugin Guard' %}">
       {%- else %}

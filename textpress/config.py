@@ -3,19 +3,22 @@
     textpress.config
     ~~~~~~~~~~~~~~~~
 
-    Implements the configuration. The config is saved in the database
-    but there is no model for that because we want a more human accessible
-    thing.
+    This module implements the configuration.  The configuration is a more or
+    less flat thing saved as ini in the instance folder.  If the configuration
+    changes the application is reloaded automatically.
+
 
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from textpress.database import configuration
+import os
+from os import path
 
 
 #: variables the textpress core uses
 DEFAULT_VARS = {
     # general settings
+    'database_uri':         (unicode, u''),
     'blog_title':           (unicode, u'My TextPress Blog'),
     'blog_tagline':         (unicode, u'just another textpress blog'),
     'blog_url':             (unicode, u''),
@@ -26,6 +29,10 @@ DEFAULT_VARS = {
     'theme':                (unicode, u'default'),
     'secret_key':           (unicode, u''),
     'blog_url_prefix':      (unicode, u''),
+
+    # template settings
+    'template_cache_path':  (unicode, u''),
+    'template_memcache':    (int, 0),
 
     # the default markup parser. Don't ever change this value! The
     # htmlprocessor module bypasses this test when falling back to
@@ -50,11 +57,46 @@ DEFAULT_VARS = {
     'smtp_password':        (unicode, u''),
 
     # plugin settings
-    'plugin_guard':         (bool, True)
+    'plugin_guard':         (bool, True),
+    'plugins':              (unicode, u'')
 }
+
+#: header for the config file
+CONFIG_HEADER = '''\
+# TextPress configuration file
+# This file is also updated by the TextPress admin interface which will strip
+# all comments due to a limitation in the current implementation.  If you
+# want to maintain the file with your text editor be warned that comments
+# may disappear.  The charset of this file must be utf-8!
+
+'''
+
+
+def unquote_value(value):
+    """Unquote a configuration value."""
+    if not value:
+        return ''
+    if value[0] in '"\'' and value[0] == value[-1]:
+        value = value[1:-1].decode('string-escape')
+    return value.decode('utf-8')
+
+
+def quote_value(value):
+    """Quote a configuration value."""
+    if not value:
+        return ''
+    if value.strip() == value and value[0] not in '"\'' and \
+       value[-1] not in '"\'' and len(value.splitlines()) == 1:
+        return value.encode('utf-8')
+    return '"%s"' % value.replace('\\', '\\\\') \
+                         .replace('\n', '\\n') \
+                         .replace('\r', '\\r') \
+                         .replace('\t', '\\t') \
+                         .replace('"', '\\"').encode('utf-8')
 
 
 def from_string(value, conv, default):
+    """Try to convert a value from string or fall back to the default."""
     if conv is bool:
         conv = lambda x: x == 'True'
     try:
@@ -73,89 +115,169 @@ def get_converter_name(conv):
 
 
 class Configuration(object):
-    """Helper class that manages configuration values."""
+    """
+    Helper class that manages configuration values in a INI-like configuration
+    file.  Changes are tracked and the application ensure that the global
+    config file flushes the changes at the end of every request is necessary.
+    """
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, filename):
+        self.filename = filename
+
         self.config_vars = DEFAULT_VARS.copy()
-        self._cache = {}
-        self.clear_cache = self._cache.clear
+        self._values = {}
+        self._converted_values = {}
+        self.changed_local = False
+
+        if not path.exists(self.filename):
+            self.exists = False
+            self._load_time = 0
+            return
+        self.exists = True
+        self._load_time = path.getmtime(self.filename)
+        section = 'textpress'
+        f = file(self.filename)
+        try:
+            for line in f:
+                if not line or line[0] in '#;':
+                    continue
+                elif line[0] == '[' and line[-1] == ']':
+                    section = line[1:-1].strip()
+                elif '=' not in line:
+                    key = line.strip()
+                    value = ''
+                else:
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    if section != 'textpress':
+                        key = section + '/' + key
+                    self._values[key] = unquote_value(value.strip())
+        finally:
+            f.close()
 
     def __getitem__(self, key):
-        if key not in self.config_vars:
-            raise KeyError()
-        if key in self._cache:
-            return self._cache[key]
+        """Return the value for a key."""
+        if key.startswith('textpress/'):
+            key = key[10:]
+        if key in self._converted_values:
+            return self._converted_values[key]
         conv, default = self.config_vars[key]
-        c = configuration.c
-        result = self.app.database_engine.execute(
-            configuration.select(c.key == key))
-        row = result.fetchone()
-        conv, default = self.config_vars[key]
-        if row is None:
-            rv = default
+        if key in self._values:
+            value = from_string(self._values[key], conv, default)
         else:
-            rv = from_string(row.value, conv, default)
-        self._cache[key] = rv
-        return rv
+            value = default
+        self._converted_values[key] = value
+        return value
 
     def __setitem__(self, key, value):
-        if not key in self.config_vars:
-            raise KeyError()
-        engine = self.app.database_engine
-        svalue = unicode(value)
-        c = configuration.c
-        result = engine.execute(configuration.select(c.key == key))
-        row = result.fetchone()
-        if row is None:
-            engine.execute(configuration.insert(), key=key, value=svalue)
-        else:
-            engine.execute(configuration.update(c.key == key),
-                           value=svalue)
-
-        from textpress.application import emit_event
-
-        #! whenver a configuration key is updated this is called.  Note
-        #! that you cannot chanve the value here, and that it also is not
-        #! called if data is reverted to the default value.
-        emit_event('after-configuration-key-updated', key, value)
-        self._cache[key] = value
+        """Set the value for a key by a python value."""
+        if key.startswith('textpress/'):
+            key = key[10:]
+        if key not in self.config_vars:
+            raise KeyError(key)
+        self._values[key] = unicode(value)
+        self._converted_values[key] = value
+        self.changed_local = True
 
     def set_from_string(self, key, value, override=False):
+        """Set the value for a key from a string."""
+        if key.startswith('textpress/'):
+            key = key[10:]
         conv, default = self.config_vars[key]
         new = from_string(value, conv, default)
         if override or unicode(self[key]) != unicode(new):
-            self[key] = new
+            self._values[key] = unicode(new)
+            self._converted_values[key] = new
+            self.changed_local = True
 
     def revert_to_default(self, key):
-        self.app.database_engine.execute(configuration.delete(
-            configuration.c.key == key))
-        self._cache.pop(key, None)
+        """Revert a key to the default value."""
+        if key.startswith('textpress'):
+            key = key[10:]
+        self._values.pop(key, None)
+        self._converted_values.pop(self, key)
+        self.changed_local = True
+
+    def touch(self):
+        """Touch the file to trigger a reload."""
+        os.utime(self.filename, None)
+
+    def flush(self):
+        """Save changes to the file system if there are any."""
+        if self.changed_local:
+            self.save()
+
+    def save(self):
+        """Save changes to the file system."""
+        sections = {}
+        for key, value in self._values.iteritems():
+            if '/' in key:
+                section, key = key.split('/', 1)
+            else:
+                section = 'textpress'
+            sections.setdefault(section, []).append((key, value))
+        sections = sorted(sections.items())
+        for section in sections:
+            section[1].sort()
+
+        f = file(self.filename, 'w')
+        f.write(CONFIG_HEADER)
+        try:
+            for idx, (section, items) in enumerate(sections):
+                if idx:
+                    f.write('\n')
+                f.write('[%s]\n' % section.encode('utf-8'))
+                for key, value in items:
+                    f.write('%s = %s\n' % (key, quote_value(value)))
+        finally:
+            f.close()
+        self.changed_local = False
+
+    @property
+    def changed_external(self):
+        """True if there are changes on the file system."""
+        if not path.isfile(self.filename):
+            return False
+        return path.getmtime(self.filename) > self._load_time
 
     def __iter__(self):
+        """Iterate over all keys"""
         return iter(self.config_vars)
-
-    def __contains__(self, key):
-        return key in self.config_vars
 
     iterkeys = __iter__
 
+    def __contains__(self, key):
+        """Check if a given key exists."""
+        if key.startswith('textpress/'):
+            key = key[10:]
+        return key in self.config_vars
+
     def itervalues(self):
+        """Iterate over all values."""
         for key in self:
             yield self[key]
 
     def iteritems(self):
+        """Iterate over all keys and values."""
         for key in self:
             yield key, self[key]
 
     def values(self):
+        """Return a list of values."""
         return list(self.itervalues())
 
     def keys(self):
+        """Return a list of keys."""
         return list(self)
 
     def items(self):
+        """Return a list of all key, value tuples."""
         return list(self.iteritems())
+
+    def update(self, *args, **kwargs):
+        """Update multiple items at once."""
+        for key, value in dict(*args, **kwargs).iteritems():
+            self[key] = value
 
     def get_detail_list(self):
         """
@@ -165,20 +287,16 @@ class Configuration(object):
         categories = {}
 
         for key, (conv, default) in self.config_vars.iteritems():
-            c = configuration.c
-            result = self.app.database_engine.execute(
-                configuration.select(c.key == key))
-            row = result.fetchone()
-            if row is None:
+            if key in self._values:
+                use_default = False
+                value = unicode(from_string(self._values[key], conv, default))
+            else:
                 use_default = True
                 value = unicode(default)
-            else:
-                use_default = False
-                value = unicode(from_string(row.value, conv, default))
             if '/' in key:
                 category, name = key.split('/', 1)
             else:
-                category = '__core__'
+                category = 'textpress'
                 name = key
             categories.setdefault(category, []).append({
                 'name':         name,
@@ -189,10 +307,19 @@ class Configuration(object):
                 'default':      default
             })
 
+        def sort_func(item):
+            """
+            Sort by key, case insensitive, ignore leading underscores and move
+            the implicit "textpress" to the index.
+            """
+            if item[0] == 'textpress':
+                return 1
+            return item[0].lower().lstrip('_')
+
         return [{
             'items':    sorted(children, key=lambda x: x['name']),
             'name':     key
-        } for key, children in sorted(categories.items())]
+        } for key, children in sorted(categories.items(), key=sort_func)]
 
     def __len__(self):
         return len(self.config_vars)

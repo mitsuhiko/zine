@@ -339,6 +339,8 @@ class NodeList(list):
         self.node = node
 
     def __delitem__(self, idx):
+        if isinstance(idx, slice):
+            raise TypeError('extended slicing not supported')
         self.pop(idx)
 
     def __delslice__(self, start, end):

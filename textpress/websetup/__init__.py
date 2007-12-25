@@ -15,6 +15,7 @@
     :license: GNU GPL.
 """
 from os import path
+from textpress.config import Configuration
 from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
 from textpress.utils import is_valid_email, gen_pwhash, gen_secret_key
@@ -32,8 +33,8 @@ def render_response(template_name, context):
     return Response(tmpl.render(context), mimetype='text/html')
 
 
-def get_blog_url(req):
-    return get_current_url(req.environ, root_only=True)
+def get_blog_url(request):
+    return get_current_url(request.environ, root_only=True)
 
 
 class WebSetup(object):
@@ -64,21 +65,21 @@ class WebSetup(object):
             self.prev[view] = prev
             self.next[view] = next
 
-    def handle_view(self, req, name, ctx=None):
+    def handle_view(self, request, name, ctx=None):
         handler = self.views[name]
         ctx = ctx or {}
         ctx.update({
             'current': name,
             'prev':    self.prev[name],
             'next':    self.next[name],
-            'values':  dict((k, v) for k, v in req.values.iteritems()
+            'values':  dict((k, v) for k, v in request.values.iteritems()
                             if not k.startswith('_'))
         })
         return render_response(name + '.html', ctx)
 
-    def test_database(self, req):
+    def test_database(self, request):
         """Check if the database uri is valid."""
-        database_uri = req.values.get('database_uri')
+        database_uri = request.values.get('database_uri')
         error = None
         if not database_uri:
             error = 'You have to provide a database URI.'
@@ -90,25 +91,25 @@ class WebSetup(object):
         if error is not None:
             return {'error': error}
 
-    def test_admin_account(self, req):
+    def test_admin_account(self, request):
         """Check if the admin mail is valid and the passwords match."""
         errors = []
-        if not req.values.get('admin_username'):
+        if not request.values.get('admin_username'):
             errors.append('You have to provide a username.')
-        email = req.values.get('admin_email')
+        email = request.values.get('admin_email')
         if not email:
             errors.append('You have to enter a mail address.')
         elif not is_valid_email(email):
             errors.append('The mail address is not valid.')
-        password = req.values.get('admin_password')
+        password = request.values.get('admin_password')
         if not password:
             errors.append('You have to enter a password.')
-        if password != req.values.get('admin_password2'):
+        if password != request.values.get('admin_password2'):
             errors.append('The two passwords do not match.')
         if errors:
             return {'errors': errors}
 
-    def start_setup(self, req):
+    def start_setup(self, request):
         """
         This is called when all the form data is validated
         and TextPress is ready to install the data. In theory
@@ -116,7 +117,7 @@ class WebSetup(object):
         someone faked the request. But because that's the fault of
         the administrator we don't care about that.
         """
-        value = req.values.get
+        value = request.values.get
         error = None
         database_uri = value('database_uri', '').strip()
 
@@ -130,7 +131,7 @@ class WebSetup(object):
             error = str(e)
         else:
             from textpress.models import ROLE_ADMIN
-            from textpress.database import users, configuration
+            from textpress.database import users
 
             # create admin account
             e.execute(users.insert(),
@@ -145,32 +146,16 @@ class WebSetup(object):
                 role=ROLE_ADMIN
             )
 
-            # enter maintenance mode
-            e.execute(configuration.insert(),
-                key='maintenance_mode',
-                value='True'
+            # set up the initial config
+            config_filename = path.join(self.instance_folder, 'textpress.ini')
+            cfg = Configuration(config_filename)
+            cfg.update(
+                maintenance_mode=True,
+                blog_url=get_blog_url(request),
+                secret_key=gen_secret_key(),
+                database_uri=database_uri
             )
-
-            # and set the blog url
-            e.execute(configuration.insert(),
-                key='blog_url',
-                value=get_blog_url(req)
-            )
-
-            # and generate a random secret key
-            e.execute(configuration.insert(),
-                key='secret_key',
-                value=gen_secret_key()
-            )
-
-            # if there was no error so far we store the database uri
-            # from this moment on all requests will be handled by the
-            # normal textpress application
-            f = file(path.join(self.instance_folder, 'database.uri'), 'w')
-            try:
-                f.write(database_uri + '\n')
-            finally:
-                f.close()
+            cfg.save()
 
         # use a local variable, the global render_response could
         # be None because we reloaded textpress and this module.
@@ -179,31 +164,31 @@ class WebSetup(object):
         })
 
     def __call__(self, environ, start_response):
-        req = Request(environ)
-        resp = None
+        request = Request(environ)
+        response = None
 
-        if req.path == '/':
-            view = req.values.get('_current', 'start')
-            if req.values.get('_startsetup'):
-                resp = self.start_setup(req)
+        if request.path == '/':
+            view = request.values.get('_current', 'start')
+            if request.values.get('_startsetup'):
+                response = self.start_setup(request)
             elif view in self.views:
                 handler = self.views[view]
                 if handler is not None and \
-                   req.values.get('_next'):
-                    ctx = handler(req)
+                   request.values.get('_next'):
+                    ctx = handler(request)
                     if ctx is not None:
-                        resp = self.handle_view(req, view, ctx)
+                        response = self.handle_view(request, view, ctx)
 
-                if resp is None:
-                    if req.values.get('_next'):
+                if response is None:
+                    if request.values.get('_next'):
                         view = self.next[view]
-                    elif req.values.get('_prev'):
+                    elif request.values.get('_prev'):
                         view = self.prev[view]
-                    resp = self.handle_view(req, view)
+                    response = self.handle_view(request, view)
 
-        if resp is None:
-            resp = redirect('/')
-        return resp(environ, start_response)
+        if response is None:
+            response = redirect('/')
+        return response(environ, start_response)
 
 
 def make_setup(app):

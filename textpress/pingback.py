@@ -3,7 +3,25 @@
     textpress.pingback
     ~~~~~~~~~~~~~~~~~~
 
-    Implements pingbacks.
+    This module implements the pingback API and a function to emit pingbacks
+    to different blogs.  The implementation here is a `Pingback 1.0`_
+    implementation, compatible to the Pingback specification by Ian Hickson.
+
+    .. _Pingback 1.0: http://www.hixie.ch/specs/pingback/pingback-1.0
+
+    Note that pingback support is implemented in the `TextPress` core and
+    can't be removed.  You can however disable it in the configuration if
+    you want.  Plugins can hook into the pingback system by registering
+    a callback for an URL endpoint using `app.add_pingback_endpoint` during
+    the application setup.
+
+    Important
+    =========
+
+    Due to a broken design for trackback we will *never* support trackbacks
+    in the `TextPress` core.  Neither do we handle incoming trackbacks, nor
+    do we emit trackbacks.
+
 
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
@@ -12,8 +30,8 @@ import re
 import urllib2
 from xmlrpclib import ServerProxy, Fault
 from werkzeug.routing import RequestRedirect, NotFound
-from werkzeug import unescape
-from textpress.api import get_request, get_application, url_for, db
+from werkzeug import escape, unescape
+from textpress.api import get_request, get_application, url_for, db, _
 from textpress.models import Post, Comment
 from textpress.utils import XMLRPC, strip_tags
 
@@ -34,11 +52,27 @@ class PingbackError(Exception):
         self.fault_code = fault_code
         Exception.__init__(self, fault_code)
 
+    @property
+    def ignore_silently(self):
+        return self.fault_code in (17, 33, 48, 49)
+
+    @property
+    def description(self):
+        return {
+            16: _('source URL does not exist'),
+            17: _('The source URL does not contain a link to the target URL'),
+            32: _('The specified target URI does not exist'),
+            33: _('The specified target URI cannot be used as a target'),
+            48: _('The pingback has already been registered'),
+            49: _('Access Denied')
+        }.get(self.fault_code, _('An unknown server error (%s) occoured') %
+              self.fault_code)
+
 
 def pingback(source_uri, target_uri):
     """
     Try to notify the server behind `target_uri` that `source_uri`
-    points to `target_uri`.
+    points to `target_uri`.  If that fails an `PingbackError` is raised.
     """
     try:
         url = urllib2.urlopen(target_uri)
@@ -49,14 +83,15 @@ def pingback(source_uri, target_uri):
     except KeyError:
         match = _pingback_re.search(url.read())
         if match is None:
-            return False
+            raise PingbackError(33)
         pingback_uri = unescape(match.group(1))
     rpc = ServerProxy(pingback_uri)
     try:
-        rpc.pingback.ping(source_uri, target_uri)
+        return rpc.pingback.ping(source_uri, target_uri)
     except Fault, e:
         raise PingbackError(e.faultCode)
-    return True
+    except:
+        raise PingbackError(32)
 
 
 def handle_pingback_request(source_uri, target_uri):
@@ -166,7 +201,8 @@ def inject_header(f):
     def oncall(*args, **kwargs):
         rv = f(*args, **kwargs)
         if rv.status_code == 200:
-            rv.headers['X-Pingback'] = url_for('services/pingback')
+            rv.headers['X-Pingback'] = url_for('services/pingback',
+                                               _external=True)
         return rv
     oncall.__name__ = f.__name__
     oncall.__module__ = f.__module__
@@ -186,7 +222,7 @@ def pingback_post(url_info, target_uri, year, month, day, slug):
     title, excerpt = get_excerpt(url_info, target_uri)
     if not title:
         return 17, 'no title provided'
-    elif not exceprt:
+    elif not excerpt:
         return 17, 'no useable link to target'
     old_pingback = Comment.objects.filter(
         (Comment.is_pingback == True) &
@@ -194,8 +230,10 @@ def pingback_post(url_info, target_uri, year, month, day, slug):
     ).first()
     if old_pingback:
         return 48, 'pingback has already been registered'
-    Comment(post, title, '', url_info.url, excerpt, is_pingback=True,
-            submitter_ip=get_request().remote_addr)
+    excerpt = escape(excerpt)
+    Comment(post, title, '', url_info.url, u'<p>%s</p>' % escape(excerpt),
+            is_pingback=True, submitter_ip=get_request().remote_addr,
+            parser='plain')
     db.commit()
 
 

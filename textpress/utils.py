@@ -235,6 +235,7 @@ def strip_tags(s, normalize_whitespace=True):
 
 
 def check_external_url(app, url, check=False):
+    """Check if a URl is on the application server."""
     blog_url = app.cfg['blog_url']
     check = urljoin(blog_url, url)
 

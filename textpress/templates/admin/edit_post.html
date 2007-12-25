@@ -70,6 +70,8 @@
           }} <label for="comments_enabled">{% trans "Allow comments" %}</label></li>
         <li>{{ h.checkbox('pings_enabled', checked=form.pings_enabled)
           }} <label for="pings_enabled">{% trans "Allow pings" %}</label></li>
+        <li>{{ h.checkbox('ping_from_text', checked=form.ping_from_text)
+          }} <label for="ping_from_text">{% trans "Ping all URLs in the text" %}</label></li>
       </ul>
     </fieldset>
     <fieldset>

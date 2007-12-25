@@ -544,6 +544,22 @@ class Post(object):
     body = property(_get_body, _set_body)
     del _get_raw_body, _set_raw_body, _get_body, _set_body
 
+    def find_urls(self):
+        """
+        Iterate over all urls in the text.  This will only work if the
+        parser for this post is available.  If it's not the behavior is
+        undefined.
+        """
+        from textpress.parsers import parse
+        found = set()
+        for text in self.raw_intro, self.raw_body:
+            tree = parse(text, self.parser, 'linksearch', False)
+            for node in tree.query('a[@href]'):
+                href = node.attributes['href']
+                if href not in found:
+                    found.add(href)
+                    yield href
+
     def auto_slug(self):
         """Generate a slug for this post."""
         self.slug = gen_slug(self.title)
@@ -581,6 +597,11 @@ class Post(object):
         # author of this post.
         else:
             return self.author == user
+
+    @property
+    def is_published(self):
+        """`True` if the post is visible for everyone."""
+        return self.can_access(AnonymousUser())
 
     def get_url_values(self):
         return 'blog/show_post', {

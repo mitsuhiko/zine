@@ -58,13 +58,6 @@ _setup_lock = allocate_lock()
 #: there is a global application setup lock.
 _next_listener_id = 0
 
-#: holds references to all the active textpress instances. This is
-#: used by the reloader function in the utils module. Some other
-#: modules might want to use this too if they want to modify application
-#: independent settings and have to access application objects.
-_instances = {}
-_instance_lock = allocate_lock()
-
 
 def get_request():
     """Get the current request."""
@@ -479,11 +472,13 @@ class ThemeLoader(CachedLoaderMixin, BaseLoader):
 
     def __init__(self, app):
         self.app = app
+        template_cache_path = app.cfg['template_cache_path']
+        template_memcache = app.cfg['template_memcache']
         CachedLoaderMixin.__init__(self,
-            False,      # don't use memory caching for the moment
-            40,         # for up to 40 templates
-            None,       # path to disk cache
-            False,      # don't reload templates
+            template_memcache > 0,
+            template_memcache,
+            template_cache_path or None,
+            False,
             app.instance_folder
         )
 
@@ -514,18 +509,20 @@ class TextPress(object):
 
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup
-        self.initialized = None
+        self.initialized = False
         self._event_manager = EventManager(self)
-
-        # add a list for database checks
-        self._database_checks = [upgrade_database]
 
         # and instanciate the configuration. this won't fail,
         # even if the database is not connected.
-        self.cfg = Configuration(self)
+        self.cfg = Configuration(path.join(instance_folder, 'textpress.ini'))
+        if not self.cfg.exists:
+            raise InstanceNotInitialized()
 
-        # connect to the database, ignore errors for now
-        self.connect_to_database()
+        # connect to the database, ignore errors for now and set up
+        # the builtin database checks
+        self._database_checks = [upgrade_database]
+        self.database_engine = db.create_engine(self.cfg['database_uri'],
+                                                convert_unicode=True)
 
         # setup core package urls and shared stuff
         import textpress
@@ -619,33 +616,15 @@ class TextPress(object):
                                              url_scheme=scheme)
 
         # mark the app as finished and send an event
-        self.initialized = int(time())
+        self.initialized = True
 
         #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
 
-    def request_reload(self):
-        f = file(path.join(self.instance_folder, 'last_reload'), 'w')
-        try:
-            f.write('%d\n' % time())
-        finally:
-            f.close()
-
     @property
     def wants_reload(self):
-        """True if the application requests a reload."""
-        reload_path = path.join(self.instance_folder, 'last_reload')
-        if not path.exists(reload_path):
-            return False
-        f = file(reload_path, 'r')
-        try:
-            try:
-                last_reload = int(f.read().strip())
-            except ValueError:
-                return False
-        finally:
-            f.close()
-        return last_reload > self.initialized
+        """True if the application requires a reload."""
+        return self.cfg.changed_external
 
     @property
     def theme(self):
@@ -659,19 +638,6 @@ class TextPress(object):
         """Bind the application to the current thread."""
         local.application = self
 
-    def connect_to_database(self):
-        """Connect the app to the database defined."""
-        database_uri_path = path.join(self.instance_folder, 'database.uri')
-        if not path.exists(database_uri_path):
-            raise InstanceNotInitialized()
-        f = file(database_uri_path)
-        try:
-            database_uri = f.read().strip()
-        finally:
-            f.close()
-        self.database_engine = db.create_engine(database_uri,
-                                                convert_unicode=True)
-
     def perform_database_upgrade(self):
         """Do the database upgrade."""
         for check in self._database_checks:
@@ -679,14 +645,14 @@ class TextPress(object):
 
     def add_template_filter(self, name, callback):
         """Add a template filter."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add template filters '
                                'after application setup')
         self._template_filters[name] = callback
 
     def add_template_global(self, name, value, deferred=False):
         """Add a template global (or deferred factory function)."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add template filters '
                                'after application setup')
         if deferred:
@@ -697,14 +663,14 @@ class TextPress(object):
         """Add a new template searchpath to the application.
         This searchpath is queried *after* the themes but
         *before* the builtin templates are looked up."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add template filters '
                                'after application setup')
         self._template_searchpath.append(path)
 
     def add_api(self, name, preferred, callback, blog_id=1):
         """Add a new API to the blog."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add template filters '
                                'after application setup')
         endpoint = 'services/' + name
@@ -718,7 +684,7 @@ class TextPress(object):
         pingbacks.  The second parameter must be the callback function
         called on pingbacks.
         """
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add pingbackable endpoints '
                                'after application setup')
         self.pingback_endpoints[endpoint] = callback
@@ -733,7 +699,7 @@ class TextPress(object):
         The metadata can be ommited but in that case some information in
         the admin panel is not available.
         """
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add themes after application setup')
         self.themes[name] = Theme(self, name, template_path, metadata)
 
@@ -743,7 +709,7 @@ class TextPress(object):
         creates an url rule for <name>/shared that takes a filename
         parameter.
         """
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add middlewares after '
                                'application setup')
         self._shared_exports['/_shared/' + name] = path
@@ -752,7 +718,7 @@ class TextPress(object):
 
     def add_middleware(self, middleware_factory, *args, **kwargs):
         """Add a middleware to the application."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add middlewares after '
                                'application setup')
         self.dispatch_request = middleware_factory(self.dispatch_request,
@@ -760,33 +726,33 @@ class TextPress(object):
 
     def add_config_var(self, key, type, default):
         """Add a configuration variable to the application."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add configuration values after '
                                'application setup')
         self.cfg.config_vars[key] = (type, default)
 
     def add_database_integrity_check(self, callback):
         """Allows plugins to perform database upgrades."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add database integrity checks '
                                'after application setup')
         self._database_checks.append(callback)
 
     def add_url_rule(self, *args, **kwargs):
         """Add a new URL rule to the url map."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add url rule after application setup')
         self._url_rules.append(routing.Rule(*args, **kwargs))
 
     def add_view(self, endpoint, callback):
         """Add a callback as view."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add view after application setup')
         self.views[endpoint] = callback
 
     def add_parser(self, name, class_):
         """Add a new parser class."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add parser after application setup')
         self.parsers[name] = class_
 
@@ -797,13 +763,13 @@ class TextPress(object):
 
     def add_widget(self, widget):
         """Add a widget."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add widget after application setup')
         self.widgets[widget.NAME] = widget
 
     def add_servicepoint(self, identifier, callback):
         """Add a new function as servicepoint."""
-        if self.initialized is not None:
+        if self.initialized:
             raise RuntimeError('cannot add servicepoint after application setup')
         self._services[identifier] = callback
 
@@ -899,6 +865,8 @@ class TextPress(object):
                 response = result
                 break
 
+        # update the session cookie at the request end if the
+        # session data requires an update.
         if request.session.should_save:
             cookie_name = self.cfg['session_cookie_name']
             if request.session.get('pmt'):
@@ -914,49 +882,101 @@ class TextPress(object):
     def __call__(self, environ, start_response):
         """Make the application object a WSGI application."""
         return ClosingIterator(self.dispatch_request(environ, start_response),
-                               [local_manager.cleanup, cleanup_session])
+                               [local_manager.cleanup, cleanup_session,
+                                self.cfg.flush])
 
 
-def get_dispatcher(instance_folder):
+class StaticDispatcher(object):
     """
-    Pass it the path to the instance folder and it will return a WSGI
-    application for that instance.  This WSGI applicaiton will be either
-    a `TextPress` object or, if the instance is not yet existing, a
-    function that initializes the textpress instance.  Keep in mind that
-    you can't have more than one application in the same python interpreter
-    for the same instance folder.  A second call for this function with
-    the same instance folder will return the same application.
+    Dispatches to textpress or the websetup and handles reloads.  Don't
+    create instances of this object on your own, use the `make_app`
+    factory function.
     """
-    instance_folder = path.realpath(instance_folder)
-    _instance_lock.acquire()
-    try:
-        application = _instances.get(instance_folder)
-        if application and not application.wants_reload:
-            return application
-        elif application:
-            del _instances[instance_folder]
+
+    def __init__(self, instance_folder):
+        self.instance_folder = instance_folder
+        self.application = None
+        self.reload_lock = allocate_lock()
+
+    def get_handler(self):
+        # we have an application and that application has no changed config
+        if self.application and not self.application.wants_reload:
+            return self.application
+
+        # otherwise we have no up to date application, reload
+        self.reload_lock.acquire()
         try:
-            application = make_textpress(instance_folder)
-        except InstanceNotInitialized:
-            from textpress.websetup import WebSetup
-            application = WebSetup(instance_folder)
+            # it could be that we waited for the lock to come free and
+            # a different request reloaded the application for us.  check
+            # here for that a second time.
+            if self.application and not self.application.wants_reload:
+                return self.application
+
+            # now try to setup the application.  it the setup does not
+            # work because the instance is not initialized we hook the
+            # websetup in.
+            try:
+                self.application = make_textpress(self.instance_folder)
+            except InstanceNotInitialized:
+                from textpress.websetup import WebSetup
+                return WebSetup(self.instance_folder)
+        finally:
+            self.reload_lock.release()
+
+        # if we reach that point we have a valid application from the
+        # reloading process which we can return
+        return self.application
+
+    def __call__(self, environ, start_response):
+        return self.get_handler()(environ, start_response)
+
+
+class DynamicDispatcher(object):
+    """
+    A dispatcher that creates applications on the fly from values of the
+    WSGI environment.  This means that the first request to a not yet
+    existing application will create it.  Don't use this object on your
+    own, always use the `make_app` factory function.
+    """
+
+    def __init__(self):
+        self.dispatchers = {}
+
+    def __call__(self, environ, start_response):
+        instance_folder = path.realpath(environ['textpress.instance_folder'])
+        if instance_folder not in self.dispatchers:
+            dispatcher = StaticDispatcher(instance_folder)
+            self.dispatchers[instance_folder] = dispatcher
         else:
-            _instances[instance_folder] = application
-        return application
-    finally:
-        _instance_lock.release()
+            dispatcher = self.dispatchers[instance_folder]
+        return dispatcher(environ, start_response)
 
 
 def make_app(instance_folder=None):
     """
-    Return WSGI application for a given instance folder.  If no instance
-    folder is given the instance folder is loaded from the WSGI environment,
-    from the `textpress.instance_folder` key.
+    This function creates a WSGI application for TextPress.   Even though the
+    central TextPress object implements the WSGI protocol we don't forward it
+    to the webserver directly because it's reloaded under some circumstances
+    by the dispatchers that wrap it.  These dispatchers also handle requests
+    to the websetup if the instance does not exist by now.
+
+    The return value of this function is guaranteed to be a WSGI application
+    but you should not do instance checks or any other operations to ensure
+    that the return value is of a given type.
+
+    If the `instance_folder` is provided a simple dispatcher is returned that
+    manages the TextPress application for this instance.  If you don't provide
+    one the return value will be a dynamic dispatcher that can handle multiple
+    TextPress instances.  The textpress instance for one request is specified
+    in the WSGI environ in the 'textpress.instance' key.
+
+    If you need a `TextPress` object for scripts or other situations you
+    should use the `make_textpress` function that returns a `TextPress`
+    object instead.
     """
-    def application(environ, start_response):
-        path = instance_folder or environ['textpress.instance_folder']
-        return get_dispatcher(path)(environ, start_response)
-    return application
+    if instance_folder is None:
+        return DynamicDispatcher()
+    return StaticDispatcher(path.realpath(instance_folder))
 
 
 def make_textpress(instance_folder, bind_to_thread=False):
@@ -965,9 +985,10 @@ def make_textpress(instance_folder, bind_to_thread=False):
     create an application because the process of setting the application up
     requires locking which *only* happens in `make_textpress`.
 
-    If bind_to_thread is true the application will be set for this thread.
-    For WSGI applications use the `make_app` or `get_dispatcher` functions
-    which return proper WSGI applications all the time.
+    If bind_to_thread is True the application will be set for this thread.
+    Don't use the application object returned as WSGI application beside for
+    scripting / testing or if you know what you're doing.  The `TextPress`
+    object alone does not handle any reloading or setup.
     """
     _setup_lock.acquire()
     try:

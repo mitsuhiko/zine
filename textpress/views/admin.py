@@ -32,6 +32,8 @@ from textpress.utils import parse_datetime, format_datetime, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
 from textpress.widgets import WidgetManager
 from textpress.pluginsystem import install_package, InstallationError
+from textpress.pingback import pingback, PingbackError
+from urlparse import urlparse
 from werkzeug import escape
 from werkzeug.exceptions import NotFound
 
@@ -275,6 +277,9 @@ def do_edit_post(request, post_id=None):
             parser=request.app.cfg['default_parser']
         )
 
+    # tick the "ping urls from text" checkbox if either we have a
+    # new post or we edit an old post and the parser is available
+    form['ping_from_text'] = not post or not post.parser_missing
 
     # handle incoming data and create/update the post
     if request.method == 'POST':
@@ -301,8 +306,9 @@ def do_edit_post(request, post_id=None):
                 raise ValueError()
         except (TypeError, ValueError, KeyError):
             errors.append(_('Invalid post status'))
-        form['comments_enabled'] = bool(request.form.get('comments_enabled'))
-        form['pings_enabled'] = bool(request.form.get('pings_enabled'))
+        form['comments_enabled'] = 'comments_enabled' in request.form
+        form['pings_enabled'] = 'pings_enabled' in request.form
+        form['ping_from_text'] = 'ping_from_text' in request.form
         form['parser'] = parser = request.form.get('parser')
         if missing_parser and parser == post.parser:
             if old_texts != (intro, body):
@@ -311,7 +317,7 @@ def do_edit_post(request, post_id=None):
             else:
                 keep_post_texts = True
         elif parser not in request.app.parsers:
-            errors.append(_('Unknown parser "%s".') % parser)
+            errors.append(_(u'Unknown parser “%s”.') % parser)
         try:
             pub_date = parse_datetime(request.form.get('pub_date') or 'now')
         except ValueError:
@@ -377,6 +383,37 @@ def do_edit_post(request, post_id=None):
                 escape(url_for(post)),
                 escape(post.title)
             )
+
+            # do automatic pingbacking if we can get all the links
+            # by parsing the post, that is wanted and the post is
+            # published.
+            if form['ping_from_text']:
+                if not post.is_published:
+                    flash(_('No URLs pinged so far because the post is not '
+                            'publicly available'))
+                elif post.parser_missing:
+                    flash(_('Could not ping URLs because the parser for the '
+                            'post is not available any longer.'), 'error')
+                else:
+                    this_url = url_for(post, _external=True)
+                    for url in post.find_urls():
+                        host = urlparse(url)[1].decode('utf-8', 'ignore')
+                        html_url = '<a href="%s">%s</a>' % (
+                            escape(url, True),
+                            escape(host)
+                        )
+                        try:
+                            pingback(this_url, url)
+                        except PingbackError, e:
+                            if not e.ignore_silently:
+                                flash(_('Could not ping %s: %s') % (
+                                    html_url,
+                                    e.description
+                                ), 'error')
+                        else:
+                            flash(_('%s was pinged successfully.') %
+                                    html_url)
+
             if new_post:
                 flash(_('The post %s was created successfully.') %
                       html_post_detail, 'add')
@@ -613,8 +650,8 @@ def do_delete_comment(request, comment_id):
         if request.form.get('cancel'):
             return redirect('admin/edit_comment', comment_id=comment.comment_id)
         elif request.form.get('confirm'):
-            return redirect.add_invalid('admin/edit_comment',
-                                        comment_id=comment.comment_id)
+            redirect.add_invalid('admin/edit_comment',
+                                 comment_id=comment.comment_id)
             db.delete(comment)
             flash(_('Comment by %s deleted successfully.' %
                     escape(comment.author)), 'remove')
@@ -1051,8 +1088,6 @@ def do_basic_options(request):
             if maintenance_mode != cfg['maintenance_mode']:
                 cfg['maintenance_mode'] = maintenance_mode
             flash(_('Configuration altered successfully.'), 'configure')
-            if not request.is_run_once:
-                request.app.request_reload()
             return simple_redirect('admin/basic_options')
 
         for error in errors:
@@ -1208,15 +1243,8 @@ def do_plugins(request):
     Load and unload plugins and reload TextPress if required.
     """
     csrf_protector = CSRFProtector()
-    want_reload = False
     if request.method == 'POST':
         csrf_protector.assert_safe()
-
-        if request.form.get('trigger_reload'):
-            flash(_('Plugins reloaded successfully.'))
-            want_reload = True
-        else:
-            want_reload = False
 
         if request.form.get('enable_guard'):
             request.app.cfg['plugin_guard'] = True
@@ -1230,12 +1258,10 @@ def do_plugins(request):
             active = request.form.get('plugin_' + name) == 'yes'
             if active and not plugin.active:
                 plugin.activate()
-                want_reload = True
                 flash(_('Plugin "%s" activated.') % plugin.html_display_name,
                       'configure')
             elif not active and plugin.active:
                 plugin.deactivate()
-                want_reload = True
                 flash(_('Plugin "%s" deactivated.') %
                       plugin.html_display_name, 'configure')
             else:
@@ -1268,14 +1294,11 @@ def do_plugins(request):
                         'enable it in the plugin list.') %
                       plugin.html_display_name, 'add')
 
-        if not request.is_run_once:
-            request.app.request_reload()
         return simple_redirect('admin/plugins')
 
     return render_admin_response('admin/plugins.html', 'options.plugins',
         plugins=sorted(request.app.plugins.values(), key=lambda x: x.name),
         csrf_protector=csrf_protector,
-        show_reload_button=not request.is_run_once,
         guard_enabled=request.app.cfg['plugin_guard']
     )
 
@@ -1331,22 +1354,20 @@ def do_configuration(request):
         else:
             already_default = set()
             for key, value in request.form.iteritems():
-                key = key.replace('____', '/')
+                key = key.replace('.', '/')
                 if key.endswith('__DEFAULT'):
                     key = key[:-9]
                     request.app.cfg.revert_to_default(key)
                     already_default.add(key)
                 elif key in request.app.cfg and key not in already_default:
                     request.app.cfg.set_from_string(key, value)
-        if not request.is_run_once:
-            request.app.request_reload()
         return simple_redirect('admin/configuration')
 
-    # html does not allow slashes.  Convert them to four underscores
+    # html does not allow slashes.  Convert them to dots
     categories = []
     for category in request.app.cfg.get_detail_list():
         for item in category['items']:
-            item['key'] = item['key'].replace('/', '____')
+            item['key'] = item['key'].replace('/', '.')
         categories.append(category)
 
     return render_admin_response('admin/configuration.html',

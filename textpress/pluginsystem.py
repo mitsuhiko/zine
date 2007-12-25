@@ -49,7 +49,6 @@ from base64 import b64encode
 import textpress
 from urllib import quote, urlencode, FancyURLopener
 from textpress.application import get_application
-from textpress.database import plugins, db
 from textpress.utils import split_email
 from werkzeug import cached_property, escape
 
@@ -61,9 +60,10 @@ PACKAGE_VERSION = 1
 def find_plugins(app):
     """Return an iterator over all plugins available."""
     enabled_plugins = set()
-    for row in app.database_engine.execute(plugins.select()):
-        if row.active:
-            enabled_plugins.add(row.name)
+    for plugin in app.cfg['plugins'].split(','):
+        plugin = plugin.strip()
+        if plugin:
+            enabled_plugins.add(plugin)
 
     for folder in app.plugin_searchpath + [BUILTIN_PLUGIN_FOLDER]:
         if not path.exists(folder):
@@ -132,6 +132,7 @@ def install_package(app, package):
 
     plugin = Plugin(app, plugin_name, plugin_path, False)
     app.plugins[plugin_name] = plugin
+    app.cfg.touch()
     return plugin
 
 
@@ -244,35 +245,15 @@ class Plugin(object):
 
     def activate(self):
         """Activate the plugin."""
-        def do(con):
-            result = con.execute(db.select([plugins.c.active],
-                                           plugins.c.name == self.name))
-            row = result.fetchone()
-            if row is not None:
-                if row.active:
-                    return
-                con.execute(plugins.update(plugins.c.name == self.name),
-                            active=True)
-            else:
-                con.execute(plugins.insert(), name=self.name, active=True)
-            self.active = True
-        self.app.database_engine.transaction(do)
+        plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
+        plugins.add(self.name)
+        self.app.cfg['plugins'] = ', '.join(x for x in sorted(plugins) if x)
 
     def deactivate(self):
         """Deactivate this plugin."""
-        def do(con):
-            result = con.execute(db.select([plugins.c.active],
-                                           plugins.c.name == self.name))
-            row = result.fetchone()
-            if row is not None:
-                if not row.active:
-                    return
-                con.execute(plugins.update(plugins.c.name == self.name),
-                            active=False)
-            else:
-                con.execute(plugins.insert(), name=self.name, active=False)
-            self.active = False
-        self.app.database_engine.transaction(do)
+        plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
+        plugins.discard(self.name)
+        self.app.cfg['plugins'] = ', '.join(x for x in sorted(plugins) if x)
 
     def remove(self):
         """Remove the plugin from the instance folder."""

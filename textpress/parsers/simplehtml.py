@@ -70,7 +70,7 @@ class HTMLParser(BaseParser):
         self.nestable_inline_tags = set(['span', 'font', 'q', 'object', 'bdo',
                                          'sub', 'sup', 'center', 'small'])
         self.paragraph_tags = self.nestable_inline_tags | set([
-            'br', 'img', 'are', 'input', 'textarea', 'em', 'strong', 'b', 'i',
+            'br', 'img', 'a', 'input', 'textarea', 'em', 'strong', 'b', 'i',
             'cite', 'dfn', 'code', 'samp', 'kbd', 'var', 'abbr', 'acronym',
             'big', 'small', 'tt', 'var'
         ])
@@ -195,6 +195,7 @@ class AutoParagraphHTMLParser(SimpleHTMLParser):
                                 new_node = Node('p')
                                 new_node.children.extend(paragraph)
                                 parent.children.append(new_node)
+                                break
         rewrite(tree)
 
         return tree

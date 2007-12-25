@@ -1,11 +1,13 @@
 {% macro render_comment(comment, add_reply_link=false) %}
   {%- if comment.visible %}
-    <div class="comment{% if comment.blocked %} blocked{% endif
-      %}" id="comment-{{ comment.comment_id }}">
+    <div class="comment{% if comment.is_pingback %} pingback{% endif %}{%
+      if comment.blocked %} blocked{% endif %}" id="comment-{{ comment.comment_id }}">
       <div class="text">{{ comment.body }}</div>
-      <p class="meta">Comment by {% if comment.www %}<a href="{{ comment.www|e
-        }}">{{ comment.author|e }}</a>{% else %}{{ comment.author|e
-        }}{% endif %} &mdash; {{ comment.pub_date|datetimeformat }} |
+      <p class="meta">{% if comment.is_pingback %}{% trans "Pingback by"
+        %}{% else %}{% trans "Comment by" %}{% endif %} {% if comment.www
+        %}<a href="{{ comment.www|e }}">{{ comment.author|e }}</a>{%
+        else %}{{ comment.author|e }}{% endif %} &mdash; {{
+        comment.pub_date|datetimeformat }} |
         <a href="#comment-{{ comment.comment_id }}">#</a>
       {%- if add_reply_link %}
         - <a href="javascript:TextPress.replyToComment({{ comment.comment_id

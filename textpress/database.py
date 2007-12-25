@@ -297,16 +297,6 @@ cleanup_session = session.remove
 metadata = db.MetaData()
 
 
-configuration = db.Table('configuration', metadata,
-    db.Column('key', db.Unicode(100), primary_key=True),
-    db.Column('value', db.Unicode)
-)
-
-plugins = db.Table('plugins', metadata,
-    db.Column('name', db.Unicode(200), primary_key=True),
-    db.Column('active', db.Boolean, nullable=False)
-)
-
 users = db.Table('users', metadata,
     db.Column('user_id', db.Integer, primary_key=True),
     db.Column('username', db.Unicode(30)),
