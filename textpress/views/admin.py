@@ -1038,9 +1038,9 @@ def do_basic_options(request):
         form['session_cookie_name'] = session_cookie_name = \
             request.form.get('session_cookie_name')
         form['comments_enabled'] = comments_enabled = \
-            request.form.get('comments_enabled') == 'yes'
+            'comments_enabled' in request.form
         form['pings_enabled'] = pings_enabled = \
-            request.form.get('pings_enabled') == 'yes'
+            'pings_enabled' in request.form
         form['default_parser'] = default_parser = \
             request.form.get('default_parser')
         if default_parser not in request.app.parsers:
@@ -1057,9 +1057,9 @@ def do_basic_options(request):
         except ValueError:
             errors.append(_('Posts per page must be a valid integer'))
         form['use_flat_comments'] = use_flat_comments = \
-            request.form.get('use_flat_comments') == 'yes'
+            'use_flat_comments' in request.form
         form['maintenance_mode'] = maintenance_mode = \
-            request.form.get('maintenance_mode') == 'yes'
+            'maintenance_mode' in request.form
         if not errors:
             if blog_title != cfg['blog_title']:
                 cfg['blog_title'] = blog_title
@@ -1255,7 +1255,7 @@ def do_plugins(request):
             flash(_('Plugin guard disabled successfully.'))
 
         for name, plugin in request.app.plugins.iteritems():
-            active = request.form.get('plugin_' + name) == 'yes'
+            active = 'plugin_' + name in request.form
             if active and not plugin.active:
                 plugin.activate()
                 flash(_('Plugin "%s" activated.') % plugin.html_display_name,

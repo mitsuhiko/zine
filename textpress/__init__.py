@@ -58,3 +58,4 @@ from textpress.application import make_app, make_textpress
 
 
 __version__ = '0.1 alpha'
+__url__ = 'http://textpress.pocoo.org/'

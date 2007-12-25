@@ -41,7 +41,7 @@ DEFAULT_VARS = {
     'default_parser':       (unicode, u'default'),
     'comment_parser':       (unicode, u'comment'),
 
-    # comments and traceback defaults
+    # comments and pingback
     'comments_enabled':     (bool, True),
     'pings_enabled':        (bool, True),
 
@@ -145,6 +145,7 @@ class Configuration(object):
         f = file(self.filename)
         try:
             for line in f:
+                line = line.strip()
                 if not line or line[0] in '#;':
                     continue
                 elif line[0] == '[' and line[-1] == ']':

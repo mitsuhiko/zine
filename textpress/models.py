@@ -13,7 +13,7 @@ from datetime import date, datetime, timedelta
 
 from textpress.database import users, tags, posts, post_tags, comments, db
 from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug
-from textpress.application import get_application, get_request
+from textpress.application import get_application, get_request, url_for
 
 
 #: user rules
@@ -290,7 +290,8 @@ class PostManager(db.DatabaseManager):
         # send the query
         q = db.and_(*conditions)
         offset = per_page * (page - 1)
-        postlist = Post.objects.filter(q)[offset:offset + per_page]
+        postlist = Post.objects.filter(q).order_by(Post.pub_date.desc()) \
+                               .offset(offset).limit(per_page)
         pagination = Pagination(endpoint, page, per_page,
                                 Post.objects.filter(q).count(), url_args)
 
@@ -460,6 +461,16 @@ class Post(object):
         if req.user.role >= ROLE_AUTHOR:
             return len(self.comments)
         return len([x for x in self.comments if not x.blocked])
+
+    @property
+    def comment_feed_url(self):
+        """The link to the comment feed."""
+        return url_for('blog/atom_feed',
+            year=self.pub_date.year,
+            month=self.pub_date.month,
+            day=self.pub_date.day,
+            post_slug=self.slug
+        )
 
     @property
     def is_draft(self):

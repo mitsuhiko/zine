@@ -57,7 +57,7 @@ def textarea(name, value='', cols=50, rows=10, **attr):
     return _generate_tag('textarea', attr, value)
 
 
-def checkbox(name, value='yes', checked=False, **attr):
+def checkbox(name, checked=False, value='yes', **attr):
     """Render a checkbox."""
     attr.update(type='checkbox', name=name, value=value)
     if checked:

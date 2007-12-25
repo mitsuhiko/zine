@@ -12,7 +12,7 @@
 from textpress.api import *
 from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
-     dump_json, dump_xml
+     dump_json, dump_xml, build_tag_uri
 from textpress import pingback
 from textpress.feedbuilder import AtomFeed
 from werkzeug.exceptions import NotFound, Forbidden
@@ -272,6 +272,9 @@ def do_show_post(request, year, month, day, slug):
             emit_event('after-comment-saved', request, comment, buffered=True)
             return redirect(url_for(post))
 
+    add_link('alternate', post.comment_feed_url, 'application/atom+xml',
+             _('Comments Feed'))
+
     return render_response('show_post.html',
         post=post,
         form=form,
@@ -344,15 +347,45 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
 
     :URL endpoint: ``blog/atom_feed``
     """
-    if post_slug is not None:
-        return Response('Not implemented', mimetype='text/plain')
+    feed = AtomFeed(request.app.cfg['blog_title'], url=request.url,
+                    subtitle=request.app.cfg['blog_tagline'])
 
-    blog_link = url_for('blog/index', _external=True)
-    postlist = Post.objects.get_list(year, month, day, tag, author)
-    feed = AtomFeed(_('Posts'), _('give me a description'), blog_link)
+    # if no post slug is given we filter the posts by the cretereons
+    # provided and pass them to the feed builder
+    if post_slug is None:
+        for post in Post.objects.get_list(year, month, day, tag, author):
+            uid = build_tag_uri(request.app, post.pub_date, 'post',
+                                post.post_id)
+            feed.add(post.title, unicode(post.body), content_type='html',
+                     author=post.author.display_name,
+                     url=url_for(post, _external=True), id=uid,
+                     updated=post.last_update, published=post.pub_date)
 
-    for post in postlist['posts']:
-        feed.add_item(post.title, post.author.display_name, url_for(post,
-                      _external=True), post.body, post.pub_date)
+    # otherwise we create a feed for all the comments of a post.
+    else:
+        post = Post.objects.get_by_timestamp_and_slug(year, month, day,
+                                                      post_slug)
+        if post is None:
+            raise NotFound()
+        elif not post.can_access():
+            raise Forbidden()
 
-    return feed.generate_response()
+        comment_num = 1
+        for comment in post.comments:
+            if not comment.visible:
+                continue
+            uid = build_tag_uri(request.app, comment.pub_date, 'comment',
+                                comment.comment_id)
+            title = _('Comment %(num)d on %(post)s') % {
+                'num':  comment_num,
+                'post': post.title
+            }
+            author = {'name': comment.author}
+            if comment.www:
+                author['uri'] = comment.www
+            feed.add(title, unicode(comment.body), content_type='html',
+                     author=author, url=url_for(comment, _external=True),
+                     id=uid, updated=comment.pub_date)
+            comment_num += 1
+
+    return feed.get_response()

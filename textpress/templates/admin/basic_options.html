@@ -27,11 +27,14 @@
       <dt>{% trans "Cookie Name" %}</dt>
       <dd>{{ h.input_field('session_cookie_name', form.session_cookie_name, size="20") }}</dd>
       <dt>{% trans "Comments Enabled" %}</dt>
-      <dd>{{ h.checkbox('comments_enabled', 'yes', form.comments_enabled) }}
+      <dd>{{ h.checkbox('comments_enabled', form.comments_enabled) }}
           <label for="comments_enabled">{% trans "enable comments per default" %}</label></dd>
       <dt>{% trans "Pingbacks Enabled" %}</dt>
-      <dd>{{ h.checkbox('pings_enabled', 'yes', form.pings_enabled) }}
+      <dd>{{ h.checkbox('pings_enabled', form.pings_enabled) }}
           <label for="pings_enabled">{% trans "enable pingbacks per default" %}</label></dd>
+      <dt>{% trans "Use Flat Comments" %}</dt>
+      <dd>{{ h.checkbox('use_flat_comments', form.use_flat_comments) }}
+          <label for="pings_enabled">{% trans "use flat comments" %}</label></dd>
       <dt>{% trans "Default Parser" %}</dt>
       <dd><select name="default_parser">
       {%- for parser_id, name in parsers %}
@@ -49,7 +52,7 @@
       <dt>{% trans "Posts Per Page" %}</dt>
       <dd>{{ h.input_field('posts_per_page', form.posts_per_page) }}</dd>
       <dt>{% trans "Maintenance Mode" %}</dt>
-      <dd>{{ h.checkbox('maintenance_mode', 'yes', form.maintenance_mode) }}
+      <dd>{{ h.checkbox('maintenance_mode', form.maintenance_mode) }}
           <label for="maintenance_mode">{% trans "enable maintenance mode" %}</label></dd>
     </dl>
     <div class="actions">

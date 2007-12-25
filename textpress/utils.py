@@ -393,6 +393,20 @@ def is_valid_ip(value):
     return idx == 3
 
 
+def build_tag_uri(app, date, resource, identifier):
+    """Build a unique tag URI for this blog."""
+    host, path = urlparse(app.cfg['blog_url'])[1:3]
+    if ':' in host:
+        host = host.split(':', 1)[0]
+    path = path.strip('/')
+    if path:
+        path = ',' + path
+    if not isinstance(identifier, basestring):
+        identifier = str(identifier)
+    return 'tag:%s,%s%s/%s:%s' % (host, date.strftime('%Y-%m-%d'), path,
+                                  url_quote(resource), url_quote(identifier))
+
+
 def parse_iso8601(value):
     """
     Parse an iso8601 date into a datetime object.

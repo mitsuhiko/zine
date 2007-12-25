@@ -29,7 +29,7 @@
               }}">{% trans "Remove plugin" %}</a>]
           {% endif -%}
         </td>
-        <td class="active">{{ h.checkbox('plugin_' + plugin.name, 'yes', plugin.active) }}
+        <td class="active">{{ h.checkbox('plugin_' + plugin.name, plugin.active) }}
             <label for="plugin_{{ plugin.name }}"></label></td>
       </tr>
     {%- endfor %}

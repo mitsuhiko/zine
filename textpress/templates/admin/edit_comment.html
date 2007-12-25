@@ -41,7 +41,7 @@
     </fieldset>
     <fieldset>
       <legend>{% trans "Block Comment" %}</legend>
-      {{ h.checkbox('blocked', 'yes', form.blocked) }}
+      {{ h.checkbox('blocked', form.blocked) }}
       {% if comment.blocked %}
         <label for="blocked">{% trans reason=comment.blocked_msg|e
           %}block comment ({{ reason }}){% endtrans %}</label>

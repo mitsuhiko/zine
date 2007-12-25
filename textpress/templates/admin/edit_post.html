@@ -36,7 +36,7 @@
       <input type="submit" value="{% trans 'Add' %}">
       <ul>
       {%- for tag in tags %}
-        <li>{{ h.checkbox('tags', tag.slug, tag.slug in form.tags,
+        <li>{{ h.checkbox('tags', tag.slug in form.tags, tag.slug,
                id='tags_' + tag.slug) }} <label for="tags_{{
           tag.slug }}">{{ tag.name|e }}</label></li>
       {%- else %}
@@ -66,11 +66,11 @@
     <fieldset>
       <legend>{% trans "Discussion" %}</legend>
       <ul>
-        <li>{{ h.checkbox('comments_enabled', checked=form.comments_enabled)
+        <li>{{ h.checkbox('comments_enabled', form.comments_enabled)
           }} <label for="comments_enabled">{% trans "Allow comments" %}</label></li>
-        <li>{{ h.checkbox('pings_enabled', checked=form.pings_enabled)
+        <li>{{ h.checkbox('pings_enabled', form.pings_enabled)
           }} <label for="pings_enabled">{% trans "Allow pings" %}</label></li>
-        <li>{{ h.checkbox('ping_from_text', checked=form.ping_from_text)
+        <li>{{ h.checkbox('ping_from_text', form.ping_from_text)
           }} <label for="ping_from_text">{% trans "Ping all URLs in the text" %}</label></li>
       </ul>
     </fieldset>
