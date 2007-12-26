@@ -57,8 +57,8 @@ class User(object):
     objects = UserManager()
     is_somebody = True
 
-    def __init__(self, username, password, email, first_name='',
-                 last_name='', description='', role=ROLE_SUBSCRIBER):
+    def __init__(self, username, password, email, first_name=u'',
+                 last_name=u'', description=u'', role=ROLE_SUBSCRIBER):
         self.username = username
         self.set_password(password)
         self.email = email
@@ -66,7 +66,7 @@ class User(object):
         self.last_name = last_name
         self.description = description
         self.extra = {}
-        self.display_name = '$nick'
+        self.display_name = u'$nick'
         self.role = role
 
     @property
