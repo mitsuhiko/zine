@@ -519,7 +519,7 @@ else:
 def build_eventmap(app):
     """
     Walk through all the builtins and plugins for an application and
-    look for emit_event() calls. This is useful for plugin developers that
+    look for `emit_event` calls. This is useful for plugin developers that
     want to find possible entry points without having to dig the source or
     missing documentation. Speaking of documentation: This could help for
     that too.
@@ -539,7 +539,7 @@ def build_eventmap(app):
     def walk_ast(ast):
         if isinstance(ast, _ast.Call) and \
            isinstance(ast.func, _ast.Name) and \
-           ast.func.id == 'emit_event' and \
+           ast.func.id in ('emit_event', 'iter_listeners') and \
            ast.args and \
            isinstance(ast.args[0], _ast.Str):
             yield ast.args[0].s, ast.func.lineno

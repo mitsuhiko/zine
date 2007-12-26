@@ -70,7 +70,7 @@ def add_config_link(req, navigation_bar):
     if req.user.role >= ROLE_ADMIN:
         for link_id, url, title, children in navigation_bar:
             if link_id == 'options':
-                children.insert(1, ('typography',
+                children.insert(2, ('typography',
                                     url_for('typography/config'),
                                     _('Typography')))
 
@@ -104,7 +104,7 @@ def show_config(req):
 def setup(app, plugin):
     app.connect_event('process-doc-tree', process_doc_tree)
     app.connect_event('modify-admin-navigation-bar', add_config_link)
-    app.add_url_rule('/admin/options/typography',
+    app.add_url_rule('/options/typography', prefix='admin',
                      endpoint='typography/config')
     app.add_view('typography/config', show_config)
     app.add_template_searchpath(TEMPLATES)

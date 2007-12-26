@@ -41,10 +41,10 @@ class AtomFeed(object):
             the type attribute for the title element. One of html, text,
             xhtml. Default is text.
           url
-            the url for the feed.
+            the url for the feed (not the url *of* the feed)
           id
             a globally unique id for the feed. Must be an URI. If not present
-            the URL is used, but one of both is required.
+            the `feed_url` is used, but one of both is required.
           updated
             the time the feed was modified the last time. Must be a `datetime`
             object. If not present the latest entry's `updated` is used.
@@ -72,7 +72,7 @@ class AtomFeed(object):
             xhtml. Default is text.
           links
             additional links. Must be a list of dictionaries with href
-            (required)  and rel, type, hreflang, title, length (all optional)
+            (required) and rel, type, hreflang, title, length (all optional)
           generator
             the software that generated this feed.  defaults to something like
             ``('TextPress 1.0', 'http://textpress.pocoo.org/', 1.0)``.  Any of
@@ -89,9 +89,9 @@ class AtomFeed(object):
         self.title = title
         self.title_type = kwargs.get('title_type')
         self.url = kwargs.get('url')
-        self.id = kwargs.get('id', self.url)
-        self.updated = kwargs.get('updated')
         self.feed_url = kwargs.get('feed_url', self.url)
+        self.id = kwargs.get('id', self.feed_url)
+        self.updated = kwargs.get('updated')
         self.author = kwargs.get('author', ())
         self.icon = kwargs.get('icon')
         self.logo = kwargs.get('logo')

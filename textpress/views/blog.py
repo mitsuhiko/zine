@@ -264,12 +264,12 @@ def do_show_post(request, year, month, day, slug):
 
             #! use this event to block comments before they are saved.  This
             #! is useful for antispam and other ways of moderation.
-            emit_event('before-comment-saved', request, comment, buffered=True)
+            emit_event('before-comment-saved', request, comment)
             db.commit()
 
             #! this is sent directly after the comment was saved.  Useful if
             #! you want to send mail notifications or whatever.
-            emit_event('after-comment-saved', request, comment, buffered=True)
+            emit_event('after-comment-saved', request, comment)
             return redirect(url_for(post))
 
     add_link('alternate', post.comment_feed_url, 'application/atom+xml',
@@ -302,7 +302,8 @@ def do_json_service(request, identifier):
 
     #! if this event returns a handler it is called instead of the default
     #! handler.  Useful to intercept certain requests.
-    for rv in emit_event('before-json-service-called', identifier, handler):
+    for callback in iter_listeners('before-json-service-called'):
+        rv = callback(identifier, handler)
         if rv is not None:
             handler = rv
     result = handler(request)
@@ -311,8 +312,8 @@ def do_json_service(request, identifier):
     #! of the request method and the result object.  Note that events *have*
     #! to return an object, even if it's just changed in place, otherwise the
     #! return value will be `null` (None).
-    for result in emit_event('after-json-service-called', identifier, result):
-        pass
+    for callback in iter_listeners('after-json-service-called'):
+        result = callback(identifier, result)
     return Response(dump_json(result), mimetype='text/javascript')
 
 
@@ -326,7 +327,8 @@ def do_xml_service(request, identifier):
 
     #! if this event returns a handler it is called instead of the default
     #! handler.  Useful to intercept certain requests.
-    for rv in emit_event('before-xml-service-called', identifier, handler):
+    for callback in iter_listeners('before-xml-service-called'):
+        rv = callback(identifier, handler)
         if rv is not None:
             handler = rv
     result = handler(request)
@@ -335,8 +337,10 @@ def do_xml_service(request, identifier):
     #! of the request method and the result object.  Note that events *have*
     #! to return an object, even if it's just changed in place, otherwise the
     #! return value will be None.
-    for result in emit_event('after-xml-service-called', identifier, result):
-        pass
+    for callback in iter_listeners('after-xml-service-called'):
+        rv = callback(identifier, result)
+        if rv is not None:
+            result = rv
     return Response(dump_xml(result), mimetype='text/xml')
 
 
@@ -347,21 +351,20 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
 
     :URL endpoint: ``blog/atom_feed``
     """
-    feed = AtomFeed(request.app.cfg['blog_title'], url=request.url,
+    feed = AtomFeed(request.app.cfg['blog_title'], feed_url=request.url,
+                    url=request.app.cfg['blog_url'],
                     subtitle=request.app.cfg['blog_tagline'])
 
     # if no post slug is given we filter the posts by the cretereons
     # provided and pass them to the feed builder
     if post_slug is None:
-        post_list = Post.objects.get_list(year, month, day, tag, author,
-                                          per_page=10)
-        if post_list.pop('probably_404'):
-            raise NotFound()
-        for post in post_list['posts']:
+        for post in Post.objects.get_list(year, month, day, tag, author,
+                                          per_page=10, as_list=True):
             uid = build_tag_uri(request.app, post.pub_date, 'post',
                                 post.post_id)
+            links = [link.as_dict() for link in post.links]
             feed.add(post.title, unicode(post.body), content_type='html',
-                     author=post.author.display_name,
+                     author=post.author.display_name, links=links,
                      url=url_for(post, _external=True), id=uid,
                      updated=post.last_update, published=post.pub_date)
 

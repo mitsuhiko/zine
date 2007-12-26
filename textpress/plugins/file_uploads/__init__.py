@@ -289,11 +289,14 @@ def setup(app, plugin):
                        '*.plugin:application/x-textpress-plugin')
     app.add_config_var('file_uploads/im_path', unicode, '')
     app.connect_event('modify-admin-navigation-bar', add_links)
-    app.add_url_rule('/admin/uploads/', endpoint='file_uploads/browse'),
-    app.add_url_rule('/admin/uploads/new', endpoint='file_uploads/upload')
-    app.add_url_rule('/admin/uploads/thumbnailer',
+    app.add_url_rule('/uploads/', prefix='admin',
+                     endpoint='file_uploads/browse'),
+    app.add_url_rule('/uploads/new', prefix='admin',
+                     endpoint='file_uploads/upload')
+    app.add_url_rule('/uploads/thumbnailer', prefix='admin',
                      endpoint='file_uploads/thumbnailer')
-    app.add_url_rule('/admin/uploads/config', endpoint='file_uploads/config')
+    app.add_url_rule('/uploads/config', prefix='admin',
+                     endpoint='file_uploads/config')
     app.add_url_rule('/_uploads/<filename>', endpoint='file_uploads/get_file')
     app.add_url_rule('/_uploads/<filename>/delete',
                      endpoint='file_uploads/delete')

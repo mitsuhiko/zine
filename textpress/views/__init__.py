@@ -48,6 +48,7 @@ all_views = {
     'admin/delete_user':        admin.do_delete_user,
     'admin/options':            admin.do_options,
     'admin/basic_options':      admin.do_basic_options,
+    'admin/urls':               admin.do_urls,
     'admin/theme':              admin.do_theme,
     'admin/overlays':           admin.do_overlays,
     'admin/widgets':            admin.do_widgets,

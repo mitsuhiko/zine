@@ -24,9 +24,11 @@ from thread import allocate_lock
 from itertools import izip
 from datetime import datetime, timedelta
 from urlparse import urlparse
+from collections import deque
 
 from textpress.database import db, upgrade_database, cleanup_session
 from textpress.config import Configuration
+from textpress.cache import get_cache
 from textpress.utils import format_datetime, format_date, format_month, \
      ClosingIterator, check_external_url, local, local_manager
 
@@ -50,14 +52,6 @@ BUILTIN_TEMPLATE_PATH = path.join(path.dirname(__file__), 'templates')
 
 #: the lock for the application setup.
 _setup_lock = allocate_lock()
-
-#: because events are not application bound we keep them
-#: unique by sharing them. For better performance we don't
-#: lock the access to this variable, it's unlikely that
-#: two applications connect a new event in the same millisecond
-#: because connecting happens during application startup and
-#: there is a global application setup lock.
-_next_listener_id = 0
 
 
 def get_request():
@@ -101,13 +95,14 @@ def redirect(url, code=302, allow_external_redirect=False):
     return simple_redirect(url, code)
 
 
-def emit_event(event, *args, **kw):
-    """Emit an event and return a `EventResult` instance."""
-    buffered = kw.pop('buffered', False)
-    if kw:
-        raise TypeError('got invalid keyword argument %r' % iter(kw).next())
-    return EventResult(local.application._event_manager.
-                       emit(event, args), buffered)
+def emit_event(event, *args):
+    """Emit a event and return a `EventResult` instance."""
+    return [x(*args) for x in local.application._event_manager.iter(event)]
+
+
+def iter_listeners(event):
+    """Return an iterator for all the listeners for the event provided."""
+    return local.application._event_manager.iter(event)
 
 
 def add_link(rel, href, type, title=None, charset=None, media=None):
@@ -154,8 +149,7 @@ def render_template(template_name, _stream=False, **context):
     """
     #! called right before a template is rendered, the return value is
     #! ignored but the context can be modified in place.
-    emit_event('before-render-template', template_name, _stream, context,
-               buffered=True)
+    emit_event('before-render-template', template_name, _stream, context)
     tmpl = local.application.template_env.get_template(template_name)
     if _stream:
         return tmpl.stream(context)
@@ -236,7 +230,7 @@ class Request(BaseRequest):
             raise RuntimeError('User does not exist')
         self.user = user
         #! called after a user was logged in successfully
-        emit_event('after-user-login', user, buffered=True)
+        emit_event('after-user-login', user)
         self.session['uid'] = user.user_id
         if permanent:
             self.session['pmt'] = True
@@ -248,7 +242,7 @@ class Request(BaseRequest):
         self.user = User.objects.get_nobody()
         self.session.clear()
         #! called after a user was logged out and the session cleared.
-        emit_event('after-user-logout', user, buffered=True)
+        emit_event('after-user-logout', user)
 
 
 class Response(BaseResponse):
@@ -261,82 +255,51 @@ class Response(BaseResponse):
 
 class EventManager(object):
     """
-    Helper class that handles event listeners and events.
+    Helper class that handles event listeners and event emitting.
 
-    This is *not* a public interface. Always use the emit_event()
-    functions to access it or the connect_event() / disconnect_event()
-    functions on the application.
+    This is *not* a public interface. Always use the `emit_event` or
+    `iter_listeners` functions to access it or the `connect_event` or
+    `disconnect_event` methods on the application.
     """
 
     def __init__(self, app):
         self.app = app
         self._listeners = {}
+        self._last_listener = 0
 
-    def connect(self, event, callback):
-        global _next_listener_id
-        listener_id = _next_listener_id
+    def connect(self, event, callback, position='after'):
+        """Connect a callback to an event."""
+        assert position in ('before', 'after'), 'invalid position'
+        listener_id = self._last_listener
         event = intern(event)
         if event not in self._listeners:
-            self._listeners[event] = {listener_id: callback}
-        else:
-            self._listeners[event][listener_id] = callback
-        _next_listener_id += 1
+            self._listeners[event] = deque([callback])
+        elif position == 'after':
+            self._listeners[event].append(callback)
+        elif position == 'before':
+            self._listeners[event].appendleft(callback)
+        self._last_listener += 1
         return listener_id
 
     def remove(self, listener_id):
+        """Remove a callback again."""
         for event in self._listeners:
             event.pop(listener_id, None)
 
-    def emit(self, name, args):
-        if name in self._listeners:
-            for listener_id, cb in self._listeners[name].iteritems():
-                yield listener_id, cb(*args)
+    def iter(self, event):
+        """Return an iterator for all listeners of a given name."""
+        if event not in self._listeners:
+            return iter(())
+        return iter(self._listeners[event])
 
 
-class EventResult(object):
-    """Wraps a generator for the emit_event() function."""
+class Listener(object):
+    """
+    Wraps a listener for manual calling.
+    """
 
-    __slots__ = ('_participated_listeners', '_results', '_gen', 'buffered')
-
-    def __init__(self, gen, buffered):
-        if buffered:
-            items = list(gen)
-            self._participated_listeners = set(x[0] for x in items)
-            self._results = [x[1] for x in items]
-        else:
-            self._gen = gen
-        self.buffered = buffered
-
-    @property
-    def participated_listeners(self):
-        if not hasattr(self, '_participated_listeners'):
-            tuple(self)
-        return self._participated_listeners
-
-    @property
-    def results(self):
-        if not hasattr(self, '_results'):
-            tuple(self)
-        return self._results
-
-    def __iter__(self):
-        if self.buffered:
-            for item in self.results:
-                yield item
-        elif not hasattr(self, '_results'):
-            self._results = []
-            self._participated_listeners = []
-            for listener_id, result in self._gen:
-                self._results.append(result)
-                self._participated_listeners.append(listener_id)
-                yield result
-
-    def __repr__(self):
-        if self.buffered:
-            detail = '- buffered [%d participants]' % len(self.results)
-        else:
-            detail = '(dynamic)'
-        return '<EventResult %s>' % detail
+    def __init__(self, callback):
+        self._callback = callback
 
 
 class Theme(object):
@@ -525,6 +488,9 @@ class TextPress(object):
         self.database_engine = db.create_engine(self.cfg['database_uri'],
                                                 convert_unicode=True)
 
+        # now setup the cache system
+        self.cache = get_cache(self)
+
         # setup core package urls and shared stuff
         import textpress
         from textpress.api import _
@@ -595,7 +561,9 @@ class TextPress(object):
         )
 
         # copy the widgets into the global namespace
-        self._template_globals.update(self.widgets)
+        for name, widget in self.widgets.iteritems():
+            if not widget.INVISIBLE:
+                self._template_globals[name] = widget
 
         # set up plugin template extensions
         env.globals.update(self._template_globals)
@@ -730,6 +698,8 @@ class TextPress(object):
         if self.initialized:
             raise RuntimeError('cannot add configuration values after '
                                'application setup')
+        elif key.count('/') > 1:
+            raise ValueError('key might not have more than one slash')
         self.cfg.config_vars[key] = (type, default)
 
     def add_database_integrity_check(self, callback):
@@ -739,11 +709,23 @@ class TextPress(object):
                                'after application setup')
         self._database_checks.append(callback)
 
-    def add_url_rule(self, *args, **kwargs):
-        """Add a new URL rule to the url map."""
+    def add_url_rule(self, rule, **kwargs):
+        """
+        Add a new URL rule to the url map.  This function accepts the same
+        arguments as a werkzeug routing rule.  Additionally a `prefix`
+        parameter is accepted that can be used to add the common prefixes
+        based on the configuration.  Basically the following two calls
+        do exactly the same::
+
+            app.add_url_rule('/foo', prefix='admin', ...)
+            app.add_url_rule(app.cfg['admin_url_prefix'] + '/foo', ...)
+        """
         if self.initialized:
             raise RuntimeError('cannot add url rule after application setup')
-        self._url_rules.append(routing.Rule(*args, **kwargs))
+        prefix = kwargs.pop('prefix', None)
+        if prefix is not None:
+            rule = self.cfg[prefix + '_url_prefix'] + rule
+        self._url_rules.append(routing.Rule(rule, **kwargs))
 
     def add_view(self, endpoint, callback):
         """Add a callback as view."""
@@ -806,7 +788,7 @@ class TextPress(object):
         #! this is called before the page metadata is assembled with
         #! the list of already collected metadata.  You can extend the
         #! list in place to add some more html snippets to the page header.
-        emit_event('before-metadata-assembled', result, buffered=True)
+        emit_event('before-metadata-assembled', result)
         return u'\n'.join(result)
 
     def dispatch_request(self, environ, start_response):
@@ -836,10 +818,9 @@ class TextPress(object):
 
         #! the after-request-setup event can return a response
         #! or modify the request object in place. If we have a
-        #! response we just send it. Plugins that inject something
-        #! into the request setup have to check if they are in
-        #! maintenance mode themselves.
-        for result in emit_event('after-request-setup', request):
+        #! response we just send it, no other modifications are done.
+        for callback in iter_listeners('after-request-setup'):
+            result = callback(request)
             if result is not None:
                 return result(environ, start_response)
 
@@ -861,10 +842,10 @@ class TextPress(object):
             response = e.get_response(environ)
 
         #! allow plugins to change the response object
-        for result in emit_event('before-response-processed', response):
+        for callback in iter_listeners('before-response-processed'):
+            result = callback(response)
             if result is not None:
                 response = result
-                break
 
         # update the session cookie at the request end if the
         # session data requires an update.

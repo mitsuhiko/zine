@@ -12,7 +12,7 @@
 
 from textpress.application import (
     # Event handling
-    emit_event,
+    emit_event, iter_listeners,
 
     # Request/Response
     Response, redirect, get_request, url_for, add_link, add_meta,

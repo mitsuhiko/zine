@@ -333,6 +333,17 @@ posts = db.Table('posts', metadata,
     db.Column('status', db.Integer)
 )
 
+post_links = db.Table('post_links', metadata,
+    db.Column('link_id', db.Integer, primary_key=True),
+    db.Column('post_id', db.Integer, db.ForeignKey('posts.post_id')),
+    db.Column('href', db.Unicode(250), nullable=False),
+    db.Column('rel', db.Unicode(250)),
+    db.Column('type', db.Unicode(100)),
+    db.Column('hreflang', db.Unicode(30)),
+    db.Column('title', db.Unicode(200)),
+    db.Column('length', db.Integer)
+)
+
 post_tags = db.Table('post_tags', metadata,
     db.Column('post_id', db.Integer, db.ForeignKey('posts.post_id')),
     db.Column('tag_id', db.Integer, db.ForeignKey('tags.tag_id'))

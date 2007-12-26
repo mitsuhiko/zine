@@ -25,7 +25,7 @@ from textpress.api import *
 from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED
-from textpress.database import comments, posts, post_tags
+from textpress.database import comments, posts, post_tags, post_links
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      build_eventmap, make_hidden_fields, dump_json, load_json, \
@@ -104,6 +104,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ]),
             ('options', url_for('admin/options'), _('Options'), [
                 ('basic', url_for('admin/basic_options'), _('Basic')),
+                ('urls', url_for('admin/urls'), _('URLs')),
                 ('theme', url_for('admin/theme'), _('Theme')),
                 ('widgets', url_for('admin/widgets'), _('Widgets')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
@@ -124,8 +125,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                           about_items))
 
     #! allow plugins to extend the navigation bar
-    emit_event('modify-admin-navigation-bar', request, navigation_bar,
-               buffered=True)
+    emit_event('modify-admin-navigation-bar', request, navigation_bar)
 
     # find out which is the correct menu and submenu bar
     active_menu = active_submenu = None
@@ -166,7 +166,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
 
     #! used to flash messages, add links to stylesheets, modify the admin
     #! context etc.
-    emit_event('before-admin-response-rendered', request, values, buffered=True)
+    emit_event('before-admin-response-rendered', request, values)
 
     # the admin variables is pushed into the context after the event was
     # sent so that plugins can flash their messages. If we would emit the
@@ -333,6 +333,8 @@ def do_edit_post(request, post_id=None):
                 errors.append(_('Unknown author "%s".') % username)
         form['author'] = author
         form['slug'] = slug = request.form.get('slug') or None
+        if slug and '/' in slug:
+            errors.append(_('A slug cannot contain a slash.'))
         form['tags'] = []
         tags = []
         for tag in request.form.getlist('tags'):
@@ -481,6 +483,7 @@ def do_delete_post(request, post_id):
             redirect.add_invalid('admin/edit_post', post_id=post.post_id)
             db.execute(comments.delete(comments.c.post_id == post.post_id))
             db.execute(post_tags.delete(post_tags.c.post_id == post.post_id))
+            db.execute(post_links.delete(post_links.c.post_id == post.post_id))
             db.delete(post)
             flash(_('The post %s was deleted successfully.') %
                   escape(post.title), 'remove')
@@ -1102,6 +1105,53 @@ def do_basic_options(request):
 
 
 @require_role(ROLE_ADMIN)
+def do_urls(request):
+    """
+    A config page for URL depending settings.
+    """
+    form = {
+        'blog_url_prefix':      request.app.cfg['blog_url_prefix'],
+        'admin_url_prefix':     request.app.cfg['admin_url_prefix'],
+        'tags_url_prefix':      request.app.cfg['tags_url_prefix'],
+        'profiles_url_prefix':  request.app.cfg['profiles_url_prefix']
+    }
+    errors = []
+    csrf_protector = CSRFProtector()
+
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+        for key in form:
+            form[key] = value = request.form.get(key, '')
+            if '<' in value or '>' in value:
+                errors.append(_('URL prefix may not contain greater than or '
+                                'smaller than signs.'))
+            elif value and not value.startswith('/'):
+                errors.append(_('URL prefixes have to start with a slash.'))
+            elif value.endswith('/'):
+                errors.append(_('URL prefixes may not end with a slash.'))
+
+        if not errors:
+            changed = False
+            for key, value in form.iteritems():
+                if value != request.app.cfg[key]:
+                    request.app.cfg[key] = value
+                    changed = True
+            if changed:
+                flash(_('URL configuration changed.'), 'configure')
+
+            # because the next request could reload the application and move
+            # the admin interface we construct the URL to this page by hand.
+            return redirect(form['admin_url_prefix'][1:] + '/options/urls')
+        else:
+            flash(errors[0], 'error')
+
+    return render_admin_response('admin/urls.html', 'options.urls',
+        form=form,
+        hidden_form_data=make_hidden_fields(csrf_protector)
+    )
+
+
+@require_role(ROLE_ADMIN)
 def do_theme(request):
     """
     Allow the user to select one of the themes that are available.
@@ -1409,7 +1459,7 @@ def do_about(request):
             'key':          key,
             'default':      default,
             'value':        request.app.cfg[key]
-        } for key, (_, default) in request.app.cfg.config_vars.iteritems()],
+        } for key, (_, default) in sorted(request.app.cfg.config_vars.iteritems())],
         hosting_env={
             'persistent':       not request.is_run_once,
             'multithreaded':    multithreaded,

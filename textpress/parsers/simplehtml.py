@@ -40,7 +40,7 @@ class HTMLParser(BaseParser):
         self._init_defs()
 
         #! allow plugins to modify the semantic rules of tags etc...
-        emit_event('setup-html-parser', self, buffered=True)
+        emit_event('setup-html-parser', self)
 
         # rather bizarre way to subclass beautiful soup but since the library
         # itself isn't less bizarre...

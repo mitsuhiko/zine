@@ -188,7 +188,7 @@ def show_error(req, context):
 def setup(app, plugin):
     if have_pygments:
         app.connect_event('modify-admin-navigation-bar', add_pygments_link)
-        app.add_url_rule('/admin/options/pygments',
+        app.add_url_rule('/options/pygments', prefix='admin',
                          endpoint='pygments_support/config')
         app.add_view('pygments_support/config', show_config)
         app.connect_event('process-doc-tree', process_doc_tree)

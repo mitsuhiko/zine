@@ -9,7 +9,7 @@
     :copyright: Copyright 2007 by Armin Ronacher
     :license: GNU GPL, see LICENSE for more details.
 """
-from textpress.application import emit_event, get_application
+from textpress.application import iter_listeners, get_application
 
 
 def parse(input_data, parser=None, reason='unknown', optimize=True):
@@ -44,10 +44,10 @@ def parse(input_data, parser=None, reason='unknown', optimize=True):
     tree = parser.parse(input_data, reason)
 
     #! allow plugins to alter the doctree.
-    for item in emit_event('process-doc-tree', tree, input_data, reason):
+    for callback in iter_listeners('process-doc-tree'):
+        item = callback(tree, input_data, reason)
         if item is not None:
             tree = item
-            break
 
     if optimize:
         return tree.optimize()

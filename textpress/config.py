@@ -28,11 +28,19 @@ DEFAULT_VARS = {
     'session_cookie_name':  (unicode, u'textpress_session'),
     'theme':                (unicode, u'default'),
     'secret_key':           (unicode, u''),
-    'blog_url_prefix':      (unicode, u''),
 
-    # template settings
+    # url settings
+    'blog_url_prefix':      (unicode, u''),
+    'admin_url_prefix':     (unicode, u'/admin'),
+    'tags_url_prefix':      (unicode, u'/tags'),
+    'profiles_url_prefix':  (unicode, u'/authors'),
+
+    # cache settings
     'template_cache_path':  (unicode, u''),
     'template_memcache':    (int, 0),
+    'cache_timeout':        (int, 300),
+    'cache_system':         (unicode, u'null'),
+    'memcached_servers':    (unicode, u''),
 
     # the default markup parser. Don't ever change this value! The
     # htmlprocessor module bypasses this test when falling back to

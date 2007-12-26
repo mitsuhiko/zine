@@ -20,13 +20,13 @@ def make_urls(app):
         Rule('/feed.atom', endpoint='blog/atom_feed'),
         Rule('/page/<int:page>', endpoint='blog/index'),
         Rule('/archive', endpoint='blog/archive'),
-        Submount('/authors', [
+        Submount(app.cfg['profiles_url_prefix'], [
             Rule('/', endpoint='blog/authors'),
             Rule('/<string:username>', defaults={'page': 1}, endpoint='blog/show_author'),
             Rule('/<string:username>/page/<int:page>', endpoint='blog/show_author'),
             Rule('/<string:author>/feed.atom', endpoint='blog/atom_feed'),
         ]),
-        Submount('/tags', [
+        Submount(app.cfg['tags_url_prefix'], [
             Rule('/', endpoint='blog/tag_cloud'),
             Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_tag'),
             Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_tag'),
@@ -59,6 +59,7 @@ def make_urls(app):
         Rule('/users/<int:user_id>/delete', endpoint='admin/delete_user'),
         Rule('/options/', endpoint='admin/options'),
         Rule('/options/basic', endpoint='admin/basic_options'),
+        Rule('/options/urls', endpoint='admin/urls'),
         Rule('/options/theme/', endpoint='admin/theme'),
         Rule('/options/theme/overlays/', endpoint='admin/overlays'),
         Rule('/options/theme/overlays/<path:template>',
@@ -89,5 +90,5 @@ def make_urls(app):
 
     return [
         Submount(app.cfg['blog_url_prefix'], blog_urls),
-        Submount('/admin', admin_urls)
+        Submount(app.cfg['admin_url_prefix'], admin_urls)
     ]

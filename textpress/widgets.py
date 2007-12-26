@@ -148,6 +148,11 @@ class Widget(object):
     #: identifier.
     NAME = None
 
+    #: Set this to true if you don't want the widget to appear in the template
+    #: context.  This is always a bad idea and only used in the special HTML
+    #: widget or similar widgets in the future.
+    INVISIBLE = False
+
     #: name of the template for this widget. Please prefix those template
     #: names with an underscore to mark it as partial. The widget is available
     #: in the template as `widget`.
@@ -184,6 +189,7 @@ class HTMLWidget(Widget):
     """
 
     NAME = 'HTML'
+    INVISIBLE = True
 
     @staticmethod
     def get_display_name():

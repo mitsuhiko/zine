@@ -11,7 +11,8 @@
 from math import ceil, log
 from datetime import date, datetime, timedelta
 
-from textpress.database import users, tags, posts, post_tags, comments, db
+from textpress.database import users, tags, posts, post_links, post_tags, \
+     comments, db
 from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug
 from textpress.application import get_application, get_request, url_for
 
@@ -198,7 +199,7 @@ class PostManager(db.DatabaseManager):
         return self.filter_drafts(exclude, ignore_user).all()
 
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
-                 page=1, per_page=None, ignore_role=False):
+                 page=1, per_page=None, ignore_role=False, as_list=False):
         """
         Return a dict with pagination, the current posts, number of pages, total
         posts and all that stuff for further processing.
@@ -295,6 +296,9 @@ class PostManager(db.DatabaseManager):
                                .offset(offset).limit(per_page)
         pagination = Pagination(endpoint, page, per_page,
                                 Post.objects.filter(q).count(), url_args)
+
+        if as_list:
+            return postlist.all()
 
         return {
             'pagination':       pagination,
@@ -630,6 +634,41 @@ class Post(object):
         )
 
 
+class PostLink(object):
+    """
+    Represents a link in a post.  This can be used for podcasts or other
+    resources that require ``<link>`` tags.
+    """
+
+    def __init__(self, post, href, rel='alternate', type=None, hreflang=None,
+                 title=None, length=None):
+        if isinstance(post, (int, long)):
+            self.post_id = post
+        else:
+            self.post = post
+        self.href = href
+        self.rel = rel
+        self.type = type
+        self.hreflang = hreflang
+        self.title = title
+        self.length = length
+
+    def as_dict(self):
+        """Return the values as dict.  Useful for feed building."""
+        result = {'href': href}
+        for key in 'rel', 'type', 'hreflang', 'title', 'length':
+            value = getattr(self, key, None)
+            if value is not None:
+                result[key] = value
+        return result
+
+    def __repr__(self):
+        return '<%s %r>' % (
+            self.__class__.__name__,
+            self.href
+        )
+
+
 class TagManager(db.DatabaseManager):
     """
     Also tags have their own manager.
@@ -876,12 +915,14 @@ db.mapper(Comment, comments, properties={
         lazy=True
     )
 }, order_by=[db.desc(comments.c.pub_date)])
+db.mapper(PostLink, post_links)
 db.mapper(Post, posts, properties={
     '_raw_body':    posts.c.body,
     '_raw_intro':   posts.c.intro,
     'comments':     db.relation(Comment, backref='post',
                                 primaryjoin=posts.c.post_id == comments.c.post_id,
                                 order_by=[db.asc(comments.c.pub_date)]),
+    'links':        db.relation(PostLink, backref='post'),
     'tags':         db.relation(Tag, secondary=post_tags, lazy=False,
                                 order_by=[db.asc(tags.c.name)],
                                 backref='posts')

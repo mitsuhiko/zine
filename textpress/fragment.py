@@ -58,7 +58,7 @@ from itertools import izip
 from weakref import WeakKeyDictionary
 from xml.sax.saxutils import quoteattr, escape
 
-from textpress.application import emit_event
+from textpress.application import iter_listeners
 
 
 #: list of self closing html tags for *rendering*
@@ -244,10 +244,10 @@ class Node(object):
         #! call the `render` method with injection.  See the render docstring.
         if self.callback_data:
             for identifier, data in self.callback_data:
-                for item in emit_event('process-node-callback', identifier,
-                                       data, self, text_only):
-                    if item is not None:
-                        return item
+                for callback in iter_listeners('process-node-callback'):
+                    rv = callback(identifier, data, self, text_only)
+                    if rv is not None:
+                        return rv
 
     @property
     def text(self):
