@@ -11,6 +11,7 @@
     :license: GNU GPL.
 """
 from time import time
+from cPickle import loads, dumps, HIGHEST_PROTOCOL
 have_memcache = True
 try:
     from cmemcache import memcache
@@ -38,16 +39,19 @@ def all_if_anonymous(timeout=None, cache_key=None):
     def decorator(f):
         key = cache_key or 'view_func/%s.%s' % (f.__module__, f.__name__)
         def oncall(request, *args, **kwargs):
+            cache_key = key + request.path.encode('utf-8')
             want_cache = False
+            response = None
             if not request.user.is_somebody:
                 response = request.app.cache.get(key)
-                if response is not None:
-                    return response
-                want_cache = True
-            response = f(request, *args, **kwargs)
+                if response is None:
+                    want_cache = True
+            if response is None:
+                response = f(request, *args, **kwargs)
             if want_cache:
                 response.freeze()
-                cache.set(key, response, timeout)
+                request.app.cache.set(key, response, timeout)
+            response.make_conditional(request)
             return response
         oncall.__name__ = f.__name__
         oncall.__module__ = f.__module__
@@ -106,22 +110,25 @@ class SimpleCache(BaseCache):
     def get(self, key):
         now = time()
         if self._expires.get(key, 0) > now:
-            return self._cache.get(key)
+            rv = self._cache.get(key)
+            if rv is not None:
+                rv = loads(rv)
+            return rv
 
     def set(self, key, value, timeout=None):
         if timeout is None:
             timeout = self.default_timeout
         if len(self._cache) > self._threshold:
             self._cull()
-        self._cache[key] = value
-        self._expires[key] = timeout
+        self._cache[key] = dumps(value, HIGHEST_PROTOCOL)
+        self._expires[key] = time() + timeout
 
     def add(self, key, value, timeout=None):
         if timeout is None:
             timeout = self.default_timeout
         if len(self._cache) > self._threshold:
             self._cull()
-        self._cache.setdefault(key, value)
+        self._cache.setdefault(key, dumps(value, HIGHEST_PROTOCOL))
         self._expires[key] = time() + timeout
 
     def delete(self, key):

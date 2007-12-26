@@ -31,6 +31,9 @@ from textpress.application import (
 # Database
 from textpress.database import db
 
+# Cache
+from textpress import cache
+
 # Gettext
 from textpress.utils import gettext as _
 

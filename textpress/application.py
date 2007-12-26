@@ -95,9 +95,10 @@ def redirect(url, code=302, allow_external_redirect=False):
     return simple_redirect(url, code)
 
 
-def emit_event(event, *args):
+def emit_event(event, *args, **kwargs):
     """Emit a event and return a `EventResult` instance."""
-    return [x(*args) for x in local.application._event_manager.iter(event)]
+    return [x(*args, **kwargs) for x in
+            local.application._event_manager.iter(event)]
 
 
 def iter_listeners(event):
@@ -204,18 +205,18 @@ class Request(BaseRequest):
 
         engine = self.app.database_engine
 
-        # get the session
+        # get the session and try to get the user object for this request.
         from textpress.models import User
         user = None
-        session = SecureCookie.load_cookie(self, app.cfg['session_cookie_name'],
+        cookie_name = app.cfg['session_cookie_name']
+        session = SecureCookie.load_cookie(self, cookie_name,
                                            app.cfg['secret_key'])
         user_id = session.get('uid')
         if user_id:
             user = User.objects.get(user_id)
         if user is None:
             user = User.objects.get_nobody()
-
-        self.user = self._old_user = user
+        self.user = user
         self.session = session
 
     def login(self, user, permanent=False):
@@ -756,9 +757,9 @@ class TextPress(object):
             raise RuntimeError('cannot add servicepoint after application setup')
         self._services[identifier] = callback
 
-    def connect_event(self, event, callback):
+    def connect_event(self, event, callback, position='after'):
         """Connect an event to the current application."""
-        return self._event_manager.connect(event, callback)
+        return self._event_manager.connect(event, callback, position)
 
     def disconnect_event(self, listener_id):
         """Disconnect a given listener_id."""

@@ -18,6 +18,7 @@ from textpress.feedbuilder import AtomFeed
 from werkzeug.exceptions import NotFound, Forbidden
 
 
+@cache.all_if_anonymous()
 def do_index(request, page=1):
     """
     Render the most recent posts.
