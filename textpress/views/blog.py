@@ -353,8 +353,11 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
     # if no post slug is given we filter the posts by the cretereons
     # provided and pass them to the feed builder
     if post_slug is None:
-        for post in Post.objects.get_list(year, month, day, tag, author,
-                                          per_page=10):
+        post_list = Post.objects.get_list(year, month, day, tag, author,
+                                          per_page=10)
+        if post_list.pop('probably_404'):
+            raise NotFound()
+        for post in post_list['posts']:
             uid = build_tag_uri(request.app, post.pub_date, 'post',
                                 post.post_id)
             feed.add(post.title, unicode(post.body), content_type='html',
