@@ -56,11 +56,11 @@ class PagesNavigation(Widget):
 def add_admin_link(request, navigation_bar):
     """Inject the links for the admin navigation bar"""
     if request.user.role >= ROLE_ADMIN:
-        navigation_bar += [
+        navigation_bar.insert(2,
             ('pages', url_for('pages/show_pages'), _('Pages'), [
                 ('overview', url_for('pages/show_pages'), _('Overview')),
                 ('write', url_for('pages/write_page'), _('Write Page')),
-        ])]
+        ]))
 
 
 @require_role(ROLE_ADMIN)

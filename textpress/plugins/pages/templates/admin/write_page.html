@@ -9,22 +9,21 @@
     </fieldset>
     <fieldset>
       <legend>{% trans "Key" %}</legend>
-      {{ h.input_field('key', form.key, size=25) }}
-      <p>
-      <em>{% trans %}The key is used to build the url. If no key is given it's just the title-slug.{% endtrans %}</em>
-      </p>
+      <p>{{ h.input_field('key', form.key, size=25) }}</p>
+      <p><em>{% trans %}
+        The key is used to build the url. If no key is given it's just the title-slug.
+      {% endtrans %}</em></p>
+    </fieldset>
     <fieldset>
       <legend>{% trans "Content" %}</legend>
-      {{ h.textarea('raw_body', form.raw_body, rows=20) }}
+      <p>{{ h.textarea('raw_body', form.raw_body, rows=20) }}</p>
     </fieldset>
     <fieldset>
       <legend>{% trans "Parser" %}</legend>
-      <select name="parser">
-      {%- for parser_id, name in parsers %}
+      <select name="parser">{% for parser_id, name in parsers %}
         <option value="{{ parser_id|e(true) }}"{% if parser_id == form.parser
           %} selected{% endif %}>{{ name|e }}</option>
-      {%- endfor %}
-      </select>
+      {%- endfor %}</select>
     </fieldset>
     <fieldset>
       <legend>{% trans "Position" %}</legend>
