@@ -5,15 +5,20 @@
 
     Just a little plugin that supports static pages.
 
-    It also provides a little widget that stores a navigation bar
-    that renders all static pages.
+    It implements also a little widget that renders a navigation
+    bar (for now just a list of links of all pages).
+    They are ordered by the `navigation_pos` attribute of every page.
+
+    It's possible to use all parsers known from the post-interface
+    so you can use the comment-parser, plain-html and others.
+
 
     :copyright: Copyright 2007 by Christopher Grebs.
     :license: GNU GPL.
 """
 from os.path import dirname, join
 from random import choice
-
+from werkzeug.exceptions import NotFound
 from textpress.api import *
 from textpress.widgets import Widget
 from textpress.views.admin import render_admin_response, flash
@@ -29,7 +34,7 @@ SHARED_FILES = join(dirname(__file__), 'shared')
 
 class PagesNavigation(Widget):
     """
-    Show a little navigation as a widget
+    A little navigation widget.
     """
 
     NAME = 'get_pages_navigation'
@@ -49,6 +54,7 @@ class PagesNavigation(Widget):
 
 
 def add_admin_link(request, navigation_bar):
+    """Inject the links for the admin navigation bar"""
     if request.user.role >= ROLE_ADMIN:
         navigation_bar += [
             ('pages', url_for('pages/show_pages'), _('Pages'), [
@@ -59,7 +65,7 @@ def add_admin_link(request, navigation_bar):
 
 @require_role(ROLE_ADMIN)
 def show_pages_overview(request):
-    """This renders the plugins admin page."""
+    """Shows all saved pages"""
     return render_admin_response(
         'admin/pages.html',
         'pages.overview',
@@ -68,6 +74,12 @@ def show_pages_overview(request):
 
 @require_role(ROLE_ADMIN)
 def show_pages_write(request, page_id=None):
+    """
+    Show the "write page" dialog.
+
+    If `page_id` is given the form is updated with
+    already saved data so that you can edit a page.
+    """
     csrf_protector = CSRFProtector()
     form = {}
     errors = []
@@ -159,6 +171,7 @@ def show_pages_write(request, page_id=None):
 
 @require_role(ROLE_ADMIN)
 def show_pages_delete(request, page_id):
+    """Shows the confirm dialog if the user deletes a page"""
     page = Page.objects.get(page_id)
     if page is None:
         raise NotFound()
@@ -181,9 +194,9 @@ def show_pages_delete(request, page_id):
         csrf_protector=csrf_protector,
     )
 
-
-@cache.all_if_anonymous()
+@cache.response(vary=('user',))
 def show_page(self, key):
+    """Shot a page found via `key`"""
     page = Page.objects.query.filter_by(key=key).first()
     if page is None:
         raise NotFound()
@@ -194,9 +207,11 @@ def show_page(self, key):
 
 
 def setup(app, plugin):
+    """setup the plugin"""
     from textpress.plugins.pages.database import upgrade_database
     app.connect_event('modify-admin-navigation-bar', add_admin_link)
     app.add_shared_exports('pages', SHARED_FILES)
+
     app.add_url_rule('/show_pages/', endpoint='pages/show_pages',
         prefix='admin')
     app.add_url_rule('/write_page/', endpoint='pages/write_page',
@@ -210,10 +225,12 @@ def setup(app, plugin):
     app.add_url_rule('/delete_page/<int:page_id>/',
         endpoint='pages/delete_page',
         prefix='admin')
+
     app.add_view('pages/show_pages', show_pages_overview)
     app.add_view('pages/write_page', show_pages_write)
     app.add_view('pages/show_page', show_page)
     app.add_view('pages/delete_page', show_pages_delete)
+
     app.add_template_searchpath(TEMPLATES)
     app.add_database_integrity_check(upgrade_database)
     app.add_widget(PagesNavigation)
