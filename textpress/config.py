@@ -18,16 +18,16 @@ from os import path
 #: variables the textpress core uses
 DEFAULT_VARS = {
     # general settings
-    'database_uri':         (unicode, u''),
-    'blog_title':           (unicode, u'My TextPress Blog'),
-    'blog_tagline':         (unicode, u'just another textpress blog'),
-    'blog_url':             (unicode, u''),
-    'blog_email':           (unicode, u''),
-    'timezone':             (unicode, u'Europe/Vienna'),
-    'maintenance_mode':     (bool, False),
-    'session_cookie_name':  (unicode, u'textpress_session'),
-    'theme':                (unicode, u'default'),
-    'secret_key':           (unicode, u''),
+    'database_uri':             (unicode, u''),
+    'blog_title':               (unicode, u'My TextPress Blog'),
+    'blog_tagline':             (unicode, u'just another textpress blog'),
+    'blog_url':                 (unicode, u''),
+    'blog_email':               (unicode, u''),
+    'timezone':                 (unicode, u'Europe/Vienna'),
+    'maintenance_mode':         (bool, False),
+    'session_cookie_name':      (unicode, u'textpress_session'),
+    'theme':                    (unicode, u'default'),
+    'secret_key':               (unicode, u''),
 
     # url settings
     'blog_url_prefix':          (unicode, u''),

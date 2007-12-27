@@ -249,49 +249,44 @@ class SimpleCache(BaseCache):
         super(SimpleCache, self).__init__(app)
         self._cache = {}
         self.clear = self._cache.clear
-        self._expires = {}
         self._threshold = 500
 
     def _prune(self):
         if len(self._cache) > self._threshold:
             now = time()
-            for idx, key in enumerate(self._cache.keys()):
-                if self._expires.get(key, 0) <= now or idx % 3 == 0:
-                    self.delete(key)
+            for idx, (key, (expires, _)) in enumerate(self._cache.items()):
+                if expires <= now or idx % 3 == 0:
+                    self._cache.pop(key, None)
 
     def get(self, key):
         now = time()
-        if self._expires.get(key, 0) > now:
-            rv = self._cache.get(key)
-            if rv is not None:
-                rv = loads(rv)
-            return rv
+        expires, value = self._cache.get(key, (0, None))
+        if expires > time():
+            return loads(value)
 
     def set(self, key, value, timeout=None):
         if timeout is None:
             timeout = self.default_timeout
         self._prune()
-        self._cache[key] = dumps(value, HIGHEST_PROTOCOL)
-        self._expires[key] = time() + timeout
+        self._cache[key] = (time() + timeout, dumps(value, HIGHEST_PROTOCOL))
 
     def add(self, key, value, timeout=None):
         if timeout is None:
             timeout = self.default_timeout
         if len(self._cache) > self._threshold:
             self._prune()
-        self._cache.setdefault(key, dumps(value, HIGHEST_PROTOCOL))
-        self._expires[key] = time() + timeout
+        item = (time() + timeout, dumps(value, HIGHEST_PROTOCOL))
+        self._cache.setdefault(key, item)
 
     def delete(self, key):
         self._cache.pop(key, None)
-        self._expires.pop(key, None)
 
 
 class MemcachedCache(BaseCache):
     """A cache that uses memcached as backend."""
 
     def __init__(self, app):
-        super(Memcache, self).__init__(app)
+        super(MemcachedCache, self).__init__(app)
         servers = [x.strip() for x in app.cfg['memcached_servers'].split(',')]
         self._client = memcache.Client(servers)
 
