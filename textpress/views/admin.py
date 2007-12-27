@@ -108,6 +108,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('theme', url_for('admin/theme'), _('Theme')),
                 ('widgets', url_for('admin/widgets'), _('Widgets')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
+                ('cache', url_for('admin/cache'), _('Cache')),
                 ('configuration', url_for('admin/configuration'),
                  _('Configuration Editor'))
             ])
@@ -1382,6 +1383,21 @@ def do_remove_plugin(request, plugin):
     return render_admin_response('admin/remove_plugin.html', 'options.plugins',
         plugin=plugin,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_cache(request):
+    """Configure the cache."""
+    csrf_protector = CSRFProtector()
+    return render_admin_response('admin/cache.html', 'options.cache',
+        hidden_form_data=make_hidden_fields(csrf_protector),
+        cache_systems=[
+            ('simple', _('Simple Cache')),
+            ('memcached', _('memcached')),
+            ('filesystem', _('Filesystem')),
+            ('null', _('No Cache'))
+        ]
     )
 
 

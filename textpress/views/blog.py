@@ -18,7 +18,7 @@ from textpress.feedbuilder import AtomFeed
 from werkzeug.exceptions import NotFound, Forbidden
 
 
-@cache.all_if_anonymous()
+@cache.response(vary=('user',))
 def do_index(request, page=1):
     """
     Render the most recent posts.
@@ -175,6 +175,7 @@ def do_authors(request):
     return render_response('authors.html', authors=User.objects.get_authors())
 
 
+@cache.response(vary=('user',))
 @pingback.inject_header
 def do_show_post(request, year, month, day, slug):
     """
@@ -345,6 +346,7 @@ def do_xml_service(request, identifier):
     return Response(dump_xml(result), mimetype='text/xml')
 
 
+@cache.response(vary=('user',))
 def do_atom_feed(request, author=None, year=None, month=None, day=None,
                  tag=None, post_slug=None):
     """

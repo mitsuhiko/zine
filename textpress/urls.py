@@ -67,6 +67,7 @@ def make_urls(app):
         Rule('/options/widgets', endpoint='admin/widgets'),
         Rule('/options/plugins/', endpoint='admin/plugins'),
         Rule('/options/plugins/<plugin>/remove', endpoint='admin/remove_plugin'),
+        Rule('/options/cache', endpoint='admin/cache'),
         Rule('/options/configuration', endpoint='admin/configuration'),
         Rule('/about/', endpoint='admin/about'),
         Rule('/about/eventmap', endpoint='admin/eventmap'),

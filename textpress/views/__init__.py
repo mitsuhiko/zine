@@ -54,6 +54,7 @@ all_views = {
     'admin/widgets':            admin.do_widgets,
     'admin/plugins':            admin.do_plugins,
     'admin/remove_plugin':      admin.do_remove_plugin,
+    'admin/cache':              admin.do_cache,
     'admin/configuration':      admin.do_configuration,
     'admin/about':              admin.do_about,
     'admin/eventmap':           admin.do_eventmap,

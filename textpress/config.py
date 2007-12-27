@@ -30,43 +30,45 @@ DEFAULT_VARS = {
     'secret_key':           (unicode, u''),
 
     # url settings
-    'blog_url_prefix':      (unicode, u''),
-    'admin_url_prefix':     (unicode, u'/admin'),
-    'tags_url_prefix':      (unicode, u'/tags'),
-    'profiles_url_prefix':  (unicode, u'/authors'),
+    'blog_url_prefix':          (unicode, u''),
+    'admin_url_prefix':         (unicode, u'/admin'),
+    'tags_url_prefix':          (unicode, u'/tags'),
+    'profiles_url_prefix':      (unicode, u'/authors'),
 
     # cache settings
-    'template_cache_path':  (unicode, u''),
-    'template_memcache':    (int, 0),
-    'cache_timeout':        (int, 300),
-    'cache_system':         (unicode, u'null'),
-    'memcached_servers':    (unicode, u''),
+    'template_cache_path':      (unicode, u''),
+    'template_memcache':        (int, 0),
+    'enable_eager_caching':     (bool, False),
+    'cache_timeout':            (int, 300),
+    'cache_system':             (unicode, u'null'),
+    'memcached_servers':        (unicode, u''),
+    'filesystem_cache_path':    (unicode, u''),
 
     # the default markup parser. Don't ever change this value! The
     # htmlprocessor module bypasses this test when falling back to
     # the default parser. If there plans to change the default parser
     # for future TextPress versions that code must be altered first.
-    'default_parser':       (unicode, u'default'),
-    'comment_parser':       (unicode, u'comment'),
+    'default_parser':           (unicode, u'default'),
+    'comment_parser':           (unicode, u'comment'),
 
     # comments and pingback
-    'comments_enabled':     (bool, True),
-    'pings_enabled':        (bool, True),
+    'comments_enabled':         (bool, True),
+    'pings_enabled':            (bool, True),
 
     # post view
-    'posts_per_page':       (int, 10),
-    'datetime_format':      (unicode, u'%Y-%m-%d %H:%M'),
-    'date_format':          (unicode, u'%Y-%m-%d'),
-    'use_flat_comments':    (bool, False),
+    'posts_per_page':           (int, 10),
+    'datetime_format':          (unicode, u'%Y-%m-%d %H:%M'),
+    'date_format':              (unicode, u'%Y-%m-%d'),
+    'use_flat_comments':        (bool, False),
 
     # email settings
-    'smtp_host':            (unicode, u'localhost'),
-    'smtp_user':            (unicode, u''),
-    'smtp_password':        (unicode, u''),
+    'smtp_host':                (unicode, u'localhost'),
+    'smtp_user':                (unicode, u''),
+    'smtp_password':            (unicode, u''),
 
     # plugin settings
-    'plugin_guard':         (bool, True),
-    'plugins':              (unicode, u'')
+    'plugin_guard':             (bool, True),
+    'plugins':                  (unicode, u'')
 }
 
 #: header for the config file

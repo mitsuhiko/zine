@@ -176,11 +176,16 @@ class Widget(object):
         return dict(zip(args, (None,) * (len(rv[3]) - len(args) - 1) + rv[3]))
 
     @staticmethod
-    def configure_widget(initial_args, req):
+    def configure_widget(initial_args, request):
+        """Display the configuration page."""
         return None, None
 
-    def __unicode__(self):
+    def render(self):
+        """Render the template."""
         return render_template(self.TEMPLATE, widget=self)
+
+    def __unicode__(self):
+        return self.render()
 
 
 class HTMLWidget(Widget):
@@ -191,22 +196,22 @@ class HTMLWidget(Widget):
     NAME = 'HTML'
     INVISIBLE = True
 
+    def __init__(self, html=u''):
+        self.html = html
+
     @staticmethod
     def get_display_name():
         return _('HTML')
 
     @staticmethod
-    def configure_widget(initial_args, req):
+    def configure_widget(initial_args, request):
         error = None
         args = initial_args.copy()
-        if req.method == 'POST':
-            args['html'] = req.form.get('html', '')
+        if request.method == 'POST':
+            args['html'] = request.form.get('html', '')
         return args, render_template('/admin/widgets/html.html', form=args)
 
-    def __init__(self, html=u''):
-        self.html = html
-
-    def __unicode__(self):
+    def render(self):
         return self.html
 
 
@@ -215,6 +220,7 @@ class TagCloud(Widget):
     A tag cloud. What else?
     """
 
+    __metaclass__ = cache.make_metaclass(vary=('user',))
     NAME = 'get_tag_cloud'
     TEMPLATE = 'widgets/tagcloud.html'
 
@@ -227,11 +233,11 @@ class TagCloud(Widget):
         return _('Tag Cloud')
 
     @staticmethod
-    def configure_widget(initial_args, req):
+    def configure_widget(initial_args, request):
         args = form = initial_args.copy()
         error = None
-        if req.method == 'POST':
-            args['max'] = max = req.form.get('max', '')
+        if request.method == 'POST':
+            args['max'] = max = request.form.get('max', '')
             if not max:
                 args['max'] = None
             elif not max.isdigit():
@@ -239,7 +245,7 @@ class TagCloud(Widget):
                           'or a number.')
             else:
                 args['max'] = int(max)
-            args['show_title'] = req.form.get('show_title') == 'yes'
+            args['show_title'] = request.form.get('show_title') == 'yes'
         if error is not None:
             args = None
         return args, render_template('admin/widgets/tagcloud.html',
@@ -253,29 +259,34 @@ class PostArchiveSummary(Widget):
     Show the last n months/years/days with posts.
     """
 
+    __metaclass__ = cache.make_metaclass(vary=('user',))
     NAME = 'get_post_archive_summary'
     TEMPLATE = 'widgets/post_archive_summary.html'
+
+    def __init__(self, detail='months', limit=6, show_title=False):
+        self.__dict__.update(Post.objects.get_archive_summary(detail, limit))
+        self.show_title = show_title
 
     @staticmethod
     def get_display_name():
         return _('Post Archive Summary')
 
     @staticmethod
-    def configure_widget(initial_args, req):
+    def configure_widget(initial_args, request):
         args = form = initial_args.copy()
         errors = []
-        if req.method == 'POST':
-            args['detail'] = detail = req.form.get('detail')
+        if request.method == 'POST':
+            args['detail'] = detail = request.form.get('detail')
             if detail not in ('years', 'months', 'days'):
                 errors.append(_('Detail must be years, months or days.'))
-            args['limit'] = limit = req.form.get('limit')
+            args['limit'] = limit = request.form.get('limit')
             if not limit:
                 args['limit'] = None
             elif not limit.isdigit():
                 errors.append(_('Limit must be omited or a valid number.'))
             else:
                 args['limit'] = int(limit)
-            args['show_title'] = req.form.get('show_title') == 'yes'
+            args['show_title'] = request.form.get('show_title') == 'yes'
         if errors:
             args = None
         return args, render_template('admin/widgets/post_archive_summary.html',
@@ -283,26 +294,23 @@ class PostArchiveSummary(Widget):
             form=form
         )
 
-    def __init__(self, detail='months', limit=6, show_title=False):
-        self.__dict__.update(Post.objects.get_archive_summary(detail, limit))
-        self.show_title = show_title
-
 
 class LatestPosts(Widget):
     """
     Show the latest n posts.
     """
 
+    __metaclass__ = cache.make_metaclass(vary=('user',))
     NAME = 'get_latest_posts'
     TEMPLATE = 'widgets/latest_posts.html'
-
-    @staticmethod
-    def get_display_name():
-        return _('Latest Posts')
 
     def __init__(self, limit=5, show_title=False):
         self.posts = Post.objects.get_latest(limit)
         self.show_title = show_title
+
+    @staticmethod
+    def get_display_name():
+        return _('Latest Posts')
 
 
 class LatestComments(Widget):
@@ -310,17 +318,19 @@ class LatestComments(Widget):
     Show the latest n comments.
     """
 
+    __metaclass__ = cache.make_metaclass(vary=('user',))
     NAME = 'get_latest_comments'
     TEMPLATE = 'widgets/latest_comments.html'
-
-    @staticmethod
-    def get_display_name():
-        return _('Latest Comments')
 
     def __init__(self, limit=5, show_title=False):
         self.comments = Comment.objects.get_latest(limit)
         self.show_title = show_title
 
+    @staticmethod
+    def get_display_name():
+        return _('Latest Comments')
 
+
+#: list of all core widgets
 all_widgets = [HTMLWidget, TagCloud, PostArchiveSummary, LatestPosts,
                LatestComments]

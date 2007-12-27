@@ -1,0 +1,39 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Cache Options" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Cache Options" %}</h2>
+  <p>{% trans %}
+    TextPress comes with a cache system that allows you to survive a sudden
+    storm of visiters.  The caching system has different backends you can
+    chose from and also different settings that you should set depending on
+    the type of server you have and the number of visitors.
+  {% endtrans %}</p>
+  <form action="" method="post">
+    <h3>Cache System</h3>
+    <p>{% trans "Current TextPress supports three caching systems:" %}</p>
+    <ul>
+      <li>{% trans %}<strong>Simple Cache</strong>: The simple cache is a very
+          basic memory cache inside the server process.  This cache works only
+          if you have a persistent environment.  Roughly speaking this cache
+          works better the higher the number of threads in a process and the
+          lower the number or processes.  If you have the chance to use a
+          memcached you should not use the simple cache.{% endtrans %}</li>
+      <li>{% trans %}<strong>memcached</strong>: This cache system uses one
+          or multiple remove memcached servers for storing the cache
+          information.  Requires at least one memcache deamon running.  This
+          is useful for high traffic sites.{% endtrans %}</li>
+      <li>{% trans %}<strong>Filesystem</strong>: This cache system stores the
+          cache information on the filesystem.  If IO is a problem for you,
+          you should not use this cache.  For most of the cases the filesystem
+          should be fast enough however.{% endtrans %}</li>
+    </ul>
+    <p>{% trans %}Per default no cache system is active.{% endtrans %}</p>
+    <p><select name="cache_system">{%- for key, value in cache_systems %}
+      <option value="{{ key }}"{% if key == form.cache_system
+        %} selected{% endif %}>{{ value }}</option>{% endfor %}</select></p>
+    <div class="actions">
+      <input type="submit" value="Save">
+      {{ hidden_form_data }}
+    </div>
+  </form>
+{% endblock %}
