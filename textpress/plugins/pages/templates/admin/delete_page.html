@@ -1,0 +1,14 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Delete Page" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Delete Page" %}</h2>
+  <form action="" method="post">
+    {{ csrf_protector }}
+    <p>{% trans page_title=page.title|e %}
+      Do you really want to delete page "{{ page_title }}"?.
+    {% endtrans %}</p>
+    <input type="submit" name="cancel" value="{% trans 'No' %}">
+    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+  </form>
+{% endblock %}
+

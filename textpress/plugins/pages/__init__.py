@@ -19,6 +19,7 @@ from textpress.widgets import Widget
 from textpress.views.admin import render_admin_response, flash
 from textpress.models import ROLE_ADMIN
 from textpress.utils import CSRFProtector, gen_slug, escape
+from textpress import cache
 from textpress.plugins.pages.database import Page, pages_table
 
 
@@ -95,6 +96,8 @@ def show_pages_write(request, page_id=None):
         )
 
     if request.method == 'POST':
+        csrf_protector.assert_safe()
+
         if request.form.get('cancel'):
             return redirect(url_for('pages/show_pages'))
         if request.form.get('delete') and not new_page:
@@ -154,7 +157,32 @@ def show_pages_write(request, page_id=None):
         csrf_protector=csrf_protector,
     )
 
+@require_role(ROLE_ADMIN)
+def show_pages_delete(request, page_id):
+    page = Page.objects.get(page_id)
+    if page is None:
+        raise NotFound()
+    csrf_protector = CSRFProtector()
 
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+
+        if request.form.get('cancel'):
+            return redirect(url_for('pages/write_page', page_id=page.page_id))
+        elif request.form.get('confirm'):
+            db.delete(page)
+            flash(_('The page %s was deleted successfully.') %
+                  escape(page.title), 'remove')
+            db.commit()
+            return redirect(url_for('pages/show_pages'))
+
+    return render_admin_response('admin/delete_page.html', 'page.write',
+        page=page,
+        csrf_protector=csrf_protector,
+    )
+
+
+@cache.all_if_anonymous()
 def show_page(self, key):
     page = Page.objects.query.filter_by(key=key).one()
     if page is None:
@@ -179,9 +207,13 @@ def setup(app, plugin):
     app.add_url_rule('/page/<key>/',
         endpoint='pages/show_page',
         prefix='blog')
+    app.add_url_rule('/delete_page/<int:page_id>/',
+        endpoint='pages/delete_page',
+        prefix='admin')
     app.add_view('pages/show_pages', show_pages_overview)
     app.add_view('pages/write_page', show_pages_write)
     app.add_view('pages/show_page', show_page)
+    app.add_view('pages/delete_page', show_pages_delete)
     app.add_template_searchpath(TEMPLATES)
     app.add_database_integrity_check(upgrade_database)
     app.add_widget(PagesNavigation)
