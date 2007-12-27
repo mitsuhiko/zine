@@ -1,0 +1,43 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "New Page" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "New Page" %}</h2>
+  <form action="" method="post">
+    <fieldset>
+      <legend>{% trans "Title" %}</legend>
+      {{ h.input_field('title', form.title, size=40) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Key" %}</legend>
+      {{ h.input_field('key', form.key, size=25) }}
+      <p>
+      <em>{% trans %}The key is used to build the url. If no key is given it's just the title-slug.{% endtrans %}</em>
+      </p>
+    <fieldset>
+      <legend>{% trans "Content" %}</legend>
+      {{ h.textarea('raw_body', form.raw_body, rows=20) }}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Parser" %}</legend>
+      <select name="parser">
+      {%- for parser_id, name in parsers %}
+        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.parser
+          %} selected{% endif %}>{{ name|e }}</option>
+      {%- endfor %}
+      </select>
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Position" %}</legend>
+      <em>This is the position the link is shown in the navigation widget</em><br>
+      {{ h.input_field('navigation_pos', form.navigation_pos, size=3) }}
+    </fieldset>
+    <div class="actions">
+      {{ csrf_protector }}
+      <input type="submit" name="save" value="{% trans 'Save' %}">
+      {%- if not new_page %}
+        <input type="submit" name="delete" value="{% trans 'Delete' %}">
+      {%- endif %}
+      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Pages" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Pages" %}</h2>
+  <table>
+    <tr>
+      <th>{% trans "ID" %}</th>
+      <th style="width: 20%;">{% trans "Key" %}</th>
+      <th style="width: 50%;">{% trans "Title" %}</th>
+      <th>{% trans "Navigation Position" %}</th>
+    </tr>
+    {% for page in pages %}
+    <tr class="pages_row">
+      <td>{{ page.page_id }}</td>
+      <td style="width: 20%;">{{ page.key }}</td>
+      <td style="width: 50%;">
+        <a href="{{ url_for('pages/write_page', page_id=page.page_id) }}">{{ page.title }}</a>
+      </td>
+      <td>{% if page.navigation_pos %}{{ page.navigation_pos }}{% else %}{% trans %}No position given{% endtrans %}{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% if not pages %}
+  <p style="text-align:center;"><strong>
+    {% trans url=url_for('pages/write_page') %}
+      No pages created yet. <a href="{{ url }}">Create</a> your first!
+    {% endtrans %}
+  </strong></p>
+  {% endif %}
+  <form action="{{ url_for('pages/write_page')|e(true) }}" method="get">
+    <div class="actions">
+      <input type="submit" value="{% trans 'New Page' %}">
+    </div>
+  </form>
+{% endblock %}

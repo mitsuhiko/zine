@@ -387,7 +387,7 @@ class PostManager(db.DatabaseManager):
         }
 
     def filter_latest(self, limit=None, ignore_role=False):
-	"""Filter for the latest n posts."""
+        """Filter for the latest n posts."""
         query = self.filter_published(ignore_role=ignore_role)
         if limit is not None:
             query = query[:limit]

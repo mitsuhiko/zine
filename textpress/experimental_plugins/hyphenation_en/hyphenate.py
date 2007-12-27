@@ -1,6 +1,6 @@
 """ Hyphenation, using Frank Liang's algorithm.
 
-    This module provides a single function to hyphenate words.  hyphenate_word takes 
+    This module provides a single function to hyphenate words.  hyphenate_word takes
     a string (the word), and returns a list of parts that can be separated by hyphens.
 
     >>> hyphenate_word("hyphenation")
@@ -9,7 +9,7 @@
     ['su', 'per', 'cal', 'ifrag', 'ilis', 'tic', 'ex', 'pi', 'ali', 'do', 'cious']
     >>> hyphenate_word("project")
     ['project']
-    
+
     Ned Batchelder, July 2007.
     This Python code is in the public domain.
 """
@@ -521,4 +521,3 @@ if __name__ == '__main__':
     else:
         import doctest
         doctest.testmod(verbose=True)
-

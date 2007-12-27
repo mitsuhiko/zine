@@ -1,0 +1,11 @@
+{% extends 'widgets/base.html' %}
+{% block title %}{% trans 'Navigation' %}{% endblock %}
+{% block body %}
+  {%- if widget.pages %}
+  <ul>
+  {%- for item in widget.pages %}
+    <li><a href="{{ url_for(item)|e }}">{{ item.title|e }}</a></li>
+  {%- endfor %}
+  </ul>
+  {%- endif %}
+{% endblock %}
