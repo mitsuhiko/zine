@@ -8,8 +8,19 @@
     chose from and also different settings that you should set depending on
     the type of server you have and the number of visitors.
   {% endtrans %}</p>
+  <script type="text/javascript">
+    $(function() {
+      $('select').change(function() {
+        var activeItem = $(this).val();
+        $('div.optionbox').each(function() {
+          $(this).is('#' + activeItem + '-options')
+            ? $(this).show() : $(this).hide();
+        });
+      }).change();
+    });
+  </script>
   <form action="" method="post">
-    <h3>Cache System</h3>
+    <h3>{% trans "Cache System" %}</h3>
     <p>{% trans "Current TextPress supports three caching systems:" %}</p>
     <ul>
       <li>{% trans %}<strong>Simple Cache</strong>: The simple cache is a very
@@ -32,7 +43,7 @@
       <option value="{{ key }}"{% if key == form.cache_system
         %} selected{% endif %}>{{ value }}</option>{% endfor %}</select></p>
     <div class="optionbox" id="memcached-options">
-      <h3>Memcached Options</h3>
+      <h3>{% trans "Memcached Options" %}</h3>
       <p>{% trans %}
         In order to use the memcached system you have to provide the address
         of at least one machine running memcached.  For further details have
@@ -47,30 +58,38 @@
         port 10000 you would have to enter <code>127.0.0.1:10000</code> into
         the following text field.
       {% endtrans %}</p>
-      <p>{{ h.input_field('memcached_servers', size=60) }}</p>
+      <p>{{ h.input_field('memcached_servers', form.memcached_servers,
+                          size=60) }}</p>
     </div>
     <div class="optionbox" id="filesystem-options">
-      <h3>Filesystem Options</h3>
+      <h3>{% trans "Filesystem Options" %}</h3>
       <p>{% trans %}
         When using the filesystem cache you can control where TextPress puts
         all the cache data.  This path is relative to your TextPress instance
         folder and will be created automatically by TextPress.  Keep in mind
         that if you change that path and old cache data is left in the old
-        folder, TextPress won't clean up the data left there for you.
+        folder, TextPress won't clean up the data left for you.
       {% endtrans %}</p>
-      <p>{{ h.input_field('filesystem_cache_path', size=40) }}</p>
+      <p>{{ h.input_field('filesystem_cache_path', form.filesystem_cache_path,
+                          size=40) }}</p>
     </div>
-    <script type="text/javascript">
-      $(function() {
-        $('select').change(function() {
-          var activeItem = $(this).val();
-          $('div.optionbox').each(function() {
-            $(this).is('#' + activeItem + '-options')
-              ? $(this).show() : $(this).hide();
-          });
-        }).change();
-      });
-    </script>
+    <h3>{% trans "General Cache Settings" %}</h3>
+    <p>{% trans %}
+      The following configuration values are cache system-independent.  You
+      can use them to fine-tune the caching.  The timeout is the number of
+      seconds an item is cached per default.  Some items have different cache
+      timeouts though.  If “eager caching” is enabled the cache system will
+      cache a lot more but it will have visible side-effects.  For example
+      new blog posts won't appear on the index or in the feed for up to the
+      default timeout.
+    {% endtrans %}</p>
+    <dl>
+      <dt>{% trans "Default cache timeout" %}</dt>
+      <dd>{{ h.input_field('cache_timeout', form.cache_timeout) }}</dd>
+      <dt>{% trans "Enable eager caching" %}
+      <dd>{{ h.checkbox('enable_eager_caching', form.enable_eager_caching) }}
+          <label for="enable_eager_caching">{% trans "enable" %}</label></dd>
+    </dl>
     <div class="actions">
       <input type="submit" value="Save">
       {{ hidden_form_data }}

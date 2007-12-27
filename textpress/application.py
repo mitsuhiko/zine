@@ -437,9 +437,11 @@ class ThemeLoader(CachedLoaderMixin, BaseLoader):
 
     def __init__(self, app):
         self.app = app
-        template_cache_path = path.join(app.instance_folder,
-                                        app.cfg['template_cache_path'])
         template_memcache = app.cfg['template_memcache']
+        template_cache_path = app.cfg['template_cache_path'] or None
+        if template_cache_path is not None:
+            template_cache_path = path.join(app.instance_folder,
+                                            template_cache_path)
         CachedLoaderMixin.__init__(self,
             template_memcache > 0,
             template_memcache,

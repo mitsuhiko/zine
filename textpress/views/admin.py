@@ -1390,8 +1390,54 @@ def do_remove_plugin(request, plugin):
 def do_cache(request):
     """Configure the cache."""
     csrf_protector = CSRFProtector()
+    cfg = request.app.cfg
+    form = {
+        'cache_system':             cfg['cache_system'],
+        'cache_timeout':            cfg['cache_timeout'],
+        'enable_eager_caching':     cfg['enable_eager_caching'],
+        'memcached_servers':        cfg['memcached_servers'],
+        'filesystem_cache_path':    cfg['filesystem_cache_path']
+    }
+    errors = []
+
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+        form['cache_system'] = cache_system = \
+            request.form.get('cache_system')
+        if cache_system not in cache.systems:
+            errors.append(_('Invalid cache system selected.'))
+        form['cache_timeout'] = cache_timeout = \
+            request.form.get('cache_timeout', '')
+        if not cache_timeout.isdigit():
+            errors.append(_('Cache timeout must be positive integer.'))
+        else:
+            cache_timeout = int(cache_timeout)
+            if cache_timeout < 10:
+                errors.append(_('Cache timeout must be greater than 10 '
+                                'seconds.'))
+        form['enable_eager_caching'] = enable_eager_caching = \
+            'enable_eager_caching' in request.form
+        form['memcached_servers'] = memcached_servers = \
+            request.form.get('memcached_servers', '')
+        form['filesystem_cache_path'] = filesystem_cache_path = \
+            request.form.get('filesystem_cache_path', '')
+
+        if not errors:
+            if cache_system != cfg['cache_system']:
+                cfg['cache_system'] = cache_system
+            if cache_timeout != cfg['cache_timeout']:
+                cfg['cache_timeout'] = cache_timeout
+            if enable_eager_caching != cfg['enable_eager_caching']:
+                cfg['enable_eager_caching'] = enable_eager_caching
+            if memcached_servers != cfg['memcached_servers']:
+                cfg['memcached_servers'] = memcached_servers
+            if filesystem_cache_path != cfg['filesystem_cache_path']:
+                cfg['filesystem_cache_path'] = filesystem_cache_path
+            flash(_('Updated cache settings.'), 'configure')
+
     return render_admin_response('admin/cache.html', 'options.cache',
         hidden_form_data=make_hidden_fields(csrf_protector),
+        form=form,
         cache_systems=[
             ('simple', _('Simple Cache')),
             ('memcached', _('memcached')),
