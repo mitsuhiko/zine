@@ -276,7 +276,8 @@ class FileSystemCache(BaseCache):
 
     def __init__(self, app):
         super(FileSystemCache, self).__init__(app)
-        self._path = app.cfg['filesystem_cache_path']
+        self._path = os.path.join(app.instance_folder,
+                                  app.cfg['filesystem_cache_path'])
         self._threshold = 500
         if not os.path.exists(self._path):
             os.makedirs(self._path)

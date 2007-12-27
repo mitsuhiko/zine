@@ -42,7 +42,7 @@ DEFAULT_VARS = {
     'cache_timeout':            (int, 300),
     'cache_system':             (unicode, u'null'),
     'memcached_servers':        (unicode, u''),
-    'filesystem_cache_path':    (unicode, u''),
+    'filesystem_cache_path':    (unicode, u'cache'),
 
     # the default markup parser. Don't ever change this value! The
     # htmlprocessor module bypasses this test when falling back to

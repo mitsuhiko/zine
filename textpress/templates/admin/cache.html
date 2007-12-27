@@ -31,6 +31,46 @@
     <p><select name="cache_system">{%- for key, value in cache_systems %}
       <option value="{{ key }}"{% if key == form.cache_system
         %} selected{% endif %}>{{ value }}</option>{% endfor %}</select></p>
+    <div class="optionbox" id="memcached-options">
+      <h3>Memcached Options</h3>
+      <p>{% trans %}
+        In order to use the memcached system you have to provide the address
+        of at least one machine running memcached.  For further details have
+        a look at <a href="http://www.danga.com/memcached/">the memcached
+        webpage</a>.  Separate multiple addresses with colons.  This also
+        requires either the <a href="http://gijsbert.org/cmemcache/"
+        >cmemcache</a> or <a href="ftp://ftp.tummy.com/pub/python-memcached/"
+        >python-memcached</a> module and install it.
+      {% endtrans %}</p>
+      <p>{% trans %}
+        If you for example have a memcached running on localhost (127.0.0.1)
+        port 10000 you would have to enter <code>127.0.0.1:10000</code> into
+        the following text field.
+      {% endtrans %}</p>
+      <p>{{ h.input_field('memcached_servers', size=60) }}</p>
+    </div>
+    <div class="optionbox" id="filesystem-options">
+      <h3>Filesystem Options</h3>
+      <p>{% trans %}
+        When using the filesystem cache you can control where TextPress puts
+        all the cache data.  This path is relative to your TextPress instance
+        folder and will be created automatically by TextPress.  Keep in mind
+        that if you change that path and old cache data is left in the old
+        folder, TextPress won't clean up the data left there for you.
+      {% endtrans %}</p>
+      <p>{{ h.input_field('filesystem_cache_path', size=40) }}</p>
+    </div>
+    <script type="text/javascript">
+      $(function() {
+        $('select').change(function() {
+          var activeItem = $(this).val();
+          $('div.optionbox').each(function() {
+            $(this).is('#' + activeItem + '-options')
+              ? $(this).show() : $(this).hide();
+          });
+        }).change();
+      });
+    </script>
     <div class="actions">
       <input type="submit" value="Save">
       {{ hidden_form_data }}
