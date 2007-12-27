@@ -9,10 +9,10 @@
     </fieldset>
     <fieldset>
       <legend>{% trans "Key" %}</legend>
-      <p>{{ h.input_field('key', form.key, size=25) }}</p>
-      <p><em>{% trans %}
+      {{ h.input_field('key', form.key, size=25) }}<br>
+      <em>{% trans %}
         The key is used to build the url. If no key is given it's just the title-slug.
-      {% endtrans %}</em></p>
+      {% endtrans %}</em>
     </fieldset>
     <fieldset>
       <legend>{% trans "Content" %}</legend>
