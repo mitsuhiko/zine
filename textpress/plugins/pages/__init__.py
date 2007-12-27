@@ -184,7 +184,7 @@ def show_pages_delete(request, page_id):
 
 @cache.all_if_anonymous()
 def show_page(self, key):
-    page = Page.objects.query.filter_by(key=key).one()
+    page = Page.objects.query.filter_by(key=key).first()
     if page is None:
         raise NotFound()
     return render_response(
