@@ -1402,6 +1402,12 @@ def do_cache(request):
 
     if request.method == 'POST':
         csrf_protector.assert_safe()
+
+        if 'clear_cache' in request.form:
+            request.app.cache.clear()
+            flash(_('The cache was cleared successfully.'), 'configure')
+            return redirect(url_for('admin/cache'))
+
         form['cache_system'] = cache_system = \
             request.form.get('cache_system')
         if cache_system not in cache.systems:

@@ -36,8 +36,6 @@ DEFAULT_VARS = {
     'profiles_url_prefix':      (unicode, u'/authors'),
 
     # cache settings
-    'template_cache_path':      (unicode, u''),
-    'template_memcache':        (int, 0),
     'enable_eager_caching':     (bool, False),
     'cache_timeout':            (int, 300),
     'cache_system':             (unicode, u'null'),

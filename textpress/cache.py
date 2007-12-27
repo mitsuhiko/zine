@@ -25,6 +25,8 @@ except ImportError:
         import memcache
     except ImportError:
         have_memcache = False
+from thread import allocate_lock
+from jinja.translators.python import PythonTranslator, Template
 from textpress.utils import local
 
 
@@ -167,6 +169,40 @@ def response(vary=(), timeout=None, cache_key=None):
     return decorator
 
 
+class TemplateLoaderMixin(object):
+    """
+    A cache mixin for the jinja template engine that uses our own cache
+    system rather than the default cache systems.
+    """
+
+    def __init__(self, app):
+        self.__cache = app.cache
+        self.__lock = allocate_lock()
+
+    def load(self, environment, name, translator):
+        """Load and translate the template.  And cache it."""
+        self.__lock.acquire()
+        try:
+            if translator is not PythonTranslator:
+                return super(TemplateLoaderMixin, self).load(
+                             environment, name, translator)
+            tmpl = None
+            push_to_memory = False
+            bytecode = self.__cache.get('template:' + name)
+            if bytecode is not None:
+                tmpl = Template.load(environment, bytecode)
+            else:
+                push_to_memory = True
+            if tmpl is None:
+                tmpl = super(TemplateLoaderMixin, self).load(
+                             environment, name, translator)
+            if push_to_memory:
+                self.__cache.set('template:' + name, tmpl.dump())
+            return tmpl
+        finally:
+            self.__lock.release()
+
+
 class BaseCache(object):
     """Baseclass for our cache systems."""
 
@@ -176,17 +212,24 @@ class BaseCache(object):
 
     def get(self, key):
         return None
+    delete = get
 
     def get_many(self, *keys):
         return [self.get(key) for key in keys]
 
-    def add(self, key, value, timeout=None):
-        pass
-
     def set(self, key, value, timeout=None):
         pass
+    add = set
 
-    def delete(self, key):
+    def set_many(self, mapping, timeout=None):
+        for key, value in mapping.iteritems():
+            self.set(key, value, timeout)
+
+    def delete_many(self, *keys):
+        for key in keys:
+            self.delete(key)
+
+    def clear(self):
         pass
 
 
@@ -205,6 +248,7 @@ class SimpleCache(BaseCache):
     def __init__(self, app):
         super(SimpleCache, self).__init__(app)
         self._cache = {}
+        self.clear = self._cache.clear
         self._expires = {}
         self._threshold = 500
 
@@ -267,8 +311,19 @@ class MemcachedCache(BaseCache):
             timeout = self.default_timeout
         self._client.set(key, value, timeout)
 
+    def set_many(self, mapping, timeout=None):
+        if timeout is None:
+            timeout = self.default_timeout
+        self._client.set_multi(mapping, timeout)
+
     def delete(self, key):
         self._client.delete(key)
+
+    def delete_many(self, *keys):
+        self._client.delete_multi(keys)
+
+    def clear(self):
+        self._client.flush_all()
 
 
 class FileSystemCache(BaseCache):
@@ -335,9 +390,13 @@ class FileSystemCache(BaseCache):
 
     def delete(self, key):
         try:
-            os.remove(self._get_filename(filename))
+            os.remove(self._get_filename(key))
         except (IOError, OSError):
             pass
+
+    def clear(self):
+        for key in os.listdir(self._path):
+            self.delete(key)
 
 
 #: map the cache systems to strings for the configuration

@@ -8,6 +8,11 @@
     chose from and also different settings that you should set depending on
     the type of server you have and the number of visitors.
   {% endtrans %}</p>
+  <p>{% trans %}
+    Keep in mind that if caching is enabled templates will be cached too and
+    as a result of that, not reloaded.  If you are trying to develop plugins
+    it's a good idea to disable all caching.
+  {% endtrans %}</p>
   <script type="text/javascript">
     $(function() {
       $('select').change(function() {
@@ -55,7 +60,7 @@
       {% endtrans %}</p>
       <p>{% trans %}
         If you for example have a memcached running on localhost (127.0.0.1)
-        port 10000 you would have to enter <code>127.0.0.1:10000</code> into
+        port 11211 you would have to enter <code>127.0.0.1:11211</code> into
         the following text field.
       {% endtrans %}</p>
       <p>{{ h.input_field('memcached_servers', form.memcached_servers,
@@ -69,6 +74,14 @@
         folder and will be created automatically by TextPress.  Keep in mind
         that if you change that path and old cache data is left in the old
         folder, TextPress won't clean up the data left for you.
+      {% endtrans %}</p>
+      <p>{% trans %}
+        One thing you have to keep in mind is that the cache path <em>must</em>
+        be a directory that only TextPress uses for file management.  The
+        TextPress code cleans up there from time to time and it could delete
+        files that are otherwise not tracked by TextPress.  This is especially
+        the case if you try to cache into <code>/tmp</code> or a similar
+        folder where all kinds of applications put temporary files in.
       {% endtrans %}</p>
       <p>{{ h.input_field('filesystem_cache_path', form.filesystem_cache_path,
                           size=40) }}</p>
@@ -91,7 +104,8 @@
           <label for="enable_eager_caching">{% trans "enable" %}</label></dd>
     </dl>
     <div class="actions">
-      <input type="submit" value="Save">
+      <input type="submit" value="{% trans 'Save' %}">
+      <input type="submit" name="clear_cache" value="{% trans 'Clear Cache' %}">
       {{ hidden_form_data }}
     </div>
   </form>

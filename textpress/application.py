@@ -28,7 +28,7 @@ from collections import deque
 
 from textpress.database import db, upgrade_database, cleanup_session
 from textpress.config import Configuration
-from textpress.cache import get_cache
+from textpress.cache import get_cache, TemplateLoaderMixin
 from textpress.utils import format_datetime, format_date, format_month, \
      ClosingIterator, check_external_url, local, local_manager
 
@@ -39,7 +39,7 @@ from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
 from werkzeug.contrib.securecookie import SecureCookie
 
 from jinja import Environment
-from jinja.loaders import BaseLoader, CachedLoaderMixin
+from jinja.loaders import BaseLoader
 from jinja.exceptions import TemplateNotFound
 from jinja.datastructure import Deferred
 
@@ -427,7 +427,7 @@ class Theme(object):
         return sorted(templates)
 
 
-class ThemeLoader(CachedLoaderMixin, BaseLoader):
+class ThemeLoader(TemplateLoaderMixin, BaseLoader):
     """
     Loads the templates. First it tries to load the templates of the
     current theme, if that doesn't work it loads the templates from the
@@ -437,18 +437,7 @@ class ThemeLoader(CachedLoaderMixin, BaseLoader):
 
     def __init__(self, app):
         self.app = app
-        template_memcache = app.cfg['template_memcache']
-        template_cache_path = app.cfg['template_cache_path'] or None
-        if template_cache_path is not None:
-            template_cache_path = path.join(app.instance_folder,
-                                            template_cache_path)
-        CachedLoaderMixin.__init__(self,
-            template_memcache > 0,
-            template_memcache,
-            template_cache_path or None,
-            False,
-            app.instance_folder
-        )
+        TemplateLoaderMixin.__init__(self, app)
 
     def get_source(self, environment, name, parent):
         rv = self.app.theme.get_source(name)
