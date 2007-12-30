@@ -1,0 +1,27 @@
+======================
+Documentation Overview
+======================
+
+Welcome to the TextPress documentation.  This documentation is not yet
+finished any many links end up in the middle of nowhere.  If you want to
+help documenting contact us in the ``#pocoo`` IRC Channel on irc.freenode.net.
+
+
+Getting Started With TextPress
+==============================
+
+This section covers the basics of TextPress so that you can get started
+quickly.
+
+-   `Installation <installation.txt>`_
+
+
+Extending TextPress
+===================
+
+This chapter of the documentation covers plugin development.  Also if you are
+interested in designing your own themes you should have a look here.
+
+-   `Introduction <extend/intro.txt>`_
+-   `Hello World Plugin <extend/helloworld.txt>`_
+-   `Code Styleguide <extend/styleguide.txt>`_

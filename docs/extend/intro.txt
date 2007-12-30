@@ -1,0 +1,129 @@
+===============================
+Plugin Development Introduction
+===============================
+
+One of the strengths of TextPress is the extensibility.  In order to be able
+to extend it you should have worked with Python in the past, at least a bit.
+If you have not, it's time to `learn it`_.
+
+.. _learn it: http://diveintopython.org/
+
+
+Using the TextPress Development Version
+=======================================
+
+If you want to develop plugins for TextPress you should always use the
+mercurial version of TextPress.  One reason for that is that this version
+comes with a script for development purposes that allows you to test your
+plugins locally without a webserver, it reloads plugin changes automatically
+and it is able to package your plugins into files you can distribute.
+
+In order to get your own development checkout execute the following
+command from a shell::
+
+    hg clone http://dev.pocoo.org/hg/textpress-main
+
+Then go to the textpress-main directory and create an empty folder called
+`instance` there.  After that you can use the `textpress-management.py`
+to control the application.
+
+In order to start the development server use the following command::
+
+    python textpress-management.py runserver
+
+To get a python shell in the context of the application use this::
+
+    python textpress-management.py shell
+
+All other commands are documented on the help page::
+
+    python textpress-management --help
+
+
+Creating a New Plugin
+=====================
+
+TextPress plugins are simple python packages with an additional file called
+`metadata.txt` which holds the name of the package, author and a description.
+
+There are two locations where TextPress looks for plugins.  One is the
+`plugins` folder in the TextPress directory.  All the core plugins go there,
+but only those.  If you develop your own plugin have to use the `plugins`
+folder in the instance folder.  If it doesn't exist by now you can create it
+yourself.
+
+The first thing you have to think about is the unique ID for the plugin.  This
+unique id is part of the import path, the plugin configuration and other
+similar things.  It should be lowercase and **must** match the following
+regular expression: ``[a-zA-Z][a-zA-Z0-9_]*``.
+
+Because the UID must be unique for all plugins you should chose a not so
+generic one.  If your plugin provides an API suffix it with ``-api``.  If
+your plugin provides a theme suffix it with ``-theme``.
+
+After you have decided on a UID you should create a folder with that name in
+the `plugins` folder and add two empty files called `__init__.py` and
+`metadata.txt`.
+
+These are the minimal requirements for a plugin.  The metadata is used in the
+plugin browser to display information about that plugin and the init file
+makes it importable as python package.  Your plugin is now importable from
+`textpress.plugins.uid` where uid is the unique ID you have selected.
+
+The MetaData
+============
+
+The `metadata.txt` is a simple text file in utf-8 encoding with all the
+information about your plugin.  Each line represents one key and value,
+delimited by a colon. If your entry is too long for one line you can
+backslash-escape the line and break afterwards.
+
+The following `metadata.txt` is used by the akismet plugin::
+
+    Name: Akismet Spam Filter
+    Plugin URL: http://textpress.pocoo.org/plugins/akismet_spam_filter
+    Author: Armin Ronacher <armin.ronacher@active-4.com>
+    Author URL: http://lucumr.pocoo.org/
+    License: GPL
+    Version: 0.1
+    Description: <a href="http://akismet.com/">Akismet</a> checks your comments\
+     against the Akismet web service to see if they look like spam or not. You\
+     need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a>\
+     to use it. You can review the spam it catches under "Comments" after\
+     configuring it.
+
+You can use this as template for your own metadata file.
+
+The Plugin Architecture
+=======================
+
+The plugin system of TextPress is pretty simple.  Plugins are enabled via the
+configuration and all enabled plugins are initialized during the application
+setup phase.  As a consequence of that plugins cannot hook into events after
+the application is started.  However TextPress is able to reinitialize the
+application automatically if the configuration changed.
+
+Each plugin must have a function called `setup` which is called with the
+instance of the application as first argument and a reference to the plugin
+as second argument.
+
+A very simple plugin that does nothing looks like this::
+
+    def setup(app, plugin):
+        pass
+
+The `app` is an instance of the `textpress.application.TextPress` object and
+provides a couple of functions plugins can use to register themselves for
+events or similar things.  The `plugin` on the other hand is a wrapper object
+around the package of this plugin.  It can be used to access the parsed
+metadata from the `metadata.txt` file.
+
+Depending on what you want to do with your plugin you have to call different
+methods on the application object.  For example to register a new
+configuration variable you can use the `app.add_config_var` method::
+
+    app.add_config_var('yourplugin/yourkey', unicode, 'default value')
+
+That's it.  More details in the `Hello World tutorial`_.
+
+.. _Hello World tutorial: extend/helloworld.txt

@@ -1,0 +1,144 @@
+====================
+"Hello World" Plugin
+====================
+
+In this tutorial we will develop a very simple Plugin that provides a page
+``/hello`` that renders a "Hello World" message.
+
+The first thing is creating the package structure for our plugin.  For that
+just follow the steps from the `Introduction`_ and name your plugin
+`helloworld`.
+
+.. _Introduction: extend/intro.txt
+
+
+Providing Templates and listen on a URL
+=======================================
+
+The first thing we want to do is to add a folder to the template search path
+where the template of our page is stored in.  Additionally we want to add a
+new URL rule to the dispatcher and bind a function to it that is called
+whenever that URL is visited.
+
+The following code should be enough for the moment.  All that goes into the
+newly created `__init__.py` file::
+
+    from textpress.api import *
+    from os.path import dirname, join
+
+    def do_show(request):
+        return Response('Hello World!')
+
+    def setup(app, plugin):
+        app.add_url_rule('/hello', prefix='blog', endpoint='helloworld/show')
+        app.add_view('helloworld/show', do_show)
+        app.add_template_searchpath(join(dirname(__file__), 'templates'))
+
+So what does that all mean?  The first import pulls all the helper functions
+from the public plugin API.  We will use it later to render the template.
+The second import gets us two functions (`dirname` and `join`) we can use
+to calculate the path to the template folder we want to add, relative to
+the location of the `__init__.py` file.
+
+The function we define will be called if the URL rule matches with a
+request object and the rule parameters.  Because our rule does not have
+any parameters we also don't accept any.
+
+The third thing is the main setup procedure.  This is called by the TextPress
+during the application initialization procedure.   We add a new URL rule for
+`/hello` below the blog (that's what prefix = blog does) and give it a new
+unique endpoint.  In the next line we bind the function we defined a view
+steps before to the endpoint and add our template folder to the searchpath.
+
+The prefix ensures that our plugin will always be below the "blog".  It
+could be that a user wants to move the blog to `/blog` or something like
+that and have other plugins providing a new index page.  For example if you
+want to display a nice welcome page or whatever.  In this case we could
+omit the prefix and the plugin will listen on `/hello` whereas the blog
+will listen on `/blog`.  Usually plugins should use the prefix unless the
+plugin has nothing to do with the blog.
+
+Now we can create the `templates` folder in our plugin folder so that the
+plugin loader does not complain.
+
+
+Testing The Plugin
+==================
+
+Assuming you are using a development checkout of TextPress you can now start
+up the development server using the following command::
+
+    python textpress-management.py runserver
+
+After the server is up and running you can fill out the web setup and go
+straight to the admin panel.  As database for development purposes we
+recommend sqlite.
+
+Once you are in the admin panel you can go to the plugin tab under options
+and enable your newly created `helloworld` plugin.  If there are no typos
+in the plugin code it should load as expected.  If not the plugin guard
+automatically disables the plugin again and gives you the error message.
+
+After the plugin is loaded you can access ``http://localhost:4000/hello``
+and should get a white page that says "Hello World!".
+
+
+Rendering a Template
+====================
+
+If you develop a plugin that provides custom pages you usually want to render
+a template and not only return a string.  If a plugin provides a template it
+can be overridden in the current active theme so you should give your template
+a meaningful name.  But beware: All plugins share the themes, so if you call
+your template `index.html` this will clash with the default templates for
+example.  A good idea is creating a folder with the same name of the plugin
+if you plan to render multiple pages or a template with the name of the plugin
++ `.html`.
+
+In our example we create a new file called `helloworld.html` in the template
+folder we have created before and put the following template code in::
+
+    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+    <title>Example Plugin</title>
+    <p>Hello {{ name|e }}!</p>
+
+The template language used by TextPress is obviously `Jinja`_.  Everything
+between double curly braces is called an expression and will be added to the
+template.  This expression basically means: render the HTML escaped name.
+
+This escaping is very important because uses can submit this name via URL
+parameter in our example.  If we won't escape it we have a serious
+`security issue`_.
+
+Now it's time to update our `do_show` function::
+
+    def do_show(request):
+        return render_template('helloworld.html',
+            name=request.args.get('name', 'World')
+        )
+
+This will render our template and pass it a variable called `name` which will
+either be the value of the name URL parameter (``?name=Foo``) or ``World``
+if no name is provided.
+
+Visiting ``http://localhost:4000/hello`` should now display "Hello World!"
+and visiting ``http://localhost:4000/hello?name=Bob`` should display
+"Hello Bob!".
+
+
+Using the Theme Layout
+======================
+
+Jinja allows use to use template inheritance to give us the layout of the
+current active theme.  If you have enabled a fancy theme (for example
+`myrtle` which is part of TextPress) you should see a nicer version after
+you have changed the template to something like this::
+
+    {% extends "layout.html" %}
+    {% block body %}
+      <p>Hello {{ name|e }}!</p>
+    {% endblock %}
+
+
+.. _Jinja: http://jinja.pocoo.org/
+.. _security issue: http://en.wikipedia.org/wiki/XSS
