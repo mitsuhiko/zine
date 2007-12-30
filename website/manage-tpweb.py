@@ -14,16 +14,35 @@ from werkzeug import script
 
 
 def make_app():
-    from tpweb import application
+    from tpweb import application, configure
+    configure(
+        database_uri='sqlite:////tmp/tpweb.db'
+    )
     return application
 
-
-def shell_init_func():
-    return {}
-
-
 action_runserver = script.make_runserver(make_app, use_reloader=True)
-action_shell = script.make_shell(shell_init_func)
+
+def action_initdb():
+    """Initialize the database tables."""
+    from tpweb import init_database
+    make_app()
+    init_database()
+
+def action_planet_add(name='', url='', feed_url='', description=''):
+    """Add a new blog to the planet."""
+    make_app()
+    if not name or not url or not feed_url:
+        print 'Error: name, url and feed_url required.'
+    else:
+        from tpweb.planet import Blog, session
+        Blog(name, url, feed_url, description)
+        session.commit()
+
+def action_planet_sync():
+    """Sync the planet."""
+    from tpweb.planet import sync
+    make_app()
+    sync()
 
 
 if __name__ == '__main__':

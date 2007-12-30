@@ -10,14 +10,18 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 from os import path
 from mako.lookup import TemplateLookup
-from werkzeug import BaseRequest, BaseResponse, SharedDataMiddleware, \
-     responder
+from werkzeug import BaseRequest, BaseResponse, SharedDataMiddleware
 from werkzeug.exceptions import HTTPException, NotFound
 
 
 ROOT = path.realpath(path.dirname(__file__))
+metadata = MetaData()
+session = scoped_session(sessionmaker(autoflush=True, transactional=True))
+configuration = {}
 template_lookup = TemplateLookup(
     directories=[path.join(ROOT, 'templates')],
     input_encoding='utf-8'
@@ -39,12 +43,11 @@ def render_to_response(request, template_name, context, status=200):
     return response
 
 
-def handle_request(environ, start_response):
+def handle_request(request):
     """Handle a request and return a response object."""
-    request = BaseRequest(environ)
-    request.url_adapter = url_adapter = url_map.bind_to_environ(environ)
     try:
-        endpoint, values = url_adapter.match(request.path)
+        endpoint, values = request.url_adapter.match(request.path)
+        request.endpoint = endpoint
         if endpoint in handlers:
             return handlers[endpoint](request, **values)
         return render_to_response(request, endpoint, values, 200)
@@ -54,10 +57,33 @@ def handle_request(environ, start_response):
         return e
 
 
+def wsgi_app(environ, start_response):
+    """Handle the low level WSGI stuff."""
+    request = BaseRequest(environ)
+    request.url_adapter = url_map.bind_to_environ(environ)
+    try:
+        return handle_request(request)(environ, start_response)
+    finally:
+        session.remove()
+
+
+def configure(**options):
+    """Update the configuration."""
+    configuration.update(options)
+    metadata.bind = create_engine(configuration['database_uri'],
+                                  convert_unicode=True)
+
+
+def init_database():
+    """Initialize the database."""
+    import tpweb.planet
+    metadata.create_all()
+
+
 # import the handlers and url map here to avoid circular dependencies
 from tpweb.urls import url_map, handlers
 
 # create the WSGI application object.
-application = SharedDataMiddleware(responder(handle_request), {
+application = SharedDataMiddleware(wsgi_app, {
     '/shared':  path.join(ROOT, 'shared')
 })

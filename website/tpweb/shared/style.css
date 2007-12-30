@@ -195,3 +195,23 @@ ul.toc ul {
 ul.toc ul li {
     padding: 0;
 }
+
+div.day div.entry img {
+    max-width: 100%;
+}
+
+div.day h3 {
+    margin-bottom: 0;
+}
+
+div.day p.meta {
+    margin: 0.1em 0 0.3em 0;
+    font-size: 0.9em;
+}
+
+div.pagination {
+    margin-top: 2em;
+    padding-top: 0.5em;
+    border-top: 1px solid black;
+    text-align: center;
+}

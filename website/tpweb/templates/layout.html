@@ -12,6 +12,7 @@
   <link rel="stylesheet" type="text/css" href="${url_for('shared', file='style.css')}">
   <script type="text/javascript" src="${url_for('shared', file='jQuery.js')}"></script>
   <script type="text/javascript" src="${url_for('shared', file='TextPress.js')}"></script>
+  ${self.html_head()}
 </head>
 <body>
   <div class="page">
@@ -21,8 +22,9 @@
     <ul class="navigation">
       <li${highlight_if(active='index')}><a href="${url_for('index.html')}">Home</a></li>
       <li${highlight_if(active='about')}><a href="${url_for('about/index.html')}">About</a></li>
-      <li${highlight_if(active='documentation')}><a href="${url_for('documentation/index.html')}">Documentation</a></li>
+      <li${highlight_if(active='documentation')}><a href="${url_for('documentation/show', slug='overview')}">Documentation</a></li>
       <li${highlight_if(active='extend')}><a href="${url_for('extend/index.html')}">Extend</a></li>
+      <li${highlight_if(active='community')}><a href="${url_for('community/index.html')}">Community</a></li>
       <li${highlight_if(active='download')}><a href="${url_for('download.html')}">Download</a></li>
     </ul>
     <div class="body">
@@ -39,3 +41,4 @@
 <%def name="title()">Untitled</%def>
 <%def name="active_navigation_item()">none</%def>
 <%def name="aside()"></%def>
+<%def name="html_head()"></%def>

@@ -4,7 +4,7 @@
 <%def name="aside()">
   <%
       def make_navigation_item(endpoint, title):
-          if endpoint == template:
+          if endpoint == request.endpoint:
               return '<strong>%s</strong>' % title
           return '<a href="%s">%s</a>' % (url_for(endpoint), title)
   %>

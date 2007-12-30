@@ -8,4 +8,4 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from tpweb.application import application
+from tpweb.application import application, configure, init_database

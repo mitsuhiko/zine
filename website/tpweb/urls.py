@@ -23,13 +23,22 @@ url_map = Map([
     Rule('/about/team', endpoint='about/team.html'),
     Rule('/about/inspiration', endpoint='about/inspiration.html'),
 
-    Rule('/documentation/', endpoint='documentation/index.html'),
+    Rule('/documentation/', defaults={'slug': 'overview'},
+         endpoint='documentation/show'),
     Rule('/documentation/<path:slug>', endpoint='documentation/show'),
     Rule('/documentation/extend/', defaults={'slug': 'extend/intro'},
          endpoint='documentation/show'),
 
     Rule('/extend/', endpoint='extend/index.html'),
     Rule('/download', endpoint='download.html'),
+
+    Rule('/community/', endpoint='community/index.html'),
+    Rule('/community/irc', endpoint='community/irc.html'),
+    Rule('/community/planet/', defaults={'page': 1},
+         endpoint='community/planet'),
+    Rule('/community/planet/page/<int:page>', endpoint='community/planet'),
+    Rule('/community/planet/feed.atom', endpoint='community/planet_feed'),
+
     Rule('/shared/<file>', endpoint='shared', build_only=True)
 ])
 
@@ -38,7 +47,9 @@ url_map = Map([
 # object and some keyword arguments for the url values.  If no handler
 # exists for an endpoint the template with the name of the template is
 # loaded and the URL parameters are passed to the context of the template.
-from tpweb.dochelpers import show_documentation_page
+from tpweb import dochelpers, planet
 handlers = {
-    'documentation/show':       show_documentation_page
+    'documentation/show':       dochelpers.show_page,
+    'community/planet':         planet.show_index,
+    'community/planet_feed':    planet.get_feed
 }

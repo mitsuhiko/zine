@@ -19,7 +19,7 @@ from tpweb.application import ROOT, render_to_response
 from tpweb.smartypants import smartypants
 
 
-def show_documentation_page(request, slug):
+def show_page(request, slug):
     """Render the documentation template for a slug."""
     parts = prepare_documentation(request, slug)
     if parts is None:

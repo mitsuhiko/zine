@@ -16,6 +16,9 @@ We have two different name styles.  `CamelCase` for classes, `UPPER_CASE`
 for constants and `lower_case_with_underlines` for everything else.  If you
 have something you want to mark as private, prefix it with an underline.
 
+If you have class names that include acronyms leave them as uppercase
+(``XMLParser`` for example).
+
 Indentation
 ===========
 
@@ -50,6 +53,30 @@ whitespace usage::
             Foo.__init__(self, 1, [2, 3], 4)
 
 So two newlines before a class, and one newline before a method or a function.
+
+Docstrings
+==========
+
+Classes always have multipline docstrings, functions can have singleline
+docstrings if it's still possible to achieve EOL 79.  All the markup in the
+docstrings must be reStructuredText.  Here some examples::
+
+    class Foo(object):
+        """
+        A class named after a placeholder word.
+        """
+
+        def __unicode__(self):
+            """Get the unicode representation of `Foo`."""
+            return u'Foo'
+
+        def __str__(self):
+            """
+            The string representation of `Foo`.  The return value will be the
+            output of `__unicode__` in utf-8 encoding.  Encoding errors are
+            silenced.
+            """
+            return unicode(self).encode('utf-8', 'ignore')
 
 Other Things
 ============

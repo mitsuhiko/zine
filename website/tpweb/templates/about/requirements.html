@@ -7,52 +7,18 @@
   a little bit tricky to get TextPress running on cheap webhosts.
 </p>
 <p>
-  There are two TextPress “distributions”.  One is the regular distribution
-  which you should chose if you want to maintain multiple TextPress
-  installations and if you have shell access to the server.  It just includes
-  the TextPress sourcecode and a script to install the application code in the
-  system wide python extension folder.  The other distribution is the
-  “quickstart” distribution.  It comes with many of the depdenceny modules
-  and should work more or less out of the box in a CGI, FastCGI, mod_python
-  or mod_wsgi environment.
+  You have to have at least Python 2.4 and the following Python modules
+  installed.  If you are using <code>easy_install</code> to install TextPress
+  these are installed automatically for you.
 </p>
-<p>
-  The table below lists the minimal requirements for TextPress:
-</p>
-<table>
-  <thead>
-    <tr>
-      <th></th>
-      <th>regular</th>
-      <th>quickstart</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>minimal Python version</th>
-      <td>2.4</td>
-      <td>2.4</td>
-    </tr>
-    <tr>
-      <th>SQLAlchemy 0.4 or higher</th>
-      <td>yes</td>
-      <td>no</td>
-    </tr>
-    <tr>
-      <th>Jinja 1.2 or higher</th>
-      <td>yes</td>
-      <td>no</td>
-    </tr>
-    <tr>
-      <th>Werkzeug 0.2 or higher</th>
-      <td>yes</td>
-      <td>no</td>
-    </tr>
-  </tbody>
-</table>
+<ul>
+  <li><strong>SQLAlchemy</strong> 0.4 or higher</li>
+  <li><strong>Jinja</strong> 1.2 or higher</li>
+  <li><strong>Werkzeug</strong> 0.2 or higher</li>
+</ul>
 <p>
   Additionally one of the database systems supported by SQLAlchemy must be
-  available.
+  available.  Currently these are MySQL, sqlite, postgresql, MSSQL, and firebird.
 </p>
 <p>
   The following webservers and interfaces are supported by TextPress:

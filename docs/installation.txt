@@ -2,11 +2,7 @@
 TextPress Installation
 ======================
 
-Currently there are two distributions of TextPress.  The regular distribution
-and the quickstart distribution.  This document currently covers only the
-regular distribution.
-
-The regular distribution is packaged like any other Python library.  That
+TextPress is distributed like any other Python library.  That
 means you can install it system wide and create multiple "instances" of it
 and upgrade them in one go.  The python package also pulls automatically all
 dependency modules on installation.  However it also requires that you have
@@ -17,7 +13,8 @@ Installing TextPress
 ====================
 
 To install the TextPress sourcecode all you have to do is to download
-`ez_setup.py <#missing_link>`_ and execute it with the following shell command::
+`ez_setup.py <http://peak.telecommunity.com/dist/ez_setup.py>`_ and execute
+it with the following shell command::
 
     sudo python ez_setup.py TextPress
 
