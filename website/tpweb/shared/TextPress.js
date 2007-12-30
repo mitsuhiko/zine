@@ -9,5 +9,13 @@
  */
 
 $(function() {
-  
+
+  /* add anchors to headlines */
+  for (var i = 1; i <= 6; i++)
+    $('h' + i + ' [@id]').each(function() {
+      var anchor = $('<a class="anchor">¶</a>')
+        .attr('href', '#' + $(this).attr('id'))
+        .attr('title', 'Permalink to this headline')
+        .appendTo(this);
+    });
 });

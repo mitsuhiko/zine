@@ -1,0 +1,64 @@
+======================
+Working on the Website
+======================
+
+The TextPress website is a simple Python WSGI application that renders some
+mako templates and reStructuredText files.  The following tools are required
+if you want to work on it:
+
+-   Werkzeug 0.2 or higher
+-   Mako
+-   Docutils 0.4 or higher
+
+You can install all of them via `easy_install`.
+
+The sourcecode of the website is currently part of the TextPress repostitory
+but we will eventually move it out into a separate repository.  Until then you
+have to check out a `development version`_ of TextPress.
+
+.. _development version: core/contribute.txt
+
+
+Adding new Static Pages
+=======================
+
+If you want to add a new static page to the webpage you have to create a
+template for this page and add a URL rule to the `tpweb.urls` file.  Say your
+file is called `foo.html` and you want to display it as `/foo` you have to
+add this URL rule::
+
+    Rule('/foo', endpoint='foo.html')
+
+Rules are normal werkzeug rules and the rule values are passed to the template
+as variables.  The templates used for the website are Mako templates, not
+Jinja templates!
+
+That `foo.html` template could look like this::
+
+    <%inherit file="layout.html"/>
+    <%def name="title()">Foo</%def>
+
+    <h2>Foo</h2>
+    <p>This is the foo page.</p>
+
+    <%def name="aside()">
+      <p>This is the sidebar</p>
+    </%def>
+
+Currently the layout template requires the `aside` def for every page or the
+resulting page looks a bit strange.  We will probably drop the sidebar for
+templates that do not provide an aside def in the future.
+
+
+Adding new Dynamic Pages
+========================
+
+Somethings a template just is not enough.  If you want to do some more complex
+computations before rendering a template or not render a template at all you
+can add a module to the `tpweb` package that provides a function which is
+called with the request object as first argument and the URL values as keyword
+parameters.
+
+In order to bind such a callback function you can use the handler dict in the
+`tpweb.urls` module.  Just look at the stuff that is currently there for some
+examples.
