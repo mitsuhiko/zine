@@ -1,0 +1,28 @@
+<%inherit file="../layout.html"/>
+<%def name="title()">Extend TextPress</%def>
+<%def name="active_navigation_item()">extend</%def>
+
+<h2>Extend TextPress</h2>
+<p>
+  TextPress was designed to be extensible via plugins.  A lot of the
+  functionality provided by TextPress is already implemented as plugin
+  like for example file uploads or the themes.
+</p>
+<p>
+  If you want to create your own plugins or themes have a look at the
+  <a href="${url_for('documentation/show', slug='extend/intro'
+  )}">developer documentation</a>.
+</p>
+<p>
+  In the near future we will add a central plugin repository under this
+  URL.  Until then have a look at the <a href="http://dev.pocoo.org/projects/textpress"
+  >TextPress wiki</a>.
+</p>
+
+<%def name="aside()">
+  <p>
+    If you have developed your own plugin and you want to share it
+    with other people you <em>have</em> to release it under the
+    GNU GPL or a compatible license.
+  </p>
+</%def>

@@ -1,0 +1,42 @@
+<%inherit file="layout.html"/>
+<%!
+  screenshots = [
+    ('myrtle-index', 'Myrtle Theme'),
+    ('myrtle-comments', 'Comments in Myrtle Theme'),
+    ('myrtle-missing-page', 'Missing Page in Myrtle Theme'),
+    ('post-admin', 'Post Administration'),
+    ('comment-moderation', 'Comment Moderation'),
+    ('blog-options', 'Blog Options')
+  ]
+  screenshots_by_filename = {}
+  for filename, title in screenshots:
+      screenshots_by_filename[filename] = title
+%>
+% if screenshot is UNDEFINED:
+  <h2>Screenshots</h2>
+  <p>
+    So how does TextPress look like?  Here some screenshots from the current
+    default theme called “myrtle” and the admin interface:
+  </p>
+  <p class="manyimages">
+  % for filename, title in screenshots:
+    <a href="${url_for('about/screenshots.html', screenshot=filename
+    )}"><img src="${url_for('shared', file='screenshots/%s-thumb.png' % filename
+    )}" alt="${title}" title="${title}"></a>
+  % endfor
+  </p>
+% elif screenshot in screenshots_by_filename:
+  <% title = screenshots_by_filename[screenshot] %>
+  <h2>${title}</h2>
+  <p class="oneimage">
+    <img src="${url_for('shared', file='screenshots/%s-medium.png' % screenshot
+    )}" alt="screenshot">
+  </p>
+  <p>
+    You can download screenshot <a href="${url_for('shared', file='screenshots/%s.png'
+    % screenshot )}">in original size</a> or go back to <a href="${url_for(
+    'about/screenshots.html')}">the screenshots</a>.
+  </p>
+% else:
+  <% raise NotFound() %>
+% endif

@@ -1,0 +1,26 @@
+<%inherit file="../layout.html"/>
+<%def name="title()">Documentation</%def>
+<%def name="active_navigation_item()">documentation</%def>
+
+<h2>Documentation</h2>
+<p>
+  Unfortunately the user documentation is not yet finished.  You can have a
+  look at the current development documentation if you want, but we don't
+  guarantee that the documentation is 100% accurate.
+</p>
+<p>
+  <a href="${url_for('documentation/show', slug='overview')}">Read
+  the documentation</a>.
+</p>
+<p>
+  We're constantly looking for people helping us documenting TextPress.  If
+  you want to help documenting contact us in the <code>#pocoo</code> IRC
+  Channel on irc.freenode.net.
+</p>
+
+<%def name="aside()">
+  <p>
+    If you want to help documenting contact us in the <code>#pocoo</code>
+    IRC Channel on irc.freenode.net.
+  </p>
+</%def>

@@ -1,0 +1,30 @@
+<%inherit file="layout.html"/>
+<%def name="title()">Download</%def>
+<%def name="active_navigation_item()">download</%def>
+
+<h2>Download TextPress</h2>
+<p>
+  Got interested?  Then you can download TextPress from below:
+</p>
+<ul>
+  <li><a href="#">TextPress 0.1</a>, regular</li>
+  <li><a href="#">TextPress 0.1</a>, quickstart</li>
+</ul>
+<p>
+  The regular distribution contains the TextPress source code, the quickstart
+  distribution also contains some dependencies so that you can get started
+  quickly on a plugin webhost.
+</p>
+
+<%def name="aside()">
+  <p>
+    Unsure which distribution to chose?  You can check which one is
+    better for you on the
+    <a href="${url_for('about/requirements.html')}">requirements</a>
+    page.
+  </p>
+  <p>
+    Both have exactly the same features, the only difference is the
+    way you install and upgrade them.
+  </p>
+</%def>

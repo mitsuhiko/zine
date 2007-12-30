@@ -1,0 +1,64 @@
+<%inherit file="layout.html"/>
+<h2>Frequently Asked Questions</h2>
+<p>
+  This page tries to answer some of the frequently asked questions about
+  TextPress.  If you have a question that is not answered on this page, send
+  a mail to one of the developers or ask your questions on the IRC Channel
+  (<code>#pocoo</code>, on irc.freenode.net).
+</p>
+<h3>What are the Advantages of TextPress over similar Systems?</h3>
+<p>
+  It's hard to sum it up few sentences and for all other blog engines out
+  there, but the design of TextPress makes it very secure and extensible.
+  It's also very simple to upgrade a TextPress installation which makes
+  it also interesting if you want to host multiple TextPress installations
+  and upgrade them all in one go.  Also an imporant fact is the programming
+  language: Python.  If you want to extend your blog it's important to know
+  the underlaying programming language and Python makes it simple to dive
+  into extension development.
+</p>
+<h3>Why does TextPress use HTML4?</h3>
+<p>
+  TextPress currently outputs valid HTML4 and not HTML5 or XHTML.  The reason
+  for this is that we want to make it simple for theme developers to design
+  themes.  HTML5 is not yet a stable specification and as result of that, out
+  of the scope and XHTML is currently problematic from different point of
+  views.
+</p>
+<p>
+  One the one hand render browsers XHTML as HTML if sent as
+  <code>text/html</code> and if sent with the XHTML mimetype, some popular
+  browsers such as the Microsoft Internet Explorer just display the XML file
+  source.
+</p>
+<p>
+  We're constantly watching the development of the upcoming standards
+  (XHTML 2 and HTML5) to see when we will make the switch to one of those
+  specifications.  If you really need XHTML support (because of MathML) there
+  is currently no supported way beside hacky JavaScript solutions.
+</p>
+<h3>Why Python and not PHP?</h3>
+<p>
+  The reason why TextPress is implemented as Python application is that it
+  makes the core easy to maintain and allows us some programming tricks that
+  are not possible in PHP.  It makes it also a lot easier to develop plugins
+  for TextPress because of many reasons.  If you are really interested in some
+  more details, have a look at the sourcecode which should speak for itself.
+</p>
+<h3>What is the License Model?</h3>
+<p>
+  TextPress is released under the GNU GPL Version 2 or higher.  The GNU GPL
+  basically allows you to do whatever you want with TextPress as long as you
+  license all your published modifications on the source code under a
+  compatible license.  You don't have to pay for TextPress and you can
+  modify it as you like.  All details can be found <a
+  href="${url_for('about/license.html')}">in the license</a>.
+</p>
+<h3>I have developed a Plugin for TextPress. Can I sell it?</h3>
+<p>
+  Yes.  It's perfectly fine to sell your plugin as long as it's licensed under
+  the GNU GPL.  All plugins have to hook into the TextPress plugin interface
+  and as a result of that they have to be licensed under the GNU GPL.  This
+  also affects templates currently because they are distributed as plugins and
+  inherit from builtin templates.
+</p>

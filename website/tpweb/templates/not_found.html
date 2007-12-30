@@ -1,0 +1,21 @@
+<%inherit file="layout.html"/>
+<%def name="title()">Page Not Found</%def>
+
+<h2>Page Not Found</h2>
+<p>
+  The page you have requested does not exist on this server.  If you have
+  entered the URL by hand check for typos, if you have not it's probably
+  our fault.  If you think something is missing here, file a ticket in the
+  <a href="http://dev.pocoo.org/projects/textpress/">TextPress trac</a>.
+</p>
+
+<%def name="aside()">
+  <p>
+    May you were looking for one of the following pages:
+  </p>
+  <ul>
+    <li><a href="${url_for('index.html')}">Index</a></li>
+    <li><a href="${url_for('download.html')}">Download</a></li>
+    <li><a href="${url_for('about/screenshots.html')}">Screenshots</a></li>
+  </ul>
+</%def>

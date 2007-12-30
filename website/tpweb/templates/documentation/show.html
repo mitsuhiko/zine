@@ -1,0 +1,24 @@
+<%inherit file="../layout.html"/>
+<%def name="title()">${parts['title']}</%def>
+<%def name="active_navigation_item()">documentation</%def>
+
+<h2>${parts['title']}</h2>
+${parts['body']}
+
+<%def name="aside()">
+  <p>
+    This documentation is not yet finished.  If you encounter any typos
+    or mistakes please <a href="http://dev.pocoo.org/projects/textpress/newticket"
+    >file a ticket</a>.
+  </p>
+  <p>
+    Go back to the <a href="${url_for('documentation/show', slug='overview')}"
+    >documentation index</a>.
+  </p>
+  % if parts['toc']:
+  <h4>Table of Contents</h4>
+  <ul class="toc">
+    ${parts['toc']}
+  </ul>
+  % endif
+</%def>
