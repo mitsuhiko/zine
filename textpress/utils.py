@@ -698,14 +698,9 @@ class AtomFeed(BaseAtomFeed):
     """
     A helper class taht creates Atom feeds.
     """
-
-    def __init__(self, title=None, entries=None, **kwargs):
-        generator = kwargs.get('generator')
-        if generator is None:
-            import textpress
-            generator = ('TextPress', textpress.__url__,
-                         textpress.__version__)
-        BaseAtomFeed.__init__(self, title, entries, **kwargs)
+    import textpress
+    default_generator = ('TextPress', textpress.__url__, textpress.__version__)
+    del textpress
 
 
 class Pagination(object):
