@@ -747,7 +747,7 @@ def do_edit_tag(request, tag_id=None):
 
         if not name:
             errors.append(_('You have to give the tag a name.'))
-        elif old_slug != slug and Tag.objects.get_by(slug=slug) is not None:
+        elif old_slug != slug and Tag.objects.filter_by(slug=slug).first() is not None:
             errors.append(_('The slug "%s" is not unique.') % slug)
 
         if not errors:
