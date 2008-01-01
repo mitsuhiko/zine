@@ -20,7 +20,6 @@ pages_table = db.Table('pages', metadata,
     db.Column('page_id', db.Integer, primary_key=True),
     db.Column('key', db.Unicode(25)),
     db.Column('title', db.Unicode(200)),
-    db.Column('raw', db.Unicode),
     db.Column('body', db.Unicode),
     db.Column('extra', db.PickleType),
     db.Column('navigation_pos', db.Integer)
@@ -34,23 +33,60 @@ def upgrade_database(app):
 
 class Page(object):
 
-    def __init__(self, key, title, raw, parser=None, navigation_pos=None):
+    def __init__(self, key, title, body, parser=None, navigation_pos=None):
         self.key = key
         self.title = title
-        self.raw = raw
         if parser is None:
             parser = get_application().cfg['default_parser']
-        self.body = parse(raw, parser).render()
+        # the extra attribute holds various data for fragment processing
         self.extra = {'parser': parser}
         if navigation_pos is not None:
             if isinstance(navigation_pos, (float, long, basestring)):
                 navigation_pos = int(navigation_pos)
-            #XXX: raise exception?
         self.navigation_pos = navigation_pos
+        self.raw_body = body
 
+    def _get_parser(self):
+        return self.extra['parser']
+
+    def _set_parser(self, value):
+        self.extra['parser'] = value
+    parser = property(_get_parser, _set_parser)
+    del _get_parser, _set_parser
+
+    def _get_raw_body(self):
+        return self._raw_body
+
+    def _set_raw_body(self, value):
+        from textpress.parsers import parse
+        from textpress.fragment import dump_tree
+        tree = parse(value, self.extra['parser'], 'page-body')
+        self._raw_body = value
+        self._body_cache = tree
+        self.extra['body'] = dump_tree(tree)
+    raw_body = property(_get_raw_body, _set_raw_body)
+
+    def _get_body(self):
+        if not hasattr(self, '_body_cache'):
+            from textpress.fragment import load_tree
+            self._body_cache = load_tree(self.extra['body'])
+        return self._body_cache
+
+    def _set_body(self, value):
+        from textpress.fragment import Fragment, dump_tree
+        if not isinstance(value, Fragment):
+            raise TypeError('fragment required, otherwise use raw_body')
+        self._body_cache = value
+        self.extra['body'] = dump_tree(value)
+    body = property(_get_body, _set_body)
+    del _get_raw_body, _set_raw_body, _get_body, _set_body
 
     def get_url_values(self):
         return ('pages/show_page',
                 {'key': self.key})
 
-db.mapper(Page, pages_table)
+
+
+db.mapper(Page, pages_table, properties={
+    '_raw_body':    pages_table.c.body,
+})
