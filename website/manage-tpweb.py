@@ -20,6 +20,7 @@ def make_app():
     )
     return application
 
+action_shell = script.make_shell(lambda: {'app': make_app()})
 action_runserver = script.make_runserver(make_app, use_reloader=True)
 
 def action_initdb():
@@ -28,14 +29,14 @@ def action_initdb():
     make_app()
     init_database()
 
-def action_planet_add(name='', url='', feed_url='', description=''):
+def action_planet_add(name='', url='', feed_url=''):
     """Add a new blog to the planet."""
     make_app()
     if not name or not url or not feed_url:
         print 'Error: name, url and feed_url required.'
     else:
         from tpweb.planet import Blog, session
-        Blog(name, url, feed_url, description)
+        Blog(name, url, feed_url)
         session.commit()
 
 def action_planet_sync():

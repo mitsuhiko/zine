@@ -1,17 +1,6 @@
 <%inherit file="layout.html"/>
-<%def name="title()">Welcome</%def>
-<%def name="active_navigation_item()">index</%def>
-
-<h2>Welcome</h2>
-<p>
-  <strong>TextPress</strong> is a personal publishing platform aka web log
-  engine written in Python.  It's OpenSource, free and developed with a focus
-  on security and usability.
-</p>
-<p>
-  Some of the <a href="${url_for('about/features.html')}">features</a> include:
-</p>
-<ul id="featurelist">
+<h2>Features</h2>
+<ul>
   <li><strong>Valid HTML4</strong>.  While it looked like XHTML would become
       the standard for long time, HTML is getting a lot of attention lately again.
       The reason for this is the current bad support of XHTML in browsers
@@ -28,8 +17,15 @@
   <li><strong>Pingback support</strong>.  TextPress comes with full support
       for <a href="http://www.hixie.ch/specs/pingback/pingback">pingback</a>
       for cross-blog communication.</li>
+  <li><strong>Mass-Hosting ready</strong>.  TextPress does not support
+      multiple blogs in one blog but is developed in a way that you can easily
+      host dozens of blog and upgrade them all in one go.  Adding new blogs
+      once you've got TextPress running is a matter of a few seconds.</li>
   <li><strong>Simple Web Setup</strong>.  The initial web setups helps you
       getting TextPress running in less than two minutes.</li>
+  <li><strong>Unicode Ready</strong>.  TextPress uses unicode internally
+      everywhere.  This allows you to write posts in any language and also
+      mix different languages in the same post.</li>
   <li><strong>Simplified HTML</strong>.  As blog author you often want to
       write the HTML for your blog posts on your own but want to have
       automatic paragraphs or some other helpers (such as automatically
@@ -37,21 +33,3 @@
       with an intelligent algorithm that ensures your code is valid HTML on
       the one hand, and easy to write on the other.</li>
 </ul>
-<script type="text/javascript">
-  tpweb.animateFeatureList('#featurelist', 7000);
-</script>
-
-<%def name="aside()">
-  <p>
-    The current TextPress release is <strong>0.1</strong> and was released
-    on <strong>January the 14th</strong>.
-  </p>
-  <p>
-    You can grab it from <a href="${url_for('download.html')}">the download
-    page</a>.
-  </p>
-  <p>
-    <strong>Looking for Help?</strong> Join the <code>#pocoo</code> IRC
-    Channel on irc.freenode.net.
-  </p>
-</%def>

@@ -141,7 +141,6 @@ def sync():
 blog_table = Table('blogs', metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(120)),
-    Column('description', String),
     Column('url', String(200)),
     Column('feed_url', String(250))
 )
@@ -160,12 +159,10 @@ entry_table = Table('entries', metadata,
 
 class Blog(object):
 
-    def __init__(self, name, url, feed_url, description=u''):
+    def __init__(self, name, url, feed_url):
         self.name = name
         self.url = url
         self.feed_url = feed_url
-        self.disabled = False
-        self.description = description
 
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.url)

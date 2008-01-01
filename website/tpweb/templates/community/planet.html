@@ -7,10 +7,11 @@
 
 % for day in days:
   <div class="day">
-    <h2 id="day-${day['date'].strftime('%d-%m-%Y')}">${day['date'].strftime('%d %B %Y')}</h2>
+    <h2 id="day-${day['date'].strftime('%d-%m-%Y'
+    )}">${day['date'].strftime('%d %B %Y')}</h2>
     % for entry in day['entries']:
     <div class="entry">
-      <h3><a href="${entry.url|h}">${entry.title}</a></h3>
+      <h3 id="entry-${entry.id}"><a href="${entry.url|h}">${entry.title}</a></h3>
       <p class="meta">by <a href="${entry.blog.url|h}">${entry.blog.name|h}</a>
                       at ${entry.pub_date.strftime('%H:%m')}</p>
       <div class="text">${entry.text}</div>

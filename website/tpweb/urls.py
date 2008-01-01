@@ -15,6 +15,7 @@ url_map = Map([
     Rule('/', endpoint='index.html'),
 
     Rule('/about/', endpoint='about/index.html'),
+    Rule('/about/features', endpoint='about/features.html'),
     Rule('/about/requirements', endpoint='about/requirements.html'),
     Rule('/about/screenshots/', endpoint='about/screenshots.html'),
     Rule('/about/screenshots/<screenshot>', endpoint='about/screenshots.html'),
