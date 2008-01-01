@@ -34,6 +34,7 @@ from werkzeug import cached_property, escape, url_quote, Local, \
      LocalManager, ClosingIterator, BaseResponse
 from werkzeug.exceptions import Forbidden
 from werkzeug.contrib.reporterstream import BaseReporterStream
+from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
 
 DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
                 '%m/%d/%y', '%d/%m/%y', '%d%m%y', '%m%d%y', '%y%m%d']
@@ -691,6 +692,15 @@ class EMail(object):
             return self.send()
         except Exception:
             return
+
+
+class AtomFeed(BaseAtomFeed):
+    """
+    A helper class taht creates Atom feeds.
+    """
+    import textpress
+    default_generator = ('TextPress', textpress.__url__, textpress.__version__)
+    del textpress
 
 
 class Pagination(object):
