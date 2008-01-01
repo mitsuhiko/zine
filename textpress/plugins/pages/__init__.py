@@ -102,7 +102,7 @@ def show_pages_write(request, page_id=None):
         form.update(
             key=page.key,
             title=page.title,
-            raw_body=page.raw,
+            raw_body=page.raw_body,
             navigation_pos=page.navigation_pos,
             parser=page.extra['parser']
         )
@@ -144,9 +144,10 @@ def show_pages_write(request, page_id=None):
             else:
                 page.key = key
                 page.title = title
-                page.raw = raw_body
-                page.navigation_pos = navigation_pos
                 page.parser = parser
+                page.raw_body = raw_body
+                page.navigation_pos = navigation_pos
+
             db.commit()
             html_detail = '<a href="%s">%s</a>' % (
                 escape(url_for(page)),
