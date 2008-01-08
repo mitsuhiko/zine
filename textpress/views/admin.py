@@ -300,7 +300,7 @@ def do_edit_post(request, post_id=None):
         form['body'] = body = request.form.get('body')
         if not body:
             errors.append(_('You have to provide a body.'))
-        form['intro'] = intro = request.form.get('intro') or ''
+        form['intro'] = intro = request.form.get('intro') or u''
         try:
             form['post_status'] = post_status = int(request.form['post_status'])
             if post_status < 0 or post_status > 2:
