@@ -30,8 +30,8 @@ def strip_tags(s):
     """Resolve HTML entities and remove tags from a string."""
     def handle_match(m):
         name = m.group(1)
-        if name in html_entities:
-            return unichr(html_entities[name])
+        if name in _html_entities:
+            return unichr(_html_entities[name])
         if name[:2] in ('#x', '#X'):
             try:
                 return unichr(int(name[2:], 16))
