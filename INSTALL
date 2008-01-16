@@ -21,7 +21,7 @@ For a quickstart with the development server do this:
     $ python textpress-management.py runserver 
 
 After the first start you will find yourself in an installation wizard that
-helps you to create the database tables and anan  administrator account.
+helps you to create the database tables and an administrator account.
 
 To get access to a python console with the textpress instance context do this:
 
