@@ -8,8 +8,9 @@
   <ul>
   {%- for event, places in get_map() %}
     <li><tt>{{ event|e }}</tt><ul>
-    {%- for location, filename, lineno in places %}
-      <li>{{ filename|e }}:{{ lineno }} <small>[{{ location }}]</small></li>
+    {%- for location, filename, lineno, help in places %}
+      <li><p>{{ filename|e }}:{{ lineno }} <small>[{{ location }}]</small></p>
+          {%- if help %}<blockquote><pre>{{ help|e }}</pre></blockquote>{% endif %}</li>
     {%- endfor %}
     </ul></li>
   {%- endfor %}

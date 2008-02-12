@@ -95,7 +95,7 @@ def do_show_tag(request, slug, page=1):
     :Template name: ``show_tag.html``
     :URL endpoint: ``blog/show_tag``
     """
-    tag = Tag.objects.get_by(slug=slug)
+    tag = Tag.objects.filter_by(slug=slug).first()
     if not tag:
         raise NotFound()
 

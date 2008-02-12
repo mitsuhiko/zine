@@ -3,7 +3,6 @@
 <html>
 <head>
   <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='stanley/style.css') }}">
   {{- get_page_metadata() }}
   {%- block head %}{% endblock %}
 </head>

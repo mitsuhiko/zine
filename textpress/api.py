@@ -37,5 +37,8 @@ from textpress import cache
 # Gettext
 from textpress.utils import gettext as _
 
+# Plugin syste
+from textpress.pluginsystem import SetupError
+
 
 __all__ = list(x for x in locals() if x == '_' or not x.startswith('_'))

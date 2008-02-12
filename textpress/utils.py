@@ -19,6 +19,7 @@ import sys
 import os
 import logging
 import pytz
+import linecache
 from time import time, strptime, sleep
 from datetime import datetime, date, timedelta
 from random import choice, randrange, random
@@ -555,6 +556,21 @@ def build_eventmap(app):
                 for item in walk_ast(value):
                     yield item
 
+    def find_help(filename, lineno):
+        help_lines = []
+        lineno -= 1
+        while lineno > 0:
+            line = linecache.getline(filename, lineno).strip()
+            if line.startswith('#!'):
+                line = line[2:]
+                if line and line[0] == ' ':
+                    line = line[1:]
+                help_lines.append(line)
+            elif line:
+                break
+            lineno -= 1
+        return '\n'.join(reversed(help_lines)).decode('utf-8')
+
     result = {}
     for folder, prefix in searchpath:
         offset = len(folder)
@@ -564,16 +580,14 @@ def build_eventmap(app):
                     continue
                 filename = os.path.join(dirpath, filename)
                 shortname = filename[offset:]
-
-                f = file(filename)
-                try:
-                    ast = compile(f.read(), filename, 'exec', 0x400)
-                finally:
-                    f.close()
+                data = ''.join(linecache.getlines(filename))
+                ast = compile(''.join(linecache.getlines(filename)),
+                              filename, 'exec', 0x400)
 
                 for event, lineno in walk_ast(ast):
+                    help = find_help(filename, lineno)
                     result.setdefault(event, []).append((prefix, shortname,
-                                                         lineno))
+                                                         lineno, help))
 
     return result
 

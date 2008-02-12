@@ -180,8 +180,8 @@ def show_akismet_config(req):
 def setup(app, plugin):
     app.add_config_var('akismet_spam_filter/apikey', unicode, u'')
     app.add_url_rule('/comments/akismet', prefix='admin',
-                     endpoint='akismet_spam_filter/config')
-    app.add_view('akismet_spam_filter/config', show_akismet_config)
+                     endpoint='akismet_spam_filter/config',
+                     view=show_akismet_config)
     app.connect_event('before-comment-saved', do_spamcheck)
     app.connect_event('before-admin-response-rendered', test_apikey)
     app.connect_event('modify-admin-navigation-bar', add_akismet_link)

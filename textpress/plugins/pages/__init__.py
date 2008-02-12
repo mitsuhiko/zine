@@ -72,6 +72,7 @@ def show_pages_overview(request):
         pages=Page.objects.all()
     )
 
+
 @require_role(ROLE_ADMIN)
 def show_pages_write(request, page_id=None):
     """
@@ -170,6 +171,7 @@ def show_pages_write(request, page_id=None):
         csrf_protector=csrf_protector,
     )
 
+
 @require_role(ROLE_ADMIN)
 def show_pages_delete(request, page_id):
     """Shows the confirm dialog if the user deletes a page"""
@@ -195,6 +197,7 @@ def show_pages_delete(request, page_id):
         csrf_protector=csrf_protector,
     )
 
+
 @cache.response(vary=('user',))
 def show_page(self, key):
     """Shot a page found via `key`"""
@@ -214,23 +217,16 @@ def setup(app, plugin):
     app.add_shared_exports('pages', SHARED_FILES)
 
     app.add_url_rule('/show_pages/', endpoint='pages/show_pages',
-        prefix='admin')
+                     prefix='admin', view=show_pages_overview)
     app.add_url_rule('/write_page/', endpoint='pages/write_page',
-        prefix='admin')
+                     prefix='admin', view=show_pages_write)
     app.add_url_rule('/write_page/<int:page_id>/',
-        endpoint='pages/write_page',
-        prefix='admin')
-    app.add_url_rule('/page/<key>/',
-        endpoint='pages/show_page',
-        prefix='blog')
+                     endpoint='pages/write_page', prefix='admin')
+    app.add_url_rule('/page/<key>/', endpoint='pages/show_page',
+                     view=show_page, prefix='blog')
     app.add_url_rule('/delete_page/<int:page_id>/',
-        endpoint='pages/delete_page',
-        prefix='admin')
-
-    app.add_view('pages/show_pages', show_pages_overview)
-    app.add_view('pages/write_page', show_pages_write)
-    app.add_view('pages/show_page', show_page)
-    app.add_view('pages/delete_page', show_pages_delete)
+                     endpoint='pages/delete_page',
+                     view=show_pages_delete, prefix='admin')
 
     app.add_template_searchpath(TEMPLATES)
     app.add_database_integrity_check(upgrade_database)

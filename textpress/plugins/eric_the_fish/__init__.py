@@ -144,10 +144,8 @@ def setup(app, plugin):
     # for the admin panel we add a url rule. Because it's an admin panel
     # page located in options we add such an url rule.
     app.add_url_rule('/options/eric-the-fish', prefix='admin',
-                     endpoint='eric_the_fish/config')
-
-    # connect the url endpoint to the show_eric_options view function.
-    app.add_view('eric_the_fish/config', show_eric_options)
+                     endpoint='eric_the_fish/config',
+                     view=show_eric_options)
 
     # add our templates to the searchpath so that TextPress can find the
     # admin panel template for the fish config panel.

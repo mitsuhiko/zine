@@ -221,6 +221,9 @@ class DatabaseManager(object):
             raise RuntimeError('manager already bound to model')
         self.model = model
 
+    def __getitem__(self, arg):
+        return self.query[arg]
+
     @property
     def query(self):
         """Return a new queryset."""

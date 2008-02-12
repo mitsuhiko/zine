@@ -204,6 +204,13 @@ class InstallationError(ValueError):
         ValueError.__init__(self, code)
 
 
+class SetupError(RuntimeError):
+    """
+    Raised by plugins if they want to stop their setup.  If a plugin raises
+    a `SetupError` during the init, it will be disabled automatically.
+    """
+
+
 class PackageUploader(FancyURLopener, object):
     """
     Helper class for uploading packages. This is not a public

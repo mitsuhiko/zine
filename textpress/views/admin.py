@@ -31,7 +31,8 @@ from textpress.utils import parse_datetime, format_datetime, \
      build_eventmap, make_hidden_fields, dump_json, load_json, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
 from textpress.widgets import WidgetManager
-from textpress.pluginsystem import install_package, InstallationError
+from textpress.pluginsystem import install_package, InstallationError, \
+     SetupError
 from textpress.pingback import pingback, PingbackError
 from urlparse import urlparse
 from werkzeug import escape
@@ -153,17 +154,25 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         for plugin in request.app.plugins.itervalues():
             if plugin.active and plugin.setup_error is not None:
                 plugin.deactivate()
-                flash(_('The plugin guard detected that the plugin "%s" '
-                        'causes problems (%s in %s, line %s) and deactivated '
-                        'it. If you want to debug it, disable the plugin '
-                        'guard and enable the debugger.') % (
-                            plugin.html_display_name,
-                            escape(str(plugin.setup_error[1]).
-                                   decode('utf-8', 'ignore')),
-                            plugin.setup_error[2].tb_frame.
-                                f_globals.get('__file__', _('unknown file')),
-                            plugin.setup_error[2].tb_lineno
-                        ), 'error')
+                exc_type, exc_value, tb = plugin.setup_error
+                if exc_type is SetupError:
+                    msg = _(u'Could not activate plugin “%s”: %s') % (
+                        plugin.html_display_name,
+                        exc_value.message
+                    )
+                else:
+                    msg =_(u'The plugin guard detected that the plugin “%s” '
+                           u'causes problems (%s in %s, line %s) and '
+                           u'deactivated it.  If you want to debug it, '
+                           u'disable the plugin guard.') % (
+                        plugin.html_display_name,
+                        escape(str(plugin.setup_error[1]).
+                               decode('utf-8', 'ignore')),
+                        plugin.setup_error[2].tb_frame.
+                            f_globals.get('__file__', _('unknown file')),
+                        plugin.setup_error[2].tb_lineno
+                    )
+                flash(msg, 'error')
 
     #! used to flash messages, add links to stylesheets, modify the admin
     #! context etc.
@@ -331,7 +340,7 @@ def do_edit_post(request, post_id=None):
         else:
             author = User.objects.filter_by(username=username).first()
             if author is None:
-                errors.append(_('Unknown author "%s".') % username)
+                errors.append(_(u'Unknown author “%s”.') % username)
         form['author'] = author
         form['slug'] = slug = request.form.get('slug') or None
         if slug and '/' in slug:
@@ -344,7 +353,7 @@ def do_edit_post(request, post_id=None):
                 tags.append(t)
                 form['tags'].append(tag)
             else:
-                errors.append(_('Unknown tag "%s".') % tag)
+                errors.append(_(u'Unknown tag “%s”.') % tag)
 
         # if someone adds a tag we don't save the post but just add
         # a tag to the list and assign it to the post list.
@@ -485,6 +494,10 @@ def do_delete_post(request, post_id):
             db.execute(comments.delete(comments.c.post_id == post.post_id))
             db.execute(post_tags.delete(post_tags.c.post_id == post.post_id))
             db.execute(post_links.delete(post_links.c.post_id == post.post_id))
+            #! plugins can use this to react to post deletes.  They can't stop
+            #! the deleting of the post but they can delete information in
+            #! their own tables so that the database is consistent afterwards.
+            emit_event('before-post-deleted', post)
             db.delete(post)
             flash(_('The post %s was deleted successfully.') %
                   escape(post.title), 'remove')
@@ -577,7 +590,7 @@ def do_edit_comment(request, comment_id):
             else:
                 keep_comment_text = True
         elif parser not in request.app.parsers:
-            errors.append(_('Unknown parser "%s".') % parser)
+            errors.append(_(u'Unknown parser “%s”.') % parser)
         if not body:
             errors.append(_('Need a text for this comment.'))
         if www and not is_valid_url(www):
@@ -655,6 +668,11 @@ def do_delete_comment(request, comment_id):
         elif request.form.get('confirm'):
             redirect.add_invalid('admin/edit_comment',
                                  comment_id=comment.comment_id)
+            #! plugins can use this to react to comment deletes.  They can't
+            #! stop the deleting of the comment but they can delete information
+            #! in their own tables so that the database is consistent
+            #! afterwards.
+            emit_event('before-comment-deleted', comment)
             db.delete(comment)
             flash(_('Comment by %s deleted successfully.' %
                     escape(comment.author)), 'remove')
@@ -799,6 +817,10 @@ def do_delete_tag(request, tag_id):
         elif request.form.get('confirm'):
             redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
             db.execute(post_tags.delete(post_tags.c.tag_id == tag.tag_id))
+            #! plugins can use this to react to tag deletes.  They can't stop
+            #! the deleting of the tag but they can delete information in
+            #! their own tables so that the database is consistent afterwards.
+            emit_event('before-tag-deleted', tag)
             db.delete(tag)
             flash(_('Tag %s deleted successfully.') % escape(tag.name))
             db.commit()
@@ -859,7 +881,7 @@ def do_edit_user(request, user_id=None):
             errors.append(_('Username is required.'))
         elif new_user and User.objects.filter_by(username=username).first() \
              is not None:
-            errors.append(_('Username "%s" is taken.') % username)
+            errors.append(_(u'Username “%s” is taken.') % username)
         password = form['password'] = request.form.get('password')
         if new_user and not password:
             errors.append(_('You have to provide a password.'))
@@ -918,7 +940,7 @@ def do_edit_user(request, user_id=None):
             display_names.extend([
                 ('$first $last', u'%s %s' % (user.first_name, user.last_name)),
                 ('$last $first', u'%s %s' % (user.last_name, user.first_name)),
-                ('$first "$nick" $last', u'%s "%s" %s' % (
+                (u'$first “$nick” $last', u'%s “%s” %s' % (
                     user.first_name,
                     user.username,
                     user.last_name
@@ -967,12 +989,26 @@ def do_delete_user(request, user_id):
         elif request.form.get('confirm'):
             redirect.add_invalid('admin/edit_user', user_id=user.user_id)
             action = request.form.get('action')
+            action_val = None
             if action == 'reassign':
+                action_val = request.form.get('reassign_user', type=int)
                 db.execute(posts.update(posts.c.author_id == user_id),
-                    author_id=request.form.get('reassign_user', type=int)
+                    author_id=action_val
                 )
             elif action == 'delete':
                 db.execute(posts.delete(posts.c.author_id == user_id))
+            #! plugins can use this to react to user deletes.  They can't stop
+            #! the deleting of the user but they can delete information in
+            #! their own tables so that the database is consistent afterwards.
+            #! Additional to the user object an action and action val is
+            #! provided.  The action can be one of the following values:
+            #!  "reassign":     Reassign the objects to the user with the
+            #!                  user_id of "action_val".
+            #!  "delete":       Delete related objects.
+            #! More actions might be added in the future so plugins should
+            #! ignore unknown actions.  If an unknown action is provided
+            #! the plugin should treat is as "delete".
+            emit_event('before-user-deleted', user, action, action_val)
             db.delete(user)
             flash(_('User %s deleted successfully.') %
                   escape(user.username), 'remove')
@@ -1033,7 +1069,7 @@ def do_basic_options(request):
                             'for the blog e-mail field.'))
         form['timezone'] = timezone = request.form.get('timezone')
         if timezone not in TIMEZONES:
-            errors.append(_('Unknown timezone "%s"') % timezone)
+            errors.append(_(u'Unknown timezone “%s”') % timezone)
         form['datetime_format'] = datetime_format = \
             request.form.get('datetime_format')
         form['date_format'] = date_format = \
@@ -1308,11 +1344,11 @@ def do_plugins(request):
             active = 'plugin_' + name in request.form
             if active and not plugin.active:
                 plugin.activate()
-                flash(_('Plugin "%s" activated.') % plugin.html_display_name,
+                flash(_(u'Plugin “%s” activated.') % plugin.html_display_name,
                       'configure')
             elif not active and plugin.active:
                 plugin.deactivate()
-                flash(_('Plugin "%s" deactivated.') %
+                flash(_(u'Plugin “%s” deactivated.') %
                       plugin.html_display_name, 'configure')
             else:
                 continue
@@ -1340,8 +1376,8 @@ def do_plugins(request):
                 else:
                     flash(_('An unknown error occoured'), 'error')
             else:
-                flash(_('Plugin "%s" added succesfully. You can now '
-                        'enable it in the plugin list.') %
+                flash(_(u'Plugin “%s” added succesfully. You can now '
+                        u'enable it in the plugin list.') %
                       plugin.html_display_name, 'add')
 
         return simple_redirect('admin/plugins')
@@ -1372,11 +1408,11 @@ def do_remove_plugin(request, plugin):
             try:
                 plugin.remove()
             except IOError:
-                flash(_('Could not remove the plugin %s because an '
-                        'IO error occoured. Wrong permissions?') %
+                flash(_(u'Could not remove the plugin “%s” because an '
+                        u'IO error occoured. Wrong permissions?') %
                       plugin.html_display_name)
-            flash(_('The plugin "%s" was removed from the instance '
-                    'successfully.') % escape(plugin.display_name), 'remove')
+            flash(_(u'The plugin “%s” was removed from the instance '
+                    u'successfully.') % escape(plugin.display_name), 'remove')
         return redirect('admin/plugins')
 
     return render_admin_response('admin/remove_plugin.html', 'options.plugins',

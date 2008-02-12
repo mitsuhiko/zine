@@ -289,22 +289,18 @@ def setup(app, plugin):
                        '*.plugin:application/x-textpress-plugin')
     app.add_config_var('file_uploads/im_path', unicode, '')
     app.connect_event('modify-admin-navigation-bar', add_links)
-    app.add_url_rule('/uploads/', prefix='admin',
+    app.add_url_rule('/uploads/', prefix='admin', view=do_browse,
                      endpoint='file_uploads/browse'),
-    app.add_url_rule('/uploads/new', prefix='admin',
+    app.add_url_rule('/uploads/new', prefix='admin', view=do_upload,
                      endpoint='file_uploads/upload')
     app.add_url_rule('/uploads/thumbnailer', prefix='admin',
+                     view=do_thumbnailer,
                      endpoint='file_uploads/thumbnailer')
-    app.add_url_rule('/uploads/config', prefix='admin',
+    app.add_url_rule('/uploads/config', prefix='admin', view=do_config,
                      endpoint='file_uploads/config')
-    app.add_url_rule('/_uploads/<filename>', endpoint='file_uploads/get_file')
-    app.add_url_rule('/_uploads/<filename>/delete',
+    app.add_url_rule('/_uploads/<filename>', view=do_get_file,
+                     endpoint='file_uploads/get_file')
+    app.add_url_rule('/_uploads/<filename>/delete', view=do_delete,
                      endpoint='file_uploads/delete')
-    app.add_view('file_uploads/browse', do_browse)
-    app.add_view('file_uploads/upload', do_upload)
-    app.add_view('file_uploads/thumbnailer', do_thumbnailer)
-    app.add_view('file_uploads/config', do_config)
-    app.add_view('file_uploads/get_file', do_get_file)
-    app.add_view('file_uploads/delete', do_delete)
     app.add_template_searchpath(TEMPLATES)
     app.add_shared_exports('file_uploads', SHARED)

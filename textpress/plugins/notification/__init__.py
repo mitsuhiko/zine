@@ -18,6 +18,7 @@ To stop mailing when new comments are posted, just disable the
 "notification" plugin.
 '''
 
+
 def notify(request, comment):
     to_addr = comment.post.author.email
     subject = _('New comment on your blog to "%s" by %s' % (
@@ -33,6 +34,7 @@ def notify(request, comment):
         SIGNATURE
     ))
     send_email(subject, msg, to_addr)
+
 
 def setup(app, plugin):
     app.connect_event('after-comment-saved', notify)

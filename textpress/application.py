@@ -456,6 +456,15 @@ class InstanceNotInitialized(RuntimeError):
 class TextPress(object):
     """The WSGI application."""
 
+    _setup_only = []
+    def setuponly(f, container=_setup_only):
+        """
+        Mark a function as "setup only".  After the setup those
+        functions will be replaced with a dummy function that raises
+        an excetion."""
+        container.append(f.__name__)
+        return f
+
     def __init__(self, instance_folder):
         # this check ensures that only make_app can create TextPress instances
         if get_application() is not self:
@@ -577,11 +586,153 @@ class TextPress(object):
         self.url_adapter = self.url_map.bind(netloc, script_name,
                                              url_scheme=scheme)
 
-        # mark the app as finished and send an event
+        # mark the app as finished and override the setup functions
+        def _error():
+            raise RuntimeError('Cannot register new callbacks after '
+                               'application setup phase.')
+        self.__dict__.update(dict.fromkeys(self._setup_only, _error))
         self.initialized = True
 
         #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
+
+    @setuponly
+    def add_template_filter(self, name, callback):
+        """Add a template filter."""
+        self._template_filters[name] = callback
+
+    @setuponly
+    def add_template_global(self, name, value, deferred=False):
+        """Add a template global (or deferred factory function)."""
+        if deferred:
+            value = Deferred(value)
+        self._template_globals[name] = value
+
+    @setuponly
+    def add_template_searchpath(self, path):
+        """Add a new template searchpath to the application.
+        This searchpath is queried *after* the themes but
+        *before* the builtin templates are looked up."""
+        self._template_searchpath.append(path)
+
+    @setuponly
+    def add_api(self, name, preferred, callback, blog_id=1):
+        """Add a new API to the blog."""
+        endpoint = 'services/' + name
+        self.apis[name] = (blog_id, preferred, endpoint)
+        self.add_url_rule('/_services/' + name, endpoint=endpoint)
+        self.add_view(endpoint, callback)
+
+    @setuponly
+    def add_pingback_endpoint(self, endpoint, callback):
+        """
+        Notify the pingback service that the endpoint provided supports
+        pingbacks.  The second parameter must be the callback function
+        called on pingbacks.
+        """
+        self.pingback_endpoints[endpoint] = callback
+
+    @setuponly
+    def add_theme(self, name, template_path, metadata=None):
+        """
+        Add a theme. You have to provide the shortname for the theme
+        which will be used in the admin panel etc. Then you have to provide
+        the path for the templates. Usually this path is relative to the
+        `__file__` directory.
+
+        The metadata can be ommited but in that case some information in
+        the admin panel is not available.
+        """
+        self.themes[name] = Theme(self, name, template_path, metadata)
+
+    @setuponly
+    def add_shared_exports(self, name, path):
+        """
+        Add a shared export for name that points to a given path and
+        creates an url rule for <name>/shared that takes a filename
+        parameter.
+        """
+        self._shared_exports['/_shared/' + name] = path
+        self.add_url_rule('/_shared/%s/<string:filename>' % name,
+                          endpoint=name + '/shared', build_only=True)
+
+    @setuponly
+    def add_middleware(self, middleware_factory, *args, **kwargs):
+        """Add a middleware to the application."""
+        self.dispatch_request = middleware_factory(self.dispatch_request,
+                                                   *args, **kwargs)
+
+    @setuponly
+    def add_config_var(self, key, type, default):
+        """Add a configuration variable to the application."""
+        if key.count('/') > 1:
+            raise ValueError('key might not have more than one slash')
+        self.cfg.config_vars[key] = (type, default)
+
+    @setuponly
+    def add_database_integrity_check(self, callback):
+        """Allows plugins to perform database upgrades."""
+        self._database_checks.append(callback)
+
+    @setuponly
+    def add_url_rule(self, rule, **kwargs):
+        """
+        Add a new URL rule to the url map.  This function accepts the same
+        arguments as a werkzeug routing rule.  Additionally a `prefix`
+        parameter is accepted that can be used to add the common prefixes
+        based on the configuration.  Basically the following two calls
+        do exactly the same::
+
+            app.add_url_rule('/foo', prefix='admin', ...)
+            app.add_url_rule(app.cfg['admin_url_prefix'] + '/foo', ...)
+
+        It also takes a `view` keyword argument that, if given registers
+        a view for the url view::
+
+            app.add_url_rule(..., endpoint='bar', view=bar)
+
+        equals::
+
+            app.add_url_rule(..., endpoint='bar')
+            app.add_view('bar', bar)
+        """
+        prefix = kwargs.pop('prefix', None)
+        if prefix is not None:
+            rule = self.cfg[prefix + '_url_prefix'] + rule
+        view = kwargs.pop('view', None)
+        self._url_rules.append(routing.Rule(rule, **kwargs))
+        if view is not None:
+            self.views[kwargs['endpoint']] = view
+
+    @setuponly
+    def add_view(self, endpoint, callback):
+        """Add a callback as view."""
+        self.views[endpoint] = callback
+
+    @setuponly
+    def add_parser(self, name, class_):
+        """Add a new parser class."""
+        self.parsers[name] = class_
+
+    @setuponly
+    def add_widget(self, widget):
+        """Add a widget."""
+        self.widgets[widget.NAME] = widget
+
+    @setuponly
+    def add_servicepoint(self, identifier, callback):
+        """Add a new function as servicepoint."""
+        self._services[identifier] = callback
+
+    @setuponly
+    def connect_event(self, event, callback, position='after'):
+        """Connect an event to the current application."""
+        return self._event_manager.connect(event, callback, position)
+
+    @setuponly
+    def disconnect_event(self, listener_id):
+        """Disconnect a given listener_id."""
+        self._event_manager.remove(listener_id)
 
     @property
     def wants_reload(self):
@@ -605,157 +756,10 @@ class TextPress(object):
         for check in self._database_checks:
             check(self)
 
-    def add_template_filter(self, name, callback):
-        """Add a template filter."""
-        if self.initialized:
-            raise RuntimeError('cannot add template filters '
-                               'after application setup')
-        self._template_filters[name] = callback
-
-    def add_template_global(self, name, value, deferred=False):
-        """Add a template global (or deferred factory function)."""
-        if self.initialized:
-            raise RuntimeError('cannot add template filters '
-                               'after application setup')
-        if deferred:
-            value = Deferred(value)
-        self._template_globals[name] = value
-
-    def add_template_searchpath(self, path):
-        """Add a new template searchpath to the application.
-        This searchpath is queried *after* the themes but
-        *before* the builtin templates are looked up."""
-        if self.initialized:
-            raise RuntimeError('cannot add template filters '
-                               'after application setup')
-        self._template_searchpath.append(path)
-
-    def add_api(self, name, preferred, callback, blog_id=1):
-        """Add a new API to the blog."""
-        if self.initialized:
-            raise RuntimeError('cannot add template filters '
-                               'after application setup')
-        endpoint = 'services/' + name
-        self.apis[name] = (blog_id, preferred, endpoint)
-        self.add_url_rule('/_services/' + name, endpoint=endpoint)
-        self.add_view(endpoint, callback)
-
-    def add_pingback_endpoint(self, endpoint, callback):
-        """
-        Notify the pingback service that the endpoint provided supports
-        pingbacks.  The second parameter must be the callback function
-        called on pingbacks.
-        """
-        if self.initialized:
-            raise RuntimeError('cannot add pingbackable endpoints '
-                               'after application setup')
-        self.pingback_endpoints[endpoint] = callback
-
-    def add_theme(self, name, template_path, metadata=None):
-        """
-        Add a theme. You have to provide the shortname for the theme
-        which will be used in the admin panel etc. Then you have to provide
-        the path for the templates. Usually this path is relative to the
-        `__file__` directory.
-
-        The metadata can be ommited but in that case some information in
-        the admin panel is not available.
-        """
-        if self.initialized:
-            raise RuntimeError('cannot add themes after application setup')
-        self.themes[name] = Theme(self, name, template_path, metadata)
-
-    def add_shared_exports(self, name, path):
-        """
-        Add a shared export for name that points to a given path and
-        creates an url rule for <name>/shared that takes a filename
-        parameter.
-        """
-        if self.initialized:
-            raise RuntimeError('cannot add middlewares after '
-                               'application setup')
-        self._shared_exports['/_shared/' + name] = path
-        self.add_url_rule('/_shared/%s/<string:filename>' % name,
-                          endpoint=name + '/shared', build_only=True)
-
-    def add_middleware(self, middleware_factory, *args, **kwargs):
-        """Add a middleware to the application."""
-        if self.initialized:
-            raise RuntimeError('cannot add middlewares after '
-                               'application setup')
-        self.dispatch_request = middleware_factory(self.dispatch_request,
-                                                   *args, **kwargs)
-
-    def add_config_var(self, key, type, default):
-        """Add a configuration variable to the application."""
-        if self.initialized:
-            raise RuntimeError('cannot add configuration values after '
-                               'application setup')
-        elif key.count('/') > 1:
-            raise ValueError('key might not have more than one slash')
-        self.cfg.config_vars[key] = (type, default)
-
-    def add_database_integrity_check(self, callback):
-        """Allows plugins to perform database upgrades."""
-        if self.initialized:
-            raise RuntimeError('cannot add database integrity checks '
-                               'after application setup')
-        self._database_checks.append(callback)
-
-    def add_url_rule(self, rule, **kwargs):
-        """
-        Add a new URL rule to the url map.  This function accepts the same
-        arguments as a werkzeug routing rule.  Additionally a `prefix`
-        parameter is accepted that can be used to add the common prefixes
-        based on the configuration.  Basically the following two calls
-        do exactly the same::
-
-            app.add_url_rule('/foo', prefix='admin', ...)
-            app.add_url_rule(app.cfg['admin_url_prefix'] + '/foo', ...)
-        """
-        if self.initialized:
-            raise RuntimeError('cannot add url rule after application setup')
-        prefix = kwargs.pop('prefix', None)
-        if prefix is not None:
-            rule = self.cfg[prefix + '_url_prefix'] + rule
-        self._url_rules.append(routing.Rule(rule, **kwargs))
-
-    def add_view(self, endpoint, callback):
-        """Add a callback as view."""
-        if self.initialized:
-            raise RuntimeError('cannot add view after application setup')
-        self.views[endpoint] = callback
-
-    def add_parser(self, name, class_):
-        """Add a new parser class."""
-        if self.initialized:
-            raise RuntimeError('cannot add parser after application setup')
-        self.parsers[name] = class_
-
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""
         return sorted([(key, parser.get_name()) for key, parser in
                        self.parsers.iteritems()], key=lambda x: x[1].lower())
-
-    def add_widget(self, widget):
-        """Add a widget."""
-        if self.initialized:
-            raise RuntimeError('cannot add widget after application setup')
-        self.widgets[widget.NAME] = widget
-
-    def add_servicepoint(self, identifier, callback):
-        """Add a new function as servicepoint."""
-        if self.initialized:
-            raise RuntimeError('cannot add servicepoint after application setup')
-        self._services[identifier] = callback
-
-    def connect_event(self, event, callback, position='after'):
-        """Connect an event to the current application."""
-        return self._event_manager.connect(event, callback, position)
-
-    def disconnect_event(self, listener_id):
-        """Disconnect a given listener_id."""
-        self._event_manager.remove(listener_id)
 
     def get_page_metadata(self):
         """Return the metadata as HTML part for templates."""
@@ -859,6 +863,9 @@ class TextPress(object):
         return ClosingIterator(self.dispatch_request(environ, start_response),
                                [local_manager.cleanup, cleanup_session,
                                 self.cfg.flush])
+
+    # remove our decorator
+    del setuponly
 
 
 class StaticDispatcher(object):

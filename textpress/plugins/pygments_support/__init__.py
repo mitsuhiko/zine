@@ -154,8 +154,7 @@ def show_config(req):
             'active':       style == active_style
         } for style in sorted(all_styles)],
         example=example,
-        csrf_protector=csrf_protector,
-        pygments_installed=have_pygments
+        csrf_protector=csrf_protector
     )
 
 
@@ -176,27 +175,16 @@ def add_pygments_link(req, navigation_bar):
                                      'Pygments'))
 
 
-def show_error(req, context):
-    """This is only connected to the admin response rendering if
-    pygments is not available."""
-    flash(_('<strong>Pygments support is not active!</strong> '
-            'the %(pygments)s library is not installed.') % {
-        'pygments': u'<a href="%s">Pygments</a>' % PYGMENTS_URL
-    }, 'error')
-
-
 def setup(app, plugin):
-    if have_pygments:
-        app.connect_event('modify-admin-navigation-bar', add_pygments_link)
-        app.add_url_rule('/options/pygments', prefix='admin',
-                         endpoint='pygments_support/config')
-        app.add_view('pygments_support/config', show_config)
-        app.connect_event('process-doc-tree', process_doc_tree)
-        app.connect_event('after-request-setup', inject_style)
-        app.add_config_var('pygments_support/style', unicode, u'default')
-        app.add_url_rule('/_shared/pygments_support/<style>.css',
-                         endpoint='pygments_support/style')
-        app.add_view('pygments_support/style', get_style)
-        app.add_template_searchpath(TEMPLATES)
-    else:
-        app.connect_event('before-admin-response-rendered', show_error)
+    if not have_pygments:
+        raise SetupError('The pygments plugin requires the pygments library '
+                         'to be installed.')
+    app.add_config_var('pygments_support/style', unicode, u'default')
+    app.connect_event('modify-admin-navigation-bar', add_pygments_link)
+    app.connect_event('process-doc-tree', process_doc_tree)
+    app.connect_event('after-request-setup', inject_style)
+    app.add_url_rule('/options/pygments', prefix='admin',
+                     view=show_config, endpoint='pygments_support/config')
+    app.add_url_rule('/_shared/pygments_support/<style>.css',
+                     view=get_style, endpoint='pygments_support/style')
+    app.add_template_searchpath(TEMPLATES)
