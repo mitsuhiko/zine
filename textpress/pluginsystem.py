@@ -21,12 +21,13 @@
         >>> app.plugins['<name of the plugin>'].dump('/target/filename.plugin')
 
     This will save the plugin as `.plugin` package. The preferred filename
-    for templates is `<DISPLAY_NAME>-<VERSION>.plugin`. So if you want to
-    dump all the plugins you have into plugin files you can use this snippet::
+    for templates is `<DISPLAY_NAME_WITHOUT_SPACES>-<VERSION>.plugin`.  So if
+    you want to dump all the plugins you have into plugin files you can use
+    this snippet::
 
         for plugin in app.plugins.itervalues():
             plugin.dump('%s-%s.plugin' % (
-                plugin.display_name,
+                ''.join(plugin.display_name.split()),
                 plugin.version
             ))
 
