@@ -147,7 +147,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # on which page he is.
     if request.app.cfg['maintenance_mode']:
         flash(_('TextPress is in maintenance mode. Don\'t forget to '
-                'turn it off again once you finished your changes.'))
+                'turn it off again once you finish your changes.'))
 
     # check for broken plugins if we have the plugin guard enabled
     if request.app.cfg['plugin_guard']:
@@ -309,7 +309,7 @@ def do_edit_post(request, post_id=None):
         form['body'] = body = request.form.get('body')
         if not body:
             errors.append(_('You have to provide a body.'))
-        form['intro'] = intro = request.form.get('intro') or ''
+        form['intro'] = intro = request.form.get('intro') or u''
         try:
             form['post_status'] = post_status = int(request.form['post_status'])
             if post_status < 0 or post_status > 2:

@@ -5,4 +5,4 @@ Author URL: http://lucumr.pocoo.org/
 License: GPL
 Version: 0.1
 Description: Adds Eric The Fish, an annoying fish to the admin panel. Clicking\
- it shows a random fortune quote. This is an documented example plugin.
+ it shows a random fortune quote. This is a documented example plugin.

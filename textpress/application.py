@@ -226,7 +226,7 @@ class Request(BaseRequest):
         if isinstance(user, (int, long)):
             user = User.objects.get(user)
         elif isinstance(user, basestring):
-            user = User.objects.get_by(username=user)
+            user = User.objects.filter_by(username=user).first()
         if user is None:
             raise RuntimeError('User does not exist')
         self.user = user
