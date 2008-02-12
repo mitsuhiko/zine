@@ -32,8 +32,8 @@ from textpress.cache import get_cache, TemplateLoaderMixin
 from textpress.utils import format_datetime, format_date, format_month, \
      ClosingIterator, check_external_url, local, local_manager
 
-from werkzeug import BaseRequest, BaseResponse, SharedDataMiddleware, \
-     url_quote, routing, redirect as simple_redirect
+from werkzeug import Request as BaseRequest, Response as BaseResponse, \
+     SharedDataMiddleware, url_quote, routing, redirect as simple_redirect
 from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
@@ -197,7 +197,6 @@ def clear_application_cache():
 
 class Request(BaseRequest):
     """The used request class."""
-    charset = 'utf-8'
 
     def __init__(self, app, environ):
         BaseRequest.__init__(self, environ)
@@ -250,7 +249,6 @@ class Response(BaseResponse):
     """
     An utf-8 response, with text/html as default mimetype.
     """
-    charset = 'utf-8'
     default_mimetype = 'text/html'
 
 
