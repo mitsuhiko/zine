@@ -293,6 +293,12 @@ for name in 'delete', 'save', 'flush', 'execute', 'begin', \
 db.session = session
 db.DatabaseManager = DatabaseManager
 
+#: support for SQLAlchemy's 0.4.2 Text type, in older versions it's
+#: just Text.  This patch will go away once SQLAlchemy 0.5 is out
+#: or something like that.
+if not hasattr(db, 'Text'):
+    db.Text = db.String
+
 #: called at the end of a request
 cleanup_session = session.remove
 
@@ -302,32 +308,32 @@ metadata = db.MetaData()
 
 users = db.Table('users', metadata,
     db.Column('user_id', db.Integer, primary_key=True),
-    db.Column('username', db.Unicode(30)),
-    db.Column('first_name', db.Unicode(40)),
-    db.Column('last_name', db.Unicode(80)),
-    db.Column('display_name', db.Unicode(130)),
-    db.Column('description', db.Unicode),
+    db.Column('username', db.String(30)),
+    db.Column('first_name', db.String(40)),
+    db.Column('last_name', db.String(80)),
+    db.Column('display_name', db.String(130)),
+    db.Column('description', db.Text),
     db.Column('extra', db.PickleType),
     db.Column('pw_hash', db.String(70)),
-    db.Column('email', db.Unicode(250)),
+    db.Column('email', db.String(250)),
     db.Column('role', db.Integer)
 )
 
 tags = db.Table('tags', metadata,
     db.Column('tag_id', db.Integer, primary_key=True),
-    db.Column('slug', db.Unicode(50)),
-    db.Column('name', db.Unicode(50)),
-    db.Column('description', db.Unicode)
+    db.Column('slug', db.String(50)),
+    db.Column('name', db.String(50)),
+    db.Column('description', db.Text)
 )
 
 posts = db.Table('posts', metadata,
     db.Column('post_id', db.Integer, primary_key=True),
     db.Column('pub_date', db.DateTime),
     db.Column('last_update', db.DateTime),
-    db.Column('slug', db.Unicode(50)),
-    db.Column('title', db.Unicode(50)),
-    db.Column('intro', db.Unicode),
-    db.Column('body', db.Unicode),
+    db.Column('slug', db.String(50)),
+    db.Column('title', db.String(50)),
+    db.Column('intro', db.Text),
+    db.Column('body', db.Text),
     db.Column('author_id', db.Integer, db.ForeignKey('users.user_id')),
     db.Column('comments_enabled', db.Boolean, nullable=False),
     db.Column('pings_enabled', db.Boolean, nullable=False),
@@ -339,11 +345,11 @@ posts = db.Table('posts', metadata,
 post_links = db.Table('post_links', metadata,
     db.Column('link_id', db.Integer, primary_key=True),
     db.Column('post_id', db.Integer, db.ForeignKey('posts.post_id')),
-    db.Column('href', db.Unicode(250), nullable=False),
-    db.Column('rel', db.Unicode(250)),
-    db.Column('type', db.Unicode(100)),
-    db.Column('hreflang', db.Unicode(30)),
-    db.Column('title', db.Unicode(200)),
+    db.Column('href', db.String(250), nullable=False),
+    db.Column('rel', db.String(250)),
+    db.Column('type', db.String(100)),
+    db.Column('hreflang', db.String(30)),
+    db.Column('title', db.String(200)),
     db.Column('length', db.Integer)
 )
 
@@ -355,17 +361,17 @@ post_tags = db.Table('post_tags', metadata,
 comments = db.Table('comments', metadata,
     db.Column('comment_id', db.Integer, primary_key=True),
     db.Column('post_id', db.Integer, db.ForeignKey('posts.post_id')),
-    db.Column('author', db.Unicode(100)),
-    db.Column('email', db.Unicode(250)),
-    db.Column('www', db.Unicode(200)),
-    db.Column('body', db.Unicode),
+    db.Column('author', db.String(100)),
+    db.Column('email', db.String(250)),
+    db.Column('www', db.String(200)),
+    db.Column('body', db.Text),
     db.Column('is_pingback', db.Boolean, nullable=False),
     db.Column('parser_data', db.PickleType),
     db.Column('parent_id', db.Integer, db.ForeignKey('comments.comment_id')),
     db.Column('pub_date', db.DateTime),
     db.Column('blocked', db.Boolean, nullable=False),
-    db.Column('blocked_msg', db.Unicode(250)),
-    db.Column('submitter_ip', db.Unicode(100))
+    db.Column('blocked_msg', db.String(250)),
+    db.Column('submitter_ip', db.String(100))
 )
 
 
