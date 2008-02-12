@@ -14,13 +14,13 @@
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+import sys
 from os import path
 from textpress.config import Configuration
 from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
 from textpress.utils import is_valid_email, gen_pwhash, gen_secret_key
-from werkzeug import BaseRequest as Request, BaseResponse as Response, \
-     get_current_url, redirect
+from werkzeug import Request, Response, redirect
 from jinja import Environment, FileSystemLoader
 
 
@@ -33,17 +33,13 @@ def render_response(template_name, context):
     return Response(tmpl.render(context), mimetype='text/html')
 
 
-def get_blog_url(request):
-    return get_current_url(request.environ, root_only=True)
-
-
 class WebSetup(object):
     """Minimal WSGI application for installing textpress"""
 
     def __init__(self, instance_folder):
         self.instance_folder = instance_folder
         views = [
-            ('start', None),
+            ('start', self.test_instance_folder),
             ('database', self.test_database),
             ('admin_account', self.test_admin_account),
             ('summary', None)
@@ -69,13 +65,23 @@ class WebSetup(object):
         handler = self.views[name]
         ctx = ctx or {}
         ctx.update({
-            'current': name,
-            'prev':    self.prev[name],
-            'next':    self.next[name],
-            'values':  dict((k, v) for k, v in request.values.iteritems()
-                            if not k.startswith('_'))
+            'current':     name,
+            'prev':        self.prev[name],
+            'next':        self.next[name],
+            'values':      dict((k, v) for k, v in request.values.iteritems()
+                                if not k.startswith('_'))
         })
         return render_response(name + '.html', ctx)
+
+    def test_instance_folder(self, request):
+        """Check if the instance folder exists."""
+        if not path.exists(self.instance_folder):
+            folder = self.instance_folder
+            if not isinstance(folder, unicode):
+                folder = folder.decode(sys.getfilesystemencoding() or 'utf-8',
+                                       'ignore')
+            return {'error': u'Instance folder does not exist.  You have to '
+                    u'create the folder “%s” before proceeding.' % folder}
 
     def test_database(self, request):
         """Check if the database uri is valid."""
@@ -151,7 +157,7 @@ class WebSetup(object):
             cfg = Configuration(config_filename)
             cfg.update(
                 maintenance_mode=True,
-                blog_url=get_blog_url(request),
+                blog_url=request.url_root,
                 secret_key=gen_secret_key(),
                 database_uri=database_uri
             )

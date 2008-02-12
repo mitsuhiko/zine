@@ -5,4 +5,10 @@
     Welcome to the TextPress Setup. This Wizard will ask you some
     basic questions and setup TextPress for you.
   </p>
+  {% if error %}
+    <div class="error">
+      <h3>An Error Occoured</h3>
+      <p>{{ error|e }}</p>
+    </div>
+  {% endif %}
 {% endblock %}
