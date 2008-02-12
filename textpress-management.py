@@ -25,7 +25,7 @@ def make_app():
 
 def make_shell():
     from textpress import make_textpress
-    textpress = make_textpress(INSTANCE_FOLDER, True)
+    app = make_textpress(INSTANCE_FOLDER, True)
     from textpress import models
     from textpress.database import db
     del make_textpress
