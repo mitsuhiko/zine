@@ -222,8 +222,6 @@ def do_config(req):
         mimetypes = ';'.join(mimetypes.splitlines())
         if mimetypes != req.app.cfg['file_uploads/mimetypes']:
             req.app.cfg['file_uploads/mimetypes'] = mimetypes
-            if req.app in _mimetype_cache:
-                del _mimetype_cache[req.app][:]
             flash(_('Upload mimetype mapping altered successfully.'))
         return redirect(url_for('file_uploads/config'))
 
