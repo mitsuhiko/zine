@@ -100,4 +100,4 @@ def get_post(post_id, user):
 
 
 def setup(app, plugin):
-    app.add_api('metaweblog', True, xmlrpc)
+    app.add_api('metaweblog', False, xmlrpc)

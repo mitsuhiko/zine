@@ -1,7 +1,0 @@
-Name: MetaWeblog API Support
-Plugin URL: http://textpress.pocoo.org/plugins/metaweblog_api
-Author: Armin Ronacher <armin.ronacher@active-4.com>
-Author URL: http://lucumr.pocoo.org/
-License: GPL
-Version: 0.1
-Description: Adds support for the MetaWeblog API to TextPress.
