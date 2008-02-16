@@ -1,0 +1,181 @@
+body {
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    background-color: white;
+    color: black;
+    margin: 2em;
+    padding: 0;
+}
+
+a {
+    color: #0066FF;
+}
+
+a:hover {
+    color: #0000FF;
+}
+
+div.header {
+    padding: 0 0 0.5em 0;
+    border-bottom: 1px dotted #ccc;
+}
+
+div.header h1 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+div.header h1 a {
+    text-decoration: none;
+}
+
+div.header p.description {
+    margin: 0 0 0 1.4em;
+    padding: 0;
+    letter-spacing: 0.3em;
+    color: #F71188;
+}
+
+div.footer {
+    clear: both;
+}
+
+div.footer p {
+    margin: 0;
+    padding: 1em 0 0 0;
+    font-size: 0.85em;
+    text-align: right;
+}
+
+div.page {
+    margin: 0 auto 0 auto;
+    width: 38em;
+}
+
+div.contents {
+    width: 28em;
+    float: left;
+}
+
+div.sidebar {
+    width: 9.5em;
+    font-size: 0.9em;
+    float: right;
+}
+
+div.sidebar h3 {
+    margin: 1.2em 0 0.5em 0;
+    color: #F71188;
+    font-size: 1.2em;
+    font-weight: normal;
+}
+
+div.sidebar ul,
+div.sidebar ol {
+    margin: 0.5em 0 0.5em 0;
+    padding: 0 0 0 1.5em;
+}
+
+h2 {
+    font-size: 1.6em;
+    margin: 1em 0 0.4em 0;
+    color: #0066FF;
+}
+
+h3 {
+    font-size: 1.4em;
+    margin: 1em 0 0.4em 0;
+    color: #0066FF;
+}
+
+h3 a {
+    text-decoration: none;
+    display: block;
+}
+
+h3 a:hover {
+    background-color: #F71188;
+    color: white;
+}
+
+p {
+    margin: 0.8em 0 0.8em 0;
+    line-height: 1.3em;
+}
+
+div.tag-cloud {
+    font-size: 0.83em;
+}
+
+div.post p.post-note {
+    background-color: #FFFBD5;
+    border: 1px solid #ECE7AD;
+    font-size: 0.85em;
+    padding: 0.3em;
+}
+
+p.meta {
+    color: #888;
+    font-size: 0.9em;
+    margin: -0.7em 0 1em 0;
+}
+
+p.related {
+    font-size: 0.85em;
+    margin: 1.5em 0 0 0;
+    padding: 0.4em;
+    border: 1px solid #ddd;
+    background-color: #f2f2f2;
+}
+
+input, select, textarea {
+    border: 1px solid #ccc;
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    font-size: 0.9em;
+    padding: 0.2em;
+}
+
+form.comments dl dt {
+    color: #888;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin: 0.5em 0 0.3em 0;
+}
+
+form.comments dl dd {
+    margin: 0;
+    padding: 0;
+}
+
+form.comments textarea {
+    width: 99%;
+    height: 8em;
+}
+
+form.comments div.actions {
+    margin: 0.4em 0 0 0;
+}
+
+div.actions input {
+    background-color: #FAF9F0;
+}
+
+form.comments div#comment-message {
+    font-size: 0.8em;
+    margin: 0.5em 0 0.5em 0;
+    background-color: #FFFBD5;
+    border: 1px solid #ECE7AD;
+    font-size: 0.85em;
+    padding: 0.3em;
+}
+
+ul#comments, ol#comments {
+    list-style: none;
+    margin: 0.5em 0 0.5em 0;
+    padding: 0;
+}
+
+ul.sub_comments, ol.sub_comments {
+    list-style: none;
+    margin: 0.5em 0 0.5em 0;
+    padding: 0 0 0 1.5em;
+}

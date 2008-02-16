@@ -20,9 +20,9 @@ inline_formatting = {
     'escaped_code': ('``',        '``'),
     'code':         ('`',         '`'),
     'strong':       ('**',        '**'),
-    'emphasized':   ('*',         '*'),
+    'em':           ('*',         '*'),
     'link':         ('[[',        ']]'),
-    'quote':        ('<quote>',   '</quote>'),
+    'blockquote':   ('<blockquote>',   '</blockquote>'),
     'code_block':   ('<code>',    '</code>'),
     'paragraph':    (r'\n{2,}',   None),
     'newline':      (r'\\$',      None)
@@ -115,11 +115,11 @@ class CommentParser(BaseParser):
         result = Fragment()
 
         for token, data in self.tokenize(input_data):
-            if token in ('strong_begin', 'emphasized_begin', 'quote_begin'):
+            if token in ('strong_begin', 'em_begin', 'blockquote_begin'):
                 new_node = Node(token[:-6])
                 node.children.append(new_node)
                 node = new_node
-            elif token in ('strong_end', 'emphasized_end', 'quote_end'):
+            elif token in ('strong_end', 'em_end', 'blockquote_end'):
                 assert node.name == token[:-4]
                 node = node.parent
             elif token in 'text':

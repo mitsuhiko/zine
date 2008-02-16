@@ -1,0 +1,18 @@
+{% macro render_post(post) -%}
+  <div class="post">
+    <h3><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a></h3>
+    <div class="text">
+      {{ post.intro or post.body }}
+      {% if post.intro -%}
+        <p><a href="{{ url_for(post)|e }}#extended">{% trans "Read on" %}...</a></p>
+      {%- endif %}
+    </div>
+    <p class="post-note">
+      <strong class="date">{{ post.pub_date|datetimeformat|e }}</strong>
+      {% trans 'by' %} <a href="{{ url_for(post.author)|e
+        }}">{{ post.author.display_name|e }}</a>,
+      <a href="{{ url_for(post)|e }}#comments">{% trans comments=post.comment_count
+         %}{{ comments }} comment{% pluralize %}{{ comments}} comments{% endtrans -%}</a>
+    </p>
+  </div>
+{%- endmacro %}

@@ -20,7 +20,7 @@
       {%- endfor %} |
       <a href="{{ url_for(post)|e }}#comments">{% trans comments=post.comment_count
          %}{{ comments }} comment{% pluralize %}{{ comments}} comments{% endtrans -%}</a>
-      {%- if req.user.is_manager %}
+      {%- if request.user.is_manager %}
       | <a href="{{ url_for('admin/edit_post', post_id=post.post_id) }}">{% trans 'Edit' %}</a>
       {%- endif %}
     </p>

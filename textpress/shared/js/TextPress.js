@@ -53,6 +53,9 @@ var TextPress = {
   }
 };
 
+$(function() {
+  $('#comment-message').hide();
+});
 
 // quick alias for translations
 function _(string) { return TextPress.gettext(string); }
