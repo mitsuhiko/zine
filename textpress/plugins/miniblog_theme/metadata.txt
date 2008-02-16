@@ -4,5 +4,6 @@ Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: GPL
 Version: 0.1
-Description: A very simple theme for tumbleblogs or whatever.
+Description: A very simple theme for tumbleblogs or whatever inspired by\
+ the flickr design.
 Preview: miniblog_theme::preview.png
