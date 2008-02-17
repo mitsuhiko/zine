@@ -31,8 +31,8 @@ from simplejson import dumps as dump_json, loads as load_json
 from SimpleXMLRPCServer import SimpleXMLRPCDispatcher
 from htmlentitydefs import name2codepoint
 
-from werkzeug import cached_property, escape, url_quote, Local, \
-     LocalManager, ClosingIterator, BaseResponse
+from werkzeug import cached_property, escape, url_quote, import_string, \
+     Local, LocalManager, ClosingIterator, BaseResponse
 from werkzeug.exceptions import Forbidden
 from werkzeug.contrib.reporterstream import BaseReporterStream
 from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
@@ -308,6 +308,22 @@ def gen_slug(text):
             word = unicodedata.normalize('NFKD', word)
             result.append(word.encode('ascii', 'ignore'))
     return u'-'.join(result)
+
+
+_etree = None
+def get_etree():
+    """Get an etree implementation."""
+    global _etree
+    if _etree is not None:
+        return _etree
+    for name in 'lxml.etree', 'elementtree.cElementTree', \
+                'cElementTree', 'xml.etree.cElementTree', \
+                'ElementEtree', 'xml.etree.ElementTree':
+        etree = import_string(name, silent=True)
+        if etree is not None:
+            _etree = etree
+            return etree
+    raise RuntimeError('no elementtree implementation found')
 
 
 def format_datetime(obj, format=None):

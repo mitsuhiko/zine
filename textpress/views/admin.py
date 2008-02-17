@@ -17,7 +17,7 @@
 
     -   Dashboard
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 from datetime import datetime
@@ -112,6 +112,11 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('cache', url_for('admin/cache'), _('Cache')),
                 ('configuration', url_for('admin/configuration'),
                  _('Configuration Editor'))
+            ]),
+            ('maintenance', url_for('admin/maintenance'), _('Maintenance'), [
+                ('overview', url_for('admin/maintenance'), _('Overview')),
+                ('import', url_for('admin/import'), _('Import')),
+                ('export', url_for('admin/export'), _('Export'))
             ])
         ]
 
@@ -1051,8 +1056,7 @@ def do_basic_options(request):
         'default_parser':       cfg['default_parser'],
         'comment_parser':       cfg['comment_parser'],
         'posts_per_page':       cfg['posts_per_page'],
-        'use_flat_comments':    cfg['use_flat_comments'],
-        'maintenance_mode':     cfg['maintenance_mode']
+        'use_flat_comments':    cfg['use_flat_comments']
     }
     errors = []
     csrf_protector = CSRFProtector()
@@ -1124,8 +1128,6 @@ def do_basic_options(request):
                 cfg['posts_per_page'] = posts_per_page
             if use_flat_comments != cfg['use_flat_comments']:
                 cfg['use_flat_comments'] = use_flat_comments
-            if maintenance_mode != cfg['maintenance_mode']:
-                cfg['maintenance_mode'] = maintenance_mode
             flash(_('Configuration altered successfully.'), 'configure')
             return simple_redirect('admin/basic_options')
 
@@ -1529,6 +1531,39 @@ def do_configuration(request):
         editor_enabled=request.session.get('ace_on', False),
         csrf_protector=csrf_protector
     )
+
+
+@require_role(ROLE_ADMIN)
+def do_maintenance(request):
+    """Enable / Disable maintenance mode."""
+    cfg = request.app.cfg
+    form = {
+        'maintenance_mode':     cfg['maintenance_mode']
+    }
+    csrf_protector = CSRFProtector()
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+        cfg['maintenance_mode'] = 'maintenance_mode' in request.form
+        flash(_('Configuration altered successfully.'), 'configure')
+        return simple_redirect('admin/maintenance')
+
+    return render_admin_response('admin/maintenance.html',
+                                 'maintenance.overview',
+        form=form,
+        hidden_form_data=make_hidden_fields(csrf_protector)
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_import(request):
+    """FOo."""
+
+
+@require_role(ROLE_ADMIN)
+def do_export(request):
+    """Not yet implemented."""
+    return render_admin_response('admin/export.html',
+                                 'maintenance.export')
 
 
 @require_role(ROLE_AUTHOR)

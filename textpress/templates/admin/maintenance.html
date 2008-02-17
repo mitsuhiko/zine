@@ -1,0 +1,25 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Maintenance" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Maintenance" %}</h2>
+  <p>{% trans %}
+    From here you can set your blog into maintenance mode and do administrative
+    tasks.  It's recommend to enable maintenance mode before doing software
+    upgrades, imports, exports or plugin installations.  While it's not stricly
+    necessary for the latter it's good idea to test the changes before going
+    live with them.  As long as maintenance mode is enabled users will see a
+    message that says that the blog is in maintenance mode.
+  {% endtrans %}</p>
+  <form action="" method="post">
+    <dl>
+      <dt>{% trans "Maintenance Mode" %}</dt>
+      <dd>{{ h.checkbox('maintenance_mode', form.maintenance_mode) }}
+          <label for="maintenance_mode">{% trans "enable maintenance mode"
+            %}</label></dd>
+    </dl>
+    <div class="actions">
+      {{ hidden_form_data }}
+      <input type="submit" value="{% trans 'Save' %}" />
+    </div>
+  </form>
+{% endblock %}

@@ -130,9 +130,9 @@ def add_meta(http_equiv=None, name=None, content=None):
 def add_script(src, type='text/javascript'):
     """Load a script."""
     local.page_metadata.append(('script', {
-            'src':      src,
-            'type':     type
-        }))
+        'src':      src,
+        'type':     type
+    }))
 
 
 def add_header_snippet(html):
@@ -515,11 +515,17 @@ class TextPress(object):
         })
         self.themes = {'default': default_theme}
         self.apis = {}
+        self.importers = {}
 
         # register the pingback API.
         from textpress import pingback
         self.add_api('pingback', True, pingback.service)
         self.pingback_endpoints = pingback.endpoints.copy()
+
+        # register our builtin importers
+        from textpress.importers import all_importers
+        for importer in all_importers:
+            self.add_importer(importer)
 
         # insert list of widgets
         from textpress.widgets import all_widgets
@@ -620,6 +626,16 @@ class TextPress(object):
         self.apis[name] = (blog_id, preferred, endpoint)
         self.add_url_rule('/_services/' + name, endpoint=endpoint)
         self.add_view(endpoint, callback)
+
+    @setuponly
+    def add_importer(self, importer):
+        """Register an importer."""
+        importer = importer(self)
+        endpoint = 'import/' + importer.name
+        self.importers[importer.name] = importer
+        self.add_url_rule('/import/' + importer.name, prefix='admin',
+                          endpoint=endpoint)
+        self.add_view(endpoint, importer)
 
     @setuponly
     def add_pingback_endpoint(self, endpoint, callback):
@@ -803,8 +819,10 @@ class TextPress(object):
         # not an administrator. in that case just show a message that
         # the user is not privileged to view the blog right now. Exception:
         # the page is the login page for the blog.
-        if request.path not in ('/admin', '/admin/', '/admin/login') \
-           and self.cfg['maintenance_mode']:
+        admin_prefix = self.cfg['admin_url_prefix']
+        if self.cfg['maintenance_mode'] and \
+           request.path != admin_prefix and not \
+           request.path.startswith(admin_prefix + '/'):
             from textpress.models import ROLE_ADMIN
             if request.user.role < ROLE_ADMIN:
                 response = render_response('maintenance.html')
