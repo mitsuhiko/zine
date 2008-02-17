@@ -1,4 +1,4 @@
 ^instance$
 ^instance/
-\.pyc$
+\.py[co]$
 \.DS_Store$

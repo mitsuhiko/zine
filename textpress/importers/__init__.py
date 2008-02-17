@@ -22,6 +22,9 @@ class Importer(object):
     def title(self):
         return self.name.title()
 
+    def get_url_values(self):
+        return 'import/' + self.name, {}
+
     def __init__(self, app):
         self.app = app
 

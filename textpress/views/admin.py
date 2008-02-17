@@ -1556,14 +1556,17 @@ def do_maintenance(request):
 
 @require_role(ROLE_ADMIN)
 def do_import(request):
-    """FOo."""
+    """Show the current import queue or add new items."""
+    return render_admin_response('admin/import.html', 'maintenance.import',
+        importers=sorted(request.app.importers.values(),
+                         key=lambda x: x.title.lower())
+    )
 
 
 @require_role(ROLE_ADMIN)
 def do_export(request):
     """Not yet implemented."""
-    return render_admin_response('admin/export.html',
-                                 'maintenance.export')
+    return render_admin_response('admin/export.html', 'maintenance.export')
 
 
 @require_role(ROLE_AUTHOR)
