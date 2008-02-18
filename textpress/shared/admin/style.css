@@ -603,7 +603,7 @@ table.plugins td {
 }
 
 table.plugins tr.plugin-active td {
-    background-color: #98E8F0;
+background-color: #98E8F0;
 }
 
 /* :::: CONFIG EDITOR :::: */
@@ -617,6 +617,11 @@ table.config-table td.default {
 
 table.config-table td input[type="text"] {
     width: 97%;
+}
+
+/* :::: IMPORTER PAGE :::: */
+table.importable-posts tr.already-imported td {
+    background-color: #98E8F0;
 }
 
 /* :::: ABOUT PAGE :::: */

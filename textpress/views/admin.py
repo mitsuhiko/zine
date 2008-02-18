@@ -30,7 +30,8 @@ from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      build_eventmap, make_hidden_fields, dump_json, load_json, flash, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
-from textpress.importers import list_import_queue, load_import_dump
+from textpress.importers import list_import_queue, load_import_dump, \
+     perform_import
 from textpress.widgets import WidgetManager
 from textpress.pluginsystem import install_package, InstallationError, \
      SetupError
@@ -1553,11 +1554,35 @@ def do_import(request):
 @require_role(ROLE_ADMIN)
 def do_inspect_import(request, id):
     """Inspect a database dump."""
-    dump = load_import_dump(request.app, id)
-    if dump is None:
+    blog = load_import_dump(request.app, id)
+    if blog is None:
         raise NotFound()
+    csrf_protector = CSRFProtector()
+
+    # assemble initial dict
+    form = {}
+    for author in blog.authors:
+        form['import_author_%s' % author.id] = True
+    for post in blog.posts:
+        form.update({
+            'import_post_%s' % post.id:     True,
+            'import_comments_%s' % post.id: True
+        })
+
+    # perform the actual import here
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+        perform_import(blog, request.form)
+        flash('Imported data from dump into database.')
+        return simple_redirect('admin/import')
+
     return render_admin_response('admin/inspect_import.html',
-                                 'maintenance.import', blog=dump)
+                                 'maintenance.import',
+        form=form,
+        blog=blog,
+        users=User.objects.order_by('username').all(),
+        hidden_form_data=make_hidden_fields(csrf_protector)
+    )
 
 
 @require_role(ROLE_ADMIN)

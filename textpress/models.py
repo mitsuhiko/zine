@@ -62,7 +62,10 @@ class User(object):
     def __init__(self, username, password, email, first_name=u'',
                  last_name=u'', description=u'', role=ROLE_SUBSCRIBER):
         self.username = username
-        self.set_password(password)
+        if password is not None:
+            self.set_password(password)
+        else:
+            self.disable()
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
@@ -106,7 +109,12 @@ class User(object):
         self.pw_hash = gen_pwhash(password)
 
     def check_password(self, password):
+        if self.pw_hash == '!':
+            return False
         return check_pwhash(self.pw_hash, password)
+
+    def disable(self):
+        self.pw_hash = '!'
 
     def get_url_values(self):
         if self.role >= ROLE_AUTHOR:
@@ -416,7 +424,7 @@ class Post(object):
 
     objects = PostManager()
 
-    def __init__(self, title, author, body, intro='', slug=None,
+    def __init__(self, title, author, body, intro=None, slug=None,
                  pub_date=None, last_update=None, comments_enabled=True,
                  pings_enabled=True, status=STATUS_PUBLISHED,
                  parser=None, uid=None):
@@ -434,8 +442,8 @@ class Post(object):
         #: but by the `raw_intro` and `raw_body` property callback a few lines
         #: below.
         self.parser_data = {'parser': parser}
-        self.raw_intro = intro
-        self.raw_body = body
+        self.raw_intro = intro or ''
+        self.raw_body = body or ''
         self.extra = {}
 
         if pub_date is None:
@@ -827,7 +835,7 @@ class Comment(object):
         if parser is None:
             parser = get_application().cfg['comment_parser']
         self.parser_data = {'parser': parser}
-        self.raw_body = body
+        self.raw_body = body or ''
         if isinstance(parent, (int, long)):
             self.parent_id = parent
         else:

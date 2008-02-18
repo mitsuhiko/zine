@@ -30,6 +30,8 @@ WORDPRESS = _Namespace('http://wordpress.org/export/1.0/')
 
 
 _xml_decl_re = re.compile(r'<\?xml.*?\?>(?s)')
+_meta_value_re = re.compile(r'(<wp:postmeta>.*?<wp:meta_value>)(.*?)'
+                            r'(</wp:meta_value>.*?</wp:postmeta>)(?s)')
 _comment_re = re.compile(r'(<wp:comment>.*?<wp:comment_content>)(.*?)'
                          r'(</wp:comment_content>.*?</wp:comment>)(?s)')
 
@@ -57,14 +59,15 @@ def parse_broken_wxr(fd):
         code = inline_doctype + code
 
     # fix two: find comment sections and escape them.  Especially trackbacks
-    # tent to break the XML structure.
-    def escape_if_useful(match):
+    # tent to break the XML structure.  same applies to wp:meta_value stuff.
+    def escape_if_good_idea(match):
         before, content, after = match.groups()
         if '>' in content and '<' in content and not \
            content.lstrip().startswith('<!CDATA[['):
             content = escape(content)
         return before + content + after
-    code = _comment_re.sub(escape_if_useful, code)
+    code = _meta_value_re.sub(escape_if_good_idea, code)
+    code = _comment_re.sub(escape_if_good_idea, code)
 
     return get_etree().fromstring(code).find('channel')
 
@@ -89,7 +92,7 @@ def parse_feed(fd):
         if name:
             author = authors.get(name)
             if author is None:
-                author = authors[name] = Author(name, None)
+                author = authors[name] = Author(len(authors) + 1, name, None)
             return author
 
     labels = {}
@@ -112,17 +115,21 @@ def parse_feed(fd):
             get_author(item.findtext(DC_METADATA.creator)),
             item.findtext('description'),
             item.findtext(CONTENT.encoded),
-            [labels[x] for x in item.findall('category') if x in labels],
+            [labels[x.text] for x in item.findall('category')
+             if x.text in labels],
             [Comment(
                 x.findtext(WORDPRESS.comment_author),
                 x.findtext(WORDPRESS.comment_author_email),
                 x.findtext(WORDPRESS.comment_author_url),
                 x.findtext(WORDPRESS.comment_author_ip),
                 parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
-                x.findtext(WORDPRESS.comment_content)
+                x.findtext(WORDPRESS.comment_content), 'plain',
+                x.findtext(WORDPRESS.comment_type) in ('pingback',
+                                                       'traceback')
             ) for x in item.findall(WORDPRESS.comment)],
             item.findtext('comment_status') != 'closed',
-            item.findtext('ping_status') != 'closed'
+            item.findtext('ping_status') != 'closed',
+            parser='autop'
         ) for item in tree.findall('item')],
         authors.values()
     )
