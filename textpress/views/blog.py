@@ -362,12 +362,10 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
     if post_slug is None:
         for post in Post.objects.get_list(year, month, day, tag, author,
                                           per_page=10, as_list=True):
-            uid = build_tag_uri(request.app, post.pub_date, 'post',
-                                post.post_id)
             links = [link.as_dict() for link in post.links]
             feed.add(post.title, unicode(post.body), content_type='html',
                      author=post.author.display_name, links=links,
-                     url=url_for(post, _external=True), id=uid,
+                     url=url_for(post, _external=True), id=post.uid,
                      updated=post.last_update, published=post.pub_date)
 
     # otherwise we create a feed for all the comments of a post.
