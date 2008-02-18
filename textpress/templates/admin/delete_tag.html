@@ -3,11 +3,13 @@
 {% block contents %}
   <h2>{% trans "Delete Tag" %}</h2>
   <form action="" method="post">
-    {{ hidden_form_data }}
-    <p>{% trans tag_name=tag.name|e %}
-      Do you really want to delete tag "{{ tag_name }}"?.
-    {% endtrans %}</p>
-    <input type="submit" name="cancel" value="{% trans 'No' %}">
-    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    <div>
+      {{ hidden_form_data }}
+      <p>{% trans tag_name=tag.name|e %}
+        Do you really want to delete tag "{{ tag_name }}"?.
+      {% endtrans %}</p>
+      <input type="submit" name="cancel" value="{% trans 'No' %}">
+      <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    </div>
   </form>
 {% endblock %}

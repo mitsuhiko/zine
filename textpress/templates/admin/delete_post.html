@@ -3,18 +3,20 @@
 {% block contents %}
   <h2>{% trans "Delete Post" %}</h2>
   <form action="" method="post">
-    {{ hidden_form_data }}
-    <p>{% trans post_title=post.title|e %}
-      Do you really want to delete post “{{ post_title }}”?.
-    {% endtrans %}</p>
-    {%- if post.comments %}
-    <p>{% trans comment_count=post.comments|count %}
-      This will also delete {{ comment_count }} comment.
-    {% pluralize %}
-      This will also delete {{ comment_count }} comments.
-    {% endtrans %}</p>
-    {%- endif %}
-    <input type="submit" name="cancel" value="{% trans 'No' %}">
-    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    <div>
+      {{ hidden_form_data }}
+      <p>{% trans post_title=post.title|e %}
+        Do you really want to delete post “{{ post_title }}”?.
+      {% endtrans %}</p>
+      {%- if post.comments %}
+      <p>{% trans comment_count=post.comments|count %}
+        This will also delete {{ comment_count }} comment.
+      {% pluralize %}
+        This will also delete {{ comment_count }} comments.
+      {% endtrans %}</p>
+      {%- endif %}
+      <input type="submit" name="cancel" value="{% trans 'No' %}">
+      <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    </div>
   </form>
 {% endblock %}

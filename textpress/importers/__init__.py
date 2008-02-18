@@ -15,7 +15,7 @@ import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
-from textpress.api import require_role, get_application
+from textpress.api import require_role
 from textpress.database import db, posts
 from textpress.models import ROLE_ADMIN, ROLE_AUTHOR
 
@@ -59,7 +59,14 @@ def load_import_dump(app, id):
         return blog
 
 
-def perform_import(blog, d):
+def delete_import_dump(app, id):
+    """Delete an import dump."""
+    path = os.path.join(app.instance_folder, 'import_queue', str(id))
+    if os.path.isfile(path):
+        os.remove(path)
+
+
+def perform_import(app, blog, d):
     """
     Perform an import from form data.  This function was designed to be called
     from a web request, if you call it form outside, make sure the config is
@@ -68,7 +75,6 @@ def perform_import(blog, d):
     # import models here because they have the same names as our
     # importer objects this module exports
     from textpress.models import User, Tag, Post, Comment
-    app = get_application()
     author_mapping = {}
     label_mapping = {}
 

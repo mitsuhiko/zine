@@ -344,7 +344,8 @@ class PostManager(db.DatabaseManager):
 
         # XXX: currently we also return months without articles in it.
         # other blog systems do not, but because we use sqlalchemy we have
-        # to go with the functionality provided. Currently there is no way
+        # to go with the functionality provided.  Currently there is no way
+        # to do date truncating in a database agnostic way.
         row = db.execute(db.select([p.pub_date], q,
                 order_by=[db.asc(p.pub_date)], limit=1)).fetchone()
 
@@ -370,7 +371,7 @@ class PostManager(db.DatabaseManager):
                 now, oldest = [x.replace(day=1) for x in now, oldest]
                 while limit is None or len(result) < limit:
                     if not now.month - 1:
-                        now = now.replace(year=now.year - 1, month=1)
+                        now = now.replace(year=now.year - 1, month=12)
                     else:
                         now = now.replace(month=now.month - 1)
                     if now < oldest:

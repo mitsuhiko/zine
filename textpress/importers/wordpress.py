@@ -62,8 +62,7 @@ def parse_broken_wxr(fd):
     # tent to break the XML structure.  same applies to wp:meta_value stuff.
     def escape_if_good_idea(match):
         before, content, after = match.groups()
-        if ('>' in content or '<' in content) and not \
-           content.lstrip().startswith('<!CDATA[['):
+        if not content.lstrip().startswith('<!CDATA[['):
             content = escape(content)
         return before + content + after
     code = _meta_value_re.sub(escape_if_good_idea, code)
@@ -97,9 +96,9 @@ def parse_feed(fd):
 
     labels = {}
     for item in tree.findall(WORDPRESS.category):
-        label = Label(item.findtext(WORDPRESS.cat_name),
-                      item.findtext(WORDPRESS.category_nicename))
-        labels[label.slug] = label
+        label = Label(item.findtext(WORDPRESS.category_nicename),
+                      item.findtext(WORDPRESS.cat_name))
+        labels[label.name] = label
 
     return Blog(
         tree.findtext('title'),
@@ -130,7 +129,8 @@ def parse_feed(fd):
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
             parser='autop'
-        ) for item in tree.findall('item')],
+        ) for item in tree.findall('item')
+          if item.findtext(WORDPRESS.status) == 'publish'],
         authors.values()
     )
 
