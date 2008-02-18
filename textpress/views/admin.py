@@ -1579,7 +1579,6 @@ def do_about(request):
 
     thread_count = activeCount()
     version_info = get_version_info()
-    multithreaded = thread_count > 1 and request.is_multithread
 
     return render_admin_response('admin/about.html', 'about.system',
         apis=[{
@@ -1600,7 +1599,7 @@ def do_about(request):
         } for key, (_, default) in sorted(request.app.cfg.config_vars.iteritems())],
         hosting_env={
             'persistent':       not request.is_run_once,
-            'multithreaded':    multithreaded,
+            'multithreaded':    request.is_multithread,
             'thread_count':     thread_count,
             'multiprocess':     request.is_multiprocess,
             'wsgi_version':     '.'.join(map(str, request.environ['wsgi.version']))
