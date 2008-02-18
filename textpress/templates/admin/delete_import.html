@@ -1,0 +1,15 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Delete Import Dump" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Delete Import Dump" %}</h2>
+  <form action="" method="post">
+    <div>
+      <p>{% trans dump_title=dump.title|e %}
+        Do you really want to delete the imported dump “{{ dump_title }}”?.
+      {% endtrans %}</p>
+      {{ hidden_form_data }}
+      <input type="submit" name="cancel" value="{% trans 'No' %}">
+      <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    </div>
+  </form>
+{% endblock %}
