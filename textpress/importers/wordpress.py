@@ -62,7 +62,7 @@ def parse_broken_wxr(fd):
     # tent to break the XML structure.  same applies to wp:meta_value stuff.
     def escape_if_good_idea(match):
         before, content, after = match.groups()
-        if '>' in content and '<' in content and not \
+        if ('>' in content or '<' in content) and not \
            content.lstrip().startswith('<!CDATA[['):
             content = escape(content)
         return before + content + after
