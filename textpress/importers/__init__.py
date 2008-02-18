@@ -178,7 +178,7 @@ class Post(object):
 
     def __init__(self, slug, title, link, pub_date, author, intro, body,
                  labels=None, comments=None, comments_enabled=True,
-                 pings_enabled=True):
+                 pings_enabled=True, uid=None):
         self.slug = slug
         self.title = title
         self.link = link
@@ -190,6 +190,7 @@ class Post(object):
         self.comments = comments or []
         self.comments_enabled = comments_enabled
         self.pings_enabled = pings_enabled
+        self.uid = uid or self.link
 
     def __repr__(self):
         return '<%s %r>' % (

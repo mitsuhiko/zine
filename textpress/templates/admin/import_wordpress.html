@@ -9,7 +9,7 @@
     the location of such a file on an external URL and it will import the posts,
     comments, custom fields, and categories into this blog.
   {% endtrans %}</p>
-  <form action="" method="post" enctype="form/multipart">
+  <form action="" method="post" enctype="multipart/form-data">
     <dl>
       <dt>{% trans "Dump Download URL" %}</dt>
       <dd>{{ h.input_field('download_url', form.download_url, size=40) }}</dd>
