@@ -2,3 +2,4 @@
 ^instance/
 \.py[co]$
 \.DS_Store$
+^dumps/
