@@ -10,6 +10,51 @@
     :copyright: Copyright 2008 by Armin Ronacher
     :license: GNU GPL, see LICENSE for more details.
 """
+import os
+from time import time
+from pickle import dump, load, HIGHEST_PROTOCOL
+from datetime import datetime
+from textpress.api import require_role
+from textpress.models import ROLE_ADMIN
+
+
+def list_import_queue(app):
+    """Return a list of all items in the import queue."""
+    path = os.path.join(app.instance_folder, 'import_queue')
+    if not os.path.isdir(path):
+        return []
+    result = []
+    for id in os.listdir(path):
+        if not id.isdigit():
+            continue
+        filename = os.path.join(path, id)
+        f = file(filename)
+        try:
+            d = load(f)
+        finally:
+            f.close()
+        d.update(
+            size=os.path.getsize(filename),
+            id=int(id)
+        )
+        result.append(d)
+    result.sort(key=lambda x: x['id'])
+    return result
+
+
+def load_import_dump(app, id):
+    """Load an import dump."""
+    path = os.path.join(app.instance_folder, 'import_queue', str(id))
+    if not os.path.isfile(path):
+        return
+    f = file(path, 'rb')
+    try:
+        load(f)
+        blog = load(f)
+    finally:
+        f.close()
+    if isinstance(blog, Blog):
+        return blog
 
 
 class Importer(object):
@@ -25,11 +70,42 @@ class Importer(object):
     def get_url_values(self):
         return 'import/' + self.name, {}
 
+    def render_admin_page(self, template_name, **context):
+        """Shortcut for rendering an page for the admin."""
+        from textpress.views.admin import render_admin_response
+        return render_admin_response(template_name, 'maintenance.import',
+                                     **context)
+
+    def enqueue_dump(self, blog):
+        """Enqueue a `Blog` object into the dump space."""
+        path = os.path.join(self.app.instance_folder, 'import_queue')
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass
+        f = file(os.path.join(path, '%d' % time()), 'wb')
+        try:
+            dump({
+                'importer':     self.title,
+                'source':       blog.link,
+                'title':        blog.title,
+                'dump_date':    blog.dump_date
+            }, f, HIGHEST_PROTOCOL)
+            dump(blog, f, HIGHEST_PROTOCOL)
+        finally:
+            f.close()
+
     def __init__(self, app):
         self.app = app
 
     def __call__(self, request):
-        pass
+        return require_role(ROLE_ADMIN)(self.configure)(request)
+
+    def configure(self, request):
+        """
+        Subclasses should override this and implement the admin panel
+        that ask for details and imports to the queue.
+        """
 
 
 class Blog(object):
@@ -39,12 +115,19 @@ class Blog(object):
 
     def __init__(self, title, link, description, language='en', labels=None,
                  posts=None, authors=None):
+        self.dump_date = datetime.utcnow()
         self.title = title
         self.link = link
         self.description = description
         self.language = language
+        if labels:
+            labels.sort(key=lambda x: x.name.lower())
         self.labels = labels or []
+        if posts:
+            posts.sort(key=lambda x: x.pub_date, reverse=True)
         self.posts = posts or []
+        if authors:
+            authors.sort(key=lambda x: x.name.lower())
         self.authors = authors or []
 
     def __repr__(self):

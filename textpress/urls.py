@@ -71,6 +71,7 @@ def make_urls(app):
         Rule('/options/configuration', endpoint='admin/configuration'),
         Rule('/maintenance/', endpoint='admin/maintenance'),
         Rule('/maintenance/import/', endpoint='admin/import'),
+        Rule('/maintenance/import/<int:id>', endpoint='admin/inspect_import'),
         Rule('/maintenance/export', endpoint='admin/export'),
         Rule('/about/', endpoint='admin/about'),
         Rule('/about/eventmap', endpoint='admin/eventmap'),

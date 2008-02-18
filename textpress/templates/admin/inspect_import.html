@@ -1,0 +1,50 @@
+{% extends "admin/layout.html" %}
+{% block title %}{% trans "Inspect Import" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Inspect Import" %}</h2>
+  <p>{% trans %}
+    Here you can now inspect the imported data and select the data you want
+    to import into the database.
+  {% endtrans %}</p>
+  <form action="" method="post">
+    <h3>{% trans "Blog Details" %}</h3>
+    <dl>
+      <dt>{% trans 'Blog Title' %}</dt>
+      <dd><a href="{{ blog.link|e }}">{{ blog.title|e }}</a></dd>
+      <dt>{% trans 'Description' %}</dt>
+      <dd>{{ blog.description }}</dd>
+      <dt>{% trans 'Language' %}</dt>
+      <dd>{{ blog.language }}</dd>
+    </dl>
+    <h3>{% trans "Authors" %}</h3>
+    <ul>
+    {%- for author in blog.authors %}
+      <li>{{ author.name|e }}</li>
+    {%- else %}
+      <li><em>{% trans "no author information" %}</em></li>
+    {%- endfor %}
+    </ul>
+    <h3>{% trans "Posts" %}</h3>
+    <table>
+      <tr>
+        <th>{% trans "Date" %}</th>
+        <th>{% trans "Title" %}</th>
+        <th>{% trans "Author" %}</th>
+        <th>{% trans "Comments" %}</th>
+      </tr>
+      {%- for post in blog.posts %}
+      <tr>
+        <td>{{ post.pub_date|datetimeformat|e }}</td>
+        <td>{{ post.title|e }}</td>
+        <td>{{ post.author.name|e }}</td>
+        <td>{{ post.comments|count }}</td>
+      </tr>
+      {%- endfor %}
+    </table>
+    <div class="actions">
+      <input type="submit" value="{% trans 'Import into Blog' %}">
+      <input type="submit" name="delete" value="{% trans 'Delete' %}">
+      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+    </div>
+  </form>
+{% endblock %}

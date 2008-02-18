@@ -28,8 +28,9 @@ from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
 from textpress.database import comments, posts, post_tags, post_links
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
-     build_eventmap, make_hidden_fields, dump_json, load_json, \
+     build_eventmap, make_hidden_fields, dump_json, load_json, flash, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
+from textpress.importers import list_import_queue, load_import_dump
 from textpress.widgets import WidgetManager
 from textpress.pluginsystem import install_package, InstallationError, \
      SetupError
@@ -47,21 +48,6 @@ def simple_redirect(*args, **kwargs):
     and not using backredirects)
     """
     return redirect(url_for(*args, **kwargs))
-
-
-def flash(msg, type='info'):
-    """
-    Add a message to the message flash buffer.
-
-    The default message type is "info", other possible values are
-    "add", "remove", "error", "ok" and "configure". The message type affects
-    the icon and visual appearance.
-    """
-    assert type in ('info', 'add', 'remove', 'error', 'ok', 'configure')
-    if type == 'error':
-        msg = (u'<strong>%s:</strong> ' % _('Error')) + msg
-    get_request().session.setdefault('admin/flashed_messages', []).\
-            append((type, msg))
 
 
 def render_admin_response(template_name, _active_menu_item=None, **values):
@@ -1559,8 +1545,19 @@ def do_import(request):
     """Show the current import queue or add new items."""
     return render_admin_response('admin/import.html', 'maintenance.import',
         importers=sorted(request.app.importers.values(),
-                         key=lambda x: x.title.lower())
+                         key=lambda x: x.title.lower()),
+        queue=list_import_queue(request.app)
     )
+
+
+@require_role(ROLE_ADMIN)
+def do_inspect_import(request, id):
+    """Inspect a database dump."""
+    dump = load_import_dump(request.app, id)
+    if dump is None:
+        raise NotFound()
+    return render_admin_response('admin/inspect_import.html',
+                                 'maintenance.import', blog=dump)
 
 
 @require_role(ROLE_ADMIN)

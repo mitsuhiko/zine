@@ -11,8 +11,10 @@
 import urllib
 from time import strptime
 from datetime import datetime
+from textpress.api import *
 from textpress.importers import Importer, Blog, Label, Author, Post, Comment
-from textpress.utils import _html_entities, get_etree
+from textpress.utils import _html_entities, get_etree, CSRFProtector, \
+     make_hidden_fields, flash
 
 
 class _Namespace(object):
@@ -22,22 +24,14 @@ class _Namespace(object):
         return '{%s}%s' % (self._uri, name)
 
 CONTENT = _Namespace('http://purl.org/rss/1.0/modules/content/')
-COMMENT_API = _Namespace('http://wellformedweb.org/CommentAPI/')
 DC_METADATA = _Namespace('http://purl.org/dc/elements/1.1/')
 WORDPRESS = _Namespace('http://wordpress.org/export/1.0/')
 
 
-def open_and_inject_dtd(resource):
-    """
-    Opens the resource (file pointer or url/filename), removes the XML
-    preamble if there is one and injects an inline DTD that makes the
-    parser happy.  Then parses it using etree.
-    """
+def open_and_inject_dtd(fd):
     etree = get_etree()
-    if isinstance(resource, basestring):
-        resource = urllib.urlopen(resource)
 
-    lines = resource.read().splitlines()
+    lines = fd.read().splitlines()
     for idx, line in enumerate(lines):
         line = line.strip()
         if line and line.startswith('<?xml'):
@@ -60,15 +54,20 @@ def parse_wordpress_date(value):
         pass
 
 
-def parse_feed(resource):
-    tree = open_and_inject_dtd(resource)
+def parse_feed(fd):
+    """
+    Parse an extended WordPress RSS feed into a structure the general importer
+    system can handle.  The return value is a `Blog` object.
+    """
+    tree = open_and_inject_dtd(fd)
 
     authors = {}
     def get_author(name):
-        author = authors.get(name)
-        if author is None:
-            author = authors[name] = Author(name, None)
-        return author
+        if name:
+            author = authors.get(name)
+            if author is None:
+                author = authors[name] = Author(name, None)
+            return author
 
     labels = {}
     for item in tree.findall(WORDPRESS.category):
@@ -76,9 +75,13 @@ def parse_feed(resource):
                       item.findtext(WORDPRESS.category_nicename))
         labels[label.slug] = label
 
-    posts = []
-    for item in tree.findall('item'):
-        posts.append(Post(
+    return Blog(
+        tree.findtext('title'),
+        tree.findtext('link'),
+        tree.findtext('description') or '',
+        tree.findtext('language') or 'en',
+        labels.values(),
+        [Post(
             item.findtext(WORDPRESS.post_name),
             item.findtext('title'),
             item.findtext('link'),
@@ -86,7 +89,7 @@ def parse_feed(resource):
             get_author(item.findtext(DC_METADATA.creator)),
             item.findtext('description'),
             item.findtext(CONTENT.encoded),
-            [labels[x] for x in item.find('category') if x in labels],
+            [labels[x] for x in item.findall('category') if x in labels],
             [Comment(
                 x.findtext(WORDPRESS.comment_author),
                 x.findtext(WORDPRESS.comment_author_email),
@@ -97,15 +100,7 @@ def parse_feed(resource):
             ) for x in item.findall(WORDPRESS.comment)],
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed'
-        ))
-
-    return Blog(
-        tree.findtext('title'),
-        tree.findtext('link'),
-        tree.findtext('description') or '',
-        tree.findtext('language') or 'en',
-        labels.values(),
-        posts,
+        ) for item in tree.findall('item')],
         authors.values()
     )
 
@@ -113,3 +108,39 @@ def parse_feed(resource):
 class WordPressImporter(Importer):
     name = 'wordpress'
     title = 'WordPress'
+
+    def configure(self, request):
+        form = dict.fromkeys(('download_url', 'dump'))
+        error = None
+        csrf_protector = CSRFProtector()
+
+        if request.method == 'POST':
+            csrf_protector.assert_safe()
+            form['download_url'] = url = request.form.get('download_url')
+            dump = request.files.get('dump')
+            if url and dump:
+                error = _('Both dump uploaded and download URL given.')
+            elif url:
+                try:
+                    dump = urllib.urlopen(url)
+                except Exception, e:
+                    error = _('Error downloading from URL: %s') % e
+            elif not dump:
+                return redirect(url_for('import/wordpress'))
+
+            if error is not None:
+                flash(error, 'error')
+            else:
+                try:
+                    blog = parse_feed(dump)
+                except Exception, e:
+                    flash(_('Error parsing uploaded file: %s') % e, 'error')
+                else:
+                    self.enqueue_dump(blog)
+                    flash('Added imported items to queue.')
+                    return redirect(url_for('admin/import'))
+
+        return self.render_admin_page('admin/import_wordpress.html',
+            form=form,
+            hidden_form_data=make_hidden_fields(csrf_protector)
+        )

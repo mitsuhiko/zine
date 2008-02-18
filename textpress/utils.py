@@ -137,6 +137,23 @@ def gettext(string, plural=None, n=1):
 _ = gettext
 
 
+def flash(msg, type='info'):
+    """
+    Add a message to the message flash buffer.
+
+    The default message type is "info", other possible values are
+    "add", "remove", "error", "ok" and "configure". The message type affects
+    the icon and visual appearance.
+
+    The flashes messages appear only in the admin interface!
+    """
+    assert type in ('info', 'add', 'remove', 'error', 'ok', 'configure')
+    if type == 'error':
+        msg = (u'<strong>%s:</strong> ' % _('Error')) + msg
+    local.request.session.setdefault('admin/flashed_messages', []).\
+            append((type, msg))
+
+
 def gen_salt(length=6):
     """Generate a random string of SALT_CHARS with specified ``length``."""
     if length <= 0:

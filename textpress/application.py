@@ -633,8 +633,8 @@ class TextPress(object):
         importer = importer(self)
         endpoint = 'import/' + importer.name
         self.importers[importer.name] = importer
-        self.add_url_rule('/import/' + importer.name, prefix='admin',
-                          endpoint=endpoint)
+        self.add_url_rule('/maintenance/import/' + importer.name,
+                          prefix='admin', endpoint=endpoint)
         self.add_view(endpoint, importer)
 
     @setuponly
