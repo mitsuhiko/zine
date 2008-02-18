@@ -13,7 +13,8 @@ from datetime import date, datetime, timedelta
 
 from textpress.database import users, tags, posts, post_links, post_tags, \
      comments, db
-from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug
+from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug, \
+     build_tag_uri
 from textpress.application import get_application, get_request, url_for
 
 
@@ -418,14 +419,15 @@ class Post(object):
     def __init__(self, title, author, body, intro='', slug=None,
                  pub_date=None, last_update=None, comments_enabled=True,
                  pings_enabled=True, status=STATUS_PUBLISHED,
-                 parser=None):
+                 parser=None, uid=None):
+        app = get_application()
         self.title = title
         if isinstance(author, (int, long)):
             self.author_id = author
         else:
             self.author = author
         if parser is None:
-            parser = get_application().cfg['default_parser']
+            parser = app.cfg['default_parser']
 
         #: this holds the parsing cache and the name of the parser in use.
         #: in fact the intro and body cached data is not assigned right here
@@ -453,6 +455,11 @@ class Post(object):
             self.auto_slug()
         else:
             self.slug = slug
+
+        # generate a UID if none is given
+        if uid is None:
+            uid = build_tag_uri(app, self.pub_date, 'post', self.slug)
+        self.uid = uid
 
     @property
     def root_comments(self):
