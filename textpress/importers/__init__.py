@@ -15,7 +15,7 @@ import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
-from textpress.api import require_role
+from textpress.api import require_role, get_application
 from textpress.database import db, posts
 from textpress.models import ROLE_ADMIN, ROLE_AUTHOR
 
@@ -68,6 +68,7 @@ def perform_import(blog, d):
     # import models here because they have the same names as our
     # importer objects this module exports
     from textpress.models import User, Tag, Post, Comment
+    app = get_application()
     author_mapping = {}
     label_mapping = {}
 
@@ -100,9 +101,9 @@ def perform_import(blog, d):
 
     # update blog configuration if user wants that
     if 'import_blog_title' in d:
-        request.app.cfg['blog_title'] = blog.title
+        app.cfg['blog_title'] = blog.title
     if 'import_blog_description' in d:
-        request.app.cfg['blog_tagline'] = blog.description
+        app.cfg['blog_tagline'] = blog.description
 
     # convert the posts now
     for old_post in blog.posts:
@@ -123,11 +124,11 @@ def perform_import(blog, d):
             post.tags.append(prepare_label(label))
 
         # now the comments if use wants them.
-        if 'convert_comments_%s' % old_post.id in d:
+        if 'import_comments_%s' % old_post.id in d:
             for comment in old_post.comments:
                 Comment(post, comment.author, comment.author_email,
                         comment.author_url, comment.body, None,
-                        comment.pub_Date, comment.remote_addr,
+                        comment.pub_date, comment.remote_addr,
                         comment.parser, comment.is_pingback)
 
     # send to the database
