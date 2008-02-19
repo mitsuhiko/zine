@@ -119,6 +119,11 @@ p.meta {
     margin: -0.7em 0 1em 0;
 }
 
+#comments p.meta {
+    margin: 0.5em 0 1.3em 0;
+    font-size: 0.85em;
+}
+
 p.related {
     font-size: 0.85em;
     margin: 1.5em 0 0 0;

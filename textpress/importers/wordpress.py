@@ -15,7 +15,7 @@ from datetime import datetime
 from textpress.api import *
 from textpress.importers import Importer, Blog, Label, Author, Post, Comment
 from textpress.utils import _html_entities, get_etree, CSRFProtector, \
-     make_hidden_fields, flash, escape
+     StreamReporter, make_hidden_fields, flash, escape
 
 
 class _Namespace(object):
@@ -143,6 +143,7 @@ class WordPressImporter(Importer):
         form = dict.fromkeys(('download_url', 'dump'))
         error = None
         csrf_protector = CSRFProtector()
+        reporter = StreamReporter()
 
         if request.method == 'POST':
             csrf_protector.assert_safe()
@@ -172,5 +173,6 @@ class WordPressImporter(Importer):
 
         return self.render_admin_page('admin/import_wordpress.html',
             form=form,
-            hidden_form_data=make_hidden_fields(csrf_protector)
+            hidden_form_data=make_hidden_fields(csrf_protector),
+            reporter=reporter
         )

@@ -6,7 +6,7 @@
     Here you can find all emitted events in the TextPress system.
   {% endtrans %}</p>
   <ul>
-  {%- for event, places in get_map() %}
+  {%- for event, places in get_map()|unsafeiter %}
     <li><tt>{{ event|e }}</tt><ul>
     {%- for location, filename, lineno, help in places %}
       <li><p>{{ filename|e }}:{{ lineno }} <small>[{{ location }}]</small></p>
