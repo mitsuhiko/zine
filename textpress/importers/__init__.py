@@ -15,8 +15,9 @@ import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
-from textpress.api import require_role
+from textpress.api import _, require_role
 from textpress.database import db, posts
+from textpress.utils import escape
 from textpress.models import ROLE_ADMIN, ROLE_AUTHOR
 
 
@@ -66,12 +67,7 @@ def delete_import_dump(app, id):
         os.remove(path)
 
 
-def perform_import(app, blog, d):
-    """
-    Perform an import from form data.  This function was designed to be called
-    from a web request, if you call it form outside, make sure the config is
-    flushed afterwards.
-    """
+def _perform_import(app, blog, d):
     # import models here because they have the same names as our
     # importer objects this module exports
     from textpress.models import User, Tag, Post, Comment
@@ -105,11 +101,16 @@ def perform_import(app, blog, d):
         tag = label_mapping[label.id] = Tag(label.name, '', label.slug)
         return tag
 
+    # start debug output
+    yield '<ul>'
+
     # update blog configuration if user wants that
     if 'import_blog_title' in d:
         app.cfg['blog_title'] = blog.title
+        yield '<li>%s</li>\n' % _('set blog title from dump')
     if 'import_blog_description' in d:
         app.cfg['blog_tagline'] = blog.description
+        yield '<li>%s</li>\n' % _('set blog tagline from dump')
 
     # convert the posts now
     for old_post in blog.posts:
@@ -126,8 +127,10 @@ def perform_import(app, blog, d):
                     old_post.pub_date, old_post.updated,
                     old_post.comments_enabled, old_post.pings_enabled,
                     parser=old_post.parser, uid=old_post.uid)
+        yield '<li><strong>%s</strong>' % escape(post.title)
         for label in old_post.labels:
             post.tags.append(prepare_label(label))
+            yield '.'
 
         # now the comments if use wants them.
         if 'import_comments_%s' % old_post.id in d:
@@ -136,9 +139,29 @@ def perform_import(app, blog, d):
                         comment.author_url, comment.body, None,
                         comment.pub_date, comment.remote_addr,
                         comment.parser, comment.is_pingback)
+                yield '.'
+        yield u' <em>%s</em></li>\n' % _('done')
 
     # send to the database
+    yield '<li>%s' % _('Committing transaction...')
     db.commit()
+    yield u' <em>%s</em></li></ul>' % _('done')
+
+
+def perform_import(app, blog, data, stream=False):
+    """
+    Perform an import from form data.  This function was designed to be called
+    from a web request, if you call it form outside, make sure the config is
+    flushed afterwards.
+    """
+    generator = _perform_import(app, blog, data)
+
+    # ignore the debug output, just do the import
+    if not stream:
+        for item in generator:
+            pass
+    else:
+        return generator
 
 
 class Importer(object):

@@ -1576,9 +1576,12 @@ def do_inspect_import(request, id):
             return simple_redirect('admin/maintenance')
         elif 'delete' in request.form:
             return simple_redirect('admin/delete_import', id=id)
-        perform_import(request.app, blog, request.form)
-        flash('Imported data from dump into database.')
-        return simple_redirect('admin/import')
+        return render_admin_response('admin/perform_import.html',
+                                     'maintenance.import',
+            live_log=perform_import(request.app, blog, request.form,
+                                    stream=True),
+            _stream=True
+        )
 
     return render_admin_response('admin/inspect_import.html',
                                  'maintenance.import',

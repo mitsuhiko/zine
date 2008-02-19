@@ -27,7 +27,6 @@ from werkzeug.exceptions import NotFound
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
-SHARED = join(dirname(__file__), 'shared')
 
 
 def add_links(req, navigation_bar):
@@ -52,14 +51,6 @@ def add_links(req, navigation_bar):
 def do_upload(req):
     csrf_protector = CSRFProtector()
     reporter = StreamReporter()
-    add_script(url_for('file_uploads/shared', filename='uploads.js'))
-    add_link('stylesheet', url_for('file_uploads/shared', filename='style.css'),
-             'text/css')
-    add_header_snippet(
-        '<script type="text/javascript">'
-            '$TRANSPORT_ID = %s'
-        '</script>' % escape(dump_json(reporter.transport_id))
-    )
 
     if req.method == 'POST':
         csrf_protector.assert_safe()
@@ -301,4 +292,3 @@ def setup(app, plugin):
     app.add_url_rule('/_uploads/<filename>/delete', view=do_delete,
                      endpoint='file_uploads/delete')
     app.add_template_searchpath(TEMPLATES)
-    app.add_shared_exports('file_uploads', SHARED)
