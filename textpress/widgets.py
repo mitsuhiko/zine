@@ -13,7 +13,7 @@
     Additionally widgets could be moved around from the admin panel in the
     future.
 
-    :copyright: Copyright 2007 by Armin Ronacher
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 import re
