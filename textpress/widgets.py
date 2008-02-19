@@ -312,6 +312,25 @@ class LatestPosts(Widget):
     def get_display_name():
         return _('Latest Posts')
 
+    @staticmethod
+    def configure_widget(initial_args, request):
+        args = form = initial_args.copy()
+        errors = []
+        if request.method == 'POST':
+            args['limit'] = limit = request.form.get('limit')
+            if not limit:
+                args['limit'] = None
+            elif not limit.isdigit():
+                errors.append(_('Limit must be omited or a valid number.'))
+            else:
+                args['limit'] = int(limit)
+            args['show_title'] = request.form.get('show_title') == 'yes'
+        if errors:
+            args = None
+        return args, render_template('admin/widgets/latest_posts.html',
+                                     errors=errors, form=form)
+
+
 
 class LatestComments(Widget):
     """
@@ -329,6 +348,24 @@ class LatestComments(Widget):
     @staticmethod
     def get_display_name():
         return _('Latest Comments')
+
+    @staticmethod
+    def configure_widget(initial_args, request):
+        args = form = initial_args.copy()
+        errors = []
+        if request.method == 'POST':
+            args['limit'] = limit = request.form.get('limit')
+            if not limit:
+                args['limit'] = None
+            elif not limit.isdigit():
+                errors.append(_('Limit must be omited or a valid number.'))
+            else:
+                args['limit'] = int(limit)
+            args['show_title'] = request.form.get('show_title') == 'yes'
+        if errors:
+            args = None
+        return args, render_template('admin/widgets/latest_comments.html',
+                                     errors=errors, form=form)
 
 
 #: list of all core widgets
