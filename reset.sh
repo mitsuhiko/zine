@@ -23,7 +23,7 @@ cfg.save()
 echo "Created initial configuration"
 python textpress-management.py shell >> /dev/null <<EOF
 from textpress.models import User
-textpress.bind_to_thread()
+app.bind_to_thread()
 a = User(u'admin', u'default', u'admin@example.com', role=4)
 db.save(a)
 db.commit()
