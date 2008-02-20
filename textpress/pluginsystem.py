@@ -280,6 +280,10 @@ class Plugin(object):
         # write all files into a "pdata/" folder
         offset = len(self.path) + 1
         for dirpath, dirnames, filenames in walk(self.path):
+            # don't recurse into hidden dirs
+            for i in range(len(dirnames)-1, -1, -1):
+                if dirnames[i].startswith('.'):
+                    del dirnames[i]
             for filename in filenames:
                 if filename.endswith('.pyc') or \
                    filename.endswith('.pyo'):

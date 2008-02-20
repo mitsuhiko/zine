@@ -30,7 +30,8 @@ from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      build_eventmap, make_hidden_fields, dump_json, load_json, flash, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
-from textpress.importers import list_import_queue, load_import_dump
+from textpress.importers import list_import_queue, load_import_dump, \
+     delete_import_dump, perform_import
 from textpress.widgets import WidgetManager
 from textpress.pluginsystem import install_package, InstallationError, \
      SetupError
@@ -462,7 +463,7 @@ def do_edit_post(request, post_id=None):
 @require_role(ROLE_AUTHOR)
 def do_delete_post(request, post_id):
     """
-    This dialog delets a post.  Usually users are redirected here from the
+    This dialog deletes a post.  Usually users are redirected here from the
     edit post view or the post index page.  If the post was not deleted the
     user is taken back to the page he's coming from or back to the edit
     page if the information is invalid.  The same happens if the post was
@@ -1553,11 +1554,69 @@ def do_import(request):
 @require_role(ROLE_ADMIN)
 def do_inspect_import(request, id):
     """Inspect a database dump."""
+    blog = load_import_dump(request.app, id)
+    if blog is None:
+        raise NotFound()
+    csrf_protector = CSRFProtector()
+
+    # assemble initial dict
+    form = {}
+    for author in blog.authors:
+        form['import_author_%s' % author.id] = True
+    for post in blog.posts:
+        form.update({
+            'import_post_%s' % post.id:     True,
+            'import_comments_%s' % post.id: True
+        })
+
+    # perform the actual import here
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+        if 'cancel' in request.form:
+            return simple_redirect('admin/maintenance')
+        elif 'delete' in request.form:
+            return simple_redirect('admin/delete_import', id=id)
+        return render_admin_response('admin/perform_import.html',
+                                     'maintenance.import',
+            live_log=perform_import(request.app, blog, request.form,
+                                    stream=True),
+            _stream=True
+        )
+
+    return render_admin_response('admin/inspect_import.html',
+                                 'maintenance.import',
+        form=form,
+        blog=blog,
+        users=User.objects.order_by('username').all(),
+        hidden_form_data=make_hidden_fields(csrf_protector)
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_delete_import(request, id):
+    """Delete an imported file."""
     dump = load_import_dump(request.app, id)
     if dump is None:
         raise NotFound()
-    return render_admin_response('admin/inspect_import.html',
-                                 'maintenance.import', blog=dump)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+        if request.form.get('cancel'):
+            return redirect('admin/inspect_import', id=id)
+        elif request.form.get('confirm'):
+            redirect.add_invalid('admin/inspect_import', id=id)
+            delete_import_dump(request.app, id)
+            flash(_(u'The imported dump “%s” was deleted successfully.') %
+                  escape(dump.title), 'remove')
+            return redirect('admin/import')
+
+    return render_admin_response('admin/delete_import.html',
+                                 'maintenance.import',
+        dump=dump,
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+    )
 
 
 @require_role(ROLE_ADMIN)

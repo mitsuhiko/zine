@@ -16,13 +16,17 @@
           <label for="overwrite">{% trans
             "Overwrite an already uploaded file with the same name." %}</label></dd>
     </dl>
-    <div class="uploadstatus">
-      <div class="bar"></div>
-      <div class="label"></div>
-    </div>
+    <div class="uploadstatus"></div>
     <div class="actions">
       {{ csrf_protector }}
       <input type="submit" value="{% trans 'Upload' %}">
     </div>
   </form>
+  <script type="text/javascript">
+    $(function() {
+      var reporter = new UploadProgressBar('div.uploadstatus', {{
+        reporter.transport_id|jsonencode }});
+      reporter.connectTo('form');
+    });
+  </script>
 {% endblock %}

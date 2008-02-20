@@ -195,6 +195,22 @@ def clear_application_cache():
     _instances.clear()
 
 
+class NullIterator(object):
+    """Wraps a generantor and gives it a length of zero."""
+
+    def __init__(self, iterable):
+        self._next = iter(iterable).next
+
+    def __len__(self):
+        return 0
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return self._next()
+
+
 class Request(BaseRequest):
     """The used request class."""
 
@@ -561,6 +577,7 @@ class TextPress(object):
 
         # XXX: l10n :-)
         env.filters.update(
+            unsafeiter=lambda:lambda e, c, v: NullIterator(v),
             datetimeformat=lambda:lambda e, c, v: format_datetime(v),
             dateformat=lambda:lambda e, c, v: format_date(v),
             monthformat=lambda:lambda e, c, v: format_month(v)

@@ -59,6 +59,7 @@ all_views = {
     'admin/maintenance':        admin.do_maintenance,
     'admin/import':             admin.do_import,
     'admin/inspect_import':     admin.do_inspect_import,
+    'admin/delete_import':      admin.do_delete_import,
     'admin/export':             admin.do_export,
     'admin/about':              admin.do_about,
     'admin/eventmap':           admin.do_eventmap,

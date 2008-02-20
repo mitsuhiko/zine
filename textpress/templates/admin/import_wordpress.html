@@ -9,16 +9,25 @@
     the location of such a file on an external URL and it will import the posts,
     comments, custom fields, and categories into this blog.
   {% endtrans %}</p>
-  <form action="" method="post" enctype="multipart/form-data">
+  <form action="?{{ reporter.url_value|e }}" method="post" enctype="multipart/form-data">
     <dl>
       <dt>{% trans "Dump Download URL" %}</dt>
       <dd>{{ h.input_field('download_url', form.download_url, size=40) }}</dd>
       <dt>{% trans "Upload Dump" %}</dt>
       <dd>{{ h.input_field('dump', form.dump, size=20, type='file') }}</dd>
     </dl>
+    <div class="uploadstatus"></div>
     <div class="actions">
       {{ hidden_form_data }}
       <input type="submit" value="{% trans 'Import' %}">
     </div>
   </form>
+  <script type="text/javascript">
+    $(function() {
+      var reporter = new UploadProgressBar('div.uploadstatus', {{
+        reporter.transport_id|jsonencode }}, {{
+        _('Finishing upload, performing import...')|jsonencode }});
+      reporter.connectTo('form');
+    });
+  </script>
 {% endblock %}
