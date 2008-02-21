@@ -1622,7 +1622,17 @@ def do_delete_import(request, id):
 @require_role(ROLE_ADMIN)
 def do_export(request):
     """Not yet implemented."""
-    return render_admin_response('admin/export.html', 'maintenance.export')
+    csrf_protector = CSRFProtector()
+    if request.args.get('format') == 'tpxa':
+        csrf_protector.assert_safe()
+        from textpress.tpxa import export
+        response = export(request.app)
+        response.headers['Content-Disposition'] = 'attachment; ' \
+            'filename="%s.tpxa"' % '_'.join(request.app.cfg['blog_title'].split())
+        return response
+    return render_admin_response('admin/export.html', 'maintenance.export',
+        hidden_form_data=make_hidden_fields(csrf_protector)
+    )
 
 
 @require_role(ROLE_AUTHOR)

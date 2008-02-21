@@ -329,11 +329,16 @@ def gen_slug(text):
 
 _etree = None
 def get_etree():
-    """Get an etree implementation."""
+    """
+    Get an etree implementation that is not lxml.  We love lxml but because
+    lxml is an c (cython) extension we can't have it as another dependency.
+    Because we need `ElementTree._write` for our tpxa module which is not
+    supported by lxml this is needed.
+    """
     global _etree
     if _etree is not None:
         return _etree
-    for name in 'lxml.etree', 'elementtree.cElementTree', \
+    for name in 'elementtree.cElementTree', \
                 'cElementTree', 'xml.etree.cElementTree', \
                 'ElementEtree', 'xml.etree.ElementTree':
         etree = import_string(name, silent=True)

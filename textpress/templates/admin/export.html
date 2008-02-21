@@ -3,7 +3,18 @@
 {% block contents %}
   <h2>{% trans "Export" %}</h2>
   <p>{% trans %}
-    Exporting is not yet implemented.  For backup purposes use the tools of
-    your database.
+    Here you can dump your TextPress database information into an standardized
+    format (Atom) with TextPress extensions which we call “TextPress eXtended
+    Atom” (TPXA).  You can use this file to import your posts into another
+    weblog software that supports Atom.  You should not use this file for
+    TextPress migrations as this file will not include attachments, the blog
+    configuration and probably data stored by plugins.
   {% endtrans %}</p>
+  <form action="" method="get">
+    <div class="actions">
+      {{ hidden_form_data }}
+      <input type="hidden" name="format" value="tpxa">
+      <input type="submit" value="{% trans 'Export' %}">
+    </div>
+  </form>
 {% endblock %}
