@@ -66,7 +66,10 @@ DEFAULT_VARS = {
 
     # plugin settings
     'plugin_guard':             (bool, True),
-    'plugins':                  (unicode, u'')
+    'plugins':                  (unicode, u''),
+
+    # importer settings
+    'blogger_auth_token':       (unicode, u'')
 }
 
 #: header for the config file

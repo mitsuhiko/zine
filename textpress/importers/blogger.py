@@ -5,9 +5,6 @@
 
     Implements an importer for Blogger.com using the GData blogger API.
 
-    :copyright: Copyright 2008 by Ali Afshar, Armin Ronacher
-    :license: GNU GPL.
-
     Uses Google's gdata library which is available under Apache license.
 
     Download: http://code.google.com/p/gdata-python-client/
@@ -90,8 +87,9 @@
     would like imported. At this point TextPress takes over.
 
 
+    :copyright: Copyright 2008 by Ali Afshar, Armin Ronacher.
+    :license: GNU GPL.
 """
-
 from datetime import datetime
 
 # Do a conditional import on this
@@ -100,17 +98,14 @@ try:
 except ImportError:
     service = None
 
-from textpress.api import *
+from textpress.application import redirect, url_for
 from textpress.importers import Importer, Blog, Label, Author, Post, Comment
-from textpress.utils import flash, parse_iso8601
+from textpress.utils import _, flash, parse_iso8601
 
 
-# This is the key for the session storage of the token
-CONFIG_TOKEN = 'blogger_import/auth_token'
-
-_GDATA_DOWNLOAD_URL = 'http://code.google.com/p/gdata-python-client/'
-_GDATA_DOWNLOAD_LINK = ('<a href="%s">%s</a>' %
-    (_GDATA_DOWNLOAD_URL, _GDATA_DOWNLOAD_URL))
+GDATA_DOWNLOAD_URL = 'http://code.google.com/p/gdata-python-client/'
+GDATA_DOWNLOAD_LINK = ('<a href="%s">%s</a>' % (GDATA_DOWNLOAD_URL,
+                                                 GDATA_DOWNLOAD_URL))
 
 
 def _create_blogger_service():
@@ -122,17 +117,13 @@ def _create_blogger_service():
 
 
 def get_blog_selflink(entry):
-    """
-    Get the link object to the atom entry.
-    """
+    """Get the link object to the atom entry."""
     self_link = entry.GetSelfLink()
     return self_link
 
 
 def get_blog_id_from_selflink(self_link):
-    """
-    Get the ID from a link object
-    """
+    """Get the ID from a link object"""
     # This is how they do it in the example, there seems no nice way
     if self_link:
         id = self_link.href.split('/')[-1]
@@ -142,9 +133,7 @@ def get_blog_id_from_selflink(self_link):
 
 
 def get_blog_id(entry):
-    """
-    Get the id of an entry.
-    """
+    """Get the id of an entry."""
     return get_blog_id_from_selflink(get_blog_selflink(entry))
 
 
@@ -161,9 +150,7 @@ def get_auth_sub_url(blogger_service):
 
 
 def get_user_blogs(blogger_service):
-    """
-    Return a list of blogs for the logged in blogger_service.
-    """
+    """Return a list of blogs for the logged in blogger_service."""
     query = service.Query()
     query.feed = '/feeds/default/blogs'
     feed = blogger_service.Get(query.ToUri())
@@ -171,9 +158,7 @@ def get_user_blogs(blogger_service):
 
 
 def get_posts_feed(blogger_service, blog_id):
-    """
-    Get the feed of posts for a blog.
-    """
+    """Get the feed of posts for a blog."""
     q = service.Query()
     q.feed = '/feeds/' + blog_id + '/posts/default'
     q.max_results = 10000000
@@ -182,17 +167,12 @@ def get_posts_feed(blogger_service, blog_id):
 
 
 def get_published_posts(feed):
-    """
-    Get a list of posts that are not drafts.
-    """
+    """Get a list of posts that are not drafts."""
     return [p for p in feed.entry if not is_post_draft(p)]
 
 
-
 def get_comments(blogger_service, blog_id, post_id):
-    """
-    Get the feed of comments for a particular post in a particular blog
-    """
+    """Get the feed of comments for a particular post in a particular blog."""
     url = '/feeds/%s/%s/comments/default' % (blog_id, post_id)
     q = service.Query()
     q.feed = url
@@ -214,7 +194,6 @@ def get_post_author(entry):
 def is_post_draft(entry):
     """Is a post a draft"""
     return entry.control and entry.control.draft
-
 
 
 class BlogDumper(object):
@@ -245,7 +224,6 @@ class BlogDumper(object):
             post = self.create_dumpable_post(e)
             posts.append(post)
         yield '<script>$("#fetchperc").html("Done")</script>'
-
         yield '<dt>Writing complete blog</dt>'
 
         b = Blog(
@@ -262,19 +240,15 @@ class BlogDumper(object):
     def create_dumpable_post(self, entry):
         author = self.create_dumpable_author(entry)
         labels = self.create_dumpable_labels(entry)
-
         post_id = get_blog_id(entry)
-
-
         comments = self.create_dumpable_comments(entry)
-        #comments = self.comments.get(post_id, [])
 
         if entry.summary:
             summary = entry.summary.text.decode('utf-8')
         else:
             summary = None
 
-        p = Post(
+        return Post(
             None,
             entry.title.text.decode('utf-8'),
             entry.GetSelfLink().href,
@@ -285,13 +259,13 @@ class BlogDumper(object):
             labels,
             comments,
         )
-        return p
 
     def create_dumpable_author(self, entry):
         name, email = get_post_author(entry)
         author = self.authors.get((name, email))
         if author is None:
-            author = self.authors[(name, email)] = Author(len(self.authors) + 1, name, email)
+            author = self.authors[(name, email)] = Author(len(self.authors) + 1,
+                                                          name, email)
         return author
 
     def create_dumpable_labels(self, entry):
@@ -328,73 +302,58 @@ class BloggerImporter(Importer):
     name = 'blogger'
     title = 'Blogger'
 
-    def __init__(self, app):
-        Importer.__init__(self, app)
-        app.add_config_var(CONFIG_TOKEN, str, '')
-
-    def configure(self, req):
-
+    def configure(self, request):
         if service is None:
             # gdata is not installed, show an error and refuse to do anything
             flash(_('GData python client library is not installed, '
                   'and is required for functioning of the Blogger importer.'
                   '<p>Please visit: %(download_link)s</p>') %
-                    {'download_link': _GDATA_DOWNLOAD_LINK},
+                    {'download_link': GDATA_DOWNLOAD_LINK},
                   type='error')
             return redirect(url_for('admin/import'))
 
-        app = get_application()
-
-        auth_token = app.cfg[CONFIG_TOKEN]
-
+        auth_token = self.app.cfg['blogger_auth_token']
         blogger_service = _create_blogger_service()
 
         if not auth_token:
-            temp_auth_token = req.args.get('token')
+            temp_auth_token = request.args.get('token')
             if temp_auth_token is not None:
                 # We just got the reply back from google
                 blogger_service.auth_token = temp_auth_token
                 blogger_service.UpgradeToSessionToken()
-                get_application().cfg[CONFIG_TOKEN] = blogger_service.auth_token
+                self.app.cfg['blogger_auth_token'] = blogger_service.auth_token
                 return redirect(url_for('import/blogger'))
-            else:
-                # We should display the "log in to google"
-                proxy_auth_url=get_auth_sub_url(blogger_service)
-                return self.render_admin_page('admin/import_blogger.html',
-                    proxy_auth_url=proxy_auth_url,
-                    has_auth=False,
-                )
+            # We should display the "log in to google"
+            proxy_auth_url=get_auth_sub_url(blogger_service)
+            return self.render_admin_page('admin/import_blogger.html',
+                proxy_auth_url=proxy_auth_url,
+                has_auth=False,
+            )
+
+        # We are logged in and can decide what to do:
+        # 1. Show the list of blogs
+        # 2. Receive the post request and act
+        # 3. log out of google
+        blogger_service.auth_token = auth_token
+        if request.method == 'GET':
+            blogs=get_user_blogs(blogger_service)
+            return self.render_admin_page('admin/import_blogger.html',
+                available_blogs=blogs,
+                has_auth=True,
+                get_blog_id=get_blog_id,
+            )
+        if u'logout' in request.form:
+            # Log out of google
+            blogger_service.RevokeAuthSubToken()
+            self.app.cfg['blogger_auth_token'] = ''
+            return redirect(url_for('import/blogger'))
         else:
-            # We are logged in and can decide what to do:
-            # 1. Show the list of blogs
-            # 2. Receive the post request and act
-            # 3. log out of google
-            blogger_service.auth_token = auth_token
-            if req.method == 'GET':
-                blogs=get_user_blogs(blogger_service)
-                return self.render_admin_page('admin/import_blogger.html',
-                    available_blogs=blogs,
-                    has_auth=True,
-                    get_blog_id=get_blog_id,
-                )
-            else:
-                if u'logout' in req.form:
-                    # Log out of google
-                    blogger_service.RevokeAuthSubToken()
-                    app.cfg[CONFIG_TOKEN] = ''
-                    return redirect(url_for('import/blogger'))
-                else:
-                    # Perform the import
-                    blog_id = req.form.get('blog_id')
-                    blog_dumper = BlogDumper(blogger_service, blog_id)
-                    live_log = blog_dumper.create_dumpable_blog(self.enqueue_dump)
-                    #flash('Added imported items to queue.')
-                    return self.render_admin_page(
-                        'admin/blogger_perform_import.html',
-                        live_log=live_log,
-                        _stream=True,
-                    )
-
-
-
-
+            # Perform the import
+            blog_id = request.form.get('blog_id')
+            blog_dumper = BlogDumper(blogger_service, blog_id)
+            live_log = blog_dumper.create_dumpable_blog(self.enqueue_dump)
+            return self.render_admin_page(
+                'admin/blogger_perform_import.html',
+                live_log=live_log,
+                _stream=True,
+            )
