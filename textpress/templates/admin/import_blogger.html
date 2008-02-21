@@ -1,0 +1,63 @@
+{% extends "admin/layout.html" %}
+
+{% macro google %}
+    {# Just looks cute #}
+    <span style="font-weight: bold"><span
+          style="color:#0000dd">G</span><span
+          style="color:#dd0000">o</span><span
+          style="color:#dddd00">o</span><span
+          style="color:#0000dd">g</span><span
+          style="color:#00dd00">l</span><span
+          style="color:#dd0000">e</span>&reg;</span>
+{% endmacro %}
+
+{% block title %}{% trans "Import from Blogger.com" %}{% endblock %}
+{% block contents %}
+  <h2>{% trans "Import from Blogger.com" %}</h2>
+  <p>{% trans %}
+  This importer allows you to import a blog from Blogger.com.
+  {% endtrans %}</p>
+
+  {% if has_auth %}
+  {# already logged in to google, list available blogs for import #}
+
+  <p>{% trans google=google() %}
+  You are authenticated with {{ google }}.
+  {% endtrans %}</p>
+
+  <form action="{{ url_for('import/blogger') }}" method="post">
+    <dl>
+      <dt>{% trans "Select Blog To Import" %}</dt>
+      <dd>
+        <select name="blog_id">
+            {% for blog in available_blogs %}
+                <option value="{{ get_blog_id(blog) }}">{{ blog.title.text }}</option>
+            {% endfor %}
+        </select>
+      </dd>
+    </dl>
+    <div class="actions">
+      {{ hidden_form_data }}
+      <input name="import" type="submit" value="{% trans 'Import' %}">
+      <input name="logout" type="submit" value="{% trans 'Log out of Google' %}">
+    </div>
+  </form>
+
+  {% else %}
+
+  {# not logged in to google. Display some info and a log in link #}
+
+  <p>{% trans google=google() %}
+  You are not authenticated with {{ google }}. You need to authenticate to continue
+  the import. This link will take you to {{ google }}, and once you are
+  authenticated you will be redirected back to this importer. This is the
+  preferred way to authenticate, and although it's a bit clumsy, it is safe.
+  {% endtrans %}</p>
+
+  <p>{% trans url=proxy_auth_url,google=google() %}
+    <a href="{{ url }}">Log into your {{ google }} account</a>
+  {% endtrans %}</p>
+
+  {% endif %}
+
+{% endblock %}

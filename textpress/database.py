@@ -200,7 +200,7 @@ class ManagerExtension(orm.MapperExtension):
         return orm.EXT_CONTINUE
 
     def init_failed(self, mapper, class_, oldinit, instance, args, kwargs):
-        orm.object_session(instance).expugne(instance)
+        orm.object_session(instance).expunge(instance)
         return orm.EXT_CONTINUE
 
 

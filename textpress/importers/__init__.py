@@ -352,4 +352,5 @@ class Comment(object):
 
 
 from textpress.importers.wordpress import WordPressImporter
-all_importers = [WordPressImporter]
+from textpress.importers.blogger import BloggerImporter
+all_importers = [WordPressImporter, BloggerImporter]
