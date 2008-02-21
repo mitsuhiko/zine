@@ -1464,6 +1464,8 @@ def do_cache(request):
             if filesystem_cache_path != cfg['filesystem_cache_path']:
                 cfg['filesystem_cache_path'] = filesystem_cache_path
             flash(_('Updated cache settings.'), 'configure')
+        else:
+            flash(errors[0], 'error')
 
     return render_admin_response('admin/cache.html', 'options.cache',
         hidden_form_data=make_hidden_fields(csrf_protector),
