@@ -35,6 +35,37 @@
     application so just create a development instance for plugin development.
 
 
+    Plugin Metadata
+    ---------------
+
+    To identify a plugin metadata are used. TextPress requires a file
+    named `metadata.txt` to load some information about the plugin.
+
+    TextPress currently supports the following metadata information:
+
+        :Name:
+            The full name of the plugin.
+        :Plugin URL:
+            The URL of the plugin (e.g download location)
+        :Description:
+            The full description of the plugin.
+        :Author:
+            The name of the author of the plugin.
+            Use the this field in the form of ``Name <author@webpage.xy>``
+            where `Name` is the full name of the author.
+        :Author URL:
+            The webpage of the plugin-author.
+        :Version:
+            The version of the deployed plugin.
+        :Preview:
+            *For themes only*
+            A little preview of the theme deployed by the plugin.
+        :Depends:
+            A list of plugins the plugin depends on. All plugin-names will
+            be splitted by a comma and also named exactly as the depended plugin.
+            All plugins in this list won't be activated if found but if one
+            is missed the admin will be informated about that.
+
     :copyright: 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
@@ -393,6 +424,16 @@ class Plugin(object):
     def version(self):
         """The version of the plugin."""
         return self.metadata.get('version')
+
+    @property
+    def depends(self):
+        """
+        Iterator of all plugins this one depends on.
+
+        Plugins listed here won't be loaded automaticly.
+        """
+        depends = self.metadata.get('depends', '')
+        return depends and (x.strip() for x in depends.split(',')) or []
 
     def setup(self):
         """Setup the plugin."""

@@ -1332,9 +1332,30 @@ def do_plugins(request):
         for name, plugin in request.app.plugins.iteritems():
             active = 'plugin_' + name in request.form
             if active and not plugin.active:
-                plugin.activate()
-                flash(_(u'Plugin “%s” activated.') % plugin.html_display_name,
-                      'configure')
+                # handle dependencies
+                missing_dependencies = []
+                loaded_dependencies = []
+
+                if plugin.depends:
+                    for dependency in plugin.depends:
+                        if not dependency in request.app.plugins:
+                            missing_dependencies.append(dependency)
+                        else:
+                            loaded_dependencies.append(dependency)
+                    if missing_dependencies:
+                        flash(_(u'Plugin “%s” has unsolved dependencies.  '
+                                u'Please install %s.')
+                                % (plugin.html_display_name,
+                                   u', '.join(missing_dependencies)))
+                    else:
+                        for dep in loaded_dependencies:
+                            request.app.plugins[dep].activate()
+                        flash(_(u'The Plugins %s are loaded as a dependency '
+                                u'of “%s”') % (u', '.join(loaded_dependencies),
+                                             plugin.html_display_name))
+                        plugin.activate()
+                        flash(_(u'Plugin “%s” activated.') % plugin.html_display_name,
+                                'configure')
             elif not active and plugin.active:
                 plugin.deactivate()
                 flash(_(u'Plugin “%s” deactivated.') %

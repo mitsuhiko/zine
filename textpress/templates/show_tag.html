@@ -3,9 +3,15 @@
 {% include "_post.html" %}
 {% block contents %}
   <h2>{% trans tag=tag.name|e %}Entries tagged "{{ tag }}"{% endtrans %}</h2>
+  {% if posts %}
   {%- for post in posts %}
     {{ render_post(post) }}
   {%- endfor %}
+  {% else %}
+  <p>
+    {% trans 'No public posts found' %}
+  </p>
+  {% endif %}
   {%- if pagination.necessary %}
   <div class="pagination">
     {{ pagination.generate() }}
