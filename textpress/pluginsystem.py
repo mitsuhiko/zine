@@ -61,10 +61,11 @@
             *For themes only*
             A little preview of the theme deployed by the plugin.
         :Depends:
-            A list of plugins the plugin depends on. All plugin-names will
+            A list of plugins the plugin depends on.  All plugin-names will
             be splitted by a comma and also named exactly as the depended plugin.
-            All plugins in this list won't be activated if found but if one
-            is missed the admin will be informated about that.
+            All plugins in this list will be activated if found but if one
+            is missed the admin will be informated about that and the plugin
+            won't be activated.
 
     :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs.
     :license: GNU GPL.
