@@ -66,7 +66,7 @@
             All plugins in this list won't be activated if found but if one
             is missed the admin will be informated about that.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs.
     :license: GNU GPL.
 """
 import sys
@@ -283,10 +283,41 @@ class Plugin(object):
         self.setup_error = None
 
     def activate(self):
-        """Activate the plugin."""
+        """
+        Activate the plugin.
+
+        :return:
+            A tuple in the form of
+            (loaded_successfully, loaded_dependences, missing_dependences)
+            Where the first item represents if the plugin was loaded and the
+            latter ones represents loaded/missing dependences.
+        """
         plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
-        plugins.add(self.name)
-        self.app.cfg['plugins'] = ', '.join(x for x in sorted(plugins) if x)
+        loaded_dependences = set()
+        missing_dependences = set()
+        # handle dependences
+        if self.depends:
+            for dep in self.depends:
+                if (dep in self.app.plugins and
+                    not self.app.plugins[dep].active):
+
+                    loaded_dependences.add(dep)
+                elif dep not in self.app.plugins:
+                    missing_dependences.add(dep)
+
+        if not missing_dependences:
+            for dep_to_load in loaded_dependences:
+                dep_obj = self.app.plugins[dep_to_load]
+                if not dep_obj.active:
+                    dep_obj.activate()
+
+            loaded = loaded_dependences.copy()
+            loaded.update([self.name])
+            plugins.update(loaded)
+            self.app.cfg['plugins'] = ', '.join(x for x in sorted(plugins) if x)
+
+        return ((missing_dependences and False or True), loaded_dependences,
+                missing_dependences)
 
     def deactivate(self):
         """Deactivate this plugin."""
