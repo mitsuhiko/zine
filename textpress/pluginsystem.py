@@ -35,7 +35,39 @@
     application so just create a development instance for plugin development.
 
 
-    :copyright: 2007 by Armin Ronacher.
+    Plugin Metadata
+    ---------------
+
+    To identify a plugin metadata are used. TextPress requires a file
+    named `metadata.txt` to load some information about the plugin.
+
+    TextPress currently supports the following metadata information:
+
+        :Name:
+            The full name of the plugin.
+        :Plugin URL:
+            The URL of the plugin (e.g download location)
+        :Description:
+            The full description of the plugin.
+        :Author:
+            The name of the author of the plugin.
+            Use the this field in the form of ``Name <author@webpage.xy>``
+            where `Name` is the full name of the author.
+        :Author URL:
+            The webpage of the plugin-author.
+        :Version:
+            The version of the deployed plugin.
+        :Preview:
+            *For themes only*
+            A little preview of the theme deployed by the plugin.
+        :Depends:
+            A list of plugins the plugin depends on.  All plugin-names will
+            be splitted by a comma and also named exactly as the depended plugin.
+            All plugins in this list will be activated if found but if one
+            is missed the admin will be informated about that and the plugin
+            won't be activated.
+
+    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs.
     :license: GNU GPL.
 """
 import sys
@@ -252,10 +284,41 @@ class Plugin(object):
         self.setup_error = None
 
     def activate(self):
-        """Activate the plugin."""
+        """
+        Activate the plugin.
+
+        :return:
+            A tuple in the form of
+            (loaded_successfully, loaded_dependences, missing_dependences)
+            Where the first item represents if the plugin was loaded and the
+            latter ones represents loaded/missing dependences.
+        """
         plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
-        plugins.add(self.name)
-        self.app.cfg['plugins'] = ', '.join(x for x in sorted(plugins) if x)
+        loaded_dependences = set()
+        missing_dependences = set()
+        # handle dependences
+        if self.depends:
+            for dep in self.depends:
+                if (dep in self.app.plugins and
+                    not self.app.plugins[dep].active):
+
+                    loaded_dependences.add(dep)
+                elif dep not in self.app.plugins:
+                    missing_dependences.add(dep)
+
+        if not missing_dependences:
+            for dep_to_load in loaded_dependences:
+                dep_obj = self.app.plugins[dep_to_load]
+                if not dep_obj.active:
+                    dep_obj.activate()
+
+            loaded = loaded_dependences.copy()
+            loaded.update([self.name])
+            plugins.update(loaded)
+            self.app.cfg['plugins'] = ', '.join(x for x in sorted(plugins) if x)
+
+        return ((missing_dependences and False or True), loaded_dependences,
+                missing_dependences)
 
     def deactivate(self):
         """Deactivate this plugin."""
@@ -393,6 +456,16 @@ class Plugin(object):
     def version(self):
         """The version of the plugin."""
         return self.metadata.get('version')
+
+    @property
+    def depends(self):
+        """
+        Iterator of all plugins this one depends on.
+
+        Plugins listed here won't be loaded automaticly.
+        """
+        depends = self.metadata.get('depends', '')
+        return depends and (x.strip() for x in depends.split(',')) or []
 
     def setup(self):
         """Setup the plugin."""

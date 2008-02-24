@@ -17,7 +17,7 @@
 
     -   Dashboard
 
-    :copyright: 2007-2008 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs.
     :license: GNU GPL.
 """
 from datetime import datetime
@@ -1331,10 +1331,27 @@ def do_plugins(request):
 
         for name, plugin in request.app.plugins.iteritems():
             active = 'plugin_' + name in request.form
+
             if active and not plugin.active:
-                plugin.activate()
-                flash(_(u'Plugin “%s” activated.') % plugin.html_display_name,
-                      'configure')
+                (loaded, loaded_dep, missing_dep) = plugin.activate()
+                if loaded:
+                    if loaded_dep:
+                        flash(_(u'The Plugins <em>%s</em> are loaded as a dependency '
+                                u'of “%s”') % (u', '.join(loaded_dep),
+                                               plugin.html_display_name))
+                    flash(_(u'Plugin “%s” activated.') % plugin.html_display_name,
+                         'configure')
+
+                else:
+                    if missing_dep:
+                        flash(_(u'Plugin “%s” has unsolved dependencies.  '
+                                u'Please install %s.')
+                                % (plugin.html_display_name,
+                                   u', '.join(missing_dependencies)))
+                    else:
+                        flash(_(u'Plugin “%s” could not be loaded')
+                                % plugin.html_display_name)
+
             elif not active and plugin.active:
                 plugin.deactivate()
                 flash(_(u'Plugin “%s” deactivated.') %
