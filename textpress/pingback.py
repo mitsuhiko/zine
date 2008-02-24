@@ -76,7 +76,7 @@ def pingback(source_uri, target_uri):
     points to `target_uri`.  If that fails an `PingbackError` is raised.
     """
     old_timeout = socket.getdefaulttimeout()
-    socket.setdefaulttimeout(10)
+    socket.setdefaulttimeout(2)
     try:
         try:
             url = urllib2.urlopen(target_uri)

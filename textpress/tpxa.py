@@ -118,10 +118,13 @@ class Participant(object):
     def before_dump(self):
         pass
 
-    def process_post(self, post):
+    def dump_data(self):
         pass
 
-    def process_user(self, user):
+    def process_post(self, node, post):
+        pass
+
+    def process_user(self, node, user):
         pass
 
 
@@ -170,6 +173,18 @@ class Writer(object):
         for participant in self.participants:
             participant.setup()
 
+        # dump configuration
+        cfg = self.tp('configuration')
+        for key, value in self.app.cfg.iteritems():
+            self.tp('item', key=key, text=value, parent=cfg)
+        yield dump_node(cfg)
+
+        # allow plugins to dump trees
+        for participant in self.participants:
+            rv = participant.dump_data()
+            if rv is not None:
+                yield dump_node(rv)
+
         # look up all the users and add them as dependencies
         for user in User.objects.all():
             self._register_user(user)
@@ -195,8 +210,6 @@ class Writer(object):
 
     def _register_user(self, user):
         rv = self.new_dependency(self.tp.user)
-        for participant in self.participants:
-            participant.process_user(rv)
         self.tp('username', text=user.username, parent=rv)
         self.tp('role', text=str(user.role), parent=rv)
         self.tp('pw_hash', text=user.pw_hash.encode('base64'), parent=rv)
@@ -204,6 +217,8 @@ class Writer(object):
         self.tp('first_name', text=user.first_name, parent=rv)
         self.tp('last_name', text=user.last_name, parent=rv)
         self.tp('description', text=user.description, parent=rv)
+        for participant in self.participants:
+            participant.process_user(rv, user)
         self.users[user.user_id] = rv
 
     def _dump_post(self, post):
@@ -265,5 +280,5 @@ class Writer(object):
             }, 2).encode('base64'), parent=entry)
 
         for participant in self.participants:
-            participant.process_post(entry)
+            participant.process_post(entry, post)
         return entry
