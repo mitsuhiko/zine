@@ -1,5 +1,6 @@
 {% macro render_post(post) -%}
   <div class="post">
+    {{ emit_event('before-post-rendered', post) }}
     <h3><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a></h3>
     <div class="text">
       {{ post.intro or post.body }}
@@ -14,5 +15,6 @@
       <a href="{{ url_for(post)|e }}#comments">{% trans comments=post.comment_count
          %}{{ comments }} comment{% pluralize %}{{ comments}} comments{% endtrans -%}</a>
     </p>
+    {{ emit_event('after-post-rendered', post) }}
   </div>
 {%- endmacro %}

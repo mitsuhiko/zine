@@ -1,5 +1,6 @@
 {% macro render_post(post) -%}
   <div class="post">
+    {{ emit_event('before-post-rendered', post) }}
     <h4><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a></h4>
     <p class="meta">{% trans "written by" %} <a href="{{ url_for(post.author)|e
       }}">{{ post.author.display_name|e }}</a>, on {{
@@ -24,5 +25,6 @@
       | <a href="{{ url_for('admin/edit_post', post_id=post.post_id) }}">{% trans 'Edit' %}</a>
       {%- endif %}
     </p>
+    {{ emit_event('after-post-rendered', post) }}
   </div>
 {%- endmacro %}

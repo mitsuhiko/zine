@@ -307,6 +307,32 @@ class EventManager(object):
             return iter(())
         return iter(self._listeners[event])
 
+    def template_emit(self, event, *args, **kwargs):
+        """Emits events for the template context."""
+        results = []
+        for f in self.iter(event):
+            rv = f(*args, **kwargs)
+            if rv is not None:
+                results.append(rv)
+        return TemplateEventResult(results)
+
+
+class TemplateEventResult(list):
+    """
+    A list subclass for results returned by the event listener that
+    concatenates the results if converted to string, otherwise it works
+    exactly like any other list.
+    """
+
+    def __init__(self, items):
+        list.__init__(self, items)
+
+    def __unicode__(self):
+        return u''.join(map(unicode, self))
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
 
 class Listener(object):
     """
@@ -567,6 +593,7 @@ class TextPress(object):
             cfg=self.cfg,
             h=htmlhelpers,
             url_for=url_for,
+            emit_event=self._event_manager.template_emit,
             render_widgets=lambda: render_template('_widgets.html'),
             get_page_metadata=self.get_page_metadata,
             textpress={

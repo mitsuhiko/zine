@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% include "_comment.html" %}
+{% include "_comment_editor.html" %}
 {% block title %}{{ post.title|e }}{% endblock %}
 {% block contents %}
   <div class="post">
@@ -20,7 +21,8 @@
         {% trans "nothing" %}
       {%- endfor %}
       {%- if request.user.is_manager %}
-      | <a href="{{ url_for('admin/edit_post', post_id=post.post_id) }}">{% trans 'Edit' %}</a>
+      | <a href="{{ url_for('admin/edit_post', post_id=post.post_id)
+        }}">{% trans 'Edit' %}</a>
       {%- endif %}
     </p>
   </div>
@@ -45,30 +47,6 @@
   {%- endif %}
   {%- if post.comments_enabled %}
     <h3 id="leave-reply">{% trans "Leave a Reply" %}</h3>
-    <form action="#leave-reply" class="comments" method="post">
-      <dl>
-        <dt><label for="name">{% trans "Name*" %}</label></dt>
-        <dd>{{ h.input_field('name', form.name) }}</dd>
-        <dt><label for="email">{% trans "Mail* (not published)" %}</label></dt>
-        <dd>{{ h.input_field('email', form.email) }}</dd>
-        <dt><label for="www">{% trans "Website" %}</label></dt>
-        <dd>{{ h.input_field('www', form.www) }}</dd>
-      </dl>
-      <div>{{ h.textarea('body', form.body) }}
-           {{ h.input_field('parent', form.parent, 'hidden') }}</div>
-      <div id="comment-message">{# used for the reply callback #}</div>
-      {%- if errors %}
-        <div class="error">
-          <h3>{% trans 'Could not Post Comment' %}</h3>
-          {%- for error in errors %}
-            <p>{{ error }}</p>
-          {%- endfor %}
-        </div>
-      {%- endif %}
-      <div class="actions">
-        <input type="submit" value="{% trans 'Submit Comment' %}">
-        <input type="reset" value="{% trans 'Reset Form' %}">
-      </div>
-    </form>
+    {{ render_comment_editor(post) }}
   {%- endif %}
 {% endblock %}
