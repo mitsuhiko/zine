@@ -52,7 +52,7 @@ examples:
         print "Please pass the plugin directory path"
         print USAGE
         sys.exit(1)
-    
+
     plugin_name = [p for p in plugin_path.split(os.sep) if p][-1]
     try:
         plugin = app.plugins[plugin_name]
@@ -79,7 +79,6 @@ examples:
         output_path, output_plugin_name)
     )
     print "Created '%s' in '%s'" % (output_plugin_name, output_path)
-    sys.exit(0)
 
 
 action_runserver = script.make_runserver(make_app, use_reloader=True,
