@@ -75,9 +75,7 @@ examples:
         ''.join(plugin.display_name.split()),
         plugin.version
     )
-    plugin.dump('%s%s' % (
-        output_path, output_plugin_name)
-    )
+    plugin.dump(os.path.join(output_path, output_plugin_name))
     print "Created '%s' in '%s'" % (output_plugin_name, output_path)
 
 
