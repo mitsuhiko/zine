@@ -7,7 +7,7 @@
     This script starts a server or a shell for a textpress
     instance. Useful for plugin development and debugging.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 import os
