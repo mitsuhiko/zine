@@ -229,12 +229,18 @@ def do_show_post(request, year, month, day, slug):
         form['name'] = name = request.form.get('name')
         if not name:
             errors.append(_('You have to enter your name.'))
+        elif len(name) > 100:
+            errors.append(_('Your name is too long.'))
         form['email'] = email = request.form.get('email')
         if not (email and is_valid_email(email)):
             errors.append(_('You have to enter a valid mail address.'))
+        elif len(email) > 250:
+            errors.append(_('Your E-Mail address is too long.'))
         form['www'] = www = request.form.get('www')
         if www and not is_valid_url(www):
             errors.append(_('You have to enter a valid URL or omit the field.'))
+        elif len(www) > 200:
+            errors.append(_('The URL is too long.'))
         form['body'] = body = request.form.get('body')
         if not body or len(body) < 10:
             errors.append(_('Your comment is too short.'))
