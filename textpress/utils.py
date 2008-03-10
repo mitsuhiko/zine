@@ -59,11 +59,6 @@ _entity_re = re.compile(r'&([^;]+);')
 _punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|}]+')
 _striptags_re = re.compile(r'(<!--.*?-->|<[^>]*>)')
 
-_mail_re = re.compile(
-    r'([a-zA-Z0-9_\.\-])+'
-    r'\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,})+$'
-)
-
 _mail_split_re = re.compile(r'^(.*?)(?:\s+<(.+)>)?$')
 
 #: a dict of html entities to codepoints. This includes the problematic
@@ -414,7 +409,7 @@ def parse_datetime(string):
 
 def is_valid_email(mail):
     """Check if the string passed is a valid mail address."""
-    return _mail_re.match(mail) is not None
+    return '@' in mail
 
 
 def is_valid_url(url):

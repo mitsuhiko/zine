@@ -106,7 +106,7 @@ def find_plugins(app):
         for filename in listdir(folder):
             full_name = path.join(folder, filename)
             if path.isdir(full_name) and \
-               path.exists(path.join(full_name, 'metadata.txt')):
+               path.isfile(path.join(full_name, 'metadata.txt')):
                 yield Plugin(app, filename, path.abspath(full_name),
                              filename in enabled_plugins)
 

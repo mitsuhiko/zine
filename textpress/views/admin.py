@@ -327,13 +327,13 @@ def do_edit_post(request, post_id=None):
 
         username = request.form.get('author')
         if not username:
-            author = request.user
+            author = post and post.author or request.user
             username = author.username
         else:
             author = User.objects.filter_by(username=username).first()
             if author is None:
                 errors.append(_(u'Unknown author “%s”.') % username)
-        form['author'] = author
+        form['author'] = username
         form['slug'] = slug = request.form.get('slug') or None
         if slug and '/' in slug:
             errors.append(_('A slug cannot contain a slash.'))
@@ -450,6 +450,7 @@ def do_edit_post(request, post_id=None):
         tags=Tag.objects.all(),
         post=post,
         drafts=list(Post.objects.get_drafts(exclude=exclude)),
+        can_change_author=request.user.role >= ROLE_EDITOR,
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
             (STATUS_DRAFT, _('Draft')),
