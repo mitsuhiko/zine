@@ -87,7 +87,7 @@ from base64 import b64encode
 import textpress
 from urllib import quote, urlencode, FancyURLopener
 from textpress.application import get_application
-from textpress.utils import split_email
+from textpress.utils import split_email, is_valid_email
 from werkzeug import cached_property, escape
 
 
@@ -441,13 +441,14 @@ class Plugin(object):
     def html_contributors_info(self):
         result = []
         for contributor in self.contributors:
-            name, email = contributor
-            if not email:
+            name, contact = contributor
+            if not contact:
                 result.append(escape(name))
             else:
-                result.append('<a href="mailto:%s">%s</a>' % (
-                    escape(name),
-                    escape(email)
+                result.append('<a href="%s">%s</a>' % (
+                    escape(is_valid_email(contact) and 'mailto:'+contact or
+                           contact),
+                    escape(name)
                 ))
         return u', '.join(result)
 
