@@ -55,6 +55,11 @@
             where `Name` is the full name of the author.
         :Author URL:
             The webpage of the plugin-author.
+        :Contributors:
+            Add a list of all contributors seperated by a comma.
+            Use this field in the form of ``Name1 <n1@w1.xy>, Name2
+            <n2@w2.xy>`` where `Name` is the full name of the author
+            and the email is optional.
         :Version:
             The version of the deployed plugin.
         :Preview:
@@ -422,6 +427,29 @@ class Plugin(object):
         """The author, mail and author URL of the plugin."""
         return split_email(self.metadata.get('author', u'Nobody')) + \
                (self.metadata.get('author_url'),)
+
+    @property
+    def contributors(self):
+        """The Contributors of the plugin."""
+        data = self.metadata.get('contributors', '')
+        if not data:
+            return []
+        return [split_email(c.strip()) for c in
+        self.metadata.get('contributors', '').split(',')]
+
+    @property
+    def html_contributors_info(self):
+        result = []
+        for contributor in self.contributors:
+            name, email = contributor
+            if not email:
+                result.append(escape(name))
+            else:
+                result.append('<a href="mailto:%s">%s</a>' % (
+                    escape(name),
+                    escape(email)
+                ))
+        return u', '.join(result)
 
     @property
     def html_author_info(self):

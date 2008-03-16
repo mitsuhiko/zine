@@ -12,7 +12,7 @@
     {% for page in pages %}
     <tr class="pages_row">
       <td>{{ page.page_id }}</td>
-      <td style="width: 20%;">{{ page.key }}</td>
+      <td style="width: 20%;"><a href="{{ url_for(page) }}">{{ page.key }}</a></td>
       <td style="width: 50%;">
         <a href="{{ url_for('pages/write_page', page_id=page.page_id) }}">{{ page.title }}</a>
       </td>

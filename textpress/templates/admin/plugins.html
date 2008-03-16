@@ -22,8 +22,16 @@
         <td class="plugin">{{ plugin.html_display_name }}</td>
         <td class="version">{{ (plugin.version or '?')|e }}</td>
         <td class="description">{{ plugin.description }}
-          <span class="author">{% trans author=plugin.html_author_info %}By {{
-            author }}{% endtrans %}</span>
+          <span class="author">
+          {% trans author=plugin.html_author_info %}
+          By {{ author }}
+          {% endtrans %}
+          {% if plugin.contributors %}
+          {% trans contributors=plugin.html_contributors_info %}
+            and {{ contributors }}
+          {% endtrans %}
+          {% endif %}
+          </span>
           {%- if not plugin.builtin_plugin and not plugin.active %}
             [<a href="{{ url_for('admin/remove_plugin', plugin=plugin.name)
               }}">{% trans "Remove plugin" %}</a>]
