@@ -5,7 +5,7 @@
 
     Just some database tables for the pages plugin.
 
-    :copyright: Copyright 2007 by Christopher Grebs.
+    :copyright: Copyright 2007-2008 by Christopher Grebs and Ali Afshar.
     :license: GNU GPL.
 """
 from textpress.api import *

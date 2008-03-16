@@ -13,7 +13,7 @@
     so you can use the comment-parser, plain-html and others.
 
 
-    :copyright: Copyright 2007 by Christopher Grebs.
+    :copyright: Copyright 2007-2008 by Christopher Grebs and Ali Afshar.
     :license: GNU GPL.
 """
 from os.path import dirname, join
