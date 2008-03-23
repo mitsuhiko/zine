@@ -5,7 +5,7 @@
 
     Just some database tables for the pages plugin.
 
-    :copyright: Copyright 2007 by Christopher Grebs.
+    :copyright: Copyright 2007-2008 by Christopher Grebs and Ali Afshar.
     :license: GNU GPL.
 """
 from textpress.api import *
@@ -22,7 +22,8 @@ pages_table = db.Table('pages', metadata,
     db.Column('title', db.Unicode(200)),
     db.Column('body', db.Unicode),
     db.Column('extra', db.PickleType),
-    db.Column('navigation_pos', db.Integer)
+    db.Column('navigation_pos', db.Integer),
+    db.Column('parent_id', db.Integer, db.ForeignKey('pages.page_id')),
 )
 
 
@@ -30,10 +31,10 @@ def upgrade_database(app):
     metadata.create_all(app.database_engine)
 
 
-
 class Page(object):
 
-    def __init__(self, key, title, body, parser=None, navigation_pos=None):
+    def __init__(self, key, title, body, parser=None, navigation_pos=None,
+                 parent_id=None):
         self.key = key
         self.title = title
         if parser is None:
@@ -45,6 +46,7 @@ class Page(object):
                 navigation_pos = int(navigation_pos)
         self.navigation_pos = navigation_pos
         self.raw_body = body
+        self.parent_id = parent_id
 
     def _get_parser(self):
         return self.extra['parser']
@@ -89,4 +91,6 @@ class Page(object):
 
 db.mapper(Page, pages_table, properties={
     '_raw_body':    pages_table.c.body,
+    'parent':       db.relation(Page,
+        remote_side=[pages_table.c.page_id], backref='children'),
 })

@@ -26,6 +26,17 @@
       {%- endfor %}</select>
     </fieldset>
     <fieldset>
+      <legend>{% trans "Parent Page" %}</legend>
+      <em>This is the parent page</em>
+      <select name="parent_id">
+      {% for page_id, page_title in all_pages %}
+        <option value="{{ page_id|e(true) }}"{%- if page_id == form.parent_id %} selected{% endif %}>
+          {{ page_title|e }}
+        </option>
+      {%- endfor %}
+      </select>
+    </fieldset>
+    <fieldset>
       <legend>{% trans "Position" %}</legend>
       <em>This is the position the link is shown in the navigation widget</em><br>
       {{ h.input_field('navigation_pos', form.navigation_pos, size=3) }}
