@@ -225,6 +225,9 @@ def do_show_post(request, year, month, day, slug):
     # handle comment posting
     errors = []
     form = {'name': '', 'email': '', 'www': '', 'body': '', 'parent': ''}
+    if request.user.is_somebody:
+        form['name'] = request.user.display_name
+        form['email'] = request.user.email
     if request.method == 'POST' and post.comments_enabled:
         form['name'] = name = request.form.get('name')
         if not name:
