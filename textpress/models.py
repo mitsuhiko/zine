@@ -849,6 +849,13 @@ class Comment(object):
         self.submitter_ip = submitter_ip
         self.is_pingback = is_pingback
 
+    def make_visible_for_request(self, request=None):
+        """Make the comment visible for the current request."""
+        if request is None:
+            request = get_request()
+        comments = request.session.setdefault('visible_comments', set())
+        comments.add(self.comment_id)
+
     def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""
         if not self.blocked:
@@ -859,7 +866,19 @@ class Comment(object):
             user = User.objects.get(user)
         return user.role >= ROLE_AUTHOR
 
-    visible = property(visible_for_user)
+    @property
+    def visible(self):
+        """
+        Check the current session it can see the comment or check against the
+        current user.  To display a comment for a request you can use the
+        `make_visible_for_request` function.  This is useful to show a comment
+        to a user that submited a comment which is not yet moderated.
+        """
+        request = get_request()
+        comments = request.session.get('visible_comments', ())
+        if self.comment_id in comments:
+            return True
+        return self.visible_for_user(request.user)
 
     @property
     def parser_missing(self):
