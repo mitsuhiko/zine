@@ -7,7 +7,7 @@
     python functions in the view modules.
 
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 from textpress.views import blog, admin
@@ -37,7 +37,9 @@ all_views = {
     'admin/show_comments':      admin.do_show_comments,
     'admin/edit_comment':       admin.do_edit_comment,
     'admin/delete_comment':     admin.do_delete_comment,
+    'admin/aprove_comment':     admin.do_aprove_comment,
     'admin/unblock_comment':    admin.do_unblock_comment,
+    'admin/moderate_comment':   admin.do_moderate_comment,
     'admin/show_tags':          admin.do_show_tags,
     'admin/new_tag':            admin.do_edit_tag,
     'admin/edit_tag':           admin.do_edit_tag,

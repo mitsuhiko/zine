@@ -12,9 +12,11 @@
   {% else %}
     <h2>{% trans "Manage Comments" %}</h2>
   {% endif %}
+  <fieldset><legend>{% trans "Unmoderated Comments" %}</legend>
   <ul class="comments">
-  {%- for comment in comments %}
-    <li class="comment {% cycle 'odd', 'even' %}{% if comment.blocked %} blocked{% endif %}">
+  {%- for comment in unmoderated %}
+    <li class="comment {% cycle 'odd', 'even' %}" style="border-bottom: none; margin: 0 0;">
+      <table style="border: none;"><tr><td width="100%">
       <p><strong>{{ comment.author }}</strong> |
          {% if comment.email %}<a href="mailto:{{ comment.email|e(true) }}">{{
            comment.email|e }}</a>{% else %}<em>no email given</em>{% endif %} |
@@ -36,9 +38,56 @@
          ]
          {% if not post %}&mdash; <a href="{{ url_for(comment.post)|e }}">{{
            comment.post.title|e }}</a>{% endif %}</p>
+      </td>
+      <td>
+        <form action="{{ url_for('admin/aprove_comment',
+                                 comment_id=comment.comment_id)|e }}" method="post">
+          <input type="submit" name="aprove" value="Aprove"
+                 style="width: 100px;"/>
+        </form>
+        <form action="{{url_for('admin/moderate_comment',
+                                comment_id=comment.comment_id)|e}}" method="post">
+          <input type="submit" name="block" value="Block"
+                 style="width: 100px;"/>
+        </form>
+      </td></tr></table>
     </li>
   {%- else %}
     <li>{% trans "No comments." %}</li>
   {%- endfor %}
-  </ul>
+  </ul></fieldset>
+
+  <fieldset><legend>{% trans "Moderated Comments" %}</legend>
+  <ul class="comments">
+  {%- for comment in comments %}
+    <li class="comment {% cycle 'odd', 'even' %}{% if comment.blocked %} blocked{% endif %}">
+      <p><strong>{{ comment.author }}</strong> |
+         {% if comment.email %}<a href="mailto:{{ comment.email|e(true) }}">{{
+           comment.email|e }}</a>{% else %}<em>no email given</em>{% endif %} |
+         {% if comment.www %}<a href="{{ comment.www|e(true) }}">{{ comment.www|e
+           }}</a> |{% endif %}
+         IP: {{ comment.submitter_ip }}
+         {%- if comment.blocked %}
+           | {{ comment.blocked_msg }}
+         {%- endif %}
+         </p>
+      {{ comment.body }}
+      <p>{{ comment.pub_date|datetimeformat|e }}
+         [ {%- if not comment.blocked
+             -%}<a href="{{url_for('admin/moderate_comment', comment_id=comment.comment_id )|e
+             }}">{% trans "Moderate" %}</a> |{% endif %}
+           <a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e
+             }}">{% trans "Edit" %}</a> |
+           <a href="{{ url_for('admin/delete_comment', comment_id=comment.comment_id)|e
+             }}">{% trans "Delete" %}</a>
+           {%- if comment.blocked %} | <a href="{{ url_for('admin/unblock_comment',
+             comment_id=comment.comment_id)|e }}">{% trans "Unblock" %}</a>{% endif %}
+         ]
+         {% if not post %}&mdash; <a href="{{ url_for(comment.post)|e }}">{{
+           comment.post.title|e }}</a>{% endif %}</p>
+    </li>
+  {%- else %}
+    <li>{% trans "No comments." %}</li>
+  {%- endfor %}
+  </ul></fieldset>
 {% endblock %}

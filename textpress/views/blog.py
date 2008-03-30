@@ -6,11 +6,12 @@
     This module implements all the views (some people call that controller)
     for the core module.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 from textpress.api import *
-from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR
+from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR, \
+    COMMENT_MODERATED
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
      dump_json, dump_xml, build_tag_uri, AtomFeed
 from textpress import pingback
@@ -230,20 +231,26 @@ def do_show_post(request, year, month, day, slug):
         form['email'] = request.user.email
     if request.method == 'POST' and post.comments_enabled:
         form['name'] = name = request.form.get('name')
-        if not name:
-            errors.append(_('You have to enter your name.'))
-        elif len(name) > 100:
-            errors.append(_('Your name is too long.'))
-        form['email'] = email = request.form.get('email')
-        if not (email and is_valid_email(email)):
-            errors.append(_('You have to enter a valid mail address.'))
-        elif len(email) > 250:
-            errors.append(_('Your E-Mail address is too long.'))
-        form['www'] = www = request.form.get('www')
-        if www and not is_valid_url(www):
-            errors.append(_('You have to enter a valid URL or omit the field.'))
-        elif len(www) > 200:
-            errors.append(_('The URL is too long.'))
+        if not request.user.is_somebody:
+            if not name:
+                errors.append(_('You have to enter your name.'))
+            elif len(name) > 100:
+                errors.append(_('Your name is too long.'))
+            form['email'] = email = request.form.get('email')
+            if not (email and is_valid_email(email)):
+                errors.append(_('You have to enter a valid mail address.'))
+            elif len(email) > 250:
+                errors.append(_('Your E-Mail address is too long.'))
+            form['www'] = www = request.form.get('www')
+            if www and not is_valid_url(www):
+                errors.append(_('You have to enter a valid URL or omit the field.'))
+            elif len(www) > 200:
+                errors.append(_('The URL is too long.'))
+        else:
+            name = request.user.username
+            email = request.user.email
+            if request.user.is_author():
+                www = url_for('blog/show_author',  username=name)
         form['body'] = body = request.form.get('body')
         if not body or len(body) < 10:
             errors.append(_('Your comment is too short.'))
@@ -272,6 +279,13 @@ def do_show_post(request, year, month, day, slug):
             comment = Comment(post, name, email, www, body, parent,
                               submitter_ip=ip)
 
+            #! Moderate Comment?
+            if not request.app.cfg['moderate_comments']:
+                comment.status = COMMENT_MODERATED
+            else:
+                comment.blocked = True
+                comment.blocked_msg = _('Comment waiting for approval')
+
             #! use this event to block comments before they are saved.  This
             #! is useful for antispam and other ways of moderation.
             emit_event('before-comment-saved', request, comment)
@@ -280,6 +294,11 @@ def do_show_post(request, year, month, day, slug):
             #! this is sent directly after the comment was saved.  Useful if
             #! you want to send mail notifications or whatever.
             emit_event('after-comment-saved', request, comment)
+
+            if comment.blocked:
+                # Still allow the user to see his comment
+                comment.make_visible_for_request(request)
+
             return redirect(url_for(post))
 
     add_link('alternate', post.comment_feed_url, 'application/atom+xml',

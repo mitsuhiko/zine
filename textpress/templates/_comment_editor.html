@@ -1,6 +1,7 @@
 {% macro render_comment_editor(post) %}
   <form action="#leave-reply" class="comments" method="post">
     {{ emit_event('before-comment-editor-rendered', post) }}
+    {%- if not request.user.is_manager %}
     <dl>
       <dt><label for="name">{% trans "Name*" %}</label></dt>
       <dd>{{ h.input_field('name', form.name) }}</dd>
@@ -9,6 +10,7 @@
       <dt><label for="www">{% trans "Website" %}</label></dt>
       <dd>{{ h.input_field('www', form.www) }}</dd>
     </dl>
+    {%- endif %}
     <div>{{ h.textarea('body', form.body) }}
          {{ h.input_field('parent', form.parent, 'hidden') }}</div>
     <div id="comment-message">{# used for the reply callback #}</div>
