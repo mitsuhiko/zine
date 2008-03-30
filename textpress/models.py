@@ -5,7 +5,7 @@
 
     The core models and query helper functions.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 from math import ceil, log
@@ -30,6 +30,11 @@ STATUS_PRIVATE = 0
 STATUS_DRAFT = 1
 STATUS_PUBLISHED = 2
 
+#: Comment Status
+COMMENT_MODERATED = 0
+COMMENT_UNMODERATED = 1
+COMMENT_BLOCKED_USER = 2
+COMMENT_BLOCKED_SPAM = 3
 
 class UserManager(db.DatabaseManager):
     """
@@ -816,6 +821,14 @@ class CommentManager(db.DatabaseManager):
         """
         return self.filter_latest(limit, ignore_role).all()
 
+    def get_unmoderated(self):
+        """Return all drafts."""
+        return self.query.filter(Comment.status > COMMENT_MODERATED)
+
+    def get_unmoderated_count(self):
+        """Return all drafts."""
+        return self.get_unmoderated().count()
+
 
 class Comment(object):
     """Represent one comment."""
@@ -848,6 +861,7 @@ class Comment(object):
         self.blocked_msg = None
         self.submitter_ip = submitter_ip
         self.is_pingback = is_pingback
+        self.status = COMMENT_UNMODERATED
 
     def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""

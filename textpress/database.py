@@ -143,7 +143,7 @@
     the `models` modules of the core and existing plugins.
 
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 from datetime import datetime, timedelta
@@ -372,7 +372,8 @@ comments = db.Table('comments', metadata,
     db.Column('pub_date', db.DateTime),
     db.Column('blocked', db.Boolean, nullable=False),
     db.Column('blocked_msg', db.String(250)),
-    db.Column('submitter_ip', db.String(100))
+    db.Column('submitter_ip', db.String(100)),
+    db.Column('status', db.Integer, nullable=False)
 )
 
 

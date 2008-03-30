@@ -7,7 +7,7 @@
     the core components.
 
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 from werkzeug.routing import Rule, Submount
@@ -48,7 +48,9 @@ def make_urls(app):
         Rule('/comments/', endpoint='admin/show_comments'),
         Rule('/comments/<int:comment_id>', endpoint='admin/edit_comment'),
         Rule('/comments/<int:comment_id>/delete', endpoint='admin/delete_comment'),
+        Rule('/comments/<int:comment_id>/aprove', endpoint='admin/aprove_comment'),
         Rule('/comments/<int:comment_id>/unblock', endpoint='admin/unblock_comment'),
+        Rule('/comments/<int:comment_id>/moderate', endpoint='admin/moderate_comment'),
         Rule('/tags/', endpoint='admin/show_tags'),
         Rule('/tags/new', endpoint='admin/new_tag'),
         Rule('/tags/<int:tag_id>', endpoint='admin/edit_tag'),

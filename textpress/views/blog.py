@@ -6,11 +6,12 @@
     This module implements all the views (some people call that controller)
     for the core module.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 from textpress.api import *
-from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR
+from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR, \
+    COMMENT_MODERATED
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
      dump_json, dump_xml, build_tag_uri, AtomFeed
 from textpress import pingback
@@ -262,6 +263,13 @@ def do_show_post(request, year, month, day, slug):
             ip = request.environ.get('REMOTE_ADDR') or '0.0.0.0'
             comment = Comment(post, name, email, www, body, parent,
                               submitter_ip=ip)
+
+            #! Using our own moderation?
+            if not request.app.cfg['moderate_comments']:
+                comment.status = COMMENT_MODERATED
+            else:
+                comment.blocked = True
+                comment.blocked_msg = _('Comment waiting for approval')
 
             #! use this event to block comments before they are saved.  This
             #! is useful for antispam and other ways of moderation.

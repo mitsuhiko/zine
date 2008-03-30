@@ -17,14 +17,14 @@
 
     -   Dashboard
 
-    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs.
+    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs, Pedro Algarvio.
     :license: GNU GPL.
 """
 from datetime import datetime
 from textpress.api import *
 from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
-     STATUS_DRAFT, STATUS_PUBLISHED
+     STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED
 from textpress.database import comments, posts, post_tags, post_links
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
@@ -205,8 +205,17 @@ def do_index(request):
     such as "new post", etc. and the recent blog activity (unmoderated
     comments etc.)
     """
-    return render_admin_response('admin/index.html', 'dashboard',
-                                 drafts=Post.objects.get_drafts())
+    unmoderated_comments = Comment.objects.get_unmoderated_count()
+    if unmoderated_comments:
+        flash(_('<a href="%s">There are %d comments awaiting moderation</a>' % \
+                (url_for('admin/show_comments'), unmoderated_comments)))
+
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+
+    return render_admin_response(
+        'admin/index.html', 'dashboard', drafts=Post.objects.get_drafts(),
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect))
 
 
 @require_role(ROLE_AUTHOR)
@@ -510,16 +519,20 @@ def do_show_comments(request, post_id=None):
     """
     post = None
     if post_id is None:
-        comments = Comment.objects.all()
+        comments = Comment.objects
     else:
         post = Post.objects.get(post_id)
         if post is None:
             raise NotFound()
-        comments = Comment.objects.filter(Comment.post_id == post_id).all()
+        comments = Comment.objects.filter(Comment.post_id == post_id)
+
+    moderated = comments.filter(Comment.status != COMMENT_UNMODERATED).all()
+    unmoderated = comments.filter(Comment.status == COMMENT_UNMODERATED).all()
     return render_admin_response('admin/show_comments.html',
                                  'comments.overview',
         post=post,
-        comments=comments
+        comments=moderated,
+        unmoderated = unmoderated
     )
 
 
@@ -696,12 +709,89 @@ def do_unblock_comment(request, comment_id):
         if request.form.get('confirm'):
             comment.blocked = False
             comment.blocked_msg = ''
+            comment.status = COMMENT_MODERATED
             db.commit()
             flash(_('Comment by %s unblocked successfully.') %
                   escape(comment.author), 'configure')
         return redirect('admin/show_comments')
 
     return render_admin_response('admin/unblock_comment.html',
+                                 'comments.overview',
+        comment=comment,
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_moderate_redirect(request, comment_id):
+    redirect = IntelligentRedirect()
+    if request.method == 'POST':
+        if request.form.get('aprove'):
+            #redirect(url_for('admin/aprove_comment', comment_id=comment_id))
+            return do_aprove_comment(comment_id)
+        elif request.form.get('block'):
+            #return redirect(url_for('admin/manage_comment', comment_id=comment_id))
+            return do_moderate_redirect(comment_id)
+    return redirect('admin/show_comments')
+
+
+@require_role(ROLE_AUTHOR)
+def do_moderate_comment(request, comment_id):
+    """moderate comment"""
+    comment = Comment.objects.get(comment_id)
+    if comment is None:
+        return redirect(url_for('admin/show_comments'))
+
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+
+    if request.method == 'POST':
+        if request.form.get('update'):
+            csrf_protector.assert_safe()
+            status = int(request.form.get('comment_status'))
+            if status > COMMENT_MODERATED:
+                comment.blocked = True
+            else:
+                comment.blocked = False
+            comment.status = status
+            comment.blocked_msg = request.form.get('block_msg')
+            db.commit()
+            flash(_('Comment by %s moderated successfully.') %
+                  escape(comment.author), 'configure')
+            return redirect('admin/show_comments')
+        elif request.form.get('cancel'):
+            return redirect('admin/show_comments')
+
+    return render_admin_response('admin/moderate_comment.html',
+                                 'comments.overview',
+        comment=comment,
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+    )
+
+@require_role(ROLE_AUTHOR)
+def do_aprove_comment(request, comment_id):
+    """moderate comment"""
+    comment = Comment.objects.get(comment_id)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+    if comment is None:
+        return redirect(url_for('admin/show_comments'))
+
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+
+    if request.method == 'POST':
+        if request.form.get('confirm'):
+            csrf_protector.assert_safe()
+            comment.blocked = False
+            comment.blocked_msg = ''
+            comment.status = COMMENT_MODERATED
+            db.commit()
+            flash(_('Comment by %s aproved successfully.') %
+                  escape(comment.author), 'configure')
+            return redirect('admin/show_comments')
+
+    return render_admin_response('admin/aprove_comment.html',
                                  'comments.overview',
         comment=comment,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
