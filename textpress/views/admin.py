@@ -307,6 +307,8 @@ def do_edit_post(request, post_id=None):
         form['title'] = title = request.form.get('title')
         if not title:
             errors.append(_('You have to provide a title.'))
+        elif len(title) > 150:
+            errors.append(_('Your title is too long.'))
         form['body'] = body = request.form.get('body')
         if not body:
             errors.append(_('You have to provide a body.'))
@@ -336,16 +338,19 @@ def do_edit_post(request, post_id=None):
 
         username = request.form.get('author')
         if not username:
-            author = request.user
+            author = post and post.author or request.user
             username = author.username
         else:
             author = User.objects.filter_by(username=username).first()
             if author is None:
                 errors.append(_(u'Unknown author “%s”.') % username)
-        form['author'] = author
+        form['author'] = username
         form['slug'] = slug = request.form.get('slug') or None
-        if slug and '/' in slug:
-            errors.append(_('A slug cannot contain a slash.'))
+        if slug:
+            if '/' in slug:
+                errors.append(_('A slug cannot contain a slash.'))
+            elif len(slug) > 150:
+                errors.append(_('Your slug is too long'))
         form['tags'] = []
         tags = []
         for tag in request.form.getlist('tags'):
@@ -459,6 +464,7 @@ def do_edit_post(request, post_id=None):
         tags=Tag.objects.all(),
         post=post,
         drafts=list(Post.objects.get_drafts(exclude=exclude)),
+        can_change_author=request.user.role >= ROLE_EDITOR,
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
             (STATUS_DRAFT, _('Draft')),
@@ -492,9 +498,6 @@ def do_delete_post(request, post_id):
             return redirect('admin/edit_post', post_id=post.post_id)
         elif request.form.get('confirm'):
             redirect.add_invalid('admin/edit_post', post_id=post.post_id)
-            db.execute(comments.delete(comments.c.post_id == post.post_id))
-            db.execute(post_tags.delete(post_tags.c.post_id == post.post_id))
-            db.execute(post_links.delete(post_links.c.post_id == post.post_id))
             #! plugins can use this to react to post deletes.  They can't stop
             #! the deleting of the post but they can delete information in
             #! their own tables so that the database is consistent afterwards.
@@ -898,7 +901,6 @@ def do_delete_tag(request, tag_id):
             return redirect('admin/edit_tag', tag_id=tag.tag_id)
         elif request.form.get('confirm'):
             redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
-            db.execute(post_tags.delete(post_tags.c.tag_id == tag.tag_id))
             #! plugins can use this to react to tag deletes.  They can't stop
             #! the deleting of the tag but they can delete information in
             #! their own tables so that the database is consistent afterwards.
@@ -1077,8 +1079,6 @@ def do_delete_user(request, user_id):
                 db.execute(posts.update(posts.c.author_id == user_id),
                     author_id=action_val
                 )
-            elif action == 'delete':
-                db.execute(posts.delete(posts.c.author_id == user_id))
             #! plugins can use this to react to user deletes.  They can't stop
             #! the deleting of the user but they can delete information in
             #! their own tables so that the database is consistent afterwards.

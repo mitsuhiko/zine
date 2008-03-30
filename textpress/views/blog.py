@@ -226,16 +226,31 @@ def do_show_post(request, year, month, day, slug):
     # handle comment posting
     errors = []
     form = {'name': '', 'email': '', 'www': '', 'body': '', 'parent': ''}
+    if request.user.is_somebody:
+        form['name'] = request.user.display_name
+        form['email'] = request.user.email
     if request.method == 'POST' and post.comments_enabled:
         form['name'] = name = request.form.get('name')
-        if not name:
-            errors.append(_('You have to enter your name.'))
-        form['email'] = email = request.form.get('email')
-        if not (email and is_valid_email(email)):
-            errors.append(_('You have to enter a valid mail address.'))
-        form['www'] = www = request.form.get('www')
-        if www and not is_valid_url(www):
-            errors.append(_('You have to enter a valid URL or omit the field.'))
+        if not request.user.is_somebody:
+            if not name:
+                errors.append(_('You have to enter your name.'))
+            elif len(name) > 100:
+                errors.append(_('Your name is too long.'))
+            form['email'] = email = request.form.get('email')
+            if not (email and is_valid_email(email)):
+                errors.append(_('You have to enter a valid mail address.'))
+            elif len(email) > 250:
+                errors.append(_('Your E-Mail address is too long.'))
+            form['www'] = www = request.form.get('www')
+            if www and not is_valid_url(www):
+                errors.append(_('You have to enter a valid URL or omit the field.'))
+            elif len(www) > 200:
+                errors.append(_('The URL is too long.'))
+        else:
+            name = request.user.username
+            email = request.user.email
+            if request.user.is_author():
+                www = url_for('blog/show_author',  username=name)
         form['body'] = body = request.form.get('body')
         if not body or len(body) < 10:
             errors.append(_('Your comment is too short.'))
@@ -264,7 +279,7 @@ def do_show_post(request, year, month, day, slug):
             comment = Comment(post, name, email, www, body, parent,
                               submitter_ip=ip)
 
-            #! Using our own moderation?
+            #! Moderate Comment?
             if not request.app.cfg['moderate_comments']:
                 comment.status = COMMENT_MODERATED
             else:
@@ -279,6 +294,11 @@ def do_show_post(request, year, month, day, slug):
             #! this is sent directly after the comment was saved.  Useful if
             #! you want to send mail notifications or whatever.
             emit_event('after-comment-saved', request, comment)
+
+            if comment.blocked:
+                # Still allow the user to see his comment
+                comment.make_visible_for_request(request)
+
             return redirect(url_for(post))
 
     add_link('alternate', post.comment_feed_url, 'application/atom+xml',

@@ -15,5 +15,7 @@
       {% endif -%}
       </p>
     </div>
+  {% else %}
+    {%- if comment.status %}<p><em>Comment waiting for aproval</em></p>{%- endif %}
   {%- endif %}
 {%- endmacro %}

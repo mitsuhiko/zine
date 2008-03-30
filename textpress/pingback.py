@@ -80,7 +80,7 @@ def pingback(source_uri, target_uri):
     try:
         try:
             url = urllib2.urlopen(target_uri)
-        except urllib2.HTTPError:
+        except:
             return False
     finally:
         socket.setdefaulttimeout(old_timeout)
@@ -135,7 +135,7 @@ def handle_pingback_request(source_uri, target_uri):
             break
 
     if endpoint not in app.pingback_endpoints:
-        raise Failt(33, 'The specified target URI does not accept pingbacks.')
+        raise Fault(33, 'The specified target URI does not accept pingbacks.')
 
     # now we have the endpoint and the values and can dispatch our pingback
     # request to the endpoint handler

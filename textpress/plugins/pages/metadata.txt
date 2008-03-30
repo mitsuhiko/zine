@@ -2,6 +2,7 @@ Name: Pages Plugin
 Plugin URL: http://textpress.pocoo.org/plugins/pages
 Author: Christopher Grebs <cg@webshox.org>
 Author URL: http://webshox.org/
+Contributors: Ali Afshar <aafshar@gmail.com>
 License: GPL
 Version: 0.1
 Description: This Plugin adds support for creating static pages.

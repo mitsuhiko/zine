@@ -1,5 +1,14 @@
 {% extends "layout.html" %}
 {% block title %}{{ page.title|e }}{% endblock %}
 {% block contents %}
+{% if show_title %}<h2>{{ page.title }}</h2>{% endif %}
 {{ page.body }}
+{% if show_children and page.children %}
+  <h3>{% trans "Children" %}</h3>
+  <ul class="page_children">
+  {% for child in page.children %}
+    <li><a href="{{ url_for(child) }}">{{ child.title }}</a></li>
+  {% endfor %}
+  </ul>
+{% endif %}
 {% endblock %}

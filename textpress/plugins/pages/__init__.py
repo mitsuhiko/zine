@@ -13,7 +13,7 @@
     so you can use the comment-parser, plain-html and others.
 
 
-    :copyright: Copyright 2007 by Christopher Grebs.
+    :copyright: Copyright 2007-2008 by Christopher Grebs and Ali Afshar.
     :license: GNU GPL.
 """
 from os.path import dirname, join
@@ -40,17 +40,16 @@ class PagesNavigation(Widget):
     NAME = 'get_pages_navigation'
     TEMPLATE = 'widgets/pages_navigation.html'
 
+    def __init__(self):
+        pages = Page.objects.query
+        to_append = pages.filter_by(navigation_pos=None)
+        self.pages = pages.filter(pages_table.c.navigation_pos!=None) \
+            .order_by(pages_table.c.navigation_pos.asc()).all()
+        self.pages.extend(to_append.all())
+
     @staticmethod
     def get_display_name():
-        return _('Pages Navigation')
-
-    def __init__(self):
-        p = pages_table.c
-        pages = Page.objects.query
-        ta = pages.filter_by(navigation_pos=None)
-        self.pages = pages.filter(p.navigation_pos!=None).order_by(
-            p.navigation_pos.asc()).all()
-        self.pages.extend(ta.all())
+        return _(u'Pages Navigation')
 
 
 def add_admin_link(request, navigation_bar):
@@ -60,7 +59,38 @@ def add_admin_link(request, navigation_bar):
             ('pages', url_for('pages/show_pages'), _('Pages'), [
                 ('overview', url_for('pages/show_pages'), _('Overview')),
                 ('write', url_for('pages/write_page'), _('Write Page')),
+                ('config', url_for('pages/configure'), _('Configuration')),
         ]))
+
+
+@require_role(ROLE_ADMIN)
+def show_pages_config(request):
+    """Show the configuration page for the pages plugin"""
+    cfg = get_application().cfg
+    csrf_protector = CSRFProtector()
+    form = {
+        'show_title': cfg['pages/show_title'],
+        'show_children': cfg['pages/show_children'],
+    }
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+        rform = request.form
+        form['show_title'] = show_title = 'show_title' in request.form
+        form['show_children'] = show_children = 'show_children' in request.form
+
+        # update the configuration
+        if show_title != cfg['pages/show_title']:
+            cfg['pages/show_title'] = show_title
+        if show_children != cfg['pages/show_children']:
+            cfg['pages/show_children'] = show_children
+        flash(u'Pages configuration updated successfull.')
+
+    return render_admin_response(
+        'admin/pages_config.html',
+        'pages.config',
+        form=form,
+        csrf_protector=csrf_protector,
+    )
 
 
 @require_role(ROLE_ADMIN)
@@ -105,7 +135,8 @@ def show_pages_write(request, page_id=None):
             title=page.title,
             raw_body=page.raw_body,
             navigation_pos=page.navigation_pos,
-            parser=page.extra['parser']
+            parser=page.extra['parser'],
+            parent_id=page.parent_id or 0,
         )
 
     if request.method == 'POST':
@@ -139,15 +170,26 @@ def show_pages_write(request, page_id=None):
         if not parser:
             parser = request.app.cfg['default_parser']
 
+        form['parent_id'] = parent_id = request.form.get('parent_id')
+
+        try:
+            parent_id = int(parent_id)
+        except (ValueError, TypeError):
+            parent_id = None
+        if parent_id == 0:
+            parent_id = None
+
         if not errors:
             if new_page:
-                page = Page(key, title, raw_body, parser, navigation_pos)
+                page = Page(key, title, raw_body, parser, navigation_pos,
+                            parent_id)
             else:
                 page.key = key
                 page.title = title
                 page.parser = parser
                 page.raw_body = raw_body
                 page.navigation_pos = navigation_pos
+                page.parent_id = parent_id
 
             db.commit()
             html_detail = '<a href="%s">%s</a>' % (
@@ -163,12 +205,16 @@ def show_pages_write(request, page_id=None):
             for error in errors:
                 flash(error, 'error')
 
+    all_pages = [(0, 'No Parent')] + [(p.page_id, p.title) for p in
+                                      Page.objects.all()]
+
     return render_admin_response(
         'admin/write_page.html',
         'pages.write',
         parsers=request.app.list_parsers(),
         form=form,
         csrf_protector=csrf_protector,
+        all_pages=all_pages,
     )
 
 
@@ -204,18 +250,31 @@ def show_page(self, key):
     page = Page.objects.query.filter_by(key=key).first()
     if page is None:
         raise NotFound()
+    cfg = get_application().cfg
     return render_response(
         'page_base.html',
-        page=page
+        page=page,
+        blog_title=get_application().cfg['blog_title'],
+        show_title=cfg['pages/show_title'],
+        show_children=cfg['pages/show_children']
     )
 
 
 def setup(app, plugin):
     """setup the plugin"""
+    # add database integrity check
     from textpress.plugins.pages.database import upgrade_database
+    app.add_database_integrity_check(upgrade_database)
+
+    # config vars
+    app.add_config_var('pages/show_title', bool, True)
+    app.add_config_var('pages/show_children', bool, True)
+
+    # inject to admin navigation and shared folder
     app.connect_event('modify-admin-navigation-bar', add_admin_link)
     app.add_shared_exports('pages', SHARED_FILES)
 
+    # add url rules
     app.add_url_rule('/show_pages/', endpoint='pages/show_pages',
                      prefix='admin', view=show_pages_overview)
     app.add_url_rule('/write_page/', endpoint='pages/write_page',
@@ -227,7 +286,9 @@ def setup(app, plugin):
     app.add_url_rule('/delete_page/<int:page_id>/',
                      endpoint='pages/delete_page',
                      view=show_pages_delete, prefix='admin')
+    app.add_url_rule('/options/pages/', endpoint='pages/configure',
+                     prefix='admin', view=show_pages_config)
 
+    # templage searchpath and widget
     app.add_template_searchpath(TEMPLATES)
-    app.add_database_integrity_check(upgrade_database)
     app.add_widget(PagesNavigation)

@@ -14,7 +14,9 @@
         <p class="description">{{ cfg.blog_tagline }}</p>
       </div>
       <div class="contents">
+        {{ emit_event('before-contents-rendered') }}
         {% block contents %}{% endblock %}
+        {{ emit_event('after-contents-rendered') }}
       </div>
       <div class="sidebar">
         {{ render_widgets() }}

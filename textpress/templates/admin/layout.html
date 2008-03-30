@@ -35,7 +35,9 @@
       {%- for message in admin.messages %}
         <div class="message message-{{ message.type }}">{{ message.msg }}</div>
       {%- endfor %}
+      {{ emit_event('before-admin-contents-rendered', post) }}
       {% block contents %}{% endblock %}
+      {{ emit_event('after-admin-contents-rendered', post) }}
     </div>
   </div>
   <div class="footer">
