@@ -703,33 +703,52 @@ class EMail(object):
         if not self.subject or not self.text or not self.to_addrs:
             raise RuntimeError("Not all mailing parameters filled in")
         try:
-            smtp = SMTP(self.app.cfg['smtp_host'])
+            smtp = SMTP(self.app.cfg['smtp_host'], self.app.cfg['smtp_port'])
         except SMTPException, e:
             raise RuntimeError(str(e))
 
+        if self.app.cfg['smtp_use_tls']:
+            #smtp.set_debuglevel(1)
+            smtp.ehlo()
+            if not smtp.esmtp_features.has_key('starttls'):
+                raise RuntimeError(_("TLS enabled but server does not support "
+                                     "TLS"))
+            smtp.starttls()
+            smtp.ehlo()
+
         if self.app.cfg['smtp_user']:
             try:
-                try:
-                    smtp.login(self.app.cfg['smtp_user'],
-                               self.app.cfg['smtp_password'])
-                except SMTPException, e:
-                    raise RuntimeError(str(e))
-            finally:
-                smtp.quit()
+                smtp.login(self.app.cfg['smtp_user'],
+                           self.app.cfg['smtp_password'])
+            except SMTPException, e:
+                raise RuntimeError(str(e))
 
         msg = MIMEText(self.text)
         msg['From'] = self.from_addr
         msg['To'] = ', '.join(self.to_addrs)
         msg['Subject'] = self.subject
 
+        msgtext = msg.as_string()
+        recrlf = re.compile("\r?\n")
+        msgtext = '\r\n'.join(recrlf.split(msgtext.encode('utf-8')))
+
         try:
             try:
                 return smtp.sendmail(self.from_addr, self.to_addrs,
-                                     msg.as_string())
+                                     msgtext)
             except SMTPException, e:
                 raise RuntimeError(str(e))
         finally:
-            smtp.quit()
+            if self.app.cfg['smtp_use_tls']:
+                # avoid false failure detection when the server closes
+                # the SMTP connection with TLS enabled
+                import socket
+                try:
+                    smtp.quit()
+                except socket.sslerror:
+                    pass
+            else:
+                smtp.quit()
 
     def send_quiet(self):
         """

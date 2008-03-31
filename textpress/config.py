@@ -62,8 +62,10 @@ DEFAULT_VARS = {
 
     # email settings
     'smtp_host':                (unicode, u'localhost'),
+    'smtp_port':                (int, 25),
     'smtp_user':                (unicode, u''),
     'smtp_password':            (unicode, u''),
+    'smtp_use_tls':             (bool, False),
 
     # plugin settings
     'plugin_guard':             (bool, True),
