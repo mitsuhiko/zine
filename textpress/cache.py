@@ -27,6 +27,7 @@ except ImportError:
         have_memcache = False
 from thread import allocate_lock
 from jinja.translators.python import PythonTranslator, Template
+from textpress.application import Response
 from textpress.utils import local
 from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
      MemcachedCache
@@ -158,6 +159,10 @@ def response(vary=(), timeout=None, cache_key=None):
 
             if response is None:
                 response = f(request, *args, **kwargs)
+
+            # make sure it's one of our request objects so that we
+            # have the `make_conditional` method on it.
+            Response.force_type(response)
 
             if use_cache and response.status_code == 200:
                 response.freeze()
