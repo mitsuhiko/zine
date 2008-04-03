@@ -119,7 +119,13 @@ def create_thumbnail(stream, width, height=None, method='normal',
     copyfileobj(stream, im.stdin)
     im.stdin.close()
     try:
-        return im.stdout.read()
+        data = im.stdout.read()
+        im.wait()
+        if im.returncode:
+            # Error running IM
+            raise RuntimeError(im.stderr.read())
+        else:
+            return data
     finally:
         im.stdout.close()
         im.stderr.close()

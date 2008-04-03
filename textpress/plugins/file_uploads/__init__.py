@@ -161,14 +161,17 @@ def do_thumbnailer(req):
                                            thumb_height or None,
                                            keep_aspect_ratio and 'normal'
                                            or 'force', 90, True))
-            finally:
                 dst.close()
-            flash(_('Thumbnail %s was created successfully.') % (
-                  u'<a href="%s">%s</a>' % (
-                      escape(url_for('file_uploads/get_file',
-                                     filename=thumb_filename)),
-                      escape(thumb_filename))))
-            return redirect('file_uploads/browse')
+                flash(_('Thumbnail %s was created successfully.') % (
+                      u'<a href="%s">%s</a>' % (
+                          escape(url_for('file_uploads/get_file',
+                                         filename=thumb_filename)),
+                          escape(thumb_filename))))
+                return redirect('file_uploads/browse')
+            except Exception, e:
+                flash('Error creating thumbnail: %s' % e, 'error')
+                dst.close()
+
 
     return render_admin_response('admin/file_uploads/thumbnailer.html',
                                  'file_uploads.thumbnailer',
