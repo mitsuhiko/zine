@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 rm -rf instance/
 mkdir instance
@@ -16,7 +16,7 @@ cfg.update(
     maintenance_mode=False,
     blog_url='http://localhost:4000',
     secret_key=gen_secret_key(),
-    database_uri='sqlite:///instance/datatabase.db'
+    database_uri='sqlite:///instance/database.db'
 )
 cfg.save()
 "

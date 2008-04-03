@@ -898,6 +898,9 @@ class TextPress(object):
         except HTTPException, e:
             response = e.get_response(environ)
 
+        # make sure the response object is one of ours
+        response = Response.force_type(response, environ)
+
         #! allow plugins to change the response object
         for callback in iter_listeners('before-response-processed'):
             result = callback(response)

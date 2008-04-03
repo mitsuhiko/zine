@@ -144,6 +144,7 @@ def response(vary=(), timeout=None, cache_key=None):
 
     This method doesn't do anything if eager caching is disabled (by default).
     """
+    from textpress.application import Response
     if not 'method' in vary:
         vary = set(vary)
         vary.add('method')
@@ -158,6 +159,10 @@ def response(vary=(), timeout=None, cache_key=None):
 
             if response is None:
                 response = f(request, *args, **kwargs)
+
+            # make sure it's one of our request objects so that we
+            # have the `make_conditional` method on it.
+            Response.force_type(response)
 
             if use_cache and response.status_code == 200:
                 response.freeze()
