@@ -27,7 +27,6 @@ except ImportError:
         have_memcache = False
 from thread import allocate_lock
 from jinja.translators.python import PythonTranslator, Template
-from textpress.application import Response
 from textpress.utils import local
 from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
      MemcachedCache
@@ -145,6 +144,7 @@ def response(vary=(), timeout=None, cache_key=None):
 
     This method doesn't do anything if eager caching is disabled (by default).
     """
+    from textpress.application import Response
     if not 'method' in vary:
         vary = set(vary)
         vary.add('method')
