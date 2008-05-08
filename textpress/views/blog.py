@@ -249,7 +249,7 @@ def do_show_post(request, year, month, day, slug):
         else:
             name = request.user.username
             email = request.user.email
-            if request.user.is_author():
+            if request.user.role >= ROLE_AUTHOR:
                 www = url_for('blog/show_author',  username=name)
         form['body'] = body = request.form.get('body')
         if not body or len(body) < 10:
