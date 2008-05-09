@@ -6,7 +6,7 @@
     When a new comment is posted to a blog entry, a mail will be sent to
     the author of the corresponding post.
 
-    :copyright: 2007 by Rafael Weber.
+    :copyright: 2007-2008 by Rafael Weber, Pedro Algarvio.
     :license: GNU GPL.
 """
 from textpress.api import *
