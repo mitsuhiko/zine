@@ -341,8 +341,9 @@ class LatestComments(Widget):
     NAME = 'get_latest_comments'
     TEMPLATE = 'widgets/latest_comments.html'
 
-    def __init__(self, limit=5, show_title=False):
-        self.comments = Comment.objects.get_latest(limit)
+    def __init__(self, limit=5, show_title=False, ignore_blocked=False):
+        self.comments = Comment.objects.get_latest(
+                            limit, ignore_blocked=ignore_blocked)
         self.show_title = show_title
 
     @staticmethod
@@ -362,6 +363,7 @@ class LatestComments(Widget):
             else:
                 args['limit'] = int(limit)
             args['show_title'] = request.form.get('show_title') == 'yes'
+            args['ignore_blocked'] = request.form.get('ignore_blocked') == 'yes'
         if errors:
             args = None
         return args, render_template('admin/widgets/latest_comments.html',

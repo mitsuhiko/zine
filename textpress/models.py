@@ -796,7 +796,7 @@ class CommentManager(db.DatabaseManager):
         """Get the number of blocked comments."""
         return Comment.filter(Comment.blocked == True).count()
 
-    def filter_latest(self, limit=None, ignore_role=False):
+    def filter_latest(self, limit=None, ignore_role=False, ignore_blocked=True):
         """
         Filter the list of non blocked comments for anonymous users or
         all comments for admin users.
@@ -808,18 +808,19 @@ class CommentManager(db.DatabaseManager):
                 role = req.user.role
 
         query = self.query
-        if role <= ROLE_SUBSCRIBER:
+        if role <= ROLE_SUBSCRIBER or ignore_blocked:
             query = query.filter(Comment.blocked == False)
+
         if limit is not None:
             query = query[:limit]
         return query
 
-    def get_latest(self, limit=None, ignore_role=False):
+    def get_latest(self, limit=None, ignore_role=False, ignore_blocked=True):
         """
         Get the list of non blocked comments for anonymous users or
         all comments for admin users.
         """
-        return self.filter_latest(limit, ignore_role).all()
+        return self.filter_latest(limit, ignore_role, ignore_blocked).all()
 
     def get_unmoderated(self):
         """Return all drafts."""
