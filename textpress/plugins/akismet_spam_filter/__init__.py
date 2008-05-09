@@ -5,14 +5,15 @@
 
     Do spam checking via Akismet of comments.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
     :license: GNU GPL.
 """
 import textpress
 from os.path import dirname, join
 from textpress.api import *
+from textpress.widgets import Widget
 from textpress.views.admin import flash, render_admin_response
-from textpress.models import ROLE_ADMIN
+from textpress.models import ROLE_ADMIN, Comment
 from textpress.utils import CSRFProtector, RequestLocal
 from urllib import urlopen
 from werkzeug import escape, url_encode
@@ -177,6 +178,31 @@ def show_akismet_config(req):
     )
 
 
+class AkismetBlockedCommentsCounterWidget(Widget):
+    NAME = 'get_akismet_blocked_comments'
+    TEMPLATE = 'akismet_widget.html'
+
+    def __init__(self, show_title=False, title='Akismet Blocked Comments'):
+        self.show_title = show_title
+        self.title = title
+        self.spam_comments = Comment.objects.filter(
+            Comment.blocked_msg == 'blocked by akismet').count()
+        print 'blocked %s comments\n\n' % self.spam_comments
+
+    @staticmethod
+    def get_display_name():
+        return _('Akismet Blocked Comments')
+
+    @staticmethod
+    def configure_widget(initial_args, request):
+        args = form = initial_args.copy()
+        errors = []
+        if request.method == 'POST':
+            args['show_title'] = request.form.get('show_title') == 'yes'
+            args['title'] = request.form.get('title')
+        return args, render_template('admin/akismet_widget.html',
+                                     errors=errors, form=form)
+
 def setup(app, plugin):
     app.add_config_var('akismet_spam_filter/apikey', unicode, u'')
     app.add_url_rule('/comments/akismet', prefix='admin',
@@ -186,3 +212,4 @@ def setup(app, plugin):
     app.connect_event('before-admin-response-rendered', test_apikey)
     app.connect_event('modify-admin-navigation-bar', add_akismet_link)
     app.add_template_searchpath(TEMPLATES)
+    app.add_widget(AkismetBlockedCommentsCounterWidget)

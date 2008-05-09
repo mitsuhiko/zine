@@ -1,0 +1,7 @@
+{% extends 'widgets/base.html' %}
+{% block title %}{{ widget.title }}{% endblock %}
+{% block body %}
+  {% trans spam_comments=widget.spam_comments or 0 -%}
+    Akisment blocked <b>{{ spam_comments }}</b> comments.
+  {%- endtrans %}
+{% endblock %}
