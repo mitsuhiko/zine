@@ -22,6 +22,7 @@ USER_AGENT = 'TextPress /%s | Akismet/1.11' % textpress.__version__
 AKISMET_URL_BASE = 'rest.akismet.com'
 AKISMET_VERSION = '1.1'
 TEMPLATES = join(dirname(__file__), 'templates')
+BLOCKED_MSG = 'blocked by akismet'
 
 #: because we need the information about verified keys on every
 #: admin page and after every tested comment it's a bad idea to
@@ -138,7 +139,7 @@ def do_spamcheck(req, comment):
     resp = send_request(apikey, True, data, 'comment-check')
     if resp == 'true':
         comment.blocked = True
-        comment.blocked_msg = 'blocked by akismet'
+        comment.blocked_msg = BLOCKED_MSG
 
 
 def add_akismet_link(req, navigation_bar):
@@ -186,8 +187,7 @@ class AkismetBlockedCommentsCounterWidget(Widget):
         self.show_title = show_title
         self.title = title
         self.spam_comments = Comment.objects.filter(
-            Comment.blocked_msg == 'blocked by akismet').count()
-        print 'blocked %s comments\n\n' % self.spam_comments
+            Comment.blocked_msg == BLOCKED_MSG).count()
 
     @staticmethod
     def get_display_name():
