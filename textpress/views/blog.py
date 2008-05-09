@@ -282,6 +282,9 @@ def do_show_post(request, year, month, day, slug):
             #! Moderate Comment?
             if not request.app.cfg['moderate_comments']:
                 comment.status = COMMENT_MODERATED
+            elif request.user.role >= ROLE_AUTHOR:
+                #! Don't moderate comments for roles >= ROLE_AUTHOR
+                comment.status = COMMENT_MODERATED
             else:
                 comment.blocked = True
                 comment.blocked_msg = _('Comment waiting for approval')
