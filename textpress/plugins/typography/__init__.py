@@ -65,7 +65,7 @@ def process_doc_tree(doctree, input_data, reason):
         if handle_typography is None:
             handle_typography = node.parent.name not in _ignored_nodes
         else:
-            handle_typography.lower() == 'true'
+            handle_typography = handle_typography.lower() == 'true'
         if handle_typography:
             for regex, sign, ignore in _rules:
                 node.value = regex.sub(handle_match, node.value)
