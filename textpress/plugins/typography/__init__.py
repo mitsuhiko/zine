@@ -61,7 +61,7 @@ def process_doc_tree(doctree, input_data, reason):
     used_signs = dict((k, cfg['typography/' + k]) for ignore, k, ignore in _rules)
     for node in doctree.query('#'):
         handle_typography = node.parent and \
-                            node.parent.attributes.get('typography')
+                            node.parent.attributes.pop('typography', None)
         if handle_typography is None:
             handle_typography = node.parent.name not in _ignored_nodes
         else:
