@@ -60,7 +60,13 @@ def process_doc_tree(doctree, input_data, reason):
     cfg = get_application().cfg
     used_signs = dict((k, cfg['typography/' + k]) for ignore, k, ignore in _rules)
     for node in doctree.query('#'):
-        if not node.parent or node.parent.name not in _ignored_nodes:
+        handle_typography = node.parent and \
+                            node.parent.attributes.get('typography')
+        if handle_typography is None:
+            handle_typography = node.parent.name not in _ignored_nodes
+        else:
+            handle_typography.lower() == 'true'
+        if handle_typography:
             for regex, sign, ignore in _rules:
                 node.value = regex.sub(handle_match, node.value)
 
