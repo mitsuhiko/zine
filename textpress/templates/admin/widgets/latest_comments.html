@@ -1,11 +1,11 @@
 {% for error in errors %}<div class="error">{{ error }}</div>{% endfor %}
 <form action="" method="post">
   <dl>
-    <dt>{% trans "Limit" %}</dt>
+    <dt>{{ _("Limit") }}</dt>
     <dd>{{ h.input_field('limit', form.limit) }}</dd>
-    <dt>{% trans "Show Title" %}</dt>
+    <dt>{{ _("Show Title") }}</dt>
     <dd>{{ h.checkbox('show_title', form.show_title) }}</dd>
-    <dt>{% trans "Ignore Blocked Comments" %}</dt>
+    <dt>{{ _("Ignore Blocked Comments") }}</dt>
     <dd>{{ h.checkbox('ignore_blocked', form.ignore_blocked) }}</dd>
   </dl>
 </form>

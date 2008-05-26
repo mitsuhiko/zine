@@ -8,13 +8,13 @@
   </p>
   <dl>
     <dt>Username</dt>
-    <dd><input type="text" name="admin_username" value="{{ values.admin_username|e(true) }}"></dd>
+    <dd><input type="text" name="admin_username" value="{{ values.admin_username|e }}"></dd>
     <dt>Password</dt>
     <dd><input type="password" name="admin_password"></dd>
     <dt>Password (repeat)</dt>
     <dd><input type="password" name="admin_password2"></dd>
     <dt>E-Mail</dt>
-    <dd><input type="text" name="admin_email" value="{{ values.admin_email|e(true) }}"></dd>
+    <dd><input type="text" name="admin_email" value="{{ values.admin_email|e }}"></dd>
   </dl>
   {% if errors %}
     <div class="error">

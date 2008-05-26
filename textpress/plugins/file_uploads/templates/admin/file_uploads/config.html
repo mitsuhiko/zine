@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Configure Uploads" %}{% endblock %}
+{% block title %}{{ _("Configure Uploads") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Configure Uploads" %}</h2>
+  <h2>{{ _("Configure Uploads") }}</h2>
   <div class="text">
     <p>{% trans %}
       From here you can configure the upload system.
@@ -30,11 +30,11 @@
   </div>
   <form action="" method="post">
     <dl>
-      <dt>{% trans "Upload files to" %}</dt>
+      <dt>{{ _("Upload files to") }}</dt>
       <dd>{{ h.input_field('upload_dest', form.upload_dest) }}</dd>
-      <dt>{% trans "Mimetype Mapping" %}</dt>
+      <dt>{{ _("Mimetype Mapping") }}</dt>
       <dd>{{ h.textarea('mimetypes', form.mimetypes, rows=5) }}</dd>
-      <dt>{% trans "Path to ImageMagick" %}</dt>
+      <dt>{{ _("Path to ImageMagick") }}</dt>
       <dd>{{ h.input_field('im_path', form.im_path, size=30) }}
           {%- if im_version -%}
           <p>Found ImageMagick version <code>{{ im_version|e }}</code></p>
@@ -45,7 +45,7 @@
     </dl>
     <div class="actions">
       {{ csrf_protector }}
-      <input type="submit" value="{% trans 'Save' %}">
+      <input type="submit" value="{{ _('Save') }}">
     </div>
   </form>
 {% endblock %}

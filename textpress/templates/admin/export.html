@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Export" %}{% endblock %}
+{% block title %}{{ _("Export") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Export" %}</h2>
+  <h2>{{ _("Export") }}</h2>
   <p>{% trans %}
     Here you can dump your TextPress database information into an standardized
     format (Atom) with TextPress extensions which we call “TextPress eXtended
@@ -14,7 +14,7 @@
     <div class="actions">
       {{ hidden_form_data }}
       <input type="hidden" name="format" value="tpxa">
-      <input type="submit" value="{% trans 'Export' %}">
+      <input type="submit" value="{{ _('Export') }}">
     </div>
   </form>
 {% endblock %}

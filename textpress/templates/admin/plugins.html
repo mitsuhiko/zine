@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Plugin Management" %}{% endblock %}
+{% block title %}{{ _("Plugin Management") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Plugin Management" %}</h2>
+  <h2>{{ _("Plugin Management") }}</h2>
   <form action="" method="post" enctype="multipart/form-data">
     <p>{% trans %}
       Plugins extend the functionality of the TextPress system. Because of
@@ -12,10 +12,10 @@
     {% endtrans %}</p>
     <table class="plugins">
       <tr>
-        <th class="plugin">{% trans "Plugin" %}</th>
-        <th class="version">{% trans "Version" %}</th>
-        <th class="description">{% trans "Description" %}</th>
-        <th class="active">{% trans "Activate" %}</th>
+        <th class="plugin">{{ _("Plugin") }}</th>
+        <th class="version">{{ _("Version") }}</th>
+        <th class="description">{{ _("Description") }}</th>
+        <th class="active">{{ _("Activate") }}</th>
       </tr>
     {%- for plugin in plugins %}
       <tr class="plugin-{{ 'active' if plugin.active else 'inactive' }}">
@@ -34,7 +34,7 @@
           </span>
           {%- if not plugin.builtin_plugin and not plugin.active %}
             [<a href="{{ url_for('admin/remove_plugin', plugin=plugin.name)
-              }}">{% trans "Remove plugin" %}</a>]
+              }}">{{ _("Remove plugin") }}</a>]
           {% endif -%}
         </td>
         <td class="active">{{ h.checkbox('plugin_' + plugin.name, plugin.active) }}
@@ -42,7 +42,7 @@
       </tr>
     {%- endfor %}
     </table>
-    <h3>{% trans "Add New Plugin" %}</h3>
+    <h3>{{ _("Add New Plugin") }}</h3>
     <p>{% trans %}
       If you have a plugin as TextPress <tt>.plugin</tt> file you can upload it
       to your TextPress instance using the following form. Plugins added this way
@@ -51,11 +51,11 @@
     <p><input type="file" name="new_plugin"></p>
     <div class="actions">
       {{ csrf_protector }}
-      <input type="submit" value="{% trans 'Update' %}">
+      <input type="submit" value="{{ _('Update') }}">
       {%- if guard_enabled %}
-      <input type="submit" name="disable_guard" value="{% trans 'Disable Plugin Guard' %}">
+      <input type="submit" name="disable_guard" value="{{ _('Disable Plugin Guard') }}">
       {%- else %}
-      <input type="submit" name="enable_guard" value="{% trans 'Enable Plugin Guard' %}">
+      <input type="submit" name="enable_guard" value="{{ _('Enable Plugin Guard') }}">
       {%- endif %}
     </div>
   </form>

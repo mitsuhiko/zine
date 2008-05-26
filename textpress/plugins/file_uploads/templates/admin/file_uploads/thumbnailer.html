@@ -1,32 +1,32 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Create Thumbnails" %}{% endblock %}
+{% block title %}{{ _("Create Thumbnails") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Create Thumbnails" %}</h2>
+  <h2>{{ _("Create Thumbnails") }}</h2>
   <p>{% trans %}
     Here you can create thumbnails for your uploaded pictures.
   {% endtrans %}</p>
   {% if images %}
   <form action="" method="post">
     <dl>
-      <dt>{% trans "Create Thumbnail For" %}</dt>
+      <dt>{{ _("Create Thumbnail For") }}</dt>
       <dd><select name="src_image">
       {%- for image in images %}
       <option{% if form.src_image == image.filename %} selected{% endif
         %}>{{ image.filename|e }}</option>
       {%- endfor %}
       </select></dd>
-      <dt>{% trans "Width" %}</dt>
+      <dt>{{ _("Width") }}</dt>
       <dd>{{ h.input_field('thumb_width', form.thumb_width, size=10) }}</dd>
-      <dt>{% trans "Height" %}</dt>
+      <dt>{{ _("Height") }}</dt>
       <dd>{{ h.input_field('thumb_height', form.thumb_height, size=10) }}</dd>
-      <dt>{% trans "Keep Aspect Ratio" %}</dt>
+      <dt>{{ _("Keep Aspect Ratio") }}</dt>
       <dd>{{ h.checkbox('keep_aspect_ratio', 'yes', form.keep_aspect_ratio) }}</dd>
-      <dt>{% trans "Thumbnail Filename" %}</dt>
+      <dt>{{ _("Thumbnail Filename") }}</dt>
       <dd>{{ h.input_field('thumb_filename', form.thumb_filename, size=50) }}</dd>
     </dl>
     <div class="actions">
       {{ hidden_form_data }}
-      <input type="submit" value="{% trans 'Create Thumbnail' %}">
+      <input type="submit" value="{{ _('Create Thumbnail') }}">
     </div>
   </form>
   <script type="text/javascript">

@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Import" %}{% endblock %}
+{% block title %}{{ _("Import") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Import" %}</h2>
+  <h2>{{ _("Import") }}</h2>
   <p>{% trans %}
     If you have posts or comments in another system, TextPress can import those
     into this blog.  The data imported doesn't directly end up in the blog but a
@@ -21,9 +21,9 @@
     {% endtrans %}</p>
     <table>
       <tr>
-        <th>{% trans 'Date' %}</th>
-        <th>{% trans 'Title' %}</th>
-        <th>{% trans 'Imported Used' %}</th>
+        <th>{{ _('Date') }}</th>
+        <th>{{ _('Title') }}</th>
+        <th>{{ _('Imported Used') }}</th>
       </tr>
       {%- for item in queue %}
       <tr>

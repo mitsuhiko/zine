@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}{% trans tag=tag.name|e %}Show Tag "{{ tag }}"{% endtrans %}{% endblock %}
-{% include "_post.html" %}
+{% from "_post.html" import render_post %}
 {% block contents %}
   <h2>{% trans tag=tag.name|e %}Entries tagged "{{ tag }}"{% endtrans %}</h2>
   {% if posts %}
@@ -9,7 +9,7 @@
   {%- endfor %}
   {% else %}
   <p>
-    {% trans 'No public posts found' %}
+    {{ _('No public posts found') }}
   </p>
   {% endif %}
   {%- if pagination.necessary %}

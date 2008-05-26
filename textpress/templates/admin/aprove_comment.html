@@ -1,14 +1,14 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Aprove Comment" %}{% endblock %}
+{% block title %}{{ _("Aprove Comment") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Aprove Comment" %}</h2>
+  <h2>{{ _("Aprove Comment") }}</h2>
   <form action="" method="post">
     {{ hidden_form_data }}
     <p>{% trans comment_author=comment.author|e,
                 reason=comment.blocked_msg|e %}
       Do you really want to aprove the comment by {{ comment_author }}?
     {% endtrans %}</p>
-    <input type="submit" name="cancel" value="{% trans 'No' %}">
-    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    <input type="submit" name="cancel" value="{{ _('No') }}">
+    <input type="submit" name="confirm" value="{{ _('Yes') }}">
   </form>
 {% endblock %}

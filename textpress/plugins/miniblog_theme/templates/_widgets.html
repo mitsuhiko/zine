@@ -2,9 +2,9 @@
 {{ get_post_archive_summary('months', 6, show_title=true) }}
 {{ get_tag_cloud(show_title=true) }}
 {% if request.user.is_manager %}
-<h3>{% trans 'Administration' %}</h3>
+<h3>{{ _('Administration') }}</h3>
 <p>
   {% trans username=request.user.username|e %}logged in as {{ username }}.{% endtrans %}
-  <a href="{{ url_for('admin/index')|e }}">{% trans 'go to admin panel' %}</a>
+  <a href="{{ url_for('admin/index')|e }}">{{ _('go to admin panel') }}</a>
 </p>
 {% endif %}

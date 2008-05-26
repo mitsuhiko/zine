@@ -1,17 +1,17 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Upload File" %}{% endblock %}
+{% block title %}{{ _("Upload File") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Upload File" %}</h2>
+  <h2>{{ _("Upload File") }}</h2>
   <p>{% trans %}
     Select a file you want to upload.
   {% endtrans %}</p>
   <form action="?{{ reporter.url_value|e }}" method="post" enctype="multipart/form-data">
     <dl>
-      <dt>{% trans "File to upload" %}</dt>
+      <dt>{{ _("File to upload") }}</dt>
       <dd><input type="file" name="file"></dd>
-      <dt>{% trans "Rename to" %}</dt>
+      <dt>{{ _("Rename to") }}</dt>
       <dd><input type="text" name="filename" size="30"></dd>
-      <dt>{% trans "Overwrite" %}</dt>
+      <dt>{{ _("Overwrite") }}</dt>
       <dd><input type="checkbox" id="overwrite" name="overwrite" value="yes">
           <label for="overwrite">{% trans
             "Overwrite an already uploaded file with the same name." %}</label></dd>
@@ -19,13 +19,13 @@
     <div class="uploadstatus"></div>
     <div class="actions">
       {{ csrf_protector }}
-      <input type="submit" value="{% trans 'Upload' %}">
+      <input type="submit" value="{{ _('Upload') }}">
     </div>
   </form>
   <script type="text/javascript">
     $(function() {
       var reporter = new UploadProgressBar('div.uploadstatus', {{
-        reporter.transport_id|jsonencode }});
+        reporter.transport_id|json }});
       reporter.connectTo('form');
     });
   </script>

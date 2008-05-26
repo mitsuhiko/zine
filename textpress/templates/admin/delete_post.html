@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Delete Post" %}{% endblock %}
+{% block title %}{{ _("Delete Post") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Delete Post" %}</h2>
+  <h2>{{ _("Delete Post") }}</h2>
   <form action="" method="post">
     <div>
       {{ hidden_form_data }}
@@ -15,8 +15,8 @@
         This will also delete {{ comment_count }} comments.
       {% endtrans %}</p>
       {%- endif %}
-      <input type="submit" name="cancel" value="{% trans 'No' %}">
-      <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+      <input type="submit" name="cancel" value="{{ _('No') }}">
+      <input type="submit" name="confirm" value="{{ _('Yes') }}">
     </div>
   </form>
 {% endblock %}

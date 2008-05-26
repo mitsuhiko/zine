@@ -1,13 +1,13 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Importing..." %}{% endblock %}
+{% block title %}{{ _("Importing...") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Importing..." %}</h2>
+  <h2>{{ _("Importing...") }}</h2>
   <p>{% trans %}
     The importer converts now all the collected and selected data for
     TextPress and inserts it into the database.  This can take some time.
     <strong>Don't hit cancel!</strong>
   {% endtrans %}</p>
-  {%- for event in live_log|unsafeiter %}{{ event }}{%- endfor %}
+  {%- for event in live_log %}{{ event }}{%- endfor %}
   <p>{% trans %}
     Imported data successfully.
   {% endtrans %}</p>

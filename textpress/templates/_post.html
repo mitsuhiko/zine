@@ -1,28 +1,28 @@
 {% macro render_post(post) -%}
   <div class="post">
-    {{ emit_event('before-post-rendered', post) }}
+    {{ emit_event('before-post-rendered', post) }}
     <h4><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a></h4>
-    <p class="meta">{% trans "written by" %} <a href="{{ url_for(post.author)|e
+    <p class="meta">{{ _("written by") }} <a href="{{ url_for(post.author)|e
       }}">{{ post.author.display_name|e }}</a>, on {{
       post.pub_date|datetimeformat|e }}.</p>
     <div class="text">
       {{ post.intro or post.body }}
       {% if post.intro -%}
-        <p><a href="{{ url_for(post)|e }}#extended">{% trans "Read on" %}...</a></p>
+        <p><a href="{{ url_for(post)|e }}#extended">{{ _("Read on") }}...</a></p>
       {%- endif %}
     </div>
     <p class="related">
-      {% trans 'Tagged as' %}:
+      {{ _('Tagged as') }}:
       {% for tag in post.tags -%}
         <a href="{{ url_for(tag)|e }}">{{ tag.name|e }}</a>
         {%- if not loop.last %}, {% endif %}
       {%- else -%}
-        {% trans "nothing" %}
+        {{ _("nothing") }}
       {%- endfor %} |
       <a href="{{ url_for(post)|e }}#comments">{% trans comments=post.comment_count
          %}{{ comments }} comment{% pluralize %}{{ comments}} comments{% endtrans -%}</a>
       {%- if request.user.is_manager %}
-      | <a href="{{ url_for('admin/edit_post', post_id=post.post_id) }}">{% trans 'Edit' %}</a>
+      | <a href="{{ url_for('admin/edit_post', post_id=post.post_id) }}">{{ _('Edit') }}</a>
       {%- endif %}
     </p>
     {{ emit_event('after-post-rendered', post) }}

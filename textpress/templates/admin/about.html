@@ -1,8 +1,8 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "About The System" %}{% endblock %}
+{% block title %}{{ _("About The System") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "About The System" %}</h2>
-  <h3>{% trans "Hosting Environment" %}</h3>
+  <h2>{{ _("About The System") }}</h2>
+  <h3>{{ _("Hosting Environment") }}</h3>
   <dl>
     <dt>TextPress Version</dt>
     <dd>{{ textpress_version|e }} {{ textpress_tag }}</dd>
@@ -30,7 +30,7 @@
     <dt>Instance Path</dt>
     <dd>{{ instance_path|e }}</dd>
   </dl>
-  <h3>{% trans "URL Endpoints" %}</h3>
+  <h3>{{ _("URL Endpoints") }}</h3>
   <p>{% trans count=endpoints|count %}
     The following {{ count }} endpoints are registered on this instance:
   {% endtrans %}</p>
@@ -39,7 +39,7 @@
     <li><strong>{{ endpoint.name|e }}</strong> -&gt; <small>{{ endpoint.rule|e }}</small></li>
   {%- endfor %}
   </ul>
-  <h3>{% trans "Services" %}</h3>
+  <h3>{{ _("Services") }}</h3>
   <p>{% trans %}
     The following servicepoints are registered on this instance to be callable
     via one of the available services.
@@ -49,7 +49,7 @@
     <li><strong>{{ service|e }}</strong></li>
   {%- endfor %}
   </ul>
-  <h3>{% trans "Installed APIs" %}</h3>
+  <h3>{{ _("Installed APIs") }}</h3>
   <p>{% trans %}
     The following APIs are installed on this blog instance. APIs marked with
     a star (*) are preferred.
@@ -63,29 +63,29 @@
     <li><em>no APIs installed</em></li>
   {%- endfor %}
   </ul>
-  <h3>{% trans "Plugins" %}</h3>
+  <h3>{{ _("Plugins") }}</h3>
   <ul class="plugin-table">
   {%- for plugin in plugins %}
     <li><dl>
-      <dt>{% trans "Name" %}</dt>
+      <dt>{{ _("Name") }}</dt>
       <dd>{{ plugin.metadata.name|e }}</dd>
-      <dt>{% trans "Author" %}</dt>
+      <dt>{{ _("Author") }}</dt>
       <dd>{{ plugin.metadata.author|e }}</dd>
-      <dt>{% trans "Location" %}</dt>
+      <dt>{{ _("Location") }}</dt>
       <dd>{{ plugin.path|e }}</dd>
-      <dt>{% trans "UID" %}</dt>
+      <dt>{{ _("UID") }}</dt>
       <dd>{{ plugin.name }}</dd>
-      <dt>{% trans "Active" %}</dt>
+      <dt>{{ _("Active") }}</dt>
       <dd>{{ "yes" if plugin.active else "no" }}</dd>
     </dl></li>
   {%- endfor %}
   </ul>
-  <h3>{% trans "Configuration Variables" %}</h3>
+  <h3>{{ _("Configuration Variables") }}</h3>
   <table>
     <tr>
-      <th>{% trans "Key" %}</th>
-      <th>{% trans "Value" %}</th>
-      <th>{% trans "Default" %}</th>
+      <th>{{ _("Key") }}</th>
+      <th>{{ _("Value") }}</th>
+      <th>{{ _("Default") }}</th>
     </tr>
   {%- for item in configuration %}
     <tr>
@@ -95,19 +95,19 @@
     </tr>
   {%- endfor %}
   </table>
-  <h3>{% trans "Template Globals" %}</h3>
+  <h3>{{ _("Template Globals") }}</h3>
   <ul>
   {%- for global in template_globals %}
     <li><strong>{{ global|e }}</strong></li>
   {%- endfor %}
   </ul>
-  <h3>{% trans "Template Filters" %}</h3>
+  <h3>{{ _("Template Filters") }}</h3>
   <ul>
   {%- for filter_ in template_filters %}
     <li><strong>{{ filter_|e }}</strong></li>
   {%- endfor %}
   </ul>
-  <h3>{% trans "Events" %}</h3>
+  <h3>{{ _("Events") }}</h3>
   <div class="text">
     <p>{% trans %}
       TextPress uses an event system for intercomponent communication. Because
@@ -121,7 +121,7 @@
         plugin sourcecode. This building process can take some time depending on
         the number of installed plugins.
       {% endtrans %}</p>
-      <p><a href="{{ url_for('admin/eventmap') }}">{% trans "Build Event Map" %}</a></p>
+      <p><a href="{{ url_for('admin/eventmap') }}">{{ _("Build Event Map") }}</a></p>
     {%- endif %}
   </div>
 {% endblock %}

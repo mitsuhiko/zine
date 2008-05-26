@@ -28,7 +28,7 @@ from collections import deque
 
 from textpress.database import db, upgrade_database, cleanup_session
 from textpress.config import Configuration
-from textpress.cache import get_cache, TemplateLoaderMixin
+from textpress.cache import get_cache
 from textpress.utils import format_datetime, format_date, format_month, \
      ClosingIterator, check_external_url, local, local_manager
 
@@ -38,10 +38,7 @@ from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
 
-from jinja import Environment
-from jinja.loaders import BaseLoader
-from jinja.exceptions import TemplateNotFound
-from jinja.datastructure import Deferred
+from jinja2 import Environment, BaseLoader, TemplateNotFound
 
 
 #: path to the shared data of the core components
@@ -195,22 +192,6 @@ def clear_application_cache():
     _instances.clear()
 
 
-class NullIterator(object):
-    """Wraps a generantor and gives it a length of zero."""
-
-    def __init__(self, iterable):
-        self._next = iter(iterable).next
-
-    def __len__(self):
-        return 0
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        return self._next()
-
-
 class Request(BaseRequest):
     """The used request class."""
 
@@ -351,6 +332,7 @@ class Theme(object):
     __slots__ = ('app', 'name', 'template_path', 'metadata')
 
     def __init__(self, app, name, template_path, metadata=None):
+        BaseLoader.__init__(self)
         self.app = app
         self.name = name
         self.template_path = template_path
@@ -371,16 +353,17 @@ class Theme(object):
         return self.metadata.get('name') or self.name.title()
 
     def get_source(self, name):
-        """Get the source of a template or `None`."""
         parts = [x for x in name.split('/') if not x == '..']
         for fn in self.get_searchpath():
             fn = path.join(fn, *parts)
             if path.exists(fn):
                 f = file(fn)
                 try:
-                    return f.read().decode('utf-8')
+                    contents = f.read().decode('utf-8')
                 finally:
                     f.close()
+                mtime = path.getmtime(fn)
+                return contents, fn, lambda: mtime == path.getmtime(fn)
 
     def get_overlay_path(self, template):
         """Return the path to an overlay for a template."""
@@ -467,19 +450,14 @@ class Theme(object):
         return sorted(templates)
 
 
-class ThemeLoader(TemplateLoaderMixin, BaseLoader):
-    """
-    Loads the templates. First it tries to load the templates of the
-    current theme, if that doesn't work it loads the templates from the
-    builtin template folder (contains base layout templates and admin
-    templates).
-    """
+class ThemeLoader(BaseLoader):
+    """Forwards theme lookups to the current active theme."""
 
     def __init__(self, app):
+        BaseLoader.__init__(self)
         self.app = app
-        TemplateLoaderMixin.__init__(self, app)
 
-    def get_source(self, environment, name, parent):
+    def get_source(self, environment, name):
         rv = self.app.theme.get_source(name)
         if rv is None:
             raise TemplateNotFound(name)
@@ -547,6 +525,7 @@ class TextPress(object):
         self._shared_exports = {}
         self._template_globals = {}
         self._template_filters = {}
+        self._template_tests = {}
         self._template_searchpath = []
 
         default_theme = Theme(self, 'default', BUILTIN_TEMPLATE_PATH, {
@@ -587,14 +566,14 @@ class TextPress(object):
 
         # init the template system with the core stuff
         from textpress import htmlhelpers, models
-        env = Environment(loader=ThemeLoader(self))
+        env = Environment(loader=ThemeLoader(self),
+                          extensions=['jinja2.ext.i18n'])
         env.globals.update(
-            request=Deferred(lambda *a: get_request()),
             cfg=self.cfg,
             h=htmlhelpers,
             url_for=url_for,
             emit_event=self._event_manager.template_emit,
-            render_widgets=lambda: render_template('_widgets.html'),
+            request=local('request'),
             get_page_metadata=self.get_page_metadata,
             textpress={
                 'version':      textpress.__version__,
@@ -604,11 +583,14 @@ class TextPress(object):
 
         # XXX: l10n :-)
         env.filters.update(
-            unsafeiter=lambda:lambda e, c, v: NullIterator(v),
-            datetimeformat=lambda:lambda e, c, v: format_datetime(v),
-            dateformat=lambda:lambda e, c, v: format_date(v),
-            monthformat=lambda:lambda e, c, v: format_month(v)
+            datetimeformat=format_datetime,
+            dateformat=format_date,
+            monthformat=format_month,
+            json=__import__('simplejson').dumps
         )
+
+        # XXX: i18n :-)
+        env.install_null_translations()
 
         # copy the widgets into the global namespace
         for name, widget in self.widgets.iteritems():
@@ -618,7 +600,9 @@ class TextPress(object):
         # set up plugin template extensions
         env.globals.update(self._template_globals)
         env.filters.update(self._template_filters)
-        del self._template_globals, self._template_filters
+        env.tests.update(self._template_tests)
+        del self._template_globals, self._template_filters, \
+            self._template_tests
         self.template_env = env
 
         # now add the middleware for static file serving
@@ -650,10 +634,13 @@ class TextPress(object):
         self._template_filters[name] = callback
 
     @setuponly
-    def add_template_global(self, name, value, deferred=False):
+    def add_template_test(self, name, callback):
+        """Add a template test."""
+        self._template_tests[name] = callback
+
+    @setuponly
+    def add_template_global(self, name, value):
         """Add a template global (or deferred factory function)."""
-        if deferred:
-            value = Deferred(value)
         self._template_globals[name] = value
 
     @setuponly

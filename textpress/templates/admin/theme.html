@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Theme Manager" %}{% endblock %}
+{% block title %}{{ _("Theme Manager") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Theme Manager" %}</h2>
+  <h2>{{ _("Theme Manager") }}</h2>
   <div class="themes">
   {%- for theme in themes %}
     <div class="themewrapper">
@@ -22,7 +22,7 @@
   {%- endfor %}
   <br style="clear: both">
   </div>
-  <h3>{% trans "Template Overlays" %}</h3>
+  <h3>{{ _("Template Overlays") }}</h3>
   <p>{% trans %}
     If you want to do minor modifications of themes you don't have to create
     a theme plugin for that.  The overlay editor allows you to modify parts of
@@ -32,7 +32,7 @@
   {% endtrans %}</p>
   <form action="{{ url_for('admin/overlays') }}" method="get">
     <div class="actions">
-      <input type="submit" value="{% trans 'Edit Overlays' %}">
+      <input type="submit" value="{{ _('Edit Overlays') }}">
     </div>
   </form>
 {% endblock %}

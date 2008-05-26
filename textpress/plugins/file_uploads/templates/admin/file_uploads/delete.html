@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Delete File" %}{% endblock %}
+{% block title %}{{ _("Delete File") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Delete File" %}</h2>
+  <h2>{{ _("Delete File") }}</h2>
   <form action="" method="post">
     {{ hidden_form_data }}
     <p>{% trans file='<a href="%s">%s</a>' % (
@@ -10,7 +10,7 @@
       ) %}
       Do you really want to delete {{ file }}?
     {% endtrans %}</p>
-    <input type="submit" name="cancel" value="{% trans 'No' %}">
-    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    <input type="submit" name="cancel" value="{{ _('No') }}">
+    <input type="submit" name="confirm" value="{{ _('Yes') }}">
   </form>
 {% endblock %}

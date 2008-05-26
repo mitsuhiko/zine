@@ -1,18 +1,18 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Pages Configuration" %}{% endblock %}
+{% block title %}{{ _("Pages Configuration") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Pages Configuration" %}</h2>
+  <h2>{{ _("Pages Configuration") }}</h2>
   <p>{% trans %}
     Configure your settings for the pages plugin.
   {% endtrans %}</p>
   <form action="" method="post">
     <dl>
-      <dt>{% trans "Show page title" %}</dt>
+      <dt>{{ _("Show page title") }}</dt>
       <dd>
         {{ h.checkbox('show_title', form.show_title) }}
         <span class="note">{% trans %}Show the title of the page on top of the page body{% endtrans %}</span>
       </dd>
-      <dt>{% trans "Show children" %}</dt>
+      <dt>{{ _("Show children") }}</dt>
       <dd>
         {{ h.checkbox('show_children', form.show_children) }}
         <span class="note">{% trans %}Show child-pages on the bottom of the page body{% endtrans %}</span>

@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Remove Plugin" %}{% endblock %}
+{% block title %}{{ _("Remove Plugin") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Remove Plugin" %}</h2>
+  <h2>{{ _("Remove Plugin") }}</h2>
   <form action="" method="post">
     {{ hidden_form_data }}
     <p>{% trans plugin_name=plugin.html_display_name %}
@@ -9,7 +9,7 @@
       from the instance folder? If you do so you have to reinstall the plugin
       if you want to use it again.
     {% endtrans %}</p>
-    <input type="submit" name="cancel" value="{% trans 'No' %}">
-    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    <input type="submit" name="cancel" value="{{ _('No') }}">
+    <input type="submit" name="confirm" value="{{ _('Yes') }}">
   </form>
 {% endblock %}

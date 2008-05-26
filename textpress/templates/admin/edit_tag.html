@@ -1,25 +1,25 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Edit Tag" %}{% endblock %}
+{% block title %}{{ _("Edit Tag") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Edit Tag" %}</h2>
+  <h2>{{ _("Edit Tag") }}</h2>
   <form action="" method="post">
     <fieldset>
-      <legend>{% trans "Slug" %}</legend>
+      <legend>{{ _("Slug") }}</legend>
       {{ h.input_field('slug', form.slug) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Name" %}</legend>
+      <legend>{{ _("Name") }}</legend>
       {{ h.input_field('name', form.name) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Description" %}</legend>
+      <legend>{{ _("Description") }}</legend>
       {{ h.textarea('description', form.description, rows=5) }}
     </fieldset>
     <div class="actions">
        {{ hidden_form_data }}
-      <input type="submit" value="{% trans 'Save' %}">
-      <input type="submit" name="delete" value="{% trans 'Delete' %}">
-      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+      <input type="submit" value="{{ _('Save') }}">
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
   </form>
 {% endblock %}

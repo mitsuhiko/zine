@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Cache Options" %}{% endblock %}
+{% block title %}{{ _("Cache Options") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Cache Options" %}</h2>
+  <h2>{{ _("Cache Options") }}</h2>
   <p>{% trans %}
     TextPress comes with a cache system that allows you to survive a sudden
     storm of visitors.  The caching system has different backends you can
@@ -25,8 +25,8 @@
     });
   </script>
   <form action="" method="post">
-    <h3>{% trans "Cache System" %}</h3>
-    <p>{% trans "Current TextPress supports three caching systems:" %}</p>
+    <h3>{{ _("Cache System") }}</h3>
+    <p>{{ _("Current TextPress supports three caching systems:") }}</p>
     <ul>
       <li>{% trans %}<strong>Simple Cache</strong>: The simple cache is a very
           basic memory cache inside the server process.  This cache works only
@@ -48,7 +48,7 @@
       <option value="{{ key }}"{% if key == form.cache_system
         %} selected{% endif %}>{{ value }}</option>{% endfor %}</select></p>
     <div class="optionbox" id="memcached-options">
-      <h3>{% trans "Memcached Options" %}</h3>
+      <h3>{{ _("Memcached Options") }}</h3>
       <p>{% trans %}
         In order to use the memcached system you have to provide the address
         of at least one machine running memcached.  For further details have
@@ -67,7 +67,7 @@
                           size=60) }}</p>
     </div>
     <div class="optionbox" id="filesystem-options">
-      <h3>{% trans "Filesystem Options" %}</h3>
+      <h3>{{ _("Filesystem Options") }}</h3>
       <p>{% trans %}
         When using the filesystem cache you can control where TextPress puts
         all the cache data.  This path is relative to your TextPress instance
@@ -86,7 +86,7 @@
       <p>{{ h.input_field('filesystem_cache_path', form.filesystem_cache_path,
                           size=40) }}</p>
     </div>
-    <h3>{% trans "General Cache Settings" %}</h3>
+    <h3>{{ _("General Cache Settings") }}</h3>
     <p>{% trans %}
       The following configuration values are cache system-independent.  You
       can use them to fine-tune the caching.  The timeout is the number of
@@ -97,15 +97,15 @@
       default timeout.
     {% endtrans %}</p>
     <dl>
-      <dt>{% trans "Default cache timeout" %}</dt>
+      <dt>{{ _("Default cache timeout") }}</dt>
       <dd>{{ h.input_field('cache_timeout', form.cache_timeout) }}</dd>
-      <dt>{% trans "Enable eager caching" %}
+      <dt>{{ _("Enable eager caching") }}
       <dd>{{ h.checkbox('enable_eager_caching', form.enable_eager_caching) }}
-          <label for="enable_eager_caching">{% trans "enable" %}</label></dd>
+          <label for="enable_eager_caching">{{ _("enable") }}</label></dd>
     </dl>
     <div class="actions">
-      <input type="submit" value="{% trans 'Save' %}">
-      <input type="submit" name="clear_cache" value="{% trans 'Clear Cache' %}">
+      <input type="submit" value="{{ _('Save') }}">
+      <input type="submit" name="clear_cache" value="{{ _('Clear Cache') }}">
       {{ hidden_form_data }}
     </div>
   </form>

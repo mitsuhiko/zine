@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Typography" %}{% endblock %}
+{% block title %}{{ _("Typography") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Typography" %}</h2>
+  <h2>{{ _("Typography") }}</h2>
   <p>{% trans %}
     From here you can configure the typography settings. Note that the
     typography plugin has hardcoded semantics at the moment, so there is
@@ -9,14 +9,14 @@
   {% endtrans %}</p>
   <form action="" method="post">
     <dl>
-      <dt>{% trans "Double Quote Pairs" %}</dt>
+      <dt>{{ _("Double Quote Pairs") }}</dt>
       <dd>
         {{ h.input_field('double_opening_quote',
                          form.double_opening_quote, size=1) }}
         {{ h.input_field('double_closing_quote',
                          form.double_closing_quote, size=1) }}
       </dd>
-      <dt>{% trans "Single Quote Pairs" %}</dt>
+      <dt>{{ _("Single Quote Pairs") }}</dt>
       <dd>
         {{ h.input_field('single_opening_quote',
                          form.single_opening_quote, size=1) }}
@@ -25,14 +25,14 @@
       </dd>
     </dl>
     <div id="char-select" style="display: none">
-      <strong>{% trans "Use Common Character" %}:</strong>
+      <strong>{{ _("Use Common Character") }}:</strong>
     {%- for char in '‘’‚“”„«»‹›\u300c\u300d\u300e\u300f' %}
       <a href="javascript:insertChar('{{ char }}')">{{ char }}</a>
     {%- endfor %}
     </div>
     <div class="actions">
       {{ csrf_protector }}
-      <input type="submit" value="{% trans 'Save' %}">
+      <input type="submit" value="{{ _('Save') }}">
     </div>
   </form>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Inspect Import" %}{% endblock %}
+{% block title %}{{ _("Inspect Import") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Inspect Import" %}</h2>
+  <h2>{{ _("Inspect Import") }}</h2>
   <p>{% trans %}
     Here you can now inspect the imported data and select the data you want
     to import into the database.
@@ -11,16 +11,16 @@
     <label for="import_{{ name }}">{{ title }}</label>
   {%- endmacro %}
   <form action="" method="post">
-    <h3>{% trans "Blog Details" %}</h3>
+    <h3>{{ _("Blog Details") }}</h3>
     <dl>
       <dt>{{ tick('blog_title', _('Blog Title')) }}</dt>
       <dd><a href="{{ blog.link|e }}">{{ blog.title|e }}</a></dd>
       <dt>{{ tick('blog_description', _('Description')) }}</dt>
       <dd>{{ blog.description }}</dd>
-      <dt>{% trans 'Language' %}</dt>
+      <dt>{{ _('Language') }}</dt>
       <dd>{{ blog.language }}</dd>
     </dl>
-    <h3>{% trans "Authors" %}</h3>
+    <h3>{{ _("Authors") }}</h3>
     <p>{% trans %}
       Chose the authors whose posts you want to import.  In the dropdown you
       can select one of the already existing users if you want to change the
@@ -30,14 +30,14 @@
     <ul>
     {%- for author in blog.authors %}
       <li><select name="author_{{ author.id }}">
-        <option value="">{% trans 'Create New User' %}</option>
+        <option value="">{{ _('Create New User') }}</option>
       {%- for user in users %}
         <option value="{{ user.user_id }}"{% if form['author_' ~ author.id] ==
           user.user_id %} selected{% endif %}>{{ user.username|e }}</option>
       {%- endfor %}
       </select> &nbsp; {{ author.name|e }}</li>
     {%- else %}
-      <li><em>{% trans "no author information" %}</em></li>
+      <li><em>{{ _("no author information") }}</em></li>
     {%- endfor %}
     </ul>
     <p>{% trans %}
@@ -45,16 +45,16 @@
       So if you unselect all the posts by a user in the list below it doesn't
       matter what you select here.
     {% endtrans %}</p>
-    <h3>{% trans "Posts" %}</h3>
+    <h3>{{ _("Posts") }}</h3>
     <p>{% trans %}
       Posts marked with a blue background are already imported.
     {% endtrans %}</p>
     <table class="importable-posts">
       <tr>
-        <th>{% trans "Date" %}</th>
-        <th>{% trans "Title" %}</th>
-        <th>{% trans "Author" %}</th>
-        <th>{% trans "Comments" %}</th>
+        <th>{{ _("Date") }}</th>
+        <th>{{ _("Title") }}</th>
+        <th>{{ _("Author") }}</th>
+        <th>{{ _("Comments") }}</th>
       </tr>
       {%- for post in blog.posts %}
       {%- if post.already_imported %}
@@ -75,9 +75,9 @@
     </table>
     <div class="actions">
       {{ hidden_form_data }}
-      <input type="submit" value="{% trans 'Import into Blog' %}">
-      <input type="submit" name="delete" value="{% trans 'Delete' %}">
-      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+      <input type="submit" value="{{ _('Import into Blog') }}">
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
   </form>
 {% endblock %}

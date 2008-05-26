@@ -176,40 +176,6 @@ def response(vary=(), timeout=None, cache_key=None):
     return decorator
 
 
-class TemplateLoaderMixin(object):
-    """
-    A cache mixin for the jinja template engine that uses our own cache
-    system rather than the default cache systems.
-    """
-
-    def __init__(self, app):
-        self.__cache = app.cache
-        self.__lock = allocate_lock()
-
-    def load(self, environment, name, translator):
-        """Load and translate the template.  And cache it."""
-        self.__lock.acquire()
-        try:
-            if translator is not PythonTranslator:
-                return super(TemplateLoaderMixin, self).load(
-                             environment, name, translator)
-            tmpl = None
-            push_to_memory = False
-            bytecode = self.__cache.get('template:' + name)
-            if bytecode is not None:
-                tmpl = Template.load(environment, bytecode)
-            else:
-                push_to_memory = True
-            if tmpl is None:
-                tmpl = super(TemplateLoaderMixin, self).load(
-                             environment, name, translator)
-            if push_to_memory:
-                self.__cache.set('template:' + name, tmpl.dump())
-            return tmpl
-        finally:
-            self.__lock.release()
-
-
 #: the cache system factories.
 systems = {
     'null':         lambda app: NullCache(),

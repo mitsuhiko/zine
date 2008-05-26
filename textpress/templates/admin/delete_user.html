@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Delete User" %}{% endblock %}
+{% block title %}{{ _("Delete User") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Delete User" %}</h2>
+  <h2>{{ _("Delete User") }}</h2>
   <form action="" method="post">
     {{ hidden_form_data }}
     <p>{% trans username=user.username|e %}
@@ -25,7 +25,7 @@
             <label for="delete">{% trans %}delete posts{% endtrans %}</li>
       </ul>
     {% endif %}
-    <input type="submit" name="cancel" value="{% trans 'No' %}">
-    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    <input type="submit" name="cancel" value="{{ _('No') }}">
+    <input type="submit" name="confirm" value="{{ _('Yes') }}">
   </form>
 {% endblock %}

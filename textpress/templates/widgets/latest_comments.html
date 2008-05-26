@@ -1,10 +1,10 @@
 {% extends 'widgets/base.html' %}
-{% block title %}{% trans 'Latest Comments' %}{% endblock %}
+{% block title %}{{ _('Latest Comments') }}{% endblock %}
 {% block body %}
   {%- if widget.comments %}
   <ul>
   {%- for item in widget.comments %}
-    <li>{% trans "by" %} <a href="{{ url_for(item)|e }}">{{
+    <li>{{ _("by") }} <a href="{{ url_for(item)|e }}">{{
       item.author|e }}</a></li>
   {%- endfor %}
   </ul>

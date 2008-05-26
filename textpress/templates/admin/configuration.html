@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Configuration Editor" %}{% endblock %}
+{% block title %}{{ _("Configuration Editor") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Configuration Editor" %}</h2>
+  <h2>{{ _("Configuration Editor") }}</h2>
   <p>{% trans %}
     Here you can tune all registered configuration values. Note that some of
     them (especially the core configuration values) can easily break your
@@ -21,8 +21,8 @@
           <td>
           {% if item.type == 'boolean' -%}
             <select name="{{ item.key|e }}">
-              <option{% if item.value == 'True' %} selected{% endif %} value="True">{% trans "True" %}</option>
-              <option{% if item.value != 'True' %} selected{% endif %} value="False">{% trans "False" %}</option>
+              <option{% if item.value == 'True' %} selected{% endif %} value="True">{{ _("True") }}</option>
+              <option{% if item.value != 'True' %} selected{% endif %} value="False">{{ _("False") }}</option>
             </select>
           {%- else -%}
             {{ h.input_field(item.key, item.value, size="30") }}
@@ -39,8 +39,8 @@
       </table>
       <div class="actions">
         {{ csrf_protector }}
-        <input type="submit" value="{% trans 'Save' %}">
-        <input type="submit" name="disable_editor" value="{% trans 'Disable Editor' %}">
+        <input type="submit" value="{{ _('Save') }}">
+        <input type="submit" name="disable_editor" value="{{ _('Disable Editor') }}">
       </div>
   {% else %}
     <p>{% trans %}
@@ -49,7 +49,7 @@
     {% endtrans %}</p>
     <div class="actions">
       {{ csrf_protector }}
-      <input type="submit" name="enable_editor" value="{% trans 'Enable Editor' %}">
+      <input type="submit" name="enable_editor" value="{{ _('Enable Editor') }}">
     </div>
   {% endif %}
   </form>

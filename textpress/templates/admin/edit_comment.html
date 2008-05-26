@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Edit Comment" %}{% endblock %}
+{% block title %}{{ _("Edit Comment") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Edit Comment" %}</h2>
+  <h2>{{ _("Edit Comment") }}</h2>
   {% if comment.is_pingback %}
   <p>
     This comment was submitted as pingback.  If you will change the URL
@@ -11,49 +11,49 @@
   {% endif %}
   <form action="" method="post">
     <fieldset>
-      <legend>{% trans "Author" %}</legend>
+      <legend>{{ _("Author") }}</legend>
       {{ h.input_field('author', form.author) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "E-Mail" %}</legend>
+      <legend>{{ _("E-Mail") }}</legend>
       {{ h.input_field('email', form.email) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Webpage" %}</legend>
+      <legend>{{ _("Webpage") }}</legend>
       {{ h.input_field('www', form.www) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Text" %}</legend>
+      <legend>{{ _("Text") }}</legend>
       {{ h.textarea('body', form.body, rows=7) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Parser" %}</legend>
+      <legend>{{ _("Parser") }}</legend>
       <select name="parser">
       {%- for parser_id, name in parsers %}
-        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.parser
+        <option value="{{ parser_id|e }}"{% if parser_id == form.parser
           %} selected{% endif %}>{{ name|e }}</option>
       {%- endfor %}
       </select>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Date" %}</legend>
+      <legend>{{ _("Date") }}</legend>
       {{ h.input_field('pub_date', form.pub_date) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Block Comment" %}</legend>
+      <legend>{{ _("Block Comment") }}</legend>
       {{ h.checkbox('blocked', form.blocked) }}
       {% if comment.blocked %}
         <label for="blocked">{% trans reason=comment.blocked_msg|e
           %}block comment ({{ reason }}){% endtrans %}</label>
       {% else %}
-        <label for="blocked">{% trans "block comment" %}</label>
+        <label for="blocked">{{ _("block comment") }}</label>
       {% endif %}
     </fieldset>
     <div class="actions">
       {{ hidden_form_data }}
-      <input type="submit" value="{% trans 'Save' %}">
-      <input type="submit" name="delete" value="{% trans 'Delete' %}">
-      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+      <input type="submit" value="{{ _('Save') }}">
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
   </form>
 {% endblock %}

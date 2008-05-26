@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Akismet Configuration" %}{% endblock %}
+{% block title %}{{ _("Akismet Configuration") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Akismet Configuration" %}</h2>
+  <h2>{{ _("Akismet Configuration") }}</h2>
   <p>{% trans api_link='http://wordpress.com/api-keys/' %}
     Akismet will help you to reduce or even completely eliminate the comment spam
     you get on your site. If you don't have a WordPress.com account yet, you can
@@ -11,6 +11,6 @@
   <form action="" method="post">
     {{ csrf_protector }}
     {{ h.input_field('api_key', api_key) }}
-    <input type="submit" value="{% trans 'Update Key' %}">
+    <input type="submit" value="{{ _('Update Key') }}">
   </form>
 {% endblock %}
