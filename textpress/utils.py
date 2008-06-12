@@ -480,7 +480,7 @@ def parse_iso8601(value):
 
 def format_iso8601(obj):
     """Format a datetime object for iso8601"""
-    return obj.strftime('%Y-%d-%mT%H:%M:%SZ')
+    return obj.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
 def generate_rsd(app):
