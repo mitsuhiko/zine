@@ -31,7 +31,7 @@
 
     `mapper`
         replacement for the normal SQLAlchemy mapper function. Works the
-        same but users our `ManagerExtension`.  See the notes below.
+        same but uses our `ManagerExtension`.  See the notes below.
 
     `save`
         bind an unbound object to the session and mark it for saving.
