@@ -47,7 +47,7 @@
     Definiting Tables
     -----------------
 
-    So let's get started quickly.  To defin tables all you have to do is to
+    So let's get started quickly.  To define tables all you have to do is to
     create a metadata instances for your table collection (so that you can
     create them) and bind some tables to it::
 
