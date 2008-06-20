@@ -793,6 +793,8 @@ class Pagination(object):
         get_link = lambda x: url_for(self.endpoint, page=x, **self.url_args)
 
         for num in xrange(1, self.pages + 1):
+            if num == self.page:
+                was_ellipsis = False
             if num - 1 == self.page:
                 next = num
             if num + 1 == self.page:
