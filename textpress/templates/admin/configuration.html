@@ -15,7 +15,7 @@
       <table class="config-table">
       {%- for category in categories %}
         <tr><th colspan="4">{{ category.name|e }}</th></tr>
-        {%- for item in category.items %}
+        {%- for item in category['items'] %}
         <tr{% if not item.use_default %} class="user-defined"{% endif %}>
           <td>{{ item.name|e }}</td>
           <td>

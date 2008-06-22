@@ -1,6 +1,6 @@
 {% macro render_post(post) -%}
   <div class="post">
-    {{ emit_event('before-post-rendered', post) }}
+    {{ emit_event('before-post-rendered', post) }}
     <h3><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a></h3>
     <div class="text">
       {{ post.intro or post.body }}
@@ -9,7 +9,7 @@
       {%- endif %}
     </div>
     <p class="post-note">
-      <strong class="date">{{ post.pub_date|datetimeformat|e }}</strong>
+      <strong class="date">{{ post.pub_date|datetimeformat|e }}</strong>
       {{ _('by') }} <a href="{{ url_for(post.author)|e
         }}">{{ post.author.display_name|e }}</a>,
       <a href="{{ url_for(post)|e }}#comments">{% trans comments=post.comment_count

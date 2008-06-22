@@ -8,8 +8,7 @@
       month=item.month)|e }}">{{ item|monthformat }}</a></li>
   {%- endfor %}
   {%- if widget.more %}
-    <li><a href="{{ url_for('blog/archive')|e }}">{% trans
-      "Complete archive" %}</a></li>
+    <li><a href="{{ url_for('blog/archive')|e }}">{{ _("Complete archive") }}</a></li>
   {%- endif %}
   </ul>
   {%- endif %}

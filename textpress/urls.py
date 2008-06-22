@@ -66,7 +66,6 @@ def make_urls(app):
         Rule('/options/theme/overlays/', endpoint='admin/overlays'),
         Rule('/options/theme/overlays/<path:template>',
              endpoint='admin/overlays'),
-        Rule('/options/widgets', endpoint='admin/widgets'),
         Rule('/options/plugins/', endpoint='admin/plugins'),
         Rule('/options/plugins/<plugin>/remove', endpoint='admin/remove_plugin'),
         Rule('/options/cache', endpoint='admin/cache'),

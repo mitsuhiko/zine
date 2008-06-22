@@ -53,7 +53,6 @@ all_views = {
     'admin/urls':               admin.do_urls,
     'admin/theme':              admin.do_theme,
     'admin/overlays':           admin.do_overlays,
-    'admin/widgets':            admin.do_widgets,
     'admin/plugins':            admin.do_plugins,
     'admin/remove_plugin':      admin.do_remove_plugin,
     'admin/cache':              admin.do_cache,
