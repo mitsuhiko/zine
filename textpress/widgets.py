@@ -23,125 +23,15 @@ from textpress.api import *
 from textpress.models import Post, Tag, Comment
 from textpress.utils import CSRFProtector
 
-from jinja import nodes
+from jinja2 import nodes
 
 
 _format_re = re.compile(r'(?<!%)%s')
 _instruction_re = re.compile(r'\{\{|\}\}|\{%|%\}')
 
 
-def jinja_repr(obj):
-    if obj is None:
-        return 'none'
-    elif obj in (True, False):
-        return obj and 'true' or 'false'
-    elif isinstance(obj, basestring):
-        return repr(unicode(obj))[1:]
-    else:
-        return repr(obj)
-
-
-class WidgetManager(object):
-    """
-    Interface to the '_widgets.html' overlay.
-    """
-
-    def __init__(self, app, filename='_widgets.html'):
-        self.widgets = []
-        self.manageable = True
-        self.default = False
-        self.filename = filename
-        self.app = app
-        if not app.theme.overlay_exists(filename):
-            self.default = True
-            return
-        tree = app.theme.parse_overlay(filename)
-        if not tree.body:
-            return
-
-        def consume_html():
-            data = data_pieces.pop()
-            if data.strip():
-                data = data.replace('%%', '%').strip('\n')
-                if self.widgets and self.widgets[-1][0] == 'HTML':
-                    self.widgets[-1][1]['html'] += '\n' + data
-                else:
-                    self.widgets.append(('HTML', {'html': data}))
-
-        for node in tree.body:
-            # with jinja 1.2 onwards all expressions are children
-            # of text nodes. In the worst case the text is just "%"
-            # and the only expression a child. but always a text node.
-            if not isinstance(node, nodes.Text):
-                self.manageable = False
-                return
-            data_pieces = _format_re.split(node.text)
-            data_pieces.reverse()
-            consume_html()
-            for expr in node.variables:
-                if not isinstance(expr, nodes.CallExpression) or \
-                   not isinstance(expr.node, nodes.NameExpression) or \
-                   expr.dyn_args or expr.dyn_kwargs:
-                    self.manageable = False
-                    return
-
-                widget_name = expr.node.name
-                if widget_name not in app.widgets:
-                    continue
-                argnames = app.widgets[widget_name].list_arguments()
-                if len(argnames) < len(expr.args):
-                    continue
-
-                args = []
-                kwargs = {}
-                for name, arg in zip(argnames, expr.args):
-                    if not isinstance(arg, nodes.ConstantExpression):
-                        self.manageable = False
-                        return
-                    kwargs[name] = arg.value
-                for name, arg in expr.kwargs:
-                    if not isinstance(arg, nodes.ConstantExpression):
-                        self.manageable = False
-                        return
-                    kwargs[name] = arg.value
-                self.widgets.append((expr.node.name, kwargs))
-                consume_html()
-
-
-    def revert_to_default(self):
-        """
-        Revert to the theme defaults (removes overlay)
-        """
-        self.app.theme.remove_overlay(self.filename)
-
-    def save(self):
-        """
-        Save the data as overlay.
-        """
-        buffer = []
-        for name, args in self.widgets:
-            if name == 'HTML':
-                if not args or not args['html'].strip():
-                    continue
-                data = args['html']
-                if _instruction_re.search(data) is not None:
-                    data = u'{%% raw %%}%s{%% endraw %%}' % data
-                buffer.append(data)
-            else:
-                buffer.append(u'{{ %s(%s) }}' % (
-                    name,
-                    u', '.join(u'%s=%s' % (
-                        name,
-                        jinja_repr(arg)
-                    ) for name, arg in sorted(args.items()))
-                ))
-        self.app.theme.set_overlay(self.filename, u'\n'.join(buffer))
-
-
 class Widget(object):
-    """
-    Baseclass for all the widgets out there!
-    """
+    """Baseclass for all the widgets out there!"""
 
     #: the name of the widget when called from a template.  This is also used
     #: if widgets are configured from the admin panel to have a unique
@@ -186,33 +76,6 @@ class Widget(object):
 
     def __unicode__(self):
         return self.render()
-
-
-class HTMLWidget(Widget):
-    """
-    Special widget for normal HTML data.
-    """
-
-    NAME = 'HTML'
-    INVISIBLE = True
-
-    def __init__(self, html=u''):
-        self.html = html
-
-    @staticmethod
-    def get_display_name():
-        return _('HTML')
-
-    @staticmethod
-    def configure_widget(initial_args, request):
-        error = None
-        args = initial_args.copy()
-        if request.method == 'POST':
-            args['html'] = request.form.get('html', '')
-        return args, render_template('/admin/widgets/html.html', form=args)
-
-    def render(self):
-        return self.html
 
 
 class TagCloud(Widget):
@@ -371,5 +234,4 @@ class LatestComments(Widget):
 
 
 #: list of all core widgets
-all_widgets = [HTMLWidget, TagCloud, PostArchiveSummary, LatestPosts,
-               LatestComments]
+all_widgets = [TagCloud, PostArchiveSummary, LatestPosts, LatestComments]

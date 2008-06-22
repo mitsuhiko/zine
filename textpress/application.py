@@ -383,10 +383,6 @@ class Theme(object):
             f.close()
         return u'\n'.join(lines)
 
-    def parse_overlay(self, template):
-        """Return the AST of an overlay."""
-        return self.app.template_env.parse(self.get_overlay(template))
-
     def set_overlay(self, template, data):
         """Set an overlay."""
         filename = self.get_overlay_path(template)
@@ -574,10 +570,11 @@ class TextPress(object):
             url_for=url_for,
             emit_event=self._event_manager.template_emit,
             request=local('request'),
+            render_widgets=lambda: render_template('_widgets.html'),
             get_page_metadata=self.get_page_metadata,
             textpress={
                 'version':      textpress.__version__,
-                'copyright':    '2007 by the Pocoo Team'
+                'copyright':    '2007-2008 by the Pocoo Team'
             }
         )
 

@@ -32,7 +32,6 @@ from textpress.utils import parse_datetime, format_datetime, \
      CSRFProtector, IntelligentRedirect, TIMEZONES
 from textpress.importers import list_import_queue, load_import_dump, \
      delete_import_dump, perform_import
-from textpress.widgets import WidgetManager
 from textpress.pluginsystem import install_package, InstallationError, \
      SetupError
 from textpress.pingback import pingback, PingbackError
@@ -94,7 +93,6 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('basic', url_for('admin/basic_options'), _('Basic')),
                 ('urls', url_for('admin/urls'), _('URLs')),
                 ('theme', url_for('admin/theme'), _('Theme')),
-                ('widgets', url_for('admin/widgets'), _('Widgets')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
                 ('cache', url_for('admin/cache'), _('Cache')),
                 ('configuration', url_for('admin/configuration'),
@@ -1333,72 +1331,6 @@ def do_overlays(request, template=None):
         active_template=template,
         source=source,
         has_overlay=has_overlay
-    )
-
-
-@require_role(ROLE_ADMIN)
-def do_widgets(request):
-    """
-    Configure the widgets.
-    """
-    manager = WidgetManager(request.app, '_widgets.html')
-    if manager.manageable:
-        # configure one widget
-        configure = request.values.get('configure')
-        if configure in request.app.widgets:
-            widget = request.app.widgets[configure]
-            args = widget.list_arguments(True)
-            old_args = request.values.get('args')
-            if old_args:
-                try:
-                    args.update(load_json(old_args))
-                except Exception, e:
-                    pass
-            body = None
-            args, body = widget.configure_widget(args, request)
-            if args is body is None:
-                args = {}
-                body = ''
-            return Response(dump_json({
-                'body':     body,
-                'args':     args
-            }), mimetype='text/javascript')
-
-        # or save all changes
-        if request.method == 'POST':
-            if request.values.get('revert'):
-                manager.revert_to_default()
-                flash(_('Removed personal widget set. Will use the '
-                        'theme defaults now'))
-            else:
-                try:
-                    widgets = load_json(request.values.get('widgets', ''))
-                    if not isinstance(widgets, list):
-                        raise TypeError()
-                except Exception, e:
-                    flash(_('invalid data submitted.'), 'error')
-                else:
-                    del manager.widgets[:]
-                    for widget in widgets:
-                        manager.widgets.append(tuple(widget))
-                    manager.save()
-                    flash(_('Widgets updated successfully.'))
-            return redirect(url_for('admin/widgets'))
-
-    # display all widgets in the admin panel
-    all_widgets = dict((i, w.get_display_name())
-                       for i, w in request.app.widgets.iteritems())
-
-    # add all the widgets we use
-    for script in 'Form.js', 'JSON.js', 'WidgetManager.js':
-        add_script(url_for('core/shared', filename='js/' + script))
-
-    return render_admin_response('admin/widgets.html', 'options.widgets',
-        widgets=sorted(all_widgets, key=lambda x: x[1]),
-        manageable=manager.manageable,
-        default=manager.default,
-        all_widgets=all_widgets,
-        active_widgets=manager.widgets
     )
 
 
