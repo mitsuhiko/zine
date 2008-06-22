@@ -133,8 +133,7 @@ _ = gettext
 
 
 def flash(msg, type='info'):
-    """
-    Add a message to the message flash buffer.
+    """Add a message to the message flash buffer.
 
     The default message type is "info", other possible values are
     "add", "remove", "error", "ok" and "configure". The message type affects
@@ -157,8 +156,7 @@ def gen_salt(length=6):
 
 
 def gen_activation_key(length=8):
-    """
-    Generate a ``length`` long string of KEY_CHARS, suitable as
+    """Generate a ``length`` long string of KEY_CHARS, suitable as
     password or activation key.
     """
     if length <= 0:
@@ -215,8 +213,7 @@ def gen_pwhash(password):
 
 
 def replace_entities(string):
-    """
-    Replace HTML entities in a string:
+    """Replace HTML entities in a string:
 
     >>> replace_entities('foo &amp; bar &raquo; foo')
     ...
@@ -266,8 +263,7 @@ def check_external_url(app, url, check=False):
 
 
 def check_pwhash(pwhash, password):
-    """
-    Check a password against a given hash value. Since
+    """Check a password against a given hash value. Since
     many forums save md5 passwords with no salt and it's
     technically impossible to convert this to an sha hash
     with a salt we use this to be able to check for
@@ -324,8 +320,7 @@ def gen_slug(text):
 
 _etree = None
 def get_etree():
-    """
-    Get an etree implementation that is not lxml.  We love lxml but because
+    """Get an etree implementation that is not lxml.  We love lxml but because
     lxml is an c (cython) extension we can't have it as another dependency.
     Because we need `ElementTree._write` for our tpxa module which is not
     supported by lxml this is needed.
@@ -443,8 +438,7 @@ def build_tag_uri(app, date, resource, identifier):
 
 
 def parse_iso8601(value):
-    """
-    Parse an iso8601 date into a datetime object.
+    """Parse an iso8601 date into a datetime object.
     The timezone is normalized to UTC, we always use UTC objects
     internally.
     """
@@ -552,8 +546,7 @@ else:
 
 
 def build_eventmap(app):
-    """
-    Walk through all the builtins and plugins for an application and
+    """Walk through all the builtins and plugins for an application and
     look for `emit_event` calls. This is useful for plugin developers that
     want to find possible entry points without having to dig the source or
     missing documentation. Speaking of documentation: This could help for
@@ -637,15 +630,14 @@ def make_hidden_fields(*fields):
 
 
 def split_email(s):
-    """
-    Split a mail address:
+    """Split a mail address:
 
-        >>> split_email("John Doe")
-        ('John Doe', None)
-        >>> split_email("John Doe <john@doe.com>")
-        ('John Doe', 'john@doe.com')
-        >>> split_email("john@doe.com")
-        (None, 'john@doe.com')
+    >>> split_email("John Doe")
+    ('John Doe', None)
+    >>> split_email("John Doe <john@doe.com>")
+    ('John Doe', 'john@doe.com')
+    >>> split_email("john@doe.com")
+    (None, 'john@doe.com')
     """
     p1, p2 = _mail_split_re.search(s).groups()
     if p2:
@@ -664,9 +656,7 @@ def send_email(subject, text, to_addrs, quiet=True):
 
 
 class EMail(object):
-    """
-    Represents one E-Mail message that can be sent.
-    """
+    """Represents one E-Mail message that can be sent."""
 
     def __init__(self, subject=None, text='', to_addrs=None):
         self.app = app = local.application
@@ -688,18 +678,14 @@ class EMail(object):
                 self.add_addr(addr)
 
     def add_addr(self, addr):
-        """
-        Add an mail address to the list of recipients
-        """
+        """Add an mail address to the list of recipients"""
         lines = addr.splitlines()
         if len(lines) != 1:
             raise ValueError('invalid value for email address')
         self.to_addrs.append(lines[0])
 
     def send(self):
-        """
-        Send the message.
-        """
+        """Send the message."""
         if not self.subject or not self.text or not self.to_addrs:
             raise RuntimeError("Not all mailing parameters filled in")
         try:
@@ -751,9 +737,7 @@ class EMail(object):
                 smtp.quit()
 
     def send_quiet(self):
-        """
-        Send the message, swallowing exceptions.
-        """
+        """Send the message, swallowing exceptions."""
         try:
             return self.send()
         except Exception:
@@ -761,9 +745,7 @@ class EMail(object):
 
 
 class AtomFeed(BaseAtomFeed):
-    """
-    A helper class taht creates Atom feeds.
-    """
+    """A helper class that creates Atom feeds."""
     import textpress
     default_generator = ('TextPress', textpress.__url__, textpress.__version__)
     del textpress
@@ -831,8 +813,7 @@ class Pagination(object):
 
 
 class RequestLocal(object):
-    """
-    All attributes on this object are request local and deleted after the
+    """All attributes on this object are request local and deleted after the
     request finished. The request local object itself must be stored somewhere
     in a global context and never deleted.
     """
@@ -862,9 +843,7 @@ class RequestLocal(object):
 
 
 class HiddenFormField(object):
-    """
-    Baseclass for special hidden fields.
-    """
+    """Baseclass for special hidden fields."""
 
     def get_hidden_field(self):
         pass
@@ -874,8 +853,7 @@ class HiddenFormField(object):
 
 
 class XMLRPC(object, SimpleXMLRPCDispatcher):
-    """
-    A XMLRPC dispatcher that uses our request and response objects.  It
+    """A XMLRPC dispatcher that uses our request and response objects.  It
     also works around a problem with Python 2.4 / 2.5 compatibility and
     registers the introspection functions automatically.
     """
@@ -905,8 +883,7 @@ class XMLRPC(object, SimpleXMLRPCDispatcher):
 
 
 class IntelligentRedirect(HiddenFormField):
-    """
-    An intelligent redirect tries to go back to the page the user
+    """An intelligent redirect tries to go back to the page the user
     is comming from or redirects to the url rule provided when called.
 
     Like the `CSRFProtector` it uses hidden form information.
@@ -933,18 +910,16 @@ class IntelligentRedirect(HiddenFormField):
         self.invalid_targets = []
 
     def add_invalid(self, *args, **kwargs):
-        """
-        Add an invalid target. Invalid targets are URLs we don't want to visit
-        again. For example if a post is deleted from the post edit page it's
-        a bad idea to redirect back to the edit page because in that situation
-        the edit page would return a page not found.
+        """Add an invalid target. Invalid targets are URLs we don't want to
+        visit again. For example if a post is deleted from the post edit page
+        it's a bad idea to redirect back to the edit page because in that
+        situation the edit page would return a page not found.
         """
         from textpress.application import url_for
         self.invalid_targets.append(url_for(*args, **kwargs))
 
     def get_redirect_target(self):
-        """
-        Check the request and get the redirect target if possible.
+        """Check the request and get the redirect target if possible.
         If not this function returns just `None`.
         """
         check_target = self.request.values.get('_redirect_target') or \
@@ -997,8 +972,7 @@ class IntelligentRedirect(HiddenFormField):
 
 
 class CSRFProtector(HiddenFormField):
-    """
-    This class is used in the admin panel to avoid CSRF attacks.
+    """This class is used in the admin panel to avoid CSRF attacks.
 
     In the controller code just create a new instance of the CSRFProtector
     and pass it the request object.  The instance then provides a method
@@ -1048,8 +1022,7 @@ class CSRFProtector(HiddenFormField):
 
 
 class StreamReporter(HiddenFormField, BaseReporterStream):
-    """
-    This class can wrap `wsgi.input` so that we get upload notifications
+    """This class can wrap `wsgi.input` so that we get upload notifications
     during uploading.
 
     TextPress also provides a service called `get_upload_info` that returns
@@ -1071,6 +1044,7 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
 
     XXX: no locking and no cleanup in some situations.
     XXX: validation for transport id that came from a URL variable
+    XXX: get rid of this class and use some sort of flash-uploader.
     """
 
     def __init__(self, transport_id=None):

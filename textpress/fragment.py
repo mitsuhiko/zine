@@ -96,8 +96,7 @@ def load_tree(data):
 
 
 def _query(nodes, rule):
-    """
-    Query some nodes.
+    """Query some nodes.
 
     ``element/subelement``:
         query all given elements that also have a given subelement.
@@ -186,9 +185,8 @@ def _iter_all(nodes):
 
 
 class Node(object):
-    """
-    Simple node class. Subclass this class and add your own render method to
-    add dynamic stuff.
+    """Simple node class. Subclass this class and add your own render method
+    to add dynamic stuff.
     """
     __slots__ = ('name', 'attributes', 'children', 'value', 'callback_data',
                  'parent')
@@ -202,8 +200,7 @@ class Node(object):
         self.parent = None
 
     def render(self, inject=None):
-        """
-        Render the node. If `callback_data` is not None (a plugin patched
+        """Render the node. If `callback_data` is not None (a plugin patched
         that in the `process-doc-tree` phase) a `process-callback-node`
         event is sent with the node as only argument. If the plugin returns
         `None` the next plugins tries. If it returns a string it will be
@@ -276,8 +273,7 @@ class Node(object):
         return False
 
     def optimize(self):
-        """
-        Simplify the node. This is an irreversible process and
+        """Simplify the node. This is an irreversible process and
         might change semantics. Do this only after a tree was created
         and you're sure that you don't need any of the special behaviour
         and more.
@@ -329,9 +325,7 @@ class Node(object):
 
 
 class NodeList(list):
-    """
-    A list that updates "parent" on set and delete.
-    """
+    """A list that updates "parent" on set and delete."""
     __slots__ = ('node',)
 
     def __init__(self, node):
@@ -434,8 +428,7 @@ class NodeList(list):
 
 
 class QueryResult(object):
-    """
-    Represents the result of a query(). You can also further query this
+    """Represents the result of a query(). You can also further query this
     object.
     """
     __slots__ = ('_gen', '_results')
@@ -451,8 +444,7 @@ class QueryResult(object):
 
     @property
     def last(self):
-        """
-        Get the last node. This queries the all results first so you should
+        """Get the last node. This queries the all results first so you should
         try to use first if possible.
         """
         return self[-1]
@@ -551,8 +543,7 @@ class Fragment(Node):
         return u''.join(n.render() for n in self.children)
 
     def optimize(self):
-        """
-        If this fragment is the fragment of a non dynamic node
+        """If this fragment is the fragment of a non dynamic node
         collection we can safely replace it with a `StaticFragment`.
         """
         if not self.dynamic_node:

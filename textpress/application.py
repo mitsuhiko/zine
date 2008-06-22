@@ -15,7 +15,7 @@
     docstring of the `textpress` package.
 
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 from os import path, remove, makedirs, walk
@@ -213,7 +213,8 @@ class Request(BaseRequest):
 
     def login(self, user, permanent=False):
         """Log the given user in. Can be user_id, username or
-        a full blown user object."""
+        a full blown user object.
+        """
         from textpress.models import User
         if isinstance(user, (int, long)):
             user = User.objects.get(user)
@@ -389,8 +390,7 @@ class Theme(object):
                 raise
 
     def get_searchpath(self):
-        """
-        Get the searchpath for this theme including plugins and
+        """Get the searchpath for this theme including plugins and
         all other template locations.
         """
         # before loading the normal template paths we check for overlays
@@ -442,9 +442,8 @@ class ThemeLoader(BaseLoader):
 
 
 class InstanceNotInitialized(RuntimeError):
-    """
-    Raised if an application was created for a not yet initialized instance
-    folder.
+    """Raised if an application was created for a not yet initialized
+    instance folder.
     """
 
 
@@ -453,8 +452,7 @@ class TextPress(object):
 
     _setup_only = []
     def setuponly(f, container=_setup_only):
-        """
-        Mark a function as "setup only".  After the setup those
+        """Mark a function as "setup only".  After the setup those
         functions will be replaced with a dummy function that raises
         an excetion."""
         container.append(f.__name__)
@@ -648,8 +646,7 @@ class TextPress(object):
 
     @setuponly
     def add_pingback_endpoint(self, endpoint, callback):
-        """
-        Notify the pingback service that the endpoint provided supports
+        """Notify the pingback service that the endpoint provided supports
         pingbacks.  The second parameter must be the callback function
         called on pingbacks.
         """
@@ -657,8 +654,7 @@ class TextPress(object):
 
     @setuponly
     def add_theme(self, name, template_path, metadata=None):
-        """
-        Add a theme. You have to provide the shortname for the theme
+        """Add a theme. You have to provide the shortname for the theme
         which will be used in the admin panel etc. Then you have to provide
         the path for the templates. Usually this path is relative to the
         `__file__` directory.
@@ -670,8 +666,7 @@ class TextPress(object):
 
     @setuponly
     def add_shared_exports(self, name, path):
-        """
-        Add a shared export for name that points to a given path and
+        """Add a shared export for name that points to a given path and
         creates an url rule for <name>/shared that takes a filename
         parameter.
         """
@@ -699,8 +694,7 @@ class TextPress(object):
 
     @setuponly
     def add_url_rule(self, rule, **kwargs):
-        """
-        Add a new URL rule to the url map.  This function accepts the same
+        """Add a new URL rule to the url map.  This function accepts the same
         arguments as a werkzeug routing rule.  Additionally a `prefix`
         parameter is accepted that can be used to add the common prefixes
         based on the configuration.  Basically the following two calls
@@ -897,8 +891,7 @@ class TextPress(object):
 
 
 class StaticDispatcher(object):
-    """
-    Dispatches to textpress or the websetup and handles reloads.  Don't
+    """Dispatches to textpress or the websetup and handles reloads.  Don't
     create instances of this object on your own, use the `make_app`
     factory function.
     """
@@ -942,8 +935,7 @@ class StaticDispatcher(object):
 
 
 class DynamicDispatcher(object):
-    """
-    A dispatcher that creates applications on the fly from values of the
+    """A dispatcher that creates applications on the fly from values of the
     WSGI environment.  This means that the first request to a not yet
     existing application will create it.  Don't use this object on your
     own, always use the `make_app` factory function.
@@ -963,12 +955,11 @@ class DynamicDispatcher(object):
 
 
 def make_app(instance_folder=None):
-    """
-    This function creates a WSGI application for TextPress.   Even though the
-    central TextPress object implements the WSGI protocol we don't forward it
-    to the webserver directly because it's reloaded under some circumstances
-    by the dispatchers that wrap it.  These dispatchers also handle requests
-    to the websetup if the instance does not exist by now.
+    """This function creates a WSGI application for TextPress.   Even though
+    the central TextPress object implements the WSGI protocol we don't forward
+    it to the webserver directly because it's reloaded under some
+    circumstances by the dispatchers that wrap it.  These dispatchers also
+    handle requests to the websetup if the instance does not exist by now.
 
     The return value of this function is guaranteed to be a WSGI application
     but you should not do instance checks or any other operations to ensure
@@ -990,8 +981,7 @@ def make_app(instance_folder=None):
 
 
 def make_textpress(instance_folder, bind_to_thread=False):
-    """
-    Creates a new instance of the application. Always use this function to
+    """Creates a new instance of the application. Always use this function to
     create an application because the process of setting the application up
     requires locking which *only* happens in `make_textpress`.
 

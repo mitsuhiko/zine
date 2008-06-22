@@ -5,7 +5,7 @@
 
     Adds support for pygments to pre code blocks.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 from os.path import join, dirname
@@ -58,16 +58,14 @@ EXAMPLE = '''\
 
 
 def get_current_style():
-    """
-    Helper function that returns the current style for the current
+    """Helper function that returns the current style for the current
     application.
     """
     return get_application().cfg['pygments_support/style']
 
 
 def get_formatter(style=None, preview=False):
-    """
-    Helper function that returns a formatter in either preview or
+    """Helper function that returns a formatter in either preview or
     normal mode for the style provided or the current style if not
     further defined.
 
@@ -92,8 +90,7 @@ def get_formatter(style=None, preview=False):
 
 
 def process_doc_tree(doctree, input_data, reason):
-    """
-    Parse time callback function that replaces all pre blocks with a
+    """Parse time callback function that replaces all pre blocks with a
     'syntax' attribute the highlighted sourcecode.
     """
     if reason in _disabled_for:
@@ -108,8 +105,7 @@ def process_doc_tree(doctree, input_data, reason):
 
 
 def get_style(req, style):
-    """
-    A request handler that returns the stylesheet for one of the
+    """A request handler that returns the stylesheet for one of the
     pygments styles. If a file does not exist it returns an
     error 404.
     """
@@ -125,8 +121,7 @@ def get_style(req, style):
 
 @require_role(ROLE_ADMIN)
 def show_config(req):
-    """
-    Request handler that provides an admin page with the configuration
+    """Request handler that provides an admin page with the configuration
     for the pygments plugin. So far this only allows changing the style.
     """
     csrf_protector = CSRFProtector()

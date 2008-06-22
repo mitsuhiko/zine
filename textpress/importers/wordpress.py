@@ -37,8 +37,7 @@ _comment_re = re.compile(r'(<wp:comment>.*?<wp:comment_content>)(.*?)'
 
 
 def parse_broken_wxr(fd):
-    """
-    This method reads from a file descriptor and parses a WXR file as
+    """This method reads from a file descriptor and parses a WXR file as
     created by current WordPress versions.  This method also injects a
     custom DTD to not bark on HTML entities and fixes some problems with
     regular expressions before parsing.  It's not my fault, wordpress is
@@ -80,9 +79,8 @@ def parse_wordpress_date(value):
 
 
 def parse_feed(fd):
-    """
-    Parse an extended WordPress RSS feed into a structure the general importer
-    system can handle.  The return value is a `Blog` object.
+    """Parse an extended WordPress RSS feed into a structure the general
+    importer system can handle.  The return value is a `Blog` object.
     """
     tree = parse_broken_wxr(fd)
 

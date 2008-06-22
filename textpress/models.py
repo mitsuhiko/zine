@@ -37,9 +37,7 @@ COMMENT_BLOCKED_USER = 2
 COMMENT_BLOCKED_SPAM = 3
 
 class UserManager(db.DatabaseManager):
-    """
-    Add some extra query methods to the user object.
-    """
+    """Add some extra query methods to the user object."""
 
     def get_nobody(self):
         return AnonymousUser()
@@ -52,8 +50,7 @@ class UserManager(db.DatabaseManager):
 
 
 class User(object):
-    """
-    Represents an user.
+    """Represents an user.
 
     If you change something on this model, even default values, keep in mind
     that the websetup does not use this model to create the admin account
@@ -150,9 +147,7 @@ class AnonymousUser(User):
 
 
 class PostManager(db.DatabaseManager):
-    """
-    Add some extra methods to the post model.
-    """
+    """Add some extra methods to the post model."""
 
     def filter_published(self, query=None, ignore_role=None):
         """Return a queryset for only published posts."""
@@ -214,9 +209,8 @@ class PostManager(db.DatabaseManager):
 
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
                  page=1, per_page=None, ignore_role=False, as_list=False):
-        """
-        Return a dict with pagination, the current posts, number of pages, total
-        posts and all that stuff for further processing.
+        """Return a dict with pagination, the current posts, number of pages,
+        total posts and all that stuff for further processing.
 
         If the role is ignored only published items are returned, otherwise the
         items the current user can see.
@@ -322,9 +316,8 @@ class PostManager(db.DatabaseManager):
 
     def get_archive_summary(self, detail='months', limit=None,
                             ignore_role=False):
-        """
-        Query function to get the archive of the blog. Usually used directly
-        from the templates to add some links to the sidebar.
+        """Query function to get the archive of the blog. Usually used
+        directly from the templates to add some links to the sidebar.
         """
         role = ROLE_NOBODY
         if not ignore_role:
@@ -505,8 +498,7 @@ class Post(object):
 
     @property
     def parser_missing(self):
-        """
-        If the parser for this post is not available this property will
+        """If the parser for this post is not available this property will
         be `True`.  If such as post is edited the text area is grayed out
         and tells the user to reinstall the plugin that provides that
         parser.  Because it doesn't know the name of the plugin, the
@@ -582,8 +574,7 @@ class Post(object):
     del _get_raw_body, _set_raw_body, _get_body, _set_body
 
     def find_urls(self):
-        """
-        Iterate over all urls in the text.  This will only work if the
+        """Iterate over all urls in the text.  This will only work if the
         parser for this post is available.  If it's not the behavior is
         undefined.
         """
@@ -609,8 +600,7 @@ class Post(object):
         self.raw_intro = self.raw_intro
 
     def can_access(self, user=None):
-        """
-        Check if the current user or the user provided can access
+        """Check if the current user or the user provided can access
         this post. If there is no user there must be a request object
         for this thread defined.
         """
@@ -656,8 +646,7 @@ class Post(object):
 
 
 class PostLink(object):
-    """
-    Represents a link in a post.  This can be used for podcasts or other
+    """Represents a link in a post.  This can be used for podcasts or other
     resources that require ``<link>`` tags.
     """
 
@@ -691,9 +680,7 @@ class PostLink(object):
 
 
 class TagManager(db.DatabaseManager):
-    """
-    Also tags have their own manager.
-    """
+    """Also tags have their own manager."""
 
     def get_or_create(self, slug, name=None):
         """Get the tag for this slug or create it if it does not exist."""
@@ -780,9 +767,7 @@ class Tag(object):
 
 
 class CommentManager(db.DatabaseManager):
-    """
-    The manager for comments
-    """
+    """The manager for comments"""
 
     def filter_blocked(self):
         """Filter all blocked comments."""
@@ -797,8 +782,7 @@ class CommentManager(db.DatabaseManager):
         return Comment.filter(Comment.blocked == True).count()
 
     def filter_latest(self, limit=None, ignore_role=False, ignore_blocked=True):
-        """
-        Filter the list of non blocked comments for anonymous users or
+        """Filter the list of non blocked comments for anonymous users or
         all comments for admin users.
         """
         role = ROLE_NOBODY
@@ -816,8 +800,7 @@ class CommentManager(db.DatabaseManager):
         return query
 
     def get_latest(self, limit=None, ignore_role=False, ignore_blocked=True):
-        """
-        Get the list of non blocked comments for anonymous users or
+        """Get the list of non blocked comments for anonymous users or
         all comments for admin users.
         """
         return self.filter_latest(limit, ignore_role, ignore_blocked).all()
@@ -883,8 +866,7 @@ class Comment(object):
 
     @property
     def visible(self):
-        """
-        Check the current session it can see the comment or check against the
+        """Check the current session it can see the comment or check against the
         current user.  To display a comment for a request you can use the
         `make_visible_for_request` function.  This is useful to show a comment
         to a user that submited a comment which is not yet moderated.

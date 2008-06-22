@@ -33,8 +33,7 @@ from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
 
 
 def get_cache(app):
-    """
-    Return the cache for the application.  This is called during the
+    """Return the cache for the application.  This is called during the
     application setup by the application itself.  No need to call that
     afterwards.
     """
@@ -42,8 +41,7 @@ def get_cache(app):
 
 
 def get_cache_context(vary, eager_caching=False, request=None):
-    """
-    Returns a tuple in the form ``(request, status)`` where request is a
+    """Returns a tuple in the form ``(request, status)`` where request is a
     request object and status a bool that is `True` if caching should be
     performed.
     """
@@ -71,8 +69,7 @@ def get_cache_context(vary, eager_caching=False, request=None):
 
 def make_metaclass(vary=(), cache_key=None, eager_caching=False,
                    timeout=None, admix_arguments=True, parent=type):
-    """
-    This metaclass factory returns a new type that can be used as metaclass
+    """This metaclass factory returns a new type that can be used as metaclass
     for classes that are cached.  If the parent of the class has already a
     metaclass you have to pass this class to the factory function using the
     `parent` keyword argument.
@@ -93,10 +90,9 @@ def make_metaclass(vary=(), cache_key=None, eager_caching=False,
 
 def result(cache_key, vary=(), eager_caching=False, timeout=None,
            admix_arguments=True, skip_posargs=0):
-    """
-    Cache the result of the function for a given timeout.  The `vary` argument
-    can be used to keep different caches or limit the cache.  Currently the
-    following `vary` modifiers are available:
+    """Cache the result of the function for a given timeout.  The `vary`
+    argument can be used to keep different caches or limit the cache.
+    Currently the following `vary` modifiers are available:
 
     ``'user'``
         cache only for anonymous users
@@ -136,11 +132,11 @@ def result(cache_key, vary=(), eager_caching=False, timeout=None,
 
 
 def response(vary=(), timeout=None, cache_key=None):
-    """
-    Cache a complete view function for a number of seconds.  This is a little
-    bit different from `result` because it freezes the response properly and
-    sets etags.  The current request path is added to the cache key to keep
-    them cached properly.  If the response is not 200 no caching is performed.
+    """Cache a complete view function for a number of seconds.  This is a
+    little bit different from `result` because it freezes the response
+    properly and sets etags.  The current request path is added to the cache
+    key to keep them cached properly.  If the response is not 200 no caching
+    is performed.
 
     This method doesn't do anything if eager caching is disabled (by default).
     """

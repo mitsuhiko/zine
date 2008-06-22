@@ -158,8 +158,7 @@ from textpress.utils import local, local_manager
 
 
 def mapper(*args, **kwargs):
-    """
-    Add our own database mapper, not the new sqlalchemy 0.4
+    """Add our own database mapper, not the new sqlalchemy 0.4
     session aware mapper.
     """
     kwargs['extension'] = extensions = to_list(kwargs.get('extension', []))
@@ -168,9 +167,7 @@ def mapper(*args, **kwargs):
 
 
 class ManagerExtension(orm.MapperExtension):
-    """
-    Use django like database managers.
-    """
+    """Use django like database managers."""
 
     def get_session(self):
         return session.registry()
@@ -205,8 +202,7 @@ class ManagerExtension(orm.MapperExtension):
 
 
 class DatabaseManager(object):
-    """
-    Baseclass for the database manager which you can also subclass to add
+    """Baseclass for the database manager which you can also subclass to add
     more methods to it and attach to models by hand.
 
     A database manager works like a limited queryset.
@@ -238,8 +234,7 @@ class DatabaseManager(object):
         return self.query.first()
 
     def one(self):
-        """
-        Return the first result of all objects, raising an exception if
+        """Return the first result of all objects, raising an exception if
         more than one row exists.
         """
         return self.query.one()
@@ -378,17 +373,15 @@ comments = db.Table('comments', metadata,
 
 
 def init_database(engine):
-    """
-    This is also called form the upgrade database function but especially from
-    the websetup. That's also why it takes an engine and not a textpress
+    """This is also called form the upgrade database function but especially
+    from the websetup. That's also why it takes an engine and not a textpress
     application.
     """
     metadata.create_all(engine)
 
 
 def upgrade_database(app):
-    """
-    Check if the tables are up to date and perform an upgrade.
+    """Check if the tables are up to date and perform an upgrade.
     Currently creating is enough. Once there are release verisons
     this function will upgrade the database structure too.
     """

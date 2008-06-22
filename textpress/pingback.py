@@ -43,8 +43,7 @@ _chunk_re = re.compile(r'\n\n|<(?:p|div|h\d)[^>]*>')
 
 
 class PingbackError(Exception):
-    """
-    Raised if the remote server caused an exception while pingbacking.
+    """Raised if the remote server caused an exception while pingbacking.
     This is not raised if the pingback function is unable to locate a
     remote server.
     """
@@ -71,8 +70,7 @@ class PingbackError(Exception):
 
 
 def pingback(source_uri, target_uri):
-    """
-    Try to notify the server behind `target_uri` that `source_uri`
+    """Try to notify the server behind `target_uri` that `source_uri`
     points to `target_uri`.  If that fails an `PingbackError` is raised.
     """
     old_timeout = socket.getdefaulttimeout()
@@ -102,9 +100,8 @@ def pingback(source_uri, target_uri):
 
 
 def handle_pingback_request(source_uri, target_uri):
-    """
-    This method is exported via XMLRPC as `pingback.ping` by the pingback
-    API.
+    """This method is exported via XMLRPC as `pingback.ping` by the
+    pingback API.
     """
     app = get_application()
 
@@ -159,8 +156,7 @@ def handle_pingback_request(source_uri, target_uri):
 
 
 def get_excerpt(url_info, url_hint, body_limit=1024 * 512):
-    """
-    Get an excerpt from the given `url_info` (the object returned by
+    """Get an excerpt from the given `url_info` (the object returned by
     `urllib2.urlopen` or a string for a URL).  `url_hint` is the URL which
     will be used as anchor for the excerpt.  The return value is a tuple
     in the form ``(title, body)``.  If one of the two items could not be
@@ -201,8 +197,7 @@ def get_excerpt(url_info, url_hint, body_limit=1024 * 512):
 
 
 def inject_header(f):
-    """
-    Decorate a view function with this function to automatically set the
+    """Decorate a view function with this function to automatically set the
     `X-Pingback` header if the status code is 200.
     """
     def oncall(*args, **kwargs):
@@ -218,9 +213,7 @@ def inject_header(f):
 
 
 def pingback_post(url_info, target_uri, year, month, day, slug):
-    """
-    This is the pingback handler for `textpress.views.blog.show_post`.
-    """
+    """This is the pingback handler for `textpress.views.blog.show_post`."""
     post = Post.objects.get_by_timestamp_and_slug(year, month, day, slug)
     if post is None or not post.pings_enabled:
         return 33, 'no such post'
