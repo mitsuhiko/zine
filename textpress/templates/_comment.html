@@ -3,8 +3,8 @@
     <div class="comment{% if comment.is_pingback %} pingback{% endif %}{%
       if comment.blocked %} blocked{% endif %}" id="comment-{{ comment.comment_id }}">
       <div class="text">{{ comment.body }}</div>
-      <p class="meta">{% if comment.is_pingback %}{% trans "Pingback by"
-        %}{% else %}{{ _("Comment by") }}{% endif %} {% if comment.www
+      <p class="meta">{% if comment.is_pingback %}{{ _("Pingback by") }}
+        {%- else %}{{ _("Comment by") }}{% endif %} {% if comment.www
         %}<a href="{{ comment.www|e }}">{{ comment.author|e }}</a>{%
         else %}{{ comment.author|e }}{% endif %} &mdash; {{
         comment.pub_date|datetimeformat }} |
@@ -16,11 +16,11 @@
       </p>
     </div>
   {% else %}
-    {%- if comment.status %}<p><em>Comment waiting for aproval</em></p>{%- endif %}
+    {%- if comment.status %}<p><em>Comment waiting for approval</em></p>{%- endif %}
   {%- endif %}
 {%- endmacro %}
 
-{% macro render_comment_editor(post) %}
+{% macro render_comment_editor(post, form) %}
   <form action="#leave-reply" class="comments" method="post">
     {{ emit_event('before-comment-editor-rendered', post) }}
     {%- if not request.user.is_manager %}

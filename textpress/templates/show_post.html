@@ -46,6 +46,6 @@
   {%- endif %}
   {%- if post.comments_enabled %}
     <h3 id="leave-reply">{{ _("Leave a Reply") }}</h3>
-    {{ render_comment_editor(post) }}
+    {{ render_comment_editor(post, form) }}
   {%- endif %}
 {% endblock %}

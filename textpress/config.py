@@ -129,8 +129,7 @@ def get_converter_name(conv):
 
 
 class Configuration(object):
-    """
-    Helper class that manages configuration values in a INI-like configuration
+    """Helper class that manages configuration values in a INI configuration
     file.  Changes are tracked and the application ensure that the global
     config file flushes the changes at the end of every request is necessary.
     """
@@ -302,8 +301,7 @@ class Configuration(object):
             self[key] = value
 
     def get_detail_list(self):
-        """
-        Return a list of categories with keys and some more
+        """Return a list of categories with keys and some more
         details for the advanced configuration editor.
         """
         categories = {}
@@ -330,9 +328,8 @@ class Configuration(object):
             })
 
         def sort_func(item):
-            """
-            Sort by key, case insensitive, ignore leading underscores and move
-            the implicit "textpress" to the index.
+            """Sort by key, case insensitive, ignore leading underscores and
+            move the implicit "textpress" to the index.
             """
             if item[0] == 'textpress':
                 return 1

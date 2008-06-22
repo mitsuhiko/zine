@@ -78,8 +78,7 @@ def url_for(endpoint, **args):
 
 
 def redirect(url, code=302, allow_external_redirect=False):
-    """
-    Return a redirect response.  Like Werkzeug's redirect but this
+    """Return a redirect response.  Like Werkzeug's redirect but this
     one checks for external redirects too.
     """
     if not allow_external_redirect:
@@ -140,8 +139,7 @@ def add_header_snippet(html):
 
 
 def render_template(template_name, _stream=False, **context):
-    """
-    Renders a template. If `_stream` is ``True`` the return value will be
+    """Renders a template. If `_stream` is ``True`` the return value will be
     a Jinja template stream and not an unicode object.
     This is used by `render_response`.
     """
@@ -155,8 +153,7 @@ def render_template(template_name, _stream=False, **context):
 
 
 def render_response(template_name, **context):
-    """
-    Like render_template but returns a response. If `_stream` is ``True``
+    """Like render_template but returns a response. If `_stream` is ``True``
     the response returned uses the Jinja stream processing. This is useful
     for pages with lazy generated content or huge output where you don't
     want the users to wait until the calculation ended. Use streaming only
@@ -184,8 +181,7 @@ def get_active_applications():
 
 
 def clear_application_cache():
-    """
-    Applications are cached for performance reasons.  If you create a bunch
+    """Applications are cached for performance reasons.  If you create a bunch
     of application objects for some scripted tasks it's a good idea to clear
     the application cache afterwards.
     """
@@ -243,15 +239,12 @@ class Request(BaseRequest):
 
 
 class Response(BaseResponse):
-    """
-    An utf-8 response, with text/html as default mimetype.
-    """
+    """An utf-8 response, with text/html as default mimetype."""
     default_mimetype = 'text/html'
 
 
 class EventManager(object):
-    """
-    Helper class that handles event listeners and event emitting.
+    """Helper class that handles event listeners and event emitting.
 
     This is *not* a public interface. Always use the `emit_event` or
     `iter_listeners` functions to access it or the `connect_event` or
@@ -299,8 +292,7 @@ class EventManager(object):
 
 
 class TemplateEventResult(list):
-    """
-    A list subclass for results returned by the event listener that
+    """A list subclass for results returned by the event listener that
     concatenates the results if converted to string, otherwise it works
     exactly like any other list.
     """
@@ -315,19 +307,8 @@ class TemplateEventResult(list):
         return unicode(self).encode('utf-8')
 
 
-class Listener(object):
-    """
-    Wraps a listener for manual calling.
-    """
-
-    def __init__(self, callback):
-        self._callback = callback
-
-
 class Theme(object):
-    """
-    Represents a theme and is created automaticall by `add_theme`
-    """
+    """Represents a theme and is created automaticall by `add_theme`"""
 
     __slots__ = ('app', 'name', 'template_path', 'metadata')
 
