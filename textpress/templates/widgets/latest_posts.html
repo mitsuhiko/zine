@@ -1,5 +1,5 @@
 {% extends 'widgets/base.html' %}
-{% block title %}{% trans 'Latest Posts' %}{% endblock %}
+{% block title %}{{ _('Latest Posts') }}{% endblock %}
 {% block body %}
   {%- if widget.posts %}
   <ul>

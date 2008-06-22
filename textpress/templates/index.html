@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
-{% block title %}{% trans "Index" %}{% endblock %}
-{% include "_post.html" %}
+{% block title %}{{ _("Index") }}{% endblock %}
+{% from "_post.html" import render_post %}
 {% block contents %}
   {%- for post in posts %}
     {{ render_post(post) }}

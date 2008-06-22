@@ -1,22 +1,22 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Dashboard" %}{% endblock %}
+{% block title %}{{ _("Dashboard") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Dashboard" %}</h2>
+  <h2>{{ _("Dashboard") }}</h2>
   <div class="text">
-    <p>{% trans user=req.user.username|e %}
+    <p>{% trans user=request.user.username|e %}
       Welcome in the admin interface {{ user }}.
     {% endtrans %}</p>
     <p>{% trans %}Use these links to get started quickly:{% endtrans %}</p>
   </div>
   <ul>
-    <li><a href="{{ url_for('admin/new_post')|e }}">{% trans "New Post" %}</a></li>
-    <li><a href="{{ url_for('admin/show_posts')|e }}">{% trans "Manage Posts" %}</a></li>
-    <li><a href="{{ url_for('admin/options')|e }}">{% trans "Configure TextPress" %}</a></li>
-    <li><a href="{{ url_for('admin/plugins')|e }}">{% trans "Manage Plugins" %}</a></li>
-    <li><a href="{{ url_for('admin/show_users')|e }}">{% trans "Manage Users" %}</a></li>
+    <li><a href="{{ url_for('admin/new_post')|e }}">{{ _("New Post") }}</a></li>
+    <li><a href="{{ url_for('admin/show_posts')|e }}">{{ _("Manage Posts") }}</a></li>
+    <li><a href="{{ url_for('admin/options')|e }}">{{ _("Configure TextPress") }}</a></li>
+    <li><a href="{{ url_for('admin/plugins')|e }}">{{ _("Manage Plugins") }}</a></li>
+    <li><a href="{{ url_for('admin/show_users')|e }}">{{ _("Manage Users") }}</a></li>
   </ul>
   {% if drafts %}
-  <h3>{% trans "Drafts" %}</h3>
+  <h3>{{ _("Drafts") }}</h3>
   <ul>
   {%- for draft in drafts %}
     <li><a href="{{ url_for('admin/edit_post',

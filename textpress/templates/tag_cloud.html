@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}{% trans "Tag Cloud" %}{% endblock %}
+{% block title %}{{ _("Tag Cloud") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Tag Cloud" %}</h2>
+  <h2>{{ _("Tag Cloud") }}</h2>
   <div class="tag-cloud">
   {%- for tag in tag_cloud %}
     <a href="{{ url_for('blog/show_tag', slug=tag.slug)|e }}" style="font-size: {{

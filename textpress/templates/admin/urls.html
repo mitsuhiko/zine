@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "URL Options" %}{% endblock %}
+{% block title %}{{ _("URL Options") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "URL Options" %}</h2>
+  <h2>{{ _("URL Options") }}</h2>
   <p>{% trans %}
     Here you can change some basic URL configuration settings.  This is especially
     useful if you have plugins installed that that add a new index page or if you
@@ -11,13 +11,13 @@
   {% endtrans %}</p>
   <form action="" method="post">
     <dl>
-      <dt>{% trans "Blog URL Prefix" %}</dt>
+      <dt>{{ _("Blog URL Prefix") }}</dt>
       <dd>{{ h.input_field('blog_url_prefix', form.blog_url_prefix) }}</dd>
-      <dt>{% trans "Admin URL Prefix" %}</dt>
+      <dt>{{ _("Admin URL Prefix") }}</dt>
       <dd>{{ h.input_field('admin_url_prefix', form.admin_url_prefix) }}</dd>
-      <dt>{% trans "Tags URL Prefix" %}</dt>
+      <dt>{{ _("Tags URL Prefix") }}</dt>
       <dd>{{ h.input_field('tags_url_prefix', form.tags_url_prefix) }}</dd>
-      <dt>{% trans "Author Profiles URL Prefix" %}</dt>
+      <dt>{{ _("Author Profiles URL Prefix") }}</dt>
       <dd>{{ h.input_field('profiles_url_prefix', form.profiles_url_prefix) }}</dd>
     </dl>
     <div class="actions">

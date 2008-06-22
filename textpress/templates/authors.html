@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}{% trans "Authors" %}{% endblock %}
+{% block title %}{{ _("Authors") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Authors" %}</h2>
+  <h2>{{ _("Authors") }}</h2>
   <ul>
   {%- for user in authors %}
     <li><a href="{{ url_for(user)|e }}">{{ user.display_name|e }}</a></li>

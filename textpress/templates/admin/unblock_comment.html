@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Unblock Comment" %}{% endblock %}
+{% block title %}{{ _("Unblock Comment") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Unblock Comment" %}</h2>
+  <h2>{{ _("Unblock Comment") }}</h2>
   <form action="" method="post">
     {{ hidden_form_data }}
     <p>{% trans comment_author=comment.author|e,
@@ -9,7 +9,7 @@
       Do you really want to unblock the comment by {{ comment_author }}
       which was blocked with the following reason: {{ reason }}?
     {% endtrans %}</p>
-    <input type="submit" name="cancel" value="{% trans 'No' %}">
-    <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+    <input type="submit" name="cancel" value="{{ _('No') }}">
+    <input type="submit" name="confirm" value="{{ _('Yes') }}">
   </form>
 {% endblock %}

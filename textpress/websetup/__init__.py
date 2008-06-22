@@ -21,7 +21,7 @@ from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
 from textpress.utils import is_valid_email, gen_pwhash, gen_secret_key
 from werkzeug import Request, Response, redirect
-from jinja import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 
 
 template_path = path.join(path.dirname(__file__), 'templates')
@@ -166,7 +166,8 @@ class WebSetup(object):
         # use a local variable, the global render_response could
         # be None because we reloaded textpress and this module.
         return render_response(error and 'error.html' or 'finished.html', {
-            'finished': True
+            'finished': True,
+            'error':    error
         })
 
     def __call__(self, environ, start_response):

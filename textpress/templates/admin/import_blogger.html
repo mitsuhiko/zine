@@ -11,9 +11,9 @@
           style="color:#dd0000">e</span>&reg;</span>
 {% endmacro %}
 
-{% block title %}{% trans "Import from Blogger.com" %}{% endblock %}
+{% block title %}{{ _("Import from Blogger.com") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Import from Blogger.com" %}</h2>
+  <h2>{{ _("Import from Blogger.com") }}</h2>
   <p>{% trans %}
   This importer allows you to import a blog from Blogger.com.
   {% endtrans %}</p>
@@ -27,7 +27,7 @@
 
   <form action="{{ url_for('import/blogger') }}" method="post">
     <dl>
-      <dt>{% trans "Select Blog To Import" %}</dt>
+      <dt>{{ _("Select Blog To Import") }}</dt>
       <dd>
         <select name="blog_id">
             {% for blog in available_blogs %}
@@ -38,8 +38,8 @@
     </dl>
     <div class="actions">
       {{ hidden_form_data }}
-      <input name="import" type="submit" value="{% trans 'Import' %}">
-      <input name="logout" type="submit" value="{% trans 'Log out of Google' %}">
+      <input name="import" type="submit" value="{{ _('Import') }}">
+      <input name="logout" type="submit" value="{{ _('Log out of Google') }}">
     </div>
   </form>
 

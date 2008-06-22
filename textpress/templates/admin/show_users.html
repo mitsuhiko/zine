@@ -1,17 +1,17 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Manage Users" %}{% endblock %}
+{% block title %}{{ _("Manage Users") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Manage Users" %}</h2>
+  <h2>{{ _("Manage Users") }}</h2>
   <table>
     <tr>
-      <th>{% trans "ID" %}</th>
-      <th>{% trans "Username" %}</th>
-      <th>{% trans "Realname" %}</th>
-      <th>{% trans "Mail" %}</th>
-      <th>{% trans "Role" %}</th>
+      <th>{{ _("ID") }}</th>
+      <th>{{ _("Username") }}</th>
+      <th>{{ _("Realname") }}</th>
+      <th>{{ _("Mail") }}</th>
+      <th>{{ _("Role") }}</th>
     </tr>
   {%- for user in users %}
-    <tr class="{% cycle 'odd', 'even' %}">
+    <tr class="{{ loop.cycle('odd', 'even') }}">
       <td>{{ user.user_id }}</td>
       <td><a href="{{ url_for('admin/edit_user', user_id=user.user_id)|e }}">{{
           user.username|e }}</a></td>
@@ -21,9 +21,9 @@
     </tr>
   {%- endfor %}
   </table>
-  <form action="{{ url_for('admin/new_user')|e(true) }}" method="get">
+  <form action="{{ url_for('admin/new_user')|e }}" method="get">
     <div class="actions">
-      <input type="submit" value="{% trans 'New User' %}">
+      <input type="submit" value="{{ _('New User') }}">
     </div>
   </form>
 {% endblock %}

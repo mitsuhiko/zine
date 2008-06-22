@@ -1,11 +1,10 @@
 {% extends "layout.html" %}
-{% include "_comment.html" %}
-{% include "_comment_editor.html" %}
+{% from "_comment.html" import render_comment, render_comment_editor %}
 {% block title %}{{ post.title|e }}{% endblock %}
 {% block contents %}
   <div class="post">
     <h2>{{ post.title|e }}</h2>
-    <p class="meta">{% trans "written by" %} <a href="{{ url_for(post.author)|e
+    <p class="meta">{{ _("written by") }} <a href="{{ url_for(post.author)|e
       }}">{{ post.author.display_name|e }}</a>, on {{
       post.pub_date|datetimeformat|e }}.</p>
     {% if post.intro %}
@@ -13,21 +12,21 @@
     {% endif %}
     <div class="text" id="extended">{{ post.body }}</div>
     <p class="related">
-      {% trans 'Tagged as' %}:
+      {{ _('Tagged as') }}:
       {% for tag in post.tags -%}
         <a href="{{ url_for(tag)|e }}">{{ tag.name|e }}</a>
         {%- if not loop.last %}, {% endif %}
       {%- else -%}
-        {% trans "nothing" %}
+        {{ _("nothing") }}
       {%- endfor %}
       {%- if request.user.is_manager %}
       | <a href="{{ url_for('admin/edit_post', post_id=post.post_id)
-        }}">{% trans 'Edit' %}</a>
+        }}">{{ _('Edit') }}</a>
       {%- endif %}
     </p>
   </div>
   {%- if post.comments %}
-    <h3>{% trans "Comments" %}</h3>
+    <h3>{{ _("Comments") }}</h3>
     {%- if cfg.use_flat_comments %}
       <ol id="comments">
       {%- for comment in post.comments %}
@@ -46,7 +45,7 @@
     {%- endif %}
   {%- endif %}
   {%- if post.comments_enabled %}
-    <h3 id="leave-reply">{% trans "Leave a Reply" %}</h3>
+    <h3 id="leave-reply">{{ _("Leave a Reply") }}</h3>
     {{ render_comment_editor(post) }}
   {%- endif %}
 {% endblock %}

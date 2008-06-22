@@ -19,7 +19,7 @@
     <dt>Postgres</dt>
     <dd><code>postgres://username:password@host/database_name</code></dd>
   </dl>
-  <input type="text" name="database_uri" value="{{ values.database_uri|e(true) }}" size="40">
+  <input type="text" name="database_uri" value="{{ values.database_uri|e }}" size="40">
   {% if error %}
     <div class="error">
       <h3>An Error Occoured</h3>

@@ -1,15 +1,15 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Delete Comment" %}{% endblock %}
+{% block title %}{{ _("Delete Comment") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Delete Comment" %}</h2>
+  <h2>{{ _("Delete Comment") }}</h2>
   <form action="" method="post">
     <div>
       {{ hidden_form_data }}
       <p>{% trans comment_author=comment.author|e %}
         Do you really want to delete the comment by {{ comment_author }}?.
       {% endtrans %}</p>
-      <input type="submit" name="cancel" value="{% trans 'No' %}">
-      <input type="submit" name="confirm" value="{% trans 'Yes' %}">
+      <input type="submit" name="cancel" value="{{ _('No') }}">
+      <input type="submit" name="confirm" value="{{ _('Yes') }}">
     </div>
   </form>
 {% endblock %}

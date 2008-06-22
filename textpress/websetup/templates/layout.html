@@ -159,10 +159,12 @@
         {% endif %}
 
         <div class="hidden">
-          {%- for key, value in values|dictsort %}
-          <input type="hidden" name="{{ key|e(true) }}" value="{{ value|e(true) }}">
-          {%- endfor %}
-          <input type="hidden" name="_current" value="{{ current|e(true) }}">
+          {%- if values %}
+            {%- for key, value in values|dictsort %}
+            <input type="hidden" name="{{ key|e }}" value="{{ value|e }}">
+            {%- endfor %}
+          {%- endif %}
+          <input type="hidden" name="_current" value="{{ current|e }}">
         </div>
       </form>
     </div>

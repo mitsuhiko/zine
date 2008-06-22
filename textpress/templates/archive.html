@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}{% trans "Archive" %}{% endblock %}
+{% block title %}{{ _("Archive") }}{% endblock %}
 {% include "_post.html" %}
+{% from "_post.html" import render_post %}
 {% block contents %}
   {%- if not year %}
     <h2>{% trans %}Archive{% endtrans %}</h2>
@@ -9,7 +10,7 @@
       <li><a href="{{ url_for('blog/archive', year=item.year,
         month=item.month)|e }}">{{ item|monthformat }}</a></li>
     {%- else %}
-      <li><em>{% trans "empty archive" %}</em></li>
+      <li><em>{{ _("empty archive") }}</em></li>
     {%- endfor %}
     </ul>
   {%- else -%}

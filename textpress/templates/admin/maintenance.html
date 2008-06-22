@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Maintenance" %}{% endblock %}
+{% block title %}{{ _("Maintenance") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Maintenance" %}</h2>
+  <h2>{{ _("Maintenance") }}</h2>
   <p>{% trans %}
     From here you can set your blog into maintenance mode and do administrative
     tasks.  It's recommend to enable maintenance mode before doing software
@@ -12,14 +12,13 @@
   {% endtrans %}</p>
   <form action="" method="post">
     <dl>
-      <dt>{% trans "Maintenance Mode" %}</dt>
+      <dt>{{ _("Maintenance Mode") }}</dt>
       <dd>{{ h.checkbox('maintenance_mode', form.maintenance_mode) }}
-          <label for="maintenance_mode">{% trans "enable maintenance mode"
-            %}</label></dd>
+          <label for="maintenance_mode">{{ _("enable maintenance mode") }}</label></dd>
     </dl>
     <div class="actions">
-      {{ hidden_form_data }}
-      <input type="submit" value="{% trans 'Save' %}" />
+      {{ hidden_form_data }}
+      <input type="submit" value="{{ _('Save') }}" />
     </div>
   </form>
 {% endblock %}

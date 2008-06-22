@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block title %}{{ user.display_name|e }}{% endblock %}
-{% include "_post.html" %}
 {% block contents %}
   <h2>{{ user.display_name|e }}</h2>
   {%- if user.real_name and user.real_name != user.display_name %}
@@ -10,10 +9,10 @@
     <div class="description">{{ user.description }}</div>
   {%- endif %}
   {%- if posts %}
-    <h3>{% trans "Posts this user wrote" %}</h3>
+    <h3>{{ _("Posts this user wrote") }}</h3>
     <ul>
     {%- for post in posts %}
-      <li><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a>, on
+      <li><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a>, on
           {{ post.pub_date|datetimeformat|e }}</li>
     {%- endfor %}
     </ul>

@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Configure Widgets" %}{% endblock %}
+{% block title %}{{ _("Configure Widgets") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Configure Widgets" %}</h2>
+  <h2>{{ _("Configure Widgets") }}</h2>
   {% if not manageable %}
     <p>{% trans %}
       The overlay "_widgets.html" which is used by the widget manager
@@ -13,8 +13,8 @@
     {% endtrans %}</p>
   {% else %}
     <script type="text/javascript">
-      var $all_widgets = {{ all_widgets|jsonencode }};
-      var $active_widgets = {{ active_widgets|jsonencode }};
+      var $all_widgets = {{ all_widgets|json }};
+      var $active_widgets = {{ active_widgets|json }};
     </script>
     {% if default %}
       <p>{% trans %}
@@ -25,24 +25,24 @@
     {% endif %}
     <form action="" method="post" id="widget-form">
       <ul id="sidebar" class="droppable">
-        <li>{% trans "No Widgets" %}</li>
+        <li>{{ _("No Widgets") }}</li>
       </ul>
       <div id="config-panel">
-        <h3>{% trans "Configure Widget" %}</h3>
+        <h3>{{ _("Configure Widget") }}</h3>
         <div class="pane"></div>
       </div>
       <div class="inventory">
-        <h3>{% trans "Available Widgets" %}</h3>
+        <h3>{{ _("Available Widgets") }}</h3>
         <ul id="inventory">
-          <li>{% trans "No Widgets" %}</li>
+          <li>{{ _("No Widgets") }}</li>
         </ul>
         <br style="clear: both">
       </div>
       <div class="actions">
         <input type="hidden" name="widgets" id="active-widgets" value="">
-        <input type="submit" value="{% trans 'Save' %}">
+        <input type="submit" value="{{ _('Save') }}">
         {%- if not default %}
-        <input type="submit" name="revert" value="{% trans 'Use Theme Defaults' %}">
+        <input type="submit" name="revert" value="{{ _('Use Theme Defaults') }}">
         {%- endif %}
       </div>
     </form>

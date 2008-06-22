@@ -2,32 +2,32 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-  <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }} {% trans "Administration" %}</title>
+  <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }} {{ _("Administration") }}</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='admin/style.css') }}">
   {{ get_page_metadata() }}
   <script type="text/javascript" src="{{ url_for('core/shared', filename='js/Admin.js') }}"></script>
 </head>
 <body>
   <div class="header">
-    <h1>{{ cfg.blog_title|e }} {% trans "Administration" %}</h1>
+    <h1>{{ cfg.blog_title|e }} {{ _("Administration") }}</h1>
     <div class="metanav">
-      <a href="{{ url_for('blog/index')|e }}">{% trans "View Blog" %}</a> |
-      <a href="{{ url_for('admin/change_password')|e }}">{% trans "Change Password" %}</a> |
-      <a href="{{ url_for('admin/logout') }}">{% trans "Logout" %}</a>
+      <a href="{{ url_for('blog/index')|e }}">{{ _("View Blog") }}</a> |
+      <a href="{{ url_for('admin/change_password')|e }}">{{ _("Change Password") }}</a> |
+      <a href="{{ url_for('admin/logout') }}">{{ _("Logout") }}</a>
     </div>
   </div>
   <div class="body">
     <ul class="navbar{% if not admin.ctxnavbar %} standalonebar{% endif %}">
     {%- for item in admin.navbar %}
       <li{% if item.active %} class="active"{% endif
-        %}><a href="{{ item.url|e(true) }}">{{ item.title|e }}</a></li>
+        %}><a href="{{ item.url|e }}">{{ item.title|e }}</a></li>
     {%- endfor %}
     </ul>
     {%- if admin.ctxnavbar %}
     <ul class="ctxnavbar">
     {%- for item in admin.ctxnavbar %}
       <li{% if item.active %} class="active"{% endif
-        %}><a href="{{ item.url|e(true) }}">{{ item.title|e }}</a></li>
+        %}><a href="{{ item.url|e }}">{{ item.title|e }}</a></li>
     {%- endfor %}
     </ul>
     {%- endif %}

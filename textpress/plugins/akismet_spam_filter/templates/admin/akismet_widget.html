@@ -1,9 +1,9 @@
 {% for error in errors %}<div class="error">{{ error }}</div>{% endfor %}
 <form action="" method="post">
   <dl>
-    <dt>{% trans "Show Title" %}</dt>
+    <dt>{{ _("Show Title") }}</dt>
     <dd>{{ h.checkbox('show_title', form.show_title) }}</dd>
-    <dt>{% trans "Title" %}</dt>
+    <dt>{{ _("Title") }}</dt>
     <dd>{{ h.input_field('title', form.title) }}</dd>
   </dl>
 </form>

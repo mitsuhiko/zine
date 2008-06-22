@@ -1,39 +1,39 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Edit User" %}{% endblock %}
+{% block title %}{{ _("Edit User") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Edit User" %}</h2>
+  <h2>{{ _("Edit User") }}</h2>
   {%- if created %}
     <div class="information message">
-      <h3>{% trans "User created successfully" %}</h3>
+      <h3>{{ _("User created successfully") }}</h3>
       <p>{% trans username=user.username|e %}The user {{ username }}
         was created successfully.{% endtrans %}</p>
-      <p><a href="javascript:hideMessage()">{% trans "Hide message" %}...</a></p>
+      <p><a href="javascript:hideMessage()">{{ _("Hide message") }}...</a></p>
     </div>
   {%- endif %}
   <form action="" method="post">
     <fieldset>
-      <legend>{% trans "Username" %}</legend>
+      <legend>{{ _("Username") }}</legend>
       {{ h.input_field('username', form.username, size=30) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Password" %}</legend>
+      <legend>{{ _("Password") }}</legend>
       {{ h.input_field('password', form.password, type='password', size=30) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "E-Mail" %}</legend>
+      <legend>{{ _("E-Mail") }}</legend>
       {{ h.input_field('email', form.email, size=30) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "First Name" %}</legend>
+      <legend>{{ _("First Name") }}</legend>
       {{ h.input_field('first_name', form.first_name, size=30) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Last Name" %}</legend>
+      <legend>{{ _("Last Name") }}</legend>
       {{ h.input_field('last_name', form.last_name, size=30) }}
     </fieldset>
     {%- if not new_user %}
     <fieldset>
-      <legend>{% trans "Display Name" %}</legend>
+      <legend>{{ _("Display Name") }}</legend>
       <ul>
       {%- for tmpl, value in display_names %}
         <li>{{ h.radio_button('display_name', tmpl, form.display_name == tmpl,
@@ -43,12 +43,12 @@
       </ul>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Description" %}</legend>
+      <legend>{{ _("Description") }}</legend>
       {{ h.textarea('description', form.description, rows=5) }}
     </fieldset>
     {%- endif %}
     <fieldset>
-      <legend>{% trans "Role" %}</legend>
+      <legend>{{ _("Role") }}</legend>
       <ul>
       {%- for role_id, caption in roles %}
         <li>{{ h.radio_button('role', role_id, form.role == role_id,
@@ -59,12 +59,12 @@
     </fieldset>
     <div class="actions">
       {{ hidden_form_data }}
-      <input type="submit" name="save" value="{% trans 'Save' %}">
-      <input type="submit" name="save_and_continue" value="{% trans 'Save and continue editing' %}">
+      <input type="submit" name="save" value="{{ _('Save') }}">
+      <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">
       {%- if not new_post %}
-        <input type="submit" name="delete" value="{% trans 'Delete' %}">
+        <input type="submit" name="delete" value="{{ _('Delete') }}">
       {%- endif %}
-      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
   </form>
 {% endblock %}

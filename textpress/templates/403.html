@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}{% trans "Access Denied" %}{% endblock %}
+{% block title %}{{ _("Access Denied") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Access Denied" %}</h2>
+  <h2>{{ _("Access Denied") }}</h2>
   <p>{% trans %}
     The access to the requested resource was restricted.
   {% endtrans %}</p>

@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Write Post" %}{% endblock %}
+{% block title %}{{ _("Write Post") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Write Post" %}</h2>
+  <h2>{{ _("Write Post") }}</h2>
   {% if drafts %}
   <div class="drafts-box">
     <strong>{% if not post or post.is_draft %}
@@ -19,21 +19,21 @@
   {% endif %}
   <form action="" method="post">
     <fieldset>
-      <legend>{% trans "Title" %}</legend>
+      <legend>{{ _("Title") }}</legend>
       {{ h.input_field('title', form.title, size=36) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Post" %}</legend>
+      <legend>{{ _("Post") }}</legend>
       {{ h.textarea('body', form.body, rows=20) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Intro" %}</legend>
+      <legend>{{ _("Intro") }}</legend>
       {{ h.textarea('intro', form.intro, rows=5) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Tags" %}</legend>
+      <legend>{{ _("Tags") }}</legend>
       {{ h.input_field('add_tag') }}
-      <input type="submit" value="{% trans 'Add' %}">
+      <input type="submit" value="{{ _('Add') }}">
       <ul>
       {%- for tag in tags %}
         <li>{{ h.checkbox('tags', tag.slug in form.tags, tag.slug,
@@ -45,7 +45,7 @@
       </ul>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Post Status" %}</legend>
+      <legend>{{ _("Post Status") }}</legend>
       <ul>
       {%- for state, caption in post_status_choices %}
         <li>{{ h.radio_button('post_status', state, form.post_status == state,
@@ -55,52 +55,52 @@
       </ul>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Parser" %}</legend>
+      <legend>{{ _("Parser") }}</legend>
       <select name="parser">
       {%- for parser_id, name in parsers %}
-        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.parser
+        <option value="{{ parser_id|e }}"{% if parser_id == form.parser
           %} selected{% endif %}>{{ name|e }}</option>
       {%- endfor %}
       </select>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Discussion" %}</legend>
+      <legend>{{ _("Discussion") }}</legend>
       <ul>
         <li>{{ h.checkbox('comments_enabled', form.comments_enabled)
-          }} <label for="comments_enabled">{% trans "Allow comments" %}</label></li>
+          }} <label for="comments_enabled">{{ _("Allow comments") }}</label></li>
         <li>{{ h.checkbox('pings_enabled', form.pings_enabled)
-          }} <label for="pings_enabled">{% trans "Allow pings" %}</label></li>
+          }} <label for="pings_enabled">{{ _("Allow pings") }}</label></li>
         <li>{{ h.checkbox('ping_from_text', form.ping_from_text)
-          }} <label for="ping_from_text">{% trans "Ping all URLs in the text" %}</label></li>
+          }} <label for="ping_from_text">{{ _("Ping all URLs in the text") }}</label></li>
       </ul>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Publication Date" %}</legend>
+      <legend>{{ _("Publication Date") }}</legend>
       {{ h.input_field('pub_date', form.pub_date) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Post Slug" %}</legend>
+      <legend>{{ _("Post Slug") }}</legend>
       {{ h.input_field('slug', form.slug) }}
     </fieldset>
     {%- if can_change_author %}
       <fieldset>
-        <legend>{% trans "Author" %}</legend>
+        <legend>{{ _("Author") }}</legend>
         {{ h.input_field('author', form.author) }}
       </fieldset>
     {%- endif %}
     {% if not new_post %}
       <p class="preview">
-        <a href="{{ url_for(post) }}">{% trans "View Post" %}</a>
+        <a href="{{ url_for(post) }}">{{ _("View Post") }}</a>
       </p>
     {% endif %}
     <div class="actions">
       {{ hidden_form_data }}
-      <input type="submit" name="save" value="{% trans 'Save' %}">
-      <input type="submit" name="save_and_continue" value="{% trans 'Save and continue editing' %}">
+      <input type="submit" name="save" value="{{ _('Save') }}">
+      <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">
       {%- if not new_post %}
-        <input type="submit" name="delete" value="{% trans 'Delete' %}">
+        <input type="submit" name="delete" value="{{ _('Delete') }}">
       {%- endif %}
-      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
   </form>
 {% endblock %}

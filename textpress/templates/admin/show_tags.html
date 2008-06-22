@@ -1,16 +1,16 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Manage Tags" %}{% endblock %}
+{% block title %}{{ _("Manage Tags") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Manage Tags" %}</h2>
+  <h2>{{ _("Manage Tags") }}</h2>
   <table>
     <tr>
-      <th>{% trans "ID" %}</th>
-      <th>{% trans "Slug" %}</th>
-      <th>{% trans "Name" %}</th>
-      <th>{% trans "Tagged Posts" %}</th>
+      <th>{{ _("ID") }}</th>
+      <th>{{ _("Slug") }}</th>
+      <th>{{ _("Name") }}</th>
+      <th>{{ _("Tagged Posts") }}</th>
     </tr>
   {%- for tag in tags %}
-    <tr class="{% cycle 'odd', 'even' %}">
+    <tr class="{{ loop.cycle('odd', 'even') }}">
       <td>{{ tag.tag_id }}</td>
       <td><a href="{{ url_for('admin/edit_tag', tag_id=tag.tag_id)|e }}">{{
           tag.slug|e }}</a></td>
@@ -18,12 +18,12 @@
       <td>{{ tag.posts|count }}</td>
     </tr>
   {%- else %}
-    <tr><td colspan="4">{% trans "No tags." %}</td></tr>
+    <tr><td colspan="4">{{ _("No tags.") }}</td></tr>
   {%- endfor %}
   </table>
-  <form action="{{ url_for('admin/new_tag')|e(true) }}" method="get">
+  <form action="{{ url_for('admin/new_tag')|e }}" method="get">
     <div class="actions">
-      <input type="submit" value="{% trans 'New Tag' %}">
+      <input type="submit" value="{{ _('New Tag') }}">
     </div>
   </form>
 {% endblock %}

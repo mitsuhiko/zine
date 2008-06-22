@@ -1,5 +1,5 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Overlay Editor" %}{% endblock %}
+{% block title %}{{ _("Overlay Editor") }}{% endblock %}
 {% block contents %}
   <h2>{% trans overlay=active_template|e %}Edit Overlay "{{ overlay }}"{% endtrans %}</h2>
   <form action="" method="post">
@@ -11,12 +11,12 @@
           %}>{{ template|e }}</option>
       {%- endfor %}
       </select>
-      <input type="submit" name="edit" value="{% trans 'Open' %}">
+      <input type="submit" name="edit" value="{{ _('Open') }}">
       {% if has_overlay %}
-        <input type="submit" value="{% trans 'Save' %}">
-        <input type="submit" name="delete" value="{% trans 'Delete' %}">
+        <input type="submit" value="{{ _('Save') }}">
+        <input type="submit" name="delete" value="{{ _('Delete') }}">
       {% else %}
-        <input type="submit" value="{% trans 'Create' %}">
+        <input type="submit" value="{{ _('Create') }}">
       {% endif %}
     </div>
   </form>

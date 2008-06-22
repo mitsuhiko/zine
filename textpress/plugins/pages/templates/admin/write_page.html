@@ -1,53 +1,53 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "New Page" %}{% endblock %}
+{% block title %}{{ _("New Page") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "New Page" %}</h2>
+  <h2>{{ _("New Page") }}</h2>
   <form action="" method="post">
     <fieldset>
-      <legend>{% trans "Title" %}</legend>
+      <legend>{{ _("Title") }}</legend>
       {{ h.input_field('title', form.title, size=40) }}
     </fieldset>
     <fieldset>
-      <legend>{% trans "Key" %}</legend>
+      <legend>{{ _("Key") }}</legend>
       {{ h.input_field('key', form.key, size=25) }}<br>
       <em>{% trans %}
         The key is used to build the url. If no key is given it's just the title-slug.
       {% endtrans %}</em>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Content" %}</legend>
+      <legend>{{ _("Content") }}</legend>
       <p>{{ h.textarea('raw_body', form.raw_body, rows=20) }}</p>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Parser" %}</legend>
+      <legend>{{ _("Parser") }}</legend>
       <select name="parser">{% for parser_id, name in parsers %}
-        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.parser
+        <option value="{{ parser_id|e }}"{% if parser_id == form.parser
           %} selected{% endif %}>{{ name|e }}</option>
       {%- endfor %}</select>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Parent Page" %}</legend>
+      <legend>{{ _("Parent Page") }}</legend>
       <em>This is the parent page</em>
       <select name="parent_id">
       {% for page_id, page_title in all_pages %}
-        <option value="{{ page_id|e(true) }}"{%- if page_id == form.parent_id %} selected{% endif %}>
+        <option value="{{ page_id|e }}"{%- if page_id == form.parent_id %} selected{% endif %}>
           {{ page_title|e }}
         </option>
       {%- endfor %}
       </select>
     </fieldset>
     <fieldset>
-      <legend>{% trans "Position" %}</legend>
+      <legend>{{ _("Position") }}</legend>
       <em>This is the position the link is shown in the navigation widget</em><br>
       {{ h.input_field('navigation_pos', form.navigation_pos, size=3) }}
     </fieldset>
     <div class="actions">
       {{ csrf_protector }}
-      <input type="submit" name="save" value="{% trans 'Save' %}">
+      <input type="submit" name="save" value="{{ _('Save') }}">
       {%- if not new_page %}
-        <input type="submit" name="delete" value="{% trans 'Delete' %}">
+        <input type="submit" name="delete" value="{{ _('Delete') }}">
       {%- endif %}
-      <input type="submit" name="cancel" value="{% trans 'Cancel' %}">
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
   </form>
 {% endblock %}

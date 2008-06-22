@@ -1,13 +1,13 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Moderate Comment" %}{% endblock %}
+{% block title %}{{ _("Moderate Comment") }}{% endblock %}
 {% block contents %}
-    <h2>{% trans "Moderate Comment" %}</h2>
+    <h2>{{ _("Moderate Comment") }}</h2>
   <ul class="comments">
-    <li class="comment {% cycle 'odd', 'even' %}{% if comment.blocked %} blocked{% endif %}">
+    <li class="comment {{ loop.cycle('odd', 'even') }}{% if comment.blocked %} blocked{% endif %}">
       <p><strong>{{ comment.author }}</strong> |
-         {% if comment.email %}<a href="mailto:{{ comment.email|e(true) }}">{{
+         {% if comment.email %}<a href="mailto:{{ comment.email|e }}">{{
            comment.email|e }}</a>{% else %}<em>no email given</em>{% endif %} |
-         {% if comment.www %}<a href="{{ comment.www|e(true) }}">{{ comment.www|e
+         {% if comment.www %}<a href="{{ comment.www|e }}">{{ comment.www|e
            }}</a> |{% endif %}
          IP: {{ comment.submitter_ip }}
          {%- if comment.blocked %}
@@ -17,11 +17,11 @@
       {{ comment.body }}
       <p>{{ comment.pub_date|datetimeformat|e }}
          [ <a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e
-             }}">{% trans "Edit" %}</a> |
+             }}">{{ _("Edit") }}</a> |
            <a href="{{ url_for('admin/delete_comment', comment_id=comment.comment_id)|e
-             }}">{% trans "Delete" %}</a>
+             }}">{{ _("Delete") }}</a>
            {%- if comment.blocked %} | <a href="{{ url_for('admin/unblock_comment',
-             comment_id=comment.comment_id)|e }}">{% trans "Unblock" %}</a>{% endif %}
+             comment_id=comment.comment_id)|e }}">{{ _("Unblock") }}</a>{% endif %}
          ]
          {% if not post %}&mdash; <a href="{{ url_for(comment.post)|e }}">{{
            comment.post.title|e }}</a>{% endif %}</p>

@@ -1,55 +1,55 @@
 {% extends "admin/layout.html" %}
-{% block title %}{% trans "Basic Options" %}{% endblock %}
+{% block title %}{{ _("Basic Options") }}{% endblock %}
 {% block contents %}
-  <h2>{% trans "Basic Options" %}</h2>
+  <h2>{{ _("Basic Options") }}</h2>
   <p>{% trans %}
     From here you can configure the basic blog settings like the blog
     title and tagline, date format, theme etc.
   {% endtrans %}</p>
   <form action="" method="post">
     <dl>
-      <dt>{% trans "Blog Title" %}</dt>
+      <dt>{{ _("Blog Title") }}</dt>
       <dd>{{ h.input_field('blog_title', form.blog_title, size="40") }}</dd>
-      <dt>{% trans "Blog Tagline" %}</dt>
+      <dt>{{ _("Blog Tagline") }}</dt>
       <dd>{{ h.input_field('blog_tagline', form.blog_tagline, size="40") }}</dd>
-      <dt>{% trans "Blog E-Mail" %}</dt>
+      <dt>{{ _("Blog E-Mail") }}</dt>
       <dd>{{ h.input_field('blog_email', form.blog_email, size="40") }}</dd>
-      <dt>{% trans "Timezone" %}</dt>
+      <dt>{{ _("Timezone") }}</dt>
       <dd><select name="timezone">
       {%- for timezone in timezones %}
         <option{% if timezone == form.timezone %} selected{% endif %}>{{ timezone|e }}</option>
       {%- endfor %}
       </select></dd>
-      <dt>{% trans "Date/Time Format" %}</dt>
+      <dt>{{ _("Date/Time Format") }}</dt>
       <dd>{{ h.input_field('datetime_format', form.datetime_format, size="20") }}</dd>
-      <dt>{% trans "Date Format" %}</dt>
+      <dt>{{ _("Date Format") }}</dt>
       <dd>{{ h.input_field('date_format', form.date_format, size="20") }}</dd>
-      <dt>{% trans "Cookie Name" %}</dt>
+      <dt>{{ _("Cookie Name") }}</dt>
       <dd>{{ h.input_field('session_cookie_name', form.session_cookie_name, size="20") }}</dd>
-      <dt>{% trans "Comments Enabled" %}</dt>
+      <dt>{{ _("Comments Enabled") }}</dt>
       <dd>{{ h.checkbox('comments_enabled', form.comments_enabled) }}
-          <label for="comments_enabled">{% trans "enable comments per default" %}</label></dd>
-      <dt>{% trans "Pingbacks Enabled" %}</dt>
+          <label for="comments_enabled">{{ _("enable comments per default") }}</label></dd>
+      <dt>{{ _("Pingbacks Enabled") }}</dt>
       <dd>{{ h.checkbox('pings_enabled', form.pings_enabled) }}
-          <label for="pings_enabled">{% trans "enable pingbacks per default" %}</label></dd>
-      <dt>{% trans "Use Flat Comments" %}</dt>
+          <label for="pings_enabled">{{ _("enable pingbacks per default") }}</label></dd>
+      <dt>{{ _("Use Flat Comments") }}</dt>
       <dd>{{ h.checkbox('use_flat_comments', form.use_flat_comments) }}
-          <label for="pings_enabled">{% trans "use flat comments" %}</label></dd>
-      <dt>{% trans "Default Parser" %}</dt>
+          <label for="pings_enabled">{{ _("use flat comments") }}</label></dd>
+      <dt>{{ _("Default Parser") }}</dt>
       <dd><select name="default_parser">
       {%- for parser_id, name in parsers %}
-        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.default_parser
+        <option value="{{ parser_id|e }}"{% if parser_id == form.default_parser
           %} selected{% endif %}>{{ name|e }}</option>
       {%- endfor %}
       </select></dd>
-      <dt>{% trans "Comment Parser" %}</dt>
+      <dt>{{ _("Comment Parser") }}</dt>
       <dd><select name="comment_parser">
       {%- for parser_id, name in parsers %}
-        <option value="{{ parser_id|e(true) }}"{% if parser_id == form.comment_parser
+        <option value="{{ parser_id|e }}"{% if parser_id == form.comment_parser
           %} selected{% endif %}>{{ name|e }}</option>
       {%- endfor %}
       </select></dd>
-      <dt>{% trans "Posts Per Page" %}</dt>
+      <dt>{{ _("Posts Per Page") }}</dt>
       <dd>{{ h.input_field('posts_per_page', form.posts_per_page) }}</dd>
     </dl>
     <div class="actions">
