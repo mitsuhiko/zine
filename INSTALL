@@ -5,7 +5,7 @@ For a working TextPress instance you need to have the following libraries
 installed:
 
   - Werkzeug from Mercurial: hg clone http://dev.pocoo.org/hg/werkzeug-main
-  - Jinja from Mercurial: hg clone http://dev.pocoo.org/hg/jinja-main
+  - Jinja2 from Mercurial: hg clone http://dev.pocoo.org/hg/jinja2-main
   - SQLAlchemy 0.4 or higher*
   - simplejson*
   - Python 2.4 or higher
