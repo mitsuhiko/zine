@@ -87,6 +87,22 @@ class Page(object):
         return ('pages/show_page',
                 {'key': self.key})
 
+    def get_ancestors(self):
+        anc = [self]
+        p = self.parent
+        while p:
+            anc.append(p)
+            p = p.parent
+        return reversed(anc)
+    ancestors = property(get_ancestors)
+
+    def get_siblings(self):
+        if self.parent:
+            return self.parent.children
+        else:
+            return [self]
+    siblings = property(get_siblings)
+
 
 
 db.mapper(Page, pages_table, properties={
