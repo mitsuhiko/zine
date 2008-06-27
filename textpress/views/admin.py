@@ -29,7 +29,7 @@ from textpress.database import comments, posts, post_tags, post_links
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      build_eventmap, make_hidden_fields, dump_json, load_json, flash, \
-     CSRFProtector, IntelligentRedirect, TIMEZONES
+     CSRFProtector, IntelligentRedirect, TIMEZONES, Pagination
 from textpress.importers import list_import_queue, load_import_dump, \
      delete_import_dump, perform_import
 from textpress.pluginsystem import install_package, InstallationError, \
@@ -40,10 +40,13 @@ from werkzeug import escape
 from werkzeug.exceptions import NotFound
 
 
+#: how many posts / comments should be displayed per page?
+PER_PAGE = 20
+
+
 def simple_redirect(*args, **kwargs):
-    """
-    A function "simple redirect" that works like the redirect function in
-    the views, just that it doesn't use the `IntelligentRedirect` which
+    """A function "simple redirect" that works like the redirect function
+    in the views, just that it doesn't use the `IntelligentRedirect` which
     sometimes doesn't do what we want. (like redirecting to target pages
     and not using backredirects)
     """
@@ -51,8 +54,7 @@ def simple_redirect(*args, **kwargs):
 
 
 def render_admin_response(template_name, _active_menu_item=None, **values):
-    """
-    Works pretty much like the normal `render_response` function but
+    """Works pretty much like the normal `render_response` function but
     it emits some events to collect navigation items and injects that
     into the template context. This also gets the flashes messages from
     the user session and injects them into the template context after the
@@ -195,8 +197,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
 
 @require_role(ROLE_AUTHOR)
 def do_index(request):
-    """
-    Show the admin interface index page which is a wordpress inspired
+    """Show the admin interface index page which is a wordpress inspired
     dashboard (doesn't exist right now).
 
     Once it's finished it should show the links to the most useful pages
@@ -205,32 +206,30 @@ def do_index(request):
     """
     unmoderated_comments = Comment.objects.get_unmoderated_count()
     if unmoderated_comments:
-        flash(_('<a href="%s">There are %d comments awaiting moderation</a>' % \
-                (url_for('admin/show_comments'), unmoderated_comments)))
-
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
-    return render_admin_response(
-        'admin/index.html', 'dashboard', drafts=Post.objects.get_drafts(),
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect))
+        flash(_('<a href="%(url)s">There are %(count)d comments awaiting '
+                'moderation</a>' % dict(url=url_for('admin/show_comments'),
+                                        count=unmoderated_comments)))
+    return render_admin_response('admin/index.html', 'dashboard',
+                                 drafts=Post.objects.get_drafts())
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_posts(request):
-    """
-    Show a list of posts for post moderation.  So far the output is not
-    paginated which makes it hard to manage if you have more posts.
-    """
+def do_show_posts(request, page):
+    """Show a list of posts for post moderation."""
+    posts = Post.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    pagination = Pagination('admin/show_posts', page, PER_PAGE,
+                            Post.objects.count())
+    if not posts and page != 1:
+        raise NotFound()
     return render_admin_response('admin/show_posts.html', 'posts.overview',
                                  drafts=Post.objects.get_drafts(),
-                                 posts=Post.objects.all())
+                                 posts=posts,
+                                 pagination=pagination)
 
 
 @require_role(ROLE_AUTHOR)
 def do_edit_post(request, post_id=None):
-    """
-    Edit or create a new post.  So far this dialog doesn't emit any events
+    """Edit or create a new post.  So far this dialog doesn't emit any events
     although it would be a good idea to allow plugins to add custom fields
     into the template.
     """
@@ -800,13 +799,18 @@ def do_aprove_comment(request, comment_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_tags(request):
-    """
-    Show a list of used post tag.  Tags can be used as web2.0 like tags or
+def do_show_tags(request, page):
+    """Show a list of used post tag.  Tags can be used as web2.0 like tags or
     normal comments.
     """
+    tags = Tag.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    pagination = Pagination('admin/show_tags', page, PER_PAGE,
+                            Tag.objects.count())
+    if not tags and page != 1:
+        raise NotFound()
     return render_admin_response('admin/show_tags.html', 'tags.overview',
-                                 tags=Tag.objects.all())
+                                 tags=tags,
+                                 pagination=pagination)
 
 
 @require_role(ROLE_AUTHOR)
@@ -915,11 +919,16 @@ def do_delete_tag(request, tag_id):
 
 
 @require_role(ROLE_ADMIN)
-def do_show_users(request):
+def do_show_users(request, page):
     """Show all users in a list."""
+    users = User.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    pagination = Pagination('admin/show_users', page, PER_PAGE,
+                            User.objects.count())
+    if not posts and page != 1:
+        raise NotFound()
     return render_admin_response('admin/show_users.html', 'users.overview',
-        users=User.objects.all()
-    )
+                                 users=users,
+                                 pagination=pagination)
 
 
 @require_role(ROLE_ADMIN)

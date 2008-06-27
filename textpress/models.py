@@ -36,6 +36,7 @@ COMMENT_UNMODERATED = 1
 COMMENT_BLOCKED_USER = 2
 COMMENT_BLOCKED_SPAM = 3
 
+
 class UserManager(db.DatabaseManager):
     """Add some extra query methods to the user object."""
 
@@ -302,11 +303,12 @@ class PostManager(db.DatabaseManager):
         offset = per_page * (page - 1)
         postlist = Post.objects.filter(q).order_by(Post.pub_date.desc()) \
                                .offset(offset).limit(per_page)
-        pagination = Pagination(endpoint, page, per_page,
-                                Post.objects.filter(q).count(), url_args)
 
         if as_list:
             return postlist.all()
+
+        pagination = Pagination(endpoint, page, per_page,
+                                Post.objects.filter(q).count(), url_args)
 
         return {
             'pagination':       pagination,
@@ -821,7 +823,7 @@ class Comment(object):
 
     def __init__(self, post, author, email, www, body, parent=None,
                  pub_date=None, submitter_ip='0.0.0.0', parser=None,
-                 is_pingback=False):
+                 is_pingback=False, status=COMMENT_UNMODERATED):
         if isinstance(post, (int, long)):
             self.post_id = post
         else:
@@ -845,7 +847,7 @@ class Comment(object):
         self.blocked_msg = None
         self.submitter_ip = submitter_ip
         self.is_pingback = is_pingback
-        self.status = COMMENT_UNMODERATED
+        self.status = status
 
     def make_visible_for_request(self, request=None):
         """Make the comment visible for the current request."""

@@ -26,4 +26,9 @@
       <input type="submit" value="{{ _('New Tag') }}">
     </div>
   </form>
+  {%- if pagination.necessary %}
+  <div class="pagination">
+    Go to: {{ pagination.generate() }}
+  </div>
+  {%- endif %}
 {% endblock %}

@@ -454,7 +454,7 @@ class TextPress(object):
     def setuponly(f, container=_setup_only):
         """Mark a function as "setup only".  After the setup those
         functions will be replaced with a dummy function that raises
-        an excetion."""
+        an exception."""
         container.append(f.__name__)
         return f
 
