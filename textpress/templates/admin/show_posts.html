@@ -44,7 +44,7 @@
   </form>
   {%- if pagination.necessary %}
   <div class="pagination">
-    Go to: {{ pagination.generate() }}
+    {{ pagination.generate() }}
   </div>
   {%- endif %}
 {% endblock %}

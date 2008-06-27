@@ -1,0 +1,15 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Delete Comments") }}{% endblock %}
+{% block contents %}
+  <h2>{{ _("Delete Comments") }}</h2>
+  <form action="" method="post">
+    <div>
+      {{ hidden_form_data }}
+      <p>{{ _('Do you really want to delete the selected comments?') }}</p>
+      <input type="hidden" name="comment_list" value="{{ comment_list|join(' ') }}">
+      <input type="hidden" name="confirm" value="yes">
+      <input type="submit" name="cancel" value="{{ _('No') }}">
+      <input type="submit" name="delete" value="{{ _('Yes') }}">
+    </div>
+  </form>
+{% endblock %}

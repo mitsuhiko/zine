@@ -149,24 +149,26 @@
       <h1>TextPress Setup</h1>
     </div>
     <div class="contents">
-      <form action="" method="post">
-        {% block body %}{% endblock %}
-        {% if not finished %}
+      {% if not finished %}
+        <form action="" method="post">
+      {% endif %}
+      {% block body %}{% endblock %}
+      {% if not finished %}
           <div class="actions">
             <input type="submit" name="_next" value="{% if next %}Next &raquo;{% else %}Install{% endif %}">
             {% if prev %}<input type="submit" name="_prev" value="&laquo; Back">{% endif %}
           </div>
-        {% endif %}
 
-        <div class="hidden">
-          {%- if values %}
-            {%- for key, value in values|dictsort %}
-            <input type="hidden" name="{{ key|e }}" value="{{ value|e }}">
-            {%- endfor %}
-          {%- endif %}
-          <input type="hidden" name="_current" value="{{ current|e }}">
-        </div>
-      </form>
+          <div class="hidden">
+            {%- if values %}
+              {%- for key, value in values|dictsort %}
+              <input type="hidden" name="{{ key|e }}" value="{{ value|e }}">
+              {%- endfor %}
+            {%- endif %}
+            <input type="hidden" name="_current" value="{{ current|e }}">
+          </div>
+        </form>
+      {% endif %}
     </div>
   </div>
 </body>

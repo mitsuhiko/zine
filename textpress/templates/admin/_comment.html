@@ -1,0 +1,27 @@
+{% macro render_comment(comment) -%}
+  <p class="meta"><strong>{{ comment.author }}</strong> |
+     {% if comment.email %}<a href="mailto:{{ comment.email|e }}">{{
+       comment.email|e }}</a>{% else %}<em>no email given</em>{% endif %} |
+     {% if comment.www %}<a href="{{ comment.www|e }}">{{ comment.www|e
+       }}</a> |{% endif %}
+     IP: {{ comment.submitter_ip }}
+  </p>
+  <div class="body">{{ comment.body }}</div>
+  <p>{{ comment.pub_date|datetimeformat|e }}
+     [ <a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e
+         }}">{{ _("Edit") }}</a> |
+       <a href="{{ url_for('admin/delete_comment', comment_id=comment.comment_id)|e
+         }}">{{ _("Delete") }}</a> |
+       {% if comment.is_spam %}<a href="{{ url_for('admin/approve_comment',
+         comment_id=comment.comment_id)|e }}">{{ _("Not Spam") }}</a>
+       {% elif comment.blocked %}
+       <a href="{{ url_for('admin/approve_comment',
+         comment_id=comment.comment_id)|e }}">{{ _("Approve") }}</a>
+       {% else %}
+         <a href="{{ url_for('admin/block_comment',
+           comment_id=comment.comment_id)|e }}">{{ _("Block") }}</a>
+       {% endif %}
+     ]
+     <a href="{{ url_for(comment.post)|e }}">{{
+       comment.post.title|e }}</a></p>
+{%- endmacro %}

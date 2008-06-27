@@ -35,6 +35,7 @@ COMMENT_MODERATED = 0
 COMMENT_UNMODERATED = 1
 COMMENT_BLOCKED_USER = 2
 COMMENT_BLOCKED_SPAM = 3
+COMMENT_BLOCKED_SYSTEM = 4
 
 
 class UserManager(db.DatabaseManager):
@@ -481,7 +482,7 @@ class Post(object):
         req = get_request()
         if req.user.role >= ROLE_AUTHOR:
             return len(self.comments)
-        return len([x for x in self.comments if not x.blocked])
+        return len(x for x in self.comments if not x.blocked)
 
     @property
     def comment_feed_url(self):
@@ -771,9 +772,13 @@ class Tag(object):
 class CommentManager(db.DatabaseManager):
     """The manager for comments"""
 
-    def filter_blocked(self):
+    def filter_blocked(self, query=None):
         """Filter all blocked comments."""
-        return Comment.filter(Comment.blocked == True)
+        if query is None:
+            query = Comment
+        return query.filter(Comment.blocked.in_(COMMENT_BLOCKED_USER,
+                                                COMMENT_BLOCKED_SPAM,
+                                                COMMENT_BLOCKED_SYSTEM))
 
     def get_blocked(self):
         """Get a list of all blocked comments."""
@@ -781,7 +786,7 @@ class CommentManager(db.DatabaseManager):
 
     def get_block_count(self):
         """Get the number of blocked comments."""
-        return Comment.filter(Comment.blocked == True).count()
+        return self.filter_blocked.count()
 
     def filter_latest(self, limit=None, ignore_role=False, ignore_blocked=True):
         """Filter the list of non blocked comments for anonymous users or
@@ -795,7 +800,7 @@ class CommentManager(db.DatabaseManager):
 
         query = self.query
         if role <= ROLE_SUBSCRIBER or ignore_blocked:
-            query = query.filter(Comment.blocked == False)
+            query = self.filter_blocked(query)
 
         if limit is not None:
             query = query[:limit]
@@ -823,7 +828,7 @@ class Comment(object):
 
     def __init__(self, post, author, email, www, body, parent=None,
                  pub_date=None, submitter_ip='0.0.0.0', parser=None,
-                 is_pingback=False, status=COMMENT_UNMODERATED):
+                 is_pingback=False, status=COMMENT_MODERATED):
         if isinstance(post, (int, long)):
             self.post_id = post
         else:
@@ -843,7 +848,6 @@ class Comment(object):
         if pub_date is None:
             pub_date = datetime.utcnow()
         self.pub_date = pub_date
-        self.blocked = False
         self.blocked_msg = None
         self.submitter_ip = submitter_ip
         self.is_pingback = is_pingback
@@ -878,6 +882,16 @@ class Comment(object):
         if self.comment_id in comments:
             return True
         return self.visible_for_user(request.user)
+
+    @property
+    def blocked(self):
+        """This is true if the status is anything but moderated."""
+        return self.status != COMMENT_MODERATED
+
+    @property
+    def is_spam(self):
+        """This is true if the comment is currently flagges as spam."""
+        return self.status == COMMENT_BLOCKED_SPAM
 
     @property
     def parser_missing(self):

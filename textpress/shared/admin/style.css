@@ -435,7 +435,8 @@ ul.comments li.blocked {
 }
 
 ul.comments li.blocked:hover {
-    color: #555;
+    color: #888;
+    background-color: #fdfdfd;
 }
 
 ul.comments li.blocked a {
@@ -444,6 +445,15 @@ ul.comments li.blocked a {
 
 ul.comments li.blocked:hover a {
     color: #2b6272;
+}
+
+ul.comments li div.body {
+    padding: 0 10px 7px 10px;
+    font-size: 0.9em;
+}
+
+ul.comments li input.mark {
+    float: right;
 }
 
 /* :::: THEME SELECTION :::: */

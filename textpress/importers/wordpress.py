@@ -124,8 +124,8 @@ def parse_feed(fd):
                 x.findtext(WORDPRESS.comment_content), 'plain',
                 x.findtext(WORDPRESS.comment_type) in ('pingback',
                                                        'traceback'),
-                x.findtext(WORDPRESS.comment_approved) == '1' and \
-                    COMMENT_MODERATED or COMMENT_UNMODERATED
+                (COMMENT_UNMODERATED, COMMENT_MODERATED)
+                    [x.findtext(WORDPRESS.comment_approved) == '1']
             ) for x in item.findall(WORDPRESS.comment)
               if x.findtext(WORDPRESS.comment_approved) != 'spam'],
             item.findtext('comment_status') != 'closed',

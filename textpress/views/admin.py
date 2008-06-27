@@ -24,8 +24,10 @@ from datetime import datetime
 from textpress.api import *
 from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
-     STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED
-from textpress.database import comments, posts, post_tags, post_links
+     STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
+     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
+from textpress.database import comments as comment_table, posts, \
+     post_tags, post_links
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      build_eventmap, make_hidden_fields, dump_json, load_json, flash, \
@@ -37,7 +39,7 @@ from textpress.pluginsystem import install_package, InstallationError, \
 from textpress.pingback import pingback, PingbackError
 from urlparse import urlparse
 from werkzeug import escape
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, BadRequest
 
 
 #: how many posts / comments should be displayed per page?
@@ -76,7 +78,10 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('write', url_for('admin/new_post'), _('Write Post'))
         ]),
         ('comments', url_for('admin/show_comments'), _('Comments'), [
-            ('overview', url_for('admin/show_comments'), _('Overview'))
+            ('overview', url_for('admin/show_comments'), _('Overview')),
+            ('unmoderated', url_for('admin/show_unmoderated_comments'),
+             _('Awaiting Moderation')),
+            ('spam', url_for('admin/show_spam_comments'), _('Spam'))
         ]),
         ('tags', url_for('admin/show_tags'), _('Tags'), [
             ('overview', url_for('admin/show_tags'), _('Overview')),
@@ -511,29 +516,82 @@ def do_delete_post(request, post_id):
     )
 
 
-@require_role(ROLE_AUTHOR)
-def do_show_comments(request, post_id=None):
-    """
-    Show all the comments for one post or all comments. This could use
-    some pagination.
-    """
-    post = None
-    if post_id is None:
-        comments = Comment.objects
-    else:
-        post = Post.objects.get(post_id)
-        if post is None:
-            raise NotFound()
-        comments = Comment.objects.filter(Comment.post_id == post_id)
+def _handle_comments(identifier, title, query, page):
+    request = get_request()
+    csrf_protector = CSRFProtector()
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
 
-    moderated = comments.filter(Comment.status != COMMENT_UNMODERATED).all()
-    unmoderated = comments.filter(Comment.status == COMMENT_UNMODERATED).all()
+        if 'comment_list' in request.form:
+            comments = map(int, request.form['comment_list'].split())
+        else:
+            comments = request.form.getlist('comment', type=int)
+
+        if comments and not 'cancel' in request.form:
+            query = comment_table.c.comment_id.in_(*comments)
+
+            # delete the comments in the list
+            if 'delete' in request.form:
+                if 'confirm' in request.form:
+                    db.execute(comment_table.delete(query))
+                    db.commit()
+                    return simple_redirect('admin/show_comments')
+                return render_admin_response('admin/delete_comments.html',
+                                             hidden_form_data=csrf_protector,
+                                             comment_list=comments)
+
+            # or approve them all
+            elif 'approve' in request.form:
+                db.execute(comment_table.update(query), dict(
+                    status=COMMENT_MODERATED,
+                    blocked_msg=''
+                ))
+                db.commit()
+                flash(_('Approved all the selected comments.'))
+                return simple_redirect('admin/show_comments')
+
+    comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    pagination = Pagination('admin/show_comments', page, PER_PAGE,
+                            query.count())
+    if not comments and page != 1:
+        raise NotFound()
     return render_admin_response('admin/show_comments.html',
-                                 'comments.overview',
-        post=post,
-        comments=moderated,
-        unmoderated = unmoderated
+                                 'comments.' + identifier,
+                                 comments_title=title,
+                                 comments=comments,
+                                 pagination=pagination,
+                                 hidden_form_data=csrf_protector)
+
+
+@require_role(ROLE_AUTHOR)
+def do_show_comments(request, page):
+    """Show all the comments."""
+    return _handle_comments('overview', 'All Comments',
+                                Comment.objects.query, page)
+
+
+@require_role(ROLE_AUTHOR)
+def do_show_unmoderated_comments(request, page):
+    """Show all unmoderated and user-blocked comments."""
+    query = Comment.objects.query.filter(
+        (Comment.status == COMMENT_UNMODERATED) |
+        (Comment.status == COMMENT_BLOCKED_USER)
     )
+    return _handle_comments('unmoderated', 'Comments Awaiting Moderation',
+                                query, page)
+
+
+@require_role(ROLE_AUTHOR)
+def do_show_spam_comments(request, page):
+    """Show all spam comments."""
+    query = Comment.objects.query.filter(Comment.status ==
+                                         COMMENT_BLOCKED_SPAM)
+    return _handle_comments('spam', 'Spam', query, page)
+
+
+@require_role(ROLE_AUTHOR)
+def do_show_post_comments(request, post_id):
+    """Show all comments for a single post."""
 
 
 @require_role(ROLE_AUTHOR)
@@ -581,8 +639,8 @@ def do_edit_comment(request, comment_id):
         form['author'] = author = request.form.get('author')
         if not author:
             errors.append(_('You have to give the comment an author.'))
-        form['email'] = email = request.form.get('email')
-        if not email or not is_valid_email(email):
+        form['email'] = email = request.form.get('email', '')
+        if email and not is_valid_email(email):
             errors.append(_('You have to provide a valid mail address for '
                             'the author.'))
         form['www'] = www = request.form.get('www')
@@ -617,11 +675,14 @@ def do_edit_comment(request, comment_id):
                 # always set parser before raw body because of callbacks.
                 comment.parser = parser
                 comment.raw_body = body
-            comment.blocked = blocked
             if not blocked:
+                comment.status = COMMENT_MODERATED
                 comment.blocked_msg = ''
-            elif not comment.blocked_msg:
-                comment.blocked_msg = _('blocked by %s') % request.user.display_name
+            else:
+                comment.status = COMMENT_BLOCKED_USER
+                if not comment.blocked_msg:
+                    comment.blocked_msg = _('blocked by %s') % \
+                        request.user.display_name
             db.commit()
             flash(_('Comment by %s moderated successfully.') %
                   escape(comment.author))
@@ -692,30 +753,28 @@ def do_delete_comment(request, comment_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_unblock_comment(request, comment_id):
-    """
-    Unblock a comment which was blocked by an antispam plugin or a user.
-    Redirect rules are identical to the delete page, just that the exception
-    for deleted comments is left out.
-    """
+def do_approve_comment(request, comment_id):
+    """Approve a comment"""
     comment = Comment.objects.get(comment_id)
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
     if comment is None:
-        return redirect(url_for('admin/show_comments'))
+        raise NotFound()
+
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
         if request.form.get('confirm'):
-            comment.blocked = False
-            comment.blocked_msg = ''
+            csrf_protector.assert_safe()
             comment.status = COMMENT_MODERATED
+            comment.blocked_msg = ''
             db.commit()
-            flash(_('Comment by %s unblocked successfully.') %
+            flash(_('Comment by %s approved successfully.') %
                   escape(comment.author), 'configure')
         return redirect('admin/show_comments')
 
-    return render_admin_response('admin/unblock_comment.html',
+    return render_admin_response('admin/approve_comment.html',
                                  'comments.overview',
         comment=comment,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
@@ -723,75 +782,31 @@ def do_unblock_comment(request, comment_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_moderate_redirect(request, comment_id):
-    redirect = IntelligentRedirect()
-    if request.method == 'POST':
-        if request.form.get('aprove'):
-            #redirect(url_for('admin/aprove_comment', comment_id=comment_id))
-            return do_aprove_comment(comment_id)
-        elif request.form.get('block'):
-            #return redirect(url_for('admin/manage_comment', comment_id=comment_id))
-            return do_moderate_redirect(comment_id)
-    return redirect('admin/show_comments')
-
-
-@require_role(ROLE_AUTHOR)
-def do_moderate_comment(request, comment_id):
-    """moderate comment"""
-    comment = Comment.objects.get(comment_id)
-    if comment is None:
-        return redirect(url_for('admin/show_comments'))
-
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
-    if request.method == 'POST':
-        if request.form.get('update'):
-            csrf_protector.assert_safe()
-            status = int(request.form.get('comment_status'))
-            if status > COMMENT_MODERATED:
-                comment.blocked = True
-            else:
-                comment.blocked = False
-            comment.status = status
-            comment.blocked_msg = request.form.get('block_msg')
-            db.commit()
-            flash(_('Comment by %s moderated successfully.') %
-                  escape(comment.author), 'configure')
-            return redirect('admin/show_comments')
-        elif request.form.get('cancel'):
-            return redirect('admin/show_comments')
-
-    return render_admin_response('admin/moderate_comment.html',
-                                 'comments.overview',
-        comment=comment,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
-
-@require_role(ROLE_AUTHOR)
-def do_aprove_comment(request, comment_id):
-    """moderate comment"""
+def do_block_comment(request, comment_id):
+    """Block a comment."""
     comment = Comment.objects.get(comment_id)
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
     if comment is None:
-        return redirect(url_for('admin/show_comments'))
+        raise NotFound()
 
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
     if request.method == 'POST':
         if request.form.get('confirm'):
+            msg = request.form.get('message')
+            if not msg:
+                msg = _('blocked by %s') % request.user.display_name
             csrf_protector.assert_safe()
-            comment.blocked = False
-            comment.blocked_msg = ''
-            comment.status = COMMENT_MODERATED
+            comment.status = COMMENT_BLOCKED_USER
+            comment.blocked_msg = msg
             db.commit()
-            flash(_('Comment by %s aproved successfully.') %
+            flash(_('Comment by %s approved successfully.') %
                   escape(comment.author), 'configure')
-            return redirect('admin/show_comments')
+        return redirect('admin/show_comments')
 
-    return render_admin_response('admin/aprove_comment.html',
+    return render_admin_response('admin/block_comment.html',
                                  'comments.overview',
         comment=comment,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
@@ -1083,9 +1098,9 @@ def do_delete_user(request, user_id):
             action_val = None
             if action == 'reassign':
                 action_val = request.form.get('reassign_user', type=int)
-                db.execute(posts.update(posts.c.author_id == user_id),
+                db.execute(posts.update(posts.c.author_id == user_id), dict(
                     author_id=action_val
-                )
+                ))
             #! plugins can use this to react to user deletes.  They can't stop
             #! the deleting of the user but they can delete information in
             #! their own tables so that the database is consistent afterwards.

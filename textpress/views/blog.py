@@ -205,7 +205,7 @@ def do_show_post(request, year, month, day, slug):
         `before-comment-saved`:
             executed right before the comment is saved to the database.
             The event data is set to the comment. This is usually used
-            to block the comment (setting the blocked and blocked_msg
+            to block the comment (setting the status and blocked_msg
             attributes) so that administrators have to approve them.
 
         `after-comment-saved`:
@@ -279,27 +279,27 @@ def do_show_post(request, year, month, day, slug):
             comment = Comment(post, name, email, www, body, parent,
                               submitter_ip=ip)
 
-            #! Moderate Comment?
-            if not request.app.cfg['moderate_comments']:
-                comment.status = COMMENT_MODERATED
-            elif request.user.role >= ROLE_AUTHOR:
-                #! Don't moderate comments for roles >= ROLE_AUTHOR
-                comment.status = COMMENT_MODERATED
-            else:
-                comment.blocked = True
-                comment.blocked_msg = _('Comment waiting for approval')
-
             #! use this event to block comments before they are saved.  This
             #! is useful for antispam and other ways of moderation.
             emit_event('before-comment-saved', request, comment)
+
+            # Moderate Comment?  Now that the spam check any everything
+            # went through the processing we explicitly set it to
+            # unmodereated if the user is not an author and the settings
+            # want comment moderation
+            if not comment.blocked and request.user.role < ROLE_AUTHOR and \
+               request.app.cfg['moderate_comments']:
+                comment.status = COMMENT_UNMODERATED
+                comment.blocked_msg = _('Comment waiting for approval')
+
             db.commit()
 
             #! this is sent directly after the comment was saved.  Useful if
             #! you want to send mail notifications or whatever.
             emit_event('after-comment-saved', request, comment)
 
+            # Still allow the user to see his comment
             if comment.blocked:
-                # Still allow the user to see his comment
                 comment.make_visible_for_request(request)
 
             return redirect(url_for(post))

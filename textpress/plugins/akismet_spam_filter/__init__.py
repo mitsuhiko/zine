@@ -13,7 +13,7 @@ from os.path import dirname, join
 from textpress.api import *
 from textpress.widgets import Widget
 from textpress.views.admin import flash, render_admin_response
-from textpress.models import ROLE_ADMIN, Comment
+from textpress.models import ROLE_ADMIN, COMMENT_BLOCKED_SPAM, Comment
 from textpress.utils import CSRFProtector, RequestLocal
 from urllib import urlopen
 from werkzeug import escape, url_encode
@@ -138,7 +138,7 @@ def do_spamcheck(req, comment):
 
     resp = send_request(apikey, True, data, 'comment-check')
     if resp == 'true':
-        comment.blocked = True
+        comment.status = COMMENT_BLOCKED_SPAM
         comment.blocked_msg = BLOCKED_MSG
 
 

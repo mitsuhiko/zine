@@ -369,7 +369,6 @@ comments = db.Table('comments', metadata,
     db.Column('parser_data', db.PickleType),
     db.Column('parent_id', db.Integer, db.ForeignKey('comments.comment_id')),
     db.Column('pub_date', db.DateTime),
-    db.Column('blocked', db.Boolean, nullable=False),
     db.Column('blocked_msg', db.String(250)),
     db.Column('submitter_ip', db.String(100)),
     db.Column('status', db.Integer, nullable=False)

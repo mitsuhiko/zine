@@ -1,93 +1,41 @@
 {% extends "admin/layout.html" %}
-{% block title %}{{ _("Manage Comments") }}{% endblock %}
+{% from 'admin/_comment.html' import render_comment %}
+{% block title %}{{ comments_title }}{% endblock %}
 {% block contents %}
-  {% if post %}
-    <h2>{% trans post_title=post.title|e %}Comments for Post "{{
-      post_title }}"{% endtrans %}</h2>
-    <p>
-      <a href="{{ url_for('admin/show_comments') }}">{{ _("show all comments") }}</a>,
-      <a href="{{ url_for('admin/edit_post', post_id=post.post_id) }}">edit post</a> or
-      <a href="{{ url_for(post)|e }}">show post</a>.
-    </p>
-  {% else %}
-    <h2>{{ _("Manage Comments") }}</h2>
-  {% endif %}
-  <fieldset><legend>{{ _("Unmoderated Comments") }}</legend>
-  <ul class="comments">
-  {%- for comment in unmoderated %}
-    <li class="comment {{ loop.cycle('odd', 'even') }}" style="border-bottom: none; margin: 0 0;">
-      <table style="border: none;"><tr><td width="100%">
-      <p><strong>{{ comment.author }}</strong> |
-         {% if comment.email %}<a href="mailto:{{ comment.email|e }}">{{
-           comment.email|e }}</a>{% else %}<em>no email given</em>{% endif %} |
-         {% if comment.www %}<a href="{{ comment.www|e }}">{{ comment.www|e
-           }}</a> |{% endif %}
-         IP: {{ comment.submitter_ip }}
-         {%- if comment.blocked %}
-           | {{ comment.blocked_msg }}
-         {%- endif %}
-         </p>
-      {{ comment.body }}
-      <p>{{ comment.pub_date|datetimeformat|e }}
-         [ <a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e
-             }}">{{ _("Edit") }}</a> |
-           <a href="{{ url_for('admin/delete_comment', comment_id=comment.comment_id)|e
-             }}">{{ _("Delete") }}</a>
-           {%- if comment.blocked %} | <a href="{{ url_for('admin/unblock_comment',
-             comment_id=comment.comment_id)|e }}">{{ _("Unblock") }}</a>{% endif %}
-         ]
-         {% if not post %}&mdash; <a href="{{ url_for(comment.post)|e }}">{{
-           comment.post.title|e }}</a>{% endif %}</p>
-      </td>
-      <td>
-        <form action="{{ url_for('admin/aprove_comment',
-                                 comment_id=comment.comment_id)|e }}" method="post">
-          <input type="submit" name="aprove" value="Aprove"
-                 style="width: 100px;"/>
-        </form>
-        <form action="{{url_for('admin/moderate_comment',
-                                comment_id=comment.comment_id)|e}}" method="post">
-          <input type="submit" name="block" value="Block"
-                 style="width: 100px;"/>
-        </form>
-      </td></tr></table>
-    </li>
-  {%- else %}
-    <li>{{ _("No comments.") }}</li>
-  {%- endfor %}
-  </ul></fieldset>
-
-  <fieldset><legend>{{ _("Moderated Comments") }}</legend>
-  <ul class="comments">
-  {%- for comment in comments %}
-    <li class="comment {{ loop.cycle('odd', 'even') }}{% if comment.blocked %} blocked{% endif %}">
-      <p><strong>{{ comment.author }}</strong> |
-         {% if comment.email %}<a href="mailto:{{ comment.email|e }}">{{
-           comment.email|e }}</a>{% else %}<em>no email given</em>{% endif %} |
-         {% if comment.www %}<a href="{{ comment.www|e }}">{{ comment.www|e
-           }}</a> |{% endif %}
-         IP: {{ comment.submitter_ip }}
-         {%- if comment.blocked %}
-           | {{ comment.blocked_msg }}
-         {%- endif %}
-         </p>
-      {{ comment.body }}
-      <p>{{ comment.pub_date|datetimeformat|e }}
-         [ {%- if not comment.blocked
-             -%}<a href="{{url_for('admin/moderate_comment', comment_id=comment.comment_id )|e
-             }}">{{ _("Moderate") }}</a> |{% endif %}
-           <a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e
-             }}">{{ _("Edit") }}</a> |
-           <a href="{{ url_for('admin/delete_comment', comment_id=comment.comment_id)|e
-             }}">{{ _("Delete") }}</a>
-           {%- if comment.blocked %} | <a href="{{ url_for('admin/unblock_comment',
-             comment_id=comment.comment_id)|e }}">{{ _("Unblock") }}</a>{% endif %}
-         ]
-         {% if not post %}&mdash; <a href="{{ url_for(comment.post)|e }}">{{
-           comment.post.title|e }}</a>{% endif %}</p>
-    </li>
-  {%- else %}
-    <li>{{ _("No comments.") }}</li>
-  {%- endfor %}
-  </ul></fieldset>
+  <h2>{{ comments_title }}</h2>
+  <form action="" method="post">
+    <ul class="comments">
+    {%- for comment in comments %}
+      <li class="comment {{ loop.cycle('odd', 'even') }}{{ ' blocked'
+        if comment.blocked else '' }}">
+        <input type="checkbox" name="comment" value="{{ comment.comment_id
+          }}" class="mark">
+        {{ render_comment(comment) }}
+      </li>
+    {%- else %}
+      <li>{{ _("No comments.") }}</li>
+    {%- endfor %}
+    </ul>
+    <div class="actions">
+      {{ hidden_form_data }}
+      <input type="submit" name="approve" value="{{ _('Approve') }}">
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+    </div>
+    <script type="text/javascript">
+      $(function() {
+        $('<input type="button" value="{{ _('Select All') }}">')
+          .click(function() {
+            $('input.mark').each(function() {
+              this.checked = true;
+            });
+          })
+          .appendTo('div.actions');
+      });
+    </script>
+    {%- if pagination.necessary %}
+    <div class="pagination">
+      {{ pagination.generate() }}
+    </div>
+    {%- endif %}
+  </form>
 {% endblock %}
