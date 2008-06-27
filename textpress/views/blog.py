@@ -11,7 +11,7 @@
 """
 from textpress.api import *
 from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR, \
-    COMMENT_MODERATED
+    COMMENT_UNMODERATED
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
      dump_json, dump_xml, build_tag_uri, AtomFeed
 from textpress import pingback

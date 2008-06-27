@@ -212,8 +212,10 @@ def do_index(request):
     unmoderated_comments = Comment.objects.get_unmoderated_count()
     if unmoderated_comments:
         flash(_('<a href="%(url)s">There are %(count)d comments awaiting '
-                'moderation</a>' % dict(url=url_for('admin/show_comments'),
-                                        count=unmoderated_comments)))
+                'moderation</a>' % dict(
+            url=url_for('admin/show_unmoderated_comments'),
+            count=unmoderated_comments
+        )))
     return render_admin_response('admin/index.html', 'dashboard',
                                  drafts=Post.objects.get_drafts())
 
@@ -528,7 +530,7 @@ def _handle_comments(identifier, title, query, page):
             comments = request.form.getlist('comment', type=int)
 
         if comments and not 'cancel' in request.form:
-            query = comment_table.c.comment_id.in_(*comments)
+            query = comment_table.c.comment_id.in_(comments)
 
             # delete the comments in the list
             if 'delete' in request.form:

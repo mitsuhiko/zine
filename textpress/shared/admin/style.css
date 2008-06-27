@@ -796,3 +796,26 @@ div.login-box input[type="submit"] {
     border-width: 3px;
     color: #333;
 }
+
+/* :::: PAGINATION :::: */
+div.pagination span.commata {
+    display: none;
+}
+
+div.pagination {
+    padding: 5px 0 5px 0;
+    text-align: center;
+}
+
+div.pagination strong,
+div.pagination a {
+    margin: 0 2px;
+    padding: 5px 8px 5px 8px;
+    border: 1px solid #ccc;
+    background: white;
+    text-decoration: none;
+}
+
+div.pagination span.ellipsis {
+    margin: 0 8px 0 8px;
+}

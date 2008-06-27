@@ -776,9 +776,9 @@ class CommentManager(db.DatabaseManager):
         """Filter all blocked comments."""
         if query is None:
             query = Comment
-        return query.filter(Comment.blocked.in_(COMMENT_BLOCKED_USER,
-                                                COMMENT_BLOCKED_SPAM,
-                                                COMMENT_BLOCKED_SYSTEM))
+        return query.filter(Comment.blocked.in_([COMMENT_BLOCKED_USER,
+                                                 COMMENT_BLOCKED_SPAM,
+                                                 COMMENT_BLOCKED_SYSTEM]))
 
     def get_blocked(self):
         """Get a list of all blocked comments."""

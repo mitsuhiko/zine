@@ -764,8 +764,10 @@ class Pagination(object):
         self.necessary = self.pages > 1
 
     def generate(self, normal='<a href="%(url)s">%(page)d</a>',
-                 active='<strong>%(page)d</strong>', commata=',\n',
-                 ellipsis=u' …\n', threshold=3, prev_link=False,
+                 active='<strong>%(page)d</strong>',
+                 commata='<span class="commata">,\n</span>',
+                 ellipsis=u'<span class="ellipsis"> …\n</span>',
+                 threshold=3, prev_link=False,
                  next_link=False, gray_prev_link=True, gray_next_link=True):
         from textpress.application import url_for
         was_ellipsis = False

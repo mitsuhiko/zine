@@ -16,7 +16,7 @@
       <td><a href="{{ url_for('admin/edit_user', user_id=user.user_id)|e }}">{{
           user.username|e }}</a></td>
       <td>{{ user.first_name|e }} {{ user.last_name|e }}</td>
-      <td>{{ user.email|e }}</td>
+      <td>{{ (user.email or '')|e }}</td>
       <td>{{ user.role_as_string|e }}</td>
     </tr>
   {%- endfor %}
