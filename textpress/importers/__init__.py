@@ -18,7 +18,7 @@ from datetime import datetime
 from textpress.api import _, require_role
 from textpress.database import db, posts
 from textpress.utils import escape, get_etree
-from textpress.models import ROLE_ADMIN, ROLE_AUTHOR
+from textpress.models import ROLE_ADMIN, ROLE_AUTHOR, COMMENT_MODERATED
 
 
 def list_import_queue(app):
@@ -138,7 +138,8 @@ def _perform_import(app, blog, d):
                 Comment(post, comment.author, comment.author_email,
                         comment.author_url, comment.body, None,
                         comment.pub_date, comment.remote_addr,
-                        comment.parser, comment.is_pingback)
+                        comment.parser, comment.is_pingback,
+                        comment.status)
                 yield '.'
         yield u' <em>%s</em></li>\n' % _('done')
 
@@ -149,10 +150,9 @@ def _perform_import(app, blog, d):
 
 
 def perform_import(app, blog, data, stream=False):
-    """
-    Perform an import from form data.  This function was designed to be called
-    from a web request, if you call it form outside, make sure the config is
-    flushed afterwards.
+    """Perform an import from form data.  This function was designed to be
+    called from a web request, if you call it form outside, make sure the
+    config is flushed afterwards.
     """
     generator = _perform_import(app, blog, data)
 
@@ -209,16 +209,13 @@ class Importer(object):
         return require_role(ROLE_ADMIN)(self.configure)(request)
 
     def configure(self, request):
-        """
-        Subclasses should override this and implement the admin panel
+        """Subclasses should override this and implement the admin panel
         that ask for details and imports to the queue.
         """
 
 
 class Blog(object):
-    """
-    Represents a blog.
-    """
+    """Represents a blog."""
 
     def __init__(self, title, link, description, language='en', labels=None,
                  posts=None, authors=None):
@@ -258,9 +255,7 @@ class Blog(object):
 
 
 class Author(object):
-    """
-    Represents an author.
-    """
+    """Represents an author."""
 
     def __init__(self, id, name, email):
         self.id = id
@@ -275,9 +270,7 @@ class Author(object):
 
 
 class Label(object):
-    """
-    Represents a category or tag.
-    """
+    """Represents a category or tag."""
 
     def __init__(self, slug, name):
         self.slug = slug
@@ -295,9 +288,7 @@ class Label(object):
 
 
 class Post(object):
-    """
-    Represents a blog post.
-    """
+    """Represents a blog post."""
 
     def __init__(self, slug, title, link, pub_date, author, intro, body,
                  labels=None, comments=None, comments_enabled=True,
@@ -334,7 +325,8 @@ class Comment(object):
     """
 
     def __init__(self, author, author_email, author_url, remote_addr,
-                 pub_date, body, parser=None, is_pingback=False):
+                 pub_date, body, parser=None, is_pingback=False,
+                 status=COMMENT_MODERATED):
         self.author = author
         self.author_email = author_email
         self.author_url = author_url
@@ -343,6 +335,7 @@ class Comment(object):
         self.body = body
         self.parser = parser or 'plain'
         self.is_pingback = is_pingback
+        self.status = status
 
     def __repr__(self):
         return '<%s %r>' % (

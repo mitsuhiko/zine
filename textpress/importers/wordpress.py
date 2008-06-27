@@ -16,6 +16,7 @@ from textpress.api import *
 from textpress.importers import Importer, Blog, Label, Author, Post, Comment
 from textpress.utils import _html_entities, get_etree, CSRFProtector, \
      StreamReporter, make_hidden_fields, flash, escape
+from textpress.models import COMMENT_UNMODERATED, COMMENT_MODERATED
 
 
 class _Namespace(object):
@@ -122,8 +123,11 @@ def parse_feed(fd):
                 parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
                 x.findtext(WORDPRESS.comment_content), 'plain',
                 x.findtext(WORDPRESS.comment_type) in ('pingback',
-                                                       'traceback')
-            ) for x in item.findall(WORDPRESS.comment)],
+                                                       'traceback'),
+                x.findtext(WORDPRESS.comment_approved) == '1' and \
+                    COMMENT_MODERATED or COMMENT_UNMODERATED
+            ) for x in item.findall(WORDPRESS.comment)
+              if x.findtext(WORDPRESS.comment_approved) != 'spam'],
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
             parser='autop'
