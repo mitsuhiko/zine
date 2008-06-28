@@ -149,7 +149,7 @@ def do_show_author(request, username, page=1):
                                (User.role >= ROLE_AUTHOR)).first()
     if user is None:
         raise NotFound()
-    data = Post.objects.get_list(author=user, per_page=30)
+    data = Post.objects.get_list(author=user, page=page, per_page=30)
     if data.pop('probably_404'):
         raise NotFound()
 
