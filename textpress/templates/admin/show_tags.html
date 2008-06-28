@@ -15,7 +15,7 @@
       <td><a href="{{ url_for('admin/edit_tag', tag_id=tag.tag_id)|e }}">{{
           tag.slug|e }}</a></td>
       <td>{{ tag.name|e }}</td>
-      <td>{{ tag.posts|count }}</td>
+      <td>{{ tag.posts.count() }}</td>
     </tr>
   {%- else %}
     <tr><td colspan="4">{{ _("No tags.") }}</td></tr>

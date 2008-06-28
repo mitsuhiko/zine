@@ -3,18 +3,18 @@
 {% block contents %}
   <h2>{{ _("Edit Tag") }}</h2>
   <form action="" method="post">
-    <fieldset>
-      <legend>{{ _("Slug") }}</legend>
+    <div class="formbox">
+      <h3>{{ _("Slug") }}</h3>
       {{ h.input_field('slug', form.slug) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Name") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Name") }}</h3>
       {{ h.input_field('name', form.name) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Description") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Description") }}</h3>
       {{ h.textarea('description', form.description, rows=5) }}
-    </fieldset>
+    </div>
     <div class="actions">
        {{ hidden_form_data }}
       <input type="submit" value="{{ _('Save') }}">

@@ -18,20 +18,30 @@
   </div>
   {% endif %}
   <form action="" method="post">
-    <fieldset>
-      <legend>{{ _("Title") }}</legend>
+    <div class="formbox formbox-title">
+      <h3>{{ _("Title") }}</h3>
       {{ h.input_field('title', form.title, size=36) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Post") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Post") }}</h3>
       {{ h.textarea('body', form.body, rows=20) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Intro") }}</legend>
+    </div>
+    <div class="formbox toggleable">
+      <h3>{{ _("Post Status") }}</h3>
+      <ul>
+      {%- for state, caption in post_status_choices %}
+        <li>{{ h.radio_button('post_status', state, form.post_status == state,
+               id='post_status_' + (state|string)) }} <label for="post_status_{{
+               state }}">{{ caption|e }}</label></li>
+      {%- endfor %}
+      </ul>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Intro") }}</h3>
       {{ h.textarea('intro', form.intro, rows=5) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Tags") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Tags") }}</h3>
       {{ h.input_field('add_tag') }}
       <input type="submit" value="{{ _('Add') }}">
       <ul>
@@ -43,50 +53,40 @@
         <li><em>no tags created yet</em></li>
       {%- endfor %}
       </ul>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Post Status") }}</legend>
-      <ul>
-      {%- for state, caption in post_status_choices %}
-        <li>{{ h.radio_button('post_status', state, form.post_status == state,
-               id='post_status_' + (state|string)) }} <label for="post_status_{{
-               state }}">{{ caption|e }}</label></li>
-      {%- endfor %}
-      </ul>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Parser") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Parser") }}</h3>
       <select name="parser">
       {%- for parser_id, name in parsers %}
         <option value="{{ parser_id|e }}"{% if parser_id == form.parser
           %} selected{% endif %}>{{ name|e }}</option>
       {%- endfor %}
       </select>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Discussion") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Discussion") }}</h3>
       <ul>
         <li>{{ h.checkbox('comments_enabled', form.comments_enabled)
           }} <label for="comments_enabled">{{ _("Allow comments") }}</label></li>
         <li>{{ h.checkbox('pings_enabled', form.pings_enabled)
           }} <label for="pings_enabled">{{ _("Allow pings") }}</label></li>
-        <li>{{ h.checkbox('ping_from_text', form.ping_from_text)
+        <li>{{ h.checkbox('ping_from_text', form.ping_from_text)
           }} <label for="ping_from_text">{{ _("Ping all URLs in the text") }}</label></li>
       </ul>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Publication Date") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Publication Date") }}</h3>
       {{ h.input_field('pub_date', form.pub_date) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Post Slug") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Post Slug") }}</h3>
       {{ h.input_field('slug', form.slug) }}
-    </fieldset>
+    </div>
     {%- if can_change_author %}
-      <fieldset>
-        <legend>{{ _("Author") }}</legend>
+      <div class="formbox toggleable collapsed">
+        <h3>{{ _("Author") }}</h3>
         {{ h.input_field('author', form.author) }}
-      </fieldset>
+      </div>
     {%- endif %}
     {% if not new_post %}
       <p class="preview">

@@ -10,37 +10,37 @@
   <p>
   {% endif %}
   <form action="" method="post">
-    <fieldset>
-      <legend>{{ _("Author") }}</legend>
+    <div class="formbox">
+      <h3>{{ _("Author") }}</h3>
       {{ h.input_field('author', form.author) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("E-Mail") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("E-Mail") }}</h3>
       {{ h.input_field('email', form.email) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Webpage") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Webpage") }}</h3>
       {{ h.input_field('www', form.www) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Text") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Text") }}</h3>
       {{ h.textarea('body', form.body, rows=7) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Parser") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Parser") }}</h3>
       <select name="parser">
       {%- for parser_id, name in parsers %}
         <option value="{{ parser_id|e }}"{% if parser_id == form.parser
           %} selected{% endif %}>{{ name|e }}</option>
       {%- endfor %}
       </select>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Date") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Date") }}</h3>
       {{ h.input_field('pub_date', form.pub_date) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Block Comment") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Block Comment") }}</h3>
       {{ h.checkbox('blocked', form.blocked) }}
       {% if comment.blocked %}
         <label for="blocked">{% trans reason=comment.blocked_msg|e
@@ -48,7 +48,7 @@
       {% else %}
         <label for="blocked">{{ _("block comment") }}</label>
       {% endif %}
-    </fieldset>
+    </div>
     <div class="actions">
       {{ hidden_form_data }}
       <input type="submit" value="{{ _('Save') }}">

@@ -11,29 +11,29 @@
     </div>
   {%- endif %}
   <form action="" method="post">
-    <fieldset>
-      <legend>{{ _("Username") }}</legend>
+    <div class="formbox">
+      <h3>{{ _("Username") }}</h3>
       {{ h.input_field('username', form.username, size=30) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Password") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Password") }}</h3>
       {{ h.input_field('password', form.password, type='password', size=30) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("E-Mail") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("E-Mail") }}</h3>
       {{ h.input_field('email', form.email, size=30) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("First Name") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("First Name") }}</h3>
       {{ h.input_field('first_name', form.first_name, size=30) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Last Name") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Last Name") }}</h3>
       {{ h.input_field('last_name', form.last_name, size=30) }}
-    </fieldset>
+    </div>
     {%- if not new_user %}
-    <fieldset>
-      <legend>{{ _("Display Name") }}</legend>
+    <div class="formbox">
+      <h3>{{ _("Display Name") }}</h3>
       <ul>
       {%- for tmpl, value in display_names %}
         <li>{{ h.radio_button('display_name', tmpl, form.display_name == tmpl,
@@ -41,14 +41,14 @@
             loop.index }}">{{ value|e }}</label></li>
       {%- endfor %}
       </ul>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Description") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Description") }}</h3>
       {{ h.textarea('description', form.description, rows=5) }}
-    </fieldset>
+    </div>
     {%- endif %}
-    <fieldset>
-      <legend>{{ _("Role") }}</legend>
+    <div class="formbox">
+      <h3>{{ _("Role") }}</h3>
       <ul>
       {%- for role_id, caption in roles %}
         <li>{{ h.radio_button('role', role_id, form.role == role_id,
@@ -56,7 +56,7 @@
             role_id }}">{{ caption|e }}</label></li>
       {%- endfor %}
       </ul>
-    </fieldset>
+    </div>
     <div class="actions">
       {{ hidden_form_data }}
       <input type="submit" name="save" value="{{ _('Save') }}">

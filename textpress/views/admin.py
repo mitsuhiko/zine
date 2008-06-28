@@ -80,8 +80,10 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         ('comments', url_for('admin/show_comments'), _('Comments'), [
             ('overview', url_for('admin/show_comments'), _('Overview')),
             ('unmoderated', url_for('admin/show_unmoderated_comments'),
-             _('Awaiting Moderation')),
-            ('spam', url_for('admin/show_spam_comments'), _('Spam'))
+             _('Awaiting Moderation (%d)') %
+             Comment.objects.unmoderated().count()),
+            ('spam', url_for('admin/show_spam_comments'),
+             _('Spam (%d)') % Comment.objects.spam().count())
         ]),
         ('tags', url_for('admin/show_tags'), _('Tags'), [
             ('overview', url_for('admin/show_tags'), _('Overview')),
@@ -209,7 +211,7 @@ def do_index(request):
     such as "new post", etc. and the recent blog activity (unmoderated
     comments etc.)
     """
-    unmoderated_comments = Comment.objects.get_unmoderated_count()
+    unmoderated_comments = Comment.objects.unmoderated().count()
     if unmoderated_comments:
         flash(_('<a href="%(url)s">There are %(count)d comments awaiting '
                 'moderation</a>' % dict(
@@ -217,7 +219,7 @@ def do_index(request):
             count=unmoderated_comments
         )))
     return render_admin_response('admin/index.html', 'dashboard',
-                                 drafts=Post.objects.get_drafts())
+                                 drafts=Post.objects.drafts().all())
 
 
 @require_role(ROLE_AUTHOR)
@@ -229,7 +231,7 @@ def do_show_posts(request, page):
     if not posts and page != 1:
         raise NotFound()
     return render_admin_response('admin/show_posts.html', 'posts.overview',
-                                 drafts=Post.objects.get_drafts(),
+                                 drafts=Post.objects.drafts().all(),
                                  posts=posts,
                                  pagination=pagination)
 
@@ -467,7 +469,7 @@ def do_edit_post(request, post_id=None):
         form=form,
         tags=Tag.objects.all(),
         post=post,
-        drafts=list(Post.objects.get_drafts(exclude=exclude)),
+        drafts=list(Post.objects.drafts(exclude=exclude).all()),
         can_change_author=request.user.role >= ROLE_EDITOR,
         post_status_choices=[
             (STATUS_PUBLISHED, _('Published')),
@@ -569,26 +571,20 @@ def _handle_comments(identifier, title, query, page):
 def do_show_comments(request, page):
     """Show all the comments."""
     return _handle_comments('overview', 'All Comments',
-                                Comment.objects.query, page)
+                            Comment.objects.query, page)
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_unmoderated_comments(request, page):
     """Show all unmoderated and user-blocked comments."""
-    query = Comment.objects.query.filter(
-        (Comment.status == COMMENT_UNMODERATED) |
-        (Comment.status == COMMENT_BLOCKED_USER)
-    )
     return _handle_comments('unmoderated', 'Comments Awaiting Moderation',
-                                query, page)
+                            Comment.objects.unmoderated(), page)
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_spam_comments(request, page):
     """Show all spam comments."""
-    query = Comment.objects.query.filter(Comment.status ==
-                                         COMMENT_BLOCKED_SPAM)
-    return _handle_comments('spam', 'Spam', query, page)
+    return _handle_comments('spam', 'Spam', Comment.objects.spam(), page)
 
 
 @require_role(ROLE_AUTHOR)

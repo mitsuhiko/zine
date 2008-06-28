@@ -172,7 +172,7 @@ def do_authors(request):
     :Template name: ``authors.html``
     :URL endpoint: ``blog/authors``
     """
-    return render_response('authors.html', authors=User.objects.get_authors())
+    return render_response('authors.html', authors=User.objects.authors().all())
 
 
 @cache.response(vary=('user',))

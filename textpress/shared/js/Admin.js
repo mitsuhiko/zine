@@ -10,6 +10,7 @@
  */
 
 $(function() {
+  // fade in messages
   var messages = $('div.message').hide().fadeIn('slow');
   window.setTimeout(function() {
     messages.each(function() {
@@ -17,6 +18,19 @@ $(function() {
         $(this).animate({height: 'hide', opacity: 'hide'}, 'slow');
     });
   }, 8000);
+
+  // support for toggleable sections
+  $('div.toggleable').each(function() {
+    var
+      fieldset = $(this),
+      children = fieldset.children().slice(1);
+    if ($(this).is('.collapsed'))
+      children.hide();
+    $('h3', this).click(function() {
+      children.toggle();
+      fieldset.toggleClass('collapsed');
+    });
+  });
 });
 
 
@@ -29,7 +43,7 @@ UploadProgressBar = function(container, transportID, readyMessage) {
   this.bar = $('<div class="bar">').appendTo(this.container);
   this.label = $('<div class="label">').appendTo(this.container);
   this.oldPercent = 0;
-  this.readyMessage = readyMessage || _('Finishing upload, stand by....');
+  this.readyMessage = readyMessage || _('Finishing upload, stand by....');
 };
 
 UploadProgressBar.prototype.connectTo = function(form) {

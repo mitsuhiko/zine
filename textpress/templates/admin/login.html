@@ -6,7 +6,7 @@
   <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='admin/style.css') }}">
   {{ get_page_metadata() }}
 </head>
-<body>
+<body class="login">
   <div class="login-box">
     <h2><span>{{ _("Login") }}</span></h2>
     {%- if logged_out %}
@@ -22,7 +22,7 @@
         <dd>{{ h.input_field('password', '', 'password') }}</dd>
       </dl>
       <p>
-        {{ h.checkbox('permanent') }}
+        {{ h.checkbox('permanent') }}
         <label for="permanent">{{ _('Remember me') }}</label>
       </p>
       <div class="actions">

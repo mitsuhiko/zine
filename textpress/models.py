@@ -44,11 +44,8 @@ class UserManager(db.DatabaseManager):
     def get_nobody(self):
         return AnonymousUser()
 
-    def filter_authors(self):
+    def authors(self):
         return self.filter(User.role >= ROLE_AUTHOR)
-
-    def get_authors(self):
-        return self.filter_authors().all()
 
 
 class User(object):
@@ -151,7 +148,7 @@ class AnonymousUser(User):
 class PostManager(db.DatabaseManager):
     """Add some extra methods to the post model."""
 
-    def filter_published(self, query=None, ignore_role=None):
+    def published(self, query=None, ignore_role=None):
         """Return a queryset for only published posts."""
         role = ROLE_NOBODY
         if query is None:
@@ -193,10 +190,12 @@ class PostManager(db.DatabaseManager):
         """Get an item by year, month, day, and the post slug."""
         return self.filter_by_timestamp_and_slug(year, month, day, slug).first()
 
-    def filter_drafts(self, exclude=None, ignore_user=False):
+    def drafts(self, query=None, exclude=None, ignore_user=False):
         """Return a query that returns all drafts."""
         req = get_request()
-        query = self.query.filter(Post.status == STATUS_DRAFT)
+        if query is None:
+            query = self.query
+        query = query.filter(Post.status == STATUS_DRAFT)
         if req and not ignore_user:
             query = query.filter(Post.author_id == req.user.user_id)
         if exclude is not None:
@@ -204,10 +203,6 @@ class PostManager(db.DatabaseManager):
                 exclude = Post.post_id
             query = query.filter(Post.post_id != exclude)
         return query
-
-    def get_drafts(self, exclude=None, ignore_user=False):
-        """Return all drafts."""
-        return self.filter_drafts(exclude, ignore_user).all()
 
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
                  page=1, per_page=None, ignore_role=False, as_list=False):
@@ -397,16 +392,12 @@ class PostManager(db.DatabaseManager):
             'empty':    not result
         }
 
-    def filter_latest(self, limit=None, ignore_role=False):
+    def latest(self, limit=None, ignore_role=False):
         """Filter for the latest n posts."""
-        query = self.filter_published(ignore_role=ignore_role)
+        query = self.published(ignore_role=ignore_role)
         if limit is not None:
             query = query[:limit]
         return query
-
-    def get_latest(self, limit=None, ignore_role=False):
-        """Return the lastest n posts as list."""
-        return self.filter_latest(limit, ignore_role).all()
 
     def search(self, query):
         """Search for posts by a query."""
@@ -482,7 +473,7 @@ class Post(object):
         req = get_request()
         if req.user.role >= ROLE_AUTHOR:
             return len(self.comments)
-        return len(x for x in self.comments if not x.blocked)
+        return len([x for x in self.comments if not x.blocked])
 
     @property
     def comment_feed_url(self):
@@ -772,23 +763,33 @@ class Tag(object):
 class CommentManager(db.DatabaseManager):
     """The manager for comments"""
 
-    def filter_blocked(self, query=None):
-        """Filter all blocked comments."""
+    def blocked(self, query=None):
+        """Filter all blocked comments.  Blocked comments are all comments but
+        unmoderated and moderated comments.
+        """
         if query is None:
-            query = Comment
-        return query.filter(Comment.blocked.in_([COMMENT_BLOCKED_USER,
-                                                 COMMENT_BLOCKED_SPAM,
-                                                 COMMENT_BLOCKED_SYSTEM]))
+            query = self.query
+        return query.filter(Comment.status.in_([COMMENT_BLOCKED_USER,
+                                                COMMENT_BLOCKED_SPAM,
+                                                COMMENT_BLOCKED_SYSTEM]))
 
-    def get_blocked(self):
-        """Get a list of all blocked comments."""
-        return self.filter_blocked().all()
+    def unmoderated(self, query=None):
+        """Filter all the unmoderated comments and comments blocked by a user
+        or system.
+        """
+        if query is None:
+            query = self.query
+        return query.filter(Comment.status.in_([COMMENT_UNMODERATED,
+                                                COMMENT_BLOCKED_USER,
+                                                COMMENT_BLOCKED_SYSTEM]))
 
-    def get_block_count(self):
-        """Get the number of blocked comments."""
-        return self.filter_blocked.count()
+    def spam(self, query=None):
+        """Filter all the spam comments."""
+        if query is None:
+            query = self.query
+        return query.filter(Comment.status == COMMENT_BLOCKED_SPAM)
 
-    def filter_latest(self, limit=None, ignore_role=False, ignore_blocked=True):
+    def latest(self, limit=None, ignore_role=False, ignore_blocked=True):
         """Filter the list of non blocked comments for anonymous users or
         all comments for admin users.
         """
@@ -800,25 +801,15 @@ class CommentManager(db.DatabaseManager):
 
         query = self.query
         if role <= ROLE_SUBSCRIBER or ignore_blocked:
-            query = self.filter_blocked(query)
+            query = self.blocked(query)
 
         if limit is not None:
             query = query[:limit]
         return query
 
-    def get_latest(self, limit=None, ignore_role=False, ignore_blocked=True):
-        """Get the list of non blocked comments for anonymous users or
-        all comments for admin users.
-        """
-        return self.filter_latest(limit, ignore_role, ignore_blocked).all()
-
-    def get_unmoderated(self):
+    def unmoderated(self):
         """Return all drafts."""
         return self.query.filter(Comment.status > COMMENT_MODERATED)
-
-    def get_unmoderated_count(self):
-        """Return all drafts."""
-        return self.get_unmoderated().count()
 
 
 class Comment(object):
@@ -950,9 +941,11 @@ class Comment(object):
 # connect the tables.
 db.mapper(User, users, properties={
     '_display_name':    users.c.display_name,
-    'posts':            db.relation(Post, backref='author')
+    'posts':            db.dynamic_loader(Post, backref='author')
 })
-db.mapper(Tag, tags)
+db.mapper(Tag, tags, properties={
+    'posts':            db.dynamic_loader(Post, secondary=post_tags)
+})
 db.mapper(Comment, comments, properties={
     '_raw_body':    comments.c.body,
     'children':     db.relation(Comment,
@@ -962,7 +955,7 @@ db.mapper(Comment, comments, properties={
                            primaryjoin=comments.c.parent_id == comments.c.comment_id),
         lazy=True
     )
-}, order_by=[db.desc(comments.c.pub_date)])
+}, order_by=comments.c.pub_date.desc())
 db.mapper(PostLink, post_links)
 db.mapper(Post, posts, properties={
     '_raw_body':    posts.c.body,
@@ -972,6 +965,5 @@ db.mapper(Post, posts, properties={
                                 order_by=[db.asc(comments.c.pub_date)]),
     'links':        db.relation(PostLink, backref='post'),
     'tags':         db.relation(Tag, secondary=post_tags, lazy=False,
-                                order_by=[db.asc(tags.c.name)],
-                                backref='posts')
-}, order_by=[db.desc(posts.c.pub_date)])
+                                order_by=[db.asc(tags.c.name)])
+}, order_by=posts.c.pub_date.desc())
