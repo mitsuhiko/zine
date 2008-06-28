@@ -211,15 +211,10 @@ def do_index(request):
     such as "new post", etc. and the recent blog activity (unmoderated
     comments etc.)
     """
-    unmoderated_comments = Comment.objects.unmoderated().count()
-    if unmoderated_comments:
-        flash(_('<a href="%(url)s">There are %(count)d comments awaiting '
-                'moderation</a>' % dict(
-            url=url_for('admin/show_unmoderated_comments'),
-            count=unmoderated_comments
-        )))
     return render_admin_response('admin/index.html', 'dashboard',
-                                 drafts=Post.objects.drafts().all())
+        drafts=Post.objects.drafts().all(),
+        unmoderated_comments=Comment.objects.unmoderated().all()
+    )
 
 
 @require_role(ROLE_AUTHOR)

@@ -161,7 +161,7 @@ div.body ul.standalonebar li.active a:hover {
 div.body div.contents {
     background: white;
     margin: 0;
-    padding: 10px 30px 10px 30px;
+    padding: 10px 30px 30px 30px;
 }
 
 div.contents div.drafts-box {
@@ -328,7 +328,7 @@ div.contents table tr.odd {
 }
 
 div.contents dl {
-    margin: 0.2em 0 0.2em 1.2em;
+    margin: 0.2em 0 0.2em 0;
     padding: 0;
 }
 
@@ -336,7 +336,7 @@ div.contents dl dt {
     font-weight: bold;
     margin: 0;
     padding: 0.5em 0 0.2em 0;
-    color: #222e4b;
+    color: #555;
 }
 
 div.contents dl dd {

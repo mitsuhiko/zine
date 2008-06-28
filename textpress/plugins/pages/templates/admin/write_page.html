@@ -3,30 +3,30 @@
 {% block contents %}
   <h2>{{ _("New Page") }}</h2>
   <form action="" method="post">
-    <fieldset>
-      <legend>{{ _("Title") }}</legend>
+    <div class="formbox">
+      <h3>{{ _("Title") }}</h3>
       {{ h.input_field('title', form.title, size=40) }}
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Key") }}</legend>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Key") }}</h3>
       {{ h.input_field('key', form.key, size=25) }}<br>
-      <em>{% trans %}
+      <small>{% trans %}
         The key is used to build the url. If no key is given it's just the title-slug.
-      {% endtrans %}</em>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Content") }}</legend>
-      <p>{{ h.textarea('raw_body', form.raw_body, rows=20) }}</p>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Parser") }}</legend>
+      {% endtrans %}</small>
+    </div>
+    <div class="formbox">
+      <h3>{{ _("Content") }}</h3>
+      {{ h.textarea('raw_body', form.raw_body, rows=20) }}
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Parser") }}</h3>
       <select name="parser">{% for parser_id, name in parsers %}
         <option value="{{ parser_id|e }}"{% if parser_id == form.parser
           %} selected{% endif %}>{{ name|e }}</option>
       {%- endfor %}</select>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Parent Page") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Parent Page") }}</h3>
       <em>This is the parent page</em>
       <select name="parent_id">
       {% for page_id, page_title in all_pages %}
@@ -35,12 +35,12 @@
         </option>
       {%- endfor %}
       </select>
-    </fieldset>
-    <fieldset>
-      <legend>{{ _("Position") }}</legend>
+    </div>
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Position") }}</h3>
       <em>This is the position the link is shown in the navigation widget</em><br>
       {{ h.input_field('navigation_pos', form.navigation_pos, size=3) }}
-    </fieldset>
+    </div>
     <div class="actions">
       {{ csrf_protector }}
       <input type="submit" name="save" value="{{ _('Save') }}">

@@ -1,4 +1,5 @@
 {% extends "admin/layout.html" %}
+{% from 'admin/_comment.html' import render_comment %}
 {% block title %}{{ _("Dashboard") }}{% endblock %}
 {% block contents %}
   <h2>{{ _("Dashboard") }}</h2>
@@ -15,8 +16,24 @@
     <li><a href="{{ url_for('admin/plugins')|e }}">{{ _("Manage Plugins") }}</a></li>
     <li><a href="{{ url_for('admin/show_users')|e }}">{{ _("Manage Users") }}</a></li>
   </ul>
+  {% if unmoderated_comments %}
+  <h3>{{ _('Comments Awaiting Approval') }}</h3>
+  <p>{% trans count=unmoderated_comments|count %}There is {{ count
+    }} comment awaiting approval:{% pluralize %}There are {{ count
+    }} comments awaiting approval:{% endtrans %}</p>
+  <ul class="comments">
+  {%- for comment in unmoderated_comments %}
+    <li class="comment {{ loop.cycle('odd', 'even') }}">
+      {{ render_comment(comment) }}
+    </li>
+  {%- endfor %}
+  </ul>
+  {% endif %}
   {% if drafts %}
   <h3>{{ _("Drafts") }}</h3>
+  <p>{% trans count=drafts|count %}You have {{ count
+    }} draft:{% pluralize %}You have {{ count
+    }} drafts:{% endtrans %}</p>
   <ul>
   {%- for draft in drafts %}
     <li><a href="{{ url_for('admin/edit_post',

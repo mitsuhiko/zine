@@ -141,6 +141,9 @@ class AnonymousUser(User):
     def __init__(self):
         pass
 
+    def __nonzero__(self):
+        return False
+
     def check_password(self, password):
         return False
 
@@ -190,14 +193,20 @@ class PostManager(db.DatabaseManager):
         """Get an item by year, month, day, and the post slug."""
         return self.filter_by_timestamp_and_slug(year, month, day, slug).first()
 
-    def drafts(self, query=None, exclude=None, ignore_user=False):
-        """Return a query that returns all drafts."""
-        req = get_request()
+    def drafts(self, query=None, exclude=None, ignore_user=False,
+               user=None):
+        """Return a query that returns all drafts for the current user.
+        or the user provided or no user at all if `ignore_user` is set.
+        """
+        if user is None and not ignore_user:
+            req = get_request()
+            if req and req.user:
+                user = req.user
         if query is None:
             query = self.query
         query = query.filter(Post.status == STATUS_DRAFT)
-        if req and not ignore_user:
-            query = query.filter(Post.author_id == req.user.user_id)
+        if user is not None:
+            query = query.filter(Post.author_id == user.user_id)
         if exclude is not None:
             if isinstance(exclude, Post):
                 exclude = Post.post_id
