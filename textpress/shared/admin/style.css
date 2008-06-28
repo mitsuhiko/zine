@@ -206,13 +206,16 @@ div.contents h2 {
     padding: 0;
     font-family: 'Georgia', serif;
     font-size: 1.8em;
-    border-bottom: 1px solid #ccc;
+    font-weight: normal;
+    border-bottom: 1px solid #eee;
 }
 
 div.contents h3 {
     color: #222e4b;
     margin: 0;
     padding: 0.5em 0 0.3em 0;
+    font-family: 'Georgia', serif;
+    font-weight: normal;
     font-size: 1.5em;
 }
 
@@ -220,7 +223,7 @@ div.contents input,
 div.contents select {
     font-family: 'Georgia', sans-serif;
     font-size: 1em;
-    font-weight: bold;
+    font-weight: normal;
     border-color: #999 #ccc #ccc #999;
     border-style: solid;
     border-width: 1px;
@@ -276,9 +279,19 @@ div.contents input[type="reset"]:hover {
     background-color: #fff;
 }
 
+div.contents input[type="checkbox"]:focus,
+div.contents input[type="radio"]:focus {
+    outline: none;
+    border: none;
+}
+
 div.contents input[name="delete"]:hover {
     background-color: #d00;
     color: white;
+}
+
+div.contents input[name="save"] {
+    font-weight: bold;
 }
 
 div.contents pre,
@@ -312,6 +325,7 @@ div.contents table th {
     background-color: #B4D2E7;
     padding: 4px;
     text-align: left;
+    color: #18374B;
 }
 
 div.contents table td {
@@ -382,6 +396,12 @@ div.formbox-title input {
     font-size: 1.6em;
 }
 
+div.formbox ul {
+    list-style: none;
+    margin: 0;
+    padding: 5px 0 5px 10px;
+}
+
 /* :::: PAGINATION :::: */
 div.pagination span.commata {
     display: none;
@@ -399,6 +419,10 @@ div.pagination a {
     border: 1px solid #ccc;
     background: white;
     text-decoration: none;
+}
+
+div.pagination a:hover {
+    background-color: #FFFDFC;
 }
 
 div.pagination span.ellipsis {
