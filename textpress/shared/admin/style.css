@@ -673,7 +673,7 @@ table.config-table td input[type="text"] {
 
 /* :::: IMPORTER PAGE :::: */
 table.importable-posts tr.already-imported td {
-    background-color: #98E8F0;
+    background-color: #DEEEF8;
 }
 
 /* :::: ABOUT PAGE :::: */
@@ -808,7 +808,6 @@ div.login-box input {
     border: 1px solid #4f849d;
     font-family: 'Georgia', serif;
     font-size: 20px;
-    font-weight: bold;
     width: 340px;
     padding: 3px;
 }
@@ -827,8 +826,12 @@ div.login-box input[type="submit"] {
     margin: 20px auto 0 auto;
     background-color: #ebf0f3;
     width: 130px;
-    border-color: #bbb #aaa #aaa #bbb;
-    border-style: double;
-    border-width: 3px;
-    color: #333;
+    color: #224466;
+    border: 1px solid #ccc;
+    -moz-border-radius: 3px;
+    cursor: pointer;
+}
+
+div.login-box input[type="submit"]:hover {
+    background-color: white;
 }

@@ -23,14 +23,14 @@
       <tr>
         <th>{{ _('Date') }}</th>
         <th>{{ _('Title') }}</th>
-        <th>{{ _('Imported Used') }}</th>
+        <th>{{ _('Importer Used') }}</th>
       </tr>
       {%- for item in queue %}
       <tr>
         <td>{{ item.dump_date|datetimeformat|e }}</td>
-        <td><a href="{{ url_for('admin/inspect_import', id=item.id) }}">{{
+        <td><a href="{{ url_for('admin/inspect_import', id=item.id) }}">{{
           item.title|e }}</a></td>
-        <td>{{ item.importer }}</td>
+        <td>{{ item.importer }}</td>
       </tr>
       {%- endfor %}
     </table>

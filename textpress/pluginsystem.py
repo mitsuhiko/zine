@@ -292,11 +292,10 @@ class Plugin(object):
         """
         Activate the plugin.
 
-        :return:
-            A tuple in the form of
-            (loaded_successfully, loaded_dependences, missing_dependences)
-            Where the first item represents if the plugin was loaded and the
-            latter ones represents loaded/missing dependences.
+        :return: A tuple in the form of ``(loaded_successfully,
+                 loaded_dependences, missing_dependences)`` where the first
+                 item represents if the plugin was loaded and the latter ones
+                 represents loaded/missing dependences.
         """
         plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
         loaded_dependences = set()
