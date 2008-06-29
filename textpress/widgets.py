@@ -168,7 +168,7 @@ class LatestPosts(Widget):
     TEMPLATE = 'widgets/latest_posts.html'
 
     def __init__(self, limit=5, show_title=False):
-        self.posts = Post.objects.get_latest(limit)
+        self.posts = Post.objects.latest(limit).all()
         self.show_title = show_title
 
     @staticmethod
@@ -205,8 +205,8 @@ class LatestComments(Widget):
     TEMPLATE = 'widgets/latest_comments.html'
 
     def __init__(self, limit=5, show_title=False, ignore_blocked=False):
-        self.comments = Comment.objects.get_latest(
-                            limit, ignore_blocked=ignore_blocked)
+        self.comments = Comment.objects. \
+            latest(limit, ignore_blocked=ignore_blocked).all()
         self.show_title = show_title
 
     @staticmethod
