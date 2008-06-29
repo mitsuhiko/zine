@@ -176,7 +176,7 @@ class Writer(object):
         # dump configuration
         cfg = self.tp('configuration')
         for key, value in self.app.cfg.iteritems():
-            self.tp('item', key=key, text=value, parent=cfg)
+            self.tp('item', key=key, text=unicode(value), parent=cfg)
         yield dump_node(cfg)
 
         # allow plugins to dump trees
