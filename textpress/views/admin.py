@@ -1152,8 +1152,6 @@ def do_basic_options(request):
         'blog_email':           cfg['blog_email'],
         'language':             cfg['language'],
         'timezone':             cfg['timezone'],
-        'datetime_format':      cfg['datetime_format'],
-        'date_format':          cfg['date_format'],
         'session_cookie_name':  cfg['session_cookie_name'],
         'comments_enabled':     cfg['comments_enabled'],
         'moderate_comments':    cfg['moderate_comments'],
@@ -1182,10 +1180,6 @@ def do_basic_options(request):
         form['timezone'] = timezone = request.form.get('timezone')
         if not has_timezone(timezone):
             raise BadRequest()
-        form['datetime_format'] = datetime_format = \
-            request.form.get('datetime_format')
-        form['date_format'] = date_format = \
-            request.form.get('date_format')
         form['session_cookie_name'] = session_cookie_name = \
             request.form.get('session_cookie_name')
         form['comments_enabled'] = comments_enabled = \
@@ -1222,10 +1216,6 @@ def do_basic_options(request):
                 cfg['language'] = language
             if timezone != cfg['timezone']:
                 cfg['timezone'] = timezone
-            if datetime_format != cfg['datetime_format']:
-                cfg['datetime_format'] = datetime_format
-            if date_format != cfg['date_format']:
-                cfg['date_format'] = date_format
             if session_cookie_name != cfg['session_cookie_name']:
                 cfg['session_cookie_name'] = session_cookie_name
             if comments_enabled != cfg['comments_enabled']:

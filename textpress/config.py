@@ -57,10 +57,8 @@ DEFAULT_VARS = {
 
     # post view
     'posts_per_page':           (int, 10),
-    'datetime_format':          (unicode, u'%Y-%m-%d %H:%M'),
-    'date_format':              (unicode, u'%Y-%m-%d'),
     'use_flat_comments':        (bool, False),
-    
+
     # pages
     'show_page_title':         (bool, True),
     'show_page_children':      (bool, True),

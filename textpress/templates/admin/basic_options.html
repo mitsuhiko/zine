@@ -4,7 +4,7 @@
   <h2>{{ _("Basic Options") }}</h2>
   <p>{% trans %}
     From here you can configure the basic blog settings like the blog
-    title and tagline, date format, theme etc.
+    title and tagline.
   {% endtrans %}</p>
   <form action="" method="post">
     <dl>
@@ -28,10 +28,6 @@
           }}">{{ value|e }}</option>
       {%- endfor %}
       </select></dd>
-      <dt>{{ _("Date/Time Format") }}</dt>
-      <dd>{{ h.input_field('datetime_format', form.datetime_format, size="20") }}</dd>
-      <dt>{{ _("Date Format") }}</dt>
-      <dd>{{ h.input_field('date_format', form.date_format, size="20") }}</dd>
       <dt>{{ _("Cookie Name") }}</dt>
       <dd>{{ h.input_field('session_cookie_name', form.session_cookie_name, size="20") }}</dd>
       <dt>{{ _("Comments Enabled") }}</dt>
