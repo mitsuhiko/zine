@@ -20,7 +20,7 @@
   {%- endif %}
 {%- endmacro %}
 
-{% macro render_comment_editor(post, form) %}
+{% macro render_comment_editor(post, form, errors) %}
   <form action="#leave-reply" class="comments" method="post">
     {{ emit_event('before-comment-editor-rendered', post) }}
     {%- if not request.user.is_manager %}

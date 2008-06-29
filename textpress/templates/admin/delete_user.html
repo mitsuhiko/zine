@@ -8,7 +8,7 @@
       Do you really want to delete the user “{{ username }}”?.
     {% endtrans %}</p>
     {% if user.posts %}
-      <p>{% trans post_count=user.posts|count %}
+      <p>{% trans post_count=user.posts.count() %}
         What should happen to the {{ post_count }} post this user wrote?
       {% pluralize %}
         What should happen to the {{ post_count }} posts this user wrote?
@@ -18,10 +18,10 @@
         <li>{{ h.input_field('action', 'reassign', 'radio') }} <label for="reassign">{% trans
         %}reassign to user{% endtrans %}
         <select name="reassign_user">{%- for user in other_users %}
-          <option value="{{ user.user_id }}">{{ user.username|e }}</option>
+          <option value="{{ user.user_id }}">{{ user.username|e }}</option>
         {%- endfor %}</select>
         {% endif %}
-        <li>{{ h.input_field('action', 'delete', 'radio', checked=true) }}
+        <li>{{ h.input_field('action', 'delete', 'radio', checked=true) }}
             <label for="delete">{% trans %}delete posts{% endtrans %}</li>
       </ul>
     {% endif %}

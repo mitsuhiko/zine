@@ -382,7 +382,7 @@ def do_edit_post(request, post_id=None):
         # if there is no need tag and there are no errors we save the post
         elif not errors:
             if new_post:
-                post = Post(title, author.user_id, body, intro, slug,
+                post = Post(title, author, body, intro, slug,
                             pub_date, parser=parser)
             else:
                 post.title = title
@@ -596,12 +596,9 @@ def do_show_post_comments(request, post_id):
 
 @require_role(ROLE_AUTHOR)
 def do_edit_comment(request, comment_id):
+    """Edit a comment.  Unlike the post edit screen it's not possible to
+    create new comments from here, that has to happen from the post page.
     """
-    Edit a comment.  Unlike the post edit screen it's not possible to create
-    new comments from here, that has to happen from the post page.
-    """
-    # XXX: maybe we should give administrators the possibility to change
-    # the parser associated with comments.
     comment = Comment.objects.get(comment_id)
     if comment is None:
         raise NotFound()
@@ -636,14 +633,15 @@ def do_edit_comment(request, comment_id):
         if request.form.get('delete'):
             return simple_redirect('admin/delete_comment', comment_id=comment_id)
 
-        form['author'] = author = request.form.get('author')
-        if not author:
-            errors.append(_('You have to give the comment an author.'))
-        form['email'] = email = request.form.get('email', '')
-        if email and not is_valid_email(email):
-            errors.append(_('You have to provide a valid mail address for '
-                            'the author.'))
-        form['www'] = www = request.form.get('www')
+        if comment.anonymous:
+            form['author'] = author = request.form.get('author')
+            if not author:
+                errors.append(_('You have to give the comment an author.'))
+            form['email'] = email = request.form.get('email', '')
+            if email and not is_valid_email(email):
+                errors.append(_('You have to provide a valid mail address for '
+                                'the author.'))
+            form['www'] = www = request.form.get('www')
         form['body'] = body = request.form.get('body')
         form['parser'] = parser = request.form.get('parser')
         if missing_parser and parser == comment.parser:
@@ -667,9 +665,10 @@ def do_edit_comment(request, comment_id):
         form['blocked'] = blocked = bool(request.form.get('blocked'))
 
         if not errors:
-            comment.author = author
-            comment.email = email
-            comment.www = www
+            if comment.anonymous:
+                comment.author = author
+                comment.email = email
+                comment.www = www
             comment.pub_date = pub_date
             if not keep_comment_text:
                 # always set parser before raw body because of callbacks.
@@ -955,7 +954,7 @@ def do_edit_user(request, user_id=None):
     user = None
     errors = []
     form = dict.fromkeys(['username', 'first_name', 'last_name',
-                          'display_name', 'description', 'email'], u'')
+                          'display_name', 'description', 'email', 'www'], u'')
     form['role'] = ROLE_AUTHOR
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
@@ -971,6 +970,7 @@ def do_edit_user(request, user_id=None):
             display_name=user._display_name,
             description=user.description,
             email=user.email,
+            www=user.www,
             role=user.role
         )
     new_user = user is None
@@ -998,6 +998,7 @@ def do_edit_user(request, user_id=None):
         email = form['email'] = request.form.get('email', '')
         if not is_valid_email(email):
             errors.append(_('The user needs a valid mail address.'))
+        www = form['www'] = request.form.get('www', '')
         try:
             role = form['role'] = int(request.form.get('role', ''))
             if role not in xrange(ROLE_ADMIN + 1):
@@ -1008,7 +1009,7 @@ def do_edit_user(request, user_id=None):
         if not errors:
             if new_user:
                 user = User(username, password, email, first_name,
-                            last_name, description, role)
+                            last_name, description, www, role)
                 user.display_name = display_name or '$username'
                 msg = 'User %s created successfully.'
                 icon = 'add'
@@ -1021,6 +1022,7 @@ def do_edit_user(request, user_id=None):
                 user.last_name = last_name
                 user.display_name = display_name or '$username'
                 user.description = description
+                user.www = www
                 user.role = role
                 msg = 'User %s edited successfully.'
                 icon = 'info'
@@ -1183,7 +1185,9 @@ def do_basic_options(request):
         form['comments_enabled'] = comments_enabled = \
             'comments_enabled' in request.form
         form['moderate_comments'] = moderate_comments = \
-            'moderate_comments' in request.form
+            request.form.get('moderate_comments', type=int)
+        if moderate_comments not in (0, 1, 2):
+            raise BadRequest()
         form['pings_enabled'] = pings_enabled = \
             'pings_enabled' in request.form
         form['default_parser'] = default_parser = \
@@ -1222,6 +1226,8 @@ def do_basic_options(request):
                 cfg['comments_enabled'] = comments_enabled
             if pings_enabled != cfg['pings_enabled']:
                 cfg['pings_enabled'] = pings_enabled
+            if moderate_comments != cfg['moderate_comments']:
+                cfg['moderate_comments'] = moderate_comments
             if default_parser != cfg['default_parser']:
                 cfg['default_parser'] = default_parser
             if comment_parser != cfg['comment_parser']:

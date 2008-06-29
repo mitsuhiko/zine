@@ -227,15 +227,12 @@ def do_show_post(request, year, month, day, slug):
     # handle comment posting
     errors = []
     form = {'name': '', 'email': '', 'www': '', 'body': '', 'parent': ''}
-    if request.user.is_somebody:
-        form['name'] = request.user.display_name
-        form['email'] = request.user.email
     if request.method == 'POST' and post.comments_enabled:
-        form['name'] = name = request.form.get('name')
+        form['name'] = author = request.form.get('name')
         if not request.user.is_somebody:
-            if not name:
+            if not author:
                 errors.append(_('You have to enter your name.'))
-            elif len(name) > 100:
+            elif len(author) > 100:
                 errors.append(_('Your name is too long.'))
             form['email'] = email = request.form.get('email')
             if not (email and is_valid_email(email)):
@@ -248,10 +245,8 @@ def do_show_post(request, year, month, day, slug):
             elif len(www) > 200:
                 errors.append(_('The URL is too long.'))
         else:
-            name = request.user.username
-            email = request.user.email
-            if request.user.role >= ROLE_AUTHOR:
-                www = url_for('blog/show_author',  username=name)
+            author = request.user
+            email = www = None
         form['body'] = body = request.form.get('body')
         if not body or len(body) < 10:
             errors.append(_('Your comment is too short.'))
@@ -277,7 +272,7 @@ def do_show_post(request, year, month, day, slug):
         # block comments so that administrators have to approve it
         if not errors:
             ip = request.environ.get('REMOTE_ADDR') or '0.0.0.0'
-            comment = Comment(post, name, email, www, body, parent,
+            comment = Comment(post, author, body, email, www, parent,
                               submitter_ip=ip)
 
             #! use this event to block comments before they are saved.  This
@@ -286,10 +281,8 @@ def do_show_post(request, year, month, day, slug):
 
             # Moderate Comment?  Now that the spam check any everything
             # went through the processing we explicitly set it to
-            # unmodereated if the user is not an author and the settings
-            # want comment moderation
-            if not comment.blocked and request.user.role < ROLE_AUTHOR and \
-               request.app.cfg['moderate_comments']:
+            # unmodereated if the blog configuration demands that
+            if not comment.blocked and comment.requires_moderation:
                 comment.status = COMMENT_UNMODERATED
                 comment.blocked_msg = _('Comment waiting for approval')
 

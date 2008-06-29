@@ -316,6 +316,7 @@ users = db.Table('users', metadata,
     db.Column('extra', db.PickleType),
     db.Column('pw_hash', db.String(70)),
     db.Column('email', db.String(250)),
+    db.Column('www', db.String(200)),
     db.Column('role', db.Integer)
 )
 
@@ -362,6 +363,7 @@ post_tags = db.Table('post_tags', metadata,
 comments = db.Table('comments', metadata,
     db.Column('comment_id', db.Integer, primary_key=True),
     db.Column('post_id', db.Integer, db.ForeignKey('posts.post_id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id')),
     db.Column('author', db.String(100)),
     db.Column('email', db.String(250)),
     db.Column('www', db.String(200)),
