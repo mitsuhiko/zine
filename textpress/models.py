@@ -37,6 +37,11 @@ COMMENT_BLOCKED_USER = 2
 COMMENT_BLOCKED_SPAM = 3
 COMMENT_BLOCKED_SYSTEM = 4
 
+#: moderation modes
+MODERATE_NONE = 0
+MODERATE_ALL = 1
+MODERATE_UNKNOWN = 2
+
 
 class UserManager(db.DatabaseManager):
     """Add some extra query methods to the user object."""
@@ -61,13 +66,15 @@ class User(object):
     is_somebody = True
 
     def __init__(self, username, password, email, first_name=u'',
-                 last_name=u'', description=u'', role=ROLE_SUBSCRIBER):
+                 last_name=u'', description=u'', www=u'',
+                 role=ROLE_SUBSCRIBER):
         self.username = username
         if password is not None:
             self.set_password(password)
         else:
             self.disable()
         self.email = email
+        self.www = www
         self.first_name = first_name
         self.last_name = last_name
         self.description = description
@@ -122,6 +129,7 @@ class User(object):
             return 'blog/show_author', {
                 'username': self.username
             }
+        return self.www or '#'
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -284,9 +292,7 @@ class PostManager(db.DatabaseManager):
                                                 timedelta(days=1)))
         # all posts for a tag
         elif tag is not None:
-            if isinstance(tag, (int, long)):
-                tag_join = tags.c.tag_id == tag
-            elif isinstance(tag, basestring):
+            if isinstance(tag, basestring):
                 tag_join = tags.c.slug == tag
             else:
                 tag_join = tags.c.tag_id == tag.tag_id
@@ -295,9 +301,7 @@ class PostManager(db.DatabaseManager):
 
         # all posts for an author
         elif author is not None:
-            if isinstance(author, (int, long)):
-                conditions.append(p.author_id == author)
-            elif isinstance(author, basestring):
+            if isinstance(author, basestring):
                 conditions.append((p.author_id == users.c.user_id) &
                                   (users.c.username == author))
             else:
@@ -432,10 +436,7 @@ class Post(object):
                  parser=None, uid=None):
         app = get_application()
         self.title = title
-        if isinstance(author, (int, long)):
-            self.author_id = author
-        else:
-            self.author = author
+        self.author = author
         if parser is None:
             parser = app.cfg['default_parser']
 
@@ -614,8 +615,6 @@ class Post(object):
 
         if user is None:
             user = get_request().user
-        elif isinstance(user, (int, long)):
-            user = User.objects.get(user)
 
         # simple rule: admins and editors may always
         if user.role in (ROLE_ADMIN, ROLE_EDITOR):
@@ -655,10 +654,7 @@ class PostLink(object):
 
     def __init__(self, post, href, rel='alternate', type=None, hreflang=None,
                  title=None, length=None):
-        if isinstance(post, (int, long)):
-            self.post_id = post
-        else:
-            self.post = post
+        self.post = post
         self.href = href
         self.rel = rel
         self.type = type
@@ -826,25 +822,26 @@ class Comment(object):
 
     objects = CommentManager()
 
-    def __init__(self, post, author, email, www, body, parent=None,
+    def __init__(self, post, author, body, email=None, www=None, parent=None,
                  pub_date=None, submitter_ip='0.0.0.0', parser=None,
                  is_pingback=False, status=COMMENT_MODERATED):
-        if isinstance(post, (int, long)):
-            self.post_id = post
+        self.post = post
+        if isinstance(author, basestring):
+            self.user = None
+            self._author = author
+            self._email = email
+            self._www = www
         else:
-            self.post = post
-        self.author = author
-        self.email = email
-        self.www = www
+            assert email is www is None, \
+                'email and www can only be provided if the author is ' \
+                'an anonmous user'
+            self.user = author
 
         if parser is None:
             parser = get_application().cfg['comment_parser']
         self.parser_data = {'parser': parser}
         self.raw_body = body or ''
-        if isinstance(parent, (int, long)):
-            self.parent_id = parent
-        else:
-            self.parent = parent
+        self.parent = parent
         if pub_date is None:
             pub_date = datetime.utcnow()
         self.pub_date = pub_date
@@ -852,6 +849,50 @@ class Comment(object):
         self.submitter_ip = submitter_ip
         self.is_pingback = is_pingback
         self.status = status
+
+    def _union_property(attribute, user_attribute=None):
+        """An attribute that can exist on a user and the comment."""
+        user_attribute = user_attribute or attribute
+        attribute = '_' + attribute
+        def get(self):
+            if self.user:
+                return getattr(self.user, user_attribute)
+            return getattr(self, attribute)
+        def set(self, value):
+            if self.user:
+                raise TypeError('can\'t set this attribute if the comment '
+                                'does not belong to an anonymous user')
+            setattr(self, attribute, value)
+        return property(get, set)
+
+    email = _union_property('email')
+    www = _union_property('www')
+    author = _union_property('author', 'display_name')
+    del _union_property
+
+    @property
+    def anonymous(self):
+        """True if this comment is an anonymous comment."""
+        return self.user is None
+
+    @property
+    def requires_moderation(self):
+        """This is `True` if the comment requires moderation with the
+        current moderation settings.  This does not check if the comment
+        is already moderated.
+        """
+        if not self.anonymous:
+            return False
+        moderate = get_application().cfg['moderate_comments']
+        if moderate == MODERATE_ALL:
+            return True
+        elif moderate == MODERATE_NONE:
+            return False
+        return db.execute(comments.select(
+            (comments.c.author == self._author) &
+            (comments.c.email == self._email) &
+            (comments.c.status == COMMENT_MODERATED)
+        )).fetchone() is None
 
     def make_visible_for_request(self, request=None):
         """Make the comment visible for the current request."""
@@ -866,8 +907,6 @@ class Comment(object):
             return True
         if user is None:
             user = get_request().user
-        elif isinstance(user, (int, long)):
-            user = User.objects.get(user)
         return user.role >= ROLE_AUTHOR
 
     @property
@@ -950,13 +989,19 @@ class Comment(object):
 # connect the tables.
 db.mapper(User, users, properties={
     '_display_name':    users.c.display_name,
-    'posts':            db.dynamic_loader(Post, backref='author')
+    'posts':            db.dynamic_loader(Post, backref='author',
+                                          cascade='all, delete, delete-orphan'),
+    'comments':         db.dynamic_loader(Comment, backref='user',
+                                          cascade='all, delete, delete-orphan')
 })
 db.mapper(Tag, tags, properties={
     'posts':            db.dynamic_loader(Post, secondary=post_tags)
 })
 db.mapper(Comment, comments, properties={
     '_raw_body':    comments.c.body,
+    '_author':      comments.c.author,
+    '_email':       comments.c.email,
+    '_www':         comments.c.www,
     'children':     db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
         order_by=[db.asc(comments.c.pub_date)],
@@ -971,8 +1016,10 @@ db.mapper(Post, posts, properties={
     '_raw_intro':   posts.c.intro,
     'comments':     db.relation(Comment, backref='post',
                                 primaryjoin=posts.c.post_id == comments.c.post_id,
-                                order_by=[db.asc(comments.c.pub_date)]),
-    'links':        db.relation(PostLink, backref='post'),
+                                order_by=[db.asc(comments.c.pub_date)],
+                                cascade='all, delete, delete-orphan'),
+    'links':        db.relation(PostLink, backref='post',
+                                cascade='all, delete, delete-orphan'),
     'tags':         db.relation(Tag, secondary=post_tags, lazy=False,
                                 order_by=[db.asc(tags.c.name)])
 }, order_by=posts.c.pub_date.desc())

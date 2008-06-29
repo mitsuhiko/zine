@@ -66,6 +66,8 @@ def url_for(endpoint, **args):
     if hasattr(endpoint, 'get_url_values'):
         rv = endpoint.get_url_values()
         if rv is not None:
+            if isinstance(rv, basestring):
+                return rv
             endpoint, updated_args = rv
             args.update(updated_args)
     anchor = args.pop('_anchor', None)

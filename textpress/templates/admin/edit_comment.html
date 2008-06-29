@@ -10,6 +10,7 @@
   <p>
   {% endif %}
   <form action="" method="post">
+    {%- if comment.anonymous %}
     <div class="formbox">
       <h3>{{ _("Author") }}</h3>
       {{ h.input_field('author', form.author) }}
@@ -19,9 +20,15 @@
       {{ h.input_field('email', form.email) }}
     </div>
     <div class="formbox">
-      <h3>{{ _("Webpage") }}</h3>
+      <h3>{{ _("Website") }}</h3>
       {{ h.input_field('www', form.www) }}
     </div>
+    {%- else %}
+    <div class="formbox">
+      <h3>{{ _('Author') }}</h3>
+      <p>{{ comment.user.username }}</p>
+    </div>
+    {%- endif %}
     <div class="formbox">
       <h3>{{ _("Text") }}</h3>
       {{ h.textarea('body', form.body, rows=7) }}

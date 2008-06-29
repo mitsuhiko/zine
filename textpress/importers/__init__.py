@@ -135,8 +135,8 @@ def _perform_import(app, blog, d):
         # now the comments if use wants them.
         if 'import_comments_%s' % old_post.id in d:
             for comment in old_post.comments:
-                Comment(post, comment.author, comment.author_email,
-                        comment.author_url, comment.body, None,
+                Comment(post, comment.author, comment.body,
+                        comment.author_email, comment.author_url, None,
                         comment.pub_date, comment.remote_addr,
                         comment.parser, comment.is_pingback,
                         comment.status)

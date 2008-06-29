@@ -51,7 +51,7 @@ DEFAULT_VARS = {
 
     # comments and pingback
     'comments_enabled':         (bool, True),
-    'moderate_comments':        (bool, True),
+    'moderate_comments':        (int, 1),       # aka MODERATE_ALL
     'pings_enabled':            (bool, True),
 
     # post view
