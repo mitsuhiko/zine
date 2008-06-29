@@ -25,6 +25,7 @@ from itertools import izip
 from datetime import datetime, timedelta
 from urlparse import urlparse
 from collections import deque
+from babel import Locale
 
 from textpress.database import db, upgrade_database, cleanup_session
 from textpress.config import Configuration
@@ -490,11 +491,11 @@ class TextPress(object):
 
         # setup core package urls and shared stuff
         import textpress
-        from textpress.api import _
         from textpress.urls import make_urls
         from textpress.views import all_views
         from textpress.services import all_services
         from textpress.parsers import all_parsers
+        from textpress import i18n
         self.views = all_views.copy()
         self.parsers = all_parsers.copy()
         self._url_rules = make_urls(self)
@@ -505,6 +506,12 @@ class TextPress(object):
         self._template_tests = {}
         self._template_searchpath = []
 
+        # initialize i18n/l10n system
+        self.locale = Locale(self.cfg['language'])
+        self.translations = i18n.load_translations(self.locale)
+
+        # init themes
+        _ = i18n.gettext
         default_theme = Theme(self, 'default', BUILTIN_TEMPLATE_PATH, {
             'name':         _('Default Theme'),
             'description':  _('Simple default theme that doesn\'t '
@@ -512,6 +519,7 @@ class TextPress(object):
             'preview':      'core::default_preview.png'
         })
         self.themes = {'default': default_theme}
+
         self.apis = {}
         self.importers = {}
 
@@ -559,19 +567,14 @@ class TextPress(object):
             }
         )
 
-        env.filters['json'] = __import__('simplejson').dumps
-
-        # initialize i18n/l10n system
-        from babel import Locale
-        from textpress import i18n
-        self.locale = Locale(self.cfg['language'])
-        self.translations = i18n.load_translations(self.locale)
-        env.install_gettext_translations(self.translations)
         env.filters.update(
+            json=__import__('simplejson').dumps,
             datetimeformat=i18n.format_datetime,
             dateformat=i18n.format_date,
             monthformat=i18n.format_month
         )
+
+        env.install_gettext_translations(self.translations)
 
         # copy the widgets into the global namespace
         for name, widget in self.widgets.iteritems():

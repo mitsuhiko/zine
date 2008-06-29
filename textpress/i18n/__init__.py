@@ -33,7 +33,7 @@ def gettext(string):
     app = get_application()
     if app is None:
         return string
-    return app.translations.gettext(string)
+    return app.translations.ugettext(string)
 
 
 def ngettext(singular, plural, n):
@@ -45,7 +45,7 @@ def ngettext(singular, plural, n):
         if n == 1:
             return singular
         return plrual
-    return app.translations.ngettext(singular, plural, n)
+    return app.translations.ungettext(singular, plural, n)
 
 
 def format_datetime(datetime=None, format='medium'):

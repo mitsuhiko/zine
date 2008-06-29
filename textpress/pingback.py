@@ -61,8 +61,8 @@ class PingbackError(Exception):
         return {
             16: _('source URL does not exist'),
             17: _('The source URL does not contain a link to the target URL'),
-            32: _('The specified target URI does not exist'),
-            33: _('The specified target URI cannot be used as a target'),
+            32: _('The specified target URL does not exist'),
+            33: _('The specified target URL cannot be used as a target'),
             48: _('The pingback has already been registered'),
             49: _('Access Denied')
         }.get(self.fault_code, _('An unknown server error (%s) occoured') %
@@ -110,14 +110,14 @@ def handle_pingback_request(source_uri, target_uri):
     if not blog_url.endswith('/'):
         blog_url += '/'
     if not target_uri.startswith(blog_url):
-        raise Fault(32, 'The specified target URI does not exist.')
+        raise Fault(32, 'The specified target URL does not exist.')
     path_info = target_uri[len(blog_url):]
 
     # next we check if the source URL does indeed exist
     try:
         url = urllib2.urlopen(source_uri)
     except urllib2.HTTPError:
-        raise Fault(16, 'The source URI does not exist.')
+        raise Fault(16, 'The source URL does not exist.')
 
     # now it's time to look up our url endpoint for the target uri.
     # if we have one we check if that endpoint is listening for pingbacks.
@@ -127,12 +127,12 @@ def handle_pingback_request(source_uri, target_uri):
         except RequestRedirect, e:
             path_info = e.new_url
         except NotFound, e:
-            raise Fault(33, 'The specified target URI does not exist.')
+            raise Fault(33, 'The specified target URL does not exist.')
         else:
             break
 
     if endpoint not in app.pingback_endpoints:
-        raise Fault(33, 'The specified target URI does not accept pingbacks.')
+        raise Fault(33, 'The specified target URL does not accept pingbacks.')
 
     # now we have the endpoint and the values and can dispatch our pingback
     # request to the endpoint handler
