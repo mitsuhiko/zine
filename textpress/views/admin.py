@@ -31,8 +31,8 @@ from textpress.database import comments as comment_table, posts, \
      post_tags, post_links
 from textpress.utils import is_valid_email, is_valid_url, \
      get_version_info, can_build_eventmap, build_eventmap, \
-     make_hidden_fields, dump_json, load_json, flash, get_slug, \
-	 CSRFProtector, IntelligentRedirect, Pagination
+     make_hidden_fields, dump_json, load_json, flash, \
+     CSRFProtector, IntelligentRedirect, Pagination
 from textpress.i18n import parse_datetime, format_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from textpress.importers import list_import_queue, load_import_dump, \
