@@ -14,10 +14,18 @@
       <dd>{{ h.input_field('blog_tagline', form.blog_tagline, size="40") }}</dd>
       <dt>{{ _("Blog E-Mail") }}</dt>
       <dd>{{ h.input_field('blog_email', form.blog_email, size="40") }}</dd>
+      <dt>{{ _("Language") }}</dt>
+      <dd><select name="language">
+      {%- for key, value in languages %}
+        <option{% if key == form.language %} selected{% endif %} value="{{ key|e
+          }}">{{ value|e }}</option>
+      {%- endfor %}
+      </select></dd>
       <dt>{{ _("Timezone") }}</dt>
       <dd><select name="timezone">
-      {%- for timezone in timezones %}
-        <option{% if timezone == form.timezone %} selected{% endif %}>{{ timezone|e }}</option>
+      {%- for key, value in timezones %}
+        <option{% if key == form.timezone %} selected{% endif %} value="{{ key|e
+          }}">{{ value|e }}</option>
       {%- endfor %}
       </select></dd>
       <dt>{{ _("Date/Time Format") }}</dt>

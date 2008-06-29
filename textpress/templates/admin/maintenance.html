@@ -11,14 +11,10 @@
     message that says that the blog is in maintenance mode.
   {% endtrans %}</p>
   <form action="" method="post">
-    <dl>
-      <dt>{{ _("Maintenance Mode") }}</dt>
-      <dd>{{ h.checkbox('maintenance_mode', form.maintenance_mode) }}
-          <label for="maintenance_mode">{{ _("enable maintenance mode") }}</label></dd>
-    </dl>
     <div class="actions">
       {{ hidden_form_data }}
-      <input type="submit" value="{{ _('Save') }}" />
+      <input type="submit" value="{{ _('Disable maintenance mode') if
+        maintenance_mode else _('Enable maintenance mode') }}" />
     </div>
   </form>
 {% endblock %}

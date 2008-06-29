@@ -4,3 +4,4 @@
 \.DS_Store$
 ^dumps/
 ^.*\.egg-info/
+^textpress/i18n/messages\.pot$
