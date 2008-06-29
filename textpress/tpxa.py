@@ -36,7 +36,7 @@ XML_PREAMBLE = u'''\
     import your blog data in other blog software.
 
     Developer Notice
-    ----------------
+    ~~~~~~~~~~~~~~~~
 
     Because we saw horrible export formats (wordpress' wxr *cough*) we want
     to avoid problems with this file right away.  If you are an application
@@ -49,7 +49,7 @@ XML_PREAMBLE = u'''\
         goddamn full qualified names with the namespaces when parsing.
 
     User Notice
-    -----------
+    ~~~~~~~~~~~
 
     This file contains a dump of your blog but probably exluding some details
     if plugins did not provide ways to export the information.  It's not
