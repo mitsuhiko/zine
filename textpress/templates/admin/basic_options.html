@@ -29,6 +29,10 @@
       <dt>{{ _("Comments Enabled") }}</dt>
       <dd>{{ h.checkbox('comments_enabled', form.comments_enabled) }}
           <label for="comments_enabled">{{ _("enable comments per default") }}</label></dd>
+      <dt>{{ _('Moderate Comments') }}</dt>
+      <dd>{{ h.checkbox('moderate_comments', form.moderate_comments) }}
+          <label for="moderate_comments">{{ _("you have to approve the comments by hand "
+                                              "before they appear") }}</label></dd>
       <dt>{{ _("Pingbacks Enabled") }}</dt>
       <dd>{{ h.checkbox('pings_enabled', form.pings_enabled) }}
           <label for="pings_enabled">{{ _("enable pingbacks per default") }}</label></dd>

@@ -23,7 +23,7 @@ DEFAULT_VARS = {
     'blog_tagline':             (unicode, u'just another textpress blog'),
     'blog_url':                 (unicode, u''),
     'blog_email':               (unicode, u''),
-    'timezone':                 (unicode, u'Europe/Vienna'),
+    'timezone':                 (unicode, u'UTC'),
     'maintenance_mode':         (bool, False),
     'session_cookie_name':      (unicode, u'textpress_session'),
     'theme':                    (unicode, u'default'),

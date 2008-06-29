@@ -1144,6 +1144,7 @@ def do_basic_options(request):
         'date_format':          cfg['date_format'],
         'session_cookie_name':  cfg['session_cookie_name'],
         'comments_enabled':     cfg['comments_enabled'],
+        'moderate_comments':    cfg['moderate_comments'],
         'pings_enabled':        cfg['pings_enabled'],
         'default_parser':       cfg['default_parser'],
         'comment_parser':       cfg['comment_parser'],
@@ -1174,6 +1175,8 @@ def do_basic_options(request):
             request.form.get('session_cookie_name')
         form['comments_enabled'] = comments_enabled = \
             'comments_enabled' in request.form
+        form['moderate_comments'] = moderate_comments = \
+            'moderate_comments' in request.form
         form['pings_enabled'] = pings_enabled = \
             'pings_enabled' in request.form
         form['default_parser'] = default_parser = \
