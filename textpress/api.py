@@ -35,7 +35,7 @@ from textpress.database import db
 from textpress import cache
 
 # Gettext
-from textpress.utils import gettext as _
+from textpress.i18n import gettext, ngettext, _
 
 # Plugin syste
 from textpress.pluginsystem import SetupError
