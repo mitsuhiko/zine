@@ -143,7 +143,8 @@
     the `models` modules of the core and existing plugins.
 
 
-    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Christopher Grebs,
+                             Ali Afshar.
     :license: GNU GPL.
 """
 from datetime import datetime, timedelta
@@ -372,6 +373,16 @@ comments = db.Table('comments', metadata,
     db.Column('blocked_msg', db.String(250)),
     db.Column('submitter_ip', db.String(100)),
     db.Column('status', db.Integer, nullable=False)
+)
+
+pages = db.Table('pages', metadata,
+    db.Column('page_id', db.Integer, primary_key=True),
+    db.Column('key', db.Unicode(25)),
+    db.Column('title', db.Unicode(200)),
+    db.Column('body', db.Unicode),
+    db.Column('extra', db.PickleType),
+    db.Column('navigation_pos', db.Integer),
+    db.Column('parent_id', db.Integer, db.ForeignKey('pages.page_id')),
 )
 
 

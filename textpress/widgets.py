@@ -13,7 +13,8 @@
     Additionally widgets could be moved around from the admin panel in the
     future.
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Pedro Algarvio.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Pedro Algarvio,
+                                       Christopher Grebs, Ali Afshar.
     :license: GNU GPL.
 """
 import re
@@ -233,5 +234,26 @@ class LatestComments(Widget):
                                      errors=errors, form=form)
 
 
+class PagesNavigation(Widget):
+    """
+    A little navigation widget.
+    """
+
+    NAME = 'get_pages_navigation'
+    TEMPLATE = 'widgets/pages_navigation.html'
+
+    def __init__(self):
+        pages = Page.objects.query
+        to_append = pages.filter_by(navigation_pos=None)
+        self.pages = pages.filter(pages_table.c.navigation_pos!=None) \
+            .order_by(pages_table.c.navigation_pos.asc()).all()
+        self.pages.extend(to_append.all())
+
+    @staticmethod
+    def get_display_name():
+        return _(u'Pages Navigation')
+
+
 #: list of all core widgets
-all_widgets = [TagCloud, PostArchiveSummary, LatestPosts, LatestComments]
+all_widgets = [TagCloud, PostArchiveSummary, LatestPosts, LatestComments,
+               PagesNavigation]

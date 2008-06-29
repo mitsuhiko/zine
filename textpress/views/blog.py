@@ -6,11 +6,12 @@
     This module implements all the views (some people call that controller)
     for the core module.
 
-    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Christopher Grebs,
+                             Ali Afshar.
     :license: GNU GPL.
 """
 from textpress.api import *
-from textpress.models import Post, Tag, User, Comment, ROLE_AUTHOR, \
+from textpress.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
     COMMENT_UNMODERATED
 from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
      dump_json, dump_xml, build_tag_uri, AtomFeed
@@ -311,6 +312,22 @@ def do_show_post(request, year, month, day, slug):
         post=post,
         form=form,
         errors=errors
+    )
+
+
+@cache.response(vary=('user',))
+def do_show_page(self, key):
+    """Show a page found via `key`"""
+    page = Page.objects.query.filter_by(key=key).first()
+    if page is None:
+        raise NotFound()
+    cfg = get_application().cfg
+    return render_response(
+        'page_base.html',
+        page=page,
+        blog_title=get_application().cfg['blog_title'],
+        show_title=cfg['show_page_title'],
+        show_children=cfg['show_page_children']
     )
 
 

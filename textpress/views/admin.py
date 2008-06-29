@@ -17,12 +17,13 @@
 
     -   Dashboard
 
-    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs, Pedro Algarvio.
+    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs, Pedro Algarvio,
+                             Ali Afshar.
     :license: GNU GPL.
 """
 from datetime import datetime
 from textpress.api import *
-from textpress.models import User, Post, Tag, Comment, ROLE_ADMIN, \
+from textpress.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
@@ -31,7 +32,7 @@ from textpress.database import comments as comment_table, posts, \
 from textpress.utils import parse_datetime, format_datetime, \
      is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
      build_eventmap, make_hidden_fields, dump_json, load_json, flash, \
-     CSRFProtector, IntelligentRedirect, TIMEZONES, Pagination
+     CSRFProtector, IntelligentRedirect, TIMEZONES, Pagination, gen_slug
 from textpress.importers import list_import_queue, load_import_dump, \
      delete_import_dump, perform_import
 from textpress.pluginsystem import install_package, InstallationError, \
@@ -93,6 +94,11 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
 
     # set up the administration menu bar
     if request.user.role == ROLE_ADMIN:
+        navigation_bar.insert(2,
+            ('pages', url_for('admin/show_pages'), _('Pages'), [
+                ('overview', url_for('admin/show_pages'), _('Overview')),
+                ('write', url_for('admin/write_page'), _('Write Page')),
+        ]))
         navigation_bar += [
             ('users', url_for('admin/show_users'), _('Users'), [
                 ('overview', url_for('admin/show_users'), _('Overview')),
@@ -102,6 +108,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('basic', url_for('admin/basic_options'), _('Basic')),
                 ('urls', url_for('admin/urls'), _('URLs')),
                 ('theme', url_for('admin/theme'), _('Theme')),
+                ('pages', url_for('admin/pages_config'), _('Pages')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
                 ('cache', url_for('admin/cache'), _('Cache')),
                 ('configuration', url_for('admin/configuration'),
@@ -1816,6 +1823,187 @@ def do_change_password(request):
 
     return render_admin_response('admin/change_password.html',
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_pages_config(request):
+    """Show the configuration page for pages"""
+    cfg = get_application().cfg
+    csrf_protector = CSRFProtector()
+    form = {
+        'show_title': cfg['show_page_title'],
+        'show_children': cfg['show_page_children'],
+    }
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+        rform = request.form
+        form['show_title'] = show_title = 'show_title' in request.form
+        form['show_children'] = show_children = 'show_children' in request.form
+
+        # update the configuration
+        if show_title != cfg['show_page_title']:
+            cfg['show_page_title'] = show_title
+        if show_children != cfg['show_page_children']:
+            cfg['show_page_children'] = show_children
+        flash(u'Pages configuration updated successfull.')
+
+    return render_admin_response(
+        'admin/pages_config.html',
+        'options.pages',
+        form=form,
+        csrf_protector=csrf_protector,
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_show_pages(request):
+    """Shows all saved pages"""
+    return render_admin_response(
+        'admin/pages.html',
+        'pages.overview',
+        pages=Page.objects.all()
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_write_page(request, page_id=None):
+    """
+    Show the "write page" dialog.
+
+    If `page_id` is given the form is updated with
+    already saved data so that you can edit a page.
+    """
+    csrf_protector = CSRFProtector()
+    form = {}
+    errors = []
+
+    if page_id is None:
+        # new page
+        new_page = True
+        form.update(
+            key=u'', title=u'',
+            raw_body=u'',
+            navigation_pos=u'',
+            parser=request.app.cfg['default_parser'],
+        )
+    else:
+        # edit a page
+        new_page = False
+        page = Page.objects.get(page_id)
+        if page is None:
+            raise NotFound()
+        form.update(
+            key=page.key,
+            title=page.title,
+            raw_body=page.raw_body,
+            navigation_pos=page.navigation_pos,
+            parser=page.extra['parser'],
+            parent_id=page.parent_id or 0,
+        )
+
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+
+        if request.form.get('cancel'):
+            return redirect(url_for('admin/show_pages'))
+        if request.form.get('delete') and not new_page:
+            return redirect(url_for('admin/delete_page', page_id=page_id))
+
+        form['title'] = title = request.form.get('title')
+        if not title:
+            errors.append(_('You have to provide a title'))
+
+        form['key'] = key = request.form.get('key') or None
+        if key is None:
+            key = gen_slug(title)
+        elif key:
+            key = gen_slug(key)
+        if u'/' in key:
+            errors.append(_("A key can't contain a slash"))
+
+        form['navigation_pos'] = navigation_pos = \
+            request.form.get('navigation_pos') or None
+
+        form['raw_body'] = raw_body = request.form.get('raw_body')
+        if not raw_body:
+            errors.append(_('You have to provide some content'))
+
+        form['parser'] = parser = request.form.get('parser')
+        if not parser:
+            parser = request.app.cfg['default_parser']
+
+        form['parent_id'] = parent_id = request.form.get('parent_id')
+
+        try:
+            parent_id = int(parent_id)
+        except (ValueError, TypeError):
+            parent_id = None
+        if parent_id == 0:
+            parent_id = None
+
+        if not errors:
+            if new_page:
+                page = Page(key, title, raw_body, parser, navigation_pos,
+                            parent_id)
+            else:
+                page.key = key
+                page.title = title
+                page.parser = parser
+                page.raw_body = raw_body
+                page.navigation_pos = navigation_pos
+                page.parent_id = parent_id
+
+            db.commit()
+            html_detail = '<a href="%s">%s</a>' % (
+                escape(url_for(page)),
+                escape(title)
+            )
+            if new_page:
+                flash('The page %s was created successfully.' % html_detail)
+            else:
+                flash('The page %s was updated successfully.' % html_detail)
+            return redirect(url_for('admin/show_pages'))
+        else:
+            for error in errors:
+                flash(error, 'error')
+
+    all_pages = [(0, 'No Parent')] + [(p.page_id, p.title) for p in
+                                      Page.objects.all()]
+
+    return render_admin_response(
+        'admin/write_page.html',
+        'pages.write',
+        parsers=request.app.list_parsers(),
+        form=form,
+        csrf_protector=csrf_protector,
+        all_pages=all_pages,
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_delete_page(request, page_id):
+    """Shows the confirm dialog if the user deletes a page"""
+    page = Page.objects.get(page_id)
+    if page is None:
+        raise NotFound()
+    csrf_protector = CSRFProtector()
+
+    if request.method == 'POST':
+        csrf_protector.assert_safe()
+
+        if request.form.get('cancel'):
+            return redirect(url_for('admin/write_page', page_id=page.page_id))
+        elif request.form.get('confirm'):
+            db.delete(page)
+            flash(_('The page %s was deleted successfully.') %
+                  escape(page.title), 'remove')
+            db.commit()
+            return redirect(url_for('admin/show_pages'))
+
+    return render_admin_response('admin/delete_page.html', 'page.write',
+        page=page,
+        csrf_protector=csrf_protector,
     )
 
 
