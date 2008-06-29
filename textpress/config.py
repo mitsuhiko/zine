@@ -28,6 +28,7 @@ DEFAULT_VARS = {
     'session_cookie_name':      (unicode, u'textpress_session'),
     'theme':                    (unicode, u'default'),
     'secret_key':               (unicode, u''),
+    'language':                 (unicode, u'en'),
 
     # url settings
     'blog_url_prefix':          (unicode, u''),

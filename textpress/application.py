@@ -29,8 +29,8 @@ from collections import deque
 from textpress.database import db, upgrade_database, cleanup_session
 from textpress.config import Configuration
 from textpress.cache import get_cache
-from textpress.utils import format_datetime, format_date, format_month, \
-     ClosingIterator, check_external_url, local, local_manager
+from textpress.utils import ClosingIterator, check_external_url, \
+     local, local_manager
 
 from werkzeug import Request as BaseRequest, Response as BaseResponse, \
      SharedDataMiddleware, url_quote, routing, redirect as simple_redirect
@@ -559,16 +559,19 @@ class TextPress(object):
             }
         )
 
-        # XXX: l10n :-)
-        env.filters.update(
-            datetimeformat=format_datetime,
-            dateformat=format_date,
-            monthformat=format_month,
-            json=__import__('simplejson').dumps
-        )
+        env.filters['json'] = __import__('simplejson').dumps
 
-        # XXX: i18n :-)
-        env.install_null_translations()
+        # initialize i18n/l10n system
+        from babel import Locale
+        from textpress import i18n
+        self.locale = Locale(self.cfg['language'])
+        self.translations = i18n.load_translations(self.locale)
+        env.install_gettext_translations(self.translations)
+        env.filters.update(
+            datetimeformat=i18n.format_datetime,
+            dateformat=i18n.format_date,
+            monthformat=i18n.format_month
+        )
 
         # copy the widgets into the global namespace
         for name, widget in self.widgets.iteritems():

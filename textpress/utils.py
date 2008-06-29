@@ -18,10 +18,9 @@ import new
 import sys
 import os
 import logging
-import pytz
 import linecache
 from time import time, strptime, sleep
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from random import choice, randrange, random
 from urlparse import urlparse, urljoin, urlsplit
 from tempfile import NamedTemporaryFile, gettempdir
@@ -36,10 +35,6 @@ from werkzeug import cached_property, escape, url_quote, import_string, \
 from werkzeug.exceptions import Forbidden
 from werkzeug.contrib.reporterstream import BaseReporterStream
 from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
-
-DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
-                '%m/%d/%y', '%d/%m/%y', '%d%m%y', '%m%d%y', '%y%m%d']
-TIME_FORMATS = ['%H:%M', '%H:%M:%S', '%I:%M %p', '%I:%M:%S %p']
 
 KEY_CHARS = string.ascii_letters + string.digits
 SALT_CHARS = string.ascii_lowercase + string.digits
@@ -75,9 +70,6 @@ _iso8601_re = re.compile(
     # time
     r'(?:T(\d{2}):(\d{2})(?::(\d{2}(?:\.\d+)?))?(Z|[+-]\d{2}:\d{2})?)?$'
 )
-
-TIMEZONES = set(pytz.common_timezones)
-get_timezones_for_country = pytz.country_timezones
 
 # load dynamic constants
 from textpress._dynamic import *
@@ -336,70 +328,6 @@ def get_etree():
             _etree = etree
             return etree
     raise RuntimeError('no elementtree implementation found')
-
-
-def format_datetime(obj, format=None):
-    """Format a datetime object. Later with i18n"""
-    cfg = local.application.cfg
-    tzinfo = pytz.timezone(str(cfg['timezone']))
-    if type(obj) is date:
-        obj = datetime(obj.year, obj.month, obj.day, tzinfo=tzinfo)
-    else:
-        obj = obj.replace(tzinfo=tzinfo)
-    if format is None:
-        format = cfg['datetime_format']
-    return obj.strftime(format.encode('utf-8')).decode('utf-8')
-
-
-def format_date(obj):
-    """Format a date or datetime object so that it's displays the date."""
-    return format_datetime(obj, local.application.cfg['date_format'])
-
-
-def format_month(obj):
-    """Formats a month."""
-    # XXX: l10n!!!
-    return format_datetime(obj, '%B %Y')
-
-
-def parse_datetime(string):
-    """Do all you can do to parse the string into a datetime object."""
-    if string.lower() == _('now'):
-        return datetime.utcnow()
-    convert = lambda fmt: datetime(*strptime(string, fmt)[:7])
-    cfg = local.application.cfg
-
-    # first of all try the datetime_format because it's likely that
-    # the users inputs the date like chosen in the config
-    try:
-        return convert(cfg['datetime_format'])
-    except ValueError:
-        pass
-
-    # no go with time only, and current day
-    base = datetime.utcnow()
-    for fmt in TIME_FORMATS:
-        try:
-            val = convert(fmt)
-        except ValueError:
-            continue
-        return base.replace(hour=val.hour, minute=val.minute,
-                            second=val.second)
-
-    # no try date + time
-    def combined():
-        for t_fmt in TIME_FORMATS:
-            for d_fmt in DATE_FORMATS:
-                yield t_fmt + ' ' + d_fmt
-                yield d_fmt + ' ' + t_fmt
-
-    for fmt in combined():
-        try:
-            return convert(fmt)
-        except ValueError:
-            pass
-
-    raise ValueError('invalid date format')
 
 
 def is_valid_email(mail):

@@ -29,10 +29,12 @@ from textpress.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from textpress.database import comments as comment_table, posts, \
      post_tags, post_links
-from textpress.utils import parse_datetime, format_datetime, \
-     is_valid_email, is_valid_url, get_version_info, can_build_eventmap, \
-     build_eventmap, make_hidden_fields, dump_json, load_json, flash, \
-     CSRFProtector, IntelligentRedirect, TIMEZONES, Pagination, gen_slug
+from textpress.utils import is_valid_email, is_valid_url, \
+     get_version_info, can_build_eventmap, build_eventmap, \
+     make_hidden_fields, dump_json, load_json, flash, get_slug, \
+	 CSRFProtector, IntelligentRedirect, Pagination
+from textpress.i18n import parse_datetime, format_datetime, \
+     list_timezones, has_timezone, list_languages, has_language
 from textpress.importers import list_import_queue, load_import_dump, \
      delete_import_dump, perform_import
 from textpress.pluginsystem import install_package, InstallationError, \
@@ -1148,6 +1150,7 @@ def do_basic_options(request):
         'blog_title':           cfg['blog_title'],
         'blog_tagline':         cfg['blog_tagline'],
         'blog_email':           cfg['blog_email'],
+        'language':             cfg['language'],
         'timezone':             cfg['timezone'],
         'datetime_format':      cfg['datetime_format'],
         'date_format':          cfg['date_format'],
@@ -1173,9 +1176,12 @@ def do_basic_options(request):
         if blog_email and not is_valid_email(blog_email):
             errors.append(_('You have to provide a valid e-mail address '
                             'for the blog e-mail field.'))
+        form['language'] = language = request.form.get('language')
+        if not has_language(language):
+            raise BadRequest()
         form['timezone'] = timezone = request.form.get('timezone')
-        if timezone not in TIMEZONES:
-            errors.append(_(u'Unknown timezone “%s”') % timezone)
+        if not has_timezone(timezone):
+            raise BadRequest()
         form['datetime_format'] = datetime_format = \
             request.form.get('datetime_format')
         form['date_format'] = date_format = \
@@ -1207,13 +1213,13 @@ def do_basic_options(request):
             errors.append(_('Posts per page must be a valid integer'))
         form['use_flat_comments'] = use_flat_comments = \
             'use_flat_comments' in request.form
-        form['maintenance_mode'] = maintenance_mode = \
-            'maintenance_mode' in request.form
         if not errors:
             if blog_title != cfg['blog_title']:
                 cfg['blog_title'] = blog_title
             if blog_tagline != cfg['blog_tagline']:
                 cfg['blog_tagline'] = blog_tagline
+            if language != cfg['language']:
+                cfg['language'] = language
             if timezone != cfg['timezone']:
                 cfg['timezone'] = timezone
             if datetime_format != cfg['datetime_format']:
@@ -1244,7 +1250,8 @@ def do_basic_options(request):
 
     return render_admin_response('admin/basic_options.html', 'options.basic',
         form=form,
-        timezones=sorted(TIMEZONES),
+        timezones=list_timezones(),
+        languages=list_languages(),
         parsers=request.app.list_parsers(),
         hidden_form_data=make_hidden_fields(csrf_protector)
     )
@@ -1598,20 +1605,19 @@ def do_configuration(request):
 def do_maintenance(request):
     """Enable / Disable maintenance mode."""
     cfg = request.app.cfg
-    form = {
-        'maintenance_mode':     cfg['maintenance_mode']
-    }
     csrf_protector = CSRFProtector()
     if request.method == 'POST':
         csrf_protector.assert_safe()
-        cfg['maintenance_mode'] = 'maintenance_mode' in request.form
-        flash(_('Configuration altered successfully.'), 'configure')
+        cfg['maintenance_mode'] = not cfg['maintenance_mode']
+        if not cfg['maintenance_mode']:
+            flash(_('Maintenance mode disabled.  The blog is now '
+                    'publicly available.'), 'configure')
         return simple_redirect('admin/maintenance')
 
     return render_admin_response('admin/maintenance.html',
                                  'maintenance.overview',
-        form=form,
-        hidden_form_data=make_hidden_fields(csrf_protector)
+        hidden_form_data=make_hidden_fields(csrf_protector),
+        maintenance_mode=cfg['maintenance_mode']
     )
 
 
