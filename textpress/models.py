@@ -1062,7 +1062,7 @@ class Page(object):
 
 # connect the tables.
 db.mapper(User, users, properties={
-    '_display_name':    users.c.display_name,
+    'display_name':     db.synonym('_display_name', map_column=True),
     'posts':            db.dynamic_loader(Post, backref='author',
                                           cascade='all, delete, delete-orphan'),
     'comments':         db.dynamic_loader(Comment, backref='user',
@@ -1073,9 +1073,9 @@ db.mapper(Tag, tags, properties={
 })
 db.mapper(Comment, comments, properties={
     '_raw_body':    comments.c.body,
-    '_author':      comments.c.author,
-    '_email':       comments.c.email,
-    '_www':         comments.c.www,
+    'author':       db.synonym('_author', map_column=True),
+    'email':        db.synonym('_email', map_column=True),
+    'www':          db.synonym('_www', map_column=True),
     'children':     db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
         order_by=[db.asc(comments.c.pub_date)],
@@ -1086,16 +1086,18 @@ db.mapper(Comment, comments, properties={
 }, order_by=comments.c.pub_date.desc())
 db.mapper(PostLink, post_links)
 db.mapper(Post, posts, properties={
-    '_raw_body':    posts.c.body,
-    '_raw_intro':   posts.c.intro,
-    'comments':     db.relation(Comment, backref='post',
-                                primaryjoin=posts.c.post_id == comments.c.post_id,
-                                order_by=[db.asc(comments.c.pub_date)],
-                                cascade='all, delete, delete-orphan'),
-    'links':        db.relation(PostLink, backref='post',
-                                cascade='all, delete, delete-orphan'),
-    'tags':         db.relation(Tag, secondary=post_tags, lazy=False,
-                                order_by=[db.asc(tags.c.name)])
+    '_raw_body':        posts.c.body,
+    '_raw_intro':       posts.c.intro,
+    'comments':         db.relation(Comment, backref='post',
+                                    primaryjoin=posts.c.post_id ==
+                                        comments.c.post_id,
+                                    order_by=[db.asc(comments.c.pub_date)],
+                                    lazy=False,
+                                    cascade='all, delete, delete-orphan'),
+    'links':            db.relation(PostLink, backref='post',
+                                    cascade='all, delete, delete-orphan'),
+    'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
+                                    order_by=[db.asc(tags.c.name)])
 }, order_by=posts.c.pub_date.desc())
 db.mapper(Page, pages, properties={
     '_raw_body':    pages.c.body,
