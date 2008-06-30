@@ -164,22 +164,22 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 plugin.deactivate()
                 exc_type, exc_value, tb = plugin.setup_error
                 if exc_type is SetupError:
-                    msg = _(u'Could not activate plugin “%s”: %s') % (
-                        plugin.html_display_name,
-                        exc_value.message
-                    )
+                    msg = _(u'Could not activate plugin “%(name)s”: %(error)s') % {
+                        'name': plugin.html_display_name,
+                        'error': exc_value.message
+                    }
                 else:
-                    msg =_(u'The plugin guard detected that the plugin “%s” '
-                           u'causes problems (%s in %s, line %s) and '
-                           u'deactivated it.  If you want to debug it, '
-                           u'disable the plugin guard.') % (
-                        plugin.html_display_name,
-                        escape(str(plugin.setup_error[1]).
-                               decode('utf-8', 'ignore')),
-                        plugin.setup_error[2].tb_frame.
-                            f_globals.get('__file__', _('unknown file')),
-                        plugin.setup_error[2].tb_lineno
-                    )
+                    msg =_(u'The plugin guard detected that the plugin '
+                           u'“%(name)s” causes problems (%(error)s in '
+                           u'%(file)s, line %(line)s) and deactivated it.  If '
+                           u'you want to debug it, disable the plugin guard.') % {
+                        'name': plugin.html_display_name,
+                        'error': escape(str(plugin.setup_error[1]).
+                                        decode('utf-8', 'ignore')),
+                        'file': plugin.setup_error[2].tb_frame.
+                                    f_globals.get('__file__', _('unknown file')),
+                        'line': plugin.setup_error[2].tb_lineno
+                    }
                 flash(msg, 'error')
 
     #! used to flash messages, add links to stylesheets, modify the admin
@@ -434,10 +434,10 @@ def do_edit_post(request, post_id=None):
                             pingback(this_url, url)
                         except PingbackError, e:
                             if not e.ignore_silently:
-                                flash(_('Could not ping %s: %s') % (
-                                    html_url,
-                                    e.description
-                                ), 'error')
+                                flash(_('Could not ping %(url)s: %(error)s') % {
+                                    'url': html_url,
+                                    'error': e.description
+                                }, 'error')
                         else:
                             flash(_('%s was pinged successfully.') %
                                     html_url)
@@ -1388,18 +1388,19 @@ def do_plugins(request):
                 (loaded, loaded_dep, missing_dep) = plugin.activate()
                 if loaded:
                     if loaded_dep:
-                        flash(_(u'The Plugins <em>%s</em> are loaded as a dependency '
-                                u'of “%s”') % (u', '.join(loaded_dep),
-                                               plugin.html_display_name))
+                        flash(_(u'The Plugins <em>%(dependencies)s</em> are '
+                                u'loaded as a dependency of “%(plugin)s”') % {
+                                    'dependencies': u', '.join(loaded_dep),
+                                    'plugin': plugin.html_display_name})
                     flash(_(u'Plugin “%s” activated.') % plugin.html_display_name,
                          'configure')
 
                 else:
                     if missing_dep:
-                        flash(_(u'Plugin “%s” has unsolved dependencies.  '
-                                u'Please install %s.')
-                                % (plugin.html_display_name,
-                                   u', '.join(missing_dependencies)))
+                        flash(_(u'Plugin “%(plugin)s” has unresolved '
+                                u'dependencies.  Please install %(dependency)s.')
+                                % {'plugin': plugin.html_display_name,
+                                   'dependency': u', '.join(missing_dependencies)})
                     else:
                         flash(_(u'Plugin “%s” could not be loaded')
                                 % plugin.html_display_name)

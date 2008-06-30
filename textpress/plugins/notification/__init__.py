@@ -11,7 +11,8 @@
 """
 from textpress.api import *
 from textpress.models import User, ROLE_AUTHOR
-from textpress.utils import send_email, format_datetime, is_valid_email
+from textpress.i18n import format_datetime
+from textpress.utils import send_email, is_valid_email
 
 SIGNATURE = '''
 -- Mail delivered from your TextPress blog.
@@ -24,18 +25,19 @@ def notify(request, comment):
     if not request.user.username == comment.author:
         #! Only notify if logged in user is not the same as the post's author
         to_addr = comment.post.author.email
-        subject = _('New comment on your blog to "%s" by %s' % (
-            comment.post.title,
-            comment.author
-        ))
+        subject = _('New comment on your blog to "%(title)s" by %(author)s') % {
+            'title': comment.post.title,
+            'author': comment.author
+        }
         pub_date = format_datetime(comment.pub_date, '%d.%m %H:%M')
-        msg = _('%s (%s) wrote at %s:\n\n%s\n%s' % (
-            comment.author,
-            comment.email,
-            pub_date,
-            comment.raw_body,
-            SIGNATURE
-        ))
+        msg = _('%(author)s (%(email)s) wrote at %(date)s:\n\n'
+                '%(content)s\n%(signature)s') % {
+            'author': comment.author,
+            'email': comment.email,
+            'date': pub_date,
+            'content': comment.raw_body,
+            'signature': SIGNATURE
+        }
         if is_valid_email(to_addr):
             send_email(subject, msg, to_addr)
 
@@ -45,11 +47,12 @@ def moderate_comments_notify(request, comment):
     unmoderated_comments = comment.objects.get_unmoderated_count()
     if unmoderated_comments:
         subject = _('Unmoderated Comments')
-        msg = _('There are %d comments awaiting moderation.\n'
-                'You can review them on:\n  %s\n%s' % (
-            unmoderated_comments,
-            url_for('admin/show_comments', _external=True),
-            SIGNATURE))
+        msg = _('There are %(number)d comments awaiting moderation.\n'
+                'You can review them on:\n  %(url)s\n%(signature)s') % {
+            'number': unmoderated_comments,
+            'url': url_for('admin/show_comments', _external=True),
+            'signature': SIGNATURE
+        }
         users = User.objects.filter(User.role >= ROLE_AUTHOR).all()
         to_addrs = [user.email for user in users if is_valid_email(user.email)]
         send_email(subject, msg, to_addrs)
