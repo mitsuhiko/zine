@@ -12,7 +12,8 @@ import sys
 from textpress.api import *
 from textpress.models import User, Post, Tag, ROLE_AUTHOR, STATUS_DRAFT, \
      STATUS_PUBLISHED
-from textpress.utils import format_iso8601, parse_iso8601, XMLRPC
+from textpress.utils.dates import format_iso8601, parse_iso8601
+from textpress.utils.xml import XMLRPC
 from datetime import datetime
 
 

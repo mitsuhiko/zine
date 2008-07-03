@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 from babel import Locale, dates, UnknownLocaleError
 from babel.support import Translations
-from textpress.application import get_application
+import textpress.application
 
 
 __all__ = ['_', 'gettext', 'ngettext']
@@ -30,7 +30,7 @@ def load_translations(locale):
 
 def gettext(string):
     """Translate the given string to the language of the application."""
-    app = get_application()
+    app = textpress.application.get_application()
     if app is None:
         return string
     return app.translations.ugettext(string)
@@ -40,7 +40,7 @@ def ngettext(singular, plural, n):
     """Translate the possible pluralized string to the language of the
     application.
     """
-    app = get_application()
+    app = textpress.application.get_application()
     if app is None:
         if n == 1:
             return singular
@@ -79,7 +79,7 @@ def list_timezones():
 
 def list_languages():
     """Return a list of all languages."""
-    app = get_application()
+    app = textpress.application.get_application()
     if app:
         locale = app.locale
     else:
@@ -124,7 +124,7 @@ def parse_datetime(string):
     if string.lower() == _('now'):
         return datetime.utcnow()
     convert = lambda fmt: datetime(*strptime(string, fmt)[:7])
-    cfg = get_application().cfg
+    cfg = textpress.application.get_application().cfg
 
     # first of all try the datetime_format because it's likely that
     # the users inputs the date like chosen in the config
@@ -160,7 +160,7 @@ def parse_datetime(string):
 
 
 def _date_format(formatter, obj, format):
-    app = get_application()
+    app = textpress.application.get_application()
     if app is None:
         locale = Locale('en')
     else:

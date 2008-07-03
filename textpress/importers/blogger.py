@@ -100,7 +100,9 @@ except ImportError:
 
 from textpress.application import redirect, url_for
 from textpress.importers import Importer, Blog, Label, Author, Post, Comment
-from textpress.utils import _, flash, parse_iso8601
+from textpress.api import _
+from textpress.utils.admin import flash
+from textpress.utils.dates import parse_iso8601
 
 
 GDATA_DOWNLOAD_URL = 'http://code.google.com/p/gdata-python-client/'

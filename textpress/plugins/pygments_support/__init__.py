@@ -11,7 +11,7 @@
 from os.path import join, dirname
 from time import time, asctime, gmtime
 from textpress.api import *
-from textpress.utils import CSRFProtector
+from textpress.utils.xxx import CSRFProtector
 from textpress.views.admin import render_admin_response, flash
 from textpress.models import ROLE_ADMIN
 from textpress.fragment import DataNode

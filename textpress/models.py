@@ -14,8 +14,10 @@ from datetime import date, datetime, timedelta
 
 from textpress.database import users, tags, posts, post_links, post_tags, \
      comments, db, pages
-from textpress.utils import Pagination, gen_pwhash, check_pwhash, gen_slug, \
-     build_tag_uri
+from textpress.utils import build_tag_uri
+from textpress.utils.admin import Pagination, gen_slug
+from textpress.utils.crypto import gen_pwhash
+from textpress.utils.validators import check_pwhash
 from textpress.application import get_application, get_request, url_for
 
 

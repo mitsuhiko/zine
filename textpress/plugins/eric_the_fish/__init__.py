@@ -27,7 +27,8 @@ from textpress.views.admin import render_admin_response
 # Because our fish uses JSON and JavaScript we use the dump_json function
 # from the utils module. We also use the CSRFProtector which helps us to
 # avoid CSRF attacks.
-from textpress.utils import dump_json, CSRFProtector
+from textpress.utils import dump_json
+from textpress.utils.xxx import CSRFProtector
 
 # we only want the admin to be able to configure eric. so we need the
 # admin role

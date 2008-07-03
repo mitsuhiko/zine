@@ -30,8 +30,8 @@ from babel import Locale
 from textpress.database import db, upgrade_database, cleanup_session
 from textpress.config import Configuration
 from textpress.cache import get_cache
-from textpress.utils import ClosingIterator, check_external_url, \
-     local, local_manager
+from textpress.utils import ClosingIterator, local, local_manager
+from textpress.utils.validators import check_external_url
 
 from werkzeug import Request as BaseRequest, Response as BaseResponse, \
      SharedDataMiddleware, url_quote, routing, redirect as simple_redirect

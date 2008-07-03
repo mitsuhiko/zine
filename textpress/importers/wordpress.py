@@ -14,8 +14,10 @@ from time import strptime
 from datetime import datetime
 from textpress.api import *
 from textpress.importers import Importer, Blog, Label, Author, Post, Comment
-from textpress.utils import _html_entities, get_etree, CSRFProtector, \
-     StreamReporter, make_hidden_fields, flash, escape
+from textpress.utils.admin import flash
+from textpress.utils.xml import _html_entities, get_etree, escape
+from textpress.utils.xxx import CSRFProtector, StreamReporter, \
+     make_hidden_fields
 from textpress.models import COMMENT_UNMODERATED, COMMENT_MODERATED
 
 

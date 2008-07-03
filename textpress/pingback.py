@@ -34,7 +34,7 @@ from werkzeug.routing import RequestRedirect, NotFound
 from werkzeug import escape, unescape
 from textpress.api import get_request, get_application, url_for, db, _
 from textpress.models import Post, Comment
-from textpress.utils import XMLRPC, strip_tags
+from textpress.utils.xml import XMLRPC, strip_tags
 
 
 _title_re = re.compile(r'<title>(.*?)</title>(?i)')

@@ -22,7 +22,7 @@ import inspect
 from os import path
 from textpress.api import *
 from textpress.models import Post, Tag, Comment
-from textpress.utils import CSRFProtector
+from textpress.utils.xxx import CSRFProtector
 
 from jinja2 import nodes
 

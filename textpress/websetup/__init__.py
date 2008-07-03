@@ -19,7 +19,8 @@ from os import path
 from textpress.config import Configuration
 from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
-from textpress.utils import is_valid_email, gen_pwhash, gen_secret_key
+from textpress.utils.crypto import gen_pwhash, gen_secret_key
+from textpress.utils.validators import is_valid_email
 from werkzeug import Request, Response, redirect
 from jinja2 import Environment, FileSystemLoader
 

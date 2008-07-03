@@ -12,7 +12,7 @@
 from textpress.api import *
 from textpress.models import User, ROLE_AUTHOR
 from textpress.i18n import format_datetime
-from textpress.utils import send_email, is_valid_email
+from textpress.utils.mail import send_email, is_valid_email
 
 SIGNATURE = '''
 -- Mail delivered from your TextPress blog.

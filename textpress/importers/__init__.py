@@ -17,7 +17,7 @@ from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
 from textpress.api import _, require_role
 from textpress.database import db, posts
-from textpress.utils import escape, get_etree
+from textpress.utils.xml import escape, get_etree
 from textpress.models import ROLE_ADMIN, ROLE_AUTHOR, COMMENT_MODERATED
 
 

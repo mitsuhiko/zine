@@ -12,7 +12,7 @@
 """
 import re
 from textpress.fragment import Fragment, Node, TextNode
-from textpress.utils import is_valid_url
+from textpress.utils.validators import is_valid_url
 from textpress.parsers import BaseParser
 
 

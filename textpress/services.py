@@ -10,7 +10,7 @@
 """
 from textpress.api import *
 from textpress.models import Comment, ROLE_AUTHOR
-from textpress.utils import StreamReporter
+from textpress.utils.xxx import StreamReporter
 
 
 def do_get_comment(req):

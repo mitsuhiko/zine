@@ -29,10 +29,12 @@ from textpress.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from textpress.database import comments as comment_table, posts, \
      post_tags, post_links
-from textpress.utils import is_valid_email, is_valid_url, \
-     get_version_info, can_build_eventmap, build_eventmap, \
-     make_hidden_fields, dump_json, load_json, flash, gen_slug, \
-     CSRFProtector, IntelligentRedirect, Pagination
+from textpress.utils import get_version_info, dump_json, load_json
+from textpress.utils.validators import is_valid_email, is_valid_url
+from textpress.utils.admin import can_build_eventmap, build_eventmap, \
+     Pagination, flash, gen_slug
+from textpress.utils.xxx import make_hidden_fields, CSRFProtector, \
+     IntelligentRedirect
 from textpress.i18n import parse_datetime, format_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from textpress.importers import list_import_queue, load_import_dump, \

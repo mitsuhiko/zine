@@ -13,11 +13,12 @@ from os import makedirs, remove, sep as pathsep
 from os.path import dirname, join, exists
 from time import asctime, gmtime, time
 from textpress.api import *
-from textpress.utils import CSRFProtector, IntelligentRedirect, \
-     make_hidden_fields, dump_json
+from textpress.utils import ClosingIterator
+from textpress.utils import dump_json
+from textpress.utils.xxx import CSRFProtector, IntelligentRedirect, \
+     StreamReporter, make_hidden_fields
 from textpress.models import ROLE_AUTHOR, ROLE_ADMIN
 from textpress.views.admin import render_admin_response, flash
-from textpress.utils import StreamReporter, ClosingIterator
 from textpress.plugins.file_uploads.utils import guess_mimetype, \
      get_upload_folder, list_files, list_images, get_im_version, \
      get_im_path, touch_upload_folder, upload_file, create_thumbnail, \

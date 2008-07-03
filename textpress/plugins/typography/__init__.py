@@ -18,7 +18,7 @@ from textpress.api import *
 from textpress.models import ROLE_ADMIN
 from textpress.views.admin import require_role, render_admin_response, \
      flash
-from textpress.utils import CSRFProtector
+from textpress.utils.xxx import CSRFProtector
 
 
 TEMPLATES = join(dirname(__file__), 'templates')

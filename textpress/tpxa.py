@@ -20,7 +20,9 @@ from itertools import chain
 import textpress
 from textpress.api import *
 from textpress.models import Post, User
-from textpress.utils import get_etree, escape, build_tag_uri, format_iso8601
+from textpress.utils import build_tag_uri
+from textpress.utils.dates import format_iso8601
+from textpress.utils.xml import get_etree, escape
 
 
 ATOM_NS = 'http://www.w3.org/2005/Atom'

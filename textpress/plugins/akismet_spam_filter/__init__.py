@@ -14,7 +14,8 @@ from textpress.api import *
 from textpress.widgets import Widget
 from textpress.views.admin import flash, render_admin_response
 from textpress.models import ROLE_ADMIN, COMMENT_BLOCKED_SPAM, Comment
-from textpress.utils import CSRFProtector, RequestLocal
+from textpress.utils import RequestLocal
+from textpress.utils.xxx import CSRFProtector
 from urllib import urlopen
 from werkzeug import escape, url_encode
 

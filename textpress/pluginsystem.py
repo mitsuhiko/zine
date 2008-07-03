@@ -87,7 +87,7 @@ from base64 import b64encode
 import textpress
 from urllib import quote, urlencode, FancyURLopener
 from textpress.application import get_application
-from textpress.utils import split_email, is_valid_email
+from textpress.utils.mail import split_email, is_valid_email
 from werkzeug import cached_property, escape
 
 

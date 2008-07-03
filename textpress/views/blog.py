@@ -13,8 +13,9 @@
 from textpress.api import *
 from textpress.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
     COMMENT_UNMODERATED
-from textpress.utils import is_valid_email, is_valid_url, generate_rsd, \
-     dump_json, dump_xml, build_tag_uri, AtomFeed
+from textpress.utils import dump_json, build_tag_uri
+from textpress.utils.validators import is_valid_email, is_valid_url
+from textpress.utils.xml import generate_rsd, dump_xml, AtomFeed
 from textpress import pingback
 from werkzeug.exceptions import NotFound, Forbidden
 
