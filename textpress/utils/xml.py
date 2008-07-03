@@ -83,8 +83,7 @@ def get_etree():
 def generate_rsd(app):
     """Generate the RSD definition for this application apis."""
     from textpress.application import url_for
-    from xml.dom.minidom import Document
-    document = Document()
+    document = __import__('xml.dom.minidom', None, None, ['']).Document()
     root = document.appendChild(document.createElement('rsd'))
     root.setAttribute('version', '1.0')
     root.setAttribute('xmlns', 'http://archipelago.phrasewise.com/rsd')
