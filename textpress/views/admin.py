@@ -107,7 +107,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
 
     # set up the administration menu bar
     if request.user.role == ROLE_ADMIN:
-        navigation_bar.insert(2,
+        navigation_bar.insert(3,
             ('pages', url_for('admin/show_pages'), _('Pages'), [
                 ('overview', url_for('admin/show_pages'), _('Overview')),
                 ('write', url_for('admin/write_page'), _('Write Page')),
@@ -143,7 +143,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                                _('Maintenance')))
         system_items.insert(2, ('import', url_for('admin/import'), _('Import')))
         system_items.insert(3, ('export', url_for('admin/export'), _('Export')))
-        
+
     navigation_bar.append(('system', url_for('admin/information'), _('System'),
                           system_items))
 
@@ -168,7 +168,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # on which page he is.
     if request.app.cfg['maintenance_mode']:
         flash(_('TextPress is in maintenance mode. Don\'t forget to '
-                'turn it off again once you finish your changes.'))
+                '<a href="%s">turn it off again</a> once you finish your '
+                'changes.') % url_for('admin/maintenance'))
 
     # check for broken plugins if we have the plugin guard enabled
     if request.app.cfg['plugin_guard']:
