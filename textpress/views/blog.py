@@ -10,10 +10,14 @@
                              Ali Afshar.
     :license: GNU GPL.
 """
+from os.path import exists
+from time import asctime, gmtime, time
+
 from textpress.api import *
 from textpress.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
     COMMENT_UNMODERATED
-from textpress.utils import dump_json, build_tag_uri
+from textpress.utils import dump_json, build_tag_uri, ClosingIterator
+from textpress.utils.uploads import get_filename, guess_mimetype
 from textpress.utils.validators import is_valid_email, is_valid_url
 from textpress.utils.xml import generate_rsd, dump_xml, AtomFeed
 from textpress import pingback
@@ -438,3 +442,22 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
             comment_num += 1
 
     return feed.get_response()
+
+
+def do_get_upload(req, filename):
+    filename = get_filename(filename)
+    if not exists(filename):
+        raise NotFound()
+    guessed_type = guess_mimetype(filename)
+    fp = file(filename, 'rb')
+    def stream():
+        while True:
+            chunk = fp.read(1024 * 512)
+            if not chunk:
+                break
+            yield chunk
+    resp = Response(ClosingIterator(stream(), fp.close),
+                    mimetype=guessed_type or 'text/plain')
+    resp.headers['Cache-Control'] = 'public'
+    resp.headers['Expires'] = asctime(gmtime(time() + 3600))
+    return resp

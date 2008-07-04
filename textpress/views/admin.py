@@ -22,6 +22,8 @@
     :license: GNU GPL.
 """
 from datetime import datetime
+from os import remove, sep as pathsep
+from os.path import exists
 from textpress.api import *
 from textpress.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
@@ -34,7 +36,11 @@ from textpress.utils.validators import is_valid_email, is_valid_url
 from textpress.utils.admin import can_build_eventmap, build_eventmap, \
      Pagination, flash, gen_slug
 from textpress.utils.xxx import make_hidden_fields, CSRFProtector, \
-     IntelligentRedirect
+     IntelligentRedirect, StreamReporter
+from textpress.utils.uploads import guess_mimetype, get_upload_folder, \
+     list_files, list_images, get_im_version, get_im_path, \
+     touch_upload_folder, upload_file, create_thumbnail, file_exists, \
+     get_filename
 from textpress.i18n import parse_datetime, format_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from textpress.importers import list_import_queue, load_import_dump, \
@@ -93,6 +99,12 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         ('tags', url_for('admin/show_tags'), _('Tags'), [
             ('overview', url_for('admin/show_tags'), _('Overview')),
             ('edit', url_for('admin/new_tag'), _('Edit Tag'))
+        ]),
+        ('file_uploads', url_for('admin/browse_uploads'), _('Uploads'), [
+            ('browse', url_for('admin/browse_uploads'), _('Browse')),
+            ('upload', url_for('admin/new_upload'), _('Upload')),
+            ('thumbnailer', url_for('admin/upload_thumbnailer'),
+             _('Create Thumbnails'))
         ])
     ]
 
@@ -113,6 +125,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('urls', url_for('admin/urls'), _('URLs')),
                 ('theme', url_for('admin/theme'), _('Theme')),
                 ('pages', url_for('admin/pages_config'), _('Pages')),
+                ('uploads', url_for('admin/upload_config'), _('Uploads')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
                 ('cache', url_for('admin/cache'), _('Cache')),
                 ('configuration', url_for('admin/configuration'),
@@ -2009,6 +2022,215 @@ def do_delete_page(request, page_id):
     return render_admin_response('admin/delete_page.html', 'page.write',
         page=page,
         csrf_protector=csrf_protector,
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_upload(req):
+    csrf_protector = CSRFProtector()
+    reporter = StreamReporter()
+
+    if req.method == 'POST':
+        csrf_protector.assert_safe()
+
+        f = req.files['file']
+        if not touch_upload_folder():
+            flash(_('Could not create upload target folder %s.') %
+                  escape(get_upload_folder()), 'error')
+            return redirect(url_for('admin/new_upload'))
+
+        filename = req.form.get('filename') or f.filename
+
+        if not f:
+            flash(_('No file uploaded.'))
+        elif pathsep in filename:
+            flash(_('Invalid filename requested.'))
+        elif file_exists(filename) and not req.form.get('overwrite'):
+            flash(_('A file with the filename %s exists already.') % (
+                u'<a href="%s">%s</a>' % (
+                    escape(url_for('blog/get_uploaded_file',
+                                   filename=filename)),
+                    escape(filename)
+                )))
+        else:
+            upload_file(f, filename)
+            flash(_('File %s uploaded successfully.') % (
+                  u'<a href="%s">%s</a>' % (
+                      escape(url_for('blog/get_uploaded_file',
+                                     filename=filename)),
+                      escape(filename))))
+        return redirect(url_for('admin/new_upload'))
+
+    return render_admin_response('admin/file_uploads/upload.html',
+                                 'file_uploads.upload',
+        csrf_protector=csrf_protector,
+        reporter=reporter
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_thumbnailer(req):
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+    form = {
+        'src_image':            '',
+        'thumb_width':          '320',
+        'thumb_height':         '240',
+        'keep_aspect_ratio':    True,
+        'thumb_filename':       ''
+    }
+
+    im_version = get_im_version()
+    if im_version is None:
+        path = get_im_path()
+        if not path:
+            extra = _('If you don\'t have ImageMagick installed system wide '
+                      'but in a different folder, you can defined that in '
+                      'the <a href="%(config)s">configuration</a>.')
+        else:
+            extra = _('There is no ImageMagick in the path defined '
+                      'installed. (<a href="%(config)s">check the '
+                      'configuration</a>)')
+        flash((_('Cannot find <a href="%(im)s">ImageMagick</a>.') + ' ' +
+               extra) % {
+                   'im':        'http://www.imagemagick.org/',
+                   'config':    url_for('admin/upload_config')
+               }, 'error')
+
+    elif req.method == 'POST':
+        errors = []
+        csrf_protector.assert_safe()
+        form['src_image'] = src_image = req.form.get('src_image')
+        if not src_image:
+            errors.append(_('You have to specify a source image'))
+        else:
+            try:
+                src = file(get_filename(src_image), 'rb')
+            except IOError:
+                errors.append(_('The image %s does not exist.') %
+                              escape(src_image))
+        form['thumb_width'] = thumb_width = req.form.get('thumb_width', '')
+        form['thumb_height'] = thumb_height = req.form.get('thumb_height', '')
+        if not thumb_width:
+            errors.append(_('You have to define at least the width of the '
+                            'thumbnail.'))
+        elif not thumb_width.isdigit() or \
+                (thumb_height and not thumb_height.isdigit()):
+            errors.append(_('Thumbnail dimensions must be integers.'))
+        form['keep_aspect_ratio'] = keep_aspect_ratio = \
+                req.form.get('keep_aspect_ratio') == 'yes'
+        form['thumb_filename'] = thumb_filename = \
+                req.form.get('thumb_filename')
+        if not thumb_filename:
+            errors.append(_('You have to specify a filename for the '
+                            'thumbnail.'))
+        elif pathsep in thumb_filename:
+            errors.append(_('Invalid filename for thumbnail.'))
+        elif file_exists(thumb_filename):
+            errors.append(_('An file with this name exists already.'))
+        if errors:
+            flash(errors[0], 'error')
+        else:
+            if guess_mimetype(thumb_filename) != 'image/jpeg':
+                thumb_filename += '.jpg'
+            dst = file(get_filename(thumb_filename), 'wb')
+            try:
+                dst.write(create_thumbnail(src, thumb_width,
+                                           thumb_height or None,
+                                           keep_aspect_ratio and 'normal'
+                                           or 'force', 90, True))
+                dst.close()
+                flash(_('Thumbnail %s was created successfully.') % (
+                      u'<a href="%s">%s</a>' % (
+                          escape(url_for('blog/get_uploaded_file',
+                                         filename=thumb_filename)),
+                          escape(thumb_filename))))
+                return redirect('admin/browse_uploads')
+            except Exception, e:
+                flash('Error creating thumbnail: %s' % e, 'error')
+                dst.close()
+
+
+    return render_admin_response('admin/file_uploads/thumbnailer.html',
+                                 'file_uploads.thumbnailer',
+        im_version=im_version,
+        images=list_images(),
+        form=form,
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_browse_uploads(req):
+    return render_admin_response('admin/file_uploads/browse.html',
+                                 'file_uploads.browse',
+        files=list_files()
+    )
+
+
+@require_role(ROLE_ADMIN)
+def do_upload_config(req):
+    csrf_protector = CSRFProtector()
+    form = {
+        'upload_dest':  req.app.cfg['upload_folder'],
+        'im_path':      req.app.cfg['im_path'],
+        'mimetypes':    u'\n'.join(req.app.cfg['upload_mimetypes'].
+                                   split(';'))
+    }
+    if req.method == 'POST':
+        csrf_protector.assert_safe()
+        upload_dest = form['upload_dest'] = req.form.get('upload_dest', '')
+        if upload_dest != req.app.cfg['upload_folder']:
+            req.app.cfg['upload_folder'] = upload_dest
+            flash(_('Upload folder changed successfully.'))
+        im_path = form['im_path'] = req.form.get('im_path', '')
+        if im_path != req.app.cfg['im_path']:
+            req.app.cfg['im_path'] = im_path
+            if im_path:
+                flash(_('Changed path to ImageMagick'))
+            else:
+                flash(_('ImageMagick is searched on the system path now.'))
+        mimetypes = form['mimetypes'] = req.form.get('mimetypes', '')
+        mimetypes = ';'.join(mimetypes.splitlines())
+        if mimetypes != req.app.cfg['upload_mimetypes']:
+            req.app.cfg['upload_mimetypes'] = mimetypes
+            flash(_('Upload mimetype mapping altered successfully.'))
+        return redirect(url_for('admin/upload_config'))
+
+    return render_admin_response('admin/file_uploads/config.html',
+                                 'options.uploads',
+        im_version=get_im_version(),
+        form=form,
+        csrf_protector=csrf_protector
+    )
+
+
+@require_role(ROLE_AUTHOR)
+def do_delete_upload(req, filename):
+    fs_filename = get_filename(filename)
+    if not exists(fs_filename):
+        raise NotFound()
+
+    csrf_protector = CSRFProtector()
+    redirect = IntelligentRedirect()
+
+    if req.method == 'POST':
+        csrf_protector.assert_safe()
+        if req.form.get('confirm'):
+            try:
+                remove(fs_filename)
+            except (OSError, IOError):
+                flash(_('Could not delete file %s.') %
+                      escape(filename), 'error')
+            else:
+                flash(_('File %s deleted successfully.') %
+                      escape(filename), 'remove')
+        return redirect('admin/browse_uploads')
+
+    return render_admin_response('admin/file_uploads/delete.html',
+                                 'file_uploads.browse',
+        hidden_form_data=make_hidden_fields(csrf_protector, redirect),
+        filename=filename
     )
 
 

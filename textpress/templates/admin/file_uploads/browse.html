@@ -14,11 +14,11 @@
     </tr>
   {%- for file in files %}
     <tr class="{{ loop.cycle('even', 'odd') }}">
-      <td><a href="{{ url_for('file_uploads/get_file', filename=file.filename)|e
+      <td><a href="{{ url_for('blog/get_uploaded_file', filename=file.filename)|e
           }}">{{ file.filename|e }}</a></td>
       <td>{{ file.size|filesizeformat }}</td>
       <td>{{ file.mimetype|e }}</td>
-      <td><a href="{{ url_for('file_uploads/delete', filename=file.filename)
+      <td><a href="{{ url_for('admin/delete_upload', filename=file.filename)
           }}">{{ _('Delete') }}</a></td>
     </tr>
   {%- else %}
@@ -27,7 +27,7 @@
     </tr>
   {%- endfor %}
   </table>
-  <form action="{{ url_for('file_uploads/upload') }}" method="get">
+  <form action="{{ url_for('admin/new_upload') }}" method="get">
     <div class="actions">
       <input type="submit" value="{{ _('Upload New File') }}">
     </div>

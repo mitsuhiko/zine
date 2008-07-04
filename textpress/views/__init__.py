@@ -28,6 +28,7 @@ all_views = {
     'blog/json_service':        blog.do_json_service,
     'blog/xml_service':         blog.do_xml_service,
     'blog/atom_feed':           blog.do_atom_feed,
+    'blog/get_uploaded_file':   blog.do_get_upload,
 
     # admin views
     'admin/index':              admin.do_index,
@@ -54,6 +55,11 @@ all_views = {
     'admin/new_user':           admin.do_edit_user,
     'admin/edit_user':          admin.do_edit_user,
     'admin/delete_user':        admin.do_delete_user,
+    'admin/browse_uploads':     admin.do_browse_uploads,
+    'admin/new_upload':         admin.do_upload,
+    'admin/delete_upload':      admin.do_delete_upload,
+    'admin/upload_thumbnailer': admin.do_thumbnailer,
+    'admin/upload_config':      admin.do_upload_config,
     'admin/options':            admin.do_options,
     'admin/basic_options':      admin.do_basic_options,
     'admin/urls':               admin.do_urls,

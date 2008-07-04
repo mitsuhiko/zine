@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    textpress.plugins.file_uploads.utils
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    textpress.utils.uploads
+    ~~~~~~~~~~~~~~~~~~~~~~~
 
-    Various utilitites for the file upload plugin (thumbnailer etc)
+    Various utilitites for file uploading (thumbnailer etc)
 
     :copyright: Copyright 2007 by Armin Ronacher
     :license: GNU GPL.
@@ -22,7 +22,7 @@ _im_version_re = re.compile(r'^version:\s+imagemagick\s+([\d.]+)(?i)')
 
 def guess_mimetype(s):
     app = get_application()
-    for item in app.cfg['file_uploads/mimetypes'].split(';'):
+    for item in app.cfg['upload_mimetypes'].split(';'):
         if ':' in item:
             pattern, mimetype = item.split(':', 1)
             if fnmatch(s, pattern):
@@ -33,7 +33,7 @@ def guess_mimetype(s):
 def get_upload_folder():
     app = get_application()
     return path.join(app.instance_folder,
-                     app.cfg['file_uploads/upload_folder'])
+                     app.cfg['upload_folder'])
 
 
 def touch_upload_folder():
@@ -134,7 +134,7 @@ def create_thumbnail(stream, width, height=None, method='normal',
 
 def get_im_path():
     app = get_application()
-    return app.cfg['file_uploads/im_path']
+    return app.cfg['im_path']
 
 
 def get_im_executable():

@@ -35,7 +35,9 @@ def make_urls(app):
         ]),
         Rule('/_services/', endpoint='blog/service_rsd'),
         Rule('/_services/json/<path:identifier>', endpoint='blog/json_service'),
-        Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service')
+        Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service'),
+        Rule('/_uploads/<filename>', endpoint='blog/get_uploaded_file'),
+        Rule('/_uploads/<filename>/delete', endpoint='admin/delete_upload')
     ]
     admin_urls = [
         Rule('/', endpoint='admin/index'),
@@ -74,6 +76,9 @@ def make_urls(app):
         Rule('/users/new', endpoint='admin/new_user'),
         Rule('/users/<int:user_id>', endpoint='admin/edit_user'),
         Rule('/users/<int:user_id>/delete', endpoint='admin/delete_user'),
+        Rule('/uploads/', endpoint='admin/browse_uploads'),
+        Rule('/uploads/new', endpoint='admin/new_upload'),
+        Rule('/uploads/thumbnailer', endpoint='admin/upload_thumbnailer'),
         Rule('/options/', endpoint='admin/options'),
         Rule('/options/basic', endpoint='admin/basic_options'),
         Rule('/options/urls', endpoint='admin/urls'),
@@ -82,6 +87,7 @@ def make_urls(app):
         Rule('/options/theme/overlays/<path:template>',
              endpoint='admin/overlays'),
         Rule('/options/pages', endpoint='admin/pages_config'),
+        Rule('/options/uploads', endpoint='admin/upload_config'),
         Rule('/options/plugins/', endpoint='admin/plugins'),
         Rule('/options/plugins/<plugin>/remove', endpoint='admin/remove_plugin'),
         Rule('/options/cache', endpoint='admin/cache'),

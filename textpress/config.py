@@ -60,8 +60,13 @@ DEFAULT_VARS = {
     'use_flat_comments':        (bool, False),
 
     # pages
-    'show_page_title':         (bool, True),
-    'show_page_children':      (bool, True),
+    'show_page_title':          (bool, True),
+    'show_page_children':       (bool, True),
+    
+    # file uploads
+    'upload_folder':            (unicode, u'uploads'),
+    'upload_mimetypes':       (unicode, u'*.plugin:application/x-textpress-plugin'),
+    'im_path':                  (unicode, u''),
 
     # email settings
     'smtp_host':                (unicode, u'localhost'),
