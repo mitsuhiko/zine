@@ -1876,7 +1876,7 @@ def do_pages_config(request):
 def do_show_pages(request):
     """Shows all saved pages"""
     return render_admin_response(
-        'admin/pages.html',
+        'admin/show_pages.html',
         'pages.overview',
         pages=Page.objects.all()
     )
