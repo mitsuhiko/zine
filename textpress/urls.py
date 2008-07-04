@@ -48,7 +48,7 @@ def make_urls(app):
         Rule('/posts/new', endpoint='admin/new_post'),
         Rule('/posts/<int:post_id>', endpoint='admin/edit_post'),
         Rule('/posts/<int:post_id>/delete', endpoint='admin/delete_post'),
-        Rule('/posts/<int:post_id>/comments', endpoint='admin/show_post_comments'),
+        Rule('/posts/<int:post_id>/comments', endpoint='admin/show_post_comments', defaults={'page': 1}),
         Rule('/pages/', endpoint='admin/show_pages'),
         Rule('/pages/write/', endpoint='admin/write_page'),
         Rule('/pages/write/<int:page_id>/', endpoint='admin/write_page'),

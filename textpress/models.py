@@ -819,6 +819,10 @@ class CommentManager(db.DatabaseManager):
         """Return all drafts."""
         return self.query.filter(Comment.status > COMMENT_MODERATED)
 
+    def comments_for_post(self, post_id):
+        """Return all comments for the blog post."""
+        return self.query.filter(Comment.post_id == post_id)
+
 
 class Comment(object):
     """Represent one comment."""

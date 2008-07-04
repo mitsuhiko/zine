@@ -30,7 +30,10 @@
       <td>{% for tag in post.tags %}<a href="{{ url_for(tag)|e }}">{{ tag.name|e }}</a>
           {%- if not loop.last %}, {% endif %}
         {%- else %}{{ _("untagged") }}{% endfor %}</td>
-      <td><a href="{{ url_for('admin/show_comments', post_id=post.post_id)|e }}">{{ post.comments|count }}</a></td>
+      <td>{%- if post.comments|count %}
+	    <a href="{{ url_for('admin/show_post_comments', post_id=post.post_id)|e }}">{{ post.comments|count }}</a>
+	    {%- else %}{{ post.comments|count }}{% endif %}
+	  </td>
       <td>{{ post.pub_date|datetimeformat|e }}</td>
     </tr>
   {%- else %}
