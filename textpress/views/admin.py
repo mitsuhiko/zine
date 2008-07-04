@@ -818,7 +818,7 @@ def do_block_comment(request, comment_id):
             comment.status = COMMENT_BLOCKED_USER
             comment.blocked_msg = msg
             db.commit()
-            flash(_('Comment by %s approved successfully.') %
+            flash(_('Comment by %s blocked successfully.') %
                   escape(comment.author), 'configure')
         return redirect('admin/show_comments')
 
