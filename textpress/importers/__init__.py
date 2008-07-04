@@ -106,10 +106,10 @@ def _perform_import(app, blog, d):
 
     # update blog configuration if user wants that
     if 'import_blog_title' in d:
-        app.cfg['blog_title'] = blog.title
+        app.cfg.change_single('blog_title', blog.title)
         yield '<li>%s</li>\n' % _('set blog title from dump')
     if 'import_blog_description' in d:
-        app.cfg['blog_tagline'] = blog.description
+        app.cfg.change_single('blog_tagline', blog.description)
         yield '<li>%s</li>\n' % _('set blog tagline from dump')
 
     # convert the posts now

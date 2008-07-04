@@ -319,7 +319,8 @@ class Plugin(object):
             loaded = loaded_dependences.copy()
             loaded.update([self.name])
             plugins.update(loaded)
-            self.app.cfg['plugins'] = ', '.join(x for x in sorted(plugins) if x)
+            self.app.cfg.change_single('plugins',
+                ', '.join(x for x in sorted(plugins) if x))
 
         return ((missing_dependences and False or True), loaded_dependences,
                 missing_dependences)
@@ -328,7 +329,8 @@ class Plugin(object):
         """Deactivate this plugin."""
         plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
         plugins.discard(self.name)
-        self.app.cfg['plugins'] = ', '.join(x for x in sorted(plugins) if x)
+        self.app.cfg.change_single('plugins',
+            ', '.join(x for x in sorted(plugins) if x))
 
     def remove(self):
         """Remove the plugin from the instance folder."""

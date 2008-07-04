@@ -132,7 +132,7 @@ def show_config(req):
 
     if req.form.get('apply'):
         csrf_protector.assert_safe()
-        req.app.cfg['pygments_support/style'] = active_style
+        req.app.cfg.change_single('pygments_support/style', active_style)
         flash(_('Pygments theme changed successfully.'), 'configure')
         return redirect(url_for('pygments_support/config'))
 

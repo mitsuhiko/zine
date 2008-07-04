@@ -160,8 +160,8 @@ def show_akismet_config(req):
     csrf_protector = CSRFProtector()
 
     if req.method == 'POST':
-        req.app.cfg['akismet_spam_filter/apikey'] = \
-            req.form.get('api_key', '')
+        req.app.cfg.change_single('akismet_spam_filter/apikey',
+                                  req.form.get('api_key', ''))
         try:
             get_verified_key()
         except InvalidKey:

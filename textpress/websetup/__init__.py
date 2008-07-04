@@ -156,13 +156,14 @@ class WebSetup(object):
             # set up the initial config
             config_filename = path.join(self.instance_folder, 'textpress.ini')
             cfg = Configuration(config_filename)
-            cfg.update(
+            t = cfg.edit()
+            t.update(
                 maintenance_mode=True,
                 blog_url=request.url_root,
                 secret_key=gen_secret_key(),
                 database_uri=database_uri
             )
-            cfg.save()
+            t.commit()
 
         # use a local variable, the global render_response could
         # be None because we reloaded textpress and this module.

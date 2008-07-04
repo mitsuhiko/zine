@@ -34,7 +34,7 @@ from textpress.database import comments as comment_table, posts, \
 from textpress.utils import get_version_info, dump_json, load_json
 from textpress.utils.validators import is_valid_email, is_valid_url
 from textpress.utils.admin import can_build_eventmap, build_eventmap, \
-     Pagination, flash, gen_slug
+     Pagination, flash, gen_slug, commit_config_change
 from textpress.utils.xxx import make_hidden_fields, CSRFProtector, \
      IntelligentRedirect, StreamReporter
 from textpress.utils.uploads import guess_mimetype, get_upload_folder, \
@@ -1224,32 +1224,35 @@ def do_basic_options(request):
         form['use_flat_comments'] = use_flat_comments = \
             'use_flat_comments' in request.form
         if not errors:
+            t = cfg.edit()
             if blog_title != cfg['blog_title']:
-                cfg['blog_title'] = blog_title
+                t['blog_title'] = blog_title
             if blog_tagline != cfg['blog_tagline']:
-                cfg['blog_tagline'] = blog_tagline
+                t['blog_tagline'] = blog_tagline
             if language != cfg['language']:
-                cfg['language'] = language
+                t['language'] = language
             if timezone != cfg['timezone']:
-                cfg['timezone'] = timezone
+                t['timezone'] = timezone
             if session_cookie_name != cfg['session_cookie_name']:
-                cfg['session_cookie_name'] = session_cookie_name
+                t['session_cookie_name'] = session_cookie_name
             if comments_enabled != cfg['comments_enabled']:
-                cfg['comments_enabled'] = comments_enabled
+                t['comments_enabled'] = comments_enabled
             if pings_enabled != cfg['pings_enabled']:
-                cfg['pings_enabled'] = pings_enabled
+                t['pings_enabled'] = pings_enabled
             if moderate_comments != cfg['moderate_comments']:
-                cfg['moderate_comments'] = moderate_comments
+                t['moderate_comments'] = moderate_comments
             if default_parser != cfg['default_parser']:
-                cfg['default_parser'] = default_parser
+                t['default_parser'] = default_parser
             if comment_parser != cfg['comment_parser']:
-                cfg['comment_parser'] = comment_parser
+                t['comment_parser'] = comment_parser
             if posts_per_page != cfg['posts_per_page']:
-                cfg['posts_per_page'] = posts_per_page
+                t['posts_per_page'] = posts_per_page
             if use_flat_comments != cfg['use_flat_comments']:
-                cfg['use_flat_comments'] = use_flat_comments
-            flash(_('Configuration altered successfully.'), 'configure')
-            return simple_redirect('admin/basic_options')
+                t['use_flat_comments'] = use_flat_comments
+
+            if commit_config_change(t):
+                flash(_('Configuration altered successfully.'), 'configure')
+                return simple_redirect('admin/basic_options')
 
         for error in errors:
             flash(error, 'error')
@@ -1293,7 +1296,7 @@ def do_urls(request):
             changed = False
             for key, value in form.iteritems():
                 if value != request.app.cfg[key]:
-                    request.app.cfg[key] = value
+                    request.app.cfg.change_single(key, value)
                     changed = True
             if changed:
                 flash(_('URL configuration changed.'), 'configure')
@@ -1319,7 +1322,7 @@ def do_theme(request):
     new_theme = request.args.get('select')
     if new_theme in request.app.themes:
         csrf_protector.assert_safe()
-        request.app.cfg['theme'] = new_theme
+        request.app.cfg.change_single('theme', new_theme)
         flash(_('Theme changed successfully.'), 'configure')
         return simple_redirect('admin/theme')
 
@@ -1390,11 +1393,11 @@ def do_plugins(request):
         csrf_protector.assert_safe()
 
         if request.form.get('enable_guard'):
-            request.app.cfg['plugin_guard'] = True
+            request.app.cfg.change_single('plugin_guard', True)
             flash(_('Plugin guard enabled successfully. Errors '
                     'occuring in plugins during setup are catched now.'))
         elif request.form.get('disable_guard'):
-            request.app.cfg['plugin_guard'] = False
+            request.app.cfg.change_single('plugin_guard', False)
             flash(_('Plugin guard disabled successfully.'))
 
         for name, plugin in request.app.plugins.iteritems():
@@ -1539,17 +1542,19 @@ def do_cache(request):
             request.form.get('filesystem_cache_path', '')
 
         if not errors:
+            t = cfg.edit()
             if cache_system != cfg['cache_system']:
-                cfg['cache_system'] = cache_system
+                t['cache_system'] = cache_system
             if cache_timeout != cfg['cache_timeout']:
-                cfg['cache_timeout'] = cache_timeout
+                t['cache_timeout'] = cache_timeout
             if enable_eager_caching != cfg['enable_eager_caching']:
-                cfg['enable_eager_caching'] = enable_eager_caching
+                t['enable_eager_caching'] = enable_eager_caching
             if memcached_servers != cfg['memcached_servers']:
-                cfg['memcached_servers'] = memcached_servers
+                t['memcached_servers'] = memcached_servers
             if filesystem_cache_path != cfg['filesystem_cache_path']:
-                cfg['filesystem_cache_path'] = filesystem_cache_path
-            flash(_('Updated cache settings.'), 'configure')
+                t['filesystem_cache_path'] = filesystem_cache_path
+            if commit_config_change(t):
+                flash(_('Updated cache settings.'), 'configure')
         else:
             flash(errors[0], 'error')
 
@@ -1590,7 +1595,9 @@ def do_configuration(request):
                     request.app.cfg.revert_to_default(key)
                     already_default.add(key)
                 elif key in request.app.cfg and key not in already_default:
-                    request.app.cfg.set_from_string(key, value)
+                    t = request.app.cfg.edit()
+                    t.set_from_string(key, value)
+                    t.commit()
         return simple_redirect('admin/configuration')
 
     # html does not allow slashes.  Convert them to dots
@@ -1615,7 +1622,7 @@ def do_maintenance(request):
     csrf_protector = CSRFProtector()
     if request.method == 'POST':
         csrf_protector.assert_safe()
-        cfg['maintenance_mode'] = not cfg['maintenance_mode']
+        cfg.change_single('maintenance_mode', not cfg['maintenance_mode'])
         if not cfg['maintenance_mode']:
             flash(_('Maintenance mode disabled.  The blog is now '
                     'publicly available.'), 'configure')
@@ -1861,11 +1868,13 @@ def do_pages_config(request):
         form['show_children'] = show_children = 'show_children' in request.form
 
         # update the configuration
+        t = cfg.edit()
         if show_title != cfg['show_page_title']:
-            cfg['show_page_title'] = show_title
+            t['show_page_title'] = show_title
         if show_children != cfg['show_page_children']:
-            cfg['show_page_children'] = show_children
-        flash(u'Pages configuration updated successfull.')
+            t['show_page_children'] = show_children
+        if commit_config_change(t):
+            flash(u'Pages configuration updated successfull.')
 
     return render_admin_response(
         'admin/pages_config.html',
@@ -2189,11 +2198,11 @@ def do_upload_config(req):
         csrf_protector.assert_safe()
         upload_dest = form['upload_dest'] = req.form.get('upload_dest', '')
         if upload_dest != req.app.cfg['upload_folder']:
-            req.app.cfg['upload_folder'] = upload_dest
+            req.app.cfg.change_single('upload_folder', upload_dest)
             flash(_('Upload folder changed successfully.'))
         im_path = form['im_path'] = req.form.get('im_path', '')
         if im_path != req.app.cfg['im_path']:
-            req.app.cfg['im_path'] = im_path
+            req.app.cfg.change_single('im_path', im_path)
             if im_path:
                 flash(_('Changed path to ImageMagick'))
             else:
@@ -2201,7 +2210,7 @@ def do_upload_config(req):
         mimetypes = form['mimetypes'] = req.form.get('mimetypes', '')
         mimetypes = ';'.join(mimetypes.splitlines())
         if mimetypes != req.app.cfg['upload_mimetypes']:
-            req.app.cfg['upload_mimetypes'] = mimetypes
+            req.app.change_single('upload_mimetypes', mimetypes)
             flash(_('Upload mimetype mapping altered successfully.'))
         return redirect(url_for('admin/upload_config'))
 

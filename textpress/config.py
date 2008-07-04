@@ -148,7 +148,6 @@ class Configuration(object):
         self.config_vars = DEFAULT_VARS.copy()
         self._values = {}
         self._converted_values = {}
-        self.changed_local = False
 
         # if the path does not exist yet set the existing flag to none and
         # set the time timetamp for the filename to something in the past
@@ -197,70 +196,17 @@ class Configuration(object):
         self._converted_values[key] = value
         return value
 
-    def __setitem__(self, key, value):
-        """Set the value for a key by a python value."""
-        if key.startswith('textpress/'):
-            key = key[10:]
-        if key not in self.config_vars:
-            raise KeyError(key)
-        self._values[key] = unicode(value)
-        self._converted_values[key] = value
-        self.changed_local = True
+    def change_single(self, key, value):
+        t = self.edit()
+        t[key] = value
+        t.commit()
 
-    def set_from_string(self, key, value, override=False):
-        """Set the value for a key from a string."""
-        if key.startswith('textpress/'):
-            key = key[10:]
-        conv, default = self.config_vars[key]
-        new = from_string(value, conv, default)
-        if override or unicode(self[key]) != unicode(new):
-            self._values[key] = unicode(new)
-            self._converted_values[key] = new
-            self.changed_local = True
-
-    def revert_to_default(self, key):
-        """Revert a key to the default value."""
-        if key.startswith('textpress'):
-            key = key[10:]
-        self._values.pop(key, None)
-        self._converted_values.pop(self, key)
-        self.changed_local = True
-
+    def edit(self):
+        return ConfigTransaction(self)
 
     def touch(self):
         """Touch the file to trigger a reload."""
         os.utime(self.filename, None)
-
-    def flush(self):
-        """Save changes to the file system if there are any."""
-        if self.changed_local:
-            self.save()
-
-    def save(self):
-        """Save changes to the file system."""
-        sections = {}
-        for key, value in self._values.iteritems():
-            if '/' in key:
-                section, key = key.split('/', 1)
-            else:
-                section = 'textpress'
-            sections.setdefault(section, []).append((key, value))
-        sections = sorted(sections.items())
-        for section in sections:
-            section[1].sort()
-
-        f = file(self.filename, 'w')
-        f.write(CONFIG_HEADER)
-        try:
-            for idx, (section, items) in enumerate(sections):
-                if idx:
-                    f.write('\n')
-                f.write('[%s]\n' % section.encode('utf-8'))
-                for key, value in items:
-                    f.write('%s = %s\n' % (key, quote_value(value)))
-        finally:
-            f.close()
-        self.changed_local = False
 
     @property
     def changed_external(self):
@@ -302,11 +248,6 @@ class Configuration(object):
     def items(self):
         """Return a list of all key, value tuples."""
         return list(self.iteritems())
-
-    def update(self, *args, **kwargs):
-        """Update multiple items at once."""
-        for key, value in dict(*args, **kwargs).iteritems():
-            self[key] = value
 
     def get_detail_list(self):
         """Return a list of categories with keys and some more
@@ -353,3 +294,84 @@ class Configuration(object):
 
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, dict(self.items()))
+
+
+class ConfigTransaction(object):
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self._values = {}
+        self._converted_values = {}
+        self._committed = False
+
+    def __setitem__(self, key, value):
+        """Set the value for a key by a python value."""
+        if self._committed:
+            raise ValueError('This transaction was already committed.')
+        if key.startswith('textpress/'):
+            key = key[10:]
+        if key not in self.cfg.config_vars:
+            raise KeyError(key)
+        self._values[key] = unicode(value)
+        self._converted_values[key] = value
+
+    def set_from_string(self, key, value, override=False):
+        """Set the value for a key from a string."""
+        if self._committed:
+            raise ValueError('This transaction was already committed.')
+        if key.startswith('textpress/'):
+            key = key[10:]
+        conv, default = self.cfg.config_vars[key]
+        new = from_string(value, conv, default)
+        old = self._converted_values.get(key, None) or self.cfg[key]
+        if override or unicode(old) != unicode(new):
+            self._values[key] = unicode(new)
+            self._converted_values[key] = new
+
+    def revert_to_default(self, key):
+        """Revert a key to the default value."""
+        if self._committed:
+            raise ValueError('This transaction was already committed.')
+        if key.startswith('textpress'):
+            key = key[10:]
+        self._values.pop(key, None)
+        self._converted_values.pop(self, key)
+
+    def update(self, *args, **kwargs):
+        """Update multiple items at once."""
+        for key, value in dict(*args, **kwargs).iteritems():
+            self[key] = value
+
+    def commit(self):
+        if self._committed:
+            raise ValueError('This transaction was already committed.')
+        if not self._values:
+            self._committed = True
+            return
+        all = self.cfg._values.copy()
+        all.update(self._values)
+
+        sections = {}
+        for key, value in all.iteritems():
+            if '/' in key:
+                section, key = key.split('/', 1)
+            else:
+                section = 'textpress'
+            sections.setdefault(section, []).append((key, value))
+        sections = sorted(sections.items())
+        for section in sections:
+            section[1].sort()
+
+        f = file(self.cfg.filename, 'w')
+        f.write(CONFIG_HEADER)
+        try:
+            for idx, (section, items) in enumerate(sections):
+                if idx:
+                    f.write('\n')
+                f.write('[%s]\n' % section.encode('utf-8'))
+                for key, value in items:
+                    f.write('%s = %s\n' % (key, quote_value(value)))
+        finally:
+            f.close()
+        self.cfg._values.update(self._values)
+        self.cfg._converted_values.update(self._converted_values)
+        self._committed = True

@@ -769,7 +769,8 @@ class TextPress(object):
         """Return the current theme."""
         theme = self.cfg['theme']
         if theme not in self.themes:
-            self.cfg['theme'] = theme = 'default'
+            theme = 'default'
+            self.cfg.change_single('theme', theme)
         return self.themes[theme]
 
     def bind_to_thread(self):
@@ -891,8 +892,7 @@ class TextPress(object):
     def __call__(self, environ, start_response):
         """Make the application object a WSGI application."""
         return ClosingIterator(self.dispatch_request(environ, start_response),
-                               [local_manager.cleanup, cleanup_session,
-                                self.cfg.flush])
+                               [local_manager.cleanup, cleanup_session])
 
     # remove our decorator
     del setuponly

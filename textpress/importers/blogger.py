@@ -323,7 +323,8 @@ class BloggerImporter(Importer):
                 # We just got the reply back from google
                 blogger_service.auth_token = temp_auth_token
                 blogger_service.UpgradeToSessionToken()
-                self.app.cfg['blogger_auth_token'] = blogger_service.auth_token
+                self.app.cfg.change_single('blogger_auth_token',
+                                           blogger_service.auth_token)
                 return redirect(url_for('import/blogger'))
             # We should display the "log in to google"
             proxy_auth_url=get_auth_sub_url(blogger_service)
@@ -347,7 +348,7 @@ class BloggerImporter(Importer):
         if u'logout' in request.form:
             # Log out of google
             blogger_service.RevokeAuthSubToken()
-            self.app.cfg['blogger_auth_token'] = ''
+            self.app.cfg.change_single('blogger_auth_token', '')
             return redirect(url_for('import/blogger'))
         else:
             # Perform the import

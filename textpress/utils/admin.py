@@ -200,3 +200,12 @@ class Pagination(object):
                 result.insert(0, u'<span class="disabled">&laquo; Prev</span> ')
 
         return u''.join(result)
+
+
+def commit_config_change(t):
+    try:
+        t.commit()
+        return True
+    except IOError, e:
+        flash(_('The configuration file could not be written.'), 'error')
+        return False
