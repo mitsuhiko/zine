@@ -86,7 +86,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         ('dashboard', url_for('admin/index'), _('Dashboard'), []),
         ('posts', url_for('admin/show_posts'), _('Posts'), [
             ('overview', url_for('admin/show_posts'), _('Overview')),
-            ('write', url_for('admin/new_post'), _('Write Post'))
+            ('write', url_for('admin/new_post'), _('Write Post')),
+            ('tags', url_for('admin/show_tags'), _('Tags'))
         ]),
         ('comments', url_for('admin/show_comments'), _('Comments'), [
             ('overview', url_for('admin/show_comments'), _('Overview')),
@@ -95,10 +96,6 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
              Comment.objects.unmoderated().count()),
             ('spam', url_for('admin/show_spam_comments'),
              _('Spam (%d)') % Comment.objects.spam().count())
-        ]),
-        ('tags', url_for('admin/show_tags'), _('Tags'), [
-            ('overview', url_for('admin/show_tags'), _('Overview')),
-            ('edit', url_for('admin/new_tag'), _('Edit Tag'))
         ]),
         ('file_uploads', url_for('admin/browse_uploads'), _('Uploads'), [
             ('browse', url_for('admin/browse_uploads'), _('Browse')),
@@ -130,24 +127,25 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('cache', url_for('admin/cache'), _('Cache')),
                 ('configuration', url_for('admin/configuration'),
                  _('Configuration Editor'))
-            ]),
-            ('maintenance', url_for('admin/maintenance'), _('Maintenance'), [
-                ('overview', url_for('admin/maintenance'), _('Overview')),
-                ('import', url_for('admin/import'), _('Import')),
-                ('export', url_for('admin/export'), _('Export'))
             ])
         ]
 
     # add the about items to the navigation bar
-    about_items = [
-        ('system', url_for('admin/about'), _('System')),
-        ('textpress', url_for('admin/about_textpress'), _('TextPress'))
+    system_items = [
+        ('information', url_for('admin/information'), _('Information')),
+        ('about', url_for('admin/about_textpress'), _('About'))
     ]
     if can_build_eventmap:
-        about_items.insert(1, ('eventmap', url_for('admin/eventmap'),
-                               _('Event Map')))
-    navigation_bar.append(('about', url_for('admin/about'), _('About'),
-                          about_items))
+        system_items.insert(1, ('eventmap', url_for('admin/eventmap'),
+                                _('Event Map')))
+    if request.user.role == ROLE_ADMIN:
+        system_items.insert(1, ('maintenance', url_for('admin/maintenance'),
+                               _('Maintenance')))
+        system_items.insert(2, ('import', url_for('admin/import'), _('Import')))
+        system_items.insert(3, ('export', url_for('admin/export'), _('Export')))
+        
+    navigation_bar.append(('system', url_for('admin/information'), _('System'),
+                          system_items))
 
     #! allow plugins to extend the navigation bar
     emit_event('modify-admin-navigation-bar', request, navigation_bar)
@@ -818,7 +816,7 @@ def do_block_comment(request, comment_id):
             comment.status = COMMENT_BLOCKED_USER
             comment.blocked_msg = msg
             db.commit()
-            flash(_('Comment by %s approved successfully.') %
+            flash(_('Comment by %s blocked successfully.') %
                   escape(comment.author), 'configure')
         return redirect('admin/show_comments')
 
@@ -839,7 +837,7 @@ def do_show_tags(request, page):
                             Tag.objects.count())
     if not tags and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_tags.html', 'tags.overview',
+    return render_admin_response('admin/show_tags.html', 'posts.tags',
                                  tags=tags,
                                  pagination=pagination)
 
@@ -910,7 +908,7 @@ def do_edit_tag(request, tag_id=None):
     for error in errors:
         flash(error, 'error')
 
-    return render_admin_response('admin/edit_tag.html', 'tags.edit',
+    return render_admin_response('admin/edit_tag.html', 'posts.tags',
         form=form,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -943,7 +941,7 @@ def do_delete_tag(request, tag_id):
             db.commit()
             return redirect('admin/show_tags')
 
-    return render_admin_response('admin/delete_tag.html', 'tags.edit',
+    return render_admin_response('admin/delete_tag.html', 'posts.tags',
         tag=tag,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -1621,7 +1619,7 @@ def do_maintenance(request):
         return simple_redirect('admin/maintenance')
 
     return render_admin_response('admin/maintenance.html',
-                                 'maintenance.overview',
+                                 'system.maintenance',
         hidden_form_data=make_hidden_fields(csrf_protector),
         maintenance_mode=cfg['maintenance_mode']
     )
@@ -1630,7 +1628,7 @@ def do_maintenance(request):
 @require_role(ROLE_ADMIN)
 def do_import(request):
     """Show the current import queue or add new items."""
-    return render_admin_response('admin/import.html', 'maintenance.import',
+    return render_admin_response('admin/import.html', 'system.import',
         importers=sorted(request.app.importers.values(),
                          key=lambda x: x.title.lower()),
         queue=list_import_queue(request.app)
@@ -1663,14 +1661,14 @@ def do_inspect_import(request, id):
         elif 'delete' in request.form:
             return simple_redirect('admin/delete_import', id=id)
         return render_admin_response('admin/perform_import.html',
-                                     'maintenance.import',
+                                     'system.import',
             live_log=perform_import(request.app, blog, request.form,
                                     stream=True),
             _stream=True
         )
 
     return render_admin_response('admin/inspect_import.html',
-                                 'maintenance.import',
+                                 'system.import',
         form=form,
         blog=blog,
         users=User.objects.order_by('username').all(),
@@ -1699,7 +1697,7 @@ def do_delete_import(request, id):
             return redirect('admin/import')
 
     return render_admin_response('admin/delete_import.html',
-                                 'maintenance.import',
+                                 'system.import',
         dump=dump,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
@@ -1716,13 +1714,13 @@ def do_export(request):
         response.headers['Content-Disposition'] = 'attachment; ' \
             'filename="%s.tpxa"' % '_'.join(request.app.cfg['blog_title'].split())
         return response
-    return render_admin_response('admin/export.html', 'maintenance.export',
+    return render_admin_response('admin/export.html', 'system.export',
         hidden_form_data=make_hidden_fields(csrf_protector)
     )
 
 
 @require_role(ROLE_AUTHOR)
-def do_about(request):
+def do_information(request):
     """
     Shows some details about this TextPress installation.  It's useful for
     debugging and checking configurations.  If severe errors in a TextPress
@@ -1735,7 +1733,7 @@ def do_about(request):
     thread_count = activeCount()
     version_info = get_version_info()
 
-    return render_admin_response('admin/about.html', 'about.system',
+    return render_admin_response('admin/information.html', 'system.information',
         apis=[{
             'name':         name,
             'blog_id':      blog_id,
@@ -1786,7 +1784,7 @@ def do_eventmap(request):
     """
     if not can_build_eventmap:
         raise NotFound()
-    return render_admin_response('admin/eventmap.html', 'about.eventmap',
+    return render_admin_response('admin/eventmap.html', 'system.eventmap',
         get_map=lambda: sorted(build_eventmap(request.app).items()),
         # walking the tree can take some time, so better use stream
         # processing for this template. that's also the reason why
@@ -1802,7 +1800,7 @@ def do_about_textpress(request):
     Just show the textpress license and some other legal stuff.
     """
     return render_admin_response('admin/about_textpress.html',
-                                 'about.textpress')
+                                 'system.about')
 
 
 @require_role(ROLE_AUTHOR)
