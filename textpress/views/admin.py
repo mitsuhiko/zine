@@ -2054,12 +2054,14 @@ def do_upload(req):
                     escape(filename)
                 )))
         else:
-            upload_file(f, filename)
-            flash(_('File %s uploaded successfully.') % (
-                  u'<a href="%s">%s</a>' % (
-                      escape(url_for('blog/get_uploaded_file',
-                                     filename=filename)),
-                      escape(filename))))
+            if upload_file(f, filename):
+                flash(_('File %s uploaded successfully.') % (
+                      u'<a href="%s">%s</a>' % (
+                          escape(url_for('blog/get_uploaded_file',
+                                         filename=filename)),
+                          escape(filename))))
+            else:
+                flash(_(u'Could not write file %s.') % escape(filename), 'error')
         return redirect(url_for('admin/new_upload'))
 
     return render_admin_response('admin/file_uploads/upload.html',
@@ -2134,7 +2136,12 @@ def do_thumbnailer(req):
         else:
             if guess_mimetype(thumb_filename) != 'image/jpeg':
                 thumb_filename += '.jpg'
-            dst = file(get_filename(thumb_filename), 'wb')
+            try:
+                dst = file(get_filename(thumb_filename), 'wb')
+            except IOError:
+                flash(_(u'Could not write file %s.') % escape(thumb_filename),
+                      'error')
+                return redirect('admin/browse_uploads')
             try:
                 dst.write(create_thumbnail(src, thumb_width,
                                            thumb_height or None,

@@ -15,6 +15,7 @@ from subprocess import Popen, PIPE
 from shutil import copyfileobj
 from mimetypes import guess_type
 from textpress.api import *
+from textpress.utils.admin import flash
 
 
 _im_version_re = re.compile(r'^version:\s+imagemagick\s+([\d.]+)(?i)')
@@ -74,12 +75,17 @@ def list_images():
 def upload_file(stream, filename):
     """Upload a stream as upload with a given filename."""
     folder = get_upload_folder()
-    dst = file(path.join(folder, filename), 'wb')
+    try:
+        dst = file(path.join(folder, filename), 'wb')
+    except IOError:
+        return False
+
     try:
         if isinstance(stream, str):
             dst.write(stream)
         else:
             copyfileobj(stream, dst)
+        return True
     finally:
         dst.close()
 
