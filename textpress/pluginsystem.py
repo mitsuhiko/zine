@@ -108,7 +108,10 @@ def textpress_import(name, *args):
 
 def register_application(app):
     """Register the application on the plugin space."""
-    setattr(plugin_space, app.iid, PluginDispatcher(app))
+    module = ModuleType('textpress._space.%s' % app.iid)
+    module.__path__ = app.plugin_searchpath
+    sys.modules[module.__name__] = module
+    setattr(plugin_space, app.iid, module)
 
 
 def unregister_application(app):
@@ -533,37 +536,8 @@ class Plugin(object):
         )
 
 
-class PseudoModule(ModuleType):
-    """A pseudo module that is automatically registered in sys.modules."""
-
-    def __init__(self, name):
-        ModuleType.__init__(self, name)
-        self.__package__ = self.__name__
-        sys.modules[self.__name__] = self
-
-    # use the object repr to avoid confusion; this is not a regular module
-    __repr__ = object.__repr__
-
-
-class PluginSpace(PseudoModule):
-    """The module space is a special module that dispatches to plugins from
-    different applications.
-    """
-
-    def __init__(self):
-        PseudoModule.__init__(self, 'textpress._space')
-
-
-class PluginDispatcher(PseudoModule):
-    """A pseudo module that loads plugins."""
-
-    def __init__(self, app):
-        PseudoModule.__init__(self, 'textpress._space.%s' % app.iid)
-        self._tp_app = app
-        self.__path__ = app.plugin_searchpath
-
-
-plugin_space = PluginSpace()
 __builtin__.__import__ = textpress_import
+plugin_space = ModuleType('textpress._space')
+sys.modules['textpress._space'] = plugin_space
 textpress_import.__doc__ = _py_import
 textpress_import.__name__ = '__import__'
