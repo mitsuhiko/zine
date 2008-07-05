@@ -95,10 +95,12 @@ def show_config(req):
         for ignore, key, ignore in _rules:
             value = req.form.get(key)
             if value:
-                req.app.change_single('typography/' + key, value)
-                altered = True
+                if req.app.change_single('typography/' + key, value)
+                    altered = True
+                else:
+                    flash(_('Typography settings could not be changed.'), 'error')
         if altered:
-            flash(_('Typography settings chaned.'), 'configure')
+            flash(_('Typography settings changed.'), 'configure')
         return redirect(url_for('typography/config'))
     return render_admin_response('admin/typography.html',
                                  'options.typography',

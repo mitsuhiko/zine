@@ -196,6 +196,9 @@ class Configuration(object):
         return value
 
     def change_single(self, key, value):
+        """Create and commit a transaction for a single key-value-pair. Return
+        True on success, otherwise False.
+        """
         t = self.edit()
         t[key] = value
         try:
@@ -205,6 +208,7 @@ class Configuration(object):
             return False
 
     def edit(self):
+        """Return a new transaction object."""
         return ConfigTransaction(self)
 
     def touch(self):

@@ -132,8 +132,10 @@ def show_config(req):
 
     if req.form.get('apply'):
         csrf_protector.assert_safe()
-        req.app.cfg.change_single('pygments_support/style', active_style)
-        flash(_('Pygments theme changed successfully.'), 'configure')
+        if req.app.cfg.change_single('pygments_support/style', active_style):
+            flash(_('Pygments theme changed successfully.'), 'configure')
+        else:
+            flash(_('Pygments theme could not be changed.'), 'error')
         return redirect(url_for('pygments_support/config'))
 
     preview_formatter = get_formatter(active_style, preview=True)

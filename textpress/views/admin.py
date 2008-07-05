@@ -1296,8 +1296,11 @@ def do_urls(request):
             changed = False
             for key, value in form.iteritems():
                 if value != request.app.cfg[key]:
-                    request.app.cfg.change_single(key, value)
-                    changed = True
+                    if request.app.cfg.change_single(key, value):
+                        changed = True
+                    else:
+                        flash(_('URL configuration could not be changed.'),
+                              'error')
             if changed:
                 flash(_('URL configuration changed.'), 'configure')
 
@@ -1322,8 +1325,10 @@ def do_theme(request):
     new_theme = request.args.get('select')
     if new_theme in request.app.themes:
         csrf_protector.assert_safe()
-        request.app.cfg.change_single('theme', new_theme)
-        flash(_('Theme changed successfully.'), 'configure')
+        if request.app.cfg.change_single('theme', new_theme):
+            flash(_('Theme changed successfully.'), 'configure')
+        else:
+            flash(_('Theme could not be changed.'), 'error')
         return simple_redirect('admin/theme')
 
     current = request.app.cfg['theme']
@@ -1393,12 +1398,16 @@ def do_plugins(request):
         csrf_protector.assert_safe()
 
         if request.form.get('enable_guard'):
-            request.app.cfg.change_single('plugin_guard', True)
-            flash(_('Plugin guard enabled successfully. Errors '
-                    'occuring in plugins during setup are catched now.'))
+            if request.app.cfg.change_single('plugin_guard', True):
+                flash(_('Plugin guard enabled successfully. Errors '
+                        'occuring in plugins during setup are catched now.'))
+            else:
+                flash(_('Plugin guard could not be enabled.'), 'error')
         elif request.form.get('disable_guard'):
-            request.app.cfg.change_single('plugin_guard', False)
-            flash(_('Plugin guard disabled successfully.'))
+            if request.app.cfg.change_single('plugin_guard', False):
+                flash(_('Plugin guard disabled successfully.'))
+            else:
+                flash(_('Plugin guard could not be disabled.'), 'error')
 
         for name, plugin in request.app.plugins.iteritems():
             active = 'plugin_' + name in request.form
@@ -2198,20 +2207,26 @@ def do_upload_config(req):
         csrf_protector.assert_safe()
         upload_dest = form['upload_dest'] = req.form.get('upload_dest', '')
         if upload_dest != req.app.cfg['upload_folder']:
-            req.app.cfg.change_single('upload_folder', upload_dest)
-            flash(_('Upload folder changed successfully.'))
+            if req.app.cfg.change_single('upload_folder', upload_dest):
+                flash(_('Upload folder changed successfully.'))
+            else:
+                flash(_('Upload folder could not be changed.'), 'error')
         im_path = form['im_path'] = req.form.get('im_path', '')
         if im_path != req.app.cfg['im_path']:
-            req.app.cfg.change_single('im_path', im_path)
-            if im_path:
-                flash(_('Changed path to ImageMagick'))
+            if req.app.cfg.change_single('im_path', im_path):
+                if im_path:
+                    flash(_('Changed path to ImageMagick'))
+                else:
+                    flash(_('ImageMagick is searched on the system path now.'))
             else:
-                flash(_('ImageMagick is searched on the system path now.'))
+                flash(_('Path to ImageMagick could not be changed.'), 'error')
         mimetypes = form['mimetypes'] = req.form.get('mimetypes', '')
         mimetypes = ';'.join(mimetypes.splitlines())
         if mimetypes != req.app.cfg['upload_mimetypes']:
-            req.app.change_single('upload_mimetypes', mimetypes)
-            flash(_('Upload mimetype mapping altered successfully.'))
+            if req.app.cfg.change_single('upload_mimetypes', mimetypes):
+                flash(_('Upload mimetype mapping altered successfully.'))
+            else:
+                flash(_('Upload mimetype mapping could not be altered.'), 'error')
         return redirect(url_for('admin/upload_config'))
 
     return render_admin_response('admin/file_uploads/config.html',

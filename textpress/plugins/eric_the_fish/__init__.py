@@ -24,6 +24,9 @@ from textpress.api import *
 # and emits the `modify-admin-navigation-bar` event also use here.
 from textpress.views.admin import render_admin_response
 
+# the following method is used to show notifications in the admin panel.
+from textpress.utils.admin import flash
+
 # Because our fish uses JSON and JavaScript we use the dump_json function
 # from the utils module. We also use the CSRFProtector which helps us to
 # avoid CSRF attacks.
@@ -93,7 +96,8 @@ def show_eric_options(req):
     csrf_protector = CSRFProtector()
     new_skin = req.args.get('select')
     if new_skin in SKINS:
-        req.app.cfg.change_single('eric_the_fish/skin', new_skin)
+        if not req.app.cfg.change_single('eric_the_fish/skin', new_skin):
+            flash(_('The skin could not be changed.'), 'error')
         return redirect(url_for('eric_the_fish/config'))
 
     return render_admin_response('admin/eric_the_fish.html',
