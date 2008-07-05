@@ -379,37 +379,41 @@ class ConfigTransaction(object):
         if not self._values and not self._remove:
             self._committed = True
             return
-        all = self.cfg._values.copy()
-        all.update(self._values)
-        for key in self._remove:
-            all.pop(key)
-
-        sections = {}
-        for key, value in all.iteritems():
-            if '/' in key:
-                section, key = key.split('/', 1)
-            else:
-                section = 'textpress'
-            sections.setdefault(section, []).append((key, value))
-        sections = sorted(sections.items())
-        for section in sections:
-            section[1].sort()
-
-        f = file(self.cfg.filename, 'w')
-        f.write(CONFIG_HEADER)
+        self.cfg._lock.acquire()
         try:
-            for idx, (section, items) in enumerate(sections):
-                if idx:
-                    f.write('\n')
-                f.write('[%s]\n' % section.encode('utf-8'))
-                for key, value in items:
-                    f.write('%s = %s\n' % (key, quote_value(value)))
-            self.cfg._load_time = path.getmtime(self.cfg.filename)
+            all = self.cfg._values.copy()
+            all.update(self._values)
+            for key in self._remove:
+                all.pop(key)
+
+            sections = {}
+            for key, value in all.iteritems():
+                if '/' in key:
+                    section, key = key.split('/', 1)
+                else:
+                    section = 'textpress'
+                sections.setdefault(section, []).append((key, value))
+            sections = sorted(sections.items())
+            for section in sections:
+                section[1].sort()
+
+            f = file(self.cfg.filename, 'w')
+            f.write(CONFIG_HEADER)
+            try:
+                for idx, (section, items) in enumerate(sections):
+                    if idx:
+                        f.write('\n')
+                    f.write('[%s]\n' % section.encode('utf-8'))
+                    for key, value in items:
+                        f.write('%s = %s\n' % (key, quote_value(value)))
+            finally:
+                f.close()
+            self.cfg._mark_loaded()
+            self.cfg._values.update(self._values)
+            self.cfg._converted_values.update(self._converted_values)
+            for key in self._remove:
+                self.cfg._values.pop(key, None)
+                self.cfg._converted_values.pop(key, None)
         finally:
-            f.close()
-        self.cfg._values.update(self._values)
-        self.cfg._converted_values.update(self._converted_values)
-        for key in self._remove:
-            self.cfg._values.pop(key, None)
-            self.cfg._converted_values.pop(key, None)
+            self.cfg._lock.release()
         self._committed = True
