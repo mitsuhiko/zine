@@ -32,7 +32,9 @@ def parse(input_data, parser=None, reason='unknown', optimize=True):
             # the plugin that provided the default parser is not
             # longer available.  reset the config value to the builtin
             # parser and parse afterwards.
-            app.cfg.revert_to_default('default_parser')
+            t = app.cfg.edit()
+            t.revert_to_default('default_parser')
+            t.commit()
             parser_cls = SimpleHTMLParser
     else:
         try:

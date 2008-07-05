@@ -1597,16 +1597,16 @@ def do_configuration(request):
             request.session['ace_on'] = False
         else:
             already_default = set()
+            t = request.app.cfg.edit()
             for key, value in request.form.iteritems():
                 key = key.replace('.', '/')
                 if key.endswith('__DEFAULT'):
                     key = key[:-9]
-                    request.app.cfg.revert_to_default(key)
+                    t.revert_to_default(key)
                     already_default.add(key)
                 elif key in request.app.cfg and key not in already_default:
-                    t = request.app.cfg.edit()
                     t.set_from_string(key, value)
-                    commit_config_change(t)
+            commit_config_change(t)
         return simple_redirect('admin/configuration')
 
     # html does not allow slashes.  Convert them to dots

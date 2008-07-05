@@ -314,6 +314,7 @@ class ConfigTransaction(object):
         self.cfg = cfg
         self._values = {}
         self._converted_values = {}
+        self._remove = []
         self._committed = False
 
     def __setitem__(self, key, value):
@@ -346,8 +347,7 @@ class ConfigTransaction(object):
             raise ValueError('This transaction was already committed.')
         if key.startswith('textpress'):
             key = key[10:]
-        self._values.pop(key, None)
-        self._converted_values.pop(self, key)
+        self._remove.append(key)
 
     def update(self, *args, **kwargs):
         """Update multiple items at once."""
@@ -361,11 +361,13 @@ class ConfigTransaction(object):
         """
         if self._committed:
             raise ValueError('This transaction was already committed.')
-        if not self._values:
+        if not self._values and not self._remove:
             self._committed = True
             return
         all = self.cfg._values.copy()
         all.update(self._values)
+        for key in self._remove:
+            all.pop(key)
 
         sections = {}
         for key, value in all.iteritems():
@@ -392,4 +394,7 @@ class ConfigTransaction(object):
             f.close()
         self.cfg._values.update(self._values)
         self.cfg._converted_values.update(self._converted_values)
+        for key in self._remove:
+            self.cfg._values.pop(key, None)
+            self.cfg._converted_values.pop(key, None)
         self._committed = True
