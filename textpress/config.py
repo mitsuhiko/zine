@@ -8,7 +8,7 @@
     changes the application is reloaded automatically.
 
 
-    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
+    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Lukas Meuser.
     :license: GNU GPL.
 """
 import os
@@ -62,7 +62,7 @@ DEFAULT_VARS = {
     # pages
     'show_page_title':          (bool, True),
     'show_page_children':       (bool, True),
-    
+
     # file uploads
     'upload_folder':            (unicode, u'uploads'),
     'upload_mimetypes':       (unicode, u'*.plugin:application/x-textpress-plugin'),
@@ -138,8 +138,7 @@ def get_converter_name(conv):
 
 class Configuration(object):
     """Helper class that manages configuration values in a INI configuration
-    file.  Changes are tracked and the application ensure that the global
-    config file flushes the changes at the end of every request is necessary.
+    file.
     """
 
     def __init__(self, filename):
@@ -199,7 +198,11 @@ class Configuration(object):
     def change_single(self, key, value):
         t = self.edit()
         t[key] = value
-        t.commit()
+        try:
+            t.commit()
+            return True
+        except IOError:
+            return False
 
     def edit(self):
         return ConfigTransaction(self)
@@ -297,6 +300,12 @@ class Configuration(object):
 
 
 class ConfigTransaction(object):
+    """A configuration transaction class. Instances of this class are returned
+    by Config.edit(). Changes can then be added to the transaction and
+    eventually be committed and saved to the file system using the commit()
+    method.
+    """
+
     def __init__(self, cfg):
         self.cfg = cfg
         self._values = {}
@@ -342,6 +351,10 @@ class ConfigTransaction(object):
             self[key] = value
 
     def commit(self):
+        """Commit the transactions. This first tries to save the changes to the
+        configuration file and only updates the config in memory when that is
+        successful.
+        """
         if self._committed:
             raise ValueError('This transaction was already committed.')
         if not self._values:
@@ -370,6 +383,7 @@ class ConfigTransaction(object):
                 f.write('[%s]\n' % section.encode('utf-8'))
                 for key, value in items:
                     f.write('%s = %s\n' % (key, quote_value(value)))
+            self.cfg._load_time = path.getmtime(self.cfg.filename)
         finally:
             f.close()
         self.cfg._values.update(self._values)
