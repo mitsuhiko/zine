@@ -21,6 +21,7 @@ from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
 from textpress.utils.crypto import gen_pwhash, gen_secret_key
 from textpress.utils.validators import is_valid_email
+from textpress.i18n import _
 from werkzeug import Request, Response, redirect
 from jinja2 import Environment, FileSystemLoader
 
@@ -163,7 +164,12 @@ class WebSetup(object):
                 secret_key=gen_secret_key(),
                 database_uri=database_uri
             )
-            t.commit()
+            try:
+                t.commit()
+            except IOError:
+                error = _('The configuration file (%s) could not be opened '
+                          'for writing. Please adjust your permissions and '
+                          'try again.') % config_filename
 
         # use a local variable, the global render_response could
         # be None because we reloaded textpress and this module.
