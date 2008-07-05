@@ -26,7 +26,6 @@ except ImportError:
     except ImportError:
         have_memcache = False
 from thread import allocate_lock
-from jinja.translators.python import PythonTranslator, Template
 from textpress.utils import local
 from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
      MemcachedCache

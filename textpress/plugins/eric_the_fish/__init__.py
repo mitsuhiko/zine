@@ -54,8 +54,7 @@ SKINS = 'blue green pink red yellow'.split()
 
 
 def inject_fish(req, context):
-    """
-    This is called before the admin response is rendered. We add the
+    """This is called before the admin response is rendered. We add the
     fish script and the stylesheet and then we add a new header snippet
     which basically is some HTML code that is added to the <head> section.
     In this header snippet we set the global `$ERIC_THE_FISH_SKIN` variable
@@ -73,8 +72,7 @@ def inject_fish(req, context):
 
 
 def add_eric_link(req, navigation_bar):
-    """
-    Called during the admin navigation bar setup. When the options menu is
+    """Called during the admin navigation bar setup. When the options menu is
     traversed we insert our eric the fish link before the plugins link.
     The outermost is the configuration editor, the next one the plugins
     link and then we add our fish link.
@@ -89,8 +87,7 @@ def add_eric_link(req, navigation_bar):
 
 @require_role(ROLE_ADMIN)
 def show_eric_options(req):
-    """
-    This renders the eric admin panel. Allow switching the skin and show
+    """This renders the eric admin panel. Allow switching the skin and show
     the available skins.
     """
     csrf_protector = CSRFProtector()
@@ -111,15 +108,12 @@ def show_eric_options(req):
 
 
 def get_fortune(req):
-    """
-    The servicepoint function. Just return one fortune from the list.
-    """
+    """The servicepoint function. Just return one fortune from the list."""
     return {'fortune': choice(FORTUNES)}
 
 
 def setup(app, plugin):
-    """
-    This function is called by TextPress in the application initialization
+    """This function is called by TextPress in the application initialization
     phase. Here we connect to the events and register our template paths,
     url rules, views etc.
     """

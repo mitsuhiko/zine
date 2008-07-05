@@ -95,7 +95,7 @@ def show_config(req):
         for ignore, key, ignore in _rules:
             value = req.form.get(key)
             if value:
-                if req.app.change_single('typography/' + key, value)
+                if req.app.change_single('typography/' + key, value):
                     altered = True
                 else:
                     flash(_('Typography settings could not be changed.'), 'error')

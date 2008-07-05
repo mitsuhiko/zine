@@ -57,4 +57,8 @@
 __version__ = '0.1 alpha'
 __url__ = 'http://textpress.pocoo.org/'
 
+# init the import system by importing it.  at the end of the module
+# the import system is hooked into the python import system
+import textpress.pluginsystem
+
 from textpress.application import make_app, make_textpress

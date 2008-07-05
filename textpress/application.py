@@ -25,13 +25,10 @@ from itertools import izip
 from datetime import datetime, timedelta
 from urlparse import urlparse
 from collections import deque
+
 from babel import Locale
 
-from textpress.database import db, upgrade_database, cleanup_session
-from textpress.config import Configuration
-from textpress.cache import get_cache
-from textpress.utils import ClosingIterator, local, local_manager
-from textpress.utils.validators import check_external_url
+from jinja2 import Environment, BaseLoader, TemplateNotFound
 
 from werkzeug import Request as BaseRequest, Response as BaseResponse, \
      SharedDataMiddleware, url_quote, routing, redirect as simple_redirect
@@ -39,7 +36,11 @@ from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
 
-from jinja2 import Environment, BaseLoader, TemplateNotFound
+from textpress.database import db, upgrade_database, cleanup_session
+from textpress.config import Configuration
+from textpress.cache import get_cache
+from textpress.utils import ClosingIterator, local, local_manager
+from textpress.utils.validators import check_external_url
 
 
 #: path to the shared data of the core components
@@ -58,7 +59,7 @@ def get_request():
 
 
 def get_application():
-    """Get the current application."""
+    """Get the current application or an application by iid."""
     return getattr(local, 'application', None)
 
 
@@ -176,19 +177,6 @@ def require_role(role):
         decorated.__doc__ = f.__doc__
         return decorated
     return wrapped
-
-
-def get_active_applications():
-    """Return a set of all active applications."""
-    return set(_instances.values())
-
-
-def clear_application_cache():
-    """Applications are cached for performance reasons.  If you create a bunch
-    of application objects for some scripted tasks it's a good idea to clear
-    the application cache afterwards.
-    """
-    _instances.clear()
 
 
 class Request(BaseRequest):
@@ -538,8 +526,15 @@ class TextPress(object):
         self.widgets = dict((x.NAME, x) for x in all_widgets)
 
         # load plugins
-        from textpress.pluginsystem import find_plugins
-        self.plugin_searchpath = [path.join(instance_folder, 'plugins')]
+        from textpress.pluginsystem import find_plugins, \
+             register_application, BUILTIN_PLUGIN_FOLDER
+        self.plugin_searchpath = [path.join(instance_folder, 'plugins'),
+                                  BUILTIN_PLUGIN_FOLDER]
+
+        # register the application in the ihook
+        register_application(self)
+
+        # load the plugins
         self.plugins = {}
         for plugin in find_plugins(self):
             if plugin.active:
@@ -611,6 +606,11 @@ class TextPress(object):
 
         #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
+
+    def close(self):
+        """Called by the dispatcher before reloading."""
+        from textpress.pluginsystem import unregister_application
+        unregister_application(self)
 
     @setuponly
     def add_template_filter(self, name, callback):
@@ -894,6 +894,12 @@ class TextPress(object):
         return ClosingIterator(self.dispatch_request(environ, start_response),
                                [local_manager.cleanup, cleanup_session])
 
+    def __repr__(self):
+        return '<TextPress %r [%s]>' % (
+            self.instance_folder,
+            self.iid
+        )
+
     # remove our decorator
     del setuponly
 
@@ -917,11 +923,15 @@ class StaticDispatcher(object):
         # otherwise we have no up to date application, reload
         self.reload_lock.acquire()
         try:
-            # it could be that we waited for the lock to come free and
-            # a different request reloaded the application for us.  check
-            # here for that a second time.
-            if self.application and not self.application.wants_reload:
-                return self.application
+            if self.application:
+                # it could be that we waited for the lock to come free and
+                # a different request reloaded the application for us.  check
+                # here for that a second time.
+                if not self.application.wants_reload:
+                    return self.application
+
+                # otherwise close the application
+                self.application.close()
 
             # now try to setup the application.  it the setup does not
             # work because the instance is not initialized we hook the
@@ -1003,6 +1013,11 @@ def make_textpress(instance_folder, bind_to_thread=False):
         # make sure this thread has access to the variable so just set
         # up a partial class and call __init__ later.
         local.application = app = object.__new__(TextPress)
+
+        # attach the iid
+        app.iid = 'tp_%x' % id(app)
+
+        # now initialize the application
         app.__init__(instance_folder)
     finally:
         # if there was no error when setting up the TextPress instance

@@ -15,13 +15,14 @@ from werkzeug import url_quote, Local, LocalManager, ClosingIterator
 
 from textpress.i18n import _
 
-
 # load dynamic constants
 from textpress._dynamic import *
+
 
 # our local stuff
 local = Local()
 local_manager = LocalManager([local])
+
 
 _version_info = None
 

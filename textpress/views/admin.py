@@ -1390,9 +1390,7 @@ def do_overlays(request, template=None):
 
 @require_role(ROLE_ADMIN)
 def do_plugins(request):
-    """
-    Load and unload plugins and reload TextPress if required.
-    """
+    """Load and unload plugins and reload TextPress if required."""
     csrf_protector = CSRFProtector()
     if request.method == 'POST':
         csrf_protector.assert_safe()
@@ -1747,7 +1745,7 @@ def do_information(request):
     a bug report mail.
     """
     from threading import activeCount
-    from jinja.defaults import DEFAULT_NAMESPACE, DEFAULT_FILTERS
+    from jinja2.defaults import DEFAULT_NAMESPACE, DEFAULT_FILTERS
 
     thread_count = activeCount()
     version_info = get_version_info()

@@ -5,10 +5,6 @@
 
     This module implements the plugin system.
 
-    Limitations: all applications share the load path.  So strange things could
-    occour if someone has the same plugins in different locations.  We should
-    fix that somewhere in the future.
-
 
     Plugin Distribution
     -------------------
@@ -72,13 +68,15 @@
             is missed the admin will be informated about that and the plugin
             won't be activated.
 
-    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs.
+    :copyright: 2006-2008 by Armin Ronacher, Christopher Grebs, Georg Brandl.
     :license: GNU GPL.
 """
+import __builtin__
 import sys
 import new
 import re
 from os import path, listdir, walk, makedirs
+from types import ModuleType
 from shutil import rmtree
 from time import localtime, time
 from cStringIO import StringIO
@@ -86,13 +84,43 @@ from base64 import b64encode
 
 import textpress
 from urllib import quote, urlencode, FancyURLopener
+from werkzeug import cached_property, escape
+
 from textpress.application import get_application
 from textpress.utils.mail import split_email, is_valid_email
-from werkzeug import cached_property, escape
+
+
+_py_import = __builtin__.__import__
 
 
 BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
 PACKAGE_VERSION = 1
+
+
+def textpress_import(name, *args):
+    """Redirect imports for textpress.plugins to the module space."""
+    if name == 'textpress.plugins' or name.startswith('textpress.plugins.'):
+        app = get_application()
+        if app is not None:
+            name = 'textpress._space.%s%s' % (app.iid, name[17:])
+    return _py_import(name, *args)
+
+
+def register_application(app):
+    """Register the application on the plugin space."""
+    setattr(plugin_space, app.iid, PluginDispatcher(app))
+
+
+def unregister_application(app):
+    """Unregister the application on the plugin space."""
+    prefix = 'textpress._space.%s' % app.iid
+    for module in sys.modules.keys():
+        if module.startswith(prefix):
+            sys.modules.pop(module, None)
+    try:
+        delattr(plugin_space, app.iid)
+    except AttributeError:
+        pass
 
 
 def find_plugins(app):
@@ -103,11 +131,9 @@ def find_plugins(app):
         if plugin:
             enabled_plugins.add(plugin)
 
-    for folder in app.plugin_searchpath + [BUILTIN_PLUGIN_FOLDER]:
-        if not path.exists(folder):
+    for folder in app.plugin_searchpath:
+        if not path.isdir(folder):
             continue
-        if folder not in global_searchpath:
-            global_searchpath.append(folder)
         for filename in listdir(folder):
             full_name = path.join(folder, filename)
             if path.isdir(full_name) and \
@@ -175,8 +201,7 @@ def install_package(app, package):
 
 
 def get_package_metadata(package):
-    """
-    Get the metadata of a plugin in a package. Pass it a filepointer or
+    """Get the metadata of a plugin in a package. Pass it a filepointer or
     filename. Raises a `ValueError` if the package is not valid.
     """
     from zipfile import ZipFile, ZipInfo, error as BadZipFile
@@ -203,9 +228,7 @@ def get_package_metadata(package):
 
 
 def parse_metadata(string_or_fp):
-    """
-    Parse the metadata and return it as dict.
-    """
+    """Parse the metadata and return it as dict."""
     result = {}
     if isinstance(string_or_fp, basestring):
         fileiter = iter(string_or_fp.splitlines(True))
@@ -233,9 +256,7 @@ def parse_metadata(string_or_fp):
 
 
 class InstallationError(ValueError):
-    """
-    Raised during plugin installation.
-    """
+    """Raised during plugin installation."""
 
     def __init__(self, code):
         self.code = code
@@ -243,15 +264,13 @@ class InstallationError(ValueError):
 
 
 class SetupError(RuntimeError):
-    """
-    Raised by plugins if they want to stop their setup.  If a plugin raises
+    """Raised by plugins if they want to stop their setup.  If a plugin raises
     a `SetupError` during the init, it will be disabled automatically.
     """
 
 
 class PackageUploader(FancyURLopener, object):
-    """
-    Helper class for uploading packages. This is not a public
+    """Helper class for uploading packages. This is not a public
     interface, always use the Plugin upload function.
     """
 
@@ -289,8 +308,7 @@ class Plugin(object):
         self.setup_error = None
 
     def activate(self):
-        """
-        Activate the plugin.
+        """Activate the plugin.
 
         :return: A tuple in the form of ``(loaded_successfully,
                  loaded_dependences, missing_dependences)`` where the first
@@ -388,10 +406,11 @@ class Plugin(object):
     @cached_property
     def module(self):
         """The module of the plugin. The first access imports it."""
-        from textpress import plugins
         try:
-            return __import__('textpress.plugins.' + self.name,
-                              None, None, ['setup'])
+            # we directly import from the textpress module space
+            return __import__('textpress._space.%s.%s' %
+                              (self.app.iid, self.name), None, None,
+                              ['setup'])
         except:
             if not self.app.cfg['plugin_guard']:
                 raise
@@ -502,10 +521,10 @@ class Plugin(object):
         try:
             self.module.setup(self.app, self)
         except:
-            if not self.app.cfg['plugin_guard']:
-                raise
             if self.setup_error is None:
                 self.setup_error = sys.exc_info()
+            if not self.app.cfg['plugin_guard']:
+                raise
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -514,7 +533,37 @@ class Plugin(object):
         )
 
 
-# setup the pseudo package for the plugins
-plugin_module = new.module('plugins')
-sys.modules['textpress.plugins'] = textpress.plugins = plugin_module
-plugin_module.__path__ = global_searchpath = []
+class PseudoModule(ModuleType):
+    """A pseudo module that is automatically registered in sys.modules."""
+
+    def __init__(self, name):
+        ModuleType.__init__(self, name)
+        self.__package__ = self.__name__
+        sys.modules[self.__name__] = self
+
+    # use the object repr to avoid confusion; this is not a regular module
+    __repr__ = object.__repr__
+
+
+class PluginSpace(PseudoModule):
+    """The module space is a special module that dispatches to plugins from
+    different applications.
+    """
+
+    def __init__(self):
+        PseudoModule.__init__(self, 'textpress._space')
+
+
+class PluginDispatcher(PseudoModule):
+    """A pseudo module that loads plugins."""
+
+    def __init__(self, app):
+        PseudoModule.__init__(self, 'textpress._space.%s' % app.iid)
+        self._tp_app = app
+        self.__path__ = app.plugin_searchpath
+
+
+plugin_space = PluginSpace()
+__builtin__.__import__ = textpress_import
+textpress_import.__doc__ = _py_import
+textpress_import.__name__ = '__import__'

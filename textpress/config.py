@@ -160,7 +160,7 @@ class Configuration(object):
         # otherwise parse the file and copy all values into the internal
         # values dict.  Do that also for values not covered by the current
         # `config_vars` dict to preserve variables of disabled plugins
-        self._mark_loaded()
+        self._load_time = path.getmtime(self.filename)
         self.exists = True
         section = 'textpress'
         f = file(self.filename)
@@ -197,10 +197,6 @@ class Configuration(object):
             value = default
         self._converted_values[key] = value
         return value
-
-    def _mark_loaded(self):
-        """Set the load time to the timestamp of the config file."""
-        self._load_time = path.getmtime(self.filename)
 
     def change_single(self, key, value):
         """Create and commit a transaction for a single key-value-pair. Return
@@ -408,7 +404,6 @@ class ConfigTransaction(object):
                         f.write('%s = %s\n' % (key, quote_value(value)))
             finally:
                 f.close()
-            self.cfg._mark_loaded()
             self.cfg._values.update(self._values)
             self.cfg._converted_values.update(self._converted_values)
             for key in self._remove:
