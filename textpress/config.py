@@ -13,6 +13,7 @@
 """
 import os
 from os import path
+from threading import Lock
 
 
 #: variables the textpress core uses
@@ -147,6 +148,7 @@ class Configuration(object):
         self.config_vars = DEFAULT_VARS.copy()
         self._values = {}
         self._converted_values = {}
+        self._lock = Lock()
 
         # if the path does not exist yet set the existing flag to none and
         # set the time timetamp for the filename to something in the past
@@ -158,8 +160,8 @@ class Configuration(object):
         # otherwise parse the file and copy all values into the internal
         # values dict.  Do that also for values not covered by the current
         # `config_vars` dict to preserve variables of disabled plugins
+        self._mark_loaded()
         self.exists = True
-        self._load_time = path.getmtime(self.filename)
         section = 'textpress'
         f = file(self.filename)
         try:
@@ -185,15 +187,20 @@ class Configuration(object):
         """Return the value for a key."""
         if key.startswith('textpress/'):
             key = key[10:]
-        if key in self._converted_values:
+        try:
             return self._converted_values[key]
-        conv, default = self.config_vars[key]
-        if key in self._values:
+        except KeyError:
+            conv, default = self.config_vars[key]
+        try:
             value = from_string(self._values[key], conv, default)
-        else:
+        except KeyError:
             value = default
         self._converted_values[key] = value
         return value
+
+    def _mark_loaded(self):
+        """Set the load time to the timestamp of the config file."""
+        self._load_time = path.getmtime(self.filename)
 
     def change_single(self, key, value):
         """Create and commit a transaction for a single key-value-pair. Return
@@ -317,6 +324,12 @@ class ConfigTransaction(object):
         self._remove = []
         self._committed = False
 
+    def __getitem__(self, key):
+        """Get an item from the transaction or the underlaying config."""
+        if key in self._converted_values:
+            return self._converted_values[key]
+        return self.cfg[key]
+
     def __setitem__(self, key, value):
         """Set the value for a key by a python value."""
         if self._committed:
@@ -328,10 +341,13 @@ class ConfigTransaction(object):
         self._values[key] = unicode(value)
         self._converted_values[key] = value
 
-    def set_from_string(self, key, value, override=False):
-        """Set the value for a key from a string."""
+    def _assert_uncommitted(self):
         if self._committed:
             raise ValueError('This transaction was already committed.')
+
+    def set_from_string(self, key, value, override=False):
+        """Set the value for a key from a string."""
+        self._assert_uncommitted()
         if key.startswith('textpress/'):
             key = key[10:]
         conv, default = self.cfg.config_vars[key]
@@ -343,8 +359,7 @@ class ConfigTransaction(object):
 
     def revert_to_default(self, key):
         """Revert a key to the default value."""
-        if self._committed:
-            raise ValueError('This transaction was already committed.')
+        self._assert_uncommitted()
         if key.startswith('textpress'):
             key = key[10:]
         self._remove.append(key)
