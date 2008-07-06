@@ -1,44 +1,68 @@
 {% extends "admin/layout.html" %}
-{% from 'admin/_comment.html' import render_comment %}
 {% block title %}{{ _("Dashboard") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Dashboard") }}</h2>
-  <div class="text">
-    <p>{% trans user=request.user.username|e %}
-      Welcome in the admin interface {{ user }}.
-    {% endtrans %}</p>
-    <p>{% trans %}Use these links to get started quickly:{% endtrans %}</p>
+  <div class="dashboard">
+    <h2>{{ _("Dashboard") }}</h2>
+    <div class="panel">
+      <div class="text">
+        <p>{% trans user=(request.user.first_name or request.user.username)|e -%}
+          Howdy.  Welcome in the TextPress administration interface {{ user }}.
+        {%- endtrans %}
+        {% trans -%}
+          You have written <strong>{{ your_posts }}</strong> post so far.
+        {%- pluralize -%}
+          You have written <strong>{{ your_posts }}</strong> posts so far.
+        {%- endtrans %}
+      </div>
+      <h3>{{ _('Quickstart') }}</h3>
+      <ul>
+        <li><a href="{{ url_for('admin/new_post')|e }}">{{ _("New Post") }}</a>
+        <li><a href="{{ url_for('admin/show_comments')|e }}">{{ _("Moderate Comments") }}</a>
+        <li><a href="{{ url_for('admin/show_posts')|e }}">{{ _("Manage Posts") }}</a>
+        <li><a href="{{ url_for('admin/options')|e }}">{{ _("Configure TextPress") }}</a>
+        <li><a href="{{ url_for('admin/plugins')|e }}">{{ _("Manage Plugins") }}</a>
+        <li><a href="{{ url_for('admin/show_users')|e }}">{{ _("Manage Users") }}</a>
+      </ul>
+    </div>
+    <div class="links">
+      {% if drafts %}
+      <h3>{{ _("Drafts") }}</h3>
+      <ul class="drafts">
+      {%- for draft in drafts %}
+        <li><a href="{{ url_for('admin/edit_post',
+          post_id=draft.post_id) }}">{{ draft.title|e }}</a>
+      {%- endfor %}
+      </ul>
+      {% endif %}
+      {% if unmoderated_comments %}
+      <h3>{{ _('Comments Awaiting Approval') }}</h3>
+      <ul class="comments">
+      {%- for comment in unmoderated_comments %}
+        <li><p class="comment">
+          by <a href="mailto:{{ comment.email|e }}">{{
+          comment.author|e }}</a>,
+          {{ comment.pub_date|datetimeformat('short') }}
+          on <a href="{{ url_for(comment.post) }}">{{ comment.post.title|e }}</a>
+          <p class="actions">
+            <a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e
+             }}">{{ _("Edit") }}</a> |
+            <a href="{{ url_for('admin/delete_comment', comment_id=comment.comment_id)|e
+             }}">{{ _("Delete") }}</a> |
+             <a href="{{ url_for('admin/approve_comment',
+               comment_id=comment.comment_id)|e }}">{{ _("Approve") }}</a>
+      {%- endfor %}
+      </ul>
+      {% endif %}
+      {% if last_posts %}
+      <h3>{{ _("Last Posts") }}</h3>
+      <ul class="last_posts">
+      {%- for post in last_posts %}
+        <li><a href="{{ url_for('admin/edit_post', post_id=post.post_id)
+          }}">{{ post.title|e }}</a>, {{ post.pub_date|datetimeformat('short') }}
+      {%- endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    <div class="bottom"></div>
   </div>
-  <ul>
-    <li><a href="{{ url_for('admin/new_post')|e }}">{{ _("New Post") }}</a></li>
-    <li><a href="{{ url_for('admin/show_posts')|e }}">{{ _("Manage Posts") }}</a></li>
-    <li><a href="{{ url_for('admin/options')|e }}">{{ _("Configure TextPress") }}</a></li>
-    <li><a href="{{ url_for('admin/plugins')|e }}">{{ _("Manage Plugins") }}</a></li>
-    <li><a href="{{ url_for('admin/show_users')|e }}">{{ _("Manage Users") }}</a></li>
-  </ul>
-  {% if unmoderated_comments %}
-  <h3>{{ _('Comments Awaiting Approval') }}</h3>
-  <p>{% trans count=unmoderated_comments|count %}There is {{ count
-    }} comment awaiting approval:{% pluralize %}There are {{ count
-    }} comments awaiting approval:{% endtrans %}</p>
-  <ul class="comments">
-  {%- for comment in unmoderated_comments %}
-    <li class="comment {{ loop.cycle('odd', 'even') }}">
-      {{ render_comment(comment) }}
-    </li>
-  {%- endfor %}
-  </ul>
-  {% endif %}
-  {% if drafts %}
-  <h3>{{ _("Drafts") }}</h3>
-  <p>{% trans count=drafts|count %}You have {{ count
-    }} draft:{% pluralize %}You have {{ count
-    }} drafts:{% endtrans %}</p>
-  <ul>
-  {%- for draft in drafts %}
-    <li><a href="{{ url_for('admin/edit_post',
-      post_id=draft.post_id) }}">{{ draft.title|e }}</a></li>
-  {%- endfor %}
-  </ul>
-  {% endif %}
 {% endblock %}

@@ -116,6 +116,12 @@ class User(object):
 
     display_name = property(_get_display_name, _set_display_name)
 
+    @property
+    def real_name(self):
+        if self.first_name and self.last_name:
+            return '%s %s' % (self.first_name, self.last_name)
+        return self.first_name or self.last_name
+
     def set_password(self, password):
         self.pw_hash = gen_pwhash(password)
 

@@ -236,7 +236,11 @@ def do_index(request):
     """
     return render_admin_response('admin/index.html', 'dashboard',
         drafts=Post.objects.drafts().all(),
-        unmoderated_comments=Comment.objects.unmoderated().all()
+        unmoderated_comments=Comment.objects.unmoderated().all(),
+        your_posts=Post.objects.filter(
+            (Post.author_id == request.user.user_id)
+        ).count(),
+        last_posts=Post.objects.order_by(Post.pub_date.desc()).limit(5).all()
     )
 
 
@@ -286,7 +290,7 @@ def do_edit_post(request, post_id=None):
             post_status=post.status,
             comments_enabled=post.comments_enabled,
             pings_enabled=post.pings_enabled,
-            pub_date=format_datetime(post.pub_date),
+            pub_date=format_datetime(post.pub_date, 'short'),
             slug=post.slug,
             author=post.author.username,
             parser=post.parser
@@ -1424,7 +1428,7 @@ def do_plugins(request):
                         flash(_(u'Plugin “%(plugin)s” has unresolved '
                                 u'dependencies.  Please install %(dependency)s.')
                                 % {'plugin': plugin.html_display_name,
-                                   'dependency': u', '.join(missing_dependencies)})
+                                   'dependency': u', '.join(missing_dep)})
                     else:
                         flash(_(u'Plugin “%s” could not be loaded')
                                 % plugin.html_display_name)

@@ -434,6 +434,85 @@ div.pagination span.ellipsis {
     margin: 0 8px 0 8px;
 }
 
+/* :::: DASHBOARD :::: */
+div.dashboard div.panel {
+    float: left;
+    width: 40%;
+}
+
+div.dashboard div.links {
+    float: right;
+    width: 55%;
+}
+
+div.dashboard div.bottom {
+    clear: both;
+}
+
+div.dashboard h2 {
+    margin-bottom: 0;
+}
+
+div.dashboard p {
+    margin: 20px 0;
+}
+
+div.dashboard h3 {
+    margin: 20px 0 0 0;
+    padding: 0;
+}
+
+div.dashboard div.links ul {
+    margin: 15px 0 0 0;
+    list-style: none;
+    padding: 0;
+}
+
+div.dashboard div.links ul li {
+    font-size: 13px;
+    margin: 0 0 10px 0;
+    padding: 6px 10px;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+}
+
+div.dashboard div.links ul.drafts li {
+    background-color: #F7FCF7;
+    border-color: #B5E8B9;
+}
+
+div.dashboard div.links ul.drafts li a {
+    color: #2F771D;
+}
+
+div.dashboard div.links ul.comments li {
+    background-color: #FCF7F7;
+    border-color: #E8B5B5;
+}
+
+div.dashboard div.links ul.comments li a {
+    color: #B44242;
+}
+
+div.dashboard div.links ul.last_posts li {
+    background-color: #F7FAFD;
+    border-color: #B4D2E7;
+}
+
+div.dashboard div.links li a:hover {
+    color: #ffa800!important;
+}
+
+div.dashboard ul.comments li p {
+    margin: 0;
+}
+
+div.dashboard ul.comments li p.actions {
+    margin: 6px 0 0 0;
+    text-align: right;
+    font-size: 11px;
+}
+
 /* :::: POST LIST :::: */
 table.postlist tr.draft td {
     background-color: #C7F1C6;
