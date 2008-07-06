@@ -81,7 +81,7 @@ def add_eric_link(req, navigation_bar):
         return
     for link_id, url, title, children in navigation_bar:
         if link_id == 'options':
-            children.insert(-2, ('eric_the_fish', url_for('eric_the_fish/config'),
+            children.insert(-3, ('eric_the_fish', url_for('eric_the_fish/config'),
                                  _('Eric The Fish')))
 
 

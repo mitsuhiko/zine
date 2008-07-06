@@ -34,7 +34,7 @@
 	    <a href="{{ url_for('admin/show_post_comments', post_id=post.post_id)|e }}">{{ post.comments|count }}</a>
 	    {%- else %}{{ post.comments|count }}{% endif %}
 	  </td>
-      <td>{{ post.pub_date|datetimeformat|e }}</td>
+      <td>{{ post.pub_date|datetimeformat('short') }}</td>
     </tr>
   {%- else %}
     <tr><td colspan="4">{{ _("No posts.") }}</td></tr>

@@ -167,7 +167,7 @@ def add_pygments_link(req, navigation_bar):
     if req.user.role >= ROLE_ADMIN:
         for link_id, url, title, children in navigation_bar:
             if link_id == 'options':
-                children.insert(-2, ('pygments_support',
+                children.insert(-3, ('pygments_support',
                                      url_for('pygments_support/config'),
                                      'Pygments'))
 

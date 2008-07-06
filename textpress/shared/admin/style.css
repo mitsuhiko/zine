@@ -51,7 +51,7 @@ div.header div.metanav {
     background-color: #222e4b;
     border: 1px solid #4f849d;
     padding: 5px;
-    font-size: 13px;
+    font-size: 12px;
     text-align: center;
     color: #eee;
 }
@@ -86,7 +86,7 @@ div.footer p {
 div.body ul.navbar {
     margin: 0;
     padding: 0 0 0 15px;
-    height: 30px;
+    height: 28px;
     background-color: #222e4b;
     list-style: none;
 }
@@ -104,9 +104,9 @@ div.body ul.navbar li a {
     color: #fff;
     text-decoration: none;
     font-weight: bold;
-    font-size: 14px!important;
-    line-height: 26px!important;
-    height: 26px!important;
+    font-size: 13px!important;
+    line-height: 24px!important;
+    height: 24px!important;
 }
 
 div.body ul.navbar li a:hover {
@@ -125,7 +125,7 @@ div.body ul.navbar li.active a:hover {
 div.body ul.ctxnavbar {
     margin: 0;
     padding: 0 0 0 17px;
-    height: 25px;
+    height: 24px;
     background-color: #316081;
     list-style: none;
 }
@@ -141,10 +141,9 @@ div.body ul.ctxnavbar li a {
     padding: 0 8px 0 8px;
     color: white;
     text-decoration: none;
-    font-weight: bold;
     font-size: 12px!important;
-    line-height: 22px!important;
-    height: 22px!important;
+    line-height: 21px!important;
+    height: 21px!important;
 }
 
 div.body ul.ctxnavbar li a:hover {
