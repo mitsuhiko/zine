@@ -1268,9 +1268,7 @@ def do_basic_options(request):
 
 @require_role(ROLE_ADMIN)
 def do_urls(request):
-    """
-    A config page for URL depending settings.
-    """
+    """A config page for URL depending settings."""
     form = {
         'blog_url_prefix':      request.app.cfg['blog_url_prefix'],
         'admin_url_prefix':     request.app.cfg['admin_url_prefix'],
@@ -1411,7 +1409,7 @@ def do_plugins(request):
             active = 'plugin_' + name in request.form
 
             if active and not plugin.active:
-                (loaded, loaded_dep, missing_dep) = plugin.activate()
+                loaded, loaded_dep, missing_dep = plugin.activate()
                 if loaded:
                     if loaded_dep:
                         flash(_(u'The Plugins <em>%(dependencies)s</em> are '

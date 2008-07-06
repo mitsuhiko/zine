@@ -31,7 +31,7 @@ a:hover {
 /* :::: ADMIN PANEL HEADER :::: */
 div.header {
     background: #316182 url(img/dialogbg.png) repeat-x left center;
-    padding: 32px;
+    padding: 26px 0 26px 30px;
     margin: 0;
 }
 
@@ -41,13 +41,13 @@ div.header h1 {
     font-family: 'Georgia', serif;
     font-weight: normal;
     padding: 0;
-    font-size: 25px;
+    font-size: 26px;
 }
 
 div.header div.metanav {
     position: absolute;
-    top: 20px;
-    right: 25px;
+    top: 17px;
+    right: 20px;
     background-color: #222e4b;
     border: 1px solid #4f849d;
     padding: 5px;

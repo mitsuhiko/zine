@@ -82,10 +82,10 @@ from time import localtime, time
 from cStringIO import StringIO
 from base64 import b64encode
 
-import textpress
-from urllib import quote, urlencode, FancyURLopener
+from urllib import quote
 from werkzeug import cached_property, escape
 
+import textpress
 from textpress.application import get_application
 from textpress.utils.mail import split_email, is_valid_email
 
@@ -97,13 +97,13 @@ BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
 PACKAGE_VERSION = 1
 
 
-def textpress_import(name, *args):
+def textpress_import(name, *args, **kwargs):
     """Redirect imports for textpress.plugins to the module space."""
     if name == 'textpress.plugins' or name.startswith('textpress.plugins.'):
         app = get_application()
         if app is not None:
             name = 'textpress._space.%s%s' % (app.iid, name[17:])
-    return _py_import(name, *args)
+    return _py_import(name, *args, **kwargs)
 
 
 def register_application(app):
@@ -272,31 +272,6 @@ class SetupError(RuntimeError):
     """
 
 
-class PackageUploader(FancyURLopener, object):
-    """Helper class for uploading packages. This is not a public
-    interface, always use the Plugin upload function.
-    """
-
-    version = 'TextPress Package Uploader/%s' % textpress.__version__
-    upload_url = 'http://textpress.pocoo.org/developers/upload_plugin'
-
-    def __init__(self, plugin, email, password):
-        FancyURLopener.__init__(self)
-        self.plugin = plugin
-        self.email = email
-        self.password = password
-
-    def upload(self):
-        stream = StringIO()
-        self.plugin.dump(stream)
-        fp = self.open(self.upload_url, urlencode({
-            'package_data':     b64encode(stream.getvalue()),
-            'email':            self.email,
-            'password':         self.password
-        }))
-        return fp.read().strip()
-
-
 class Plugin(object):
     """Wraps a plugin module."""
 
@@ -321,12 +296,12 @@ class Plugin(object):
         plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
         loaded_dependences = set()
         missing_dependences = set()
+
         # handle dependences
         if self.depends:
             for dep in self.depends:
                 if (dep in self.app.plugins and
                     not self.app.plugins[dep].active):
-
                     loaded_dependences.add(dep)
                 elif dep not in self.app.plugins:
                     missing_dependences.add(dep)
@@ -343,8 +318,8 @@ class Plugin(object):
             self.app.cfg.change_single('plugins',
                 ', '.join(x for x in sorted(plugins) if x))
 
-        return ((missing_dependences and False or True), loaded_dependences,
-                missing_dependences)
+        return not missing_dependences, loaded_dependences, \
+                   missing_dependences
 
     def deactivate(self):
         """Deactivate this plugin."""
@@ -391,10 +366,6 @@ class Plugin(object):
 
         f.close()
 
-    def upload(self, email, password):
-        """Upload the plugin to the textpress server."""
-        return PackageUploader(self, email, password).upload()
-
     @cached_property
     def metadata(self):
         try:
@@ -408,7 +379,13 @@ class Plugin(object):
 
     @cached_property
     def module(self):
-        """The module of the plugin. The first access imports it."""
+        """The module of the plugin. The first access imports it.
+        When the `unregister_application` function deletes the references to
+        the modules from the sys.modules dict, the cached property will keep
+        one reference until the reloader finishes it's work.  This should
+        make sure that requests that happen during plugin reloading don't
+        break things.
+        """
         try:
             # we directly import from the textpress module space
             return __import__('textpress._space.%s.%s' %
@@ -511,13 +488,12 @@ class Plugin(object):
 
     @property
     def depends(self):
-        """
-        Iterator of all plugins this one depends on.
+        """A list of depenencies for this plugin.
 
         Plugins listed here won't be loaded automaticly.
         """
-        depends = self.metadata.get('depends', '')
-        return depends and (x.strip() for x in depends.split(',')) or []
+        depends = self.metadata.get('depends', '').strip()
+        return [x.strip() for x in depends.split(',')]
 
     def setup(self):
         """Setup the plugin."""
@@ -539,5 +515,5 @@ class Plugin(object):
 __builtin__.__import__ = textpress_import
 plugin_space = ModuleType('textpress._space')
 sys.modules['textpress._space'] = plugin_space
-textpress_import.__doc__ = _py_import
+textpress_import.__doc__ = _py_import.__doc__
 textpress_import.__name__ = '__import__'
