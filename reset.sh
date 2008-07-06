@@ -5,20 +5,21 @@ mkdir instance
 python -c "
 from sqlalchemy import create_engine
 from textpress.database import users, init_database
-from textpress.utils import gen_pwhash, gen_secret_key
+from textpress.utils.crypto import gen_pwhash, gen_secret_key
 from textpress.config import Configuration
 e = create_engine('sqlite:///instance/database.db')
 init_database(e)
 
 cfg_fn = './instance/textpress.ini'
 cfg = Configuration(cfg_fn)
-cfg.update(
+t = cfg.edit()
+t.update(
     maintenance_mode=False,
     blog_url='http://localhost:4000',
     secret_key=gen_secret_key(),
     database_uri='sqlite:///instance/database.db'
 )
-cfg.save()
+t.commit()
 "
 echo "Created initial configuration"
 python textpress-management.py shell >> /dev/null <<EOF

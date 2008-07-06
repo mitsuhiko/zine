@@ -86,10 +86,21 @@ def is_valid_url(url):
 
 
 def is_valid_ip(value):
-    """Check if the string provided is a valid IP."""
+    """Check if the string provided is a valid IP.
+    >>> is_valid_ip('192.168.10.99')
+    True
+    >>> is_valid_ip('255.0.23.1')
+    True
+    >>> is_valid_ip('255.0.23')
+    False
+    >>> is_valid_ip('255.-0.23.5')
+    False
+    >>> is_valid_ip('256.17.23.5')
+    False
+    """
     # XXX: ipv6!
     idx = 0
     for idx, bit in enumerate(value.split('.')):
-        if not bit.isdigit() or not 0 <= int(value) <= 255:
+        if not bit.isdigit() or not 0 <= int(bit) <= 255:
             return False
     return idx == 3
