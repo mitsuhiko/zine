@@ -213,7 +213,7 @@ def get_package_metadata(package):
     except (IOError, BadZipFile):
         raise ValueError('not a valid package')
 
-    # get the package version
+    # get the package version and name
     try:
         package_version = int(f.read('TEXTPRESS_PACKAGE'))
         plugin_name = f.read('TEXTPRESS_PLUGIN')
@@ -515,5 +515,3 @@ class Plugin(object):
 __builtin__.__import__ = textpress_import
 plugin_space = ModuleType('textpress._space')
 sys.modules['textpress._space'] = plugin_space
-textpress_import.__doc__ = _py_import.__doc__
-textpress_import.__name__ = '__import__'

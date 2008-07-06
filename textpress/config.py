@@ -66,7 +66,8 @@ DEFAULT_VARS = {
 
     # file uploads
     'upload_folder':            (unicode, u'uploads'),
-    'upload_mimetypes':       (unicode, u'*.plugin:application/x-textpress-plugin'),
+    'upload_mimetypes':         (unicode, u'*.plugin:application/'
+                                          u'x-textpress-plugin'),
     'im_path':                  (unicode, u''),
 
     # email settings

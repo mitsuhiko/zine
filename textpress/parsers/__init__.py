@@ -13,8 +13,7 @@ from textpress.application import iter_listeners, get_application
 
 
 def parse(input_data, parser=None, reason='unknown', optimize=True):
-    """
-    Generate a doc tree out of the data provided. If we are not in unbound
+    """Generate a doc tree out of the data provided. If we are not in unbound
     mode the `process-doc-tree` event is sent so that plugins can modify
     the tree in place. The reason is useful for plugins to find out if they
     want to render it or now. For example a normal blog post would have the
@@ -57,9 +56,7 @@ def parse(input_data, parser=None, reason='unknown', optimize=True):
 
 
 class BaseParser(object):
-    """
-    Baseclass for all kinds of parsers.
-    """
+    """Baseclass for all kinds of parsers."""
 
     @staticmethod
     def get_name():

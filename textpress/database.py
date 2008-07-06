@@ -3,10 +3,11 @@
     textpress.database
     ~~~~~~~~~~~~~~~~~~
 
-    This module is a rather complex layer on top of SQLAlchemy 0.4 or higher.
+    This module is a rather complex layer on top of SQLAlchemy 0.4.
     Basically you will never use the `textpress.database` module except you
-    are a core developer, but always use the high level `db` module which you
-    can import from the `textpress.api` module.
+    are a core developer, but always the high level
+    :mod:`~textpress.database.db` module which you can import from the
+    :mod:`textpress.api` module.
 
     The following examples all assume that you have imported the db module.
 
@@ -18,57 +19,39 @@
     database connection and session automatically.  There are also some
     wrappers around the normal sqlalchemy module functions.
 
-    What you have to know is that the `textpress.api.db` module contains all
-    the public objects from `sqlalchemy` and `sqlalchemy.orm`.  Additionally
-    there are the following functions:
+    .. admonition:: Information
 
-    `db.get_engine`
+        Plugins can't utilize the database layer in the sense that they can
+        create custom tables.  This limitation will go away once we have
+        found a clever system for that.
+
+    Synopsis
+    --------
+
+    What you have to know is that the :mod:`~textpress.database.db` module
+    contains all the public objects from `sqlalchemy` and `sqlalchemy.orm`.
+    Additionally there are the following extra objects:
+
+    :func:`~textpress.database.db.get_engine`
         return the engine object for the current application. This is
         equivalent with `get_application().database_engine`.
 
-    `flush`
+    :func:`~textpress.database.db.flush`
         flush all outstanding database changes in the current session.
 
-    `mapper`
+    :func:`~textpress.database.db.mapper`
         replacement for the normal SQLAlchemy mapper function. Works the
-        same but uses our `ManagerExtension`.  See the notes below.
+        same but uses our manager extension.  See the notes below.
 
-    `save`
+    :func:`~textpress.database.db.save`
         bind an unbound object to the session and mark it for saving.
         Normally models you create by hand are automatically saved, unless
         you create it with ``_tp_no_save=True``
 
-    `DatabaseManager`
+    :class:`~textpress.database.db.DatabaseManager`
         baseclass for all the database managers.  If you don't set at least
         one database manager to your model TextPress will create one for
         you called `objects`.
-
-
-    Definiting Tables
-    -----------------
-
-    So let's get started quickly.  To define tables all you have to do is to
-    create a metadata instances for your table collection (so that you can
-    create them) and bind some tables to it::
-
-        metadata = db.MetaData()
-
-        my_table = db.Table('my_plugin_my_table', metadata,
-            db.Column('my_table_id', db.Integer, primary_key=True),
-            ...
-        )
-
-
-    Creating a Upgrade Function
-    ---------------------------
-
-    If you want to use those tables in a TextPress plugin you have to create
-    them.  You have to register a database upgrade function (see the
-    docstrings on the application object regarding taht) which looks like
-    this::
-
-        def upgrade_database(app):
-            metadata.create_all(app.database_engine)
 
 
     Writing Models
@@ -92,19 +75,19 @@
     and raise an exception.
 
     You can of course bind multiple database managers to one model.  But now
-    what are `DatabaseManagers`?
+    what are :class:`~textpress.database.db.DatabaseManager`\s?
 
     Say you have a model but the queries in the views are quite complex.  So
     you can write functions that fire that requests somewhere else.  But where
     to put those queries?  Per default all query methods are stored an a
     database manager and it's a good idea to keep them there.  If you want to
-    add some more methods to a manager just subclass `db.DatabaseManager` and
-    instanciate them on your model::
+    add some more methods to a manager just subclass the default database
+    manager and instanciate them on your model::
 
         class UserManager(db.DatabaseManager):
 
-            def get_authors(self):
-                return self.select(User.role >= ROLE_AUTHOR)
+            def authors(self):
+                return self.filter(User.role >= ROLE_AUTHOR)
 
         class User(object):
             objects = UserManager()
@@ -119,15 +102,9 @@
     --------
 
     How to query? Just use the database manager attached to an object.  If
-    you haven't attached on yourself the default `DatabaseManager` is mounted
-    on the model as `objects`.  See the `DatabaseManager` docstring for more
-    details.
-
-    If you have to fire up some more raw and complex queries that don't use
-    the mapper, get yourself a engine object using `get_engine` and start
-    playing with it :-)  For normal execution you however don't have to do
-    this, you can use `db.execute`, `db.begin` etc. which is also the
-    preferred way since it takes place in the current session.
+    you haven't attached on yourself the default
+    :class:`~textpress.database.db.DatabaseManager` is mounted on the model
+    as `objects`.  See the docstring of that object for more details.
 
 
     Deleting Objects
@@ -147,8 +124,8 @@
                              Ali Afshar.
     :license: GNU GPL.
 """
+import sys
 from datetime import datetime, timedelta
-
 from types import ModuleType
 
 import sqlalchemy
@@ -168,7 +145,7 @@ def mapper(*args, **kwargs):
 
 
 class ManagerExtension(orm.MapperExtension):
-    """Use django like database managers."""
+    """Use Django-like database managers."""
 
     def get_session(self):
         return session.registry()
@@ -191,7 +168,9 @@ class ManagerExtension(orm.MapperExtension):
             manager.bind(class_)
 
     def init_instance(self, mapper, class_, oldinit, instance, args, kwargs):
-        session = kwargs.pop('_sa_session', self.get_session())
+        session = kwargs.pop('_sa_session', None)
+        if session is None:
+            session = self.get_session()
         if not kwargs.pop('_tp_no_save', False):
             entity = kwargs.pop('_sa_entity_name', None)
             session._save_impl(instance, entity_name=entity)
@@ -276,28 +255,36 @@ session = orm.scoped_session(lambda: orm.create_session(
                              local_manager.get_ident)
 
 #: create a new module for all the database related functions and objects
-db = ModuleType('db')
+sys.modules['textpress.database.db'] = db = ModuleType('db')
+public_names = set(['mapper', 'get_engine', 'session', 'DatabaseManager'])
 key = value = mod = None
 for mod in sqlalchemy, orm:
     for key, value in mod.__dict__.iteritems():
         if key in mod.__all__:
             setattr(db, key, value)
+            public_names.add(key)
 del key, mod, value
 
-db.__doc__ = __doc__
+
+def get_engine():
+    """Return the active database engine (the database engine of the active
+    application).  If no application is enabled this has an undefined behavior.
+    If you are not sure if the application is bound to the active thread, use
+    :func:`~textpress.application.get_application` and check it for `None`.
+    The database engine is stored on the application object as `database_engine`.
+    """
+    return local.application.database_engine
+
 db.mapper = mapper
-db.get_engine = lambda: local.application.database_engine
+db.get_engine = get_engine
 for name in 'delete', 'save', 'flush', 'execute', 'begin', \
             'commit', 'rollback', 'clear', 'refresh', 'expire':
     setattr(db, name, getattr(session, name))
+    public_names.add(name)
 db.session = session
 db.DatabaseManager = DatabaseManager
+db.__all__ = sorted(public_names)
 
-#: support for SQLAlchemy's 0.4.2 Text type, in older versions it's
-#: just Text.  This patch will go away once SQLAlchemy 0.5 is out
-#: or something like that.
-if not hasattr(db, 'Text'):
-    db.Text = db.String
 
 #: called at the end of a request
 cleanup_session = session.remove

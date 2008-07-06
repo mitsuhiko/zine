@@ -3,16 +3,8 @@
     textpress.application
     ~~~~~~~~~~~~~~~~~~~~~
 
-    This module implements the central application object called `TextPress`
-    and a couple of helper functions.  An important implementation detail is
-    that we use werkzeug's local objects for many operations like getting the
-    current active application object or request.
-
-    Every context can only have one application object or request at the same
-    time.
-
-    If you're looking for ways to get the WSGI application have a look at the
-    docstring of the `textpress` package.
+    This module implements the central application object :class:`TextPress`
+    and a couple of helper functions and classes.
 
 
     :copyright: 2007-2008 by Armin Ronacher.
@@ -25,12 +17,13 @@ from itertools import izip
 from datetime import datetime, timedelta
 from urlparse import urlparse
 from collections import deque
+from inspect import getdoc
 
 from babel import Locale
 
 from jinja2 import Environment, BaseLoader, TemplateNotFound
 
-from werkzeug import Request as BaseRequest, Response as BaseResponse, \
+from werkzeug import Request as RequestBase, Response as ResponseBase, \
      SharedDataMiddleware, url_quote, routing, redirect as simple_redirect
 from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
      NotFound
@@ -54,17 +47,31 @@ _setup_lock = allocate_lock()
 
 
 def get_request():
-    """Get the current request."""
+    """Return the current request.  If no request is available this function
+    returns `None`.
+    """
     return getattr(local, 'request', None)
 
 
 def get_application():
-    """Get the current application or an application by iid."""
+    """Get the current application.  If there is not application available
+    because no application is bound to the thread, `None` is returned.
+    """
     return getattr(local, 'application', None)
 
 
 def url_for(endpoint, **args):
-    """Get the url to an endpoint."""
+    """Get the URL to an endpoint.  The keyword arguments provided are used
+    as URL values.  Unknown URL values are used as keyword argument.
+    Additionally there are some special keyword arguments:
+
+    `_anchor`
+        This string is used as URL anchor.
+
+    `_external`
+        If set to `True` the URL will be generated with the full server name
+        and `http://` prefix.
+    """
     if hasattr(endpoint, 'get_url_values'):
         rv = endpoint.get_url_values()
         if rv is not None:
@@ -83,7 +90,9 @@ def url_for(endpoint, **args):
 
 def redirect(url, code=302, allow_external_redirect=False):
     """Return a redirect response.  Like Werkzeug's redirect but this
-    one checks for external redirects too.
+    one checks for external redirects too.  If a redirect to an external
+    target was requested `BadRequest` is raised unless
+    `allow_external_redirect` was explicitly set to `True`.
     """
     if not allow_external_redirect:
         #: check if the url is on the same server
@@ -96,7 +105,15 @@ def redirect(url, code=302, allow_external_redirect=False):
 
 
 def emit_event(event, *args, **kwargs):
-    """Emit a event and return a `EventResult` instance."""
+    """Emit a event and return a list of event results.  Each called
+    function contributes one item to the returned list.
+
+    This is equivalent to the following call to :func:`iter_listeners`::
+
+        result = []
+        for listener in iter_listeners(event):
+            result.append(listener(*args, **kwargs))
+    """
     return [x(*args, **kwargs) for x in
             local.application._event_manager.iter(event)]
 
@@ -179,11 +196,13 @@ def require_role(role):
     return wrapped
 
 
-class Request(BaseRequest):
-    """The used request class."""
+class Request(RequestBase):
+    """This class holds the incoming request data."""
 
-    def __init__(self, app, environ):
-        BaseRequest.__init__(self, environ)
+    def __init__(self, environ, app=None):
+        RequestBase.__init__(self, environ)
+        if app is None:
+            app = get_application()
         self.app = app
 
         engine = self.app.database_engine
@@ -230,8 +249,10 @@ class Request(BaseRequest):
         emit_event('after-user-logout', user)
 
 
-class Response(BaseResponse):
-    """An utf-8 response, with text/html as default mimetype."""
+class Response(ResponseBase):
+    """This class holds the resonse data.  The default charset is utf-8
+    and the default mimetype ``'text/html'``.
+    """
     default_mimetype = 'text/html'
 
 
@@ -439,7 +460,13 @@ class InstanceNotInitialized(RuntimeError):
 
 
 class TextPress(object):
-    """The WSGI application."""
+    """The central application object.
+
+    Even though the :class:`TextPress` class is a regular Python class, you
+    can't create instances by using the regular constructor.  The only
+    documented way to create this class is the :func:`make_textpress`
+    function or by using one of the dispatchers created by :func:`make_app`.
+    """
 
     _setup_only = []
     def setuponly(f, container=_setup_only):
@@ -447,6 +474,8 @@ class TextPress(object):
         functions will be replaced with a dummy function that raises
         an exception."""
         container.append(f.__name__)
+        f.__doc__ = (getdoc(f) or '') + '\n\n*This function can only be ' \
+                    'called during application setup*'
         return f
 
     def __init__(self, instance_folder):
@@ -608,35 +637,51 @@ class TextPress(object):
         emit_event('application-setup-done')
 
     def close(self):
-        """Called by the dispatcher before reloading."""
+        """Called by the dispatcher before reloading.  This method should be
+        called by hand if the application object is no longer in use for shell
+        scripts and similar situations.  This cleans up data stored outside of
+        the application object such as loaded plugins.  After this was called,
+        the application object can't be used any more and has undefined
+        behavior.
+
+        Multiple calls to :meth:`close` are safe and won't cause errors.
+        """
         from textpress.pluginsystem import unregister_application
         unregister_application(self)
 
     @setuponly
     def add_template_filter(self, name, callback):
-        """Add a template filter."""
+        """Add a Jinja2 template filter."""
         self._template_filters[name] = callback
 
     @setuponly
     def add_template_test(self, name, callback):
-        """Add a template test."""
+        """Add a Jinja2 template test."""
         self._template_tests[name] = callback
 
     @setuponly
     def add_template_global(self, name, value):
-        """Add a template global (or deferred factory function)."""
+        """Add a template global.  Object's added that way are available in
+        the global template namespace.
+        """
         self._template_globals[name] = value
 
     @setuponly
     def add_template_searchpath(self, path):
-        """Add a new template searchpath to the application.
-        This searchpath is queried *after* the themes but
-        *before* the builtin templates are looked up."""
+        """Add a new template searchpath to the application.  This searchpath
+        is queried *after* the themes but *before* the builtin templates are
+        looked up.
+        """
         self._template_searchpath.append(path)
 
     @setuponly
     def add_api(self, name, preferred, callback, blog_id=1):
-        """Add a new API to the blog."""
+        """Add a new API to the blog.  The newly added API is available at
+        ``/_services/<name>`` and automatically exported in the RSD file.
+        The `blog_id` is an unused oddity of the RSD file, preferred an
+        indicator if this API is preferred or not.
+        The callback is called for all requests to the service URL.
+        """
         endpoint = 'services/' + name
         self.apis[name] = (blog_id, preferred, endpoint)
         self.add_url_rule('/_services/' + name, endpoint=endpoint)
@@ -644,7 +689,9 @@ class TextPress(object):
 
     @setuponly
     def add_importer(self, importer):
-        """Register an importer."""
+        """Register an importer.  For more informations about importers
+        see the :mod:`textpress.importers`.
+        """
         importer = importer(self)
         endpoint = 'import/' + importer.name
         self.importers[importer.name] = importer
@@ -665,7 +712,7 @@ class TextPress(object):
         """Add a theme. You have to provide the shortname for the theme
         which will be used in the admin panel etc. Then you have to provide
         the path for the templates. Usually this path is relative to the
-        `__file__` directory.
+        directory of the plugin's `__file__`.
 
         The metadata can be ommited but in that case some information in
         the admin panel is not available.
@@ -676,7 +723,15 @@ class TextPress(object):
     def add_shared_exports(self, name, path):
         """Add a shared export for name that points to a given path and
         creates an url rule for <name>/shared that takes a filename
-        parameter.
+        parameter.  A shared export is some sort of static data from a
+        plugin.  Per default TextPress will shared the data on it's own but
+        in the future it would be possible to generate an Apache/nginx
+        config on the fly for the static data.
+
+        The static data is available at `/_shared/<name>` and points to
+        `path` on the file system.  This also generates a URL rule named
+        `<name>/shared` that accepts a `filename` parameter.  This can be
+        used for URL generation.
         """
         self._shared_exports['/_shared/' + name] = path
         self.add_url_rule('/_shared/%s/<string:filename>' % name,
@@ -684,21 +739,42 @@ class TextPress(object):
 
     @setuponly
     def add_middleware(self, middleware_factory, *args, **kwargs):
-        """Add a middleware to the application."""
+        """Add a middleware to the application.  The `middleware_factory`
+        is a callable that is called with the active WSGI application as
+        first argument, `args` as extra positional arguments and `kwargs`
+        as keyword arguments.
+
+        The newly applied middleware wraps an internal WSGI application.
+        """
         self.dispatch_request = middleware_factory(self.dispatch_request,
                                                    *args, **kwargs)
 
     @setuponly
     def add_config_var(self, key, type, default):
-        """Add a configuration variable to the application."""
+        """Add a configuration variable to the application.  The config
+        variable should be named ``<plugin_name>/<variable_name>``.  The
+        `variable_name` itself must not contain another slash.  Variables
+        that are not prefixed are reserved for TextPress' internal usage.
+        The `type` can be one of the following builtins:
+
+        +-------------+--------------------------+
+        | `int`       | An integer value         |
+        +-------------+--------------------------+
+        | `unicode`   | An unicode value         |
+        +-------------+--------------------------+
+        | `bool`      | A boolean value          |
+        +-------------+--------------------------+
+
+        Lists and other data structures are not supported at the moment,
+        you can however use strings and split them by comma.
+
+        Example usage::
+
+            app.add_config_var('my_plugin/with_useless_stuff', bool, True)
+        """
         if key.count('/') > 1:
             raise ValueError('key might not have more than one slash')
         self.cfg.config_vars[key] = (type, default)
-
-    @setuponly
-    def add_database_integrity_check(self, callback):
-        """Allows plugins to perform database upgrades."""
-        self._database_checks.append(callback)
 
     @setuponly
     def add_url_rule(self, rule, **kwargs):
@@ -716,7 +792,7 @@ class TextPress(object):
 
             app.add_url_rule(..., endpoint='bar', view=bar)
 
-        equals::
+        is equivalent to::
 
             app.add_url_rule(..., endpoint='bar')
             app.add_view('bar', bar)
@@ -731,12 +807,17 @@ class TextPress(object):
 
     @setuponly
     def add_view(self, endpoint, callback):
-        """Add a callback as view."""
+        """Add a callback as view.  The endpoint is the endpoint for the URL
+        rule and has to be equivalent to the endpoint passed to
+        :meth:`add_url_rule`.
+        """
         self.views[endpoint] = callback
 
     @setuponly
     def add_parser(self, name, class_):
-        """Add a new parser class."""
+        """Add a new parser class.  This parser has to be a subclass of
+        :class:`textpress.parsers.BaseParser`.
+        """
         self.parsers[name] = class_
 
     @setuponly
@@ -746,27 +827,42 @@ class TextPress(object):
 
     @setuponly
     def add_servicepoint(self, identifier, callback):
-        """Add a new function as servicepoint."""
+        """Add a new function as servicepoint.  A service point is a function
+        that is called by an external non-human interface such as an
+        JavaScript or XMLRPC client.  It's automatically exposed to all
+        service interfaces.
+        """
         self._services[identifier] = callback
 
     @setuponly
     def connect_event(self, event, callback, position='after'):
-        """Connect an event to the current application."""
-        return self._event_manager.connect(event, callback, position)
+        """Connect a callback to an event.  Per default the callback is
+        appended to the end of the handlers but handlers can ask for a higher
+        privilege by setting `position` to ``'before'``.
 
-    @setuponly
-    def disconnect_event(self, listener_id):
-        """Disconnect a given listener_id."""
-        self._event_manager.remove(listener_id)
+        Example usage::
+
+            def on_before_metadata_assembled(metadata):
+                metadata.append('<!-- IM IN UR METADATA -->')
+
+            def setup(app):
+                app.connect_event('before-metadata-assembled',
+                                  on_before_metadata_assembled)
+        """
+        self._event_manager.connect(event, callback, position)
 
     @property
     def wants_reload(self):
-        """True if the application requires a reload."""
+        """True if the application requires a reload.  This is `True` if
+        the config was changed on the file system.  A dispatcher checks this
+        value every request and automatically unloads and reloads the
+        application if necessary.
+        """
         return self.cfg.changed_external
 
     @property
     def theme(self):
-        """Return the current theme."""
+        """Return the current :class:`Theme`."""
         theme = self.cfg['theme']
         if theme not in self.themes:
             theme = 'default'
@@ -774,7 +870,9 @@ class TextPress(object):
         return self.themes[theme]
 
     def bind_to_thread(self):
-        """Bind the application to the current thread."""
+        """Bind the application to the current thread.  For more information
+        about the context concept have a look at :ref:`contexts`.
+        """
         local.application = self
 
     def perform_database_upgrade(self):
@@ -788,7 +886,9 @@ class TextPress(object):
                        self.parsers.iteritems()], key=lambda x: x[1].lower())
 
     def get_page_metadata(self):
-        """Return the metadata as HTML part for templates."""
+        """Return the metadata as HTML part for templates.  This is normally
+        called by the layout template to get the metadata for the head section.
+        """
         from textpress.htmlhelpers import script, meta, link
         from textpress.utils import dump_json
         generators = {'script': script, 'meta': meta, 'link': link,
@@ -815,7 +915,10 @@ class TextPress(object):
         return u'\n'.join(result)
 
     def dispatch_request(self, environ, start_response):
-        """Handle the incoming request."""
+        """This method is the internal WSGI request and is overridden by
+        middlewares applied with :meth:`add_middleware`.  It handles the
+        actual request dispatching.
+        """
         # Create a new request object, register it with the application
         # and all the other stuff on the current thread but initialize
         # it afterwards.  We do this so that the request object can query
@@ -825,7 +928,7 @@ class TextPress(object):
         local.request = request
         local.page_metadata = []
         local.request_locals = {}
-        request.__init__(self, environ)
+        request.__init__(environ, self)
 
         # check if the blog is in maintenance_mode and the user is
         # not an administrator. in that case just show a message that
@@ -905,9 +1008,9 @@ class TextPress(object):
 
 
 class StaticDispatcher(object):
-    """Dispatches to textpress or the websetup and handles reloads.  Don't
-    create instances of this object on your own, use the `make_app`
-    factory function.
+    """Dispatches to textpress or the websetup and handles reloads.  Instances
+    of this class are created by :func:`make_app` when passed the path to an
+    instance folder.
     """
 
     def __init__(self, instance_folder):
@@ -955,43 +1058,49 @@ class StaticDispatcher(object):
 class DynamicDispatcher(object):
     """A dispatcher that creates applications on the fly from values of the
     WSGI environment.  This means that the first request to a not yet
-    existing application will create it.  Don't use this object on your
-    own, always use the `make_app` factory function.
+    existing application will create it.  Internally it's creating a
+    :class:`StaticDispatcher` for every instance folder.
     """
 
     def __init__(self):
         self.dispatchers = {}
+        self.init_lock = Lock()
 
     def __call__(self, environ, start_response):
         instance_folder = path.realpath(environ['textpress.instance_folder'])
-        if instance_folder not in self.dispatchers:
-            dispatcher = StaticDispatcher(instance_folder)
-            self.dispatchers[instance_folder] = dispatcher
-        else:
-            dispatcher = self.dispatchers[instance_folder]
+        self.init_lock.acquire()
+        try:
+            if instance_folder not in self.dispatchers:
+                dispatcher = StaticDispatcher(instance_folder)
+                self.dispatchers[instance_folder] = dispatcher
+            else:
+                dispatcher = self.dispatchers[instance_folder]
+        finally:
+            self.init_lock.release()
         return dispatcher(environ, start_response)
 
 
 def make_app(instance_folder=None):
     """This function creates a WSGI application for TextPress.   Even though
-    the central TextPress object implements the WSGI protocol we don't forward
-    it to the webserver directly because it's reloaded under some
-    circumstances by the dispatchers that wrap it.  These dispatchers also
-    handle requests to the websetup if the instance does not exist by now.
+    the central :class:`TextPress` object implements the WSGI protocol it's
+    not forwarded to the webserver directly because the it's reloaded under
+    some circumstances by the :ref:`dispatchers <dispatchers>` that wrap it.
+    These dispatchers also redirect requests to the websetup if the instance
+    does not exist by now.
 
-    The return value of this function is guaranteed to be a WSGI application
-    but you should not do instance checks or any other operations to ensure
-    that the return value is of a given type.
+    The return value of this function is guaranteed to be a WSGI application.
+    It's either a :class:`StaticDispatcher` that points to the instance
+    provided or a :class:`DynamicDispatcher`.
 
     If the `instance_folder` is provided a simple dispatcher is returned that
     manages the TextPress application for this instance.  If you don't provide
     one the return value will be a dynamic dispatcher that can handle multiple
     TextPress instances.  The textpress instance for one request is specified
-    in the WSGI environ in the 'textpress.instance' key.
+    in the WSGI environ in the ``'textpress.instance'`` key.
 
-    If you need a `TextPress` object for scripts or other situations you
-    should use the `make_textpress` function that returns a `TextPress`
-    object instead.
+    If you need a :class:`TextPress` object for scripts or other situations
+    you should use the :func:`make_textpress` function that returns a
+    :class:`TextPress` object instead.
     """
     if instance_folder is None:
         return DynamicDispatcher()
@@ -999,14 +1108,16 @@ def make_app(instance_folder=None):
 
 
 def make_textpress(instance_folder, bind_to_thread=False):
-    """Creates a new instance of the application. Always use this function to
-    create an application because the process of setting the application up
-    requires locking which *only* happens in `make_textpress`.
+    """Creates a new instance of the application.  Always use this function
+    to create an application because the process of setting the application
+    up requires locking which *only* happens in :func:`make_textpress`.
 
-    If bind_to_thread is True the application will be set for this thread.
+    If `bind_to_thread` is `True` the application will be set for this thread.
     Don't use the application object returned as WSGI application beside for
-    scripting / testing or if you know what you're doing.  The `TextPress`
-    object alone does not handle any reloading or setup.
+    scripting / testing or if you know what you're doing.
+
+    The :class:`TextPress` object alone does not handle any reloading or
+    instance setup.
     """
     _setup_lock.acquire()
     try:
