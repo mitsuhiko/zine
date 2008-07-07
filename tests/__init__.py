@@ -18,7 +18,9 @@ from doctest import DocTestSuite
 from textpress.application import make_textpress
 
 #: the modules in this list are not tested in a full run
-untested = ['textpress.i18n.compilejs']
+untested = ['textpress.i18n.compilejs',
+            'textpress.experimental_plugins.hyphenation_en',
+            'textpress.experimental_plugins.hyphenation_en.hyphenate']
 
 try:
     import coverage
@@ -29,7 +31,7 @@ except ImportError:
 def suite(return_covermods=False, modnames=[]):
     """Generate the test suite."""
     instance_path = join(dirname(__file__), 'instance')
-    app = make_textpress(instance_path)
+    app = make_textpress(instance_path, True)
 
     if return_covermods:
         covermods = []
@@ -40,13 +42,16 @@ def suite(return_covermods=False, modnames=[]):
     for modname in modnames:
         if modname in untested:
             continue
-        # currently there are problems with plugins because of the
-        # import hook. Therefore, we skip them:
-        if 'plugins' in modname:
-            continue
         # the fromlist must contain something, otherwise the textpress
         # package is returned, not our module
-        mod = __import__(modname, fromlist=[''])
+        try:
+            mod = __import__(modname, fromlist=[''])
+        except ImportError:
+            if 'plugins.' in modname:
+                sys.stderr.write('could not import plugin %s\n' % modname)
+                continue
+            else:
+                raise
 
         dts = DocTestSuite(mod, extraglobs={'app': app})
         if dts.countTestCases():
