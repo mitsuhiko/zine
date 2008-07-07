@@ -32,7 +32,7 @@
           {% endtrans %}
           {% endif %}
           </span>
-          {%- if not plugin.builtin_plugin and not plugin.active %}
+          {%- if plugin.instance_plugin and not plugin.active %}
             [<a href="{{ url_for('admin/remove_plugin', plugin=plugin.name)
               }}">{{ _("Remove plugin") }}</a>]
           {% endif -%}

@@ -557,8 +557,11 @@ class TextPress(object):
         # load plugins
         from textpress.pluginsystem import find_plugins, \
              register_application, BUILTIN_PLUGIN_FOLDER
-        self.plugin_searchpath = [path.join(instance_folder, 'plugins'),
-                                  BUILTIN_PLUGIN_FOLDER]
+        self.plugin_folder = path.join(instance_folder, 'plugins')
+        self.plugin_searchpath = [self.plugin_folder]
+        for folder in self.cfg['plugin_searchpath'].split(','):
+            self.plugin_searchpath.append(folder.strip())
+        self.plugin_searchpath.append(BUILTIN_PLUGIN_FOLDER)
 
         # register the application in the ihook
         register_application(self)

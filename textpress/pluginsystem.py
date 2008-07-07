@@ -280,9 +280,9 @@ class Plugin(object):
         self.name = name
         self.path = path_
         self.active = active
-        self.builtin_plugin = path.commonprefix([
-            path.realpath(path_), path.realpath(BUILTIN_PLUGIN_FOLDER)]) == \
-            BUILTIN_PLUGIN_FOLDER
+        self.instance_plugin = path.commonprefix([
+            path.realpath(path_), path.realpath(app.plugin_folder)]) == \
+            app.plugin_folder
         self.setup_error = None
 
     def activate(self):
@@ -330,8 +330,8 @@ class Plugin(object):
 
     def remove(self):
         """Remove the plugin from the instance folder."""
-        if self.builtin_plugin:
-            raise ValueError('cannot remove builtin plugins')
+        if not self.instance_plugin:
+            raise ValueError('cannot remove non instance-plugins')
         if self.active:
             raise ValueError('cannot remove active plugin')
         rmtree(self.path)

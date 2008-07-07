@@ -30,6 +30,7 @@ DEFAULT_VARS = {
     'theme':                    (unicode, u'default'),
     'secret_key':               (unicode, u''),
     'language':                 (unicode, u'en'),
+    'plugin_searchpath':        (unicode, u''),
 
     # url settings
     'blog_url_prefix':          (unicode, u''),

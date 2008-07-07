@@ -1485,7 +1485,7 @@ def do_remove_plugin(request, plugin):
     """
     plugin = request.app.plugins.get(plugin)
     if plugin is None or \
-       plugin.builtin_plugin or \
+       not plugin.instance_plugin or \
        plugin.active:
         raise NotFound()
     csrf_protector = CSRFProtector()
