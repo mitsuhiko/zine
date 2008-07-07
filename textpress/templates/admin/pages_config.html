@@ -10,12 +10,14 @@
       <dt>{{ _("Show page title") }}</dt>
       <dd>
         {{ h.checkbox('show_title', form.show_title) }}
-        <span class="note">{% trans %}Show the title of the page on top of the page body{% endtrans %}</span>
+        <label for="show_title">{{ _('Show the title of the page on top of the page body')
+          }}</label>
       </dd>
       <dt>{{ _("Show children") }}</dt>
       <dd>
         {{ h.checkbox('show_children', form.show_children) }}
-        <span class="note">{% trans %}Show child-pages on the bottom of the page body{% endtrans %}</span>
+        <label for="show_children">{{ _('Show the child-pages on the bottom of the page body')
+          }}</label>
       </dd>
     <div class="actions">
       <input type="submit" value="Save">
@@ -23,4 +25,3 @@
     </div>
   </form>
 {% endblock %}
-
