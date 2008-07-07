@@ -5,3 +5,4 @@
 ^dumps/
 ^.*\.egg-info/
 ^textpress/i18n/messages\.pot$
+.coverage
