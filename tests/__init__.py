@@ -60,7 +60,7 @@ def suite(modnames=[], return_covermods=False):
         # the fromlist must contain something, otherwise the textpress
         # package is returned, not our module
         try:
-            mod = __import__(modname, fromlist=[''])
+            mod = __import__(modname, None, None, [''])
         except ImportError:
             # some plugins can have external dependencies (e.g. creoleparser,
             # pygments) that are not installed on the machine the tests are

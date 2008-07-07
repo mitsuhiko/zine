@@ -14,8 +14,7 @@
     admin panel.  You can easily create .plugin files yourself.  Just finish
     the plugin and open the textpress shell::
 
-        >>> app.plugins['<name of the plugin>'].dump('/target/filename.plugin') \
-        # doctest: +SKIP
+        >> app.plugins['<name of the plugin>'].dump('/target/filename.plugin')
 
     This will save the plugin as `.plugin` package. The preferred filename
     for templates is `<DISPLAY_NAME_WITHOUT_SPACES>-<VERSION>.plugin`.  So if
@@ -98,13 +97,13 @@ BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
 PACKAGE_VERSION = 1
 
 
-def textpress_import(name, *args, **kwargs):
+def textpress_import(name, *args):
     """Redirect imports for textpress.plugins to the module space."""
     if name == 'textpress.plugins' or name.startswith('textpress.plugins.'):
         app = get_application()
         if app is not None:
             name = 'textpress._space.%s%s' % (app.iid, name[17:])
-    return _py_import(name, *args, **kwargs)
+    return _py_import(name, *args)
 
 
 def register_application(app):
