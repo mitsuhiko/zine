@@ -277,7 +277,7 @@ div.sidebar div.tag-cloud {
 }
 
 /* :::: POST LIST PAGES :::: */
-div.post h4 {
+div.post h3 {
     font-size: 1.9em;
     font-weight: normal;
     margin: 1em 0 0 0;
@@ -287,14 +287,14 @@ div.post h4 {
     font-variant: small-caps;
 }
 
-div.post h4 a {
+div.post h3 a {
     color: #21421e;
     display: block;
     padding: 1px 5px 2px 5px;
     text-decoration: none;
 }
 
-div.post h4 a:hover {
+div.post h3 a:hover {
     background-color: #21421e;
     color: #dae7d9;
 }

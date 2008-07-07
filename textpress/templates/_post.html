@@ -1,7 +1,7 @@
 {% macro render_post(post) -%}
   <div class="post">
     {{ emit_event('before-post-rendered', post) }}
-    <h4><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a></h4>
+    <h3><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a></h3>
     <p class="meta">{{ _("written by") }} <a href="{{ url_for(post.author)|e
       }}">{{ post.author.display_name|e }}</a>, on {{
       post.pub_date|datetimeformat|e }}.</p>
