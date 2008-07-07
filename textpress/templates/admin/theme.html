@@ -1,13 +1,13 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Theme Manager") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Theme Manager") }}</h2>
+  <h1>{{ _("Theme Manager") }}</h1>
   <div class="themes">
   {%- for theme in themes %}
     <div class="themewrapper">
       <div class="theme{% if theme.current %} current{% endif %}">
-        <h3><a href="?select={{ theme.uid|e }}&amp;{{ csrf_protector.url_value|e
-          }}">{{ theme.name }}</a></h3>
+        <h2><a href="?select={{ theme.uid|e }}&amp;{{ csrf_protector.url_value|e
+          }}">{{ theme.name }}</a></h2>
         {%- if theme.has_preview %}
           <img src="{{ theme.preview_url|e }}" alt="preview image" class="preview">
         {%- endif %}
@@ -22,7 +22,7 @@
   {%- endfor %}
   <br style="clear: both">
   </div>
-  <h3>{{ _("Template Overlays") }}</h3>
+  <h2>{{ _("Template Overlays") }}</h2>
   <p>{% trans %}
     If you want to do minor modifications of themes you don't have to create
     a theme plugin for that.  The overlay editor allows you to modify parts of

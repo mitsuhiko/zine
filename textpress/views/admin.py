@@ -133,7 +133,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # add the about items to the navigation bar
     system_items = [
         ('information', url_for('admin/information'), _('Information')),
-        ('about', url_for('admin/about_textpress'), _('About'))
+        ('about', url_for('admin/about_textpress'), _('About')),
+        ('help', url_for('admin/help'), _('Help'))
     ]
     if can_build_eventmap:
         system_items.insert(1, ('eventmap', url_for('admin/eventmap'),
@@ -2264,6 +2265,41 @@ def do_delete_upload(req, filename):
         hidden_form_data=make_hidden_fields(csrf_protector, redirect),
         filename=filename
     )
+
+
+@require_role(ROLE_AUTHOR)
+def do_help(req, page='index'):
+    """Show help page."""
+    from pickle import load
+    from os.path import join, dirname, pardir, isfile, sep
+
+    # no short cutting, we wan't clean urls
+    if page.endswith('/index'):
+        raise NotFound()
+
+    parts = [x for x in page.split('/') if x[:1] not in '_.']
+    for ts, suffix in enumerate(('.page', sep + '/index.page')):
+        filename = join(dirname(__file__), pardir, 'docs', *parts) + suffix
+        if isfile(filename):
+            # if a trailing slash is required, redirect to the page
+            # with the trailing slash.  We have to do that because
+            # sphinx generates relative urls
+            if ts:
+                if not page.endswith('/'):
+                    return simple_redirect('admin/help', page=page + '/')
+            # otherwise there must not be a trailing slash
+            elif page.endswith('/'):
+                raise NotFound()
+            break
+    else:
+        raise NotFound()
+
+    f = file(filename, 'rb')
+    try:
+        parts = load(f)
+    finally:
+        f.close()
+    return render_admin_response('admin/help.html', 'system.help', **parts)
 
 
 def do_login(request):

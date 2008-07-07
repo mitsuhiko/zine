@@ -79,6 +79,7 @@ all_views = {
     'admin/eventmap':           admin.do_eventmap,
     'admin/about_textpress':    admin.do_about_textpress,
     'admin/change_password':    admin.do_change_password,
+    'admin/help':               admin.do_help,
     'admin/login':              admin.do_login,
     'admin/logout':             admin.do_logout
 }

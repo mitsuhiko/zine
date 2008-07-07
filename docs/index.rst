@@ -13,9 +13,3 @@ Contents:
    installation
    architecture
    api/index
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

@@ -1,8 +1,8 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("About The System") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("About The System") }}</h2>
-  <h3>{{ _("Hosting Environment") }}</h3>
+  <h1>{{ _("About The System") }}</h1>
+  <h2>{{ _("Hosting Environment") }}</h2>
   <dl>
     <dt>TextPress Version</dt>
     <dd>{{ textpress_version|e }} {{ textpress_tag }}</dd>
@@ -30,7 +30,7 @@
     <dt>Instance Path</dt>
     <dd>{{ instance_path|e }}</dd>
   </dl>
-  <h3>{{ _("URL Endpoints") }}</h3>
+  <h2>{{ _("URL Endpoints") }}</h2>
   <p>{% trans count=endpoints|count %}
     The following {{ count }} endpoints are registered on this instance:
   {% endtrans %}</p>
@@ -39,7 +39,7 @@
     <li><strong>{{ endpoint.name|e }}</strong> -&gt; <small>{{ endpoint.rule|e }}</small></li>
   {%- endfor %}
   </ul>
-  <h3>{{ _("Services") }}</h3>
+  <h2>{{ _("Services") }}</h2>
   <p>{% trans %}
     The following servicepoints are registered on this instance to be callable
     via one of the available services.
@@ -49,7 +49,7 @@
     <li><strong>{{ service|e }}</strong></li>
   {%- endfor %}
   </ul>
-  <h3>{{ _("Installed APIs") }}</h3>
+  <h2>{{ _("Installed APIs") }}</h2>
   <p>{% trans %}
     The following APIs are installed on this blog instance. APIs marked with
     a star (*) are preferred.
@@ -63,7 +63,7 @@
     <li><em>no APIs installed</em></li>
   {%- endfor %}
   </ul>
-  <h3>{{ _("Plugins") }}</h3>
+  <h2>{{ _("Plugins") }}</h2>
   <ul class="plugin-table">
   {%- for plugin in plugins %}
     <li><dl>
@@ -80,7 +80,7 @@
     </dl></li>
   {%- endfor %}
   </ul>
-  <h3>{{ _("Configuration Variables") }}</h3>
+  <h2>{{ _("Configuration Variables") }}</h2>
   <table>
     <tr>
       <th>{{ _("Key") }}</th>
@@ -95,19 +95,19 @@
     </tr>
   {%- endfor %}
   </table>
-  <h3>{{ _("Template Globals") }}</h3>
+  <h2>{{ _("Template Globals") }}</h2>
   <ul>
   {%- for global in template_globals %}
     <li><strong>{{ global|e }}</strong></li>
   {%- endfor %}
   </ul>
-  <h3>{{ _("Template Filters") }}</h3>
+  <h2>{{ _("Template Filters") }}</h2>
   <ul>
   {%- for filter_ in template_filters %}
     <li><strong>{{ filter_|e }}</strong></li>
   {%- endfor %}
   </ul>
-  <h3>{{ _("Events") }}</h3>
+  <h2>{{ _("Events") }}</h2>
   <div class="text">
     <p>{% trans %}
       TextPress uses an event system for intercomponent communication. Because

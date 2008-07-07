@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Delete Page") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Delete Page") }}</h2>
+  <h1>{{ _("Delete Page") }}</h1>
   <form action="" method="post">
     {{ csrf_protector }}
     <p>{% trans page_title=page.title|e %}

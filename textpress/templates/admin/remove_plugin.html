@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Remove Plugin") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Remove Plugin") }}</h2>
+  <h1>{{ _("Remove Plugin") }}</h1>
   <form action="" method="post">
     {{ hidden_form_data }}
     <p>{% trans plugin_name=plugin.html_display_name %}

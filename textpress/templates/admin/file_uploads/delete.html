@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Delete File") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Delete File") }}</h2>
+  <h1>{{ _("Delete File") }}</h1>
   <form action="" method="post">
     {{ hidden_form_data }}
     <p>{% trans file='<a href="%s">%s</a>' % (

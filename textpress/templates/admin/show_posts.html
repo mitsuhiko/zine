@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Manage Posts") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Manage Posts") }}</h2>
+  <h1>{{ _("Manage Posts") }}</h1>
   {% if drafts %}
   <div class="drafts-box">
     <strong>{% trans count=drafts|length %}Your draft:{% pluralize

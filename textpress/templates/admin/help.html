@@ -1,0 +1,7 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ title|striptags }}{% endblock %}
+{% block contents %}
+  <div class="help">
+    {{ body }}
+  </div>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends "admin/layout.html" %}
 
-{% macro google %}
+{% macro google() %}
     {# Just looks cute #}
     <span style="font-weight: bold"><span
           style="color:#0000dd">G</span><span
@@ -13,7 +13,7 @@
 
 {% block title %}{{ _("Import from Blogger.com") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Import from Blogger.com") }}</h2>
+  <h1>{{ _("Import from Blogger.com") }}</h1>
   <p>{% trans %}
   This importer allows you to import a blog from Blogger.com.
   {% endtrans %}</p>

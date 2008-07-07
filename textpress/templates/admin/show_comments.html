@@ -2,7 +2,7 @@
 {% from 'admin/_comment.html' import render_comment %}
 {% block title %}{{ comments_title }}{% endblock %}
 {% block contents %}
-  <h2>{{ comments_title }}</h2>
+  <h1>{{ comments_title }}</h1>
   <form action="" method="post">
     <ul class="comments">
     {%- for comment in comments %}

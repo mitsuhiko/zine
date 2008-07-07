@@ -2,7 +2,7 @@
 {% block title %}{{ _("Dashboard") }}{% endblock %}
 {% block contents %}
   <div class="dashboard">
-    <h2>{{ _("Dashboard") }}</h2>
+    <h1>{{ _("Dashboard") }}</h1>
     <div class="panel">
       <div class="text">
         <p>{% trans user=(request.user.first_name or request.user.username)|e -%}
@@ -14,7 +14,7 @@
           You have written <strong>{{ your_posts }}</strong> posts so far.
         {%- endtrans %}
       </div>
-      <h3>{{ _('Quickstart') }}</h3>
+      <h2>{{ _('Quickstart') }}</h2>
       <ul>
         <li><a href="{{ url_for('admin/new_post')|e }}">{{ _("New Post") }}</a>
         <li><a href="{{ url_for('admin/show_comments')|e }}">{{ _("Moderate Comments") }}</a>
@@ -26,7 +26,7 @@
     </div>
     <div class="links">
       {% if drafts %}
-      <h3>{{ _("Drafts") }}</h3>
+      <h2>{{ _("Drafts") }}</h2>
       <ul class="drafts">
       {%- for draft in drafts %}
         <li><a href="{{ url_for('admin/edit_post',
@@ -35,7 +35,7 @@
       </ul>
       {% endif %}
       {% if unmoderated_comments %}
-      <h3>{{ _('Comments Awaiting Approval') }}</h3>
+      <h2>{{ _('Comments Awaiting Approval') }}</h2>
       <ul class="comments">
       {%- for comment in unmoderated_comments %}
         <li><p class="comment">
@@ -54,7 +54,7 @@
       </ul>
       {% endif %}
       {% if last_posts %}
-      <h3>{{ _("Last Posts") }}</h3>
+      <h2>{{ _("Last Posts") }}</h2>
       <ul class="last_posts">
       {%- for post in last_posts %}
         <li><a href="{{ url_for('admin/edit_post', post_id=post.post_id)

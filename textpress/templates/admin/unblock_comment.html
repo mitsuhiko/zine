@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Unblock Comment") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Unblock Comment") }}</h2>
+  <h1>{{ _("Unblock Comment") }}</h1>
   <form action="" method="post">
     {{ hidden_form_data }}
     <p>{% trans comment_author=comment.author|e,

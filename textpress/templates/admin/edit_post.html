@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Write Post") }}{% endblock %}
 {% block contents %}
-  <h2>{{ _("Write Post") }}</h2>
+  <h1>{{ _("Write Post") }}</h1>
   {% if drafts %}
   <div class="drafts-box">
     <strong>{% if not post or post.is_draft %}

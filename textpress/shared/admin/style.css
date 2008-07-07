@@ -35,7 +35,7 @@ div.header {
     margin: 0;
 }
 
-div.header h1 {
+div.header div.title {
     color: white;
     margin: -10px 0 -10px -10px;
     font-family: 'Georgia', serif;
@@ -199,7 +199,7 @@ div.contents div.message-configure {
     background-image: url(img/configure.png);
 }
 
-div.contents h2 {
+div.contents h1 {
     color: #222e4b;
     margin: 0 0 0.8em -10px;
     padding: 0;
@@ -209,7 +209,7 @@ div.contents h2 {
     border-bottom: 1px solid #eee;
 }
 
-div.contents h3 {
+div.contents h2 {
     color: #222e4b;
     margin: 0;
     padding: 0.5em 0 0.3em 0;
@@ -448,7 +448,7 @@ div.dashboard div.bottom {
     clear: both;
 }
 
-div.dashboard h2 {
+div.dashboard h1 {
     margin-bottom: 0;
 }
 
@@ -456,7 +456,7 @@ div.dashboard p {
     margin: 20px 0;
 }
 
-div.dashboard h3 {
+div.dashboard h2 {
     margin: 20px 0 0 0;
     padding: 0;
 }
@@ -592,23 +592,20 @@ div.themes div.theme {
     overflow: hidden;
 }
 
-div.themes div.current h3 a {
-    color: #ff7200;
-}
-
 div.themes div.current {
-    border: 1px solid #aaa;
-    background-color: #f2f2f2;
+    border: 1px solid #B4D2E7;
+    background-color: #F7FAFD;
+    -moz-border-radius: 5px;
     padding: 9px;
 }
 
-div.themes div.theme h3 {
+div.themes div.theme h2 {
     margin: 0;
     padding: 2px 0 10px 0;
     text-align: center;
 }
 
-div.themes div.theme h3 a {
+div.themes div.theme h2 a {
     text-decoration: none;
 }
 
@@ -814,6 +811,40 @@ div.uploadstatus div.label {
     width: 500px;
     text-align: center;
 }
+
+/* :::: HELP :::: */
+div.help {
+    max-width: 45em;
+}
+
+div.help pre {
+    border-left: none;
+    border-right: none;
+}
+
+div.help h2,
+div.help h3,
+div.help h4 {
+    color: #050B1B;
+    margin: 1em 0 0.8em 0;
+    padding: 0;
+    font-family: 'Georgia', serif;
+    font-weight: normal;
+    border: none;
+}
+
+div.help h2 {
+    font-size: 1.6em;
+}
+
+div.help h3 {
+    font-size: 1.3em;
+}
+
+div.help h4 {
+    font-size: 1.1em;
+}
+
 
 /* :::: LOGIN BOX :::: */
 div.login-box {

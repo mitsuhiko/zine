@@ -6,3 +6,4 @@
 ^.*\.egg-info/
 ^textpress/i18n/messages\.pot$
 ^docs/_build/
+^textpress/docs/
