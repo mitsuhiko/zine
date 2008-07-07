@@ -28,8 +28,22 @@ except ImportError:
     coverage = None
 
 
-def suite(return_covermods=False, modnames=[]):
-    """Generate the test suite."""
+def suite(modnames=[], return_covermods=False):
+    """Generate the test suite.
+
+    The first argument is a list of modules to be tested. If it is empty (which
+    it is by default), all sub-modules of the textpress package are tested.
+    If the second argument is True, this function returns two objects: a
+    TestSuite instance and a list of the names of the tested modules. Otherwise
+    (which is the default) it only returns the former. This is done so that
+    this function can be used as setuptools' test_suite.
+    """
+
+    # the app object is used for two purposes:
+    # 1) plugins are not usable (i.e. not testable) without an initialised app
+    # 2) for functions that require an application object as argument, you can
+    #    write >>> my_function(app, ...) in the tests
+    # The instance directory of this object is located in the tests directory.
     instance_path = join(dirname(__file__), 'instance')
     app = make_textpress(instance_path, True)
 
@@ -42,11 +56,15 @@ def suite(return_covermods=False, modnames=[]):
     for modname in modnames:
         if modname in untested:
             continue
+
         # the fromlist must contain something, otherwise the textpress
         # package is returned, not our module
         try:
             mod = __import__(modname, fromlist=[''])
         except ImportError:
+            # some plugins can have external dependencies (e.g. creoleparser,
+            # pygments) that are not installed on the machine the tests are
+            # run on. Therefore, just skip those (with an error message)
             if 'plugins.' in modname:
                 sys.stderr.write('could not import plugin %s\n' % modname)
                 continue
@@ -54,6 +72,7 @@ def suite(return_covermods=False, modnames=[]):
                 raise
 
         dts = DocTestSuite(mod, extraglobs={'app': app})
+        # skip modules without any tests
         if dts.countTestCases():
             suite.addTest(dts)
             if return_covermods:
@@ -111,11 +130,11 @@ def main():
         use_coverage = False
 
     if use_coverage:
-        s, covermods = suite(True, modnames=modnames)
+        s, covermods = suite(modnames, True)
         coverage.erase()
         coverage.start()
     else:
-        s = suite(modnames=modnames)
+        s = suite(modnames)
     TextTestRunner(verbosity=options.verbose + 1).run(s)
     if use_coverage:
         coverage.stop()
