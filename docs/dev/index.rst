@@ -9,4 +9,5 @@ Contents:
    :maxdepth: 2
 
    architecture
+   plugins
    api/index
