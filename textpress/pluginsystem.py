@@ -493,7 +493,10 @@ class Plugin(object):
         Plugins listed here won't be loaded automaticly.
         """
         depends = self.metadata.get('depends', '').strip()
-        return [x.strip() for x in depends.split(',')]
+        if depends:
+            return [x.strip() for x in depends.split(',')]
+        else:
+            return ''
 
     def setup(self):
         """Setup the plugin."""
