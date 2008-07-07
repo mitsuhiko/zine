@@ -50,7 +50,7 @@
             Use the this field in the form of ``Name <author@webpage.xy>``
             where `Name` is the full name of the author.
         :Author URL:
-            The webpage of the plugin-author.
+            The website of the plugin-author.
         :Contributors:
             Add a list of all contributors seperated by a comma.
             Use this field in the form of ``Name1 <n1@w1.xy>, Name2
@@ -67,6 +67,24 @@
             All plugins in this list will be activated if found but if one
             is missed the admin will be informated about that and the plugin
             won't be activated.
+
+
+    Warnings for the Professionals
+    ------------------------------
+
+    TextPress separates multiple instances in the interpreter as good as it
+    can.  That you can still interact with different instances is the nature
+    of Python.  But just because you can you shouldn't do that.  Actually you
+    are not allowed to do that because TextPress supports reloading of plugins
+    at runtime which requires that a plugin can shut down without leaving
+    traces behind.  Additionally plugin must never do monkey patching because
+    that cannot be undone savely again.
+
+    There is no callback that is called on plugin unloading, what TextPress
+    does, is dropping all references it has to the plugins and waits for
+    Python to deallocate the memory.  As plugin developer you have no chance
+    to execute code before unloading.
+
 
     :copyright: 2006-2008 by Armin Ronacher, Christopher Grebs, Georg Brandl.
     :license: GNU GPL.

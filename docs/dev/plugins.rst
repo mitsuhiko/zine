@@ -137,17 +137,10 @@ Python interpreter) are importing the plugins separately.  That allows plugins
 to savely use the global namespace to store application bound information.
 
 
-Warnings for the Professionals
-------------------------------
+Real Plugins
+------------
 
-TextPress separates multiple instances in the interpreter as good as it cans.
-That you can still interact with different instances is the nature of Python.
-But just because you can you shouldn't do that.  Actually you are not allowed
-to do that because TextPress supports reloading of plugins at runtime which
-requires that a plugin can shut down without leaving traces behind.  A plugin
-must never do monkey patching because that cannot be undone savely again.
-
-There is no callback that is called on plugin unloading, what TextPress does
-is dropping all references it has to the plugins and waits for Python to
-deallocate the memory.  As plugin developer you have no chance to execute
-code before unloading.
+Now you know the basics.  Check out the documentation for the
+:class:`~textpress.applicaiton.TextPress` object for all the methods you can
+call on it during the setup phase.  More information about the plugin system
+is available in the :mod:`~textpress.pluginsystem` documentation.
