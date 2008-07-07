@@ -140,6 +140,66 @@ def get_converter_name(conv):
 class Configuration(object):
     """Helper class that manages configuration values in a INI configuration
     file.
+
+    >>> app.cfg                             # doctest: +ELLIPSIS
+    <Configuration ...>
+    >>> app.cfg['blog_title']
+    u'My TextPress Blog'
+    >>> app.cfg.change_single('pings_enabled', False)
+    True
+    >>> [line for line in open(app.cfg.filename) if 'pings_enabled' in line][0]
+    'pings_enabled = False\\n'
+    >>> t = app.cfg.edit()
+    >>> t.revert_to_default('pings_enabled')
+    >>> t['blog_title'] = 'Another Blog Title'
+    >>> t.commit()
+    >>> len([line for line in open(app.cfg.filename) if 'pings_enabled' in line])
+    0
+    >>> app.cfg['blog_title']
+    u'Another Blog Title'
+    >>> t = app.cfg.edit()
+    >>> t.revert_to_default('blog_title')
+    >>> t.commit()
+    >>> app.cfg['blog_title']
+    u'My TextPress Blog'
+    >>> t.commit()
+    Traceback (most recent call last):
+    ...
+    ValueError: This transaction was already committed.
+    >>> big_t = app.cfg.edit()
+    >>> big_t.update({'blog_tagline': '...and the test goes on',
+    ...               'language': 'de'})
+    >>> big_t['blog_tagline']
+    u'...and the test goes on'
+    >>> app.cfg['blog_tagline']
+    u'just another textpress blog'
+    >>> app.cfg['language']
+    u'en'
+    >>> big_t.set_from_string('posts_per_page', '42')
+    >>> big_t.commit()
+    >>> app.cfg['language']
+    u'de'
+    >>> app.cfg['blog_tagline']
+    u'...and the test goes on'
+    >>> app.cfg['posts_per_page']
+    42
+    >>> app.cfg.change_single('inexisting_key', 23)
+    Traceback (most recent call last):
+    ...
+    KeyError: 'inexisting_key'
+    >>> app.cfg['inexisting_key']
+    Traceback (most recent call last):
+    ...
+    KeyError: 'inexisting_key'
+    >>> 'blog_title' in app.cfg
+    True
+    >>> 'foobar' in app.cfg
+    False
+    >>> reset = app.cfg.edit()
+    >>> reset.revert_to_default('blog_tagline')
+    >>> reset.revert_to_default('posts_per_page')
+    >>> reset.revert_to_default('language')
+    >>> reset.commit()
     """
 
     def __init__(self, filename):
@@ -328,12 +388,13 @@ class ConfigTransaction(object):
 
     def __setitem__(self, key, value):
         """Set the value for a key by a python value."""
-        if self._committed:
-            raise ValueError('This transaction was already committed.')
+        self._assert_uncommitted()
         if key.startswith('textpress/'):
             key = key[10:]
         if key not in self.cfg.config_vars:
             raise KeyError(key)
+        if isinstance(value, str):
+            value = value.decode('utf-8')
         self._values[key] = unicode(value)
         self._converted_values[key] = value
 
@@ -370,8 +431,7 @@ class ConfigTransaction(object):
         configuration file and only updates the config in memory when that is
         successful.
         """
-        if self._committed:
-            raise ValueError('This transaction was already committed.')
+        self._assert_uncommitted()
         if not self._values and not self._remove:
             self._committed = True
             return
