@@ -3,7 +3,9 @@
     ~~~~~~~~~~~~~~~~~~~~
 
     This is the TextPress test suite. It collects all modules in the textpress
-    package, builds a TestSuite with their doctests and executes them.
+    package, builds a TestSuite with their doctests and executes them. It also
+    collects the tests from the text files in this directory (which are too
+    extensive to put them into the code without cluttering it up).
 
     Please note that coverage reporting and doctest don't play well together
     and your reports will probably miss some of the executed code. Doctest can
@@ -18,7 +20,7 @@ import sys
 import os
 from os.path import join, dirname
 from unittest import TestSuite, TextTestRunner
-from doctest import DocTestSuite
+from doctest import DocTestSuite, DocFileSuite
 
 #: the modules in this list are not tested in a full run
 untested = ['textpress.i18n.compilejs',
@@ -60,6 +62,7 @@ def suite(modnames=[], return_covermods=False):
 
     if modnames == []:
         modnames = find_tp_modules()
+    test_files = os.listdir(dirname(__file__))
     for modname in modnames:
         if modname in untested:
             continue
@@ -78,12 +81,18 @@ def suite(modnames=[], return_covermods=False):
             else:
                 raise
 
-        dts = DocTestSuite(mod, extraglobs={'app': app})
-        # skip modules without any tests
-        if dts.countTestCases():
-            suite.addTest(dts)
-            if return_covermods:
-                covermods.append(mod)
+        suites = [DocTestSuite(mod, extraglobs={'app': app})]
+        filename = modname[10:] + '.txt'
+        if filename in test_files:
+            globs = {'app': app}
+            globs.update(mod.__dict__)
+            suites.append(DocFileSuite(filename, globs=globs))
+        for subsuite in suites:
+            # skip modules without any tests
+            if subsuite.countTestCases():
+                suite.addTest(subsuite)
+                if return_covermods:
+                    covermods.append(mod)
     if return_covermods:
         return suite, covermods
     else:
