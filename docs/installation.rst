@@ -33,6 +33,17 @@ You can install all libraries using ``easy_install``.
 .. _mercurial: http://selenic.com/mercurial/
 
 
+Updating the Source Code
+------------------------
+
+To update the code you can use the ``hg pull -u`` command mercurial provides.
+If you are creating changes locally make sure to ``hg ci`` first.  If you have
+local changes and an upstream developer made a change that requires merging
+use ``hg merge && hg ci``.
+
+For more information about that process consult the mercurial wiki.
+
+
 Creating a Development Instance
 -------------------------------
 

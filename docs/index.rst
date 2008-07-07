@@ -1,7 +1,8 @@
 Welcome to TextPress' documentation!
 ====================================
 
-Contents:
+The TextPress documentation is currently work in progress like textPress
+itself.
 
 .. toctree::
    :maxdepth: 2

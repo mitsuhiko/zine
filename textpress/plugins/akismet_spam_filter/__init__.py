@@ -147,10 +147,10 @@ def add_akismet_link(req, navigation_bar):
     """Add a button for akismet to the comments page."""
     if req.user.role >= ROLE_ADMIN:
         for link_id, url, title, children in navigation_bar:
-            if link_id == 'comments':
-                children.append(('akismet_spam_filter',
-                                 url_for('akismet_spam_filter/config'),
-                                 _('Akismet Configuration')))
+            if link_id == 'options':
+                children.insert(-3, ('akismet_spam_filter',
+                                     url_for('akismet_spam_filter/config'),
+                                     _('Akismet')))
 
 
 @require_role(ROLE_ADMIN)
@@ -176,7 +176,7 @@ def show_akismet_config(req):
                     'is valid'), 'ok')
         return redirect(url_for('akismet_spam_filter/config'))
     return render_admin_response('admin/akismet_spam_filter.html',
-                                 'comments.akismet_spam_filter',
+                                 'options.akismet_spam_filter',
         api_key=req.app.cfg['akismet_spam_filter/apikey'],
         csrf_protector=csrf_protector
     )

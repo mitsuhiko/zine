@@ -39,7 +39,6 @@ div.header div.title {
     color: white;
     margin: -10px 0 -10px -10px;
     font-family: 'Georgia', serif;
-    font-weight: normal;
     padding: 0;
     font-size: 26px;
 }
@@ -52,7 +51,6 @@ div.header div.metanav {
     border: 1px solid #4f849d;
     padding: 5px;
     font-size: 12px;
-    text-align: center;
     color: #eee;
 }
 
@@ -973,6 +971,8 @@ div.login-box div.notice {
     font-size: 14px;
     text-align: center;
     color: #ffa800;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
 }
 
 div.login-box form {
@@ -1004,6 +1004,8 @@ div.login-box input {
     font-size: 20px;
     width: 340px;
     padding: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
 }
 
 div.login-box input[type="checkbox"] {
@@ -1022,8 +1024,8 @@ div.login-box input[type="submit"] {
     width: 130px;
     color: #224466;
     border: 1px solid #ccc;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
     cursor: pointer;
 }
 
