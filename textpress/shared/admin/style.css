@@ -254,6 +254,7 @@ div.contents input[type="reset"] {
     color: #224466;
     border: 1px solid #ccc;
     -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
     cursor: pointer;
 }
 
@@ -596,6 +597,7 @@ div.themes div.current {
     border: 1px solid #B4D2E7;
     background-color: #F7FAFD;
     -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
     padding: 9px;
 }
 
@@ -1021,6 +1023,7 @@ div.login-box input[type="submit"] {
     color: #224466;
     border: 1px solid #ccc;
     -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
     cursor: pointer;
 }
 

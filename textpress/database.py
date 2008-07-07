@@ -9,116 +9,6 @@
     :mod:`~textpress.database.db` module which you can import from the
     :mod:`textpress.api` module.
 
-    The following examples all assume that you have imported the db module.
-
-    Foreword
-    --------
-
-    One important thing is that this module does some things in the background
-    you don't have to care about in the modules.  For example it fetches a
-    database connection and session automatically.  There are also some
-    wrappers around the normal sqlalchemy module functions.
-
-    .. admonition:: Information
-
-        Plugins can't utilize the database layer in the sense that they can
-        create custom tables.  This limitation will go away once we have
-        found a clever system for that.
-
-    Synopsis
-    --------
-
-    What you have to know is that the :mod:`~textpress.database.db` module
-    contains all the public objects from `sqlalchemy` and `sqlalchemy.orm`.
-    Additionally there are the following extra objects:
-
-    :func:`~textpress.database.db.get_engine`
-        return the engine object for the current application. This is
-        equivalent with `get_application().database_engine`.
-
-    :func:`~textpress.database.db.flush`
-        flush all outstanding database changes in the current session.
-
-    :func:`~textpress.database.db.mapper`
-        replacement for the normal SQLAlchemy mapper function. Works the
-        same but uses our manager extension.  See the notes below.
-
-    :func:`~textpress.database.db.save`
-        bind an unbound object to the session and mark it for saving.
-        Normally models you create by hand are automatically saved, unless
-        you create it with ``_tp_no_save=True``
-
-    :class:`~textpress.database.db.DatabaseManager`
-        baseclass for all the database managers.  If you don't set at least
-        one database manager to your model TextPress will create one for
-        you called `objects`.
-
-
-    Writing Models
-    --------------
-
-    If you want to map your tables to classes you have to write some tables.
-    This works exactly like mentioned in the excellent SQLAlchemy
-    documentation, except that all the functions and objects you want to use
-    are stored in the `db` module.
-
-    For some example models have a look at the `textpress.models` module.
-
-    One difference to plain SQLAlchemy is that we don't use a normal session
-    context that sets a query object to models, but we use a technique similar
-    to django's models, which they call `DatabaseManagers`.
-
-    Basically what happens is that after the `mapper()` call, TextPress checks
-    your models and looks for `DatabaseManager` instances.  If it cannot find
-    at least one it will create a standard database managed on the attribute
-    called `objects`.  If that attribute is already in used it will complain
-    and raise an exception.
-
-    You can of course bind multiple database managers to one model.  But now
-    what are :class:`~textpress.database.db.DatabaseManager`\s?
-
-    Say you have a model but the queries in the views are quite complex.  So
-    you can write functions that fire that requests somewhere else.  But where
-    to put those queries?  Per default all query methods are stored an a
-    database manager and it's a good idea to keep them there.  If you want to
-    add some more methods to a manager just subclass the default database
-    manager and instanciate them on your model::
-
-        class UserManager(db.DatabaseManager):
-
-            def authors(self):
-                return self.filter(User.role >= ROLE_AUTHOR)
-
-        class User(object):
-            objects = UserManager()
-            ...
-
-    Now you can get all the authors by calling `User.objects.get_authors()`.
-    The object returned is a normal SQLAlchemy queryset so you can easily
-    filter that using the normal query methods.
-
-
-    Querying
-    --------
-
-    How to query? Just use the database manager attached to an object.  If
-    you haven't attached on yourself the default
-    :class:`~textpress.database.db.DatabaseManager` is mounted on the model
-    as `objects`.  See the docstring of that object for more details.
-
-
-    Deleting Objects
-    ----------------
-
-    To delete objects you have to call `db.delete(obj)` and flush the session.
-
-
-    Final Words
-    -----------
-
-    If you're lost, check out existing modules. Especially the views and
-    the `models` modules of the core and existing plugins.
-
 
     :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Christopher Grebs,
                              Ali Afshar.
@@ -136,8 +26,10 @@ from textpress.utils import local, local_manager
 
 
 def mapper(*args, **kwargs):
-    """Add our own database mapper, not the new sqlalchemy 0.4
-    session aware mapper.
+    """This works like the regular sqlalchemy mapper function but adds our
+    own database manager extension.  Models mapped to tables with this mapper
+    are automatically saved on the session unless ``_tp_no_save=True`` is
+    passed to the constructor of a database model.
     """
     kwargs['extension'] = extensions = to_list(kwargs.get('extension', []))
     extensions.append(ManagerExtension())
@@ -183,69 +75,61 @@ class ManagerExtension(orm.MapperExtension):
 
 class DatabaseManager(object):
     """Baseclass for the database manager which you can also subclass to add
-    more methods to it and attach to models by hand.
+    more methods to it and attach to models by hand.  An instance of this
+    manager is added to model classes automatically as `objects` unless there
+    is at least one model manager specified on the class.
 
-    A database manager works like a limited queryset.
+    Example for custom managers::
+
+        class UserManager(DatabaseManager):
+
+            def authors(self):
+                return self.filter(User.role >= ROLE_AUTHOR)
+
+
+        class User(object):
+            objects = UserManager()
+
+    :meth:`bind` is called with the reference to the model automatically by
+    the mapper extension to bind the manager to the model.
     """
 
     def __init__(self):
         self.model = None
 
     def bind(self, model):
-        """Called automatically by the `ManagerExtension`."""
+        """Called automatically by the manager extension to bind the manager
+        to the model.  This sets the :attr:`model` attribute of the manager
+        and must not be called by hand.  Subclasses may override this method
+        to react to the mapping.
+        """
         if self.model is not None:
             raise RuntimeError('manager already bound to model')
         self.model = model
 
-    def __getitem__(self, arg):
-        return self.query[arg]
-
     @property
     def query(self):
-        """Return a new queryset."""
+        """A fresh queryset.  Subclasses can override this mapper to limit
+        the queryset::
+
+            class AuthorManager(DatabaseManager):
+
+                @property
+                def query(self):
+                    query = DatabaseManager.query.__get__(self)
+                    return query.filter(User.role >= ROLE_AUTHOR)
+        """
         return session.registry().query(self.model)
 
-    def all(self):
-        """Return all objects."""
-        return self.query.all()
-
-    def first(self):
-        """Return the first object."""
-        return self.query.first()
-
-    def one(self):
-        """Return the first result of all objects, raising an exception if
-        more than one row exists.
-        """
-        return self.query.one()
-
-    def get(self, *args, **kwargs):
-        """Look up an object by primary key."""
-        return self.query.get(*args, **kwargs)
-
-    def filter(self, arg):
-        """Filter all objects by the criteron provided and return a query."""
-        return self.query.filter(arg)
-
-    def filter_by(self, **kwargs):
-        """Filter by keyword arguments."""
-        return self.query.filter_by(**kwargs)
-
-    def order_by(self, arg):
-        """Order by something."""
-        return self.query.order_by(arg)
-
-    def limit(self, limit):
-        """Limit all objects."""
-        return self.query.limit(limit)
-
-    def offset(self, offset):
-        """Return a query with an offset."""
-        return self.query.offset(offset)
-
-    def count(self):
-        """Count all posts."""
-        return self.query.count()
+    # add proxies to non-deprecated methods on the query object.
+    for _name, _obj in orm.Query.__dict__.iteritems():
+        if _name[0] != '_' and callable(_obj) and \
+           'DEPRECATED' not in (_obj.__doc__ or ''):
+            exec '''def %s(self, *args, **kwargs):
+                        return self.query.%s(*args, **kwargs)''' % \
+                 (_name, _name)
+            locals()[_name].__doc__ = _obj.__doc__
+    del _name, _obj
 
 
 #: a new scoped session
@@ -283,8 +167,10 @@ for name in 'delete', 'save', 'flush', 'execute', 'begin', \
     public_names.add(name)
 db.session = session
 db.DatabaseManager = DatabaseManager
-db.__all__ = sorted(public_names)
 
+#: these members help documentation tools
+db.__all__ = sorted(public_names)
+db.__file__ = __file__
 
 #: called at the end of a request
 cleanup_session = session.remove

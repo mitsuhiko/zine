@@ -42,7 +42,7 @@ Application
 Database
 --------
 
--   :data:`~textpress.database.db`
+-   :mod:`~textpress.database.db`
 
 Cache
 -----

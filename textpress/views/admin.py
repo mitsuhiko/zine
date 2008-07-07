@@ -615,7 +615,8 @@ def do_show_spam_comments(request, page):
 def do_show_post_comments(request, page, post_id):
     """Show all comments for a single post."""
     # XXX: Fetch also the title and comment count...
-    return _handle_comments('post_comments', 'Comments for single post', Comment.objects.comments_for_post(post_id), page)
+    return _handle_comments('post_comments', 'Comments for single post',
+                            Comment.objects.comments_for_post(post_id), page)
 
 
 @require_role(ROLE_AUTHOR)
