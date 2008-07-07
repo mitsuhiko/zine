@@ -239,7 +239,8 @@ def do_index(request):
         drafts=Post.objects.drafts().all(),
         unmoderated_comments=Comment.objects.unmoderated().all(),
         your_posts=Post.objects.filter(
-            (Post.author_id == request.user.user_id)
+            (Post.author_id == request.user.user_id) &
+            (Post.status == STATUS_PUBLISHED)
         ).count(),
         last_posts=Post.objects.order_by(Post.pub_date.desc()).limit(5).all()
     )

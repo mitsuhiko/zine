@@ -164,17 +164,17 @@ div.body div.contents {
 }
 
 div.contents div.drafts-box {
-    border: 1px solid #30C42B;
+    border: 1px solid #B5E8B9;
     margin: -15px 0 15px 0;
     padding: 8px 8px 8px 32px;
-    background: #C7F1C6 url(img/info.png) no-repeat 9px 9px;
+    background: #F7FCF7 url(img/info.png) no-repeat 9px 9px;
 }
 
 div.contents div.message {
-    border: 1px solid #2580B2;
+    border: 1px solid #B4D2E7;
     margin: 0 0 10px 0;
     padding: 8px 8px 8px 32px;
-    background: #CFEBF7 url(img/info.png) no-repeat 9px 9px;
+    background: #F7FAFD url(img/info.png) no-repeat 9px 9px;
 }
 
 div.contents div.message-add {
@@ -187,8 +187,8 @@ div.contents div.message-remove {
 
 div.contents div.message-error {
     background-image: url(img/error.png);
-    background-color: #e3cbc1;
-    border-color: #c80e0e;
+    background-color: #FCF7F7;
+    border-color: #E8B5B5;
 }
 
 div.contents div.message-ok {
@@ -514,7 +514,7 @@ div.dashboard ul.comments li p.actions {
 
 /* :::: POST LIST :::: */
 table.postlist tr.draft td {
-    background-color: #C7F1C6;
+    background-color: #DDF7DC;
 }
 
 table.postlist tr.draft a {
