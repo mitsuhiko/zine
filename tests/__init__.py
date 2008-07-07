@@ -5,6 +5,11 @@
     This is the TextPress test suite. It collects all modules in the textpress
     package, builds a TestSuite with their doctests and executes them.
 
+    Please note that coverage reporting and doctest don't play well together
+    and your reports will probably miss some of the executed code. Doctest can
+    be patched to remove this incompatibility, the patch is at
+    http://tinyurl.com/doctest-patch
+
     :copyright: 2008 by Lukas Meuser.
     :license: GNU GPL.
 """
@@ -14,8 +19,6 @@ import os
 from os.path import join, dirname
 from unittest import TestSuite, TextTestRunner
 from doctest import DocTestSuite
-
-from textpress.application import make_textpress
 
 #: the modules in this list are not tested in a full run
 untested = ['textpress.i18n.compilejs',
@@ -44,6 +47,10 @@ def suite(modnames=[], return_covermods=False):
     # 2) for functions that require an application object as argument, you can
     #    write >>> my_function(app, ...) in the tests
     # The instance directory of this object is located in the tests directory.
+    #
+    # make_textpress isn't imported at module level because this way coverage
+    # can track the whole textpress imports
+    from textpress.application import make_textpress
     instance_path = join(dirname(__file__), 'instance')
     app = make_textpress(instance_path, True)
 
@@ -130,9 +137,9 @@ def main():
         use_coverage = False
 
     if use_coverage:
-        s, covermods = suite(modnames, True)
         coverage.erase()
         coverage.start()
+        s, covermods = suite(modnames, True)
     else:
         s = suite(modnames)
     TextTestRunner(verbosity=options.verbose + 1).run(s)

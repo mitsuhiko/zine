@@ -55,6 +55,19 @@ def check_pwhash(pwhash, password):
     only 60 chars long. If you have a very large salt
     or the plaintext password is too long it will be
     truncated.
+
+    >>> check_pwhash('plain$$default', 'default')
+    True
+    >>> check_pwhash('sha$$5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8', 'password')
+    True
+    >>> check_pwhash('sha$$5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8', 'wrong')
+    False
+    >>> check_pwhash('md5$xyz$bcc27016b4fdceb2bd1b369d5dc46c3f', u'example')
+    True
+    >>> check_pwhash('sha$5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8', 'password')
+    False
+    >>> check_pwhash('md42$xyz$bcc27016b4fdceb2bd1b369d5dc46c3f', 'example')
+    False
     """
     if isinstance(password, unicode):
         password = password.encode('utf-8')
@@ -75,18 +88,37 @@ def check_pwhash(pwhash, password):
 
 
 def is_valid_email(mail):
-    """Check if the string passed is a valid mail address."""
+    """Check if the string passed is a valid mail address.
+
+    >>> is_valid_email('somebody@example.com')
+    True
+    >>> is_valid_email('somebody AT example DOT com')
+    False
+    >>> is_valid_email('some random string')
+    False
+    """
     return '@' in mail
 
 
 def is_valid_url(url):
-    """Check if the string passed is a valid url."""
+    """Check if the string passed is a valid url.
+
+    >>> is_valid_url('http://pocoo.org/')
+    True
+    >>> is_valid_url('http://textpress.pocoo.org/archive')
+    True
+    >>> is_valid_url('textpress.pocoo.org/archive')
+    False
+    >>> is_valid_url('javascript:alert("TextPress rocks!");')
+    False
+    """
     protocol = urlparse(url)[0]
-    return protocol and protocol != 'javascript'
+    return bool(protocol and protocol != 'javascript')
 
 
 def is_valid_ip(value):
     """Check if the string provided is a valid IP.
+
     >>> is_valid_ip('192.168.10.99')
     True
     >>> is_valid_ip('255.0.23.1')
