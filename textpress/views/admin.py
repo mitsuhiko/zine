@@ -1352,48 +1352,6 @@ def do_theme(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_overlays(request, template=None):
-    """
-    Edit the theme overlays.
-    """
-    if not template:
-        return redirect(url_for('admin/overlays', template='layout.html'))
-    elif request.form.get('edit'):
-        return redirect(url_for('admin/overlays',
-                                template=request.form.get('template', '')))
-    has_overlay=request.app.theme.overlay_exists(template)
-    source = request.app.theme.get_source(template)
-    if source is None:
-        raise NotFound()
-    elif source.endswith('\n'):
-        source = source[:-1]
-
-    if request.method == 'POST':
-        if request.form.get('delete'):
-            request.app.theme.remove_overlay(template)
-            flash(_('Overlay %s removed.') % escape(template),
-                  'remove')
-        else:
-            request.app.theme.set_overlay(template,
-                                      request.form.get('source', ''))
-            if has_overlay:
-                flash(_('Updated overlay %s.') % escape(template))
-            else:
-                flash(_('Created overlay %s.') % escape(template),
-                      'add')
-        return redirect(url_for('admin/overlays', template=template))
-
-    templates = [x for x in request.app.theme.list_templates()
-                 if not x.startswith('admin/')]
-    return render_admin_response('admin/overlays.html', 'options.theme',
-        templates=templates,
-        active_template=template,
-        source=source,
-        has_overlay=has_overlay
-    )
-
-
-@require_role(ROLE_ADMIN)
 def do_plugins(request):
     """Load and unload plugins and reload TextPress if required."""
     csrf_protector = CSRFProtector()

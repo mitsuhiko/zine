@@ -98,8 +98,8 @@ h3 a {
 }
 
 h3 a:hover {
-    background-color: #222e4b;
-    color: white;
+    color: #222e4b;
+    background-color: #F7FAFD;
 }
 
 p {
@@ -109,13 +109,6 @@ p {
 
 div.tag-cloud {
     font-size: 0.8em;
-}
-
-div.post p.post-note {
-    background-color: #FFFBD5;
-    border: 1px solid #ECE7AD;
-    font-size: 0.85em;
-    padding: 0.3em;
 }
 
 p.meta {

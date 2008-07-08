@@ -22,17 +22,4 @@
   {%- endfor %}
   <br style="clear: both">
   </div>
-  <h2>{{ _("Template Overlays") }}</h2>
-  <p>{% trans %}
-    If you want to do minor modifications of themes you don't have to create
-    a theme plugin for that.  The overlay editor allows you to modify parts of
-    the current template without overriding any template data.  This is useful
-    if you for example want to modify the sidebar, the page not found template
-    or other parts.
-  {% endtrans %}</p>
-  <form action="{{ url_for('admin/overlays') }}" method="get">
-    <div class="actions">
-      <input type="submit" value="{{ _('Edit Overlays') }}">
-    </div>
-  </form>
 {% endblock %}
