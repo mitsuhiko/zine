@@ -7,18 +7,23 @@
     to import into the database.
   {% endtrans %}</p>
   {%- macro tick(name, title) -%}
-    {{ h.checkbox('import_' ~ name, form['import_' ~ name]) }}
-    <label for="import_{{ name }}">{{ title }}</label>
+    {{ h.checkbox('import_' ~ name, form['import_' ~ name]) }}
+    <label for="import_{{ name }}">{{ title }}</label>
   {%- endmacro %}
   <form action="" method="post">
     <h2>{{ _("Blog Details") }}</h2>
     <dl>
       <dt>{{ tick('blog_title', _('Blog Title')) }}</dt>
-      <dd><a href="{{ blog.link|e }}">{{ blog.title|e }}</a></dd>
+      <dd><a href="{{ blog.link|e }}">{{ blog.title|e }}</a></dd>
       <dt>{{ tick('blog_description', _('Description')) }}</dt>
-      <dd>{{ blog.description }}</dd>
+      <dd>{{ blog.description }}</dd>
       <dt>{{ _('Language') }}</dt>
-      <dd>{{ blog.language }}</dd>
+      <dd>{{ blog.language }}</dd>
+      <dt>{{ _('Dump ID') }}</dt>
+      <dd><code>{{ dump_id }}</code><br>
+          <small>{{ _('If you have a special installation and want to '
+                      'rewrite the import programmatically you need this '
+                      'identifier.') }}</small></dd>
     </dl>
     <h2>{{ _("Authors") }}</h2>
     <p>{% trans %}
@@ -32,8 +37,8 @@
       <li><select name="author_{{ author.id }}">
         <option value="">{{ _('Create New User') }}</option>
       {%- for user in users %}
-        <option value="{{ user.user_id }}"{% if form['author_' ~ author.id] ==
-          user.user_id %} selected{% endif %}>{{ user.username|e }}</option>
+        <option value="{{ user.user_id }}"{% if form['author_' ~ author.id] ==
+          user.user_id %} selected{% endif %}>{{ user.username|e }}</option>
       {%- endfor %}
       </select> &nbsp; {{ author.name|e }}</li>
     {%- else %}
@@ -66,15 +71,15 @@
       {%- else %}
       <tr>
         <td>{{ post.pub_date|datetimeformat|e }}</td>
-        <td>{{ tick('post_' ~ post.id, post.title|e) }}</td>
+        <td>{{ tick('post_' ~ post.id, post.title|e) }}</td>
         <td>{{ post.author.name|e }}</td>
-        <td>{{ tick('comments_' ~ post.id, post.comments|count) }}</td>
+        <td>{{ tick('comments_' ~ post.id, post.comments|count) }}</td>
       {% endif %}
       </tr>
       {%- endfor %}
     </table>
     <div class="actions">
-      {{ hidden_form_data }}
+      {{ hidden_form_data }}
       <input type="submit" value="{{ _('Import into Blog') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
       <input type="submit" name="cancel" value="{{ _('Cancel') }}">

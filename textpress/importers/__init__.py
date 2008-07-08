@@ -164,10 +164,10 @@ def perform_import(app, blog, data, stream=False):
         return generator
 
 
-def rewrite_import(app, id, callback):
+def rewrite_import(app, id, callback, title='Modified Import'):
     """Calls a callback with the blog from the dump `id` for rewriting.  The
     callback can modify the blog in place (it's passed as first argument) and
-    the changes are written back to the filesystem.
+    the changes are written back to the filesystem as new dump.
 
     `app` can either be a `TextPress` object that is also bound to the active
     thread or a string with the path to the instance folder.  The latter is
@@ -181,10 +181,10 @@ def rewrite_import(app, id, callback):
 
     blog = load_import_dump(app, id)
     callback(blog)
-    path = os.path.join(app.instance_folder, 'import_queue', str(id))
-    f = file(path, 'wb')
+    f = file(os.path.join(app.instance_folder, 'import_queue',
+                          '%d' % time()), 'wb')
     try:
-        blog.dump(f, 'Modified Import')
+        blog.dump(f, title)
     finally:
         f.close()
 

@@ -1652,7 +1652,8 @@ def do_inspect_import(request, id):
         form=form,
         blog=blog,
         users=User.objects.order_by('username').all(),
-        hidden_form_data=make_hidden_fields(csrf_protector)
+        hidden_form_data=make_hidden_fields(csrf_protector),
+        dump_id=id
     )
 
 
