@@ -164,6 +164,34 @@ def perform_import(app, blog, data, stream=False):
         return generator
 
 
+def rewrite_import(app, id, callback):
+    """Calls a callback with the blog from the dump `id` for rewriting.  The
+    callback can modify the blog in place (it's passed as first argument) and
+    the changes are written back to the filesystem.
+
+    `app` can either be a `TextPress` object that is also bound to the active
+    thread or a string with the path to the instance folder.  The latter is
+    useful for simple scripts that should rewrite imports.
+    """
+    close = False
+    if isinstance(app, basestring):
+        from textpress import make_textpress
+        app = make_textpress(app, bind_to_thread=True)
+        close = True
+
+    blog = load_import_dump(app, id)
+    callback(blog)
+    path = os.path.join(app.instance_folder, 'import_queue', str(id))
+    f = file(path, 'wb')
+    try:
+        blog.dump(f, 'Modified Import')
+    finally:
+        f.close()
+
+    if close:
+        app.close()
+
+
 class Importer(object):
 
     #: the shortname of the importer.  This is used for the URLs

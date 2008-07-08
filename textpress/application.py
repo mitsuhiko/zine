@@ -651,6 +651,7 @@ class TextPress(object):
         """
         from textpress.pluginsystem import unregister_application
         unregister_application(self)
+        local.application = None
 
     @setuponly
     def add_template_filter(self, name, callback):
