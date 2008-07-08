@@ -532,7 +532,12 @@ table.postlist tr.draft a:hover {
 }
 
 table.postlist td.tags {
-    font-size: 0.75em;
+    font-size: 0.8em;
+}
+
+table.postlist td.date {
+    color: #444;
+    font-size: 0.8em;
 }
 
 table.postlist .comments {

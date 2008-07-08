@@ -233,7 +233,11 @@ class PostManager(db.DatabaseManager):
     def get_list(self, year=None, month=None, day=None, tag=None, author=None,
                  page=1, per_page=None, ignore_role=False, as_list=False):
         """Return a dict with pagination, the current posts, number of pages,
-        total posts and all that stuff for further processing.
+        total posts and all that stuff for further processing.  the triple of
+        year, month and day are mutually exclusive to either tag or author.
+
+        The behavior if both a date *and* tag or *author* are specified is
+        undefined and will probably not raise an exception.
 
         If the role is ignored only published items are returned, otherwise the
         items the current user can see.
@@ -247,23 +251,27 @@ class PostManager(db.DatabaseManager):
         if per_page is None:
             per_page = app.cfg['posts_per_page']
         url_args = {}
-        if year is not None:
-            endpoint = 'blog/archive'
-            url_args['year'] = year
-        elif tag is not None:
+
+        # show all posts for a tag
+        if tag is not None:
             url_args['slug'] = tag
             endpoint = 'blog/show_tag'
+        # show all posts for an author
         elif author is not None:
             url_args['username'] = author.username
             endpoint = 'blog/show_author'
-        else:
+        # show the blog index
+        elif day is month is year is None:
             endpoint = 'blog/index'
-            if month is not None:
-                url_args['month'] = month
+        # or an archive page
+        else:
+            endpoint = 'blog/archive'
             if day is not None:
                 url_args['day'] = day
-            if tag is not None:
-                url_args['slug'] = tag
+            if month is not None:
+                url_args['month'] = month
+            if year is not None:
+                url_args['year'] = year
 
         conditions = []
         p = Post.c

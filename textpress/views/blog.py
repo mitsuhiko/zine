@@ -70,7 +70,7 @@ def do_archive(request, year=None, month=None, day=None, page=1):
     if not year:
         return render_response('archive.html',
                                **Post.objects.get_archive_summary())
-    data = Post.objects.get_list(year, month, day, page)
+    data = Post.objects.get_list(year, month, day, page=page)
     if data.pop('probably_404'):
         raise NotFound()
 
