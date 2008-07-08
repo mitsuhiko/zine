@@ -364,8 +364,7 @@ class ConfigTransaction(object):
         new = from_string(value, conv, default)
         old = self._converted_values.get(key, None) or self.cfg[key]
         if override or unicode(old) != unicode(new):
-            self._values[key] = unicode(new)
-            self._converted_values[key] = new
+            self[key] = new
 
     def revert_to_default(self, key):
         """Revert a key to the default value."""
