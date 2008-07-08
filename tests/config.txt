@@ -1,59 +1,108 @@
->>> app.cfg                             # doctest: +ELLIPSIS
-<Configuration ...>
->>> app.cfg['blog_title']
-u'My TextPress Blog'
->>> app.cfg.change_single('pings_enabled', False)
-True
->>> [line for line in open(app.cfg.filename) if 'pings_enabled' in line][0]
-'pings_enabled = False\n'
->>> t = app.cfg.edit()
->>> t.revert_to_default('pings_enabled')
->>> t['blog_title'] = 'Another Blog Title'
->>> t.commit()
->>> len([line for line in open(app.cfg.filename) if 'pings_enabled' in line])
-0
->>> app.cfg['blog_title']
-u'Another Blog Title'
->>> t = app.cfg.edit()
->>> t.revert_to_default('blog_title')
->>> t.commit()
->>> app.cfg['blog_title']
-u'My TextPress Blog'
->>> t.commit()
-Traceback (most recent call last):
-...
-ValueError: This transaction was already committed.
->>> big_t = app.cfg.edit()
->>> big_t.update({'blog_tagline': '...and the test goes on',
-...               'language': 'de'})
->>> big_t['blog_tagline']
-u'...and the test goes on'
->>> app.cfg['blog_tagline']
-u'just another textpress blog'
->>> app.cfg['language']
-u'en'
->>> big_t.set_from_string('posts_per_page', '42')
->>> big_t.commit()
->>> app.cfg['language']
-u'de'
->>> app.cfg['blog_tagline']
-u'...and the test goes on'
->>> app.cfg['posts_per_page']
-42
->>> app.cfg.change_single('inexisting_key', 23)
-Traceback (most recent call last):
-...
-KeyError: 'inexisting_key'
->>> app.cfg['inexisting_key']
-Traceback (most recent call last):
-...
-KeyError: 'inexisting_key'
->>> 'blog_title' in app.cfg
-True
->>> 'foobar' in app.cfg
-False
->>> reset = app.cfg.edit()
->>> reset.revert_to_default('blog_tagline')
->>> reset.revert_to_default('posts_per_page')
->>> reset.revert_to_default('language')
->>> reset.commit()
+MISSING: tests for nearly everything that has to do with the config file (i.e.
+		 no permissions, external changes, etc)
+		 tests for some parts of Configuration's dict interface (iter* etc)
+
+
+Basics:
+
+	>>> app.cfg                             # doctest: +ELLIPSIS
+	<Configuration ...>
+	>>> app.cfg['blog_title']
+	u'My TextPress Blog'
+
+
+Are those changes written to the config file correctly?
+	
+	>>> app.cfg.change_single('pings_enabled', False)
+	True
+	>>> [line for line in open(app.cfg.filename) if 'pings_enabled' in line][0]
+	'pings_enabled = False\n'
+
+
+Basic transaction test. Also tests that default values are not written to the
+config file.
+
+	>>> t = app.cfg.edit()
+	>>> t['pings_enabled'] = True
+	>>> t['blog_title']
+	u'My TextPress Blog'
+	>>> t['blog_title'] = 'Another Blog Title'
+	>>> t.commit()
+	>>> len([line for line in open(app.cfg.filename) if 'pings_enabled' in line])
+	0
+	>>> app.cfg['blog_title']
+	u'Another Blog Title'
+
+
+Test revert_to_default
+
+	>>> t = app.cfg.edit()
+	>>> t.revert_to_default('blog_title')
+	>>> t['blog_title']
+	u'My TextPress Blog'
+	>>> t.commit()
+	>>> app.cfg['blog_title']
+	u'My TextPress Blog'
+
+
+Transactions can only be committed once:
+	
+	>>> t.commit()
+	Traceback (most recent call last):
+	...
+	ValueError: This transaction was already committed.
+
+
+Somewhat bigger transaction. Tests update(), set_from_string() and if changes
+are really only written to the config when the transaction is committed.
+
+	>>> big_t = app.cfg.edit()
+	>>> big_t.update({'textpress/blog_tagline': '...and the test goes on',
+	...               'language': 'de'})
+	>>> big_t['blog_tagline']
+	u'...and the test goes on'
+	>>> app.cfg['blog_tagline']
+	u'just another textpress blog'
+	>>> app.cfg['language']
+	u'en'
+	>>> big_t.set_from_string('textpress/posts_per_page', '42')
+	>>> big_t.commit()
+
+
+Was the transaction commited correctly?
+
+	>>> app.cfg['textpress/language']
+	u'de'
+	>>> app.cfg['blog_tagline']
+	u'...and the test goes on'
+	>>> app.cfg['posts_per_page']
+	42
+
+
+Handling of inexisting keys
+
+	>>> app.cfg.change_single('inexisting_key', 23)
+	Traceback (most recent call last):
+	...
+	KeyError: 'inexisting_key'
+	>>> app.cfg['inexisting_key']
+	Traceback (most recent call last):
+	...
+	KeyError: 'inexisting_key'
+
+
+__contains__
+
+	>>> 'textpress/blog_title' in app.cfg
+	True
+	>>> 'foobar' in app.cfg
+	False
+
+
+Reset the config so future tests get the same initial values
+	
+	>>> reset = app.cfg.edit()
+	>>> reset.revert_to_default('textpress/blog_tagline')
+	>>> reset.revert_to_default('posts_per_page')
+	>>> reset.revert_to_default('language')
+	>>> reset.commit()

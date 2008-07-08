@@ -332,6 +332,8 @@ class ConfigTransaction(object):
         """Get an item from the transaction or the underlaying config."""
         if key in self._converted_values:
             return self._converted_values[key]
+        elif key in self._remove:
+            return self.cfg.config_vars[key][1]
         return self.cfg[key]
 
     def __setitem__(self, key, value):
@@ -343,8 +345,11 @@ class ConfigTransaction(object):
             raise KeyError(key)
         if isinstance(value, str):
             value = value.decode('utf-8')
-        self._values[key] = unicode(value)
-        self._converted_values[key] = value
+        if value == self.cfg.config_vars[key][1]:
+            self._remove.append(key)
+        else:
+            self._values[key] = unicode(value)
+            self._converted_values[key] = value
 
     def _assert_uncommitted(self):
         if self._committed:
@@ -388,7 +393,7 @@ class ConfigTransaction(object):
             all = self.cfg._values.copy()
             all.update(self._values)
             for key in self._remove:
-                all.pop(key)
+                all.pop(key, None)
 
             sections = {}
             for key, value in all.iteritems():

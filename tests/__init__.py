@@ -87,11 +87,11 @@ def suite(modnames=[], return_covermods=False):
             globs = {'app': app}
             globs.update(mod.__dict__)
             suites.append(DocFileSuite(filename, globs=globs))
-        for subsuite in suites:
+        for i, subsuite in enumerate(suites):
             # skip modules without any tests
             if subsuite.countTestCases():
                 suite.addTest(subsuite)
-                if return_covermods:
+                if return_covermods and i == 0:
                     covermods.append(mod)
     if return_covermods:
         return suite, covermods
