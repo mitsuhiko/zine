@@ -192,13 +192,7 @@ class Importer(object):
             pass
         f = file(os.path.join(path, '%d' % time()), 'wb')
         try:
-            dump({
-                'importer':     self.title,
-                'source':       blog.link,
-                'title':        blog.title,
-                'dump_date':    blog.dump_date
-            }, f, HIGHEST_PROTOCOL)
-            dump(blog, f, HIGHEST_PROTOCOL)
+            blog.dump(f, self.title)
         finally:
             f.close()
 
@@ -244,6 +238,16 @@ class Blog(object):
         uids = set(x.uid for x in db.execute(db.select([posts.c.uid])))
         for post in self.posts:
             post.already_imported = post.uid in uids
+
+    def dump(self, f, importer_name=None):
+        """Dump the blog into a file descriptor."""
+        dump({
+            'importer':     importer_name,
+            'source':       self.link,
+            'title':        self.title,
+            'dump_date':    self.dump_date
+        }, f, HIGHEST_PROTOCOL)
+        dump(self, f, HIGHEST_PROTOCOL)
 
     def __repr__(self):
         return '<%s %r posts: %d, authors: %d>' % (

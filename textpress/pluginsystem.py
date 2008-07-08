@@ -530,6 +530,7 @@ class Plugin(object):
         )
 
 
+import textpress
 __builtin__.__import__ = textpress_import
 plugin_space = ModuleType('textpress._space')
 sys.modules['textpress._space'] = plugin_space

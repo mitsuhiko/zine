@@ -5,8 +5,7 @@
   <title>TextPress Setup</title>
   <style type="text/css">
     body {
-        font-family: 'Times New Roman', serif;
-        font-size: 1.1em;
+        font-family: 'Trebuchet MS', sans-serif;
         letter-spacing: 0.04em;
         background-color: #EEF5FA;
         padding: 2em 0 2em 0;
@@ -15,10 +14,10 @@
     }
 
     div.page {
-        height: 100%;
         background-color: white;
+        color: #0C1B2C;
         border: 1px solid #316182;
-        width: 45em;
+        width: 40em;
         padding: 0 0 0.5em 0;
         margin: 0 auto 0 auto;
     }
@@ -57,6 +56,7 @@
         color: #222e4b;
         margin: 0.6em 0 0.9em -1em;
         padding: 0;
+        font-weight: normal;
         font-family: 'Georgia', serif;
         font-size: 1.3em;
         border-bottom: 1px solid #eee;
@@ -72,6 +72,7 @@
 
     dl dt {
         font-weight: bold;
+        color: #444;
     }
 
     input {
@@ -102,6 +103,10 @@
         outline: none;
     }
 
+    input[type="submit"]:focus {
+        outline: none;
+    }
+
     input[type="submit"]:hover {
         border-color: #B4D2E7;
         background-color: #fff;
@@ -122,8 +127,8 @@
     }
 
     div.error {
-        border: 1px solid #982a2a;
-        background-color: #da7a7a;
+        background-color: #FCF7F7;
+        border: 1px solid #E8B5B5;
         padding: 0.5em;
         margin: 1em 0 1em 0;
     }
@@ -133,7 +138,8 @@
         padding: 0;
         color: #802424;
         font-family: 'Georgia', serif;
-        font-size: 1.4em;
+        font-weight: normal;
+        font-size: 1.1em;
     }
 
     div.error p {
