@@ -1,6 +1,6 @@
 {% extends "admin/layout.html" %}
 {% from 'admin/_comment.html' import render_comment %}
-{% block title %}{{ comments_title }}{% endblock %}
+{% block title %}{{ comments_title|striptags }}{% endblock %}
 {% block contents %}
   <h1>{{ comments_title }}</h1>
   <form action="" method="post">

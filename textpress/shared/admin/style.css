@@ -11,13 +11,13 @@ body.login {
 }
 
 ::-moz-selection {
-    background-color: #ffa800;
-    color: white;
+    background-color: #D0DFF0;
+    color: #456981;
 }
 
 ::selection {
-    background-color: #ffa800;
-    color: white;
+    background-color: #D0DFF0;
+    color: #456981;
 }
 
 a {
@@ -84,7 +84,7 @@ div.footer p {
 div.body ul.navbar {
     margin: 0;
     padding: 0 0 0 15px;
-    height: 28px;
+    height: 27px;
     background-color: #222e4b;
     list-style: none;
 }
@@ -92,7 +92,7 @@ div.body ul.navbar {
 div.body ul.navbar li {
     float: left;
     margin: 0;
-    padding: 4px 0 0 4px;
+    padding: 3px 0 0 3px;
 }
 
 div.body ul.navbar li a {
@@ -122,8 +122,8 @@ div.body ul.navbar li.active a:hover {
 
 div.body ul.ctxnavbar {
     margin: 0;
-    padding: 0 0 0 17px;
-    height: 24px;
+    padding: 0 0 0 16px;
+    height: 23px;
     background-color: #316081;
     list-style: none;
 }
@@ -131,7 +131,7 @@ div.body ul.ctxnavbar {
 div.body ul.ctxnavbar li {
     float: left;
     margin: 0;
-    padding: 3px 0 0 3px;
+    padding: 2px 0 0 2px;
 }
 
 div.body ul.ctxnavbar li a {
@@ -146,6 +146,13 @@ div.body ul.ctxnavbar li a {
 
 div.body ul.ctxnavbar li a:hover {
     background-color: #2a516d;
+}
+
+div.body ul.ctxnavbar li a:focus,
+div.body ul.navbar li a:focus {
+    outline: none;
+    -moz-outline: none;
+    color: #AFC5DF;
 }
 
 div.body ul.ctxnavbar li.active a,
@@ -443,7 +450,7 @@ div.dashboard div.links {
     width: 55%;
 }
 
-div.dashboard div.bottom {
+div.dashboard div.planet {
     clear: both;
 }
 
@@ -522,6 +529,18 @@ table.postlist tr.draft a {
 
 table.postlist tr.draft a:hover {
     color: #51AD3E;
+}
+
+table.postlist td.tags {
+    font-size: 0.75em;
+}
+
+table.postlist .comments {
+    text-align: center;
+}
+
+table.postlist .date {
+    text-align: right;
 }
 
 /* :::: COMMENTS :::: */

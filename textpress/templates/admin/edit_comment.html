@@ -49,12 +49,10 @@
     <div class="formbox toggleable collapsed">
       <h3>{{ _("Block Comment") }}</h3>
       {{ h.checkbox('blocked', form.blocked) }}
-      {% if comment.blocked %}
-        <label for="blocked">{% trans reason=comment.blocked_msg|e
-          %}block comment ({{ reason }}){% endtrans %}</label>
-      {% else %}
-        <label for="blocked">{{ _("block comment") }}</label>
-      {% endif %}
+      <label for="blocked">{{ _("block comment") }}</label>
+      <p>
+        {{ _('Block message') }}:
+        {{ h.input_field('reason', form.reason, size=40) }}
     </div>
     <div class="actions">
       {{ hidden_form_data }}

@@ -235,6 +235,11 @@ def do_index(request):
     such as "new post", etc. and the recent blog activity (unmoderated
     comments etc.)
     """
+    # the template loads the planet with a separate http request via
+    # javascript to not slow down the page loading
+    if request.args.get('load') == 'planet':
+        return Response('<p>XXX: not supported yet :-(</p>')
+
     return render_admin_response('admin/index.html', 'dashboard',
         drafts=Post.objects.drafts().all(),
         unmoderated_comments=Comment.objects.unmoderated().all(),
@@ -583,8 +588,10 @@ def _handle_comments(identifier, title, query, page):
                             query.count())
     if not comments and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_comments.html',
-                                 'comments.' + identifier,
+    tab = 'comments'
+    if identifier is not None:
+        tab += '.' + identifier
+    return render_admin_response('admin/show_comments.html', tab,
                                  comments_title=title,
                                  comments=comments,
                                  pagination=pagination,
@@ -594,28 +601,34 @@ def _handle_comments(identifier, title, query, page):
 @require_role(ROLE_AUTHOR)
 def do_show_comments(request, page):
     """Show all the comments."""
-    return _handle_comments('overview', 'All Comments',
+    return _handle_comments('overview', _('All Comments'),
                             Comment.objects.query, page)
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_unmoderated_comments(request, page):
     """Show all unmoderated and user-blocked comments."""
-    return _handle_comments('unmoderated', 'Comments Awaiting Moderation',
+    return _handle_comments('unmoderated', _('Comments Awaiting Moderation'),
                             Comment.objects.unmoderated(), page)
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_spam_comments(request, page):
     """Show all spam comments."""
-    return _handle_comments('spam', 'Spam', Comment.objects.spam(), page)
+    return _handle_comments('spam', _('Spam'), Comment.objects.spam(), page)
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_post_comments(request, page, post_id):
     """Show all comments for a single post."""
-    # XXX: Fetch also the title and comment count...
-    return _handle_comments('post_comments', 'Comments for single post',
+    post = Post.objects.get(post_id)
+    if post is None:
+        raise NotFound()
+    link = '<a href="%s">%s</a>' % (
+        url_for('admin/edit_post', post_id=post_id),
+        escape(post.title)
+    )
+    return _handle_comments(None, _(u'Comments for “%s”') % link,
                             Comment.objects.comments_for_post(post_id), page)
 
 
@@ -636,7 +649,8 @@ def do_edit_comment(request, comment_id):
         'body':         comment.raw_body,
         'parser':       comment.parser,
         'pub_date':     format_datetime(comment.pub_date),
-        'blocked':      comment.blocked
+        'blocked':      comment.blocked,
+        'blocked_msg':  comment.blocked_msg
     }
     old_text = comment.raw_body
     missing_parser = None
@@ -688,6 +702,8 @@ def do_edit_comment(request, comment_id):
         except ValueError:
             errors.append(_('Invalid date for comment.'))
         form['blocked'] = blocked = bool(request.form.get('blocked'))
+        form['blocked_msg'] = blocked_msg = \
+            request.form.get('blocked_msg', '')
 
         if not errors:
             if comment.anonymous:
@@ -704,9 +720,10 @@ def do_edit_comment(request, comment_id):
                 comment.blocked_msg = ''
             else:
                 comment.status = COMMENT_BLOCKED_USER
-                if not comment.blocked_msg:
-                    comment.blocked_msg = _('blocked by %s') % \
+                if not blocked_msg:
+                    blocked_msg = _('blocked by %s') % \
                         request.user.display_name
+                comment.blocked_msg = blocked_msg
             db.commit()
             flash(_('Comment by %s moderated successfully.') %
                   escape(comment.author))

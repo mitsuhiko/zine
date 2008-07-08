@@ -71,6 +71,11 @@
       </ul>
       {% endif %}
     </div>
-    <div class="bottom"></div>
+    <div class="planet">
+      <h2>{{ _('Planet TextPress') }}</h2>
+      <script type="text/javascript">
+        $('div.planet').append($('<div>').load('?load=planet'));
+      </script>
+    </div>
   </div>
 {% endblock %}
