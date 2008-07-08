@@ -501,7 +501,7 @@ class TextPress(object):
         # the builtin database checks
         self._database_checks = [upgrade_database]
         self.database_engine = db.create_engine(self.cfg['database_uri'],
-                                                convert_unicode=True)
+                                                self.instance_folder)
 
         # now setup the cache system
         self.cache = get_cache(self)

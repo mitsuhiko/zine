@@ -93,7 +93,7 @@ class WebSetup(object):
             error = 'You have to provide a database URI.'
         else:
             try:
-                db.create_engine(database_uri, convert_unicode=True)
+                db.create_engine(database_uri, self.instance_folder)
             except Exception, e:
                 error = str(e)
         if error is not None:
@@ -133,7 +133,7 @@ class WebSetup(object):
             from textpress.database import init_database
 
             # create database and all tables
-            e = db.create_engine(database_uri)
+            e = db.create_engine(database_uri, self.instance_folder)
             init_database(e)
         except Exception, e:
             error = str(e)

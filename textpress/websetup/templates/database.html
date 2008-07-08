@@ -9,11 +9,12 @@
   </p>
   <dl>
     <dt>SQLite</dt>
-    <dd><code>sqlite:////path/to/database.db</code> &mdash;
+    <dd><code>sqlite:///database.db</code> &mdash;
         connect to a database that is located at a specific absolute path
-        on the file system of the server. Note the four slashes on Mac OS X
-        or Linux systems. On Windows you have to use three slashes and a
-        drive letter.</dd>
+        on the file system of the server.  Note that on Mac OS X and Linux
+        systems three slashes mean relative to the instance folder and four
+        slashes represent an absolute path.  On Windows you have to use
+        three slashes, a drive letter and the full path.</dd>
     <dt>MySQL</dt>
     <dd><code>mysql://username:password@host/database_name</code></dd>
     <dt>Postgres</dt>

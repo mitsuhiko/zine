@@ -15,12 +15,14 @@
     :license: GNU GPL.
 """
 import sys
+from os import path
 from datetime import datetime, timedelta
 from types import ModuleType
 
 import sqlalchemy
 from sqlalchemy import orm
 from sqlalchemy.util import to_list
+from sqlalchemy.engine.url import make_url
 
 from textpress.utils import local, local_manager
 
@@ -34,6 +36,39 @@ def mapper(*args, **kwargs):
     kwargs['extension'] = extensions = to_list(kwargs.get('extension', []))
     extensions.append(ManagerExtension())
     return orm.mapper(*args, **kwargs)
+
+
+def get_engine():
+    """Return the active database engine (the database engine of the active
+    application).  If no application is enabled this has an undefined behavior.
+    If you are not sure if the application is bound to the active thread, use
+    :func:`~textpress.application.get_application` and check it for `None`.
+    The database engine is stored on the application object as `database_engine`.
+    """
+    return local.application.database_engine
+
+
+def create_engine(uri, relative_to=None, echo=False):
+    """Create a new engine.  This works a bit like SQLAlchemy's
+    `create_engine` with the difference that it automaticaly set's MySQL
+    engines to 'utf-8', and paths for SQLite are relative to the path
+    provided as `relative_to`.
+
+    Furthermore the engine is created with `convert_unicode` by default.
+    """
+    info = make_url(uri)
+
+    # if we have the sqlite driver make the database relative to the
+    # instance folder
+    if info.drivername == 'sqlite' and relative_to is not None:
+        info.database = path.join(relative_to, info.database)
+
+    # if mysql is the database engine and no connection encoding is
+    # provided we set it to utf-8
+    elif info.drivername == 'mysql':
+        info.query.setdefault('charset', 'utf8')
+
+    return sqlalchemy.create_engine(info, convert_unicode=True, echo=echo)
 
 
 class ManagerExtension(orm.MapperExtension):
@@ -150,17 +185,9 @@ for mod in sqlalchemy, orm:
 del key, mod, value
 
 
-def get_engine():
-    """Return the active database engine (the database engine of the active
-    application).  If no application is enabled this has an undefined behavior.
-    If you are not sure if the application is bound to the active thread, use
-    :func:`~textpress.application.get_application` and check it for `None`.
-    The database engine is stored on the application object as `database_engine`.
-    """
-    return local.application.database_engine
-
 db.mapper = mapper
 db.get_engine = get_engine
+db.create_engine = create_engine
 for name in 'delete', 'save', 'flush', 'execute', 'begin', \
             'commit', 'rollback', 'clear', 'refresh', 'expire':
     setattr(db, name, getattr(session, name))
