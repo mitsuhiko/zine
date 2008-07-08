@@ -154,14 +154,14 @@ class Pagination(object):
                  active='<strong>%(page)d</strong>',
                  commata='<span class="commata">,\n</span>',
                  ellipsis=u'<span class="ellipsis"> …\n</span>',
-                 threshold=3, prev_link=False,
-                 next_link=False, gray_prev_link=True, gray_next_link=True):
+                 threshold=3, left_threshold=2, right_threshold=1,
+                 prev_link=False, next_link=False, gray_prev_link=True,
+                 gray_next_link=True):
         from textpress.application import url_for
         was_ellipsis = False
         result = []
         prev = None
         next = None
-        small_threshold = math.ceil(threshold / 2.0)
         get_link = lambda x: url_for(self.endpoint, page=x, **self.url_args)
 
         for num in xrange(1, self.pages + 1):
@@ -171,8 +171,8 @@ class Pagination(object):
                 next = num
             if num + 1 == self.page:
                 prev = num
-            if num <= small_threshold or \
-               num > self.pages - small_threshold or \
+            if num <= left_threshold or \
+               num > self.pages - right_threshold or \
                abs(self.page - num) < threshold:
                 if result and result[-1] != ellipsis:
                     result.append(commata)
