@@ -47,26 +47,26 @@
             The full description of the plugin.
         :Author:
             The name of the author of the plugin.
-            Use the this field in the form of ``Name <author@webpage.xy>``
-            where `Name` is the full name of the author.
-        :Author URL:
-            The website of the plugin-author.
-        :Contributors:
-            Add a list of all contributors seperated by a comma.
-            Use this field in the form of ``Name1 <n1@w1.xy>, Name2
-            <n2@w2.xy>`` where `Name` is the full name of the author
-            and the email is optional.
-        :Version:
-            The version of the deployed plugin.
-        :Preview:
-            *For themes only*
-            A little preview of the theme deployed by the plugin.
-        :Depends:
-            A list of plugins the plugin depends on.  All plugin-names will
-            be splitted by a comma and also named exactly as the depended plugin.
-            All plugins in this list will be activated if found but if one
-            is missed the admin will be informated about that and the plugin
-            won't be activated.
+        Use the this field in the form of ``Name <author@webpage.xy>``
+        where `Name` is the full name of the author.
+    :Author URL:
+        The website of the plugin-author.
+    :Contributors:
+        Add a list of all contributors seperated by a comma.
+        Use this field in the form of ``Name1 <n1@w1.xy>, Name2
+        <n2@w2.xy>`` where `Name` is the full name of the author
+        and the email is optional.
+    :Version:
+        The version of the deployed plugin.
+    :Preview:
+        *For themes only*
+        A little preview of the theme deployed by the plugin.
+    :Depends:
+        A list of plugins the plugin depends on.  All plugin-names will
+        be splitted by a comma and also named exactly as the depended plugin.
+        All plugins in this list will be activated if found but if one
+        is missed the admin will be informated about that and the plugin
+        won't be activated.
 
 
     Warnings for the Professionals
@@ -92,7 +92,6 @@
 import __builtin__
 import sys
 import new
-import re
 from os import path, listdir, walk, makedirs
 from types import ModuleType
 from shutil import rmtree
@@ -147,6 +146,7 @@ def unregister_application(app):
 def find_plugins(app):
     """Return an iterator over all plugins available."""
     enabled_plugins = set()
+    found_plugins = set()
     for plugin in app.cfg['plugins'].split(','):
         plugin = plugin.strip()
         if plugin:
@@ -158,8 +158,10 @@ def find_plugins(app):
         for filename in listdir(folder):
             full_name = path.join(folder, filename)
             if path.isdir(full_name) and \
-               path.isfile(path.join(full_name, 'metadata.txt')):
-                yield Plugin(app, filename, path.abspath(full_name),
+               path.isfile(path.join(full_name, 'metadata.txt')) and \
+               filename not in found_plugins:
+                found_plugins.add(filename)
+                yield Plugin(app, str(filename), path.abspath(full_name),
                              filename in enabled_plugins)
 
 

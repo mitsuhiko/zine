@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
-{% block title %}{{ _("Edit User") }}{% endblock %}
+{% block title %}{{ _("Edit User") if user else _('New User') }}{% endblock %}
 {% block contents %}
-  <h1>{{ _("Edit User") }}</h1>
+  <h1>{{ self.title()|e }}</h1>
   {%- if created %}
     <div class="information message">
       <h3>{{ _("User created successfully") }}</h3>

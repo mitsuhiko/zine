@@ -744,6 +744,7 @@ table.plugins td.active {
 
 table.plugins td.description span.author {
     font-style: italic;
+    font-size: 0.8em;
 }
 
 table.plugins td.plugin {
@@ -752,6 +753,8 @@ table.plugins td.plugin {
 
 table.plugins td.version {
     text-align: center;
+    color: #444;
+    font-weight: bold;
 }
 
 table.plugins td {
