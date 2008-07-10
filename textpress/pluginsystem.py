@@ -114,13 +114,13 @@ BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
 PACKAGE_VERSION = 1
 
 
-def textpress_import(name, *args, **kwargs):
+def textpress_import(name, *args):
     """Redirect imports for textpress.plugins to the module space."""
     if name == 'textpress.plugins' or name.startswith('textpress.plugins.'):
         app = get_application()
         if app is not None:
             name = 'textpress._space.%s%s' % (app.iid, name[17:])
-    return _py_import(name, *args, **kwargs)
+    return _py_import(name, *args)
 
 
 def register_application(app):

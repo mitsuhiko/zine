@@ -1406,7 +1406,7 @@ def do_plugins(request):
                         flash(_(u'Plugin “%(plugin)s” has unresolved '
                                 u'dependencies.  Please install %(dependency)s.')
                                 % {'plugin': plugin.html_display_name,
-                                   'dependency': u', '.join(missing_dep)})
+                                   'dependency': u', '.join(missing_dep)}, 'error')
                     else:
                         flash(_(u'Plugin “%s” could not be loaded')
                                 % plugin.html_display_name)
