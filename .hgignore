@@ -5,5 +5,6 @@
 ^dumps/
 ^.*\.egg-info/
 ^textpress/i18n/messages\.pot$
+.coverage
 ^docs/_build/
 ^textpress/docs/

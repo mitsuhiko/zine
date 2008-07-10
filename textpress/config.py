@@ -142,6 +142,14 @@ def get_converter_name(conv):
 class Configuration(object):
     """Helper class that manages configuration values in a INI configuration
     file.
+
+    >>> app.cfg['blog_title']
+    u'My TextPress Blog'
+    >>> app.cfg.change_single('blog_title', 'Test Blog')
+    True
+    >>> app.cfg['blog_title']
+    u'Test Blog'
+    >>> t = app.cfg.edit(); t.revert_to_default('blog_title'); t.commit()
     """
 
     def __init__(self, filename):
@@ -326,18 +334,24 @@ class ConfigTransaction(object):
         """Get an item from the transaction or the underlaying config."""
         if key in self._converted_values:
             return self._converted_values[key]
+        elif key in self._remove:
+            return self.cfg.config_vars[key][1]
         return self.cfg[key]
 
     def __setitem__(self, key, value):
         """Set the value for a key by a python value."""
-        if self._committed:
-            raise ValueError('This transaction was already committed.')
+        self._assert_uncommitted()
         if key.startswith('textpress/'):
             key = key[10:]
         if key not in self.cfg.config_vars:
             raise KeyError(key)
-        self._values[key] = unicode(value)
-        self._converted_values[key] = value
+        if isinstance(value, str):
+            value = value.decode('utf-8')
+        if value == self.cfg.config_vars[key][1]:
+            self._remove.append(key)
+        else:
+            self._values[key] = unicode(value)
+            self._converted_values[key] = value
 
     def _assert_uncommitted(self):
         if self._committed:
@@ -352,8 +366,7 @@ class ConfigTransaction(object):
         new = from_string(value, conv, default)
         old = self._converted_values.get(key, None) or self.cfg[key]
         if override or unicode(old) != unicode(new):
-            self._values[key] = unicode(new)
-            self._converted_values[key] = new
+            self[key] = new
 
     def revert_to_default(self, key):
         """Revert a key to the default value."""
@@ -372,8 +385,7 @@ class ConfigTransaction(object):
         configuration file and only updates the config in memory when that is
         successful.
         """
-        if self._committed:
-            raise ValueError('This transaction was already committed.')
+        self._assert_uncommitted()
         if not self._values and not self._remove:
             self._committed = True
             return
@@ -382,7 +394,7 @@ class ConfigTransaction(object):
             all = self.cfg._values.copy()
             all.update(self._values)
             for key in self._remove:
-                all.pop(key)
+                all.pop(key, None)
 
             sections = {}
             for key, value in all.iteritems():

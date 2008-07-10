@@ -31,7 +31,7 @@ def replace_entities(string):
     """Replace HTML entities in a string:
 
     >>> replace_entities('foo &amp; bar &raquo; foo')
-    ...
+    u'foo & bar \\xbb foo'
     """
     def handle_match(m):
         name = m.group(1)
