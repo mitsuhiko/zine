@@ -39,14 +39,14 @@
 
     TextPress currently supports the following metadata information:
 
-        :Name:
-            The full name of the plugin.
-        :Plugin URL:
-            The URL of the plugin (e.g download location)
-        :Description:
-            The full description of the plugin.
-        :Author:
-            The name of the author of the plugin.
+    :Name:
+        The full name of the plugin.
+    :Plugin URL:
+        The URL of the plugin (e.g download location)
+    :Description:
+        The full description of the plugin.
+    :Author:
+        The name of the author of the plugin.
         Use the this field in the form of ``Name <author@webpage.xy>``
         where `Name` is the full name of the author.
     :Author URL:

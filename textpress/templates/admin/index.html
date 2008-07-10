@@ -6,7 +6,7 @@
     <div class="panel">
       <div class="text">
         <p>{% trans user=(request.user.first_name or request.user.username)|e -%}
-          Howdy.  Welcome in the TextPress administration interface {{ user }}.
+          Howdy.  Welcome to the TextPress administration interface {{ user }}.
         {%- endtrans %}
         {% trans -%}
           You have written <strong>{{ your_posts }}</strong> post so far.
