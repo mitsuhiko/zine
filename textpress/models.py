@@ -1123,6 +1123,5 @@ db.mapper(Page, pages, properties={
     '_raw_body':    pages.c.body,
     'parent':       db.relation(Page,
         remote_side=[pages.c.page_id],
-        order_by=[pages.c.navigation_pos],
-        backref='children'),
+        backref=db.backref('children', order_by=[pages.c.navigation_pos])),
 })

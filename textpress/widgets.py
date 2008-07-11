@@ -21,6 +21,7 @@ import re
 import inspect
 from os import path
 from textpress.api import *
+from textpress.database import pages as pages_table
 from textpress.models import Post, Tag, Comment, Page
 from textpress.utils.xxx import CSRFProtector
 
