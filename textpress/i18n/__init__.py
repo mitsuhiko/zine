@@ -10,6 +10,7 @@
 """
 import os
 from datetime import datetime
+from time import strptime
 from babel import Locale, dates, UnknownLocaleError
 from babel.support import Translations
 import textpress.application
@@ -126,10 +127,10 @@ def parse_datetime(string):
     convert = lambda fmt: datetime(*strptime(string, fmt)[:7])
     cfg = textpress.application.get_application().cfg
 
-    # first of all try the datetime_format because it's likely that
-    # the users inputs the date like chosen in the config
+    # first of all try the following format because a while ago it was
+    # Texpress' default format
     try:
-        return convert(cfg['datetime_format'])
+        return convert(u'%Y-%m-%d %H:%M')
     except ValueError:
         pass
 
