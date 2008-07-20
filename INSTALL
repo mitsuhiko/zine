@@ -11,6 +11,7 @@ installed:
   - Python 2.4 or higher
   - A database (MySQL, SQLite or PostgreSQL and others are supported)
   - pytz*
+  - Babel
 
 Libraries marked with * are installable from the cheeseshop via easy_install or
 might be available in Debian already.
