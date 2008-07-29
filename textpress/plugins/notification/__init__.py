@@ -44,7 +44,7 @@ def notify(request, comment):
 
 def moderate_comments_notify(request, comment):
     #! Notification to Admins/Managers about unmoderated comments
-    unmoderated_comments = comment.objects.get_unmoderated_count()
+    unmoderated_comments = comment.objects.unmoderated().count()
     if unmoderated_comments:
         subject = _('Unmoderated Comments')
         msg = _('There are %(number)d comments awaiting moderation.\n'

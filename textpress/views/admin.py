@@ -663,6 +663,7 @@ def do_edit_comment(request, comment_id):
 
     if request.method == 'POST':
         csrf_protector.assert_safe()
+        www = None
 
         # cancel
         if request.form.get('cancel'):

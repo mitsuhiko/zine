@@ -794,7 +794,6 @@ class CommentManager(db.DatabaseManager):
         return query.filter(Comment.status.in_([COMMENT_BLOCKED_USER,
                                                 COMMENT_BLOCKED_SPAM,
                                                 COMMENT_BLOCKED_SYSTEM]))
-
     def unmoderated(self, query=None):
         """Filter all the unmoderated comments and comments blocked by a user
         or system.
@@ -828,10 +827,6 @@ class CommentManager(db.DatabaseManager):
         if limit is not None:
             query = query[:limit]
         return query
-
-    def unmoderated(self):
-        """Return all drafts."""
-        return self.query.filter(Comment.status > COMMENT_MODERATED)
 
     def comments_for_post(self, post_id):
         """Return all comments for the blog post."""
