@@ -189,17 +189,19 @@ def parse_datetime(string, rebase=True):
     raise ValueError('invalid date format')
 
 
-def _date_format(formatter, obj, format, rebase):
+def _date_format(formatter, obj, format, rebase, **extra):
     """Internal helper that formats the date."""
     app = textpress.application.get_application()
     if app is None:
         locale = Locale('en')
     else:
         locale = app.locale
-    tzinfo = None
-    if rebase:
-        tzinfo = get_timezone()
-    return formatter(obj, format, locale=locale, tzinfo=tzinfo)
+    extra = {}
+    # a limitation in babel doesn't allow dates being formatted
+    # with a timezone information.
+    if formatter is not dates.format_date and rebase:
+        extra['tzinfo'] = get_timezone()
+    return formatter(obj, format, locale=locale, **extra)
 
 
 def get_timezone(name=None):

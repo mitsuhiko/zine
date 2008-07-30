@@ -8,3 +8,4 @@
 .coverage
 ^docs/_build/
 ^textpress/docs/
+^textpress/i18n/.*?/LC_MESSAGES/messages.(js|mo)$

@@ -41,13 +41,11 @@ $(function() {
       return;
     var
       bookmarkletURL = TextPress.ADMIN_URL + '/_bookmarklet',
-      bookmarklet = '(function(){' +
-      'var s=(getSelection?getSelection():document.getSelection?' +
-      'document.getSelection():document.selection.createRange().text);' +
-      'location.href="' + bookmarkletURL + '?mode=newpost&' +
-      'text="+encodeURIComponent(s)+"&title="+' +
-      'encodeURIComponent(document.title)+"&url="+encodeURIComponent(' +
-      'document.location.href)})();';
+      bookmarklet = 'document.location.href="' + bookmarkletURL +
+      '?mode=newpost&text="+encodeURI(getSelection?getSelection()' +
+      ':document.getSelection?document.getSelection():document.' +
+      'selection.createRange().text)+"&title="+encodeURI(document.' +
+      'title)+"&url="+encodeURI(document.location.href)';
     container.append($('<h2>').text(_('Bookmarklet')));
     container.append($('<p>').text(
       _('Right click on the following link and choose ' +
