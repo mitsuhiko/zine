@@ -148,7 +148,7 @@ def parse_datetime(string, rebase=True):
         return datetime.utcnow()
 
     def convert(format):
-        rv = datetime(*strptime(string, fmt)[:7])
+        rv = datetime(*strptime(string, format)[:7])
         if not rebase:
             return rv
         return rv.replace(tzinfo=UTC).astimezone(get_timezone()) \

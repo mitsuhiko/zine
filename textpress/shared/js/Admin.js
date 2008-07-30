@@ -58,7 +58,13 @@ $(function() {
         'text and click on the bookmark.')));
     container.append($('<p>').append($('<a>')
       .attr('href', 'javascript:' + encodeURI(bookmarklet))
-      .text(_('Blog It!'))));
+      .text(_('Blog It!'))
+      .click(function() {
+        alert(_('Right click on this link and choose "Add to ' +
+                'favorites" or "Bookmark link" to create a ' +
+                'posting shortcut.'));
+        return false;
+      })));
   })();
 });
 

@@ -252,6 +252,11 @@ def do_index(request):
 
 
 def do_bookmarklet(request):
+    """Requests to this view are usually triggered by the bookmarklet
+    from the edit-post page.  Currently this is a redirect to the new-post
+    page with some small modifications but in the future this could be
+    expanded to add a wizzard or something.
+    """
     if request.args['mode'] != 'newpost':
         raise BadRequest()
     body = '%s\n\n<a href="%s">%s</a>' % (
@@ -455,7 +460,7 @@ def do_edit_post(request, post_id=None):
             # by parsing the post, that is wanted and the post is
             # published.
             if form['ping_from_text']:
-                if not post.is_published:
+                if request.app.cfg['maintenance_mode'] or not post.is_published:
                     flash(_('No URLs pinged so far because the post is not '
                             'publicly available'))
                 elif post.parser_missing:
