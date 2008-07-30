@@ -43,6 +43,7 @@ def make_urls(app):
         Rule('/', endpoint='admin/index'),
         Rule('/login', endpoint='admin/login'),
         Rule('/logout', endpoint='admin/logout'),
+        Rule('/_bookmarklet', endpoint='admin/bookmarklet'),
         Rule('/posts/', endpoint='admin/show_posts', defaults={'page': 1}),
         Rule('/posts/page/<int:page>', endpoint='admin/show_posts'),
         Rule('/posts/new', endpoint='admin/new_post'),

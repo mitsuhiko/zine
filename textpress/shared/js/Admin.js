@@ -31,6 +31,35 @@ $(function() {
       fieldset.toggleClass('collapsed');
     });
   });
+
+  /**
+   * Add bookmarklets to pages that want them
+   */
+  (function() {
+    var container = $('div.post-bookmarklets');
+    if (!container.length)
+      return;
+    var
+      bookmarkletURL = TextPress.ADMIN_URL + '/_bookmarklet',
+      bookmarklet = '(function(){' +
+      'var s=(getSelection?getSelection():document.getSelection?' +
+      'document.getSelection():document.selection.createRange().text);' +
+      'location.href="' + bookmarkletURL + '?mode=newpost&' +
+      'text="+encodeURIComponent(s)+"&title="+' +
+      'encodeURIComponent(document.title)+"&url="+encodeURIComponent(' +
+      'document.location.href)})();';
+    container.append($('<h2>').text(_('Bookmarklet')));
+    container.append($('<p>').text(
+      _('Right click on the following link and choose ' +
+        '"Add to favorites" or "Bookmark link" to create a ' +
+        'posting shortcut.')));
+    container.append($('<p>').text(
+      _('Next time you visit an interesting page, just select some ' +
+        'text and click on the bookmark.')));
+    container.append($('<p>').append($('<a>')
+      .attr('href', 'javascript:' + encodeURI(bookmarklet))
+      .text(_('Blog It!'))));
+  })();
 });
 
 

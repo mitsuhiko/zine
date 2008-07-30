@@ -251,6 +251,20 @@ def do_index(request):
     )
 
 
+def do_bookmarklet(request):
+    if request.args['mode'] != 'newpost':
+        raise BadRequest()
+    body = '%s\n\n<a href="%s">%s</a>' % (
+        request.args.get('text', _('Text here...')),
+        request.args['url'],
+        request.args.get('title', _('Untitled Page'))
+    )
+    return simple_redirect('admin/new_post',
+        title=request.args.get('title'),
+        body=body
+    )
+
+
 @require_role(ROLE_AUTHOR)
 def do_show_posts(request, page):
     """Show a list of posts for post moderation."""
@@ -310,8 +324,8 @@ def do_edit_post(request, post_id=None):
     else:
         new_post = True
         form.update(
-            title='',
-            body='',
+            title=request.args.get('title', ''),
+            body=request.args.get('body', ''),
             intro='',
             tags=[],
             post_status=STATUS_DRAFT,

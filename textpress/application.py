@@ -904,10 +904,15 @@ class TextPress(object):
             script(url_for('core/shared', filename='js/jQuery.js')),
             script(url_for('core/shared', filename='js/TextPress.js'))
         ]
+        base_url = self.cfg['blog_url'].rstrip('/')
         result.append(
             u'<script type="text/javascript">'
                 u'TextPress.BLOG_URL = %s;'
-            u'</script>' % dump_json(self.cfg['blog_url'].rstrip('/'))
+                u'TextPress.ADMIN_URL = %s;'
+            u'</script>' % (
+                dump_json(base_url),
+                dump_json(base_url + self.cfg['admin_url_prefix'])
+            )
         )
         for type, attr in local.page_metadata:
             result.append(generators[type](**attr))

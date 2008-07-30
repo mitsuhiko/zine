@@ -32,6 +32,7 @@ all_views = {
 
     # admin views
     'admin/index':              admin.do_index,
+    'admin/bookmarklet':        admin.do_bookmarklet,
     'admin/show_posts':         admin.do_show_posts,
     'admin/new_post':           admin.do_edit_post,
     'admin/edit_post':          admin.do_edit_post,
