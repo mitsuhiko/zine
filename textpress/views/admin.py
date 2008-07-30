@@ -1352,7 +1352,7 @@ def do_urls(request):
         else:
             flash(errors[0], 'error')
 
-    return render_admin_response('admin/urls.html', 'options.urls',
+    return render_admin_response('admin/url_options.html', 'options.urls',
         form=form,
         hidden_form_data=make_hidden_fields(csrf_protector)
     )

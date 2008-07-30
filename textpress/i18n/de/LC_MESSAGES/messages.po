@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-07-30 23:25+0100\n"
+"PO-Revision-Date: 2008-07-30 23:36+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -454,7 +454,7 @@ msgstr "Verwende häufige Zeichen"
 #: textpress/templates/admin/edit_user.html:66
 #: textpress/templates/admin/overlays.html:16
 #: textpress/templates/admin/pages_config.html:23
-#: textpress/templates/admin/urls.html:24
+#: textpress/templates/admin/url_options.html:24
 #: textpress/templates/admin/write_page.html:46
 #: textpress/templates/admin/file_uploads/config.html:48
 msgid "Save"
@@ -2508,11 +2508,12 @@ msgstr ""
 "      dem folgenden Grund blockiert: %(reason)s\n"
 "    "
 
-#: textpress/templates/admin/urls.html:2 textpress/templates/admin/urls.html:4
+#: textpress/templates/admin/url_options.html:2
+#: textpress/templates/admin/url_options.html:4
 msgid "URL Options"
 msgstr "URL Einstellungen"
 
-#: textpress/templates/admin/urls.html:5
+#: textpress/templates/admin/url_options.html:5
 msgid ""
 "\n"
 "    Here you can change some basic URL configuration settings.  This is "
@@ -2536,19 +2537,19 @@ msgstr ""
 "    einen anderen Präfix geben und die Vorlagen anpassen.\n"
 "  "
 
-#: textpress/templates/admin/urls.html:14
+#: textpress/templates/admin/url_options.html:14
 msgid "Blog URL Prefix"
 msgstr "Blog URL Präfix"
 
-#: textpress/templates/admin/urls.html:16
+#: textpress/templates/admin/url_options.html:16
 msgid "Admin URL Prefix"
 msgstr "Admin URL Präfix"
 
-#: textpress/templates/admin/urls.html:18
+#: textpress/templates/admin/url_options.html:18
 msgid "Tags URL Prefix"
 msgstr "URL Präfix für Markierungen"
 
-#: textpress/templates/admin/urls.html:20
+#: textpress/templates/admin/url_options.html:20
 msgid "Author Profiles URL Prefix"
 msgstr "URL Präfix für Autoren"
 

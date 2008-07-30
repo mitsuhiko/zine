@@ -1,0 +1,28 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("URL Options") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("URL Options") }}</h1>
+  <p>{% trans %}
+    Here you can change some basic URL configuration settings.  This is especially
+    useful if you have plugins installed that that add a new index page or if you
+    want to move the administration to a different location.
+    If you want to use the tags as categories you can also give them a different
+    prefix and adapt the templates.
+  {% endtrans %}</p>
+  <form action="" method="post">
+    <dl>
+      <dt>{{ _("Blog URL Prefix") }}</dt>
+      <dd>{{ h.input_field('blog_url_prefix', form.blog_url_prefix) }}</dd>
+      <dt>{{ _("Admin URL Prefix") }}</dt>
+      <dd>{{ h.input_field('admin_url_prefix', form.admin_url_prefix) }}</dd>
+      <dt>{{ _("Tags URL Prefix") }}</dt>
+      <dd>{{ h.input_field('tags_url_prefix', form.tags_url_prefix) }}</dd>
+      <dt>{{ _("Author Profiles URL Prefix") }}</dt>
+      <dd>{{ h.input_field('profiles_url_prefix', form.profiles_url_prefix) }}</dd>
+    </dl>
+    <div class="actions">
+      <input type="submit" value="{{ _('Save') }}">
+      {{ hidden_form_data }}
+    </div>
+  </form>
+{% endblock %}
