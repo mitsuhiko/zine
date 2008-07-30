@@ -1784,8 +1784,8 @@ msgstr "Servus.  Willkommen im TextPress Administrationsbereich %(user)s."
 #, python-format
 msgid "You have written <strong>%(your_posts)s</strong> post so far."
 msgid_plural "You have written <strong>%(your_posts)s</strong> posts so far."
-msgstr[0] "Du hast <strong>%(your_posts)s</strong> Eintrag bis jetzt geschrieben."
-msgstr[1] "Du hast <strong>%(your_posts)s</strong> Einträge bis jetzt geschrieben."
+msgstr[0] "Du hast bis jetzt <strong>%(your_posts)s</strong> Eintrag geschrieben."
+msgstr[1] "Du hast bis jetzt <strong>%(your_posts)s</strong> Einträge geschrieben."
 
 #: textpress/templates/admin/index.html:17
 msgid "Quickstart"
@@ -2804,7 +2804,7 @@ msgstr "Spam (%d)"
 
 #: textpress/views/admin.py:100 textpress/views/admin.py:125
 msgid "Uploads"
-msgstr "Hochgeladene Dateien"
+msgstr "Dateien"
 
 #: textpress/views/admin.py:101
 msgid "Browse"
