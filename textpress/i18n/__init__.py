@@ -13,6 +13,7 @@ from datetime import datetime
 from time import strptime
 from babel import Locale, dates, UnknownLocaleError
 from babel.support import Translations
+from pytz import timezone, UTC
 import textpress.application
 
 
@@ -49,21 +50,32 @@ def ngettext(singular, plural, n):
     return app.translations.ungettext(singular, plural, n)
 
 
-def format_datetime(datetime=None, format='medium'):
+def format_datetime(datetime=None, format='medium', rebase=True):
     """Return a date formatted according to the given pattern."""
-    return _date_format(dates.format_datetime, datetime, format)
+    return _date_format(dates.format_datetime, datetime, format, rebase)
 
 
-def format_system_datetime(datetime=None):
+def format_system_datetime(datetime=None, rebase=True):
     """Formats a system datetime.  This is the format the admin
-    panel uses by default.  (Format: YYYY-MM-DD hh:mm and in UTC)
+    panel uses by default.  (Format: YYYY-MM-DD hh:mm and in the
+    user timezone unless rebase is disabled)
     """
-    return unicode(datetime.strftime('%Y-%m-%d %H:%M'))
+    if rebase:
+        if datetime.tzinfo is None:
+            datetime = datetime.replace(tzinfo=UTC)
+        datetime = datetime.astimezone(get_timezone())
+    return u'%d-%02d-%02d %02d:%02d' % (
+        datetime.year,
+        datetime.month,
+        datetime.day,
+        datetime.hour,
+        datetime.minute
+    )
 
 
-def format_date(date=None, format='medium'):
+def format_date(date=None, format='medium', rebase=True):
     """Return the date formatted according to the pattern."""
-    return _date_format(dates.format_date, date, format)
+    return _date_format(dates.format_date, date, format, rebase)
 
 
 def format_month(date=None):
@@ -71,9 +83,9 @@ def format_month(date=None):
     return format_date(date, 'MMMM YY')
 
 
-def format_time(time=None, format='medium'):
+def format_time(time=None, format='medium', rebase=True):
     """Return the time formatted according to the pattern."""
-    return _date_format(dates.format_time, time, format)
+    return _date_format(dates.format_time, time, format, rebase)
 
 
 def list_timezones():
@@ -119,7 +131,6 @@ def has_timezone(tz):
     """When pased a timezone as string this function checks if
     the timezone is know.
     """
-    from pytz import timezone
     try:
         timezone(tz)
     except:
@@ -127,11 +138,21 @@ def has_timezone(tz):
     return True
 
 
-def parse_datetime(string):
-    """Parses a string into a datetime object."""
+def parse_datetime(string, rebase=True):
+    """Parses a string into a datetime object.  Per default a conversion
+    from the blog timezone to UTC is performed but returned as naive
+    datetime object (that is tzinfo being None).  If rebasing is disabled
+    the string is expected in UTC.
+    """
     if string.lower() == _('now'):
         return datetime.utcnow()
-    convert = lambda fmt: datetime(*strptime(string, fmt)[:7])
+
+    def convert(format):
+        rv = datetime(*strptime(string, fmt)[:7])
+        if not rebase:
+            return rv
+        return rv.replace(tzinfo=UTC).astimezone(get_timezone()) \
+                 .replace(tzinfo=None)
     cfg = textpress.application.get_application().cfg
 
     # first of all try the following format because this is the format
@@ -168,13 +189,26 @@ def parse_datetime(string):
     raise ValueError('invalid date format')
 
 
-def _date_format(formatter, obj, format):
+def _date_format(formatter, obj, format, rebase):
+    """Internal helper that formats the date."""
     app = textpress.application.get_application()
     if app is None:
         locale = Locale('en')
     else:
         locale = app.locale
-    return formatter(obj, format, locale=locale)
+    tzinfo = None
+    if rebase:
+        tzinfo = get_timezone()
+    return formatter(obj, format, locale=locale, tzinfo=tzinfo)
+
+
+def get_timezone(name=None):
+    """Return the timezone for the given identifier or the timezone
+    of the application based on the configuration.
+    """
+    if name is None:
+        name = textpress.application.get_application().cfg['timezone']
+    return timezone(name)
 
 
 _ = gettext
