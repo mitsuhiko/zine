@@ -14,6 +14,7 @@ from time import strptime
 from babel import Locale, dates, UnknownLocaleError
 from babel.support import Translations
 from pytz import timezone, UTC
+from werkzeug.exceptions import NotFound
 import textpress.application
 
 
@@ -23,6 +24,10 @@ __all__ = ['_', 'gettext', 'ngettext']
 DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
                 '%m/%d/%y', '%d/%m/%y', '%d%m%y', '%m%d%y', '%y%m%d']
 TIME_FORMATS = ['%H:%M', '%H:%M:%S', '%I:%M %p', '%I:%M:%S %p']
+
+
+#: loaded javascript catalogs
+_js_catalogs = {}
 
 
 def load_translations(locale):
@@ -211,6 +216,30 @@ def get_timezone(name=None):
     if name is None:
         name = textpress.application.get_application().cfg['timezone']
     return timezone(name)
+
+
+def serve_javascript_translation(request, locale):
+    """Serves the JavaScript translation file for a locale."""
+    if locale in _js_catalogs:
+        data = _js_catalogs[locale]
+    else:
+        try:
+            l = Locale.parse(locale)
+        except UnknownLocaleError:
+            raise NotFound()
+        filename = os.path.join(os.path.dirname(__file__), str(l),
+                                'LC_MESSAGES', 'messages.js')
+        if not os.path.isfile(filename):
+            raise NotFound()
+        f = file(filename)
+        try:
+            data = _js_catalogs[locale] = f.read().decode('utf-8')
+        finally:
+            f.close()
+    response = textpress.application.Response(data, mimetype='application/javascript')
+    response.add_etag()
+    response.make_conditional(request)
+    return response
 
 
 _ = gettext

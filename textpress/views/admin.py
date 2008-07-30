@@ -336,7 +336,7 @@ def do_edit_post(request, post_id=None):
             post_status=STATUS_DRAFT,
             comments_enabled=request.app.cfg['comments_enabled'],
             pings_enabled=request.app.cfg['pings_enabled'],
-            pub_date='now', # XXX: i18n
+            pub_date=_('now'),
             slug='',
             author=request.user.username,
             parser=request.app.cfg['default_parser']
@@ -386,7 +386,7 @@ def do_edit_post(request, post_id=None):
         elif parser not in request.app.parsers:
             errors.append(_(u'Unknown parser “%s”.') % parser)
         try:
-            pub_date = parse_datetime(request.form.get('pub_date') or 'now')
+            pub_date = parse_datetime(request.form.get('pub_date') or _('now'))
         except ValueError:
             errors.append(_('Invalid publication date.'))
 

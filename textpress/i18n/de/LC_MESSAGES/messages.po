@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-07-30 23:36+0100\n"
+"PO-Revision-Date: 2008-07-31 00:21+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -113,7 +113,8 @@ msgstr "Letzte Kommentare"
 msgid "Pages Navigation"
 msgstr "Seiten-Navigation"
 
-#: textpress/i18n/__init__.py:147
+#: textpress/i18n/__init__.py:152 textpress/views/admin.py:339
+#: textpress/views/admin.py:389
 msgid "now"
 msgstr "jetzt"
 
@@ -464,17 +465,36 @@ msgstr "Speichern"
 msgid "Bookmarklet"
 msgstr "Bookmarklet"
 
-#: textpress/shared/js/Admin.js:51 textpress/shared/js/Admin.js:61
-msgid "posting shortcut."
+#: textpress/shared/js/Admin.js:51
+msgid ""
+"Right click on the following link and choose \"Add to favorites\" or "
+"\"Bookmark link\" to create a posting shortcut."
 msgstr ""
+"Nach einem Rechtsklick auf den folgenden Link wähle \"Zu Favoriten "
+"hinzufügen\" oder \"Lesezeichen erstellen\" um einen Schnellverweis "
+"für das Erstellen von neuen Einträgen hinzuzufügen."
 
 #: textpress/shared/js/Admin.js:55
-msgid "text and click on the bookmark."
+msgid ""
+"Next time you visit an interesting page, just select some text and click "
+"on the bookmark."
 msgstr ""
+"Wenn du nächstens eine interessante Seite besuchst über die du bloggen "
+"willst, wähle einfach ein wenig Text aus und klicke auf den neu "
+"erstellten Bookmark."
 
 #: textpress/shared/js/Admin.js:59
 msgid "Blog It!"
 msgstr "Blogge Es!"
+
+#: textpress/shared/js/Admin.js:61
+msgid ""
+"Right click on this link and choose \"Add to favorites\" or \"Bookmark "
+"link\" to create a posting shortcut."
+msgstr ""
+"Ein Rechtsklick auf diesen Link und wähle \"Zu den Favoriten hinzufügen\" "
+"oder \"Lesezeichen erstellen\" um einen Schnellverweis für das Erstellen "
+"von neuen Einträgen hinzuzufügen."
 
 #: textpress/shared/js/Admin.js:79
 msgid "Finishing upload, stand by...."
@@ -484,12 +504,12 @@ msgstr "Daten wurden hochgeladen, bitte warten...."
 msgid "Starting upload..."
 msgstr "Upload wird gestartet..."
 
-#: textpress/shared/js/TextPress.js:29
+#: textpress/shared/js/TextPress.js:31
 #, python-format
 msgid "Replying to comment by %s."
 msgstr "Antworte zu Kommentar von %s."
 
-#: textpress/shared/js/TextPress.js:31
+#: textpress/shared/js/TextPress.js:33
 msgid "(Create as top level comment)"
 msgstr "(Erstelle als top-level Kommentar)"
 
@@ -2163,7 +2183,7 @@ msgstr "Blog anzeigen"
 
 #: textpress/templates/admin/login.html:5
 #: textpress/templates/admin/login.html:11
-#: textpress/templates/admin/login.html:30
+#: textpress/templates/admin/login.html:33
 msgid "Login"
 msgstr "Anmelden"
 
@@ -3640,4 +3660,10 @@ msgid ""
 msgstr ""
 "Die Konfigurationsdatei (%s) konnte nicht zum schreiben geöffnet werden. "
 "Bitte passe die Zugriffsrechte an und probiere nochmal."
+
+#~ msgid "posting shortcut."
+#~ msgstr ""
+
+#~ msgid "text and click on the bookmark."
+#~ msgstr ""
 

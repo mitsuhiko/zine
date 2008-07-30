@@ -36,6 +36,7 @@ def make_urls(app):
         Rule('/_services/', endpoint='blog/service_rsd'),
         Rule('/_services/json/<path:identifier>', endpoint='blog/json_service'),
         Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service'),
+        Rule('/_translations/<locale>.js', endpoint='blog/serve_translation'),
         Rule('/_uploads/<filename>', endpoint='blog/get_uploaded_file'),
         Rule('/_uploads/<filename>/delete', endpoint='admin/delete_upload')
     ]

@@ -28,11 +28,10 @@ for domain in domains:
                             msgid = msgid[0]
                         jscatalog[msgid] = message.string
             with file(path.join(folder, domain + '.js'), 'w') as f:
-                f.write('babel.Translations.load(');
+                f.write('TextPress.addTranslations(');
                 dump(dict(
                     messages=jscatalog,
                     plural_expr=catalog.plural_expr,
-                    locale=str(catalog.locale),
-                    domain=catalog.domain
+                    locale=str(catalog.locale)
                 ), f)
-                f.write(').install();')
+                f.write(');')

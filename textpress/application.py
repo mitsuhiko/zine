@@ -902,7 +902,8 @@ class TextPress(object):
             link('EditURI', url_for('blog/service_rsd'),
                  type='application/rsd+xml', title='RSD'),
             script(url_for('core/shared', filename='js/jQuery.js')),
-            script(url_for('core/shared', filename='js/TextPress.js'))
+            script(url_for('core/shared', filename='js/TextPress.js')),
+            script(url_for('blog/serve_translation', locale=self.cfg['language']))
         ]
         base_url = self.cfg['blog_url'].rstrip('/')
         result.append(

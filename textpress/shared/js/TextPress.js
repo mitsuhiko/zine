@@ -11,6 +11,8 @@
 
 var TextPress = {
   TRANSLATIONS : {},
+  PLURAL_EXPR : function(n) { return n == 1 ? 0 : 1; },
+  LOCALE : 'unknown',
 
   getJSONServiceURL : function(identifier) {
     return this.BLOG_URL + '/_services/json/' + identifier;
@@ -44,12 +46,24 @@ var TextPress = {
   },
 
   gettext : function(string) {
-    return this.TRANSLATIONS[string] || string;
+    var translated = TextPress.TRANSLATIONS[string];
+    if (typeof translated == 'undefined')
+      return string;
+    return (typeof translated == 'string') ? translated : translated[0];
   },
 
-  addTranslations : function(translations) {
-    for (var key in translations)
-      this.TRANSLATIONS[key] = translations[key];
+  ngettext: function(singular, plural, n) {
+    var translated = TextPress.TRANSLATIONS[singular];
+    if (typeof translated == 'undefined')
+      return (n == 1) ? singular : plural;
+    return translated[TextPress.PLURALEXPR(n)];
+  },
+
+  addTranslations : function(catalog) {
+    for (var key in catalog.messages)
+      this.TRANSLATIONS[key] = catalog.messages[key];
+    this.PLURAL_EXPR = new Function('n', 'return +(' + catalog.plural_expr + ')');
+    this.LOCALE = catalog.locale;
   }
 };
 
@@ -58,4 +72,4 @@ $(function() {
 });
 
 // quick alias for translations
-function _(string) { return TextPress.gettext(string); }
+_ = TextPress.gettext;

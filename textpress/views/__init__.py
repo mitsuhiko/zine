@@ -11,6 +11,7 @@
     :license: GNU GPL.
 """
 from textpress.views import blog, admin
+from textpress import i18n
 
 
 #: bind the views to url endpoints
@@ -29,6 +30,7 @@ all_views = {
     'blog/xml_service':         blog.do_xml_service,
     'blog/atom_feed':           blog.do_atom_feed,
     'blog/get_uploaded_file':   blog.do_get_upload,
+    'blog/serve_translation':   i18n.serve_javascript_translation,
 
     # admin views
     'admin/index':              admin.do_index,
