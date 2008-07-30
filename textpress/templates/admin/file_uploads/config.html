@@ -39,7 +39,7 @@
           {%- if im_version -%}
           <p>Found ImageMagick version <code>{{ im_version|e }}</code></p>
           {%- else -%}
-          <p><strong>Cannot find ImageMagick</strong></p>
+          <p><strong>{{ _('Cannot find ImageMagick') }}</strong></p>
           {%- endif -%}
       </dd>
     </dl>

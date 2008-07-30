@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-07-31 00:21+0100\n"
+"PO-Revision-Date: 2008-07-31 00:43+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -471,8 +471,8 @@ msgid ""
 "\"Bookmark link\" to create a posting shortcut."
 msgstr ""
 "Nach einem Rechtsklick auf den folgenden Link wähle \"Zu Favoriten "
-"hinzufügen\" oder \"Lesezeichen erstellen\" um einen Schnellverweis "
-"für das Erstellen von neuen Einträgen hinzuzufügen."
+"hinzufügen\" oder \"Lesezeichen erstellen\" um einen Schnellverweis für "
+"das Erstellen von neuen Einträgen hinzuzufügen."
 
 #: textpress/shared/js/Admin.js:55
 msgid ""
@@ -492,9 +492,9 @@ msgid ""
 "Right click on this link and choose \"Add to favorites\" or \"Bookmark "
 "link\" to create a posting shortcut."
 msgstr ""
-"Ein Rechtsklick auf diesen Link und wähle \"Zu den Favoriten hinzufügen\" "
-"oder \"Lesezeichen erstellen\" um einen Schnellverweis für das Erstellen "
-"von neuen Einträgen hinzuzufügen."
+"Ein Rechtsklick auf diesen Link und wähle \"Zu den Favoriten hinzufügen\""
+" oder \"Lesezeichen erstellen\" um einen Schnellverweis für das Erstellen"
+" von neuen Einträgen hinzuzufügen."
 
 #: textpress/shared/js/Admin.js:79
 msgid "Finishing upload, stand by...."
@@ -2710,6 +2710,10 @@ msgstr "Mimetype-Zuordnung"
 msgid "Path to ImageMagick"
 msgstr "Pfad zu ImageMagick"
 
+#: textpress/templates/admin/file_uploads/config.html:42
+msgid "Cannot find ImageMagick"
+msgstr "Kann ImageMagick nicht finden"
+
 #: textpress/templates/admin/file_uploads/delete.html:2
 #: textpress/templates/admin/file_uploads/delete.html:4
 msgid "Delete File"
@@ -3660,10 +3664,4 @@ msgid ""
 msgstr ""
 "Die Konfigurationsdatei (%s) konnte nicht zum schreiben geöffnet werden. "
 "Bitte passe die Zugriffsrechte an und probiere nochmal."
-
-#~ msgid "posting shortcut."
-#~ msgstr ""
-
-#~ msgid "text and click on the bookmark."
-#~ msgstr ""
 
