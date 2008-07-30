@@ -230,12 +230,13 @@ def serve_javascript_translation(request, locale):
         filename = os.path.join(os.path.dirname(__file__), str(l),
                                 'LC_MESSAGES', 'messages.js')
         if not os.path.isfile(filename):
-            raise NotFound()
-        f = file(filename)
-        try:
-            data = _js_catalogs[locale] = f.read().decode('utf-8')
-        finally:
-            f.close()
+            data = ''
+        else:
+            f = file(filename)
+            try:
+                data = _js_catalogs[locale] = f.read().decode('utf-8')
+            finally:
+                f.close()
     response = textpress.application.Response(data, mimetype='application/javascript')
     response.add_etag()
     response.make_conditional(request)

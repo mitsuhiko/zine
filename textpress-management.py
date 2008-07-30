@@ -24,6 +24,7 @@ def make_app():
     from textpress import make_app
     return make_app(INSTANCE_FOLDER)
 
+
 def make_shell():
     from textpress import make_textpress
     app = make_textpress(INSTANCE_FOLDER, True)
@@ -77,6 +78,12 @@ examples:
     )
     plugin.dump(os.path.join(output_path, output_plugin_name))
     print "Created '%s' in '%s'" % (output_plugin_name, output_path)
+
+
+def action_apacheconfig():
+    """Generate an apache config for the shared exports."""
+    from textpress import make_textpress
+    print make_textpress(INSTANCE_FOLDER, True).generate_apache_config()
 
 
 action_runserver = script.make_runserver(make_app, use_reloader=True,

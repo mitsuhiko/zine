@@ -653,6 +653,16 @@ class TextPress(object):
         unregister_application(self)
         local.application = None
 
+    def generate_apache_config(self):
+        """Return a string with an apache config for shared data."""
+        buf = []
+        for alias, dst in self._shared_exports.iteritems():
+            dst = path.abspath(dst)
+            if len(dst.split()) != 1:
+                dst = '"%s"' % dst
+            buf.append('Alias %s %s' % (alias, dst))
+        return '\n'.join(buf)
+
     @setuponly
     def add_template_filter(self, name, callback):
         """Add a Jinja2 template filter."""
