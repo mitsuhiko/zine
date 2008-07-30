@@ -18,11 +18,11 @@
     {%- if hosting_env.multithreaded -%}
       {% trans count=hosting_env.thread_count %}yes ({{ count }} active threads){% endtrans %}
     {%- else -%}
-      no
+      {{ _("no") }}
     {%- endif -%}
     </dd>
     <dt>Multiprocess</dt>
-    <dd>{{ 'yes' if hosting_env.multiprocess else 'no' }}</dd>
+    <dd>{{ _('yes') if hosting_env.multiprocess else _('no') }}</dd>
     <dt>WSGI Version</dt>
     <dd>{{ hosting_env.wsgi_version|e }}</dd>
     <dt>Database URI</dt>
@@ -76,7 +76,7 @@
       <dt>{{ _("UID") }}</dt>
       <dd>{{ plugin.name }}</dd>
       <dt>{{ _("Active") }}</dt>
-      <dd>{{ "yes" if plugin.active else "no" }}</dd>
+      <dd>{{ _("yes") if plugin.active else _("no") }}</dd>
     </dl></li>
   {%- endfor %}
   </ul>

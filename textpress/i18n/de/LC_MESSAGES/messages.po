@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-07-30 22:46+0100\n"
+"PO-Revision-Date: 2008-07-30 23:25+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -445,6 +445,7 @@ msgid "Use Common Character"
 msgstr "Verwende häufige Zeichen"
 
 #: textpress/plugins/typography/templates/admin/typography.html:35
+#: textpress/templates/admin/basic_options.html:70
 #: textpress/templates/admin/cache.html:107
 #: textpress/templates/admin/configuration.html:42
 #: textpress/templates/admin/edit_comment.html:59
@@ -452,6 +453,8 @@ msgstr "Verwende häufige Zeichen"
 #: textpress/templates/admin/edit_tag.html:20
 #: textpress/templates/admin/edit_user.html:66
 #: textpress/templates/admin/overlays.html:16
+#: textpress/templates/admin/pages_config.html:23
+#: textpress/templates/admin/urls.html:24
 #: textpress/templates/admin/write_page.html:46
 #: textpress/templates/admin/file_uploads/config.html:48
 msgid "Save"
@@ -695,6 +698,41 @@ msgstr "Blocken"
 #: textpress/templates/admin/about_textpress.html:4
 msgid "About TextPress"
 msgstr "Über TextPress"
+
+#: textpress/templates/admin/about_textpress.html:6
+msgid ""
+"\n"
+"      TextPress is an open source content publishing platform emphasizing"
+" ease\n"
+"      of use and extensibility. It provides an powerful internal "
+"infrastructure,\n"
+"      an simple and an intuitive userinterface.\n"
+"    "
+msgstr ""
+"\n"
+"      TextPress ist eine Platform für das Veröffentlichen von Inhalten\n"
+"      mit Benutzerfreundlichkeit und Erweiterbarbeit als Schwerpunkten.\n"
+"      Es verfügt über eine umfangreiche interne Infrastruktur und einer\n"
+"      intuitiven Benutzeroberfläche.\n"
+"    "
+
+#: textpress/templates/admin/about_textpress.html:11
+msgid ""
+"\n"
+"      TextPress is distributed under the GNU GPL 2 or any later version. "
+"The\n"
+"      complete text of the license can be found online as well as in the "
+"LICENSE\n"
+"      file included in the distribution.\n"
+"    "
+msgstr ""
+"\n"
+"      TextPress wird under der GNU GPL 2 oder einer späteren Version"
+"       vertrieben.  Der komplette Lizenztext kann online gefunden werden,"
+"\n"
+"      und in der Englishen Originalversion in der LICENSE Datei, die sich"
+"       im TextPress Ordner befindet.\n"
+"    "
 
 #: textpress/templates/admin/approve_comment.html:2
 #: textpress/templates/admin/approve_comment.html:4
@@ -1873,6 +1911,17 @@ msgstr "Hosting Umgebung"
 #, python-format
 msgid "yes (%(count)s active threads)"
 msgstr "ja (%(count)s aktive Threads)"
+
+#: textpress/templates/admin/information.html:21
+#: textpress/templates/admin/information.html:25
+#: textpress/templates/admin/information.html:79
+msgid "no"
+msgstr "nein"
+
+#: textpress/templates/admin/information.html:25
+#: textpress/templates/admin/information.html:79
+msgid "yes"
+msgstr "ja"
 
 #: textpress/templates/admin/information.html:33
 msgid "URL Endpoints"
