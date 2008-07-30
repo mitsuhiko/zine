@@ -274,7 +274,7 @@ class PostManager(db.DatabaseManager):
                 url_args['year'] = year
 
         conditions = []
-        p = Post.c
+        p = posts.c
 
         # subcribers and normal users can just view the page if it was published
         if role <= ROLE_SUBSCRIBER:
@@ -426,7 +426,7 @@ class PostManager(db.DatabaseManager):
         """Filter for the latest n posts."""
         query = self.published(ignore_role=ignore_role)
         if limit is not None:
-            query = query[:limit]
+            query = query.limit(limit)
         return query
 
     def search(self, query):
@@ -825,7 +825,7 @@ class CommentManager(db.DatabaseManager):
             query = self.blocked(query)
 
         if limit is not None:
-            query = query[:limit]
+            query = query.limit(limit)
         return query
 
     def comments_for_post(self, post_id):

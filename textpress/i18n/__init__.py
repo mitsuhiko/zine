@@ -54,6 +54,13 @@ def format_datetime(datetime=None, format='medium'):
     return _date_format(dates.format_datetime, datetime, format)
 
 
+def format_system_datetime(datetime=None):
+    """Formats a system datetime.  This is the format the admin
+    panel uses by default.  (Format: YYYY-MM-DD hh:mm and in UTC)
+    """
+    return unicode(datetime.strftime('%Y-%m-%d %H:%M'))
+
+
 def format_date(date=None, format='medium'):
     """Return the date formatted according to the pattern."""
     return _date_format(dates.format_date, date, format)
@@ -127,8 +134,9 @@ def parse_datetime(string):
     convert = lambda fmt: datetime(*strptime(string, fmt)[:7])
     cfg = textpress.application.get_application().cfg
 
-    # first of all try the following format because a while ago it was
-    # Texpress' default format
+    # first of all try the following format because this is the format
+    # Texpress will output by default for any date time string in the
+    # administration panel.
     try:
         return convert(u'%Y-%m-%d %H:%M')
     except ValueError:

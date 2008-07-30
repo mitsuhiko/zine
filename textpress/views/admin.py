@@ -41,7 +41,7 @@ from textpress.utils.uploads import guess_mimetype, get_upload_folder, \
      list_files, list_images, get_im_version, get_im_path, \
      touch_upload_folder, upload_file, create_thumbnail, file_exists, \
      get_filename
-from textpress.i18n import parse_datetime, format_datetime, \
+from textpress.i18n import parse_datetime, format_system_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from textpress.importers import list_import_queue, load_import_dump, \
      delete_import_dump, perform_import
@@ -297,7 +297,7 @@ def do_edit_post(request, post_id=None):
             post_status=post.status,
             comments_enabled=post.comments_enabled,
             pings_enabled=post.pings_enabled,
-            pub_date=format_datetime(post.pub_date, 'short'),
+            pub_date=format_system_datetime(post.pub_date),
             slug=post.slug,
             author=post.author.username,
             parser=post.parser
@@ -648,7 +648,7 @@ def do_edit_comment(request, comment_id):
         'www':          comment.www,
         'body':         comment.raw_body,
         'parser':       comment.parser,
-        'pub_date':     format_datetime(comment.pub_date),
+        'pub_date':     format_system_datetime(comment.pub_date),
         'blocked':      comment.blocked,
         'blocked_msg':  comment.blocked_msg
     }
