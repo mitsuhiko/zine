@@ -25,6 +25,9 @@
         {{ h.checkbox('permanent') }}
         <label for="permanent">{{ _('Remember me') }}</label>
       </p>
+      <script type="text/javascript">
+        $('input[name="username"]').focus();
+      </script>
       <div class="actions">
         {{ hidden_redirect_field }}
         <input type="submit" value="{{ _('Login') }}">

@@ -2906,7 +2906,7 @@ msgid ""
 "TextPress is in maintenance mode. Don't forget to <a href=\"%s\">turn it "
 "off again</a> once you finish your changes."
 msgstr ""
-"TextPress ist im Wartungsmodus.  Vergiss nicht ihn <a href\"%s\">wieder "
+"TextPress ist im Wartungsmodus.  Vergiss nicht ihn <a href=\"%s\">wieder "
 "zu deaktivieren</a> wenn du fertig bist."
 
 #: textpress/views/admin.py:182
