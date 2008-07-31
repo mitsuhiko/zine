@@ -23,9 +23,8 @@
       </div>
     </div>
     <div class="footer">
-      <p>
-        Proudly powered by <a href="http://textpress.pocoo.org/">TextPress</a>.
-      </p>
+      <p>{% trans textpress='<a href="http://textpress.pocoo.org/">TextPress</a>'
+        %}Proudly powered by {{ textpress }}.{% endtrans %}</p>
     </div>
   </div>
 </body>

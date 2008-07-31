@@ -1,14 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>Welcome To The TextPress Setup</h2>
-  <p>
+  <h2>{{ _('Welcome To The TextPress Setup') }}</h2>
+  <p>{% trans %}
     Welcome to the TextPress Setup. This Wizard will ask you some
     basic questions and setup TextPress for you.
-  </p>
-  {% if error %}
-    <div class="error">
-      <h3>An Error Occoured</h3>
-      <p>{{ error|e }}</p>
-    </div>
-  {% endif %}
+  {% endtrans %}</p>
 {% endblock %}

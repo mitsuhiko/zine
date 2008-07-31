@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-07-31 08:23+0100\n"
+"PO-Revision-Date: 2008-07-31 20:16+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -23,6 +23,11 @@ msgstr "Standard Thema"
 #: textpress/application.py:534
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Ein einfaches Standard Thema, dass keine Stilinformationen beinhaltet."
+
+#: textpress/application.py:593
+#, python-format
+msgid "Copyright %(years)s by the Pocoo Team"
+msgstr "Copyright %(years)s by the Pocoo Team"
 
 #: textpress/models.py:97 textpress/views/admin.py:1131
 msgid "Administrator"
@@ -320,6 +325,18 @@ msgstr "angemeldet als %(username)s"
 #: textpress/plugins/vessel_theme/templates/_widgets.html:8
 msgid "go to admin panel"
 msgstr "zur Administration"
+
+#: textpress/plugins/miniblog_theme/templates/layout.html:26
+#: textpress/plugins/vessel_theme/templates/layout.html:26
+#: textpress/templates/layout.html:19
+#, python-format
+msgid "Proudly powered by %(textpress)s."
+msgstr "%(textpress)s unter der Haube."
+
+#: textpress/plugins/myrtle_theme/templates/layout.html:27
+#, python-format
+msgid "Proudly powered by %(textpress)s, %(theme)s designed by %(author)s."
+msgstr "%(textpress)s unter der Haube, %(theme)s designed von %(author)s."
 
 #: textpress/plugins/myrtle_theme/templates/layout.html:32
 msgid "Admin Panel"
@@ -760,8 +777,8 @@ msgstr ""
 
 #: textpress/templates/admin/about_textpress.html:16
 #, python-format
-msgid "Copyright © %(years)s by the Pocoo Team. Some rights reserved."
-msgstr "Copyright © %(years)s by the Pocoo Team. Some rights reserved."
+msgid "© Copyright %(years)s by the Pocoo Team. Some rights reserved."
+msgstr "© Copyright %(years)s by the Pocoo Team. Some rights reserved."
 
 #: textpress/templates/admin/approve_comment.html:2
 #: textpress/templates/admin/approve_comment.html:4
@@ -1936,21 +1953,61 @@ msgstr "Über das System"
 msgid "Hosting Environment"
 msgstr "Hosting Umgebung"
 
-#: textpress/templates/admin/information.html:19
-#, python-format
-msgid "yes (%(count)s active threads)"
-msgstr "ja (%(count)s aktive Threads)"
+#: textpress/templates/admin/information.html:7
+msgid "TextPress Version"
+msgstr "TextPress Version"
 
+#: textpress/templates/admin/information.html:10
+msgid "TextPress HG Node"
+msgstr "TextPress HG Knoten"
+
+#: textpress/templates/admin/information.html:11
+msgid "this textpress installation runs a mercurial checkout of textpress"
+msgstr ""
+"diese TextPress installation verwendet einen Mercurial Checkout von "
+"TextPress"
+
+#: textpress/templates/admin/information.html:14
+msgid "Persistent Environment"
+msgstr "Persistente Umgebung"
+
+#: textpress/templates/admin/information.html:15
+#: textpress/templates/admin/information.html:25
+#: textpress/templates/admin/information.html:79
+msgid "yes"
+msgstr "ja"
+
+#: textpress/templates/admin/information.html:15
 #: textpress/templates/admin/information.html:21
 #: textpress/templates/admin/information.html:25
 #: textpress/templates/admin/information.html:79
 msgid "no"
 msgstr "nein"
 
-#: textpress/templates/admin/information.html:25
-#: textpress/templates/admin/information.html:79
-msgid "yes"
-msgstr "ja"
+#: textpress/templates/admin/information.html:16
+msgid "Multithreaded"
+msgstr "Mehrere Threads"
+
+#: textpress/templates/admin/information.html:19
+#, python-format
+msgid "yes (%(count)s active threads)"
+msgstr "ja (%(count)s aktive Threads)"
+
+#: textpress/templates/admin/information.html:24
+msgid "Multiprocess"
+msgstr "Mehrere Prozesse"
+
+#: textpress/templates/admin/information.html:26
+msgid "WSGI Version"
+msgstr "WSGI Version"
+
+#: textpress/templates/admin/information.html:28
+msgid "Database URI"
+msgstr "Datenbank URI"
+
+#: textpress/templates/admin/information.html:30
+msgid "Instance Path"
+msgstr "Instanz-Pfad"
 
 #: textpress/templates/admin/information.html:33
 msgid "URL Endpoints"
@@ -1982,7 +2039,8 @@ msgid ""
 msgstr ""
 "\n"
 "    Die folgenden Servicepunkte sind in dieser Instanz registriert und\n"
-"    von einem der Services aufrufbar.\\›    "
+"    von einem der Services aufrufbar.\n"
+"    "
 
 #: textpress/templates/admin/information.html:52
 msgid "Installed APIs"
@@ -2189,6 +2247,11 @@ msgstr "In Blog importieren"
 #: textpress/templates/admin/layout.html:14
 msgid "View Blog"
 msgstr "Blog anzeigen"
+
+#: textpress/templates/admin/layout.html:45
+#, python-format
+msgid "Powered by %(textpress)s %(version)s."
+msgstr "%(textpress)s %(version)s unter der Haube."
 
 #: textpress/templates/admin/login.html:5
 #: textpress/templates/admin/login.html:11
@@ -2824,7 +2887,7 @@ msgstr "Hochladen"
 #: textpress/templates/admin/widgets/latest_posts.html:4
 #: textpress/templates/admin/widgets/post_archive_summary.html:15
 msgid "Limit"
-msgstr ""
+msgstr "Limit"
 
 #: textpress/templates/admin/widgets/latest_comments.html:8
 msgid "Ignore Blocked Comments"
@@ -2856,7 +2919,7 @@ msgstr "Navigation"
 
 #: textpress/templates/widgets/post_archive_summary.html:11
 msgid "Complete archive"
-msgstr ""
+msgstr "Vollständiges Archiv"
 
 #: textpress/utils/admin.py:44
 msgid "Error"
@@ -3665,7 +3728,36 @@ msgstr "Kommentar-Feed"
 msgid "Comment %(num)d on %(post)s"
 msgstr "Kommentar %(num)d von %(post)s"
 
-#: textpress/websetup/__init__.py:170
+#: textpress/websetup/__init__.py:93
+#, python-format
+msgid ""
+"Instance folder does not exist.  You have to create the folder “%s” "
+"before proceeding."
+msgstr ""
+"Der Instanz-Ordner existiert nicht.  Du musst den Ordner \"%s\" "
+"erstellen bevor das Setup fortfahren kann."
+
+#: textpress/websetup/__init__.py:115
+msgid "You have to provide a username."
+msgstr "Du musst einen Benutzernamen angeben."
+
+#: textpress/websetup/__init__.py:118
+msgid "You have to enter a mail address."
+msgstr "Du musst eine gültige E-Mail Adresse angeben."
+
+#: textpress/websetup/__init__.py:120
+msgid "The mail address is not valid."
+msgstr "Deine E-Mail Adresse ist nicht gültig."
+
+#: textpress/websetup/__init__.py:123
+msgid "You have to enter a password."
+msgstr "Du musst ein Passwort eingeben."
+
+#: textpress/websetup/__init__.py:125
+msgid "The two passwords do not match."
+msgstr "Die Passwörter stimmen nicht überein."
+
+#: textpress/websetup/__init__.py:183
 #, python-format
 msgid ""
 "The configuration file (%s) could not be opened for writing. Please "
@@ -3674,3 +3766,176 @@ msgstr ""
 "Die Konfigurationsdatei (%s) konnte nicht zum schreiben geöffnet werden. "
 "Bitte passe die Zugriffsrechte an und probiere nochmal."
 
+#: textpress/websetup/templates/database.html:3
+msgid "Database"
+msgstr "Datenbank"
+
+#: textpress/websetup/templates/database.html:4
+msgid ""
+"\n"
+"    TextPress uses a database to store blog posts and other information. "
+"The\n"
+"    only information it requires therefore is a database URI. Depending "
+"on your\n"
+"    database this URI looks different. Have a look at the following table"
+" for\n"
+"    examples of database URIs.\n"
+"  "
+msgstr ""
+"\n"
+"    TextPress verwendet eine Datenbank um Blog Einträge und andere Informationen\n"
+"    zu speichern.  Die einzige Information die es dazu benötigt ist die Datenbank\n"
+"    URI.  Abhängig von der Datenbank sieht diese URI anders aus.  Die folgende\n"
+"    Tabelle führt einige Beispiel URIs auf.\n"
+"  "
+
+#: textpress/websetup/templates/database.html:11
+msgid "SQLite"
+msgstr "SQLite"
+
+#: textpress/websetup/templates/database.html:12
+msgid "sqlite:///database.db"
+msgstr "sqlite:///datenbank.db"
+
+#: textpress/websetup/templates/database.html:13
+msgid ""
+"\n"
+"        connect to a database that is located at a specific absolute path"
+"\n"
+"        on the file system of the server.  Note that on Mac OS X and "
+"Linux\n"
+"        systems three slashes mean relative to the instance folder and "
+"four\n"
+"        slashes represent an absolute path.  On Windows you have to use\n"
+"        three slashes, a drive letter and the full path.\n"
+"      "
+msgstr ""
+"\n"
+"        verbindet zu einer Datenbank zu einem angegebenen Pfad auf dem\n"
+"        Dateisystem des Servers.  Beachte, dass auf Mac OS X und Linux\n"
+"        drei Schrägstriche einen Pfad relativ zum Instanzordner angeben\n"
+"        und vier einen absoluten Pfad.  Auf Windows werden hingegen drei\n"
+"        Slashes und ein Laufwerksbuchstabe benötigt.\n"
+"      "
+
+#: textpress/websetup/templates/database.html:20
+msgid "MySQL"
+msgstr "MySQL"
+
+#: textpress/websetup/templates/database.html:21
+msgid "mysql://username:password@host/database_name"
+msgstr "mysql://benutzername:passwort@server/datenbank_name"
+
+#: textpress/websetup/templates/database.html:22
+msgid "Postgres"
+msgstr "Postgres"
+
+#: textpress/websetup/templates/database.html:23
+msgid "postgres://username:password@host/database_name"
+msgstr "postgres://benutzername:passwort@server/datenbank_name"
+
+#: textpress/websetup/templates/error.html:3
+msgid "Setup Failed"
+msgstr "Setup Fehlgeschlagen"
+
+#: textpress/websetup/templates/error.html:4
+msgid ""
+"The websetup was not able to finish the TextPress installation "
+"successfully."
+msgstr ""
+"Das Websetup konnte die Installation nicht erfolgreich beenden."
+
+#: textpress/websetup/templates/error.html:5
+msgid ""
+"\n"
+"    If you need help for setting up TextPress have a look at the support\n"
+"    wepage that will be there once a beta is available :-)\n"
+"  "
+msgstr ""
+"\n"
+"    Wenn du Hilfe benötigst TextPress zu installieren schau auf die\n"
+"    Support Webseite sobald die Beta erhältlich ist :-)\n"
+"  "
+
+#: textpress/websetup/templates/finished.html:3
+msgid "Setup Finished"
+msgstr "Setup Fertiggstellt"
+
+#: textpress/websetup/templates/finished.html:4
+msgid ""
+"\n"
+"    The setup was finished successfully. You can now go to the\n"
+"    admin panel and start configuring your blog. Don't forget\n"
+"    to disable the maintenance mode after you finish your configuration.\n"
+"  "
+msgstr ""
+"\n"
+"    Das Setup wurde erfolgreich fertiggestellt.  Du kannst nun\n"
+"    zum Admin Panel gehen und die Konfiguration des Blogs beginnen.\n"
+"    Vergiss nicht den Wartungsmodus zu deaktivieren sobald du die\n"
+"    Konfiguration beendet hast.\n"
+"  "
+
+#: textpress/websetup/templates/layout.html:5
+#: textpress/websetup/templates/layout.html:153
+msgid "TextPress Setup"
+msgstr "TextPress Installation"
+
+#: textpress/websetup/templates/layout.html:162
+msgid "An Error Occoured"
+msgstr "Ein Fehler ist aufgetreten"
+
+#: textpress/websetup/templates/layout.html:168
+msgid "Next"
+msgstr "Weiter"
+
+#: textpress/websetup/templates/layout.html:168
+msgid "Install"
+msgstr "Installieren"
+
+#: textpress/websetup/templates/layout.html:169
+msgid "Back"
+msgstr "Zurück"
+
+#: textpress/websetup/templates/start.html:3
+msgid "Welcome To The TextPress Setup"
+msgstr "Willkommen zum TextPress Setup"
+
+#: textpress/websetup/templates/start.html:4
+msgid ""
+"\n"
+"    Welcome to the TextPress Setup. This Wizard will ask you some\n"
+"    basic questions and setup TextPress for you.\n"
+"  "
+msgstr ""
+"\n"
+"    Willkommen zur TextPress Installation.  Dieser Assistent wird\n"
+"    dir ein paar einfache Fragen stellen und TextPress für dich\n"
+"    konfigurieren.\n"
+"  "
+
+#: textpress/websetup/templates/summary.html:3
+msgid "Setup Starting"
+msgstr "Installation Starten"
+
+#: textpress/websetup/templates/summary.html:4
+msgid ""
+"\n"
+"    TextPress knows now about all the information it needs to setup your\n"
+"    instance. After you click on the install button TextPress will create"
+"\n"
+"    the database tables and insert the default information. Right after "
+"that\n"
+"    TextPress will be online in maintenance mode which means that it's "
+"only\n"
+"    visible to the administrator, all other users will get a message that"
+"\n"
+"    shows that the blog is in maintenance mode right now.\n"
+"  "
+msgstr ""
+"\n"
+"    TextPress kennt nun alle Informationen die es benötigt.  Wenn du\n"
+"    auf den \"Installieren\" Knopf drückst wird TextPress die\n"
+"    Datenbank-Tabellen und die Konfiguration erstellen.  Danach ist\n"
+"    TextPress im Wartungsmodus online.\n"
+"  "

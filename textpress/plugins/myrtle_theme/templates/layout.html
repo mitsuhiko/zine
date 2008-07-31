@@ -24,10 +24,10 @@
     </div>
     <div class="footer">
       {#- be kind and don't remove that message. but of course we can't hinder you :) #}
-      <p>
-        Proudly powered by <a href="http://textpress.pocoo.org/">TextPress</a>,
-        <a href="http://textpress.pocoo.org/plugins/myrtle_theme/">Myrtle theme</a> designed
-        by <a href="http://lucumr.pocoo.org/">Armin Ronacher</a>.
+      <p>{% trans textpress='<a href="http://textpress.pocoo.org/">TextPress</a>',
+        theme='<a href="http://textpress.pocoo.org/plugins/myrtle_theme/">Myrtle theme</a>',
+        author='<a href="http://lucumr.pocoo.org/">Armin Ronacher</a>'
+        %}Proudly powered by {{ textpress }}, {{ theme }} designed by {{ author }}.{% endtrans %}
         {%- if request.user.is_manager %}
           | <a href="{{ url_for('admin/index')|e }}">{{ _('Admin Panel') }}</a>
           | <a href="{{ url_for('admin/logout')|e }}">{{ _('Logout') }}</a>

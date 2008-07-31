@@ -11,7 +11,7 @@
     last request could not send any more requests to external files. Those
     would already be returned by the normal TextPress installation.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 import sys
@@ -21,16 +21,23 @@ from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
 from textpress.utils.crypto import gen_pwhash, gen_secret_key
 from textpress.utils.validators import is_valid_email
-from textpress.i18n import _
+from textpress.i18n import load_translations, has_language
 from werkzeug import Request, Response, redirect
 from jinja2 import Environment, FileSystemLoader
 
 
 template_path = path.join(path.dirname(__file__), 'templates')
-jinja_env = Environment(loader=FileSystemLoader(template_path))
+jinja_env = Environment(loader=FileSystemLoader(template_path),
+                        extensions=['jinja2.ext.i18n'])
+jinja_env.install_null_translations()
 
 
-def render_response(template_name, context):
+def render_response(request, template_name, context):
+    context.update(
+        gettext=request.translations.ugettext,
+        ngettext=request.translations.ungettext,
+        lang=request.translations.language
+    )
     tmpl = jinja_env.get_template(template_name)
     return Response(tmpl.render(context), mimetype='text/html')
 
@@ -73,17 +80,18 @@ class WebSetup(object):
             'values':      dict((k, v) for k, v in request.values.iteritems()
                                 if not k.startswith('_'))
         })
-        return render_response(name + '.html', ctx)
+        return render_response(request, name + '.html', ctx)
 
     def test_instance_folder(self, request):
         """Check if the instance folder exists."""
+        _ = request.translations.ugettext
         if not path.exists(self.instance_folder):
             folder = self.instance_folder
             if not isinstance(folder, unicode):
                 folder = folder.decode(sys.getfilesystemencoding() or 'utf-8',
                                        'ignore')
-            return {'error': u'Instance folder does not exist.  You have to '
-                    u'create the folder “%s” before proceeding.' % folder}
+            return {'error': _(u'Instance folder does not exist.  You have to '
+                    u'create the folder “%s” before proceeding.') % folder}
 
     def test_database(self, request):
         """Check if the database uri is valid."""
@@ -101,19 +109,20 @@ class WebSetup(object):
 
     def test_admin_account(self, request):
         """Check if the admin mail is valid and the passwords match."""
+        _ = request.translations.ugettext
         errors = []
         if not request.values.get('admin_username'):
-            errors.append('You have to provide a username.')
+            errors.append(_('You have to provide a username.'))
         email = request.values.get('admin_email')
         if not email:
-            errors.append('You have to enter a mail address.')
+            errors.append(_('You have to enter a mail address.'))
         elif not is_valid_email(email):
-            errors.append('The mail address is not valid.')
+            errors.append(_('The mail address is not valid.'))
         password = request.values.get('admin_password')
         if not password:
-            errors.append('You have to enter a password.')
+            errors.append(_('You have to enter a password.'))
         if password != request.values.get('admin_password2'):
-            errors.append('The two passwords do not match.')
+            errors.append(_('The two passwords do not match.'))
         if errors:
             return {'errors': errors}
 
@@ -162,24 +171,36 @@ class WebSetup(object):
                 maintenance_mode=True,
                 blog_url=request.url_root,
                 secret_key=gen_secret_key(),
-                database_uri=database_uri
+                database_uri=database_uri,
+                language=request.translations.language,
+                # load one plugin by default for a better theme
+                plugins='vessel_theme',
+                theme='vessel'
             )
             try:
                 t.commit()
             except IOError:
+                _ = request.translations.ugettext
                 error = _('The configuration file (%s) could not be opened '
                           'for writing. Please adjust your permissions and '
                           'try again.') % config_filename
 
         # use a local variable, the global render_response could
         # be None because we reloaded textpress and this module.
-        return render_response(error and 'error.html' or 'finished.html', {
+        return render_response(request, error and 'error.html' or 'finished.html', {
             'finished': True,
             'error':    error
         })
 
     def __call__(self, environ, start_response):
         request = Request(environ)
+        lang = request.values.get('_lang')
+        if lang is None:
+            lang = (request.accept_languages.best or 'en').split('-')[0].lower()
+        if not has_language(lang):
+            lang = 'en'
+        request.translations = load_translations(lang)
+        request.translations.language = lang
         response = None
 
         if request.path == '/':

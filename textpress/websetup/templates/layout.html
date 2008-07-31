@@ -2,7 +2,7 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-  <title>TextPress Setup</title>
+  <title>{{ _('TextPress Setup') }}</title>
   <style type="text/css">
     body {
         font-family: 'Trebuchet MS', sans-serif;
@@ -150,17 +150,23 @@
 <body>
   <div class="page">
     <div class="header">
-      <h1>TextPress Setup</h1>
+      <h1>{{ _('TextPress Setup') }}</h1>
     </div>
     <div class="contents">
       {% if not finished %}
         <form action="" method="post">
       {% endif %}
       {% block body %}{% endblock %}
+      {% if error %}
+        <div class="error">
+          <h3>{{ _('An Error Occoured') }}</h3>
+          <p>{{ error|e }}</p>
+        </div>
+      {% endif %}
       {% if not finished %}
           <div class="actions">
-            <input type="submit" name="_next" value="{% if next %}Next &raquo;{% else %}Install{% endif %}">
-            {% if prev %}<input type="submit" name="_prev" value="&laquo; Back">{% endif %}
+            <input type="submit" name="_next" value="{% if next %}{{ _('Next') }} &raquo;{% else %}{{ _('Install') }}{% endif %}">
+            {% if prev %}<input type="submit" name="_prev" value="&laquo; {{ _('Back') }}">{% endif %}
           </div>
 
           <div class="hidden">
@@ -170,6 +176,7 @@
               {%- endfor %}
             {%- endif %}
             <input type="hidden" name="_current" value="{{ current|e }}">
+            <input type="hidden" name="_lang" value="{{ lang|e }}">
           </div>
         </form>
       {% endif %}

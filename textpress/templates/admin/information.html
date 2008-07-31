@@ -4,16 +4,16 @@
   <h1>{{ _("About The System") }}</h1>
   <h2>{{ _("Hosting Environment") }}</h2>
   <dl>
-    <dt>TextPress Version</dt>
+    <dt>{{ _('TextPress Version') }}</dt>
     <dd>{{ textpress_version|e }} {{ textpress_tag }}</dd>
     {%- if textpress_hg_checkout %}
-      <dt>TextPress HG Node</dt>
-      <dd>{{ textpress_hg_node|e }} <small>[this textpress installation runs
-          a mercurial checkout of textpress]</small></dd>
+      <dt>{{ _('TextPress HG Node') }}</dt>
+      <dd>{{ textpress_hg_node|e }} <small>[{{ _('this textpress installation runs '
+        'a mercurial checkout of textpress') }}]</small></dd>
     {%- endif %}
-    <dt>Persistent Environment</dt>
-    <dd>{{ 'yes' if hosting_env.persistent else 'no' }}</dd>
-    <dt>Multithreaded</dt>
+    <dt>{{ _('Persistent Environment') }}</dt>
+    <dd>{{ _('yes') if hosting_env.persistent else _('no') }}</dd>
+    <dt>{{ _('Multithreaded') }}</dt>
     <dd>
     {%- if hosting_env.multithreaded -%}
       {% trans count=hosting_env.thread_count %}yes ({{ count }} active threads){% endtrans %}
@@ -21,13 +21,13 @@
       {{ _("no") }}
     {%- endif -%}
     </dd>
-    <dt>Multiprocess</dt>
+    <dt>{{ _('Multiprocess') }}</dt>
     <dd>{{ _('yes') if hosting_env.multiprocess else _('no') }}</dd>
-    <dt>WSGI Version</dt>
+    <dt>{{ _('WSGI Version') }}</dt>
     <dd>{{ hosting_env.wsgi_version|e }}</dd>
-    <dt>Database URI</dt>
+    <dt>{{ _('Database URI') }}</dt>
     <dd>{{ database_uri|e }}</dd>
-    <dt>Instance Path</dt>
+    <dt>{{ _('Instance Path') }}</dt>
     <dd>{{ instance_path|e }}</dd>
   </dl>
   <h2>{{ _("URL Endpoints") }}</h2>

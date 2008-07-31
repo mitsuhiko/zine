@@ -16,8 +16,8 @@
     {% block contents %}{% endblock %}
     {{ emit_event('after-contents-rendered') }}
   </div>
-  <div class="footer">
-    Proudly powered by <a href="http://textpress.pocoo.org/">TextPress</a>.
+  <div class="footer">{% trans textpress='<a href="http://textpress.pocoo.org/">TextPress</a>'
+    %}Proudly powered by {{ textpress }}.{% endtrans %}</div>
   </div>
 </body>
 </html>

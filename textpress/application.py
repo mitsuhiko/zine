@@ -590,7 +590,8 @@ class TextPress(object):
             get_page_metadata=self.get_page_metadata,
             textpress={
                 'version':      textpress.__version__,
-                'copyright':    '2007-2008 by the Pocoo Team'
+                'copyright':    _('Copyright %(years)s by the Pocoo Team')
+                                % {'years': '2007-2008'}
             }
         )
 

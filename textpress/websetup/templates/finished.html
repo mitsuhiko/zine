@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>Setup Finished</h2>
-  <p>
+  <h2>{{ _('Setup Finished') }}</h2>
+  <p>{% trans %}
     The setup was finished successfully. You can now go to the
     admin panel and start configuring your blog. Don't forget
     to disable the maintenance mode after you finish your configuration.
-  </p>
+  {% endtrans %}
   <form action="admin" method="post">
-    <p><input type="submit" value="Admin Panel"></p>
+    <p><input type="submit" value="Admin Panel">
   </form>
 {% endblock %}

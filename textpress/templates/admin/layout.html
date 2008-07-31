@@ -42,8 +42,9 @@
     </div>
   </div>
   <div class="footer">
-    <p>Powered by <a href="http://textpress.pocoo.org/">TextPress</a> {{
-      textpress.version }} | &copy; Copyright {{ textpress.copyright|e }}</p>
+    <p>{% trans textpress='<a href="http://textpress.pocoo.org/">TextPress</a>',
+      version=textpress.version -%}Powered by {{ textpress }} {{ version }}.{% endtrans %} |
+      &copy; {{ textpress.copyright|e }}</p>
   </div>
 </body>
 </html>

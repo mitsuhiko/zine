@@ -1,12 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>Setup Failed</h2>
-  <p>
-    The websetup was not able to finish the TextPress installation
-    successfully. The error message the system gave was "{{ error|e }}".
-  </p>
-  <p>
+  <h2>{{ _('Setup Failed') }}</h2>
+  <p>{{ _('The websetup was not able to finish the TextPress installation successfully.') }}
+  <p>{% trans %}
     If you need help for setting up TextPress have a look at the support
     wepage that will be there once a beta is available :-)
-  </p>
+  {% endtrans %}
 {% endblock %}
