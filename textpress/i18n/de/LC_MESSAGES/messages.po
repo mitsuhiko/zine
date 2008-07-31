@@ -1,15 +1,14 @@
-# German translations for PROJECT.
-# Copyright (C) 2008 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
+# German translations for TextPress.
+# Copyright (C) 2008 The Pocoo Team
+# This file is distributed under the same license as the TextPress project.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-07-31 00:43+0100\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2008-07-31 08:23+0100\n"
+"Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +18,7 @@ msgstr ""
 
 #: textpress/application.py:533
 msgid "Default Theme"
-msgstr "Standard Theme"
+msgstr "Standard Thema"
 
 #: textpress/application.py:534
 msgid "Simple default theme that doesn't contain any style information."
@@ -87,7 +86,7 @@ msgstr "Tag Wolke"
 
 #: textpress/widgets.py:109
 msgid "Maximum number of tags must be empty or a number."
-msgstr "Die maximale Anazhl der Tags muss leer oder eine Nummer sein."
+msgstr "Die maximale Anazhl der Markierungen muss leer oder eine Nummer sein."
 
 #: textpress/widgets.py:137
 msgid "Post Archive Summary"
@@ -286,7 +285,7 @@ msgstr ""
 "  "
 
 #: textpress/plugins/miniblog_theme/templates/_post.html:8
-#: textpress/templates/_post.html:11
+#: textpress/templates/_post.html:13
 msgid "Read on"
 msgstr "Weiterlesen"
 
@@ -296,7 +295,7 @@ msgid "by"
 msgstr "von"
 
 #: textpress/plugins/miniblog_theme/templates/_post.html:15
-#: textpress/templates/_post.html:22
+#: textpress/templates/_post.html:24
 #, python-format
 msgid "%(comments)s comment"
 msgid_plural "%(comments)s comments"
@@ -587,19 +586,20 @@ msgstr "Kommentar absenden"
 msgid "Reset Form"
 msgstr "Formular zurücksetzen"
 
-#: textpress/templates/_post.html:5 textpress/templates/show_post.html:7
-msgid "written by"
-msgstr "geschrieben von"
+#: textpress/templates/_post.html:5
+#, python-format
+msgid "written by %(author)s, on %(pub_date)s."
+msgstr "geschrieben von %(author)s am %(pub_date)s."
 
-#: textpress/templates/_post.html:15 textpress/templates/show_post.html:15
+#: textpress/templates/_post.html:17 textpress/templates/show_post.html:15
 msgid "Tagged as"
 msgstr "Markiert als"
 
-#: textpress/templates/_post.html:20 textpress/templates/show_post.html:20
+#: textpress/templates/_post.html:22 textpress/templates/show_post.html:20
 msgid "nothing"
 msgstr "nichts"
 
-#: textpress/templates/_post.html:25 textpress/templates/show_post.html:24
+#: textpress/templates/_post.html:27 textpress/templates/show_post.html:24
 #: textpress/templates/admin/_comment.html:12
 #: textpress/templates/admin/index.html:56
 msgid "Edit"
@@ -653,6 +653,10 @@ msgstr "Kinder"
 #: textpress/templates/show_author.html:12
 msgid "Posts this user wrote"
 msgstr "Einträge von diesem Benutzer"
+
+#: textpress/templates/show_post.html:7
+msgid "written by"
+msgstr "geschrieben von"
 
 #: textpress/templates/show_post.html:29
 #: textpress/templates/admin/inspect_import.html:62
@@ -753,6 +757,11 @@ msgstr ""
 "      und in der Englishen Originalversion in der LICENSE Datei, die sich"
 "       im TextPress Ordner befindet.\n"
 "    "
+
+#: textpress/templates/admin/about_textpress.html:16
+#, python-format
+msgid "Copyright © %(years)s by the Pocoo Team. Some rights reserved."
+msgstr "Copyright © %(years)s by the Pocoo Team. Some rights reserved."
 
 #: textpress/templates/admin/approve_comment.html:2
 #: textpress/templates/admin/approve_comment.html:4
@@ -1513,7 +1522,7 @@ msgstr "Einleitung"
 #: textpress/templates/admin/show_posts.html:20
 #: textpress/templates/widgets/tagcloud.html:2 textpress/views/admin.py:90
 msgid "Tags"
-msgstr "Tags"
+msgstr "Markierungen"
 
 #: textpress/templates/admin/edit_post.html:46
 msgid "Add"
@@ -1880,7 +1889,7 @@ msgstr "Benutzer verwalten"
 
 #: textpress/templates/admin/index.html:25
 msgid "Get Help"
-msgstr ""
+msgstr "Hilfe ansehen"
 
 #: textpress/templates/admin/index.html:27
 #, python-format
@@ -2827,7 +2836,7 @@ msgstr "Details"
 
 #: textpress/templates/admin/widgets/post_archive_summary.html:7
 msgid "Days"
-msgstr "Tags"
+msgstr "Tage"
 
 #: textpress/templates/admin/widgets/post_archive_summary.html:8
 msgid "Months"
