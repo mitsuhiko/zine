@@ -3,7 +3,7 @@
 {% include "_post.html" %}
 {% from "_post.html" import render_post %}
 {% block contents %}
-  {%- if not year %}
+  {%- if month_list %}
     <h2>{% trans %}Archive{% endtrans %}</h2>
     <ul>
     {%- for item in months %}
@@ -17,9 +17,9 @@
     {%- if not month %}
       <h2>{% trans year %}Archive for {{ year }}{% endtrans %}</h2>
     {%- elif not day %}
-      <h2>{% trans year, month %}Archive for {{ month }}, {{ year }}{% endtrans %}</h2>
+      <h2>{% trans month=date|monthformat %}Archive for {{ month }}{% endtrans %}</h2>
     {%- else %}
-      <h2>{% trans year, month, day %}Archive for {{ month }} {{ day }}, {{ year }}{% endtrans %}</h2>
+      <h2>{% trans day=date|dateformat('full') %}Archive for {{ day }}{% endtrans %}</h2>
     {%- endif %}
     {%- for post in posts %}
       {{ render_post(post) }}

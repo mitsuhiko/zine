@@ -12,6 +12,7 @@
 """
 from os.path import exists
 from time import asctime, gmtime, time
+from datetime import date
 
 from textpress.api import *
 from textpress.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
@@ -68,7 +69,7 @@ def do_archive(request, year=None, month=None, day=None, page=1):
     :URL endpoint: ``blog/archive``
     """
     if not year:
-        return render_response('archive.html',
+        return render_response('archive.html', month_list=True,
                                **Post.objects.get_archive_summary())
     data = Post.objects.get_list(year, month, day, page=page)
     if data.pop('probably_404'):
@@ -81,7 +82,8 @@ def do_archive(request, year=None, month=None, day=None, page=1):
     add_link('alternate', url_for('blog/atom_feed', **feed_parameters),
              'application/atom+xml', _('Recent Posts Feed'))
     return render_response('archive.html', year=year, month=month, day=day,
-                           **data)
+                           date=date(year, month or 1, day or 1),
+                           month_list=False, **data)
 
 
 def do_show_tag(request, slug, page=1):

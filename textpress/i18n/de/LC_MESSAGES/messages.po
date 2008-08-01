@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-01 09:30+0100\n"
+"PO-Revision-Date: 2008-08-01 23:31+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -117,7 +117,7 @@ msgstr "Letzte Kommentare"
 msgid "Pages Navigation"
 msgstr "Seiten-Navigation"
 
-#: textpress/i18n/__init__.py:155 textpress/views/admin.py:339
+#: textpress/i18n/__init__.py:180 textpress/views/admin.py:339
 #: textpress/views/admin.py:389
 msgid "now"
 msgstr "jetzt"
@@ -638,13 +638,13 @@ msgstr "Archiv für %(year)s"
 
 #: textpress/templates/archive.html:20
 #, python-format
-msgid "Archive for %(month)s, %(year)s"
-msgstr "Archiv für %(month)s, %(year)s"
+msgid "Archive for %(month)s"
+msgstr "Archiv für %(month)s"
 
 #: textpress/templates/archive.html:22
 #, python-format
-msgid "Archive for %(month)s %(day)s, %(year)s"
-msgstr "Archiv für %(day)s. %(month)s, %(year)s"
+msgid "Archive for %(day)s"
+msgstr "Archiv für %(day)s"
 
 #: textpress/templates/authors.html:2 textpress/templates/authors.html:4
 #: textpress/templates/admin/inspect_import.html:28
@@ -3669,61 +3669,61 @@ msgstr "Falsches Passwort"
 msgid "You have to enter a username."
 msgstr "Du musst einen Benutzernamen angeben."
 
-#: textpress/views/blog.py:48 textpress/views/blog.py:82
+#: textpress/views/blog.py:49 textpress/views/blog.py:83
 msgid "Recent Posts Feed"
 msgstr "Feed für Letze Einträge"
 
-#: textpress/views/blog.py:114
+#: textpress/views/blog.py:116
 #, python-format
 msgid "All posts tagged %s"
 msgstr "Alle Einträge markiert mit %s"
 
-#: textpress/views/blog.py:163
+#: textpress/views/blog.py:165
 #, python-format
 msgid "All posts written by %s"
 msgstr "Alle Einträge geschrieben von %s"
 
-#: textpress/views/blog.py:239
+#: textpress/views/blog.py:241
 msgid "You have to enter your name."
 msgstr "Du musst einen Namen eingeben."
 
-#: textpress/views/blog.py:241
+#: textpress/views/blog.py:243
 msgid "Your name is too long."
 msgstr "Dein Name ist zu lang."
 
-#: textpress/views/blog.py:244
+#: textpress/views/blog.py:246
 msgid "You have to enter a valid mail address."
 msgstr "Du musst eine gültige E-Mail Adresse angeben."
 
-#: textpress/views/blog.py:246
+#: textpress/views/blog.py:248
 msgid "Your E-Mail address is too long."
 msgstr "Deine E-Mail Adresse ist zu lang."
 
-#: textpress/views/blog.py:249
+#: textpress/views/blog.py:251
 msgid "You have to enter a valid URL or omit the field."
 msgstr "Du musst eine gültige URL eingeben oder das Feld leer lassen."
 
-#: textpress/views/blog.py:251
+#: textpress/views/blog.py:253
 msgid "The URL is too long."
 msgstr "Die URL ist zu lang."
 
-#: textpress/views/blog.py:257
+#: textpress/views/blog.py:259
 msgid "Your comment is too short."
 msgstr "Dein Kommentar ist zu kurz."
 
-#: textpress/views/blog.py:259
+#: textpress/views/blog.py:261
 msgid "Your comment is too long."
 msgstr "Dein Kommentar ist zu lang."
 
-#: textpress/views/blog.py:292
+#: textpress/views/blog.py:294
 msgid "Comment waiting for approval"
 msgstr "Kommentar muss erst von einem Administrator bestätigt werden."
 
-#: textpress/views/blog.py:307
+#: textpress/views/blog.py:309
 msgid "Comments Feed"
 msgstr "Kommentar-Feed"
 
-#: textpress/views/blog.py:432
+#: textpress/views/blog.py:434
 #, python-format
 msgid "Comment %(num)d on %(post)s"
 msgstr "Kommentar %(num)d von %(post)s"
@@ -3879,23 +3879,23 @@ msgstr ""
 "  "
 
 #: textpress/websetup/templates/layout.html:5
-#: textpress/websetup/templates/layout.html:158
+#: textpress/websetup/templates/layout.html:159
 msgid "TextPress Setup"
 msgstr "TextPress Installation"
 
-#: textpress/websetup/templates/layout.html:167
+#: textpress/websetup/templates/layout.html:168
 msgid "An Error Occoured"
 msgstr "Ein Fehler ist aufgetreten"
 
-#: textpress/websetup/templates/layout.html:173
+#: textpress/websetup/templates/layout.html:174
 msgid "Next"
 msgstr "Weiter"
 
-#: textpress/websetup/templates/layout.html:173
+#: textpress/websetup/templates/layout.html:174
 msgid "Install"
 msgstr "Installieren"
 
-#: textpress/websetup/templates/layout.html:174
+#: textpress/websetup/templates/layout.html:175
 msgid "Back"
 msgstr "Zurück"
 
@@ -3925,8 +3925,10 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Das Setup hat die Sprache von deinen Browsereinstellungen übernommen.\n"
-"    Solltest du eine andere Sprache wünschen kannst du es in der folgenden\n"
+"    Das Setup hat die Sprache von deinen Browsereinstellungen übernommen."
+"\n"
+"    Solltest du eine andere Sprache wünschen kannst du es in der "
+"folgenden\n"
 "    Liste auswählen.\n"
 "  "
 
@@ -3955,4 +3957,7 @@ msgstr ""
 "    Datenbank-Tabellen und die Konfiguration erstellen.  Danach ist\n"
 "    TextPress im Wartungsmodus online.\n"
 "  "
+
+#~ msgid "Archive for %(month)s %(day)s, %(year)s"
+#~ msgstr "Archiv für %(day)s. %(month)s, %(year)s"
 

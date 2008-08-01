@@ -104,7 +104,7 @@ def format_date(date=None, format='medium', rebase=True):
 
 def format_month(date=None):
     """Format month and year of a date."""
-    return format_date(date, 'MMMM YY')
+    return format_date(date, 'MMMM YYYY')
 
 
 def format_time(time=None, format='medium', rebase=True):
