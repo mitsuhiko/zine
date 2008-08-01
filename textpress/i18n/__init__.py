@@ -59,12 +59,15 @@ def to_user_timezone(datetime):
     """Convert a datetime object to the user timezone."""
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
-    return datetime.astimezone(get_timezone())
+    tzinfo = get_timezone()
+    return tzinfo.normalize(datetime.astimezone(tzinfo))
 
 
-def to_utc(datetime):
+def to_utc(datetime, tzinfo=None):
     """Convert a datetime object to UTC and drop tzinfo."""
-    if datetime.tzinfo is None:
+    if tzinfo is not None:
+        datetime = tzinfo.localize(datetime)
+    elif datetime.tzinfo is None:
         return datetime
     return datetime.astimezone(UTC).replace(tzinfo=None)
 
@@ -168,7 +171,9 @@ def parse_datetime(string, rebase=True):
     datetime object (that is tzinfo being None).  If rebasing is disabled
     the string is expected in UTC.
 
-    The return value is **always** a naive datetime object in UTC.
+    The return value is **always** a naive datetime object in UTC.  This
+    function should be considered of a lenient counterpart of
+    `format_system_datetime`.
     """
     # shortcut: string as None or "now" or the current locale's
     # equivalent returns the current timestamp.
@@ -179,7 +184,7 @@ def parse_datetime(string, rebase=True):
         """Helper that parses the string and convers the timezone."""
         rv = datetime(*strptime(string, format)[:7])
         if rebase:
-            return to_utc(rv.replace(tzinfo=get_timezone()))
+            return to_utc(rv, get_timezone())
         return rv
     cfg = textpress.application.get_application().cfg
 
@@ -192,14 +197,14 @@ def parse_datetime(string, rebase=True):
         pass
 
     # no go with time only, and current day
-    base = datetime.utcnow().replace(tzinfo=get_timezone(), microsecond=0)
     for fmt in TIME_FORMATS:
         try:
             val = convert(fmt)
         except ValueError:
             continue
-        return to_utc(base.replace(hour=val.hour, minute=val.minute,
-                                   second=val.second))
+        return to_utc(datetime.utcnow().replace(hour=val.hour,
+                      minute=val.minute, second=val.second, microsecond=0),
+                      get_timezone())
 
     # no try various types of date + time strings
     def combined():
