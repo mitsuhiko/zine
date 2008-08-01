@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-02 00:00+0100\n"
+"PO-Revision-Date: 2008-08-02 00:20+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -1545,6 +1545,10 @@ msgstr "Markierungen"
 #: textpress/templates/admin/edit_post.html:46
 msgid "Add"
 msgstr "Hinzufügen"
+
+#: textpress/templates/admin/edit_post.html:53
+msgid "no tags created yet"
+msgstr "noch keine Markierungen vorhanden"
 
 #: textpress/templates/admin/edit_post.html:67
 msgid "Discussion"

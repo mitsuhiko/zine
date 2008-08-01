@@ -50,7 +50,7 @@
                id='tags_' + tag.slug) }} <label for="tags_{{
           tag.slug }}">{{ tag.name|e }}</label></li>
       {%- else %}
-        <li><em>no tags created yet</em></li>
+        <li><em>{{ _('no tags created yet') }}</em></li>
       {%- endfor %}
       </ul>
     </div>
