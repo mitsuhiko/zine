@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-07-31 20:16+0100\n"
+"PO-Revision-Date: 2008-08-01 09:30+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -117,7 +117,7 @@ msgstr "Letzte Kommentare"
 msgid "Pages Navigation"
 msgstr "Seiten-Navigation"
 
-#: textpress/i18n/__init__.py:152 textpress/views/admin.py:339
+#: textpress/i18n/__init__.py:155 textpress/views/admin.py:339
 #: textpress/views/admin.py:389
 msgid "now"
 msgstr "jetzt"
@@ -3728,36 +3728,36 @@ msgstr "Kommentar-Feed"
 msgid "Comment %(num)d on %(post)s"
 msgstr "Kommentar %(num)d von %(post)s"
 
-#: textpress/websetup/__init__.py:93
+#: textpress/websetup/__init__.py:94
 #, python-format
 msgid ""
 "Instance folder does not exist.  You have to create the folder “%s” "
 "before proceeding."
 msgstr ""
-"Der Instanz-Ordner existiert nicht.  Du musst den Ordner \"%s\" "
-"erstellen bevor das Setup fortfahren kann."
+"Der Instanz-Ordner existiert nicht.  Du musst den Ordner \"%s\" erstellen"
+" bevor das Setup fortfahren kann."
 
-#: textpress/websetup/__init__.py:115
+#: textpress/websetup/__init__.py:116
 msgid "You have to provide a username."
 msgstr "Du musst einen Benutzernamen angeben."
 
-#: textpress/websetup/__init__.py:118
+#: textpress/websetup/__init__.py:119
 msgid "You have to enter a mail address."
 msgstr "Du musst eine gültige E-Mail Adresse angeben."
 
-#: textpress/websetup/__init__.py:120
+#: textpress/websetup/__init__.py:121
 msgid "The mail address is not valid."
 msgstr "Deine E-Mail Adresse ist nicht gültig."
 
-#: textpress/websetup/__init__.py:123
+#: textpress/websetup/__init__.py:124
 msgid "You have to enter a password."
 msgstr "Du musst ein Passwort eingeben."
 
-#: textpress/websetup/__init__.py:125
+#: textpress/websetup/__init__.py:126
 msgid "The two passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-#: textpress/websetup/__init__.py:183
+#: textpress/websetup/__init__.py:185
 #, python-format
 msgid ""
 "The configuration file (%s) could not be opened for writing. Please "
@@ -3783,9 +3783,12 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    TextPress verwendet eine Datenbank um Blog Einträge und andere Informationen\n"
-"    zu speichern.  Die einzige Information die es dazu benötigt ist die Datenbank\n"
-"    URI.  Abhängig von der Datenbank sieht diese URI anders aus.  Die folgende\n"
+"    TextPress verwendet eine Datenbank um Blog Einträge und andere "
+"Informationen\n"
+"    zu speichern.  Die einzige Information die es dazu benötigt ist die "
+"Datenbank\n"
+"    URI.  Abhängig von der Datenbank sieht diese URI anders aus.  Die "
+"folgende\n"
 "    Tabelle führt einige Beispiel URIs auf.\n"
 "  "
 
@@ -3842,8 +3845,7 @@ msgstr "Setup Fehlgeschlagen"
 msgid ""
 "The websetup was not able to finish the TextPress installation "
 "successfully."
-msgstr ""
-"Das Websetup konnte die Installation nicht erfolgreich beenden."
+msgstr "Das Websetup konnte die Installation nicht erfolgreich beenden."
 
 #: textpress/websetup/templates/error.html:5
 msgid ""
@@ -3877,23 +3879,23 @@ msgstr ""
 "  "
 
 #: textpress/websetup/templates/layout.html:5
-#: textpress/websetup/templates/layout.html:153
+#: textpress/websetup/templates/layout.html:158
 msgid "TextPress Setup"
 msgstr "TextPress Installation"
 
-#: textpress/websetup/templates/layout.html:162
+#: textpress/websetup/templates/layout.html:167
 msgid "An Error Occoured"
 msgstr "Ein Fehler ist aufgetreten"
 
-#: textpress/websetup/templates/layout.html:168
+#: textpress/websetup/templates/layout.html:173
 msgid "Next"
 msgstr "Weiter"
 
-#: textpress/websetup/templates/layout.html:168
+#: textpress/websetup/templates/layout.html:173
 msgid "Install"
 msgstr "Installieren"
 
-#: textpress/websetup/templates/layout.html:169
+#: textpress/websetup/templates/layout.html:174
 msgid "Back"
 msgstr "Zurück"
 
@@ -3912,6 +3914,20 @@ msgstr ""
 "    Willkommen zur TextPress Installation.  Dieser Assistent wird\n"
 "    dir ein paar einfache Fragen stellen und TextPress für dich\n"
 "    konfigurieren.\n"
+"  "
+
+#: textpress/websetup/templates/start.html:8
+msgid ""
+"\n"
+"    The setup tried to determine the language from your browser\n"
+"    settings.  If you want to step through the wizzard in another\n"
+"    language select it from the dropdown menu below and press next.\n"
+"  "
+msgstr ""
+"\n"
+"    Das Setup hat die Sprache von deinen Browsereinstellungen übernommen.\n"
+"    Solltest du eine andere Sprache wünschen kannst du es in der folgenden\n"
+"    Liste auswählen.\n"
 "  "
 
 #: textpress/websetup/templates/summary.html:3
@@ -3939,3 +3955,4 @@ msgstr ""
 "    Datenbank-Tabellen und die Konfiguration erstellen.  Danach ist\n"
 "    TextPress im Wartungsmodus online.\n"
 "  "
+

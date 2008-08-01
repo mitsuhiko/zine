@@ -21,7 +21,7 @@ from textpress.api import db
 from textpress.models import User, ROLE_ADMIN
 from textpress.utils.crypto import gen_pwhash, gen_secret_key
 from textpress.utils.validators import is_valid_email
-from textpress.i18n import load_translations, has_language
+from textpress.i18n import load_translations, has_language, list_languages
 from werkzeug import Request, Response, redirect
 from jinja2 import Environment, FileSystemLoader
 
@@ -78,7 +78,8 @@ class WebSetup(object):
             'prev':        self.prev[name],
             'next':        self.next[name],
             'values':      dict((k, v) for k, v in request.values.iteritems()
-                                if not k.startswith('_'))
+                                if not k.startswith('_')),
+            'languages':   list_languages(request.translations.language)
         })
         return render_response(request, name + '.html', ctx)
 
