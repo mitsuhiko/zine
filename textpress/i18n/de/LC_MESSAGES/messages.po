@@ -177,7 +177,7 @@ msgstr "Vereinfachtes HTML"
 
 #: textpress/parsers/simplehtml.py:134
 msgid "Automatic Paragraphs"
-msgstr "Automatische Paragraphen"
+msgstr "Automatische Absätze"
 
 #: textpress/plugins/akismet_spam_filter/__init__.py:74
 msgid "No Akismet key provided."

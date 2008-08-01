@@ -55,6 +55,20 @@ def ngettext(singular, plural, n):
     return app.translations.ungettext(singular, plural, n)
 
 
+def to_user_timezone(datetime):
+    """Convert a datetime object to the user timezone."""
+    if datetime.tzinfo is None:
+        datetime = datetime.replace(tzinfo=UTC)
+    return datetime.astimezone(get_timezone())
+
+
+def to_utc(datetime):
+    """Convert a datetime object to UTC and drop tzinfo."""
+    if datetime.tzinfo is None:
+        return datetime
+    return datetime.astimezone(UTC).replace(tzinfo=None)
+
+
 def format_datetime(datetime=None, format='medium', rebase=True):
     """Return a date formatted according to the given pattern."""
     return _date_format(dates.format_datetime, datetime, format, rebase)
@@ -66,9 +80,7 @@ def format_system_datetime(datetime=None, rebase=True):
     user timezone unless rebase is disabled)
     """
     if rebase:
-        if datetime.tzinfo is None:
-            datetime = datetime.replace(tzinfo=UTC)
-        datetime = datetime.astimezone(get_timezone())
+        datetime = to_user_timezone(datetime)
     return u'%d-%02d-%02d %02d:%02d' % (
         datetime.year,
         datetime.month,
@@ -79,7 +91,11 @@ def format_system_datetime(datetime=None, rebase=True):
 
 
 def format_date(date=None, format='medium', rebase=True):
-    """Return the date formatted according to the pattern."""
+    """Return the date formatted according to the pattern.  Rebasing only
+    works for datetime objects passed to this function obviously.
+    """
+    if rebase and isinstance(date, datetime):
+        date = to_user_timezone(date)
     return _date_format(dates.format_date, date, format, rebase)
 
 
@@ -97,7 +113,7 @@ def list_timezones():
     """Return a list of all timezones."""
     from pytz import common_timezones
     # XXX: translate
-    result = [(x, x) for x in common_timezones]
+    result = [(x, x.replace('_', ' ')) for x in common_timezones]
     result.sort(key=lambda x: x[1].lower())
     return result
 
@@ -151,16 +167,20 @@ def parse_datetime(string, rebase=True):
     from the blog timezone to UTC is performed but returned as naive
     datetime object (that is tzinfo being None).  If rebasing is disabled
     the string is expected in UTC.
+
+    The return value is **always** a naive datetime object in UTC.
     """
-    if string.lower() == _('now'):
-        return datetime.utcnow()
+    # shortcut: string as None or "now" or the current locale's
+    # equivalent returns the current timestamp.
+    if string is None or string.lower() in ('now', _('now')):
+        return datetime.utcnow().replace(microsecond=0)
 
     def convert(format):
+        """Helper that parses the string and convers the timezone."""
         rv = datetime(*strptime(string, format)[:7])
-        if not rebase:
-            return rv
-        return rv.replace(tzinfo=UTC).astimezone(get_timezone()) \
-                 .replace(tzinfo=None)
+        if rebase:
+            return to_utc(rv.replace(tzinfo=get_timezone()))
+        return rv
     cfg = textpress.application.get_application().cfg
 
     # first of all try the following format because this is the format
@@ -172,16 +192,16 @@ def parse_datetime(string, rebase=True):
         pass
 
     # no go with time only, and current day
-    base = datetime.utcnow()
+    base = datetime.utcnow().replace(tzinfo=get_timezone(), microsecond=0)
     for fmt in TIME_FORMATS:
         try:
             val = convert(fmt)
         except ValueError:
             continue
-        return base.replace(hour=val.hour, minute=val.minute,
-                            second=val.second)
+        return to_utc(base.replace(hour=val.hour, minute=val.minute,
+                                   second=val.second))
 
-    # no try date + time
+    # no try various types of date + time strings
     def combined():
         for t_fmt in TIME_FORMATS:
             for d_fmt in DATE_FORMATS:
@@ -205,8 +225,6 @@ def _date_format(formatter, obj, format, rebase, **extra):
     else:
         locale = app.locale
     extra = {}
-    # a limitation in babel doesn't allow dates being formatted
-    # with a timezone information.
     if formatter is not dates.format_date and rebase:
         extra['tzinfo'] = get_timezone()
     return formatter(obj, format, locale=locale, **extra)
