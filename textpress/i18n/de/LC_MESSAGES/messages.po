@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-01 23:31+0100\n"
+"PO-Revision-Date: 2008-08-02 00:00+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -1477,6 +1477,7 @@ msgstr "Kommentar bearbeiten"
 
 #: textpress/templates/admin/edit_comment.html:19
 #: textpress/templates/admin/edit_user.html:23
+#: textpress/websetup/templates/admin_account.html:16
 msgid "E-Mail"
 msgstr "E-Mail"
 
@@ -1628,11 +1629,13 @@ msgstr "Nachricht verstecken"
 #: textpress/templates/admin/edit_user.html:15
 #: textpress/templates/admin/login.html:19
 #: textpress/templates/admin/show_users.html:8
+#: textpress/websetup/templates/admin_account.html:10
 msgid "Username"
 msgstr "Benutzername"
 
 #: textpress/templates/admin/edit_user.html:19
 #: textpress/templates/admin/login.html:21
+#: textpress/websetup/templates/admin_account.html:12
 msgid "Password"
 msgstr "Passwort"
 
@@ -3766,6 +3769,30 @@ msgstr ""
 "Die Konfigurationsdatei (%s) konnte nicht zum schreiben geöffnet werden. "
 "Bitte passe die Zugriffsrechte an und probiere nochmal."
 
+#: textpress/websetup/templates/admin_account.html:3
+msgid "Administrator Account"
+msgstr "Administratorzugang"
+
+#: textpress/websetup/templates/admin_account.html:4
+msgid ""
+"\n"
+"    In order to log into your TextPress installation you have to provide "
+"a\n"
+"    login name for the administration user. You can later rename or "
+"delete\n"
+"    that user if you want.\n"
+"  "
+msgstr ""
+"\n"
+"    Um dich in deinem Blog anmelden zu können musst du einen Namen\n"
+"    Für den Administrator Benutzer angeben.  Du kannst diesen später\n"
+"    umbenennen oder löschen.\n"
+"  "
+
+#: textpress/websetup/templates/admin_account.html:14
+msgid "Password (repeat)"
+msgstr "Passwort (wiederholen)"
+
 #: textpress/websetup/templates/database.html:3
 msgid "Database"
 msgstr "Datenbank"
@@ -3957,7 +3984,4 @@ msgstr ""
 "    Datenbank-Tabellen und die Konfiguration erstellen.  Danach ist\n"
 "    TextPress im Wartungsmodus online.\n"
 "  "
-
-#~ msgid "Archive for %(month)s %(day)s, %(year)s"
-#~ msgstr "Archiv für %(day)s. %(month)s, %(year)s"
 

@@ -1035,6 +1035,10 @@ div.login-box input {
     -webkit-border-radius: 3px;
 }
 
+div.login-box input:focus {
+    background: url(img/dialogbg.png) repeat-x left top;
+}
+
 div.login-box input[type="checkbox"] {
     width: 18px;
     height: 18px;

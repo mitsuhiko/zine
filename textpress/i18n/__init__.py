@@ -121,16 +121,16 @@ def list_timezones():
     return result
 
 
-def list_languages(locale=None):
+def list_languages(self_translated=False):
     """Return a list of all languages."""
-    if locale is None:
+    if not self_translated:
         app = textpress.application.get_application()
         if app:
             locale = app.locale
         else:
             locale = Locale('en')
     else:
-        locale = Locale.parse(locale)
+        locale = None
 
     languages = [('en', Locale('en').get_display_name(locale))]
     folder = os.path.dirname(__file__)

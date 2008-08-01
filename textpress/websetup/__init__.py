@@ -79,7 +79,7 @@ class WebSetup(object):
             'next':        self.next[name],
             'values':      dict((k, v) for k, v in request.values.iteritems()
                                 if not k.startswith('_')),
-            'languages':   list_languages(request.translations.language)
+            'languages':   list_languages(self_translated=True)
         })
         return render_response(request, name + '.html', ctx)
 
@@ -125,7 +125,7 @@ class WebSetup(object):
         if password != request.values.get('admin_password2'):
             errors.append(_('The two passwords do not match.'))
         if errors:
-            return {'errors': errors}
+            return {'error': errors[0]}
 
     def start_setup(self, request):
         """
