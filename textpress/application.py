@@ -29,7 +29,7 @@ from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
 
-from textpress.database import db, upgrade_database, cleanup_session
+from textpress.database import db, cleanup_session
 from textpress.config import Configuration
 from textpress.cache import get_cache
 from textpress.utils import ClosingIterator, local, local_manager
@@ -497,9 +497,7 @@ class TextPress(object):
         if not self.cfg.exists:
             raise InstanceNotInitialized()
 
-        # connect to the database, ignore errors for now and set up
-        # the builtin database checks
-        self._database_checks = [upgrade_database]
+        # connect to the database
         self.database_engine = db.create_engine(self.cfg['database_uri'],
                                                 self.instance_folder)
 
@@ -572,9 +570,6 @@ class TextPress(object):
             if plugin.active:
                 plugin.setup()
             self.plugins[plugin.name] = plugin
-
-        # check database integrity by performing the database checks
-        self.perform_database_upgrade()
 
         # init the template system with the core stuff
         from textpress import htmlhelpers, models
@@ -889,11 +884,6 @@ class TextPress(object):
         about the context concept have a look at :ref:`contexts`.
         """
         local.application = self
-
-    def perform_database_upgrade(self):
-        """Do the database upgrade."""
-        for check in self._database_checks:
-            check(self)
 
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""

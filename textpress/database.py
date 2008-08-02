@@ -289,16 +289,7 @@ pages = db.Table('pages', metadata,
 
 
 def init_database(engine):
-    """This is also called form the upgrade database function but especially
-    from the websetup. That's also why it takes an engine and not a textpress
-    application.
+    """This is called from the websetup which explains why it takes an engine
+    and not a textpress application.
     """
     metadata.create_all(engine)
-
-
-def upgrade_database(app):
-    """Check if the tables are up to date and perform an upgrade.
-    Currently creating is enough. Once there are release verisons
-    this function will upgrade the database structure too.
-    """
-    init_database(app.database_engine)

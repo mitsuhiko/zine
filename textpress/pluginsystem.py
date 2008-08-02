@@ -485,7 +485,8 @@ class Plugin(object):
         except:
             if not self.app.cfg['plugin_guard']:
                 raise
-            self.setup_error = sys.exc_info()
+            exc_type, exc_value, tb = sys.exc_info()
+            self.setup_error = exc_type, exc_value, tb.tb_next
 
     @property
     def display_name(self):
