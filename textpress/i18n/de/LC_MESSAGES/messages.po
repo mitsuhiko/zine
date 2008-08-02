@@ -514,7 +514,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Diese Thema hat mehrere Farbvariationen von denen du eine auswählen kannst.\n"
+"    Dieses Thema hat mehrere Farbvariationen von denen du eine auswählen kannst.\n"
 "  "
 
 #: textpress/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:10
@@ -3424,7 +3424,7 @@ msgstr "Das Thema konnte nicht geändert werden."
 
 #: textpress/views/admin.py:1389
 msgid "This theme is not configurable"
-msgstr "Diese Thema kann nicht konfiguriert werden"
+msgstr "Dieses Thema kann nicht konfiguriert werden"
 
 #: textpress/views/admin.py:1403
 msgid ""
