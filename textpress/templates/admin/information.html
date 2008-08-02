@@ -2,15 +2,31 @@
 {% block title %}{{ _("About The System") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("About The System") }}</h1>
-  <h2>{{ _("Hosting Environment") }}</h2>
+  <h2>{{ _('TextPress Environment') }}</h2>
   <dl>
     <dt>{{ _('TextPress Version') }}</dt>
-    <dd>{{ textpress_version|e }} {{ textpress_tag }}</dd>
-    {%- if textpress_hg_checkout %}
-      <dt>{{ _('TextPress HG Node') }}</dt>
-      <dd>{{ textpress_hg_node|e }} <small>[{{ _('this textpress installation runs '
-        'a mercurial checkout of textpress') }}]</small></dd>
-    {%- endif %}
+    <dd>{{ textpress_version|e }}</dd>
+    <dt>{{ _('Distribution Mode') }}</dt>
+    <dd>{{ textpress_env.MODE }}</dd>
+    <dt>{{ _('Package Location') }}</dt>
+    <dd>{{ textpress_env.PACKAGE_LOCATION|e }}</dd>
+    <dt>{{ _('Shared Data') }}</dt>
+    <dd>{{ textpress_env.SHARED_DATA|e }}</dd>
+    <dt>{{ _('Builtin Templates') }}</dt>
+    <dd>{{ textpress_env.BUILTIN_TEMPLATE_PATH|e }}</dd>
+    <dt>{{ _('Builtin Plugins') }}</dt>
+    <dd>{{ textpress_env.BUILTIN_PLUGIN_FOLDER|e }}</dd>
+    <dt>{{ _('Path to Locales') }}</dt>
+    <dd>{{ textpress_env.LOCALE_PATH|e }}</dd>
+    <dt>{{ _('Path to Instance') }}</dt>
+    <dd>{{ instance_path|e }}</dd>
+    <dt>{{ _('Database URI') }}</dt>
+    <dd>{{ database_uri|e }}</dd>
+  </dl>
+  <h2>{{ _("Hosting Environment") }}</h2>
+  <dl>
+    <dt>{{ _('Python Version') }}</dt>
+    <dd>{{ python_version }}</dd>
     <dt>{{ _('Persistent Environment') }}</dt>
     <dd>{{ _('yes') if hosting_env.persistent else _('no') }}</dd>
     <dt>{{ _('Multithreaded') }}</dt>
@@ -25,10 +41,6 @@
     <dd>{{ _('yes') if hosting_env.multiprocess else _('no') }}</dd>
     <dt>{{ _('WSGI Version') }}</dt>
     <dd>{{ hosting_env.wsgi_version|e }}</dd>
-    <dt>{{ _('Database URI') }}</dt>
-    <dd>{{ database_uri|e }}</dd>
-    <dt>{{ _('Instance Path') }}</dt>
-    <dd>{{ instance_path|e }}</dd>
   </dl>
   <h2>{{ _("URL Endpoints") }}</h2>
   <p>{% trans count=endpoints|count %}

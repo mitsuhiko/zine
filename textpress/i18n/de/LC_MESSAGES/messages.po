@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-02 12:33+0100\n"
+"PO-Revision-Date: 2008-08-02 20:07+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -16,15 +16,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.0dev-r0\n"
 
-#: textpress/application.py:533
+#: textpress/application.py:527
 msgid "Default Theme"
 msgstr "Standard Thema"
 
-#: textpress/application.py:534
+#: textpress/application.py:528
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Ein einfaches Standard Thema, dass keine Stilinformationen beinhaltet."
 
-#: textpress/application.py:593
+#: textpress/application.py:584
 #, python-format
 msgid "Copyright %(years)s by the Pocoo Team"
 msgstr "Copyright %(years)s by the Pocoo Team"
@@ -48,7 +48,7 @@ msgstr "Editor"
 #: textpress/models.py:101 textpress/templates/admin/edit_comment.html:15
 #: textpress/templates/admin/edit_comment.html:28
 #: textpress/templates/admin/edit_post.html:87
-#: textpress/templates/admin/information.html:72
+#: textpress/templates/admin/information.html:84
 #: textpress/templates/admin/inspect_import.html:61
 #: textpress/templates/admin/show_posts.html:19 textpress/views/admin.py:1133
 msgid "Author"
@@ -125,7 +125,42 @@ msgstr "Letzte Kommentare"
 msgid "Pages Navigation"
 msgstr "Seiten-Navigation"
 
-#: textpress/i18n/__init__.py:200 textpress/views/admin.py:339
+#: textpress/experimental_plugins/notification/__init__.py:28
+#, python-format
+msgid "New comment on your blog to \"%(title)s\" by %(author)s"
+msgstr "Neuer Kommentar in deinem Blog zu \"%(title)s\" von %(author)s"
+
+#: textpress/experimental_plugins/notification/__init__.py:33
+#, python-format
+msgid ""
+"%(author)s (%(email)s) wrote at %(date)s:\n"
+"\n"
+"%(content)s\n"
+"%(signature)s"
+msgstr ""
+"%(author)s (%(email)s) schrieb um %(date)s:\n"
+"\n"
+"%(content)s\n"
+"%(signature)s"
+
+#: textpress/experimental_plugins/notification/__init__.py:49
+msgid "Unmoderated Comments"
+msgstr "Unmoderierte Kommentare"
+
+#: textpress/experimental_plugins/notification/__init__.py:50
+#, python-format
+msgid ""
+"There are %(number)d comments awaiting moderation.\n"
+"You can review them on:\n"
+"  %(url)s\n"
+"%(signature)s"
+msgstr ""
+"Es warten %(number)d Kommentare auf Moderation.\n"
+"Du kannst sie hier überprüfen:\n"
+"  %(url)s\n"
+"%(signature)s"
+
+#: textpress/i18n/__init__.py:295 textpress/views/admin.py:339
 #: textpress/views/admin.py:389
 msgid "now"
 msgstr "jetzt"
@@ -354,41 +389,6 @@ msgstr "Administration"
 #: textpress/templates/admin/layout.html:16
 msgid "Logout"
 msgstr "Abmelden"
-
-#: textpress/plugins/notification/__init__.py:28
-#, python-format
-msgid "New comment on your blog to \"%(title)s\" by %(author)s"
-msgstr "Neuer Kommentar in deinem Blog zu \"%(title)s\" von %(author)s"
-
-#: textpress/plugins/notification/__init__.py:33
-#, python-format
-msgid ""
-"%(author)s (%(email)s) wrote at %(date)s:\n"
-"\n"
-"%(content)s\n"
-"%(signature)s"
-msgstr ""
-"%(author)s (%(email)s) schrieb um %(date)s:\n"
-"\n"
-"%(content)s\n"
-"%(signature)s"
-
-#: textpress/plugins/notification/__init__.py:49
-msgid "Unmoderated Comments"
-msgstr "Unmoderierte Kommentare"
-
-#: textpress/plugins/notification/__init__.py:50
-#, python-format
-msgid ""
-"There are %(number)d comments awaiting moderation.\n"
-"You can review them on:\n"
-"  %(url)s\n"
-"%(signature)s"
-msgstr ""
-"Es warten %(number)d Kommentare auf Moderation.\n"
-"Du kannst sie hier überprüfen:\n"
-"  %(url)s\n"
-"%(signature)s"
 
 #: textpress/plugins/pygments_support/__init__.py:136
 msgid "Pygments theme changed successfully."
@@ -1602,7 +1602,7 @@ msgid "Slug"
 msgstr "URL-Bezeichner"
 
 #: textpress/templates/admin/edit_tag.html:11
-#: textpress/templates/admin/information.html:70
+#: textpress/templates/admin/information.html:82
 #: textpress/templates/admin/show_tags.html:9
 msgid "Name"
 msgstr "Name"
@@ -1965,70 +1965,92 @@ msgid "About The System"
 msgstr "Über das System"
 
 #: textpress/templates/admin/information.html:5
-msgid "Hosting Environment"
-msgstr "Hosting Umgebung"
+msgid "TextPress Environment"
+msgstr "TextPress Umgebung"
 
 #: textpress/templates/admin/information.html:7
 msgid "TextPress Version"
 msgstr "TextPress Version"
 
-#: textpress/templates/admin/information.html:10
-msgid "TextPress HG Node"
-msgstr "TextPress HG Knoten"
+#: textpress/templates/admin/information.html:9
+msgid "Distribution Mode"
+msgstr "Distributionsmodus"
 
 #: textpress/templates/admin/information.html:11
-msgid "this textpress installation runs a mercurial checkout of textpress"
-msgstr ""
-"diese TextPress installation verwendet einen Mercurial Checkout von "
-"TextPress"
+msgid "Package Location"
+msgstr "Pfad zum Package"
 
-#: textpress/templates/admin/information.html:14
+#: textpress/templates/admin/information.html:13
+msgid "Shared Data"
+msgstr "Geteilte Daten"
+
+#: textpress/templates/admin/information.html:15
+msgid "Builtin Templates"
+msgstr "Mitgelieferte Vorlagen"
+
+#: textpress/templates/admin/information.html:17
+msgid "Builtin Plugins"
+msgstr "Mitgelieferte Plugins"
+
+#: textpress/templates/admin/information.html:19
+msgid "Path to Locales"
+msgstr "Pfad zu den Übersetzungen"
+
+#: textpress/templates/admin/information.html:21
+msgid "Path to Instance"
+msgstr "Pfad zur Instanz"
+
+#: textpress/templates/admin/information.html:23
+msgid "Database URI"
+msgstr "Datenbank URI"
+
+#: textpress/templates/admin/information.html:26
+msgid "Hosting Environment"
+msgstr "Hosting Umgebung"
+
+#: textpress/templates/admin/information.html:28
+msgid "Python Version"
+msgstr "Python Version"
+
+#: textpress/templates/admin/information.html:30
 msgid "Persistent Environment"
 msgstr "Persistente Umgebung"
 
-#: textpress/templates/admin/information.html:15
-#: textpress/templates/admin/information.html:25
-#: textpress/templates/admin/information.html:79
+#: textpress/templates/admin/information.html:31
+#: textpress/templates/admin/information.html:41
+#: textpress/templates/admin/information.html:91
 msgid "yes"
 msgstr "ja"
 
-#: textpress/templates/admin/information.html:15
-#: textpress/templates/admin/information.html:21
-#: textpress/templates/admin/information.html:25
-#: textpress/templates/admin/information.html:79
+#: textpress/templates/admin/information.html:31
+#: textpress/templates/admin/information.html:37
+#: textpress/templates/admin/information.html:41
+#: textpress/templates/admin/information.html:91
 msgid "no"
 msgstr "nein"
 
-#: textpress/templates/admin/information.html:16
+#: textpress/templates/admin/information.html:32
 msgid "Multithreaded"
 msgstr "Mehrere Threads"
 
-#: textpress/templates/admin/information.html:19
+#: textpress/templates/admin/information.html:35
 #, python-format
 msgid "yes (%(count)s active threads)"
 msgstr "ja (%(count)s aktive Threads)"
 
-#: textpress/templates/admin/information.html:24
+#: textpress/templates/admin/information.html:40
 msgid "Multiprocess"
 msgstr "Mehrere Prozesse"
 
-#: textpress/templates/admin/information.html:26
+#: textpress/templates/admin/information.html:42
 msgid "WSGI Version"
 msgstr "WSGI Version"
 
-#: textpress/templates/admin/information.html:28
-msgid "Database URI"
-msgstr "Datenbank URI"
-
-#: textpress/templates/admin/information.html:30
-msgid "Instance Path"
-msgstr "Instanz-Pfad"
-
-#: textpress/templates/admin/information.html:33
+#: textpress/templates/admin/information.html:45
 msgid "URL Endpoints"
 msgstr "URL Endpunkte"
 
-#: textpress/templates/admin/information.html:34
+#: textpress/templates/admin/information.html:46
 #, python-format
 msgid ""
 "\n"
@@ -2040,11 +2062,11 @@ msgstr ""
 "registriert:\n"
 "  "
 
-#: textpress/templates/admin/information.html:42
+#: textpress/templates/admin/information.html:54
 msgid "Services"
 msgstr "Services"
 
-#: textpress/templates/admin/information.html:43
+#: textpress/templates/admin/information.html:55
 msgid ""
 "\n"
 "    The following servicepoints are registered on this instance to be "
@@ -2057,11 +2079,11 @@ msgstr ""
 "    von einem der Services aufrufbar.\n"
 "    "
 
-#: textpress/templates/admin/information.html:52
+#: textpress/templates/admin/information.html:64
 msgid "Installed APIs"
 msgstr "Installierte APIs"
 
-#: textpress/templates/admin/information.html:53
+#: textpress/templates/admin/information.html:65
 msgid ""
 "\n"
 "    The following APIs are installed on this blog instance. APIs marked "
@@ -2074,53 +2096,53 @@ msgstr ""
 "    Stern (*) werden bevorzugt.\n"
 "  "
 
-#: textpress/templates/admin/information.html:66 textpress/views/admin.py:126
+#: textpress/templates/admin/information.html:78 textpress/views/admin.py:126
 msgid "Plugins"
 msgstr "Plugins"
 
-#: textpress/templates/admin/information.html:74
+#: textpress/templates/admin/information.html:86
 msgid "Location"
 msgstr "Stelle"
 
-#: textpress/templates/admin/information.html:76
+#: textpress/templates/admin/information.html:88
 msgid "UID"
 msgstr "UID"
 
-#: textpress/templates/admin/information.html:78
+#: textpress/templates/admin/information.html:90
 msgid "Active"
 msgstr "Aktiv"
 
-#: textpress/templates/admin/information.html:83
+#: textpress/templates/admin/information.html:95
 msgid "Configuration Variables"
 msgstr "Konfigurationsvariablen"
 
-#: textpress/templates/admin/information.html:86
+#: textpress/templates/admin/information.html:98
 #: textpress/templates/admin/show_pages.html:8
 #: textpress/templates/admin/write_page.html:11
 msgid "Key"
 msgstr "Schlüssel"
 
-#: textpress/templates/admin/information.html:87
+#: textpress/templates/admin/information.html:99
 msgid "Value"
 msgstr "Wert"
 
-#: textpress/templates/admin/information.html:88
+#: textpress/templates/admin/information.html:100
 msgid "Default"
 msgstr "Standard"
 
-#: textpress/templates/admin/information.html:98
+#: textpress/templates/admin/information.html:110
 msgid "Template Globals"
 msgstr "Template Globale"
 
-#: textpress/templates/admin/information.html:104
+#: textpress/templates/admin/information.html:116
 msgid "Template Filters"
 msgstr "Template Filter"
 
-#: textpress/templates/admin/information.html:110
+#: textpress/templates/admin/information.html:122
 msgid "Events"
 msgstr "Events"
 
-#: textpress/templates/admin/information.html:112
+#: textpress/templates/admin/information.html:124
 msgid ""
 "\n"
 "      TextPress uses an event system for intercomponent communication. "
@@ -2138,7 +2160,7 @@ msgstr ""
 "      nicht.\n"
 "    "
 
-#: textpress/templates/admin/information.html:118
+#: textpress/templates/admin/information.html:130
 msgid ""
 "\n"
 "        Your python version however supports the new AST compile mode "
@@ -2158,7 +2180,7 @@ msgstr ""
 "        installierten Plugins.\n"
 "     "
 
-#: textpress/templates/admin/information.html:124
+#: textpress/templates/admin/information.html:136
 msgid "Build Event Map"
 msgstr "Event-Map erstellen"
 
@@ -3996,4 +4018,12 @@ msgstr ""
 "    Datenbank-Tabellen und die Konfiguration erstellen.  Danach ist\n"
 "    TextPress im Wartungsmodus online.\n"
 "  "
+
+#~ msgid "TextPress HG Node"
+#~ msgstr "TextPress HG Knoten"
+
+#~ msgid "this textpress installation runs a mercurial checkout of textpress"
+#~ msgstr ""
+#~ "diese TextPress installation verwendet einen"
+#~ " Mercurial Checkout von TextPress"
 

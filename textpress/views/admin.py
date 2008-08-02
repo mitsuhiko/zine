@@ -31,7 +31,7 @@ from textpress.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from textpress.database import comments as comment_table, posts, \
      post_tags, post_links
-from textpress.utils import get_version_info, dump_json, load_json
+from textpress.utils import dump_json, load_json
 from textpress.utils.validators import is_valid_email, is_valid_url
 from textpress.utils.admin import can_build_eventmap, build_eventmap, \
      Pagination, flash, gen_slug, commit_config_change
@@ -1745,11 +1745,12 @@ def do_information(request):
     installation occour it's a good idea to dump this page and attach it to
     a bug report mail.
     """
+    from sys import version as python_version
     from threading import activeCount
     from jinja2.defaults import DEFAULT_NAMESPACE, DEFAULT_FILTERS
+    from textpress import environment, __version__ as textpress_version
 
     thread_count = activeCount()
-    version_info = get_version_info()
 
     return render_admin_response('admin/information.html', 'system.information',
         apis=[{
@@ -1776,10 +1777,9 @@ def do_information(request):
             'wsgi_version':     '.'.join(map(str, request.environ['wsgi.version']))
         },
         plugins=sorted(request.app.plugins.values(), key=lambda x: x.name),
-        textpress_version='.'.join(map(str, version_info[0:3])),
-        textpress_tag=version_info[3],
-        textpress_hg_node=version_info[4],
-        textpress_hg_checkout=version_info[4] is not None,
+        python_version='<br>'.join(map(escape, python_version.splitlines())),
+        textpress_env=environment,
+        textpress_version=textpress_version,
         template_globals=[name for name, obj in
                           sorted(request.app.template_env.globals.items())
                           if name not in DEFAULT_NAMESPACE],

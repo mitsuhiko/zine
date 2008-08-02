@@ -24,43 +24,6 @@ local = Local()
 local_manager = LocalManager([local])
 
 
-_version_info = None
-
-def get_version_info():
-    """Get the TextPress version info tuple."""
-    global _version_info
-    if _version_info is None:
-        import textpress
-        p = textpress.__version__.split()
-        version = map(int, p.pop(0).split('.'))
-        while len(version) < 3:
-            version.append(0)
-
-        if p:
-            tag = p.pop(0)
-            assert not p
-        else:
-            tag = 'release'
-
-        from subprocess import Popen, PIPE
-        hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, stdin=PIPE,
-                   cwd=os.path.dirname(textpress.__file__))
-        hg.stdin.close()
-        hg.stderr.close()
-        rv = hg.stdout.read()
-        hg.stdout.close()
-        hg.wait()
-        hg_node = None
-        if hg.wait() == 0:
-            for line in rv.splitlines():
-                p = line.split(':', 1)
-                if len(p) == 2 and p[0].lower().strip() == 'changeset':
-                    hg_node = p[1].strip()
-                    break
-        _version_info = tuple(version) + (tag, hg_node)
-    return _version_info
-
-
 def build_tag_uri(app, date, resource, identifier):
     """Build a unique tag URI for this blog."""
     host, path = urlparse(app.cfg['blog_url'])[1:3]
