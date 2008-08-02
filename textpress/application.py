@@ -29,18 +29,14 @@ from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
 
+from textpress.environment import SHARED_DATA, BUILTIN_TEMPLATE_PATH, \
+     BUILTIN_PLUGIN_FOLDER
 from textpress.database import db, cleanup_session
 from textpress.config import Configuration
 from textpress.cache import get_cache
 from textpress.utils import ClosingIterator, local, local_manager
 from textpress.utils.validators import check_external_url
 
-
-#: path to the shared data of the core components
-SHARED_DATA = path.join(path.dirname(__file__), 'shared')
-
-#: path to the builtin templates (admin panel and page defaults)
-BUILTIN_TEMPLATE_PATH = path.join(path.dirname(__file__), 'templates')
 
 #: the lock for the application setup.
 _setup_lock = allocate_lock()
@@ -554,7 +550,7 @@ class TextPress(object):
 
         # load plugins
         from textpress.pluginsystem import find_plugins, \
-             register_application, BUILTIN_PLUGIN_FOLDER
+             register_application
         self.plugin_folder = path.join(instance_folder, 'plugins')
         self.plugin_searchpath = [self.plugin_folder]
         for folder in self.cfg['plugin_searchpath'].split(','):

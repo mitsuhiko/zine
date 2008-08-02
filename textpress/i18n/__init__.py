@@ -29,7 +29,9 @@ from babel import Locale, dates, UnknownLocaleError
 from babel.support import Translations
 from pytz import timezone, UTC
 from werkzeug.exceptions import NotFound
+
 import textpress.application
+from textpress.environment import LOCALE_PATH, LOCALE_DOMAIN
 
 
 __all__ = ['_', 'gettext', 'ngettext', 'lazy_gettext', 'lazy_ngettext']
@@ -50,7 +52,7 @@ def load_translations(locale):
     a `UnknownLocaleError` is raised.
     """
     locale = Locale.parse(locale)
-    return Translations.load(os.path.dirname(__file__), [locale])
+    return Translations.load(LOCALE_PATH, [locale], LOCALE_DOMAIN)
 
 
 def gettext(string):
@@ -95,7 +97,7 @@ class _TranslationProxy(object):
         return bool(self.value)
 
     def __dir__(self):
-        return dir(self.value)
+        return dir(unicode)
 
     def __iter__(self):
         return iter(self.value)
@@ -146,6 +148,8 @@ class _TranslationProxy(object):
         return self.value >= other
 
     def __getattr__(self, name):
+        if name == '__members__':
+            return self.__dir__()
         return getattr(self.value, name)
 
     def __getitem__(self, key):
@@ -244,11 +248,11 @@ def list_languages(self_translated=False):
         locale = None
 
     languages = [('en', Locale('en').get_display_name(locale))]
-    folder = os.path.dirname(__file__)
 
-    for filename in os.listdir(folder):
+    for filename in os.listdir(LOCALE_PATH):
         if filename == 'en' or not \
-           os.path.isdir(os.path.join(folder, filename)):
+           os.path.isfile(os.path.join(LOCALE_PATH, filename, 'LC_MESSAGES',
+                                       LOCALE_DOMAIN + '.mo')):
             continue
         try:
             l = Locale.parse(filename)

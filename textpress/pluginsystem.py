@@ -117,7 +117,6 @@ _py_import = __builtin__.__import__
 _i18n_key_re = re.compile(r'^(.*?)\[([^\]]+)\]$')
 
 
-BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
 PACKAGE_VERSION = 1
 
 
