@@ -68,6 +68,11 @@
         is missed the admin will be informated about that and the plugin
         won't be activated.
 
+    Each key can be suffixed with "[LANG_CODE]" for internationlization::
+
+        Title: Example Plugin
+        Title[de]: Beispielplugin
+
 
     Warnings for the Professionals
     ------------------------------
@@ -287,7 +292,11 @@ def parse_metadata(string_or_fp):
 
 
 class MetaData(object):
-    """Holds metadata."""
+    """Holds metadata.  This object has a dict like interface to the metadata
+    from the file and will return the values for the current language by
+    default.  It's however possible to get an "untranslated" version of the
+    metadata by calling the `untranslated` method.
+    """
 
     def __init__(self, values, i18n_values=None):
         self._values = values
@@ -465,8 +474,8 @@ class Plugin(object):
         When the `unregister_application` function deletes the references to
         the modules from the sys.modules dict, the cached property will keep
         one reference until the reloader finishes it's work.  This should
-        make sure that requests that happen during plugin reloading don't
-        break things.
+        make sure that requests that happen during plugin reloading can finish
+        without a problem.
         """
         try:
             # we directly import from the textpress module space

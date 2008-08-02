@@ -26,7 +26,7 @@ import os
 from datetime import datetime
 from time import strptime
 from babel import Locale, dates, UnknownLocaleError
-from babel.support import Translations, LazyProxy
+from babel.support import Translations
 from pytz import timezone, UTC
 from werkzeug.exceptions import NotFound
 import textpress.application
@@ -73,16 +73,89 @@ def ngettext(singular, plural, n):
     return app.translations.ungettext(singular, plural, n)
 
 
-class _TranslationProxy(LazyProxy):
-    """A lazy proxy with a unicode like repr.  The repr of this class is the
-    repr of the resolved string plus the small letter i.  Example: iu'foo'.
-
-    This makes a good repr for debugging and shows that it's a translated
-    string rather than a a raw one.
+class _TranslationProxy(object):
+    """Class for proxy strings from gettext translations.  This is a helper
+    for the lazy_* functions from this module.
+    
+    The proxy implementation attempts to be as complete as possible, so that
+    the lazy objects should mostly work as expected, for example for sorting.
     """
+    __slots__ = ('_func', '_args')
+
+    def __init__(self, func, *args):
+        self._func = func
+        self._args = args
+
+    value = property(lambda x: x._func(*x._args))
+
+    def __contains__(self, key):
+        return key in self.value
+
+    def __nonzero__(self):
+        return bool(self.value)
+
+    def __dir__(self):
+        return dir(self.value)
+
+    def __iter__(self):
+        return iter(self.value)
+
+    def __len__(self):
+        return len(self.value)
+
+    def __str__(self):
+        return str(self.value)
+
+    def __unicode__(self):
+        return unicode(self.value)
+
+    def __add__(self, other):
+        return self.value + other
+
+    def __radd__(self, other):
+        return other + self.value
+
+    def __mod__(self, other):
+        return self.value % other
+
+    def __rmod__(self, other):
+        return other % self.value
+
+    def __mul__(self, other):
+        return self.value * other
+
+    def __rmul__(self, other):
+        return other * self.value
+
+    def __lt__(self, other):
+        return self.value < other
+
+    def __le__(self, other):
+        return self.value <= other
+
+    def __eq__(self, other):
+        return self.value == other
+
+    def __ne__(self, other):
+        return self.value != other
+
+    def __gt__(self, other):
+        return self.value > other
+
+    def __ge__(self, other):
+        return self.value >= other
+
+    def __getattr__(self, name):
+        return getattr(self.value, name)
+
+    def __getitem__(self, key):
+        return self.value[key]
 
     def __repr__(self):
-        return 'i' + repr(unicode(self))
+        try:
+            return 'i' + repr(unicode(self.value))
+        except:
+            return '<%s broken>' % self.__class__.__name__
 
 
 def lazy_gettext(string):

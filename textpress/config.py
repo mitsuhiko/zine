@@ -207,6 +207,7 @@ class Configuration(object):
         except KeyError:
             value = default
         self._converted_values[key] = value
+        print self._converted_values
         return value
 
     def change_single(self, key, value):
