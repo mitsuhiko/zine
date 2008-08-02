@@ -55,35 +55,40 @@ def ngettext(singular, plural, n):
     return app.translations.ungettext(singular, plural, n)
 
 
-class TranslationProxy(LazyProxy):
-    """A lazy proxy with a unicode like repr."""
+class _TranslationProxy(LazyProxy):
+    """A lazy proxy with a unicode like repr.  The repr of this class is the
+    repr of the resolved string plus the small letter i.  Example: iu'foo'.
+
+    This makes a good repr for debugging and shows that it's a translated
+    string rather than a a raw one.
+    """
 
     def __repr__(self):
         return 'i' + repr(unicode(self))
 
 
 def lazy_gettext(string):
-    return TranslationProxy(gettext, string)
+    """A lazy version of `gettext`."""
+    return _TranslationProxy(gettext, string)
 
 
 def lazy_ngettext(singular, plural, n):
-    return TranslationProxy(ngettext, singular, plural, n)
+    """A lazy version of `ngettext`"""
+    return _TranslationProxy(ngettext, singular, plural, n)
 
 
-def to_user_timezone(datetime):
-    """Convert a datetime object to the user timezone."""
+def to_blog_timezone(datetime):
+    """Convert a datetime object to the blog timezone."""
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
     tzinfo = get_timezone()
     return tzinfo.normalize(datetime.astimezone(tzinfo))
 
 
-def to_utc(datetime, tzinfo=None):
+def to_utc(datetime):
     """Convert a datetime object to UTC and drop tzinfo."""
-    if tzinfo is not None:
+    if datetime.tzinfo is None:
         datetime = tzinfo.localize(datetime)
-    elif datetime.tzinfo is None:
-        return datetime
     return datetime.astimezone(UTC).replace(tzinfo=None)
 
 
@@ -98,7 +103,7 @@ def format_system_datetime(datetime=None, rebase=True):
     user timezone unless rebase is disabled)
     """
     if rebase:
-        datetime = to_user_timezone(datetime)
+        datetime = to_blog_timezone(datetime)
     return u'%d-%02d-%02d %02d:%02d' % (
         datetime.year,
         datetime.month,
@@ -113,7 +118,7 @@ def format_date(date=None, format='medium', rebase=True):
     works for datetime objects passed to this function obviously.
     """
     if rebase and isinstance(date, datetime):
-        date = to_user_timezone(date)
+        date = to_blog_timezone(date)
     return _date_format(dates.format_date, date, format, rebase)
 
 
@@ -199,7 +204,7 @@ def parse_datetime(string, rebase=True):
         """Helper that parses the string and convers the timezone."""
         rv = datetime(*strptime(string, format)[:7])
         if rebase:
-            return to_utc(rv, get_timezone())
+            return to_utc(rv)
         return rv
     cfg = textpress.application.get_application().cfg
 
@@ -218,8 +223,7 @@ def parse_datetime(string, rebase=True):
         except ValueError:
             continue
         return to_utc(datetime.utcnow().replace(hour=val.hour,
-                      minute=val.minute, second=val.second, microsecond=0),
-                      get_timezone())
+                      minute=val.minute, second=val.second, microsecond=0))
 
     # no try various types of date + time strings
     def combined():
