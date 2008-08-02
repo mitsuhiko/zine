@@ -25,7 +25,7 @@
     });
   </script>
   <form action="" method="post">
-    <h3>{{ _("Cache System") }}</h3>
+    <h2>{{ _("Cache System") }}</h2>
     <p>{{ _("Current TextPress supports three caching systems:") }}</p>
     <ul>
       <li>{% trans %}<strong>Simple Cache</strong>: The simple cache is a very
@@ -48,7 +48,7 @@
       <option value="{{ key }}"{% if key == form.cache_system
         %} selected{% endif %}>{{ value }}</option>{% endfor %}</select></p>
     <div class="optionbox" id="memcached-options">
-      <h3>{{ _("Memcached Options") }}</h3>
+      <h2>{{ _("Memcached Options") }}</h2>
       <p>{% trans %}
         In order to use the memcached system you have to provide the address
         of at least one machine running memcached.  For further details have
@@ -67,7 +67,7 @@
                           size=60) }}</p>
     </div>
     <div class="optionbox" id="filesystem-options">
-      <h3>{{ _("Filesystem Options") }}</h3>
+      <h2>{{ _("Filesystem Options") }}</h2>
       <p>{% trans %}
         When using the filesystem cache you can control where TextPress puts
         all the cache data.  This path is relative to your TextPress instance
@@ -86,7 +86,7 @@
       <p>{{ h.input_field('filesystem_cache_path', form.filesystem_cache_path,
                           size=40) }}</p>
     </div>
-    <h3>{{ _("General Cache Settings") }}</h3>
+    <h2>{{ _("General Cache Settings") }}</h2>
     <p>{% trans %}
       The following configuration values are cache system-independent.  You
       can use them to fine-tune the caching.  The timeout is the number of

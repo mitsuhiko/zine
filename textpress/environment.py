@@ -76,7 +76,7 @@ if isdir(SHARED_DATA):
 # a TextPress installation on a posix system
 elif PLATFORM == 'posix':
     MODE = 'posix'
-    share = join(PACKAGE_LOCATION, pardir, 'share')
+    share = join(PACKAGE_LOCATION, pardir, pardir, 'share')
     BUILTIN_PLUGIN_FOLDER = realpath(join(PACKAGE_LOCATION, 'plugins'))
     BUILTIN_TEMPLATE_PATH = realpath(join(share, 'textpress', 'templates'))
     SHARED_DATA = realpath(join(share, 'textpress', 'htdocs'))

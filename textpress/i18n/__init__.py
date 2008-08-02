@@ -368,7 +368,7 @@ def serve_javascript_translation(request, locale):
         except UnknownLocaleError:
             raise NotFound()
         filename = os.path.join(os.path.dirname(__file__), str(l),
-                                'LC_MESSAGES', 'messages.js')
+                                'LC_MESSAGES', LOCALE_DOMAIN + '.js')
         if not os.path.isfile(filename):
             data = ''
         else:
