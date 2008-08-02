@@ -92,6 +92,7 @@
 import __builtin__
 import sys
 import new
+import re
 from os import path, listdir, walk, makedirs
 from types import ModuleType
 from shutil import rmtree
@@ -108,6 +109,7 @@ from textpress.utils.mail import split_email, is_valid_email
 
 
 _py_import = __builtin__.__import__
+_i18n_key_re = re.compile(r'^(.*?)\[([^\]]+)\]$')
 
 
 BUILTIN_PLUGIN_FOLDER = path.join(path.dirname(__file__), 'plugins')
@@ -251,14 +253,16 @@ def get_package_metadata(package):
 
 
 def parse_metadata(string_or_fp):
-    """Parse the metadata and return it as dict."""
+    """Parse the metadata and return it as metadata object."""
     result = {}
+    translations = {}
     if isinstance(string_or_fp, basestring):
         fileiter = iter(string_or_fp.splitlines(True))
     else:
         fileiter = iter(string_or_fp.readline, '')
+    fileiter = (line.decode('utf-8') for line in fileiter)
     for line in fileiter:
-        line = line.strip().decode('utf-8')
+        line = line.strip()
         if not line or line.startswith('#'):
             continue
         if not ':' in line:
@@ -271,11 +275,69 @@ def parse_metadata(string_or_fp):
                 value = value[:-1] + fileiter.next().rstrip('\n')
             except StopIteration:
                 pass
+        key = '_'.join(key.lower().split()).encode('ascii', 'ignore')
+        value = value.lstrip()
+        match = _i18n_key_re.match(key)
+        if match is not None:
+            key, lang = match.groups()
+            translations.setdefault(lang, {})[key] = value
+        else:
+            result[key] = value
+    return MetaData(result, translations)
+
+
+class MetaData(object):
+    """Holds metadata."""
+
+    def __init__(self, values, i18n_values=None):
+        self._values = values
+        self._i18n_values = i18n_values or {}
+
+    def untranslated(self):
+        """Return a metadata object without translations."""
+        return MetaData(self._values)
+
+    def __getitem__(self, name):
+        locale = str(get_application().locale)
+        if name in self._i18n_values.get(locale, ()):
+            return self._i18n_values[locale][name]
+        if name in self._values:
+            return self._values[name]
+        raise KeyError(name)
+
+    def get(self, name, default=None):
+        """Return a key or the default value if no value exists."""
         try:
-            result[str('_'.join(key.lower().split()))] = value.lstrip()
-        except UnicodeError:
-            continue
-    return result
+            return self[name]
+        except KeyError:
+            return default
+
+    def __contains__(self, name):
+        try:
+            self[name]
+        except KeyError:
+            return False
+        return True
+
+    def _dict_method(name):
+        def proxy(self):
+            return getattr(self.as_dict(), name)()
+        proxy.__name__ = name
+        proxy.__doc__ = getattr(dict, name).__doc__
+        return proxy
+
+    __iter__ = iterkeys = _dict_method('iterkeys')
+    itervalues = _dict_method('itervalues')
+    iteritems = _dict_method('iteritems')
+    keys = _dict_method('keys')
+    values = _dict_method('values')
+    items = _dict_method('items')
+    del _dict_method
+
+    def as_dict(self):
+        result = self._values.copy()
+        result.update(self._i18n_values.get(str(get_application().locale), {}))
+        return result
 
 
 class InstallationError(ValueError):

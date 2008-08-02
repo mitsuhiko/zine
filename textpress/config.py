@@ -22,7 +22,7 @@ DEFAULT_VARS = {
     # general settings
     'database_uri':             (unicode, u''),
     'blog_title':               (unicode, lazy_gettext(u'My TextPress Blog')),
-    'blog_tagline':             (unicode, lazy_gettext(u'just another textpress blog')),
+    'blog_tagline':             (unicode, lazy_gettext(u'just another TextPress blog')),
     'blog_url':                 (unicode, u''),
     'blog_email':               (unicode, u''),
     'timezone':                 (unicode, u'UTC'),

@@ -5,3 +5,5 @@ Author URL: http://lucumr.pocoo.org/
 License: GPL
 Version: 0.1
 Description: This plugin allows you to use the Creole Parser for your posts.
+Description[de]: Dieses Plugin erlaubt es dir deine Posts mit Creole Wikisyntax\
+ zu formattieren.

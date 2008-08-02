@@ -1,8 +1,10 @@
 Name: Vessel Theme
+Name[de]: Vessel Thema
 Plugin URL: http://textpress.pocoo.org/plugins/vessel_theme
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: GPL
 Version: 0.1
 Description: A bluish default theme
+Description[de]: Ein blaues Standardthema
 Preview: vessel_theme::preview.png

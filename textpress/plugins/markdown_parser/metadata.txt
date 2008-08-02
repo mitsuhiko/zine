@@ -5,3 +5,5 @@ Author URL: http://lucumr.pocoo.org/
 License: GPL
 Version: 0.1
 Description: This plugin allows you to use Markdown for your posts.
+Description[de]: Dieses Plugin erlaubt dir Markdown für die Post-\
+ Formattierung zu verwenden.

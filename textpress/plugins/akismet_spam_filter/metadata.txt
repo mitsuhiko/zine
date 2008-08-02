@@ -9,3 +9,7 @@ Description: <a href="http://akismet.com/">Akismet</a> checks your comments\
  need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a>\
  to use it. You can review the spam it catches under "Comments" after\
  configuring it.
+Description[de]: <a href="http://akismet.com/">Akismet</a> überprüft Kommentare\
+ mit dem Akismet Web-Service auf Spam. Du benötigst dazu einen\
+ <a href="http://wordpress.com/api-keys/">WordPress.com API Schlüssel</a>.\
+ Gefangener Spam kann unter "Kommentare" kontrolliert werden.

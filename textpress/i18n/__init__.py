@@ -3,7 +3,21 @@
     textpress.i18n
     ~~~~~~~~~~~~~~
 
-    i18n tools for TextPress.
+    i18n tools for TextPress.  This module provides various helpers for
+    internationalization.  That is a translation system (with an API
+    compatible to standard gettext), timezone helpers as well as date
+    parsing and formatting functions.
+
+    General Architecture
+    --------------------
+
+    The i18n system is based on a few general principles.  Internally all
+    times are stored in UTC as naive datetime objects (that means no tzinfo
+    is present).  The internal language is American English and all text
+    information is stored as unicode strings.
+
+    For display strings are translated to the language of the blog and all
+    dates as converted to the blog timezone.
 
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
@@ -31,7 +45,11 @@ _js_catalogs = {}
 
 
 def load_translations(locale):
-    """Load the translation for a locale."""
+    """Load the translation for a locale.  If a locale does not exist
+    the return value a fake translation object.  If the locale is unknown
+    a `UnknownLocaleError` is raised.
+    """
+    locale = Locale.parse(locale)
     return Translations.load(os.path.dirname(__file__), [locale])
 
 

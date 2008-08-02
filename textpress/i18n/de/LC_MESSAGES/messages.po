@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-02 09:11+0100\n"
+"PO-Revision-Date: 2008-08-02 12:33+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -34,8 +34,8 @@ msgid "My TextPress Blog"
 msgstr "Mein TextPress Blog"
 
 #: textpress/config.py:25
-msgid "just another textpress blog"
-msgstr "einfach nur ein weiteres textpress blog"
+msgid "just another TextPress blog"
+msgstr "einfach nur ein weiteres TextPress Blog"
 
 #: textpress/models.py:97 textpress/views/admin.py:1131
 msgid "Administrator"
@@ -125,7 +125,7 @@ msgstr "Letzte Kommentare"
 msgid "Pages Navigation"
 msgstr "Seiten-Navigation"
 
-#: textpress/i18n/__init__.py:195 textpress/views/admin.py:339
+#: textpress/i18n/__init__.py:200 textpress/views/admin.py:339
 #: textpress/views/admin.py:389
 msgid "now"
 msgstr "jetzt"

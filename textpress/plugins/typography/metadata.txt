@@ -1,4 +1,5 @@
 Name: Typography
+Name[de]: Typographie
 Plugin URL: http://textpress.pocoo.org/plugins/typography
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
@@ -6,3 +7,5 @@ License: GPL
 Version: 0.1
 Description: This plugin replaces some characters with their typographic\
  better replacements (quotes etc.)
+Description[de]: Dieses Plugin erlaubt es dir einige Zeichen automatisch\
+ mit dem typographisch besseren zu ersetzen (Anführungszeichen usw.)
