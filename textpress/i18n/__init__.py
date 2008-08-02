@@ -12,13 +12,13 @@ import os
 from datetime import datetime
 from time import strptime
 from babel import Locale, dates, UnknownLocaleError
-from babel.support import Translations
+from babel.support import Translations, LazyProxy
 from pytz import timezone, UTC
 from werkzeug.exceptions import NotFound
 import textpress.application
 
 
-__all__ = ['_', 'gettext', 'ngettext']
+__all__ = ['_', 'gettext', 'ngettext', 'lazy_gettext', 'lazy_ngettext']
 
 
 DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
@@ -53,6 +53,21 @@ def ngettext(singular, plural, n):
             return singular
         return plrual
     return app.translations.ungettext(singular, plural, n)
+
+
+class TranslationProxy(LazyProxy):
+    """A lazy proxy with a unicode like repr."""
+
+    def __repr__(self):
+        return 'i' + repr(unicode(self))
+
+
+def lazy_gettext(string):
+    return TranslationProxy(gettext, string)
+
+
+def lazy_ngettext(singular, plural, n):
+    return TranslationProxy(ngettext, singular, plural, n)
 
 
 def to_user_timezone(datetime):

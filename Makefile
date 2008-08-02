@@ -24,7 +24,7 @@ reset:
 	@(sh reset.sh)
 
 extract-messages:
-	pybabel extract -F babel.ini -o textpress/i18n/messages.pot .
+	pybabel extract -F babel.ini -k lazy_gettext -k lazy_ngettext -o textpress/i18n/messages.pot .
 
 update-translations:
 	pybabel update -itextpress/i18n/messages.pot -dtextpress/i18n -Dmessages
