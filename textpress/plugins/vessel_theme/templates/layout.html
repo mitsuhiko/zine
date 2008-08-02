@@ -4,6 +4,10 @@
 <head>
   <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('vessel_theme/shared', filename='style.css') }}">
+  {%- if cfg['vessel_theme/variation'] != 'blue' %}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('vessel_theme/shared',
+    filename=cfg['vessel_theme/variation'] ~ '.css') }}">
+  {%- endif %}
   {{ get_page_metadata() }}
 </head>
 <body>

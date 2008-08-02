@@ -1364,6 +1364,8 @@ def do_theme(request):
     Allow the user to select one of the themes that are available.
     """
     csrf_protector = CSRFProtector()
+    if 'configure' in request.args:
+        return simple_redirect('admin/configure_theme')
     new_theme = request.args.get('select')
     if new_theme in request.app.themes:
         csrf_protector.assert_safe()
@@ -1373,19 +1375,20 @@ def do_theme(request):
             flash(_('Theme could not be changed.'), 'error')
         return simple_redirect('admin/theme')
 
-    current = request.app.cfg['theme']
     return render_admin_response('admin/theme.html', 'options.theme',
-        themes=[{
-            'uid':          theme.name,
-            'name':         theme.detail_name,
-            'author':       theme.metadata.get('author'),
-            'description':  theme.metadata.get('description'),
-            'has_preview':  theme.has_preview,
-            'preview_url':  theme.preview_url,
-            'current':      name == current
-        } for name, theme in sorted(request.app.themes.items())],
+        themes=sorted(request.app.themes.values(),
+                      key=lambda x: x.name == 'default' or x.display_name.lower()),
+        current_theme=request.app.theme,
         csrf_protector=csrf_protector
     )
+
+
+@require_role(ROLE_ADMIN)
+def do_configure_theme(request):
+    if not request.app.theme.configurable:
+        flash(_('This theme is not configurable'), 'error')
+        return simple_redirect('admin/theme')
+    return request.app.theme.configuration_page(request)
 
 
 @require_role(ROLE_ADMIN)

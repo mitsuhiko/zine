@@ -1,0 +1,46 @@
+body {
+    background-color: #f6f6f6;
+    color: #222;
+}
+
+a {
+    color: #333;
+}
+
+a:hover {
+    color: #888;
+}
+
+div.header {
+    background: #ebebeb;
+    border-bottom-color: #b4b4b4;
+}
+
+div.header p.description {
+    color: #111;
+}
+
+div.page {
+    border-color: #b4b4b4;
+}
+
+h2, h3 a:hover {
+    color: #222;
+}
+
+h3 a:hover {
+    background-color: #eee;
+}
+
+p.related {
+    background-color: #f2f2f2;
+    border: 1px solid #bbb;
+}
+
+input, select, textarea {
+    border: 1px solid #bbb;
+}
+
+div.actions input {
+    background-color: #f2f2f2;
+}

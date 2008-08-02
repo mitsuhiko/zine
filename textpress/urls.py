@@ -86,6 +86,7 @@ def make_urls(app):
         Rule('/options/basic', endpoint='admin/basic_options'),
         Rule('/options/urls', endpoint='admin/urls'),
         Rule('/options/theme/', endpoint='admin/theme'),
+        Rule('/options/theme/configure', endpoint='admin/configure_theme'),
         Rule('/options/pages', endpoint='admin/pages_config'),
         Rule('/options/uploads', endpoint='admin/upload_config'),
         Rule('/options/plugins/', endpoint='admin/plugins'),

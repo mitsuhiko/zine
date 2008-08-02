@@ -5,16 +5,16 @@
   <div class="themes">
   {%- for theme in themes %}
     <div class="themewrapper">
-      <div class="theme{% if theme.current %} current{% endif %}">
-        <h2><a href="?select={{ theme.uid|e }}&amp;{{ csrf_protector.url_value|e
-          }}">{{ theme.name }}</a></h2>
+      <div class="theme{% if theme.is_current %} current{% endif %}">
+        <h2><a href="?select={{ theme.name|e }}&amp;{{ csrf_protector.url_value|e
+          }}">{{ theme.display_name|e }}</a></h2>
         {%- if theme.has_preview %}
           <img src="{{ theme.preview_url|e }}" alt="preview image" class="preview">
         {%- endif %}
         <div class="detail">
           <blockquote><p>{{ theme.description|e }}</p></blockquote>
-          {%- if theme.author %}
-            <p class="author">{% trans author=theme.author|e %}by {{ author }}{% endtrans %}</p>
+          {%- if theme.has_author %}
+            <p class="author">{% trans author=theme.html_author_info %}by {{ author }}{% endtrans %}</p>
           {%- endif %}
         </div>
       </div>
@@ -22,4 +22,11 @@
   {%- endfor %}
   <br style="clear: both">
   </div>
+  {%- if current_theme.configurable %}
+  <form action="" method="get">
+    <div class="actions">
+      <input type="submit" name="configure" value="{{ _('Configure Theme') }}">
+    </div>
+  </form>
+  {%- endif %}
 {% endblock %}

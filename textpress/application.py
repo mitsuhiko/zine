@@ -24,7 +24,8 @@ from babel import Locale
 from jinja2 import Environment, BaseLoader, TemplateNotFound
 
 from werkzeug import Request as RequestBase, Response as ResponseBase, \
-     SharedDataMiddleware, url_quote, routing, redirect as simple_redirect
+     SharedDataMiddleware, url_quote, routing, redirect as simple_redirect, \
+     escape
 from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
@@ -36,6 +37,7 @@ from textpress.config import Configuration
 from textpress.cache import get_cache
 from textpress.utils import ClosingIterator, local, local_manager
 from textpress.utils.validators import check_external_url
+from textpress.utils.mail import split_email
 
 
 #: the lock for the application setup.
@@ -319,14 +321,18 @@ class TemplateEventResult(list):
 class Theme(object):
     """Represents a theme and is created automaticall by `add_theme`"""
 
-    __slots__ = ('app', 'name', 'template_path', 'metadata')
-
-    def __init__(self, app, name, template_path, metadata=None):
+    def __init__(self, app, name, template_path, metadata=None,
+                 configuration_page=None):
         BaseLoader.__init__(self)
         self.app = app
         self.name = name
         self.template_path = template_path
         self.metadata = metadata or {}
+        self.configuration_page = configuration_page
+
+    @property
+    def configurable(self):
+        return self.configuration_page is not None
 
     @property
     def preview_url(self):
@@ -339,8 +345,62 @@ class Theme(object):
         return bool(self.metadata.get('preview'))
 
     @property
-    def detail_name(self):
+    def is_current(self):
+        return self.name == self.app.cfg['theme']
+
+    @property
+    def display_name(self):
         return self.metadata.get('name') or self.name.title()
+
+    @property
+    def description(self):
+        """Return the description of the plugin."""
+        return self.metadata.get('description', u'')
+
+    @property
+    def has_author(self):
+        """Does the theme has an author at all?"""
+        return 'author' in self.metadata
+
+    @property
+    def author_info(self):
+        """The author, mail and author URL of the plugin."""
+        return split_email(self.metadata.get('author', u'Nobody')) + \
+               (self.metadata.get('author_url'),)
+
+    @property
+    def html_author_info(self):
+        """Return the author info as html link."""
+        name, email, url = self.author_info
+        if not url:
+            if not email:
+                return escape(name)
+            url = 'mailto:%s' % quote(email)
+        return u'<a href="%s">%s</a>' % (
+            escape(url),
+            escape(name)
+        )
+
+    @property
+    def author(self):
+        """Return the author of the plugin."""
+        x = self.author_info
+        return x[0] or x[1]
+
+    @property
+    def author_email(self):
+        """Return the author email address of the plugin."""
+        return self.author_info[1]
+
+    @property
+    def author_url(self):
+        """Return the URL of the author of the plugin."""
+        return self.author_info[2]
+
+    def get_url_values(self):
+        if self.configurable:
+            return self.name + '/configure', {}
+        raise TypeError('can\'t link to unconfigurable theme')
 
     def get_source(self, name):
         parts = [x for x in name.split('/') if not x == '..']
@@ -714,7 +774,8 @@ class TextPress(object):
         self.pingback_endpoints[endpoint] = callback
 
     @setuponly
-    def add_theme(self, name, template_path, metadata=None):
+    def add_theme(self, name, template_path, metadata=None,
+                  configuration_page=None):
         """Add a theme. You have to provide the shortname for the theme
         which will be used in the admin panel etc. Then you have to provide
         the path for the templates. Usually this path is relative to the
@@ -723,7 +784,8 @@ class TextPress(object):
         The metadata can be ommited but in that case some information in
         the admin panel is not available.
         """
-        self.themes[name] = Theme(self, name, template_path, metadata)
+        self.themes[name] = Theme(self, name, template_path, metadata,
+                                  configuration_page)
 
     @setuponly
     def add_shared_exports(self, name, path):

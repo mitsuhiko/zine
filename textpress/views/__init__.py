@@ -67,6 +67,7 @@ all_views = {
     'admin/basic_options':      admin.do_basic_options,
     'admin/urls':               admin.do_urls,
     'admin/theme':              admin.do_theme,
+    'admin/configure_theme':    admin.do_configure_theme,
     'admin/pages_config':       admin.do_pages_config,
     'admin/plugins':            admin.do_plugins,
     'admin/remove_plugin':      admin.do_remove_plugin,

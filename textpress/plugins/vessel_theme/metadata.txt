@@ -5,6 +5,6 @@ Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: GPL
 Version: 0.1
-Description: A bluish default theme
-Description[de]: Ein blaues Standardthema
+Description: A simple default theme
+Description[de]: Ein einfaches Standardthema
 Preview: vessel_theme::preview.png

@@ -1,0 +1,24 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Configure Vessel Theme") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Configure Vessel Theme") }}</h1>
+  <p>{% trans %}
+    This theme comes with various color variations you can chose from.
+  {% endtrans %}
+  <form action="" method="post">
+    <dl>
+      <dt>{{ _('Color Variation') }}</dt>
+      <dd><select name="variation">
+      {%- for key, value in variations %}
+        <option value="{{ key }}"{% if key == current %} selected{% endif
+          %}>{{ value }}</option>
+      {%- endfor %}
+      </select></dd>
+    </dl>
+    <div class="actions">
+      {{ csrf_protector }}
+      <input type="submit" name="save" value="{{ _('Save') }}">
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
+    </div>
+  </form>
+{% endblock %}

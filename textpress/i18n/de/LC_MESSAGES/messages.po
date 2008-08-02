@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-02 20:07+0100\n"
+"PO-Revision-Date: 2008-08-02 21:35+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -16,15 +16,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.0dev-r0\n"
 
-#: textpress/application.py:527
+#: textpress/application.py:587
 msgid "Default Theme"
 msgstr "Standard Thema"
 
-#: textpress/application.py:528
+#: textpress/application.py:588
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Ein einfaches Standard Thema, dass keine Stilinformationen beinhaltet."
 
-#: textpress/application.py:584
+#: textpress/application.py:644
 #, python-format
 msgid "Copyright %(years)s by the Pocoo Team"
 msgstr "Copyright %(years)s by the Pocoo Team"
@@ -370,7 +370,7 @@ msgid "go to admin panel"
 msgstr "zur Administration"
 
 #: textpress/plugins/miniblog_theme/templates/layout.html:26
-#: textpress/plugins/vessel_theme/templates/layout.html:26
+#: textpress/plugins/vessel_theme/templates/layout.html:30
 #: textpress/templates/layout.html:19
 #, python-format
 msgid "Proudly powered by %(textpress)s."
@@ -470,6 +470,7 @@ msgid "Use Common Character"
 msgstr "Verwende häufige Zeichen"
 
 #: textpress/plugins/typography/templates/admin/typography.html:35
+#: textpress/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:20
 #: textpress/templates/admin/basic_options.html:70
 #: textpress/templates/admin/cache.html:107
 #: textpress/templates/admin/configuration.html:42
@@ -484,6 +485,52 @@ msgstr "Verwende häufige Zeichen"
 #: textpress/templates/admin/file_uploads/config.html:48
 msgid "Save"
 msgstr "Speichern"
+
+#: textpress/plugins/vessel_theme/__init__.py:21
+msgid "Blue"
+msgstr "Blau"
+
+#: textpress/plugins/vessel_theme/__init__.py:22
+msgid "Gray"
+msgstr "Grau"
+
+#: textpress/plugins/vessel_theme/__init__.py:23
+msgid "Green"
+msgstr "Grün"
+
+#: textpress/plugins/vessel_theme/__init__.py:39
+msgid "Color variation changed successfully."
+msgstr "Farbvariation wurde erfolgreich geändert."
+
+#: textpress/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:2
+#: textpress/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:4
+msgid "Configure Vessel Theme"
+msgstr "Vessel Thema Konfigurieren"
+
+#: textpress/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:5
+msgid ""
+"\n"
+"    This theme comes with various color variations you can chose from.\n"
+"  "
+msgstr ""
+"\n"
+"    Diese Thema hat mehrere Farbvariationen von denen du eine auswählen kannst.\n"
+"  "
+
+#: textpress/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:10
+msgid "Color Variation"
+msgstr "Farbvariation"
+
+#: textpress/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:21
+#: textpress/templates/admin/change_password.html:17
+#: textpress/templates/admin/edit_comment.html:61
+#: textpress/templates/admin/edit_post.html:104
+#: textpress/templates/admin/edit_tag.html:22
+#: textpress/templates/admin/edit_user.html:71
+#: textpress/templates/admin/inspect_import.html:85
+#: textpress/templates/admin/write_page.html:50
+msgid "Cancel"
+msgstr "Abbrechen"
 
 #: textpress/shared/js/Admin.js:49
 msgid "Bookmarklet"
@@ -1249,16 +1296,6 @@ msgstr "Neues Passwort"
 #: textpress/templates/admin/change_password.html:11
 msgid "Repeat"
 msgstr "Wiederholen"
-
-#: textpress/templates/admin/change_password.html:17
-#: textpress/templates/admin/edit_comment.html:61
-#: textpress/templates/admin/edit_post.html:104
-#: textpress/templates/admin/edit_tag.html:22
-#: textpress/templates/admin/edit_user.html:71
-#: textpress/templates/admin/inspect_import.html:85
-#: textpress/templates/admin/write_page.html:50
-msgid "Cancel"
-msgstr "Abbrechen"
 
 #: textpress/templates/admin/configuration.html:2
 #: textpress/templates/admin/configuration.html:4 textpress/views/admin.py:129
@@ -2618,6 +2655,10 @@ msgstr "Themaverwaltung"
 msgid "by %(author)s"
 msgstr "von %(author)s"
 
+#: textpress/templates/admin/theme.html:28
+msgid "Configure Theme"
+msgstr "Thema konfigurieren"
+
 #: textpress/templates/admin/unblock_comment.html:2
 #: textpress/templates/admin/unblock_comment.html:4
 msgid "Unblock Comment"
@@ -3373,15 +3414,19 @@ msgstr "Die URL Konfiguration konnte nicht geändert werden."
 msgid "URL configuration changed."
 msgstr "Die URL Konfiguration wurde geändert."
 
-#: textpress/views/admin.py:1371
+#: textpress/views/admin.py:1373
 msgid "Theme changed successfully."
 msgstr "Das Thema wurde erfolgreich geändert."
 
-#: textpress/views/admin.py:1373
+#: textpress/views/admin.py:1375
 msgid "Theme could not be changed."
 msgstr "Das Thema konnte nicht geändert werden."
 
-#: textpress/views/admin.py:1400
+#: textpress/views/admin.py:1389
+msgid "This theme is not configurable"
+msgstr "Diese Thema kann nicht konfiguriert werden"
+
+#: textpress/views/admin.py:1403
 msgid ""
 "Plugin guard enabled successfully. Errors occuring in plugins during "
 "setup are catched now."
@@ -3389,19 +3434,19 @@ msgstr ""
 "Die Plugin Wache wurde erfolgreich aktiviert.  Fehler im Plugin Setup "
 "werden nun abgefangen."
 
-#: textpress/views/admin.py:1403
+#: textpress/views/admin.py:1406
 msgid "Plugin guard could not be enabled."
 msgstr "Die Pluginwache konnte nicht aktiviert werden."
 
-#: textpress/views/admin.py:1406
+#: textpress/views/admin.py:1409
 msgid "Plugin guard disabled successfully."
 msgstr "Die Pluginwache wurde erfolgreich aktiviert."
 
-#: textpress/views/admin.py:1408
+#: textpress/views/admin.py:1411
 msgid "Plugin guard could not be disabled."
 msgstr "Die Pluginwache konnte nicht deaktiviert werden."
 
-#: textpress/views/admin.py:1417
+#: textpress/views/admin.py:1420
 #, python-format
 msgid ""
 "The Plugins <em>%(dependencies)s</em> are loaded as a dependency of "
@@ -3410,12 +3455,12 @@ msgstr ""
 "Die Plugins <em>%(dependencies)</em> wurden als Abhängigkein von "
 "\"%(plugin)s\" geladen."
 
-#: textpress/views/admin.py:1421
+#: textpress/views/admin.py:1424
 #, python-format
 msgid "Plugin “%s” activated."
 msgstr "Plugin \"%s\" aktiviert."
 
-#: textpress/views/admin.py:1426
+#: textpress/views/admin.py:1429
 #, python-format
 msgid ""
 "Plugin “%(plugin)s” has unresolved dependencies.  Please install "
@@ -3424,17 +3469,17 @@ msgstr ""
 "Das Plugin \"%(plugin)s\" hat unaufgelöste Abhängigkeiten.  Bitte "
 "installiere %(dependency)s."
 
-#: textpress/views/admin.py:1431
+#: textpress/views/admin.py:1434
 #, python-format
 msgid "Plugin “%s” could not be loaded"
 msgstr "Plugin \"%s\" konnte nicht geladen werden"
 
-#: textpress/views/admin.py:1436
+#: textpress/views/admin.py:1439
 #, python-format
 msgid "Plugin “%s” deactivated."
 msgstr "Plugin \"%s\" wurde deaktiviert."
 
-#: textpress/views/admin.py:1447
+#: textpress/views/admin.py:1450
 msgid ""
 "Could not install the plugin because the file uploaded is not a valid "
 "plugin file."
@@ -3442,7 +3487,7 @@ msgstr ""
 "Konnte das Plugin nicht installieren weil die hochgeladene keine gültige "
 "Plugin Datei ist."
 
-#: textpress/views/admin.py:1451
+#: textpress/views/admin.py:1454
 msgid ""
 "The plugin uploaded has a newer package version than this TextPress "
 "installation can handle."
@@ -3450,11 +3495,11 @@ msgstr ""
 "Das hochgeladene Plugin hat eine neuere Package Version als diese "
 "TextPress installation verarbeiten kann."
 
-#: textpress/views/admin.py:1455
+#: textpress/views/admin.py:1458
 msgid "A plugin with the same UID is already installed. Aborted."
 msgstr "Ein plugin mit der gleichen UID wurde bereits installiert. Abbruch."
 
-#: textpress/views/admin.py:1458
+#: textpress/views/admin.py:1461
 msgid ""
 "Could not install the package because the installer wasn't able to write "
 "the package information. Wrong permissions?"
@@ -3462,18 +3507,18 @@ msgstr ""
 "Konnte das Paket nicht installieren weil der Installer die Plugin "
 "Informationen nicht schreiben konnte.  Falsche Zugriffsrechte?"
 
-#: textpress/views/admin.py:1462
+#: textpress/views/admin.py:1465
 msgid "An unknown error occoured"
 msgstr "Ein unbekannter Fehler ist aufgetreten"
 
-#: textpress/views/admin.py:1464
+#: textpress/views/admin.py:1467
 #, python-format
 msgid "Plugin “%s” added succesfully. You can now enable it in the plugin list."
 msgstr ""
 "Plugin \"%s\" wurde erfolgreich hinzugefügt.  Du kannst das Plugin nun "
 "aktivieren."
 
-#: textpress/views/admin.py:1496
+#: textpress/views/admin.py:1499
 #, python-format
 msgid ""
 "Could not remove the plugin “%s” because an IO error occoured. Wrong "
@@ -3482,122 +3527,122 @@ msgstr ""
 "Konnte das Plugin \"%s\" nicht entfernen weil ein Fehler aufgetreten ist."
 "  Falsche Zugriffsrechte?"
 
-#: textpress/views/admin.py:1499
+#: textpress/views/admin.py:1502
 #, python-format
 msgid "The plugin “%s” was removed from the instance successfully."
 msgstr "Das Plugin \"%s\" wurde erfolgreich entfernt."
 
-#: textpress/views/admin.py:1528
+#: textpress/views/admin.py:1531
 msgid "The cache was cleared successfully."
 msgstr "Der cache wurde erfolgreich geleert."
 
-#: textpress/views/admin.py:1534
+#: textpress/views/admin.py:1537
 msgid "Invalid cache system selected."
 msgstr "Ungültiges Cache System ausgewählt."
 
-#: textpress/views/admin.py:1538
+#: textpress/views/admin.py:1541
 msgid "Cache timeout must be positive integer."
 msgstr "Cache-Timeout muss eine positive Ganzzahl sein."
 
-#: textpress/views/admin.py:1542
+#: textpress/views/admin.py:1545
 msgid "Cache timeout must be greater than 10 seconds."
 msgstr "Cache-Timeout muss größer als 10 Sekunden sein."
 
-#: textpress/views/admin.py:1564
+#: textpress/views/admin.py:1567
 msgid "Updated cache settings."
 msgstr "Cache Einstellungen aktualisiert."
 
-#: textpress/views/admin.py:1572
+#: textpress/views/admin.py:1575
 msgid "Simple Cache"
 msgstr "Einfacher Cache"
 
-#: textpress/views/admin.py:1573
+#: textpress/views/admin.py:1576
 msgid "memcached"
 msgstr "memcached"
 
-#: textpress/views/admin.py:1574
+#: textpress/views/admin.py:1577
 msgid "Filesystem"
 msgstr "Dateisystem"
 
-#: textpress/views/admin.py:1575
+#: textpress/views/admin.py:1578
 msgid "No Cache"
 msgstr "Kein Cache"
 
-#: textpress/views/admin.py:1634
+#: textpress/views/admin.py:1637
 msgid "Maintenance mode disabled.  The blog is now publicly available."
 msgstr "Wartungsmodus deaktiviert.  Das Blog ist nun öffentlich verfügbar."
 
-#: textpress/views/admin.py:1713
+#: textpress/views/admin.py:1716
 #, python-format
 msgid "The imported dump “%s” was deleted successfully."
 msgstr "Der Import \"%s\" wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:1839
+#: textpress/views/admin.py:1842
 msgid "You have to enter your old password."
 msgstr "Du musst das alte Passwort eingeben."
 
-#: textpress/views/admin.py:1841
+#: textpress/views/admin.py:1844
 msgid "Your old password is wrong."
 msgstr "Das alte Passwort ist falsch."
 
-#: textpress/views/admin.py:1844
+#: textpress/views/admin.py:1847
 msgid "Your new password cannot be empty."
 msgstr "Das neue Passwort darf nicht leer sein."
 
-#: textpress/views/admin.py:1847
+#: textpress/views/admin.py:1850
 msgid "The passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-#: textpress/views/admin.py:1851
+#: textpress/views/admin.py:1854
 msgid "Password changed successfully."
 msgstr "Das Passwort wurde erfolgreich geändert."
 
-#: textpress/views/admin.py:1951
+#: textpress/views/admin.py:1954
 msgid "You have to provide a title"
 msgstr "Du musst einen Titel angeben"
 
-#: textpress/views/admin.py:1959
+#: textpress/views/admin.py:1962
 msgid "A key can't contain a slash"
 msgstr "Der Schlüssel darf keinen Schrägstrich beinhalten"
 
-#: textpress/views/admin.py:1966
+#: textpress/views/admin.py:1969
 msgid "You have to provide some content"
 msgstr "Du musst einen Inhalt angeben"
 
-#: textpress/views/admin.py:2035
+#: textpress/views/admin.py:2038
 #, python-format
 msgid "The page %s was deleted successfully."
 msgstr "Die Seite %s wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:2056
+#: textpress/views/admin.py:2059
 #, python-format
 msgid "Could not create upload target folder %s."
 msgstr "Konnte den Ordner %s für hochgeladene Dateien nicht erstellen."
 
-#: textpress/views/admin.py:2063
+#: textpress/views/admin.py:2066
 msgid "No file uploaded."
 msgstr "Keine Datei hochgeladen"
 
-#: textpress/views/admin.py:2065
+#: textpress/views/admin.py:2068
 msgid "Invalid filename requested."
 msgstr "Ungültiger Dateinamen angefordert."
 
-#: textpress/views/admin.py:2067
+#: textpress/views/admin.py:2070
 #, python-format
 msgid "A file with the filename %s exists already."
 msgstr "Eine Datei mit den Namen %s existiert bereits."
 
-#: textpress/views/admin.py:2075
+#: textpress/views/admin.py:2078
 #, python-format
 msgid "File %s uploaded successfully."
 msgstr "Datei %s wurde erfolgreich hochgeladen."
 
-#: textpress/views/admin.py:2081 textpress/views/admin.py:2159
+#: textpress/views/admin.py:2084 textpress/views/admin.py:2162
 #, python-format
 msgid "Could not write file %s."
 msgstr "Konnte Datei %s nicht schreiben."
 
-#: textpress/views/admin.py:2107
+#: textpress/views/admin.py:2110
 #, python-format
 msgid ""
 "If you don't have ImageMagick installed system wide but in a different "
@@ -3607,7 +3652,7 @@ msgstr ""
 "Wenn du ImageMagick nicht systemweit installiert hast, kannst du den Pfad"
 " in der <a href=\"%(config)s\">Konfiguration</a> angeben."
 
-#: textpress/views/admin.py:2111
+#: textpress/views/admin.py:2114
 #, python-format
 msgid ""
 "There is no ImageMagick in the path defined installed. (<a "
@@ -3616,93 +3661,93 @@ msgstr ""
 "In dem angegebenen Pfad wurde ImageMagick nicht gefunden. (<a "
 "href\"%(config)s\">überprüfe die Konfiguration</a>)"
 
-#: textpress/views/admin.py:2114
+#: textpress/views/admin.py:2117
 #, python-format
 msgid "Cannot find <a href=\"%(im)s\">ImageMagick</a>."
 msgstr "Konnte <a href=\"%(im)s\">ImageMagick</a> nicht finden."
 
-#: textpress/views/admin.py:2125
+#: textpress/views/admin.py:2128
 msgid "You have to specify a source image"
 msgstr "Du musst ein Quellbild angeben"
 
-#: textpress/views/admin.py:2130
+#: textpress/views/admin.py:2133
 #, python-format
 msgid "The image %s does not exist."
 msgstr "Das Bild %s existiert nicht."
 
-#: textpress/views/admin.py:2135
+#: textpress/views/admin.py:2138
 msgid "You have to define at least the width of the thumbnail."
 msgstr "Du musst zumindest die Breite des Vorschaubilds angeben."
 
-#: textpress/views/admin.py:2139
+#: textpress/views/admin.py:2142
 msgid "Thumbnail dimensions must be integers."
 msgstr "Die Abmessungen des Vorschaubildes müssen Zahlen sein."
 
-#: textpress/views/admin.py:2145
+#: textpress/views/admin.py:2148
 msgid "You have to specify a filename for the thumbnail."
 msgstr "Du musst einen Dateinamen für das Vorschaubild angeben."
 
-#: textpress/views/admin.py:2148
+#: textpress/views/admin.py:2151
 msgid "Invalid filename for thumbnail."
 msgstr "Ungültiger Dateiname für Vorschaubild."
 
-#: textpress/views/admin.py:2150
+#: textpress/views/admin.py:2153
 msgid "An file with this name exists already."
 msgstr "Eine Datei mit diesem Namen existiert bereits."
 
-#: textpress/views/admin.py:2168
+#: textpress/views/admin.py:2171
 #, python-format
 msgid "Thumbnail %s was created successfully."
 msgstr "Das Vorschaubild %s wurde erfolgreich erstellt."
 
-#: textpress/views/admin.py:2210
+#: textpress/views/admin.py:2213
 msgid "Upload folder changed successfully."
 msgstr "Der Ordner für Hochgeladene Dateien wurde erfolgreich erstellt."
 
-#: textpress/views/admin.py:2212
+#: textpress/views/admin.py:2215
 msgid "Upload folder could not be changed."
 msgstr "Der Ordner für Hochgeladene Dateien konnte nicht geändert werden."
 
-#: textpress/views/admin.py:2217
+#: textpress/views/admin.py:2220
 msgid "Changed path to ImageMagick"
 msgstr "Pfad zu ImageMagick wurde geändert"
 
-#: textpress/views/admin.py:2219
+#: textpress/views/admin.py:2222
 msgid "ImageMagick is searched on the system path now."
 msgstr "ImageMagick wird nun systemweit gesucht."
 
-#: textpress/views/admin.py:2221
+#: textpress/views/admin.py:2224
 msgid "Path to ImageMagick could not be changed."
 msgstr "Der Pfad zu ImageMagick konnte nicht geändert werden."
 
-#: textpress/views/admin.py:2226
+#: textpress/views/admin.py:2229
 msgid "Upload mimetype mapping altered successfully."
 msgstr "Mimetype-Verknüpfungen für hochgeladene Dateien wurde geändert."
 
-#: textpress/views/admin.py:2228
+#: textpress/views/admin.py:2231
 msgid "Upload mimetype mapping could not be altered."
 msgstr "Mimetype-Verknüpfungen konnte nicht geändert werden."
 
-#: textpress/views/admin.py:2254
+#: textpress/views/admin.py:2257
 #, python-format
 msgid "Could not delete file %s."
 msgstr "Konnte Datei %s nicht löschen."
 
-#: textpress/views/admin.py:2257
+#: textpress/views/admin.py:2260
 #, python-format
 msgid "File %s deleted successfully."
 msgstr "Datei %s wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:2317
+#: textpress/views/admin.py:2320
 #, python-format
 msgid "User %s does not exist."
 msgstr "Benutzer %s existiert nicht."
 
-#: textpress/views/admin.py:2322
+#: textpress/views/admin.py:2325
 msgid "Incorrect password."
 msgstr "Falsches Passwort"
 
-#: textpress/views/admin.py:2324
+#: textpress/views/admin.py:2327
 msgid "You have to enter a username."
 msgstr "Du musst einen Benutzernamen angeben."
 
@@ -4018,12 +4063,4 @@ msgstr ""
 "    Datenbank-Tabellen und die Konfiguration erstellen.  Danach ist\n"
 "    TextPress im Wartungsmodus online.\n"
 "  "
-
-#~ msgid "TextPress HG Node"
-#~ msgstr "TextPress HG Knoten"
-
-#~ msgid "this textpress installation runs a mercurial checkout of textpress"
-#~ msgstr ""
-#~ "diese TextPress installation verwendet einen"
-#~ " Mercurial Checkout von TextPress"
 

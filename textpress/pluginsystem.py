@@ -514,6 +514,11 @@ class Plugin(object):
         return self.metadata.get('description', u'')
 
     @property
+    def has_author(self):
+        """Does the plugin has an author at all?"""
+        return 'author' in self.metadata
+
+    @property
     def author_info(self):
         """The author, mail and author URL of the plugin."""
         return split_email(self.metadata.get('author', u'Nobody')) + \
