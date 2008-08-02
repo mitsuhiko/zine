@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     textpress.plugins.vessel_theme
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Very simple textpress theme.
 

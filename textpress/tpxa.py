@@ -65,8 +65,8 @@ XML_PREAMBLE = u'''\
 <a:title>%(title)s</a:title>\
 <a:subtitle>%(subtitle)s</a:subtitle>\
 <a:id>%(id)s</a:id>\
-<a:generator a:uri="http://textpress.pocoo.org/"\
- a:version="%(version)s">TextPress TPXA Export</a:generator>\
+<a:generator uri="http://textpress.pocoo.org/"\
+ version="%(version)s">TextPress TPXA Export</a:generator>\
 <a:link href="%(blog_url)s"/>\
 <a:updated>%(updated)s</a:updated>'''
 XML_EPILOG = '</a:feed>'

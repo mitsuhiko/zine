@@ -183,7 +183,7 @@ def to_blog_timezone(datetime):
 def to_utc(datetime):
     """Convert a datetime object to UTC and drop tzinfo."""
     if datetime.tzinfo is None:
-        datetime = tzinfo.localize(datetime)
+        datetime = get_timezone().localize(datetime)
     return datetime.astimezone(UTC).replace(tzinfo=None)
 
 
