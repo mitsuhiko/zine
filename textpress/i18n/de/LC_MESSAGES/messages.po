@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-03 15:13+0100\n"
+"PO-Revision-Date: 2008-08-03 18:22+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -726,6 +726,11 @@ msgstr "Kinder"
 #: textpress/templates/show_author.html:12
 msgid "Posts this user wrote"
 msgstr "Einträge von diesem Benutzer"
+
+#: textpress/templates/show_author.html:15
+#, python-format
+msgid "%(post)s, on %(date)s"
+msgstr "%(post)s, am %(date)s."
 
 #: textpress/templates/show_post.html:7
 msgid "written by"
