@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    Reset the Instance
+    ~~~~~~~~~~~~~~~~~~
+
+    This script resets the development instance.
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+import sys
+from os import mkdir, path
+from shutil import rmtree
+from optparse import OptionParser
+
+
+sys.path.append(path.dirname(__file__))
+from _init_textpress import find_instance
+
+
+def main():
+    parser = OptionParser(usage='%prog [path]')
+    parser.add_option('--username', '-u', dest='username', default='admin')
+    parser.add_option('--password', '-p', dest='password', default='default')
+    parser.add_option('--blog-url', dest='blog_url', default='http://localhost:4000/')
+    parser.add_option('--database', dest='database_uri', default='sqlite:///textpress.db')
+    parser.add_option('--language', dest='lang', default='en')
+
+    options, args = parser.parse_args()
+    if not args:
+        instance = find_instance()
+        if instance is None:
+            parser.error('instance not found.  Specify path to instance')
+    elif len(args) == 1:
+        instance = args[0]
+    else:
+        parser.error('incorrent number of arguments')
+
+    print 'Resetting instance', instance
+
+    rmtree(instance)
+    mkdir(instance)
+
+    from textpress.application import make_textpress
+    from textpress.database import users, init_database, db
+    from textpress.utils.crypto import gen_pwhash, gen_secret_key
+    from textpress.config import Configuration
+    e = db.create_engine(options.database_uri, instance)
+    init_database(e)
+
+    cfg = Configuration(path.join(instance, 'textpress.ini'))
+    t = cfg.edit()
+    t.update(
+        maintenance_mode=False,
+        blog_url=options.blog_url,
+        secret_key=gen_secret_key(),
+        database_uri=options.database_uri,
+        language=options.lang,
+        plugins='vessel_theme',
+        theme='vessel'
+    )
+    t.commit()
+
+    from textpress.models import User, ROLE_ADMIN
+    app = make_textpress(instance, True)
+    User(options.username, options.password, 'admin@localhost', role=ROLE_ADMIN)
+    db.commit()
+
+    print 'All done.'
+
+
+if __name__ == '__main__':
+    main()
