@@ -14,7 +14,7 @@
     admin panel.  You can easily create .plugin files yourself.  Just finish
     the plugin and open the textpress shell::
 
-        >>> app.plugins['<name of the plugin>'].dump('/target/filename.plugin')
+        app.plugins['<name of the plugin>'].dump('/target/filename.plugin')
 
     This will save the plugin as `.plugin` package. The preferred filename
     for templates is `<DISPLAY_NAME_WITHOUT_SPACES>-<VERSION>.plugin`.  So if

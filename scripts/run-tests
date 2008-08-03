@@ -9,6 +9,12 @@
     :copyright: 2008 by Lukas Meuser.
     :license: GNU GPL.
 """
+import os
+import sys
+
+path = os.path.join(os.path.dirname(__file__), os.path.pardir)
+os.chdir(path)
+sys.path.insert(0, path)
 
 from tests import main
 main()

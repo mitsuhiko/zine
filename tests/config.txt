@@ -8,7 +8,7 @@ Basics:
 	>>> app.cfg                             # doctest: +ELLIPSIS
 	<Configuration ...>
 	>>> app.cfg['blog_title']
-	u'My TextPress Blog'
+	iu'My TextPress Blog'
 
 
 Are those changes written to the config file correctly?
@@ -25,7 +25,7 @@ config file.
 	>>> t = app.cfg.edit()
 	>>> t['pings_enabled'] = True
 	>>> t['blog_title']
-	u'My TextPress Blog'
+	iu'My TextPress Blog'
 	>>> t['blog_title'] = 'Another Blog Title'
 	>>> t.commit()
 	>>> len([line for line in open(app.cfg.filename) if 'pings_enabled' in line])
@@ -39,10 +39,10 @@ Test revert_to_default
 	>>> t = app.cfg.edit()
 	>>> t.revert_to_default('blog_title')
 	>>> t['blog_title']
-	u'My TextPress Blog'
+	iu'My TextPress Blog'
 	>>> t.commit()
 	>>> app.cfg['blog_title']
-	u'My TextPress Blog'
+	iu'My TextPress Blog'
 
 
 Transactions can only be committed once:
@@ -62,7 +62,7 @@ are really only written to the config when the transaction is committed.
 	>>> big_t['blog_tagline']
 	u'...and the test goes on'
 	>>> app.cfg['blog_tagline']
-	u'just another textpress blog'
+	iu'just another TextPress blog'
 	>>> app.cfg['language']
 	u'en'
 	>>> big_t.set_from_string('textpress/posts_per_page', '42')

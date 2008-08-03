@@ -24,7 +24,8 @@ from doctest import DocTestSuite, DocFileSuite
 
 #: the modules in this list are not tested in a full run
 untested = ['textpress.experimental_plugins.hyphenation_en',
-            'textpress.experimental_plugins.hyphenation_en.hyphenate']
+            'textpress.experimental_plugins.hyphenation_en.hyphenate',
+            'textpress.experimental_plugins.notification']
 
 try:
     import coverage

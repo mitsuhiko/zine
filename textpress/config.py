@@ -145,7 +145,7 @@ class Configuration(object):
     file.
 
     >>> app.cfg['blog_title']
-    u'My TextPress Blog'
+    iu'My TextPress Blog'
     >>> app.cfg.change_single('blog_title', 'Test Blog')
     True
     >>> app.cfg['blog_title']
