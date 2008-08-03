@@ -21,7 +21,7 @@ from textpress import make_app
 
 
 def main():
-    parser = OptionParser(usage='%prog [options] [instance]')
+    parser = OptionParser(usage='%prog [options]')
     parser.add_option('--hostname', '-a', dest='hostname', default='localhost')
     parser.add_option('--port', '-p', dest='port', type='int', default=4000)
     parser.add_option('--no-reloader', dest='reloader', action='store_false',
@@ -30,15 +30,14 @@ def main():
                       default=True, help='Disable the debugger')
     parser.add_option('--profile', dest='profile', action='store_true',
                       help='Enable the profiler')
+    parser.add_option('--instance', '-I', dest='instance',
+                      help='Use the path provided as TextPress instance.')
     options, args = parser.parse_args()
-    if not args:
-        instance = find_instance()
-        if instance is None:
-            parser.error('instance not found.  Specify path to instance')
-    elif len(args) == 1:
-        instance = args[0]
-    else:
+    if args:
         parser.error('incorrect number of arguments')
+    instance = options.instance or find_instance()
+    if instance is None:
+        parser.error('instance not found.  Specify path to instance')
     
     app = make_app(instance)
     if options.profile:

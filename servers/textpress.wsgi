@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
 """
     TextPress mod_wsgi Runner
     ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Run TextPress in mod_wsgi.
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
 """
 
 # path to the instance. the folder for the instance must exist,
@@ -10,7 +14,13 @@
 # will show an assistent
 INSTANCE_FOLDER = '/path/to/instance/folder'
 
+# path to the TextPress application code.
+TEXTPRESS_LIB = '/usr/lib/textpress'
+
 # here you can further configure the wsgi app settings but usually you don't
 # have to touch them
+import sys
+sys.path.insert(0, TEXTPRESS_LIB)
+
 from textpress import make_app
 application = make_app(INSTANCE_FOLDER)

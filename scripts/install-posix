@@ -49,4 +49,9 @@ done
 cp -R $SRC/shared $PREFIX/share/textpress/htdocs
 cp -R $SRC/templates $PREFIX/share/textpress/templates
 
+# copy the server files and adjust the TEXTPRESS_LIB path
+cp -R $SRC/../servers $PREFIX/share/textpress
+sed -i'' -r "s|^TEXTPRESS_LIB\s*=.*$|TEXTPRESS_LIB = '$PREFIX/lib/textpress'|g" $PREFIX/share/textpress/servers/*
+
+
 echo "All done."

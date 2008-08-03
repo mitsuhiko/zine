@@ -1,0 +1,23 @@
+Server Information
+==================
+
+This folder contains scripts for various deployment types.  Depending
+on the kind of Webserver and Webserver interface you should chose one
+of them or create your own.
+
+The following files exist currently:
+
+`textpress.cgi`
+    This file implements can be used to use TextPress over CGI.  This
+    should *NOT* be used unless you have to.  TextPress is not designed
+    for the run-once nature of CGI and will perform poorly on it.
+
+`textpress.fcgi`
+    This file serves TextPress over FastCGI.  It requires the flup
+    module for Python.
+
+`textpress.wsgi`
+    This file can be used to execute TextPress over mod_wsgi.
+
+Just take the file of choice, copy it to where you want it to be and
+adjust it.

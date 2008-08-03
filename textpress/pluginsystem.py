@@ -12,18 +12,19 @@
     The best way to distribute plugins are `.plugin` files.  Those files are
     simple zip files that are uncompressed when installed from the plugin
     admin panel.  You can easily create .plugin files yourself.  Just finish
-    the plugin and open the textpress shell::
+    the plugin and use the `scripts/bundle-plugin` script or do it
+    programmatically::
 
         app.plugins['<name of the plugin>'].dump('/target/filename.plugin')
 
     This will save the plugin as `.plugin` package. The preferred filename
-    for templates is `<DISPLAY_NAME_WITHOUT_SPACES>-<VERSION>.plugin`.  So if
+    for templates is `<FILESYSTEM_NAME>-<VERSION>.plugin`.  So if
     you want to dump all the plugins you have into plugin files you can use
     this snippet::
 
         for plugin in app.plugins.itervalues():
             plugin.dump('%s-%s.plugin' % (
-                ''.join(plugin.display_name.split()),
+                plugin.filesystem_name,
                 plugin.version
             ))
 
@@ -491,6 +492,12 @@ class Plugin(object):
     def display_name(self):
         """The full name from the metadata."""
         return self.metadata.get('name', self.name)
+
+    @property
+    def filesystem_name(self):
+        """The human readable package name for the filesystem."""
+        string = self.metadata.untranslated().get('name', self.name)
+        return ''.join(string.split())
 
     @property
     def html_display_name(self):

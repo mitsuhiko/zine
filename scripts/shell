@@ -29,18 +29,17 @@ def init_func(instance):
 
 
 def main():
-    parser = OptionParser(usage='%prog [options] [instance]')
+    parser = OptionParser(usage='%prog [options]')
     parser.add_option('--no-ipython', dest='no_ipython', action='store_true',
                       help='Do not launch ipython, even if present.')
+    parser.add_option('--instance', '-I', dest='instance',
+                      help='Use the path provided as TextPress instance.')
     options, args = parser.parse_args()
-    if not args:
-        instance = find_instance()
-        if instance is None:
-            parser.error('instance not found.  Specify path to instance')
-    elif len(args) == 1:
-        instance = args[0]
-    else:
+    if args:
         parser.error('incorrect number of arguments')
+    instance = options.instance or find_instance()
+    if instance is None:
+        parser.error('instance not found.  Specify path to instance')
 
     make_shell(lambda: init_func(instance), banner='TextPress Shell [%s]' %
                abspath(instance))(ipython=not options.no_ipython)
