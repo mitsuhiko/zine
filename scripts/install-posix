@@ -2,7 +2,7 @@
 # This script copies textpress into PREFIX and compiles the python
 # files with PYTHON.  If PREFIX is not defined /usr is assumed.
 
-SRC="`dirname '$0'`/textpress"
+SRC="`dirname $0`/../textpress"
 PACKAGES="_dynamic _ext importers parsers utils views websetup"
 
 if [ x$PREFIX == x ]; then

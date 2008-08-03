@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    Extract Messages
+    ~~~~~~~~~~~~~~~~
+
+    Extract messages into a PO-Template.
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+from os import path, makedirs
+from optparse import OptionParser
+from babel.messages import Catalog
+from babel.messages.extract import extract_from_dir
+from babel.messages.pofile import write_po
+
+
+KEYWORDS = {
+    '_': None,
+    'gettext': None,
+    'ngettext': (1, 2),
+    'ugettext': None,
+    'ungettext': (1, 2),
+    'lazy_gettext': None,
+    'lazy_ngettext': (1, 2)
+}
+BUGS_ADDRESS = 'textpress-i18n@pocoo.org'
+COPYRIGHT = 'The Pocoo Team'
+METHODS = [
+    ('**.py', 'python'),
+    ('**.html', 'jinja2'),
+    ('i18n/*/LC_MESSAGES/messages.js', 'ignore'),
+    ('**.js', 'javascript'),
+]
+COMMENT_TAGS = ['_']
+
+
+def strip_path(filename, base):
+    filename = path.normpath(path.join(base, filename))
+    return filename[len(path.commonprefix([
+        filename, path.dirname(base)])):].lstrip(path.sep)
+
+
+def main():
+    global parser
+    parser = OptionParser(usage='%prog [path]')
+    options, args = parser.parse_args()
+    if not args:
+        print 'Extracting core strings'
+        root = path.abspath(path.join(path.dirname(__file__),
+                                      path.pardir, 'textpress'))
+    elif len(args) == 1:
+        root = path.join(path.abspath(args[0]))
+        if not path.isdir(root):
+            parser.error('source folder missing')
+        print 'Extracting from', root
+    else:
+        parser.error('incorrent number of arguments')
+
+    catalog = Catalog(msgid_bugs_address=BUGS_ADDRESS,
+                      copyright_holder=COPYRIGHT, charset='utf-8')
+
+    def callback(filename, method, options):
+        if method != 'ignore':
+            print strip_path(filename, root)
+
+    extracted = extract_from_dir(root, METHODS, {}, KEYWORDS,
+                                 COMMENT_TAGS, callback=callback,
+                                 strip_comment_tags=True)
+    
+    for filename, lineno, message, comments in extracted:
+        catalog.add(message, None, [(strip_path(filename, root), lineno)],
+                    auto_comments=comments)
+
+    output_path = path.join(root, 'i18n')
+    if not path.isdir(output_path):
+        makedirs(output_path)
+
+    f = file(path.join(output_path, 'messages.pot'), 'w')
+    try:
+        write_po(f, catalog, width=79)
+    finally:
+        f.close()
+
+    print 'All done.'
+
+
+if __name__ == '__main__':
+    main()

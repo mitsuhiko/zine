@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    Compile translations
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Compile translations into JavaScript files and MOs.
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+from os import listdir, path
+from optparse import OptionParser
+from simplejson import dump
+from babel.messages.pofile import read_po
+from babel.messages.mofile import write_mo
+
+domains = ['messages']
+
+
+def main():
+    global parser
+    parser = OptionParser(usage='%prog [path]')
+    options, args = parser.parse_args()
+    if not args:
+        print 'Compiling builtin languages'
+        root = path.abspath(path.join(path.dirname(__file__),
+                                      path.pardir, 'textpress', 'i18n'))
+    elif len(args) == 1:
+        root = path.join(path.abspath(args[0]), 'i18n')
+        if not path.isdir(root):
+            parser.error('i18n folder missing')
+        print 'Compiling', root
+    else:
+        parser.error('incorrent number of arguments')
+
+    for domain in domains:
+        for lang in listdir(root):
+            folder = path.join(root, lang, 'LC_MESSAGES')
+            translations = path.join(folder, domain + '.po')
+            if path.isfile(translations):
+                print 'Compiling %r' % lang
+                jscatalog = {}
+                f = file(translations)
+                try:
+                    catalog = read_po(f, locale=lang, domain=domain)
+                    pluralexpr = catalog.plural_expr
+                    for message in catalog:
+                        if any(x[0].endswith('.js') for x in message.locations):
+                            msgid = message.id
+                            if isinstance(msgid, (list, tuple)):
+                                msgid = msgid[0]
+                            jscatalog[msgid] = message.string
+                finally:
+                    f.close()
+                f = file(path.join(folder, domain + '.js'), 'w')
+                try:
+                    f.write('TextPress.addTranslations(');
+                    dump(dict(
+                        messages=jscatalog,
+                        plural_expr=catalog.plural_expr,
+                        locale=str(catalog.locale)
+                    ), f)
+                    f.write(');')
+                finally:
+                    f.close()
+                f = file(path.join(folder, domain + '.mo'), 'w')
+                try:
+                    write_mo(f, catalog)
+                finally:
+                    f.close()
+
+
+if __name__ == '__main__':
+    main()
