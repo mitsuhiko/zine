@@ -21,8 +21,6 @@
                 plugins/                    builtin plugins
                 shared/                     core shared data
                 templates/                  core templates
-                i18n/LANG/LC_MESSAGES/messages.mo
-                                            the compiled translations
 
     posix
         On a posix system (including Linux) the files are distributed to
@@ -33,8 +31,6 @@
             /usr/lib/textpress/plugins      builtin plugins
             /usr/share/textpress/htdocs     core shared data
             /usr/share/textpress/templates  core templates
-            /usr/share/locale/LANG/LC_MESSAGES/textpress.mo
-                                            the compiled translations
 
     windows
         On windows the files are installed into the program files
@@ -44,8 +40,6 @@
             %/TextPress/plugins             builtin plugins
             %/TextPress/htdocs              core shared data
             %/TextPress/templates           core templates
-            %/TextPress/i18n/LANG/LC_MESSAGES/messages.mo
-                                            the compiled translations
 
     :copyright: 2008 by Armin Ronacher.
     :license: GNU GPL.
@@ -63,6 +57,10 @@ PACKAGE_CONTENTS = realpath(dirname(__file__))
 # the path to the folder where the "textpress" package is stored in.
 PACKAGE_LOCATION = realpath(join(PACKAGE_CONTENTS, pardir))
 
+# These are currently the same on all platforms because we run our
+# own gettext inspired system
+LOCALE_PATH = join(PACKAGE_CONTENTS, 'i18n')
+
 # check development mode first.  If there is a shared folder we must be
 # in development mode.
 SHARED_DATA = join(PACKAGE_CONTENTS, 'shared')
@@ -70,8 +68,6 @@ if isdir(SHARED_DATA):
     MODE = 'development'
     BUILTIN_PLUGIN_FOLDER = join(PACKAGE_CONTENTS, 'plugins')
     BUILTIN_TEMPLATE_PATH = join(PACKAGE_CONTENTS, 'templates')
-    LOCALE_PATH = join(PACKAGE_CONTENTS, 'i18n')
-    LOCALE_DOMAIN = 'messages'
 
 # a TextPress installation on a posix system
 elif PLATFORM == 'posix':
@@ -80,8 +76,6 @@ elif PLATFORM == 'posix':
     BUILTIN_PLUGIN_FOLDER = realpath(join(PACKAGE_LOCATION, 'plugins'))
     BUILTIN_TEMPLATE_PATH = realpath(join(share, 'textpress', 'templates'))
     SHARED_DATA = realpath(join(share, 'textpress', 'htdocs'))
-    LOCALE_PATH = realpath(join(share, 'locale'))
-    LOCALE_DOMAIN = 'textpress'
     del share
 
 # a TextPress installation on windows

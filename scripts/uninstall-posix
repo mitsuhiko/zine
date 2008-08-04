@@ -9,5 +9,4 @@ fi
 echo "Uninstalling TextPress from $PREFIX"
 rm -rf $PREFIX/lib/textpress
 rm -rf $PREFIX/share/textpress
-rm $PREFIX/share/locale/*/LC_MESSAGES/textpress.*
 echo "All done."

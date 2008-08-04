@@ -34,8 +34,8 @@ jinja_env.install_null_translations()
 
 def render_response(request, template_name, context):
     context.update(
-        gettext=request.translations.ugettext,
-        ngettext=request.translations.ungettext,
+        gettext=request.translations.gettext,
+        ngettext=request.translations.ngettext,
         lang=request.translations.language
     )
     tmpl = jinja_env.get_template(template_name)
@@ -85,7 +85,7 @@ class WebSetup(object):
 
     def test_instance_folder(self, request):
         """Check if the instance folder exists."""
-        _ = request.translations.ugettext
+        _ = request.translations.gettext
         if not path.exists(self.instance_folder):
             folder = self.instance_folder
             if not isinstance(folder, unicode):
@@ -110,7 +110,7 @@ class WebSetup(object):
 
     def test_admin_account(self, request):
         """Check if the admin mail is valid and the passwords match."""
-        _ = request.translations.ugettext
+        _ = request.translations.gettext
         errors = []
         if not request.values.get('admin_username'):
             errors.append(_('You have to provide a username.'))
@@ -181,7 +181,7 @@ class WebSetup(object):
             try:
                 t.commit()
             except IOError:
-                _ = request.translations.ugettext
+                _ = request.translations.gettext
                 error = _('The configuration file (%s) could not be opened '
                           'for writing. Please adjust your permissions and '
                           'try again.') % config_filename

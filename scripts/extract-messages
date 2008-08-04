@@ -20,8 +20,6 @@ KEYWORDS = {
     '_': None,
     'gettext': None,
     'ngettext': (1, 2),
-    'ugettext': None,
-    'ungettext': (1, 2),
     'lazy_gettext': None,
     'lazy_ngettext': (1, 2)
 }
@@ -30,7 +28,6 @@ COPYRIGHT = 'The Pocoo Team'
 METHODS = [
     ('**.py', 'python'),
     ('**.html', 'jinja2'),
-    ('i18n/*/LC_MESSAGES/messages.js', 'ignore'),
     ('**.js', 'javascript'),
 ]
 COMMENT_TAGS = ['_']

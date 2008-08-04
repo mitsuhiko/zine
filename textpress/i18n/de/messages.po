@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-03 18:22+0100\n"
+"PO-Revision-Date: 2008-08-04 18:48+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -24,7 +24,7 @@ msgstr "Standard Thema"
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Ein einfaches Standard Thema, dass keine Stilinformationen beinhaltet."
 
-#: textpress/application.py:644
+#: textpress/application.py:645
 #, python-format
 msgid "Copyright %(years)s by the Pocoo Team"
 msgstr "Copyright %(years)s by the Pocoo Team"
@@ -160,7 +160,7 @@ msgstr ""
 "  %(url)s\n"
 "%(signature)s"
 
-#: textpress/i18n/__init__.py:295 textpress/views/admin.py:339
+#: textpress/i18n/__init__.py:376 textpress/views/admin.py:339
 #: textpress/views/admin.py:389
 msgid "now"
 msgstr "jetzt"

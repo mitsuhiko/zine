@@ -112,6 +112,7 @@ from werkzeug import cached_property, escape
 import textpress
 from textpress.application import get_application
 from textpress.utils.mail import split_email, is_valid_email
+from textpress.i18n import Translations
 
 
 _py_import = __builtin__.__import__
@@ -467,6 +468,12 @@ class Plugin(object):
             return parse_metadata(f)
         finally:
             f.close()
+
+    @cached_property
+    def translations(self):
+        """The translations for this application."""
+        locale_path = path.join(self.path, 'i18n')
+        return Translations.load(locale_path, [self.app.cfg['language']])
 
     @cached_property
     def module(self):

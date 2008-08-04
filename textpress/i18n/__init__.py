@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~
 
     i18n tools for TextPress.  This module provides various helpers for
-    internationalization.  That is a translation system (with an API
+    internationalization.  That is a translation system (with an API,
     compatible to standard gettext), timezone helpers as well as date
     parsing and formatting functions.
 
@@ -19,19 +19,54 @@
     For display strings are translated to the language of the blog and all
     dates as converted to the blog timezone.
 
+    Translations are handled in a gettext inspired way via babel.  The
+    translatable strings are stored in POT and PO files but the files
+    TextPress loads afterwards are stored in pickles rather than MO files.
+
+    The reason for that is that we have to put additional information into
+    these files.  Currently that is the information if strings are used on
+    the client too.
+
+    As a matter of fact we are using nearly nothing from the original gettext
+    library that comes with Python.  Differences in the API are outlined in
+    the `Translations` class docstring.
+
+    Translation Workflow
+    --------------------
+
+    The extracting of strings (either for TextPress core or plugins) is done
+    with the `extract-messages` script.  If called without arguments it will
+    extract the strings of the core, otherwise the strings of the plugin which
+    is specified.  The messages collected are stored in the `messages.pot`
+    file in the i18n folder of the core or plugin.
+
+    The actual translations have to be updated by hand with those strings.
+    The `update-translations` script will automatically add new strings to
+    the po files and try to do fuzzy matching.
+
+    To compile the translations into the pickled catalog files just use
+    `compile-translations`.
+
+    New languages are added with `add-translation`.
+
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 import os
+import simplejson
+import cPickle as pickle
+from gettext import c2py
 from datetime import datetime
 from time import strptime
+from weakref import WeakKeyDictionary
+
 from babel import Locale, dates, UnknownLocaleError
-from babel.support import Translations
+from babel.support import Translations as TranslationsBase
 from pytz import timezone, UTC
 from werkzeug.exceptions import NotFound
 
 import textpress.application
-from textpress.environment import LOCALE_PATH, LOCALE_DOMAIN
+from textpress.environment import LOCALE_PATH
 
 
 __all__ = ['_', 'gettext', 'ngettext', 'lazy_gettext', 'lazy_ngettext']
@@ -42,17 +77,93 @@ DATE_FORMATS = ['%m/%d/%Y', '%d/%m/%Y', '%Y%m%d', '%d. %m. %Y',
 TIME_FORMATS = ['%H:%M', '%H:%M:%S', '%I:%M %p', '%I:%M:%S %p']
 
 
-#: loaded javascript catalogs
-_js_catalogs = {}
+_js_translations = WeakKeyDictionary()
 
 
 def load_translations(locale):
     """Load the translation for a locale.  If a locale does not exist
     the return value a fake translation object.  If the locale is unknown
     a `UnknownLocaleError` is raised.
+
+    This only loads the translations for TextPress itself and not the
+    plugins.  Plugins themselves have an attribute translations that is
+    the translations object pointing to the active translations of the
+    plugin.
+
+    The application code combines them into one translations object.
     """
-    locale = Locale.parse(locale)
-    return Translations.load(LOCALE_PATH, [locale], LOCALE_DOMAIN)
+    return Translations.load(LOCALE_PATH, locale)
+
+
+class Translations(object):
+    """A gettext like API for TextPress."""
+
+    def __init__(self, catalog=None, locale=None):
+        if locale is not None:
+            locale = Locale.parse(locale)
+        self.locale = locale
+        if catalog is None:
+            self.messages = {}
+            self.client_keys = set()
+            self.plural_func = lambda n: int(n != 1)
+            self.plural_expr = '(n != 1)'
+        else:
+            close = False
+            if isinstance(catalog, basestring):
+                catalog = file(catalog, 'rb')
+                close = True
+            try:
+                dump = pickle.load(catalog)
+                self.messages = dump['messages']
+                self.client_keys = dump['client_keys']
+                self.plural_func = c2py(dump['plural'])
+                self.plural_expr = dump['plural']
+            finally:
+                if close:
+                    catalog.close()
+        self._lookup = self.messages.get
+
+    def __nonzero__(self):
+        return bool(self.messages)
+
+    def gettext(self, string):
+        msg = self._lookup(string)
+        if msg is None:
+            return string
+        elif msg.__class__ is tuple:
+            return msg[0]
+        return msg
+
+    def ngettext(self, singular, plural, n):
+        msgs = self._lookup(singular)
+        if msgs is None or msgs.__class__ is not tuple:
+            if n == 1:
+                return singular
+            return plural
+        return msgs[self.plural_func(n)]
+
+    # unicode aliases for gettext compatibility.  Jinja for example
+    # will try to use those.
+    ugettext = gettext
+    ungettext = ngettext
+
+    def merge(self, translations):
+        """Update the translations with others."""
+        self.messages.update(translations.messages)
+        self.client_keys.update(translations.client_keys)
+
+    @classmethod
+    def load(cls, path, locale, domain='messages'):
+        """Looks for .catalog files in the path provided in a gettext
+        inspired manner.
+
+        If there are no translations an empty locale is returned.
+        """
+        locale = Locale.parse(locale)
+        catalog = os.path.join(path, str(locale), domain + '.catalog')
+        if os.path.isfile(catalog):
+            return Translations(catalog, locale)
+        return Translations(locale=locale)
 
 
 def gettext(string):
@@ -60,7 +171,7 @@ def gettext(string):
     app = textpress.application.get_application()
     if app is None:
         return string
-    return app.translations.ugettext(string)
+    return app.translations.gettext(string)
 
 
 def ngettext(singular, plural, n):
@@ -72,7 +183,7 @@ def ngettext(singular, plural, n):
         if n == 1:
             return singular
         return plrual
-    return app.translations.ungettext(singular, plural, n)
+    return app.translations.ngettext(singular, plural, n)
 
 
 class _TranslationProxy(object):
@@ -251,8 +362,8 @@ def list_languages(self_translated=False):
 
     for filename in os.listdir(LOCALE_PATH):
         if filename == 'en' or not \
-           os.path.isfile(os.path.join(LOCALE_PATH, filename, 'LC_MESSAGES',
-                                       LOCALE_DOMAIN + '.mo')):
+           os.path.isfile(os.path.join(LOCALE_PATH, filename,
+                                       'messages.catalog')):
             continue
         try:
             l = Locale.parse(filename)
@@ -358,26 +469,18 @@ def get_timezone(name=None):
     return timezone(name)
 
 
-def serve_javascript_translation(request, locale):
-    """Serves the JavaScript translation file for a locale."""
-    if locale in _js_catalogs:
-        data = _js_catalogs[locale]
-    else:
-        try:
-            l = Locale.parse(locale)
-        except UnknownLocaleError:
-            raise NotFound()
-        filename = os.path.join(os.path.dirname(__file__), str(l),
-                                'LC_MESSAGES', LOCALE_DOMAIN + '.js')
-        if not os.path.isfile(filename):
-            data = ''
-        else:
-            f = file(filename)
-            try:
-                data = _js_catalogs[locale] = f.read().decode('utf-8')
-            finally:
-                f.close()
-    response = textpress.application.Response(data, mimetype='application/javascript')
+def serve_javascript(request):
+    """Serves the JavaScript translations."""
+    code = _js_translations.get(request.app)
+    if code is None:
+        t = request.app.translations
+        code = 'TextPress.addTranslations(%s)' % simplejson.dumps(dict(
+            messages=dict((k, t.messages[k]) for k in t.client_keys),
+            plural_expr=t.plural_expr,
+            locale=str(t.locale)
+        ))
+        _js_translations[request.app] = code
+    response = textpress.application.Response(code, mimetype='application/javascript')
     response.add_etag()
     response.make_conditional(request)
     return response

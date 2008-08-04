@@ -4,16 +4,17 @@
     Compile translations
     ~~~~~~~~~~~~~~~~~~~~
 
-    Compile translations into JavaScript files and MOs.
+    Compile translations into pickles containing the translated messages.
+    We do not use standard MO files because we have to store additional
+    information in those files.
 
     :copyright: 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
+import pickle
 from os import listdir, path
 from optparse import OptionParser
-from simplejson import dump
 from babel.messages.pofile import read_po
-from babel.messages.mofile import write_mo
 
 domains = ['messages']
 
@@ -36,37 +37,30 @@ def main():
 
     for domain in domains:
         for lang in listdir(root):
-            folder = path.join(root, lang, 'LC_MESSAGES')
+            folder = path.join(root, lang)
             translations = path.join(folder, domain + '.po')
             if path.isfile(translations):
                 print 'Compiling %r' % lang
-                jscatalog = {}
                 f = file(translations)
                 try:
-                    catalog = read_po(f, locale=lang, domain=domain)
-                    pluralexpr = catalog.plural_expr
-                    for message in catalog:
-                        if any(x[0].endswith('.js') for x in message.locations):
-                            msgid = message.id
-                            if isinstance(msgid, (list, tuple)):
-                                msgid = msgid[0]
-                            jscatalog[msgid] = message.string
+                    catalog = read_po(f, locale=lang)
                 finally:
                     f.close()
-                f = file(path.join(folder, domain + '.js'), 'w')
+                rv = dict(messages={}, plural=catalog.plural_expr,
+                          client_keys=set())
+                for message in catalog:
+                    if message.id:
+                        s = message.string
+                        if isinstance(s, list):
+                            s = tuple(s)
+                        rv['messages'][message.id] = s
+                        for filename, lineno in message.locations:
+                            if filename.endswith('.js'):
+                                rv['client_keys'].add(message.id)
+                                break
+                f = file(path.join(folder, domain + '.catalog'), 'wb')
                 try:
-                    f.write('TextPress.addTranslations(');
-                    dump(dict(
-                        messages=jscatalog,
-                        plural_expr=catalog.plural_expr,
-                        locale=str(catalog.locale)
-                    ), f)
-                    f.write(');')
-                finally:
-                    f.close()
-                f = file(path.join(folder, domain + '.mo'), 'w')
-                try:
-                    write_mo(f, catalog)
+                    pickle.dump(rv, f, protocol=2)
                 finally:
                     f.close()
 

@@ -625,6 +625,7 @@ class TextPress(object):
         for plugin in find_plugins(self):
             if plugin.active:
                 plugin.setup()
+                self.translations.merge(plugin.translations)
             self.plugins[plugin.name] = plugin
 
         # init the template system with the core stuff
@@ -962,7 +963,7 @@ class TextPress(object):
                  type='application/rsd+xml', title='RSD'),
             script(url_for('core/shared', filename='js/jQuery.js')),
             script(url_for('core/shared', filename='js/TextPress.js')),
-            script(url_for('blog/serve_translation', locale=self.cfg['language']))
+            script(url_for('blog/serve_translations'))
         ]
         base_url = self.cfg['blog_url'].rstrip('/')
         result.append(

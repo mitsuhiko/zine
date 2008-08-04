@@ -44,7 +44,7 @@ def main():
     po_files = []
     for lang in listdir(root):
         for domain in domains:
-            filename = path.join(root, lang, 'LC_MESSAGES', domain + '.po')
+            filename = path.join(root, lang, domain + '.po')
             if path.exists(filename):
                 print 'Updating %r' % lang
                 locale = Locale.parse(lang)

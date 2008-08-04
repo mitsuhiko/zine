@@ -30,7 +30,7 @@ all_views = {
     'blog/xml_service':         blog.do_xml_service,
     'blog/atom_feed':           blog.do_atom_feed,
     'blog/get_uploaded_file':   blog.do_get_upload,
-    'blog/serve_translation':   i18n.serve_javascript_translation,
+    'blog/serve_translations':  i18n.serve_javascript,
 
     # admin views
     'admin/index':              admin.do_index,
