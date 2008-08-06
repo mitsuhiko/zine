@@ -476,6 +476,14 @@ class Plugin(object):
         return Translations.load(locale_path, [self.app.cfg['language']])
 
     @cached_property
+    def is_documented(self):
+        """This property is True if the plugin has documentation."""
+        for lang in self.app.cfg['language'], 'en':
+            if path.isfile(path.join(self.path, 'docs', lang, 'index.page')):
+                return True
+        return False
+
+    @cached_property
     def module(self):
         """The module of the plugin. The first access imports it.
         When the `unregister_application` function deletes the references to

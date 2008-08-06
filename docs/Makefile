@@ -18,7 +18,6 @@ help:
 	@echo "  html      to make standalone HTML files"
 	@echo "  pickle    to make pickle files"
 	@echo "  json      to make JSON files"
-	@echo "  adminhtml to make pickle dumps for the admin"
 	@echo "  htmlhelp  to make HTML files and a HTML help project"
 	@echo "  latex     to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
 	@echo "  changes   to make an overview over all changed/added/deprecated items"
@@ -45,12 +44,6 @@ json:
 	$(SPHINXBUILD) -b json $(ALLSPHINXOPTS) _build/json
 	@echo
 	@echo "Build finished; now you can process the JSON files."
-
-adminhtml:
-	mkdir -p ../textpress/docs _build/doctrees
-	$(SPHINXBUILD) -b adminhtml $(ALLSPHINXOPTS) ../textpress/docs
-	@echo
-	@echo "Build finished; the TextPress docs are updated."
 
 htmlhelp:
 	mkdir -p _build/htmlhelp _build/doctrees

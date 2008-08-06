@@ -13,10 +13,6 @@
     `IntelligentRedirect` classes located there.  Do this before you try to
     add your own admin panel pages!
 
-    Todo:
-
-    -   Dashboard
-
     :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs, Pedro Algarvio,
                              Ali Afshar.
     :license: GNU GPL.
@@ -133,8 +129,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # add the about items to the navigation bar
     system_items = [
         ('information', url_for('admin/information'), _('Information')),
-        ('about', url_for('admin/about_textpress'), _('About')),
-        ('help', url_for('admin/help'), _('Help'))
+        ('help', url_for('admin/help'), _('Help')),
+        ('about', url_for('admin/about_textpress'), _('About'))
     ]
     if can_build_eventmap:
         system_items.insert(1, ('eventmap', url_for('admin/eventmap'),
@@ -1073,7 +1069,7 @@ def do_edit_user(request, user_id=None):
                 user = User(username, password, email, first_name,
                             last_name, description, www, role)
                 user.display_name = display_name or '$username'
-                msg = 'User %s created successfully.'
+                msg = _('User %s created successfully.')
                 icon = 'add'
             else:
                 user.username = username
@@ -1086,7 +1082,7 @@ def do_edit_user(request, user_id=None):
                 user.description = description
                 user.www = www
                 user.role = role
-                msg = 'User %s edited successfully.'
+                msg = _('User %s edited successfully.')
                 icon = 'info'
             db.commit()
             html_user_detail = u'<a href="%s">%s</a>' % (
@@ -2269,37 +2265,24 @@ def do_delete_upload(req, filename):
 
 
 @require_role(ROLE_AUTHOR)
-def do_help(req, page='index'):
+def do_help(req, page=''):
     """Show help page."""
-    from pickle import load
-    from os.path import join, dirname, pardir, isfile, sep
+    from textpress.docs import load_page, get_resource
 
-    # no short cutting, we wan't clean urls
-    if page.endswith('/index'):
+    rv = load_page(req.app, page)
+    if rv is None:
+        resource = get_resource(req.app, page)
+        if resource is None:
+            raise NotFound()
+        return resource
+
+    parts, is_index = rv
+    ends_with_slash = not page or page.endswith('/')
+    if is_index and not ends_with_slash:
+        return simple_redirect('admin/help', page=page + '/')
+    elif not is_index and ends_with_slash:
         raise NotFound()
 
-    parts = [x for x in page.split('/') if x[:1] not in '_.']
-    for ts, suffix in enumerate(('.page', sep + '/index.page')):
-        filename = join(dirname(__file__), pardir, 'docs', *parts) + suffix
-        if isfile(filename):
-            # if a trailing slash is required, redirect to the page
-            # with the trailing slash.  We have to do that because
-            # sphinx generates relative urls
-            if ts:
-                if not page.endswith('/'):
-                    return simple_redirect('admin/help', page=page + '/')
-            # otherwise there must not be a trailing slash
-            elif page.endswith('/'):
-                raise NotFound()
-            break
-    else:
-        raise NotFound()
-
-    f = file(filename, 'rb')
-    try:
-        parts = load(f)
-    finally:
-        f.close()
     return render_admin_response('admin/help.html', 'system.help', **parts)
 
 

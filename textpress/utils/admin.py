@@ -46,7 +46,7 @@ def flash(msg, type='info'):
             append((type, msg))
 
 
-def gen_slug(text):
+def gen_slug(text, delim='-'):
     """remove accents and make text lowercase."""
     result = []
     for word in _punctuation_re.split(text.lower()):
@@ -55,7 +55,7 @@ def gen_slug(text):
                 word = word.replace(search, replace)
             word = unicodedata.normalize('NFKD', word)
             result.append(word.encode('ascii', 'ignore'))
-    return u'-'.join(result)
+    return unicode(delim.join(result))
 
 
 try:

@@ -1,0 +1,123 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    Create a New Plugin
+    ~~~~~~~~~~~~~~~~~~~
+
+    This script asks a few questions to create a plugin skeleton
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+import re
+import sys
+import os
+from datetime import date
+from jinja2 import Template
+from optparse import OptionParser
+
+
+_ident_re = re.compile(r'^[a-z][a-z0-9_]*$')
+init_template = Template('''\
+# -*- coding: utf-8 -*-
+"""
+    textpress.plugins.{{ package }}
+    ~~~~~~~~~~~~~~~~~~{{ '~' * package|length }}
+
+    Plugin implementation description goes here.
+
+    :copyright: {{ year }} by {{ author }}.
+    :license: GNU GPL.
+"""
+
+def setup(app, plugin):
+    pass
+
+''')
+
+doc_template = Template('''\
+{{ name }}
+{{ '~' * name|length }}
+
+Plugin documentation goes here...
+
+''')
+
+sys.path.append(os.path.dirname(__file__))
+import _init_textpress
+
+from textpress.utils.admin import gen_slug
+from textpress.utils.mail import split_email
+
+
+def main():
+    global parser
+    parser = OptionParser(usage='%prog [path]')
+    options, args = parser.parse_args()
+    if not args:
+        path = '.'
+    elif len(args) == 1:
+        path = args[0]
+    else:
+        parser.error('incorrect number of arguments')
+
+    print 'Welcome to the Plugin Wizzard'
+    print 'This wizzard will ask you a few questions to create a new'
+    print 'plugin skelleton.'
+    print
+
+    while 1:
+        name = raw_input('English Name of the Plugin: ').strip()
+        if name:
+            break
+        print 'Error: you have to provide a name'
+
+    package = gen_slug(name, delim='_')
+    while 1:
+        tmp = raw_input('Name of the package [%s]: ' % package)
+        if not tmp:
+            break
+        if _ident_re.search(tmp):
+            package = tmp
+            break
+        print 'Error: invalid package name'
+
+    while 1:
+        author = raw_input('Author: ').strip()
+        if author:
+            break
+        print 'Error: You have to provide an author'
+
+    author_url = raw_input('Author URL: ')
+    plugin_url = raw_input('Plugin URL: ')
+
+    folder = os.path.join(path, package)
+    os.mkdir(folder)
+
+    f = file(os.path.join(folder, 'metadata.txt'), 'w')
+    try:
+        for key, value in ('Name', name), ('Author', author), \
+                          ('Author URL', author_url), \
+                          ('Plugin URL', plugin_url):
+            if value:
+                f.write('%s: %s\n' % (key, value.encode('utf-8')))
+        f.write('\nVersion: 0.1\nLicense: GPL\nDescription:\n')
+    finally:
+        f.close()
+
+    author_name, author_email = split_email(author)
+    init_template.stream(dict(
+        package=package,
+        author=author_name or author_email,
+        year=date.today().year
+    )).dump(os.path.join(folder, '__init__.py'), 'utf-8')
+
+    os.mkdir(os.path.join(folder, 'i18n'))
+    os.mkdir(os.path.join(folder, 'docs'))
+    os.mkdir(os.path.join(folder, 'docs', 'en'))
+    doc_template.stream(dict(name=name)) \
+        .dump(os.path.join(folder, 'docs', 'en', 'index.rst'))
+
+
+if __name__ == '__main__':
+    main()

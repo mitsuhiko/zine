@@ -1,7 +1,14 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ title|striptags }}{% endblock %}
 {% block contents %}
+  <h1>{{ title }}</h1>
   <div class="help">
+    {% if toc %}
+    <div class="toc">
+      <h4>{{ _('Table Of Contents') }}</h4>
+      <ul>{{ toc }}</ul>
+    </div>
+    {% endif %}
     {{ body }}
   </div>
 {% endblock %}

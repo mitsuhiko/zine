@@ -50,13 +50,16 @@ def main():
                           client_keys=set())
                 for message in catalog:
                     if message.id:
+                        i = message.id
+                        if isinstance(i, (list, tuple)):
+                            i = i[0]
                         s = message.string
                         if isinstance(s, list):
                             s = tuple(s)
-                        rv['messages'][message.id] = s
+                        rv['messages'][i] = s
                         for filename, lineno in message.locations:
                             if filename.endswith('.js'):
-                                rv['client_keys'].add(message.id)
+                                rv['client_keys'].add(i)
                                 break
                 f = file(path.join(folder, domain + '.catalog'), 'wb')
                 try:

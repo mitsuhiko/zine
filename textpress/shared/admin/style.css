@@ -846,8 +846,8 @@ div.help {
 
 div.help p, div.help dl dd {
     line-height: 150%;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 div.help pre {
@@ -883,13 +883,13 @@ div.help cite {
 
 div.help div.admonition {
     margin: 10px 0 10px 0;
-    padding: 10px 10px 10px 10px;
+    padding: 0 10px 0 10px;
     border: 1px solid #ccc;
 }
 
 div.help div.admonition p.admonition-title {
     color: white;
-    margin: -10px -10px 10px -10px;
+    margin: 0 -10px 10px -10px;
     padding: 4px 10px 4px 10px;
     font-weight: bold;
     background-color: #ccc;
@@ -911,6 +911,13 @@ div.help h4 {
     border: none;
 }
 
+div.help h2 a,
+div.help h3 a,
+div.help h4 a {
+    color: black;
+    text-decoration: none;
+}
+
 div.help h2 {
     font-size: 1.6em;
 }
@@ -927,29 +934,27 @@ div.help dl dt {
     color: #111;
 }
 
-div.help dl.function dt,
-div.help dl.class dt,
-div.help dl.exception dt,
-div.help dl.method dt,
-div.help dl.attribute dt,
-div.help dl.data dt {
-    font-weight: normal;
+div.help div.toc {
+    float: right;
+    margin: 0 0 1em 1em;
+    padding: 0.5em;
+    border: 1px solid #ddd;
 }
 
-div.help dt tt.descname {
+div.help div.toc h4 {
+    margin: 0 0 0.5em 0;
+    font-size: 1em;
     font-weight: bold;
-    margin-right: 4px;
 }
 
-div.help dt tt.descname, dt tt.descclassname {
-    padding: 0;
-    border-bottom: 1px solid #111;
+div.help div.toc p {
+    margin: 0;
 }
 
-div.help dt tt.descclassname {
-    margin-left: 2px;
+div.help div.toc ul {
+    margin: 0;
+    padding: 0 0 0 1.4em;
 }
-
 
 /* :::: LOGIN BOX :::: */
 div.login-box {

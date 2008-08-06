@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-04 18:48+0100\n"
+"PO-Revision-Date: 2008-08-05 23:28+0100\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -37,24 +37,24 @@ msgstr "Mein TextPress Blog"
 msgid "just another TextPress blog"
 msgstr "einfach nur ein weiteres TextPress Blog"
 
-#: textpress/models.py:97 textpress/views/admin.py:1131
+#: textpress/models.py:97 textpress/views/admin.py:1127
 msgid "Administrator"
 msgstr "Administrator"
 
-#: textpress/models.py:99 textpress/views/admin.py:1132
+#: textpress/models.py:99 textpress/views/admin.py:1128
 msgid "Editor"
 msgstr "Editor"
 
 #: textpress/models.py:101 textpress/templates/admin/edit_comment.html:15
 #: textpress/templates/admin/edit_comment.html:28
 #: textpress/templates/admin/edit_post.html:87
-#: textpress/templates/admin/information.html:84
+#: textpress/templates/admin/information.html:82
 #: textpress/templates/admin/inspect_import.html:61
-#: textpress/templates/admin/show_posts.html:19 textpress/views/admin.py:1133
+#: textpress/templates/admin/show_posts.html:19 textpress/views/admin.py:1129
 msgid "Author"
 msgstr "Autor"
 
-#: textpress/models.py:103 textpress/views/admin.py:1134
+#: textpress/models.py:103 textpress/views/admin.py:1130
 msgid "Subscriber"
 msgstr "Abonent"
 
@@ -125,6 +125,10 @@ msgstr "Letzte Kommentare"
 msgid "Pages Navigation"
 msgstr "Seiten-Navigation"
 
+#: textpress/docs/__init__.py:67
+msgid "no documented plugins installed."
+msgstr "Keine dokumentierten Plugins installiert."
+
 #: textpress/experimental_plugins/notification/__init__.py:28
 #, python-format
 msgid "New comment on your blog to \"%(title)s\" by %(author)s"
@@ -160,8 +164,8 @@ msgstr ""
 "  %(url)s\n"
 "%(signature)s"
 
-#: textpress/i18n/__init__.py:376 textpress/views/admin.py:339
-#: textpress/views/admin.py:389
+#: textpress/i18n/__init__.py:406 textpress/views/admin.py:335
+#: textpress/views/admin.py:385
 msgid "now"
 msgstr "jetzt"
 
@@ -416,7 +420,7 @@ msgstr ""
 "  "
 
 #: textpress/plugins/pygments_support/templates/admin/pygments_support.html:12
-#: textpress/views/admin.py:123
+#: textpress/views/admin.py:119
 msgid "Theme"
 msgstr "Thema"
 
@@ -738,7 +742,7 @@ msgstr "geschrieben von"
 
 #: textpress/templates/show_post.html:29
 #: textpress/templates/admin/inspect_import.html:62
-#: textpress/templates/admin/show_posts.html:21 textpress/views/admin.py:92
+#: textpress/templates/admin/show_posts.html:21 textpress/views/admin.py:88
 msgid "Comments"
 msgstr "Kommentare"
 
@@ -1304,7 +1308,7 @@ msgid "Repeat"
 msgstr "Wiederholen"
 
 #: textpress/templates/admin/configuration.html:2
-#: textpress/templates/admin/configuration.html:4 textpress/views/admin.py:129
+#: textpress/templates/admin/configuration.html:4 textpress/views/admin.py:125
 msgid "Configuration Editor"
 msgstr "Konfigurationseditor"
 
@@ -1558,7 +1562,7 @@ msgid "Block message"
 msgstr "Nachricht blocken"
 
 #: textpress/templates/admin/edit_post.html:2
-#: textpress/templates/admin/edit_post.html:4 textpress/views/admin.py:89
+#: textpress/templates/admin/edit_post.html:4 textpress/views/admin.py:85
 msgid "Write Post"
 msgstr "Eintrag schreiben"
 
@@ -1589,7 +1593,7 @@ msgstr "Einleitung"
 
 #: textpress/templates/admin/edit_post.html:44
 #: textpress/templates/admin/show_posts.html:20
-#: textpress/templates/widgets/tagcloud.html:2 textpress/views/admin.py:90
+#: textpress/templates/widgets/tagcloud.html:2 textpress/views/admin.py:86
 msgid "Tags"
 msgstr "Markierungen"
 
@@ -1645,7 +1649,7 @@ msgid "Slug"
 msgstr "URL-Bezeichner"
 
 #: textpress/templates/admin/edit_tag.html:11
-#: textpress/templates/admin/information.html:82
+#: textpress/templates/admin/information.html:80
 #: textpress/templates/admin/show_tags.html:9
 msgid "Name"
 msgstr "Name"
@@ -1657,7 +1661,7 @@ msgstr "Name"
 msgid "Description"
 msgstr "Beschreibung"
 
-#: textpress/templates/admin/edit_user.html:2 textpress/views/admin.py:118
+#: textpress/templates/admin/edit_user.html:2 textpress/views/admin.py:114
 msgid "Edit User"
 msgstr "Benutzer bearbeiten"
 
@@ -1712,7 +1716,7 @@ msgid "Role"
 msgstr "Rolle"
 
 #: textpress/templates/admin/eventmap.html:2
-#: textpress/templates/admin/eventmap.html:4 textpress/views/admin.py:141
+#: textpress/templates/admin/eventmap.html:4 textpress/views/admin.py:137
 msgid "Event Map"
 msgstr "Event-Map"
 
@@ -1728,7 +1732,7 @@ msgstr ""
 
 #: textpress/templates/admin/export.html:2
 #: textpress/templates/admin/export.html:4
-#: textpress/templates/admin/export.html:17 textpress/views/admin.py:146
+#: textpress/templates/admin/export.html:17 textpress/views/admin.py:142
 msgid "Export"
 msgstr "Exportieren"
 
@@ -1759,11 +1763,15 @@ msgstr ""
 "    um Backups deines Blogs zu erstellen.\n"
 "  "
 
+#: textpress/templates/admin/help.html:8
+msgid "Table Of Contents"
+msgstr "Inhaltsverzeichnis"
+
 #: textpress/templates/admin/import.html:2
 #: textpress/templates/admin/import.html:4
 #: textpress/templates/admin/import_blogger.html:41
 #: textpress/templates/admin/import_wordpress.html:22
-#: textpress/views/admin.py:145
+#: textpress/views/admin.py:141
 msgid "Import"
 msgstr "Importieren"
 
@@ -1913,7 +1921,7 @@ msgid "Finishing upload, performing import..."
 msgstr "Upload fertiggestellt, Import wird durchgeführt..."
 
 #: textpress/templates/admin/index.html:2
-#: textpress/templates/admin/index.html:5 textpress/views/admin.py:86
+#: textpress/templates/admin/index.html:5 textpress/views/admin.py:82
 msgid "Dashboard"
 msgstr "Dashboard"
 
@@ -2036,64 +2044,60 @@ msgid "Builtin Plugins"
 msgstr "Mitgelieferte Plugins"
 
 #: textpress/templates/admin/information.html:19
-msgid "Path to Locales"
-msgstr "Pfad zu den Übersetzungen"
-
-#: textpress/templates/admin/information.html:21
 msgid "Path to Instance"
 msgstr "Pfad zur Instanz"
 
-#: textpress/templates/admin/information.html:23
+#: textpress/templates/admin/information.html:21
 msgid "Database URI"
 msgstr "Datenbank URI"
 
-#: textpress/templates/admin/information.html:26
+#: textpress/templates/admin/information.html:24
 msgid "Hosting Environment"
 msgstr "Hosting Umgebung"
 
-#: textpress/templates/admin/information.html:28
+#: textpress/templates/admin/information.html:26
 msgid "Python Version"
 msgstr "Python Version"
 
-#: textpress/templates/admin/information.html:30
+#: textpress/templates/admin/information.html:28
 msgid "Persistent Environment"
 msgstr "Persistente Umgebung"
 
-#: textpress/templates/admin/information.html:31
-#: textpress/templates/admin/information.html:41
-#: textpress/templates/admin/information.html:91
+#: textpress/templates/admin/information.html:29
+#: textpress/templates/admin/information.html:39
+#: textpress/templates/admin/information.html:89
 msgid "yes"
 msgstr "ja"
 
-#: textpress/templates/admin/information.html:31
-#: textpress/templates/admin/information.html:37
-#: textpress/templates/admin/information.html:41
-#: textpress/templates/admin/information.html:91
+#: textpress/templates/admin/information.html:29
+#: textpress/templates/admin/information.html:35
+#: textpress/templates/admin/information.html:39
+#: textpress/templates/admin/information.html:89
 msgid "no"
 msgstr "nein"
 
-#: textpress/templates/admin/information.html:32
+#: textpress/templates/admin/information.html:30
 msgid "Multithreaded"
 msgstr "Mehrere Threads"
 
-#: textpress/templates/admin/information.html:35
+#: textpress/templates/admin/information.html:33
 #, python-format
 msgid "yes (%(count)s active threads)"
 msgstr "ja (%(count)s aktive Threads)"
 
-#: textpress/templates/admin/information.html:40
+#: textpress/templates/admin/information.html:38
 msgid "Multiprocess"
 msgstr "Mehrere Prozesse"
 
-#: textpress/templates/admin/information.html:42
+#: textpress/templates/admin/information.html:40
 msgid "WSGI Version"
 msgstr "WSGI Version"
 
-#: textpress/templates/admin/information.html:45
+#: textpress/templates/admin/information.html:43
 msgid "URL Endpoints"
 msgstr "URL Endpunkte"
 
-#: textpress/templates/admin/information.html:46
+#: textpress/templates/admin/information.html:44
 #, python-format
 msgid ""
 "\n"
@@ -2105,11 +2109,11 @@ msgstr ""
 "registriert:\n"
 "  "
 
-#: textpress/templates/admin/information.html:54
+#: textpress/templates/admin/information.html:52
 msgid "Services"
 msgstr "Services"
 
-#: textpress/templates/admin/information.html:55
+#: textpress/templates/admin/information.html:53
 msgid ""
 "\n"
 "    The following servicepoints are registered on this instance to be "
@@ -2122,11 +2126,11 @@ msgstr ""
 "    von einem der Services aufrufbar.\n"
 "    "
 
-#: textpress/templates/admin/information.html:64
+#: textpress/templates/admin/information.html:62
 msgid "Installed APIs"
 msgstr "Installierte APIs"
 
-#: textpress/templates/admin/information.html:65
+#: textpress/templates/admin/information.html:63
 msgid ""
 "\n"
 "    The following APIs are installed on this blog instance. APIs marked "
@@ -2139,53 +2143,53 @@ msgstr ""
 "    Stern (*) werden bevorzugt.\n"
 "  "
 
-#: textpress/templates/admin/information.html:78 textpress/views/admin.py:126
+#: textpress/templates/admin/information.html:76 textpress/views/admin.py:122
 msgid "Plugins"
 msgstr "Plugins"
 
-#: textpress/templates/admin/information.html:86
+#: textpress/templates/admin/information.html:84
 msgid "Location"
 msgstr "Stelle"
 
-#: textpress/templates/admin/information.html:88
+#: textpress/templates/admin/information.html:86
 msgid "UID"
 msgstr "UID"
 
-#: textpress/templates/admin/information.html:90
+#: textpress/templates/admin/information.html:88
 msgid "Active"
 msgstr "Aktiv"
 
-#: textpress/templates/admin/information.html:95
+#: textpress/templates/admin/information.html:93
 msgid "Configuration Variables"
 msgstr "Konfigurationsvariablen"
 
-#: textpress/templates/admin/information.html:98
+#: textpress/templates/admin/information.html:96
 #: textpress/templates/admin/show_pages.html:8
 #: textpress/templates/admin/write_page.html:11
 msgid "Key"
 msgstr "Schlüssel"
 
-#: textpress/templates/admin/information.html:99
+#: textpress/templates/admin/information.html:97
 msgid "Value"
 msgstr "Wert"
 
-#: textpress/templates/admin/information.html:100
+#: textpress/templates/admin/information.html:98
 msgid "Default"
 msgstr "Standard"
 
-#: textpress/templates/admin/information.html:110
+#: textpress/templates/admin/information.html:108
 msgid "Template Globals"
 msgstr "Template Globale"
 
-#: textpress/templates/admin/information.html:116
+#: textpress/templates/admin/information.html:114
 msgid "Template Filters"
 msgstr "Template Filter"
 
-#: textpress/templates/admin/information.html:122
+#: textpress/templates/admin/information.html:120
 msgid "Events"
 msgstr "Events"
 
-#: textpress/templates/admin/information.html:124
+#: textpress/templates/admin/information.html:122
 msgid ""
 "\n"
 "      TextPress uses an event system for intercomponent communication. "
@@ -2203,7 +2207,7 @@ msgstr ""
 "      nicht.\n"
 "    "
 
-#: textpress/templates/admin/information.html:130
+#: textpress/templates/admin/information.html:128
 msgid ""
 "\n"
 "        Your python version however supports the new AST compile mode "
@@ -2223,7 +2227,7 @@ msgstr ""
 "        installierten Plugins.\n"
 "     "
 
-#: textpress/templates/admin/information.html:136
+#: textpress/templates/admin/information.html:134
 msgid "Build Event Map"
 msgstr "Event-Map erstellen"
 
@@ -2305,7 +2309,7 @@ msgstr ""
 "      benutzers abwählst ist es egal was du hier auswählst.\n"
 "    "
 
-#: textpress/templates/admin/inspect_import.html:53 textpress/views/admin.py:87
+#: textpress/templates/admin/inspect_import.html:53 textpress/views/admin.py:83
 msgid "Posts"
 msgstr "Einträge"
 
@@ -2348,7 +2352,7 @@ msgid "Remember me"
 msgstr "Erinnere dich an mich"
 
 #: textpress/templates/admin/maintenance.html:2
-#: textpress/templates/admin/maintenance.html:4 textpress/views/admin.py:144
+#: textpress/templates/admin/maintenance.html:4 textpress/views/admin.py:140
 msgid "Maintenance"
 msgstr "Wartung"
 
@@ -2588,8 +2592,8 @@ msgid "Select All"
 msgstr "Alle markieren"
 
 #: textpress/templates/admin/show_pages.html:2
-#: textpress/templates/admin/show_pages.html:4 textpress/views/admin.py:111
-#: textpress/views/admin.py:124
+#: textpress/templates/admin/show_pages.html:4 textpress/views/admin.py:107
+#: textpress/views/admin.py:120
 msgid "Pages"
 msgstr "Seiten"
 
@@ -2888,7 +2892,7 @@ msgstr ""
 
 #: textpress/templates/admin/file_uploads/thumbnailer.html:2
 #: textpress/templates/admin/file_uploads/thumbnailer.html:4
-#: textpress/views/admin.py:104
+#: textpress/views/admin.py:100
 msgid "Create Thumbnails"
 msgstr "Vorschaubilder erstellen"
 
@@ -2963,7 +2967,7 @@ msgid "Overwrite an already uploaded file with the same name."
 msgstr "Überschreibe bereits hochgeladene Datei mit selben Namen."
 
 #: textpress/templates/admin/file_uploads/upload.html:25
-#: textpress/views/admin.py:102
+#: textpress/views/admin.py:98
 msgid "Upload"
 msgstr "Hochladen"
 
@@ -3017,70 +3021,70 @@ msgstr "Die Konfigurationsdatei konnte nicht geschrieben werden."
 msgid "TLS enabled but server does not support TLS"
 msgstr "TLS wurde aktiviert aber der Server unterstützt kein TLS"
 
-#: textpress/views/admin.py:88 textpress/views/admin.py:93
-#: textpress/views/admin.py:112 textpress/views/admin.py:117
+#: textpress/views/admin.py:84 textpress/views/admin.py:89
+#: textpress/views/admin.py:108 textpress/views/admin.py:113
 msgid "Overview"
 msgstr "Übersicht"
 
-#: textpress/views/admin.py:95
+#: textpress/views/admin.py:91
 #, python-format
 msgid "Awaiting Moderation (%d)"
 msgstr "Unmoderiert (%d)"
 
-#: textpress/views/admin.py:98
+#: textpress/views/admin.py:94
 #, python-format
 msgid "Spam (%d)"
 msgstr "Spam (%d)"
 
-#: textpress/views/admin.py:100 textpress/views/admin.py:125
+#: textpress/views/admin.py:96 textpress/views/admin.py:121
 msgid "Uploads"
 msgstr "Dateien"
 
-#: textpress/views/admin.py:101
+#: textpress/views/admin.py:97
 msgid "Browse"
 msgstr "Durchsuchen"
 
-#: textpress/views/admin.py:113
+#: textpress/views/admin.py:109
 msgid "Write Page"
 msgstr "Seite schreiben"
 
-#: textpress/views/admin.py:116
+#: textpress/views/admin.py:112
 msgid "Users"
 msgstr "Benutzer"
 
-#: textpress/views/admin.py:120
+#: textpress/views/admin.py:116
 msgid "Options"
 msgstr "Optionen"
 
-#: textpress/views/admin.py:121
+#: textpress/views/admin.py:117
 msgid "Basic"
 msgstr "Einfach"
 
-#: textpress/views/admin.py:122
+#: textpress/views/admin.py:118
 msgid "URLs"
 msgstr "URLs"
 
-#: textpress/views/admin.py:127
+#: textpress/views/admin.py:123
 msgid "Cache"
 msgstr "Cache"
 
-#: textpress/views/admin.py:135
+#: textpress/views/admin.py:131
 msgid "Information"
 msgstr "Information"
 
-#: textpress/views/admin.py:136
-msgid "About"
-msgstr "Über"
-
-#: textpress/views/admin.py:137
+#: textpress/views/admin.py:132
 msgid "Help"
 msgstr "Hilfe"
 
-#: textpress/views/admin.py:148
+#: textpress/views/admin.py:133
+msgid "About"
+msgstr "Über"
+
+#: textpress/views/admin.py:144
 msgid "System"
 msgstr "System"
 
-#: textpress/views/admin.py:171
+#: textpress/views/admin.py:167
 #, python-format
 msgid ""
 "TextPress is in maintenance mode. Don't forget to <a href=\"%s\">turn it "
@@ -3089,12 +3093,12 @@ msgstr ""
 "TextPress ist im Wartungsmodus.  Vergiss nicht ihn <a href=\"%s\">wieder "
 "zu deaktivieren</a> wenn du fertig bist."
 
-#: textpress/views/admin.py:182
+#: textpress/views/admin.py:178
 #, python-format
 msgid "Could not activate plugin “%(name)s”: %(error)s"
 msgstr "Konnte das Plugin \"%(name)s\" nicht aktivieren: %(error)s"
 
-#: textpress/views/admin.py:187
+#: textpress/views/admin.py:183
 #, python-format
 msgid ""
 "The plugin guard detected that the plugin “%(name)s” causes problems "
@@ -3106,35 +3110,35 @@ msgstr ""
 "deaktiviert. Wenn du das Problem debuggen willst deaktiviere die "
 "Pluginwache."
 
-#: textpress/views/admin.py:195
+#: textpress/views/admin.py:191
 msgid "unknown file"
 msgstr "Unbekannte Datei"
 
-#: textpress/views/admin.py:263
+#: textpress/views/admin.py:259
 msgid "Text here..."
 msgstr "Text hier..."
 
-#: textpress/views/admin.py:265
+#: textpress/views/admin.py:261
 msgid "Untitled Page"
 msgstr "Seite schreiben"
 
-#: textpress/views/admin.py:363
+#: textpress/views/admin.py:359
 msgid "You have to provide a title."
 msgstr "Du musst einen Titel angeben."
 
-#: textpress/views/admin.py:365
+#: textpress/views/admin.py:361
 msgid "Your title is too long."
 msgstr "Der Titel ist zu lang."
 
-#: textpress/views/admin.py:368
+#: textpress/views/admin.py:364
 msgid "You have to provide a body."
 msgstr "Du musst einen Text angeben."
 
-#: textpress/views/admin.py:375
+#: textpress/views/admin.py:371
 msgid "Invalid post status"
 msgstr "Ungültiger Status"
 
-#: textpress/views/admin.py:382
+#: textpress/views/admin.py:378
 msgid ""
 "You cannot change the text of a post which parser does not exist any "
 "longer."
@@ -3142,40 +3146,40 @@ msgstr ""
 "Du kannst den Text eines Posts nicht verändern dessen Parser nicht länger"
 " existiert."
 
-#: textpress/views/admin.py:387 textpress/views/admin.py:713
+#: textpress/views/admin.py:383 textpress/views/admin.py:709
 #, python-format
 msgid "Unknown parser “%s”."
 msgstr "Unbekannter parser \"%s\"."
 
-#: textpress/views/admin.py:391
+#: textpress/views/admin.py:387
 msgid "Invalid publication date."
 msgstr "Ungültiges Datum der Veröffentlichung"
 
-#: textpress/views/admin.py:400
+#: textpress/views/admin.py:396
 #, python-format
 msgid "Unknown author “%s”."
 msgstr "Unbekannter Author \"%s\"."
 
-#: textpress/views/admin.py:405
+#: textpress/views/admin.py:401
 msgid "A slug cannot contain a slash."
 msgstr "Ein URL Bezeichner darf keinen Schrägstrich beinhalten."
 
-#: textpress/views/admin.py:407
+#: textpress/views/admin.py:403
 msgid "Your slug is too long"
 msgstr "Der URL Bezeichner ist zu lang."
 
-#: textpress/views/admin.py:416
+#: textpress/views/admin.py:412
 #, python-format
 msgid "Unknown tag “%s”."
 msgstr "Unbekannte Markierung \"%s\"."
 
-#: textpress/views/admin.py:464
+#: textpress/views/admin.py:460
 msgid "No URLs pinged so far because the post is not publicly available"
 msgstr ""
 "Es wurden noch keine URLs gepingt, weil der Eintrag nicht öffentlich "
 "erreichbar ist"
 
-#: textpress/views/admin.py:467
+#: textpress/views/admin.py:463
 msgid ""
 "Could not ping URLs because the parser for the post is not available any "
 "longer."
@@ -3183,32 +3187,32 @@ msgstr ""
 "Konnte URLs nicht pingen weil der Parser für diesen Eintrag nicht mehr "
 "länger verfügbar ist."
 
-#: textpress/views/admin.py:481
+#: textpress/views/admin.py:477
 #, python-format
 msgid "Could not ping %(url)s: %(error)s"
 msgstr "Konnte %(url)s nicht pingen: %(error)s"
 
-#: textpress/views/admin.py:486
+#: textpress/views/admin.py:482
 #, python-format
 msgid "%s was pinged successfully."
 msgstr "%s wurde erfolgreich gepingt."
 
-#: textpress/views/admin.py:490
+#: textpress/views/admin.py:486
 #, python-format
 msgid "The post %s was created successfully."
 msgstr "Der Eintrag %s wurde erfolgreich erstellt."
 
-#: textpress/views/admin.py:493
+#: textpress/views/admin.py:489
 #, python-format
 msgid "The post %s was updated successfully."
 msgstr "Der Eintrag %s wurde erfolgreich erstellt."
 
-#: textpress/views/admin.py:506 textpress/views/admin.py:757
+#: textpress/views/admin.py:502 textpress/views/admin.py:753
 #, python-format
 msgid "Missing Parser “%s”"
 msgstr "Parser \"%s\" fehlt."
 
-#: textpress/views/admin.py:508
+#: textpress/views/admin.py:504
 #, python-format
 msgid ""
 "This post was created with the parser “%(parser)s” that is not installed "
@@ -3221,79 +3225,79 @@ msgstr ""
 "am Text bis entweder der Parser für diesen Text geändert wurder oder der "
 "Parser neu installiert wurde."
 
-#: textpress/views/admin.py:523
+#: textpress/views/admin.py:519
 msgid "Published"
 msgstr "Veröffentlicht"
 
-#: textpress/views/admin.py:524
+#: textpress/views/admin.py:520
 msgid "Draft"
 msgstr "Entwurf"
 
-#: textpress/views/admin.py:525
+#: textpress/views/admin.py:521
 msgid "Private"
 msgstr "Privat"
 
-#: textpress/views/admin.py:560
+#: textpress/views/admin.py:556
 #, python-format
 msgid "The post %s was deleted successfully."
 msgstr "Der Eintrag %s wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:602
+#: textpress/views/admin.py:598
 msgid "Approved all the selected comments."
 msgstr "Alle markierten Kommentare wurden bestätigt."
 
-#: textpress/views/admin.py:623
+#: textpress/views/admin.py:619
 msgid "All Comments"
 msgstr "Alle Kommentare"
 
-#: textpress/views/admin.py:630
+#: textpress/views/admin.py:626
 msgid "Comments Awaiting Moderation"
 msgstr "Unmoderierte Kommentare"
 
-#: textpress/views/admin.py:637
+#: textpress/views/admin.py:633
 msgid "Spam"
 msgstr "Spam"
 
-#: textpress/views/admin.py:650
+#: textpress/views/admin.py:646
 #, python-format
 msgid "Comments for “%s”"
 msgstr "Kommentare für \"%s\""
 
-#: textpress/views/admin.py:698
+#: textpress/views/admin.py:694
 msgid "You have to give the comment an author."
 msgstr "Du musst dem Kommentar einen Author geben."
 
-#: textpress/views/admin.py:701
+#: textpress/views/admin.py:697
 msgid "You have to provide a valid mail address for the author."
 msgstr "Du musst eine gültige E-Mail Adresse für den Autor angeben."
 
-#: textpress/views/admin.py:708
+#: textpress/views/admin.py:704
 msgid "You cannot change the text of a comment if the parser is missing."
 msgstr "Du kannst den Text eines Kommentars nicht ändern wenn der Parser fehlt."
 
-#: textpress/views/admin.py:715
+#: textpress/views/admin.py:711
 msgid "Need a text for this comment."
 msgstr "Es muss ein Text für dieses Kommentar angegeben werden."
 
-#: textpress/views/admin.py:717
+#: textpress/views/admin.py:713
 msgid "You have to ommitt the url or provide a valid one."
 msgstr "Du musst die URL leer lassen oder eine gültige angeben."
 
-#: textpress/views/admin.py:723
+#: textpress/views/admin.py:719
 msgid "Invalid date for comment."
 msgstr "Ungültiges Datum für Kommentar."
 
-#: textpress/views/admin.py:744 textpress/views/admin.py:861
+#: textpress/views/admin.py:740 textpress/views/admin.py:857
 #, python-format
 msgid "blocked by %s"
 msgstr "geblockt von %s"
 
-#: textpress/views/admin.py:748
+#: textpress/views/admin.py:744
 #, python-format
 msgid "Comment by %s moderated successfully."
 msgstr "Kommentar von %s wurde erfolgreich moderiert."
 
-#: textpress/views/admin.py:759
+#: textpress/views/admin.py:755
 #, python-format
 msgid ""
 "This comment was submitted when the parser “%(parser)s” was the comment "
@@ -3306,133 +3310,142 @@ msgstr ""
 "TextPress keine Veränderungen am Text bis der Parser wieder installiert "
 "wurde."
 
-#: textpress/views/admin.py:805
+#: textpress/views/admin.py:801
 #, python-format
 msgid "Comment by %s deleted successfully."
 msgstr "Kommentar von %s wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:834
+#: textpress/views/admin.py:830
 #, python-format
 msgid "Comment by %s approved successfully."
 msgstr "Kommentar von %s wurde erfolgreich bestätigt.."
 
-#: textpress/views/admin.py:866
+#: textpress/views/admin.py:862
 #, python-format
 msgid "Comment by %s blocked successfully."
 msgstr "Kommentar von %s wurde erfolgreich geblockt."
 
-#: textpress/views/admin.py:930
+#: textpress/views/admin.py:926
 msgid "You have to give the tag a name."
 msgstr "Du musst der Markierung einen Namen geben."
 
-#: textpress/views/admin.py:932
+#: textpress/views/admin.py:928
 #, python-format
 msgid "The slug \"%s\" is not unique."
 msgstr "Der Bezeichner \"%s\" ist nicht eindeutig."
 
-#: textpress/views/admin.py:937
+#: textpress/views/admin.py:933
 #, python-format
 msgid "Tag %s created successfully."
 msgstr "Markierung %s wurde erfolgreich erstellt."
 
-#: textpress/views/admin.py:944
+#: textpress/views/admin.py:940
 #, python-format
 msgid "Tag %s updated successfully."
 msgstr "Markierung %s wurde erfolgreich verändert."
 
-#: textpress/views/admin.py:987
+#: textpress/views/admin.py:983
 #, python-format
 msgid "Tag %s deleted successfully."
 msgstr "Markierung %s wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:1049
+#: textpress/views/admin.py:1045
 msgid "Username is required."
 msgstr "Der Benutzername ist verpflichtend."
 
-#: textpress/views/admin.py:1052
+#: textpress/views/admin.py:1048
 #, python-format
 msgid "Username “%s” is taken."
 msgstr "Der Benutzername \"%s\" ist bereits in Verwendung."
 
-#: textpress/views/admin.py:1055
+#: textpress/views/admin.py:1051
 msgid "You have to provide a password."
 msgstr "Du musst ein Passwort angeben."
 
-#: textpress/views/admin.py:1062
+#: textpress/views/admin.py:1058
 msgid "The user needs a valid mail address."
 msgstr "Der Benutzer benötigt eine gültige E-Mail Adresse."
 
-#: textpress/views/admin.py:1069
+#: textpress/views/admin.py:1065
 msgid "Invalid user role."
 msgstr "Ungültige Rolle für Benutzer."
 
-#: textpress/views/admin.py:1152
+#: textpress/views/admin.py:1072
+msgid "User %s created successfully."
+msgstr "Benutzer %s erfolgreich erstellt"
+
+#: textpress/views/admin.py:1085
+#, python-format
+msgid "User %s edited successfully."
+msgstr "Benutzer %s wurde erfolgreich bearbeitet."
+
+#: textpress/views/admin.py:1148
 msgid "You cannot delete yourself."
 msgstr "Du kannst dich selbst nicht löschen."
 
-#: textpress/views/admin.py:1181
+#: textpress/views/admin.py:1177
 #, python-format
 msgid "User %s deleted successfully."
 msgstr "Benutzer %s wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:1231
+#: textpress/views/admin.py:1227
 msgid "You have to provide a blog title"
 msgstr "Du musst einen Titel für das Blog angeben."
 
-#: textpress/views/admin.py:1235
+#: textpress/views/admin.py:1231
 msgid "You have to provide a valid e-mail address for the blog e-mail field."
 msgstr "Du musst eine E-Mail Adresse für das Blog E-Mail Feld angeben."
 
-#: textpress/views/admin.py:1256 textpress/views/admin.py:1260
+#: textpress/views/admin.py:1252 textpress/views/admin.py:1256
 #, python-format
 msgid "Unknown parser %s."
 msgstr "Unbekannter Parser %s."
 
-#: textpress/views/admin.py:1265
+#: textpress/views/admin.py:1261
 msgid "Posts per page must be at least 1"
 msgstr "Die Anzahl der Beiträge pro Seite muss zumindest 1 sein"
 
-#: textpress/views/admin.py:1267
+#: textpress/views/admin.py:1263
 msgid "Posts per page must be a valid integer"
 msgstr "Die Anzahl der Beiträge pro Seite muss eine Zahl sein"
 
-#: textpress/views/admin.py:1298
+#: textpress/views/admin.py:1294
 msgid "Configuration altered successfully."
 msgstr "Konfiguration wurde erfolgreich verändert."
 
-#: textpress/views/admin.py:1330
+#: textpress/views/admin.py:1326
 msgid "URL prefix may not contain greater than or smaller than signs."
 msgstr "Der URL Präfix darf nicht ein größer oder kleiner als Zeichen beinhalten."
 
-#: textpress/views/admin.py:1333
+#: textpress/views/admin.py:1329
 msgid "URL prefixes have to start with a slash."
 msgstr "URL Präfixe müssen mit einem Slash beginnen."
 
-#: textpress/views/admin.py:1335
+#: textpress/views/admin.py:1331
 msgid "URL prefixes may not end with a slash."
 msgstr "ein URL Präfix darf nicht mit einem Slash enden."
 
-#: textpress/views/admin.py:1344
+#: textpress/views/admin.py:1340
 msgid "URL configuration could not be changed."
 msgstr "Die URL Konfiguration konnte nicht geändert werden."
 
-#: textpress/views/admin.py:1347
+#: textpress/views/admin.py:1343
 msgid "URL configuration changed."
 msgstr "Die URL Konfiguration wurde geändert."
 
-#: textpress/views/admin.py:1373
+#: textpress/views/admin.py:1369
 msgid "Theme changed successfully."
 msgstr "Das Thema wurde erfolgreich geändert."
 
-#: textpress/views/admin.py:1375
+#: textpress/views/admin.py:1371
 msgid "Theme could not be changed."
 msgstr "Das Thema konnte nicht geändert werden."
 
-#: textpress/views/admin.py:1389
+#: textpress/views/admin.py:1385
 msgid "This theme is not configurable"
 msgstr "Dieses Thema kann nicht konfiguriert werden"
 
-#: textpress/views/admin.py:1403
+#: textpress/views/admin.py:1399
 msgid ""
 "Plugin guard enabled successfully. Errors occuring in plugins during "
 "setup are catched now."
@@ -3440,19 +3453,19 @@ msgstr ""
 "Die Plugin Wache wurde erfolgreich aktiviert.  Fehler im Plugin Setup "
 "werden nun abgefangen."
 
-#: textpress/views/admin.py:1406
+#: textpress/views/admin.py:1402
 msgid "Plugin guard could not be enabled."
 msgstr "Die Pluginwache konnte nicht aktiviert werden."
 
-#: textpress/views/admin.py:1409
+#: textpress/views/admin.py:1405
 msgid "Plugin guard disabled successfully."
 msgstr "Die Pluginwache wurde erfolgreich aktiviert."
 
-#: textpress/views/admin.py:1411
+#: textpress/views/admin.py:1407
 msgid "Plugin guard could not be disabled."
 msgstr "Die Pluginwache konnte nicht deaktiviert werden."
 
-#: textpress/views/admin.py:1420
+#: textpress/views/admin.py:1416
 #, python-format
 msgid ""
 "The Plugins <em>%(dependencies)s</em> are loaded as a dependency of "
@@ -3461,12 +3474,12 @@ msgstr ""
 "Die Plugins <em>%(dependencies)</em> wurden als Abhängigkein von "
 "\"%(plugin)s\" geladen."
 
-#: textpress/views/admin.py:1424
+#: textpress/views/admin.py:1420
 #, python-format
 msgid "Plugin “%s” activated."
 msgstr "Plugin \"%s\" aktiviert."
 
-#: textpress/views/admin.py:1429
+#: textpress/views/admin.py:1425
 #, python-format
 msgid ""
 "Plugin “%(plugin)s” has unresolved dependencies.  Please install "
@@ -3475,17 +3488,17 @@ msgstr ""
 "Das Plugin \"%(plugin)s\" hat unaufgelöste Abhängigkeiten.  Bitte "
 "installiere %(dependency)s."
 
-#: textpress/views/admin.py:1434
+#: textpress/views/admin.py:1430
 #, python-format
 msgid "Plugin “%s” could not be loaded"
 msgstr "Plugin \"%s\" konnte nicht geladen werden"
 
-#: textpress/views/admin.py:1439
+#: textpress/views/admin.py:1435
 #, python-format
 msgid "Plugin “%s” deactivated."
 msgstr "Plugin \"%s\" wurde deaktiviert."
 
-#: textpress/views/admin.py:1450
+#: textpress/views/admin.py:1446
 msgid ""
 "Could not install the plugin because the file uploaded is not a valid "
 "plugin file."
@@ -3493,7 +3506,7 @@ msgstr ""
 "Konnte das Plugin nicht installieren weil die hochgeladene keine gültige "
 "Plugin Datei ist."
 
-#: textpress/views/admin.py:1454
+#: textpress/views/admin.py:1450
 msgid ""
 "The plugin uploaded has a newer package version than this TextPress "
 "installation can handle."
@@ -3501,11 +3514,11 @@ msgstr ""
 "Das hochgeladene Plugin hat eine neuere Package Version als diese "
 "TextPress installation verarbeiten kann."
 
-#: textpress/views/admin.py:1458
+#: textpress/views/admin.py:1454
 msgid "A plugin with the same UID is already installed. Aborted."
 msgstr "Ein plugin mit der gleichen UID wurde bereits installiert. Abbruch."
 
-#: textpress/views/admin.py:1461
+#: textpress/views/admin.py:1457
 msgid ""
 "Could not install the package because the installer wasn't able to write "
 "the package information. Wrong permissions?"
@@ -3513,18 +3526,18 @@ msgstr ""
 "Konnte das Paket nicht installieren weil der Installer die Plugin "
 "Informationen nicht schreiben konnte.  Falsche Zugriffsrechte?"
 
-#: textpress/views/admin.py:1465
+#: textpress/views/admin.py:1461
 msgid "An unknown error occoured"
 msgstr "Ein unbekannter Fehler ist aufgetreten"
 
-#: textpress/views/admin.py:1467
+#: textpress/views/admin.py:1463
 #, python-format
 msgid "Plugin “%s” added succesfully. You can now enable it in the plugin list."
 msgstr ""
 "Plugin \"%s\" wurde erfolgreich hinzugefügt.  Du kannst das Plugin nun "
 "aktivieren."
 
-#: textpress/views/admin.py:1499
+#: textpress/views/admin.py:1495
 #, python-format
 msgid ""
 "Could not remove the plugin “%s” because an IO error occoured. Wrong "
@@ -3533,122 +3546,122 @@ msgstr ""
 "Konnte das Plugin \"%s\" nicht entfernen weil ein Fehler aufgetreten ist."
 "  Falsche Zugriffsrechte?"
 
-#: textpress/views/admin.py:1502
+#: textpress/views/admin.py:1498
 #, python-format
 msgid "The plugin “%s” was removed from the instance successfully."
 msgstr "Das Plugin \"%s\" wurde erfolgreich entfernt."
 
-#: textpress/views/admin.py:1531
+#: textpress/views/admin.py:1527
 msgid "The cache was cleared successfully."
 msgstr "Der cache wurde erfolgreich geleert."
 
-#: textpress/views/admin.py:1537
+#: textpress/views/admin.py:1533
 msgid "Invalid cache system selected."
 msgstr "Ungültiges Cache System ausgewählt."
 
-#: textpress/views/admin.py:1541
+#: textpress/views/admin.py:1537
 msgid "Cache timeout must be positive integer."
 msgstr "Cache-Timeout muss eine positive Ganzzahl sein."
 
-#: textpress/views/admin.py:1545
+#: textpress/views/admin.py:1541
 msgid "Cache timeout must be greater than 10 seconds."
 msgstr "Cache-Timeout muss größer als 10 Sekunden sein."
 
-#: textpress/views/admin.py:1567
+#: textpress/views/admin.py:1563
 msgid "Updated cache settings."
 msgstr "Cache Einstellungen aktualisiert."
 
-#: textpress/views/admin.py:1575
+#: textpress/views/admin.py:1571
 msgid "Simple Cache"
 msgstr "Einfacher Cache"
 
-#: textpress/views/admin.py:1576
+#: textpress/views/admin.py:1572
 msgid "memcached"
 msgstr "memcached"
 
-#: textpress/views/admin.py:1577
+#: textpress/views/admin.py:1573
 msgid "Filesystem"
 msgstr "Dateisystem"
 
-#: textpress/views/admin.py:1578
+#: textpress/views/admin.py:1574
 msgid "No Cache"
 msgstr "Kein Cache"
 
-#: textpress/views/admin.py:1637
+#: textpress/views/admin.py:1633
 msgid "Maintenance mode disabled.  The blog is now publicly available."
 msgstr "Wartungsmodus deaktiviert.  Das Blog ist nun öffentlich verfügbar."
 
-#: textpress/views/admin.py:1716
+#: textpress/views/admin.py:1712
 #, python-format
 msgid "The imported dump “%s” was deleted successfully."
 msgstr "Der Import \"%s\" wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:1842
+#: textpress/views/admin.py:1838
 msgid "You have to enter your old password."
 msgstr "Du musst das alte Passwort eingeben."
 
-#: textpress/views/admin.py:1844
+#: textpress/views/admin.py:1840
 msgid "Your old password is wrong."
 msgstr "Das alte Passwort ist falsch."
 
-#: textpress/views/admin.py:1847
+#: textpress/views/admin.py:1843
 msgid "Your new password cannot be empty."
 msgstr "Das neue Passwort darf nicht leer sein."
 
-#: textpress/views/admin.py:1850
+#: textpress/views/admin.py:1846
 msgid "The passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-#: textpress/views/admin.py:1854
+#: textpress/views/admin.py:1850
 msgid "Password changed successfully."
 msgstr "Das Passwort wurde erfolgreich geändert."
 
-#: textpress/views/admin.py:1954
+#: textpress/views/admin.py:1950
 msgid "You have to provide a title"
 msgstr "Du musst einen Titel angeben"
 
-#: textpress/views/admin.py:1962
+#: textpress/views/admin.py:1958
 msgid "A key can't contain a slash"
 msgstr "Der Schlüssel darf keinen Schrägstrich beinhalten"
 
-#: textpress/views/admin.py:1969
+#: textpress/views/admin.py:1965
 msgid "You have to provide some content"
 msgstr "Du musst einen Inhalt angeben"
 
-#: textpress/views/admin.py:2038
+#: textpress/views/admin.py:2034
 #, python-format
 msgid "The page %s was deleted successfully."
 msgstr "Die Seite %s wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:2059
+#: textpress/views/admin.py:2055
 #, python-format
 msgid "Could not create upload target folder %s."
 msgstr "Konnte den Ordner %s für hochgeladene Dateien nicht erstellen."
 
-#: textpress/views/admin.py:2066
+#: textpress/views/admin.py:2062
 msgid "No file uploaded."
 msgstr "Keine Datei hochgeladen"
 
-#: textpress/views/admin.py:2068
+#: textpress/views/admin.py:2064
 msgid "Invalid filename requested."
 msgstr "Ungültiger Dateinamen angefordert."
 
-#: textpress/views/admin.py:2070
+#: textpress/views/admin.py:2066
 #, python-format
 msgid "A file with the filename %s exists already."
 msgstr "Eine Datei mit den Namen %s existiert bereits."
 
-#: textpress/views/admin.py:2078
+#: textpress/views/admin.py:2074
 #, python-format
 msgid "File %s uploaded successfully."
 msgstr "Datei %s wurde erfolgreich hochgeladen."
 
-#: textpress/views/admin.py:2084 textpress/views/admin.py:2162
+#: textpress/views/admin.py:2080 textpress/views/admin.py:2158
 #, python-format
 msgid "Could not write file %s."
 msgstr "Konnte Datei %s nicht schreiben."
 
-#: textpress/views/admin.py:2110
+#: textpress/views/admin.py:2106
 #, python-format
 msgid ""
 "If you don't have ImageMagick installed system wide but in a different "
@@ -3658,7 +3671,7 @@ msgstr ""
 "Wenn du ImageMagick nicht systemweit installiert hast, kannst du den Pfad"
 " in der <a href=\"%(config)s\">Konfiguration</a> angeben."
 
-#: textpress/views/admin.py:2114
+#: textpress/views/admin.py:2110
 #, python-format
 msgid ""
 "There is no ImageMagick in the path defined installed. (<a "
@@ -3667,93 +3680,93 @@ msgstr ""
 "In dem angegebenen Pfad wurde ImageMagick nicht gefunden. (<a "
 "href\"%(config)s\">überprüfe die Konfiguration</a>)"
 
-#: textpress/views/admin.py:2117
+#: textpress/views/admin.py:2113
 #, python-format
 msgid "Cannot find <a href=\"%(im)s\">ImageMagick</a>."
 msgstr "Konnte <a href=\"%(im)s\">ImageMagick</a> nicht finden."
 
-#: textpress/views/admin.py:2128
+#: textpress/views/admin.py:2124
 msgid "You have to specify a source image"
 msgstr "Du musst ein Quellbild angeben"
 
-#: textpress/views/admin.py:2133
+#: textpress/views/admin.py:2129
 #, python-format
 msgid "The image %s does not exist."
 msgstr "Das Bild %s existiert nicht."
 
-#: textpress/views/admin.py:2138
+#: textpress/views/admin.py:2134
 msgid "You have to define at least the width of the thumbnail."
 msgstr "Du musst zumindest die Breite des Vorschaubilds angeben."
 
-#: textpress/views/admin.py:2142
+#: textpress/views/admin.py:2138
 msgid "Thumbnail dimensions must be integers."
 msgstr "Die Abmessungen des Vorschaubildes müssen Zahlen sein."
 
-#: textpress/views/admin.py:2148
+#: textpress/views/admin.py:2144
 msgid "You have to specify a filename for the thumbnail."
 msgstr "Du musst einen Dateinamen für das Vorschaubild angeben."
 
-#: textpress/views/admin.py:2151
+#: textpress/views/admin.py:2147
 msgid "Invalid filename for thumbnail."
 msgstr "Ungültiger Dateiname für Vorschaubild."
 
-#: textpress/views/admin.py:2153
+#: textpress/views/admin.py:2149
 msgid "An file with this name exists already."
 msgstr "Eine Datei mit diesem Namen existiert bereits."
 
-#: textpress/views/admin.py:2171
+#: textpress/views/admin.py:2167
 #, python-format
 msgid "Thumbnail %s was created successfully."
 msgstr "Das Vorschaubild %s wurde erfolgreich erstellt."
 
-#: textpress/views/admin.py:2213
+#: textpress/views/admin.py:2209
 msgid "Upload folder changed successfully."
 msgstr "Der Ordner für Hochgeladene Dateien wurde erfolgreich erstellt."
 
-#: textpress/views/admin.py:2215
+#: textpress/views/admin.py:2211
 msgid "Upload folder could not be changed."
 msgstr "Der Ordner für Hochgeladene Dateien konnte nicht geändert werden."
 
-#: textpress/views/admin.py:2220
+#: textpress/views/admin.py:2216
 msgid "Changed path to ImageMagick"
 msgstr "Pfad zu ImageMagick wurde geändert"
 
-#: textpress/views/admin.py:2222
+#: textpress/views/admin.py:2218
 msgid "ImageMagick is searched on the system path now."
 msgstr "ImageMagick wird nun systemweit gesucht."
 
-#: textpress/views/admin.py:2224
+#: textpress/views/admin.py:2220
 msgid "Path to ImageMagick could not be changed."
 msgstr "Der Pfad zu ImageMagick konnte nicht geändert werden."
 
-#: textpress/views/admin.py:2229
+#: textpress/views/admin.py:2225
 msgid "Upload mimetype mapping altered successfully."
 msgstr "Mimetype-Verknüpfungen für hochgeladene Dateien wurde geändert."
 
-#: textpress/views/admin.py:2231
+#: textpress/views/admin.py:2227
 msgid "Upload mimetype mapping could not be altered."
 msgstr "Mimetype-Verknüpfungen konnte nicht geändert werden."
 
-#: textpress/views/admin.py:2257
+#: textpress/views/admin.py:2253
 #, python-format
 msgid "Could not delete file %s."
 msgstr "Konnte Datei %s nicht löschen."
 
-#: textpress/views/admin.py:2260
+#: textpress/views/admin.py:2256
 #, python-format
 msgid "File %s deleted successfully."
 msgstr "Datei %s wurde erfolgreich gelöscht."
 
-#: textpress/views/admin.py:2320
+#: textpress/views/admin.py:2303
 #, python-format
 msgid "User %s does not exist."
 msgstr "Benutzer %s existiert nicht."
 
-#: textpress/views/admin.py:2325
+#: textpress/views/admin.py:2308
 msgid "Incorrect password."
 msgstr "Falsches Passwort"
 
-#: textpress/views/admin.py:2327
+#: textpress/views/admin.py:2310
 msgid "You have to enter a username."
 msgstr "Du musst einen Benutzernamen angeben."
 
