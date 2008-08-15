@@ -99,8 +99,7 @@ class ManagerExtension(orm.MapperExtension):
         if session is None:
             session = self.get_session()
         if not kwargs.pop('_tp_no_save', False):
-            entity = kwargs.pop('_sa_entity_name', None)
-            session._save_without_cascade(instance, entity_name=entity)
+            session._save_without_cascade(instance)
         return orm.EXT_CONTINUE
 
     def init_failed(self, mapper, class_, oldinit, instance, args, kwargs):
