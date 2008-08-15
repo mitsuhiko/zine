@@ -527,8 +527,7 @@ def do_edit_post(request, post_id=None):
 
 @require_role(ROLE_AUTHOR)
 def do_delete_post(request, post_id):
-    """
-    This dialog deletes a post.  Usually users are redirected here from the
+    """This dialog deletes a post.  Usually users are redirected here from the
     edit post view or the post index page.  If the post was not deleted the
     user is taken back to the page he's coming from or back to the edit
     page if the information is invalid.  The same happens if the post was
@@ -769,8 +768,7 @@ def do_edit_comment(request, comment_id):
 
 @require_role(ROLE_AUTHOR)
 def do_delete_comment(request, comment_id):
-    """
-    This dialog delets a comment.  Usually users are redirected here from the
+    """This dialog delets a comment.  Usually users are redirected here from the
     comment moderation page or the comment edit page.  If the comment was not
     deleted, the user is taken back to the page he's coming from or back to
     the edit page if the information is invalid.  The same happens if the post
@@ -959,9 +957,7 @@ def do_edit_tag(request, tag_id=None):
 
 @require_role(ROLE_AUTHOR)
 def do_delete_tag(request, tag_id):
-    """
-    Works like the other delete pages, just that it deletes tags.
-    """
+    """Works like the other delete pages, just that it deletes tags."""
     tag = Tag.objects.get(tag_id)
     if tag is None:
         return redirect(url_for('admin/show_tags'))
@@ -1005,9 +1001,8 @@ def do_show_users(request, page):
 
 @require_role(ROLE_ADMIN)
 def do_edit_user(request, user_id=None):
-    """
-    Edit a user.  This can also create a user.  If a new user is created the
-    dialog is simplified, some unimportant details are left out.
+    """Edit a user.  This can also create a user.  If a new user is created
+    the dialog is simplified, some unimportant details are left out.
     """
     user = None
     errors = []
@@ -1135,9 +1130,7 @@ def do_edit_user(request, user_id=None):
 
 @require_role(ROLE_ADMIN)
 def do_delete_user(request, user_id):
-    """
-    Like all other delete screens just that it deletes a user.
-    """
+    """Like all other delete screens just that it deletes a user."""
     user = User.objects.get(user_id)
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
@@ -1188,8 +1181,7 @@ def do_delete_user(request, user_id):
 
 @require_role(ROLE_ADMIN)
 def do_options(request):
-    """
-    So far just a redirect page, later it would be a good idea to have
+    """So far just a redirect page, later it would be a good idea to have
     a page that shows all the links to configuration things in form of
     a simple table.
     """
@@ -1198,9 +1190,13 @@ def do_options(request):
 
 @require_role(ROLE_ADMIN)
 def do_basic_options(request):
-    """
-    The dialog for basic options such as the blog title etc.
-    """
+    """The dialog for basic options such as the blog title etc."""
+    # flash an altered message if the url is ?altered=true.  For more information
+    # see the comment that redirects to the url below.
+    if request.args.get('altered') == 'true':
+        flash(_('Configuration altered successfully.'), 'configure')
+        return simple_redirect('admin/basic_options')
+
     cfg = request.app.cfg
     form = {
         'blog_title':           cfg['blog_title'],
@@ -1291,8 +1287,12 @@ def do_basic_options(request):
                 t['use_flat_comments'] = use_flat_comments
 
             if commit_config_change(t):
-                flash(_('Configuration altered successfully.'), 'configure')
-                return simple_redirect('admin/basic_options')
+                # because the configuration page could change the language and
+                # we want to flash the message "configuration changed" in the
+                # new language rather than the old.  As a matter of fact we have
+                # to wait for TextPress to reload first which is why we do the
+                # actual flashing after one reload.
+                return simple_redirect('admin/basic_options', altered='true')
 
         for error in errors:
             flash(error, 'error')
@@ -1356,9 +1356,7 @@ def do_urls(request):
 
 @require_role(ROLE_ADMIN)
 def do_theme(request):
-    """
-    Allow the user to select one of the themes that are available.
-    """
+    """Allow the user to select one of the themes that are available."""
     csrf_protector = CSRFProtector()
     if 'configure' in request.args:
         return simple_redirect('admin/configure_theme')
@@ -1475,9 +1473,7 @@ def do_plugins(request):
 
 @require_role(ROLE_ADMIN)
 def do_remove_plugin(request, plugin):
-    """
-    Remove an inactive, instance installed plugin completely.
-    """
+    """Remove an inactive, instance installed plugin completely."""
     plugin = request.app.plugins.get(plugin)
     if plugin is None or \
        not plugin.instance_plugin or \
@@ -1578,8 +1574,7 @@ def do_cache(request):
 
 @require_role(ROLE_ADMIN)
 def do_configuration(request):
-    """
-    Advanced configuration editor.  This is useful for development or if a
+    """Advanced configuration editor.  This is useful for development or if a
     plugin doesn't ship an editor for the configuration values.  Because all
     the values are not further checked it could easily be that TextPress is
     left in an unusable state if a variable is set to something bad.  Because
@@ -1738,8 +1733,7 @@ def do_export(request):
 
 @require_role(ROLE_AUTHOR)
 def do_information(request):
-    """
-    Shows some details about this TextPress installation.  It's useful for
+    """Shows some details about this TextPress installation.  It's useful for
     debugging and checking configurations.  If severe errors in a TextPress
     installation occour it's a good idea to dump this page and attach it to
     a bug report mail.
@@ -1793,8 +1787,7 @@ def do_information(request):
 
 @require_role(ROLE_AUTHOR)
 def do_eventmap(request):
-    """
-    The GUI version of the `textpress-management.py eventmap` command.
+    """The GUI version of the `textpress-management.py eventmap` command.
     Traverses the sourcecode for emit_event calls using the python2.5
     ast compiler.  Because of that it raises an page not found exception
     for python2.4.
@@ -1813,18 +1806,14 @@ def do_eventmap(request):
 
 @require_role(ROLE_AUTHOR)
 def do_about_textpress(request):
-    """
-    Just show the textpress license and some other legal stuff.
-    """
+    """Just show the textpress license and some other legal stuff."""
     return render_admin_response('admin/about_textpress.html',
                                  'system.about')
 
 
 @require_role(ROLE_AUTHOR)
 def do_change_password(request):
-    """
-    Allow the current user to change his password.
-    """
+    """Allow the current user to change his password."""
     errors = []
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
@@ -1903,8 +1892,7 @@ def do_show_pages(request):
 
 @require_role(ROLE_ADMIN)
 def do_write_page(request, page_id=None):
-    """
-    Show the "write page" dialog.
+    """Show the "write page" dialog.
 
     If `page_id` is given the form is updated with
     already saved data so that you can edit a page.
