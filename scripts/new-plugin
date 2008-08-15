@@ -61,8 +61,8 @@ def main():
     else:
         parser.error('incorrect number of arguments')
 
-    print 'Welcome to the Plugin Wizzard'
-    print 'This wizzard will ask you a few questions to create a new'
+    print 'Welcome to the Plugin Wizard'
+    print 'This wizard will ask you a few questions to create a new'
     print 'plugin skelleton.'
     print
 

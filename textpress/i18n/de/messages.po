@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-05 23:28+0100\n"
+"PO-Revision-Date: 2008-08-15 15:59+0200\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.0dev-r0\n"
+"Generated-By: Babel 1.0dev-r409\n"
 
 #: textpress/application.py:587
 msgid "Default Theme"
@@ -541,36 +541,17 @@ msgstr "Abbrechen"
 msgid "Bookmarklet"
 msgstr "Bookmarklet"
 
-#: textpress/shared/js/Admin.js:51
-msgid ""
-"Right click on the following link and choose \"Add to favorites\" or "
-"\"Bookmark link\" to create a posting shortcut."
+#: textpress/shared/js/Admin.js:51 textpress/shared/js/Admin.js:61
+msgid "posting shortcut."
 msgstr ""
-"Nach einem Rechtsklick auf den folgenden Link wähle \"Zu Favoriten "
-"hinzufügen\" oder \"Lesezeichen erstellen\" um einen Schnellverweis für "
-"das Erstellen von neuen Einträgen hinzuzufügen."
 
 #: textpress/shared/js/Admin.js:55
-msgid ""
-"Next time you visit an interesting page, just select some text and click "
-"on the bookmark."
+msgid "text and click on the bookmark."
 msgstr ""
-"Wenn du nächstens eine interessante Seite besuchst über die du bloggen "
-"willst, wähle einfach ein wenig Text aus und klicke auf den neu "
-"erstellten Bookmark."
 
 #: textpress/shared/js/Admin.js:59
 msgid "Blog It!"
 msgstr "Blogge Es!"
-
-#: textpress/shared/js/Admin.js:61
-msgid ""
-"Right click on this link and choose \"Add to favorites\" or \"Bookmark "
-"link\" to create a posting shortcut."
-msgstr ""
-"Ein Rechtsklick auf diesen Link und wähle \"Zu den Favoriten hinzufügen\""
-" oder \"Lesezeichen erstellen\" um einen Schnellverweis für das Erstellen"
-" von neuen Einträgen hinzuzufügen."
 
 #: textpress/shared/js/Admin.js:79
 msgid "Finishing upload, stand by...."
@@ -2690,6 +2671,7 @@ msgstr ""
 
 #: textpress/templates/admin/url_options.html:2
 #: textpress/templates/admin/url_options.html:4
+#: textpress/templates/admin/urls.html:2 textpress/templates/admin/urls.html:4
 msgid "URL Options"
 msgstr "URL Einstellungen"
 
@@ -2718,20 +2700,39 @@ msgstr ""
 "  "
 
 #: textpress/templates/admin/url_options.html:14
+#: textpress/templates/admin/urls.html:14
 msgid "Blog URL Prefix"
 msgstr "Blog URL Präfix"
 
 #: textpress/templates/admin/url_options.html:16
+#: textpress/templates/admin/urls.html:16
 msgid "Admin URL Prefix"
 msgstr "Admin URL Präfix"
 
 #: textpress/templates/admin/url_options.html:18
+#: textpress/templates/admin/urls.html:18
 msgid "Tags URL Prefix"
 msgstr "URL Präfix für Markierungen"
 
 #: textpress/templates/admin/url_options.html:20
+#: textpress/templates/admin/urls.html:20
 msgid "Author Profiles URL Prefix"
 msgstr "URL Präfix für Autoren"
+
+#: textpress/templates/admin/urls.html:5
+msgid ""
+"\n"
+"    Here you can change some basic URL configuration settings.  This is "
+"especially\n"
+"    useful if you have plugins installed that that add a new index page "
+"or if you\n"
+"    want to move the administration to a different location as "
+"additional, small\n"
+"    security feature.  If you want to use the tags as categories you can "
+"also give\n"
+"    them a different prefix and adapt the templates etc.\n"
+"  "
+msgstr ""
 
 #: textpress/templates/admin/write_page.html:13
 msgid ""
@@ -3371,6 +3372,7 @@ msgid "Invalid user role."
 msgstr "Ungültige Rolle für Benutzer."
 
 #: textpress/views/admin.py:1072
+#, python-format
 msgid "User %s created successfully."
 msgstr "Benutzer %s erfolgreich erstellt"
 
@@ -4045,7 +4047,7 @@ msgstr ""
 msgid ""
 "\n"
 "    The setup tried to determine the language from your browser\n"
-"    settings.  If you want to step through the wizzard in another\n"
+"    settings.  If you want to step through the wizard in another\n"
 "    language select it from the dropdown menu below and press next.\n"
 "  "
 msgstr ""

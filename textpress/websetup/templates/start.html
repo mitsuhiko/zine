@@ -7,10 +7,10 @@
   {% endtrans %}</p>
   <p>{% trans %}
     The setup tried to determine the language from your browser
-    settings.  If you want to step through the wizzard in another
+    settings.  If you want to step through the wizard in another
     language select it from the dropdown menu below and press next.
   {% endtrans %}</p>
-  <p><select name="_lang">
+  <p><select name="_lang" onchange="this.form.submit()">
   {%- for code, name in languages %}
     <option value="{{ code }}"{% if code == lang %} selected{% endif %}>{{ name|e }}</option>
   {%- endfor %}

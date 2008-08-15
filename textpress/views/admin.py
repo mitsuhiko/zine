@@ -251,7 +251,7 @@ def do_bookmarklet(request):
     """Requests to this view are usually triggered by the bookmarklet
     from the edit-post page.  Currently this is a redirect to the new-post
     page with some small modifications but in the future this could be
-    expanded to add a wizzard or something.
+    expanded to add a wizard or something.
     """
     if request.args['mode'] != 'newpost':
         raise BadRequest()
