@@ -29,4 +29,5 @@ def find_instance():
             if isfile(join(path, 'textpress.ini')):
                 instance = path
                 break
+            old_path = path
     return instance
