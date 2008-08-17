@@ -446,6 +446,9 @@ def do_edit_post(request, post_id=None):
             post.status = post_status
             post.last_update = max(datetime.utcnow(), pub_date)
             db.commit()
+            #! a after-post-saved event is always extremely useful. plugins can
+            #! use it to update search indexes / feeds or whatever
+            emit_event('after-post-saved', request, post)
 
             html_post_detail = u'<a href="%s">%s</a>' % (
                 escape(url_for(post)),
