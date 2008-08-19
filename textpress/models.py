@@ -642,7 +642,7 @@ class Post(object):
         # authors here, they can only view it if they are the
         # author of this post.
         else:
-            return self.author == user
+            return self.author_id == user.id
 
     @property
     def is_published(self):

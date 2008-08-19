@@ -448,7 +448,7 @@ def do_edit_post(request, post_id=None):
             db.commit()
             #! a after-post-saved event is always extremely useful. plugins can
             #! use it to update search indexes / feeds or whatever
-            emit_event('after-post-saved', request, post)
+            emit_event('after-post-saved', post)
 
             html_post_detail = u'<a href="%s">%s</a>' % (
                 escape(url_for(post)),
