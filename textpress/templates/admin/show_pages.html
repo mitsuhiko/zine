@@ -12,7 +12,7 @@
     {%- for page in pages %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
       <td>{{ page.page_id }}</td>
-      <td><a href="{{ url_for(page) }}">{{ page.key }}</a></td>
+      <td><a href="{{ url_for('admin/write_page', page_id=page.page_id) }}">{{ page.key }}</a></td>
       <td><a href="{{ url_for('admin/write_page', page_id=page.page_id) }}">{{ page.title }}</a></td>
       <td>{% if page.navigation_pos %}{{ page.navigation_pos }}{% else %}{% trans %}No position given{% endtrans %}{% endif %}</td>
     </tr>

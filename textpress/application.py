@@ -15,7 +15,7 @@ from time import time
 from thread import allocate_lock
 from itertools import izip
 from datetime import datetime, timedelta
-from urlparse import urlparse
+from urlparse import urlparse, urljoin
 from collections import deque
 from inspect import getdoc
 
@@ -74,7 +74,7 @@ def url_for(endpoint, **args):
         rv = endpoint.get_url_values()
         if rv is not None:
             if isinstance(rv, basestring):
-                return rv
+                return urljoin(local.application.cfg['blog_url'], rv)
             endpoint, updated_args = rv
             args.update(updated_args)
     anchor = args.pop('_anchor', None)
@@ -562,7 +562,7 @@ class TextPress(object):
 
         # setup core package urls and shared stuff
         import textpress
-        from textpress.urls import make_urls
+        from textpress.urls import make_urls, absolute_url_handlers
         from textpress.views import all_views
         from textpress.services import all_services
         from textpress.parsers import all_parsers
@@ -570,6 +570,7 @@ class TextPress(object):
         self.views = all_views.copy()
         self.parsers = all_parsers.copy()
         self._url_rules = make_urls(self)
+        self._absolute_url_handlers = absolute_url_handlers[:]
         self._services = all_services.copy()
         self._shared_exports = {}
         self._template_globals = {}
@@ -875,6 +876,20 @@ class TextPress(object):
             self.views[kwargs['endpoint']] = view
 
     @setuponly
+    def add_absolute_url(self, handler):
+        """Adds a new callback as handler for absolute URLs.  If the normal
+        request handling was unable to find a proper response for the request
+        the handler is called with the current request as argument and can
+        return a response that is then used as normal response.
+
+        If a handler doesn't want to handle the response it may raise a
+        `NotFound` exception or return `None`.
+
+        This is for example used to implement the pages support in TextPress.
+        """
+        self._absolute_url_handlers.append(handler)
+
+    @setuponly
     def add_view(self, endpoint, callback):
         """Add a callback as view.  The endpoint is the endpoint for the URL
         rule and has to be equivalent to the endpoint passed to
@@ -984,6 +999,25 @@ class TextPress(object):
         emit_event('before-metadata-assembled', result)
         return u'\n'.join(result)
 
+    def handle_not_found(self, request, exception):
+        """Handle a not found exception.  This also dispatches to plugins
+        that listen for for absolute urls.  See `add_absolute_url` for
+        details.
+        """
+        for handler in self._absolute_url_handlers:
+            try:
+                rv = handler(request)
+                if rv is not None:
+                    return rv
+            except NotFound:
+                # a not found exception has the same effect as returning
+                # None.  The next handler is processed.  All other http
+                # exceptions are passed trough.
+                pass
+        response = render_response('404.html')
+        response.status_code = 404
+        return response
+
     def dispatch_request(self, environ, start_response):
         """This method is the internal WSGI request and is overridden by
         middlewares applied with :meth:`add_middleware`.  It handles the
@@ -1024,18 +1058,18 @@ class TextPress(object):
 
         # normal request dispatching
         try:
-            endpoint, args = self.url_adapter.match(request.path)
-            response = self.views[endpoint](request, **args)
-        except NotFound, e:
-            response = render_response('404.html')
-            response.status_code = 404
-        except Forbidden, e:
-            if request.user.is_somebody:
-                response = render_response('403.html')
-                response.status_code = 403
-            else:
-                response = simple_redirect(url_for('admin/login',
-                                                   next=request.path))
+            try:
+                endpoint, args = self.url_adapter.match(request.path)
+                response = self.views[endpoint](request, **args)
+            except NotFound, e:
+                response = self.handle_not_found(request, e)
+            except Forbidden, e:
+                if request.user.is_somebody:
+                    response = render_response('403.html')
+                    response.status_code = 403
+                else:
+                    response = simple_redirect(url_for('admin/login',
+                                                       next=request.path))
         except HTTPException, e:
             response = e.get_response(environ)
 

@@ -76,6 +76,7 @@ def configure(request):
                               request.form['stem_lang'])
         return redirect(url_for('admin/options'))
     return render_admin_response('admin/configure_xapian_search.html',
+                                 'options.xapian_search',
                                  database_path=cfg['xapian_search/database_path'],
                                  stem_lang=cfg['xapian_search/stem_lang'],
                                  csrf_protector=csrf_protector)
@@ -92,14 +93,20 @@ def add_configure_link(request, navigation_bar):
                                  _('Search')))
 
 
+def _get_database_path():
+    """Return the path to the database."""
+    app = get_application()
+    return join(app.instance_folder, app.cfg['xapian_search/database_path'])
+
+
 def _get_writable_db():
     """Open the database for writing."""
     cfg = get_application().cfg
     if not cfg['xapian_search/database_path']:
         return
     try:
-        db = xapian.WritableDatabase(cfg['xapian_search/database_path'],
-                xapian.DB_CREATE_OR_OPEN)
+        db = xapian.WritableDatabase(_get_database_path(),
+                                     xapian.DB_CREATE_OR_OPEN)
         return db
     except xapian.DatabaseCreateError, e:
         flash(_(u'Search index update failed. Please check the path in ' \
@@ -161,7 +168,7 @@ def search(request):
         return redirect(url_for('blog/index'))
     cfg = request.app.cfg
     try:
-        db = xapian.Database(cfg['xapian_search/database_path'])
+        db = xapian.Database(_get_database_path())
     except xapian.DatabaseOpeningError:
         # if the search database doesn't exist just display an empty
         # result page
@@ -208,7 +215,7 @@ def setup(app, plugin):
     app.add_template_searchpath(TEMPLATE_FILES)
     app.add_widget(QuickSearchWidget)
     app.add_config_var('xapian_search/database_path', unicode,
-                       '/path/to/instance/search.xapdb')
+                       'search.xapdb')
     app.add_config_var('xapian_search/stem_lang', unicode, 'en')
     app.connect_event('modify-admin-navigation-bar', add_configure_link)
     app.connect_event('after-post-saved', index_post)

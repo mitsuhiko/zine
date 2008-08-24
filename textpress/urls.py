@@ -20,7 +20,6 @@ def make_urls(app):
         Rule('/feed.atom', endpoint='blog/atom_feed'),
         Rule('/page/<int:page>', endpoint='blog/index'),
         Rule('/archive', endpoint='blog/archive'),
-        Rule('/page/<key>/', endpoint='blog/show_page'),
         Submount(app.cfg['profiles_url_prefix'], [
             Rule('/', endpoint='blog/authors'),
             Rule('/<string:username>', defaults={'page': 1}, endpoint='blog/show_author'),
@@ -124,3 +123,7 @@ def make_urls(app):
         Submount(app.cfg['blog_url_prefix'], blog_urls),
         Submount(app.cfg['admin_url_prefix'], admin_urls)
     ]
+
+
+from views.blog import handle_user_pages
+absolute_url_handlers = [handle_user_pages]
