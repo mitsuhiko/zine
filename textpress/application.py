@@ -284,7 +284,10 @@ class EventManager(object):
     def remove(self, listener_id):
         """Remove a callback again."""
         for event in self._listeners:
-            event.pop(listener_id, None)
+            try:
+                event.remove(listener_id)
+            except ValueError:
+                pass
 
     def iter(self, event):
         """Return an iterator for all listeners of a given name."""
@@ -968,6 +971,7 @@ class TextPress(object):
         """Return the metadata as HTML part for templates.  This is normally
         called by the layout template to get the metadata for the head section.
         """
+        from textpress.models import ROLE_ADMIN
         from textpress.htmlhelpers import script, meta, link
         from textpress.utils import dump_json
         generators = {'script': script, 'meta': meta, 'link': link,
@@ -980,16 +984,18 @@ class TextPress(object):
             script(url_for('core/shared', filename='js/TextPress.js')),
             script(url_for('blog/serve_translations'))
         ]
+
+        # the url information.  Only expose the admin url for admin users
+        # or calls to this method without a request.
         base_url = self.cfg['blog_url'].rstrip('/')
-        result.append(
-            u'<script type="text/javascript">'
-                u'TextPress.BLOG_URL = %s;'
-                u'TextPress.ADMIN_URL = %s;'
-            u'</script>' % (
-                dump_json(base_url),
-                dump_json(base_url + self.cfg['admin_url_prefix'])
-            )
-        )
+        request = get_request()
+        javascript = ['TextPress.BLOG_URL = %s' % dump_json(base_url)]
+        if request is None or request.user.role >= ROLE_ADMIN:
+            javascript.append('TextPress.ADMIN_URL = %s' %
+                              dump_json(base_url + self.cfg['admin_url_prefix']))
+        result.append(u'<script type="text/javascript">%s;</script>' %
+                      '; '.join(javascript))
+
         for type, attr in local.page_metadata:
             result.append(generators[type](**attr))
 

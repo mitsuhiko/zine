@@ -283,6 +283,35 @@ def lazy_ngettext(singular, plural, n):
     return _TranslationProxy(ngettext, singular, plural, n)
 
 
+def per_language_string(en, **languages):
+    """Returns a lazy string that returns the string for the current language
+    of the application without looking up in the translations but the strings
+    provided as keyword arguments.  The default language (english) can be
+    specified as first argument.
+
+    Here an example:
+
+    >>> per_language_string('yes', de='ja', it='si')
+    iu'yes'
+
+    This should not be used for arbitrary translations but language depending
+    strings such as configuration variables that do not represent text.
+
+    An example could be quotes for different languages:
+
+    >>> per_language_string(u'\u201c', de=u'\u201e')
+    iu'\u201c'
+    """
+    def lookup():
+        app = textpress.application.get_application()
+        lang = app and app.cfg['language'] or 'en'
+        if lang in languages:
+            return languages[lang]
+        return languages['en']
+    languages['en'] = en
+    return _TranslationProxy(lookup)
+
+
 def to_blog_timezone(datetime):
     """Convert a datetime object to the blog timezone."""
     if datetime.tzinfo is None:

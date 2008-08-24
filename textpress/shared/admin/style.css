@@ -235,7 +235,7 @@ div.contents select {
 }
 
 div.contents textarea {
-    font-family: 'Consolas', 'Bitstream Vera Sans Mono', monospace;
+    font-family: 'Consolas', 'Bitstream Vera Sans Mono', 'Monaco', monospace;
     font-size: 1em;
     font-weight: normal;
     border-color: #999 #ccc #ccc #999;
@@ -786,27 +786,45 @@ table.importable-posts tr.already-imported td {
 /* :::: ABOUT PAGE :::: */
 ul.plugin-table {
     list-style: none;
-}
-
-ul.plugin-table dl {
-    margin: 20px 0 20px 0;
-    padding: 10px;
-    border: 1px solid #ccc;
+    margin: 0;
+    padding: 0;
 }
 
 ul.plugin-table li {
+    padding: 0;
+    margin: 10px 0;
     clear: both;
+    border: 1px solid #B4D2E7;
+}
+
+ul.plugin-table li h3 {
+    margin: 0;
+    padding: 5px;
+    font-size: 0.9em;
+    color: #222e4b;
+    background: #B4D2E7;
+}
+
+ul.plugin-table dl {
+    margin: 0;
+    padding: 0;
 }
 
 ul.plugin-table dl dt {
-    margin: 0;
+    margin: 8px 0 0 8px;
     padding: 0;
     font-weight: bold;
-    font-size: 0.9em;
+    font-size: 0.8em;
+    color: #222e4b;
 }
 
 ul.plugin-table dl dd {
-    margin: -3px 0 4px 20px;
+    margin: 0 0 8px 18px;
+}
+
+ul.plugin-table dl dd.location {
+    font-family: 'Consolas', 'Bitstream Vera Sans Mono', 'Monaco', monospace;
+    font-size: 0.8em;
 }
 
 div.text {

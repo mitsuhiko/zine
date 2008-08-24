@@ -120,9 +120,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('pages', url_for('admin/pages_config'), _('Pages')),
                 ('uploads', url_for('admin/upload_config'), _('Uploads')),
                 ('plugins', url_for('admin/plugins'), _('Plugins')),
-                ('cache', url_for('admin/cache'), _('Cache')),
-                ('configuration', url_for('admin/configuration'),
-                 _('Configuration Editor'))
+                ('cache', url_for('admin/cache'), _('Cache'))
             ])
         ]
 
@@ -133,10 +131,14 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         ('about', url_for('admin/about_textpress'), _('About'))
     ]
     if request.user.role == ROLE_ADMIN:
-        system_items.insert(1, ('maintenance', url_for('admin/maintenance'),
-                               _('Maintenance')))
-        system_items.insert(2, ('import', url_for('admin/import'), _('Import')))
-        system_items.insert(3, ('export', url_for('admin/export'), _('Export')))
+        system_items[1:1] = [
+             ('maintenance', url_for('admin/maintenance'),
+             _('Maintenance')),
+             ('import', url_for('admin/import'), _('Import')),
+             ('export', url_for('admin/export'), _('Export')),
+             ('configuration', url_for('admin/configuration'),
+              _('Configuration Editor'))
+        ]
 
     navigation_bar.append(('system', url_for('admin/information'), _('System'),
                           system_items))
@@ -1609,7 +1611,7 @@ def do_configuration(request):
         categories.append(category)
 
     return render_admin_response('admin/configuration.html',
-                                 'options.configuration',
+                                 'system.configuration',
         categories=categories,
         editor_enabled=request.session.get('ace_on', False),
         csrf_protector=csrf_protector

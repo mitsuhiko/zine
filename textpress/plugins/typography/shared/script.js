@@ -15,7 +15,7 @@ $(function() {
   $('form dd input').focus(function() {
     $active_field = $(this);
     $('#char-select').fadeIn('fast');
-  }).blur(function() {
+  }).blur(function() {
     $('#char-select').fadeOut('fast');
   });
 });

@@ -76,17 +76,13 @@
   <h2>{{ _("Plugins") }}</h2>
   <ul class="plugin-table">
   {%- for plugin in plugins %}
-    <li><dl>
-      <dt>{{ _("Name") }}</dt>
-      <dd>{{ plugin.metadata.name|e }}</dd>
+    <li><h3>{{ plugin.metadata.name|e }}</h3><dl>
+      <dt>{{ _("UID") }}</dt>
+      <dd>{{ plugin.name }}</dd>
       <dt>{{ _("Author") }}</dt>
       <dd>{{ plugin.metadata.author|e }}</dd>
       <dt>{{ _("Location") }}</dt>
-      <dd>{{ plugin.path|e }}</dd>
-      <dt>{{ _("UID") }}</dt>
-      <dd>{{ plugin.name }}</dd>
-      <dt>{{ _("Active") }}</dt>
-      <dd>{{ _("yes") if plugin.active else _("no") }}</dd>
+      <dd class="location">{{ plugin.path|e }}</dd>
     </dl></li>
   {%- endfor %}
   </ul>
