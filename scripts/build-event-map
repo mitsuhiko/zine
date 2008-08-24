@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    Build the Event-Map
+    ~~~~~~~~~~~~~~~~~~~
+
+    Lists all the events send in a given TextPress installation.
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+import sys
+import os
+import linecache
+from optparse import OptionParser
+
+
+sys.path.append(os.path.dirname(__file__))
+from _init_textpress import find_instance
+import textpress
+
+
+try:
+    import _ast
+except ImportError:
+    can_build_eventmap = False
+else:
+    can_build_eventmap = True
+
+
+def build_eventmap(instance_folder):
+    app = textpress.make_textpress(instance_folder)
+    textpress_root = os.path.realpath(os.path.dirname(textpress.__file__))
+    searchpath = [(textpress_root, '__builtin__')]
+
+    for plugin in app.plugins.itervalues():
+        path = os.path.realpath(plugin.path)
+        if os.path.commonprefix([textpress_root, path]) != textpress_root:
+            searchpath.append((plugin.path, plugin.name))
+
+    def walk_ast(ast):
+        if isinstance(ast, _ast.Call) and \
+           isinstance(ast.func, _ast.Name) and \
+           ast.func.id in ('emit_event', 'iter_listeners') and \
+           ast.args and \
+           isinstance(ast.args[0], _ast.Str):
+            yield ast.args[0].s, ast.func.lineno
+        for field in ast._fields or ():
+            value = getattr(ast, field)
+            if isinstance(value, (tuple, list)):
+                for node in value:
+                    if isinstance(node, _ast.AST):
+                        for item in walk_ast(node):
+                            yield item
+            elif isinstance(value, _ast.AST):
+                for item in walk_ast(value):
+                    yield item
+
+    def find_help(filename, lineno):
+        help_lines = []
+        lineno -= 1
+        while lineno > 0:
+            line = linecache.getline(filename, lineno).strip()
+            if line.startswith('#!'):
+                line = line[2:]
+                if line and line[0] == ' ':
+                    line = line[1:]
+                help_lines.append(line)
+            elif line:
+                break
+            lineno -= 1
+        return '\n'.join(reversed(help_lines)).decode('utf-8')
+
+    result = {}
+    for folder, prefix in searchpath:
+        offset = len(folder)
+        for dirpath, dirnames, filenames in os.walk(folder):
+            for filename in filenames:
+                if not filename.endswith('.py'):
+                    continue
+                filename = os.path.join(dirpath, filename)
+                shortname = filename[offset:]
+                ast = compile(''.join(linecache.getlines(filename)),
+                              filename, 'exec', 0x400)
+
+                for event, lineno in walk_ast(ast):
+                    help = find_help(filename, lineno)
+                    result.setdefault(event, []).append((prefix, shortname,
+                                                         lineno, help))
+
+    return result
+
+
+def main():
+    parser = OptionParser(usage='%prog')
+    parser.add_option('--instance', '-I', dest='instance',
+                      help='Use the path provided as TextPress instance.')
+    options, args = parser.parse_args()
+    if args:
+        parser.error('incorrect number of arguments')
+    if not can_build_eventmap:
+        parser.error('This script requires Python 2.5')
+    instance = options.instance or find_instance()
+    if instance is None:
+        parser.error('instance not found.  Specify path to instance')
+
+    sys.stdout.write('Building Eventmap...')
+    sys.stdout.flush()
+    results = build_eventmap(instance)
+    sys.stdout.write('\rEvents emitted in %s:\n' % instance)
+
+    for event, occurrences in results.iteritems():
+        print
+        print '  ' + event
+        for prefix, filename, line, help in occurrences:
+            print '    in %s:%d (%s)' % (filename, line, prefix)
+            for line in help.splitlines():
+                print '      ' + line
+
+
+if __name__ == '__main__':
+    main()

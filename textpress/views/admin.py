@@ -29,8 +29,8 @@ from textpress.database import comments as comment_table, posts, \
      post_tags, post_links
 from textpress.utils import dump_json, load_json
 from textpress.utils.validators import is_valid_email, is_valid_url
-from textpress.utils.admin import can_build_eventmap, build_eventmap, \
-     Pagination, flash, gen_slug, commit_config_change
+from textpress.utils.admin import Pagination, flash, gen_slug, \
+     commit_config_change
 from textpress.utils.xxx import make_hidden_fields, CSRFProtector, \
      IntelligentRedirect, StreamReporter
 from textpress.utils.uploads import guess_mimetype, get_upload_folder, \
@@ -132,9 +132,6 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         ('help', url_for('admin/help'), _('Help')),
         ('about', url_for('admin/about_textpress'), _('About'))
     ]
-    if can_build_eventmap:
-        system_items.insert(1, ('eventmap', url_for('admin/eventmap'),
-                                _('Event Map')))
     if request.user.role == ROLE_ADMIN:
         system_items.insert(1, ('maintenance', url_for('admin/maintenance'),
                                _('Maintenance')))
@@ -1782,28 +1779,8 @@ def do_information(request):
         template_filters=[name for name, obj in
                           sorted(request.app.template_env.filters.items())
                           if name not in DEFAULT_FILTERS],
-        can_build_eventmap=can_build_eventmap,
         instance_path=request.app.instance_folder,
         database_uri=str(request.app.database_engine.url)
-    )
-
-
-@require_role(ROLE_AUTHOR)
-def do_eventmap(request):
-    """The GUI version of the `textpress-management.py eventmap` command.
-    Traverses the sourcecode for emit_event calls using the python2.5
-    ast compiler.  Because of that it raises an page not found exception
-    for python2.4.
-    """
-    if not can_build_eventmap:
-        raise NotFound()
-    return render_admin_response('admin/eventmap.html', 'system.eventmap',
-        get_map=lambda: sorted(build_eventmap(request.app).items()),
-        # walking the tree can take some time, so better use stream
-        # processing for this template. that's also the reason why
-        # the building process is triggered from inside the template.
-        # stream rendering however is buggy in wsgiref :-/
-        _stream=True
     )
 
 

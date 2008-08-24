@@ -117,21 +117,4 @@
     <li><strong>{{ filter_|e }}</strong></li>
   {%- endfor %}
   </ul>
-  <h2>{{ _("Events") }}</h2>
-  <div class="text">
-    <p>{% trans %}
-      TextPress uses an event system for intercomponent communication. Because
-      the event system does not keep track of the events that are passed around
-      there is no central index of all the event names.
-    {% endtrans %}</p>
-    {%- if can_build_eventmap %}
-      <p>{% trans %}
-        Your python version however supports the new AST compile mode which
-        TextPress can use to build an event map based on the TextPress core and
-        plugin sourcecode. This building process can take some time depending on
-        the number of installed plugins.
-      {% endtrans %}</p>
-      <p><a href="{{ url_for('admin/eventmap') }}">{{ _("Build Event Map") }}</a></p>
-    {%- endif %}
-  </div>
 {% endblock %}

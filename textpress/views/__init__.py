@@ -78,7 +78,6 @@ all_views = {
     'admin/delete_import':      admin.do_delete_import,
     'admin/export':             admin.do_export,
     'admin/information':        admin.do_information,
-    'admin/eventmap':           admin.do_eventmap,
     'admin/about_textpress':    admin.do_about_textpress,
     'admin/change_password':    admin.do_change_password,
     'admin/help':               admin.do_help,

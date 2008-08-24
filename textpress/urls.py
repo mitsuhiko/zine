@@ -98,7 +98,6 @@ def make_urls(app):
         Rule('/system/import/<int:id>', endpoint='admin/inspect_import'),
         Rule('/system/import/<int:id>/delete', endpoint='admin/delete_import'),
         Rule('/system/export', endpoint='admin/export'),
-        Rule('/system/eventmap', endpoint='admin/eventmap'),
         Rule('/system/about', endpoint='admin/about_textpress'),
         Rule('/system/help/', endpoint='admin/help'),
         Rule('/system/help/<path:page>', endpoint='admin/help'),
