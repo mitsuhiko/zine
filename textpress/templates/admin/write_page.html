@@ -41,6 +41,11 @@
       <em>This is the position the link is shown in the navigation widget</em><br>
       {{ h.input_field('navigation_pos', form.navigation_pos, size=3) }}
     </div>
+    {% if not new_page %}
+      <p class="preview">
+        <a href="{{ url_for(page) }}">{{ _("View Page") }}</a>
+      </p>
+    {% endif %}
     <div class="actions">
       {{ csrf_protector }}
       <input type="submit" name="save" value="{{ _('Save') }}">

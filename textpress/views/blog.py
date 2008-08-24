@@ -315,22 +315,6 @@ def do_show_post(request, year, month, day, slug):
     )
 
 
-@cache.response(vary=('user',))
-def do_show_page(self, key):
-    """Show a page found via `key`"""
-    page = Page.objects.query.filter_by(key=key).first()
-    if page is None:
-        raise NotFound()
-    cfg = get_application().cfg
-    return render_response(
-        'page_base.html',
-        page=page,
-        blog_title=get_application().cfg['blog_title'],
-        show_title=cfg['show_page_title'],
-        show_children=cfg['show_page_children']
-    )
-
-
 def do_service_rsd(request):
     """
     Serves and RSD definition (really simple discovery) so that blog frontends
@@ -463,3 +447,28 @@ def do_get_upload(req, filename):
     resp.headers['Cache-Control'] = 'public'
     resp.headers['Expires'] = asctime(gmtime(time() + 3600))
     return resp
+
+
+@cache.response(vary=('user',))
+def handle_user_pages(req):
+    """Show a user page."""
+    page_key = req.path.lstrip('/')
+
+    page = Page.objects.filter_by(key=page_key).first()
+    if page is None:
+        # if the page does not exist, check if a page with a trailing slash
+        # exists.  If it does, redirect to that page.  This is allows users
+        # to emulate folders and to get relative links working.
+        if not page_key.endswith('/'):
+            real_page = Page.objects.filter_by(key=page_key + '/').first()
+            if real_page is not None:
+                return redirect(url_for(real_page))
+        raise NotFound()
+    cfg = get_application().cfg
+    return render_response(
+        'page_base.html',
+        page=page,
+        blog_title=get_application().cfg['blog_title'],
+        show_title=cfg['show_page_title'],
+        show_children=cfg['show_page_children']
+    )

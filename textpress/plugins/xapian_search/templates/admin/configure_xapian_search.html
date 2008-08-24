@@ -4,10 +4,10 @@
   <h1>{{ _("Configure Xapian Search") }}</h1>
   <form action="" method="post">
     <dl>
-      <dt>{{ _('Database Path (use a absolute path)') }}</dt>
-      <dd><input type="text" name="database_path" value="{{ database_path|e }}" /></dd>
+      <dt>{{ _('Database Path') }}</dt>
+      <dd><input type="text" name="database_path" value="{{ database_path|e }}"></dd>
       <dt>{{ _('Stemming Language') }}</dt>
-      <dd><input type="text" name="stem_lang" value="{{ stem_lang|e }}" /></dd>
+      <dd><input type="text" name="stem_lang" value="{{ stem_lang|e }}"></dd>
     </dl>
     <div class="actions">
       {{ csrf_protector }}

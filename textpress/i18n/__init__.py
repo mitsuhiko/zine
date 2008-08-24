@@ -189,7 +189,7 @@ def ngettext(singular, plural, n):
 class _TranslationProxy(object):
     """Class for proxy strings from gettext translations.  This is a helper
     for the lazy_* functions from this module.
-    
+
     The proxy implementation attempts to be as complete as possible, so that
     the lazy objects should mostly work as expected, for example for sorting.
     """

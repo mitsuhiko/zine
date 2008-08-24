@@ -1055,8 +1055,7 @@ class Page(object):
     del _get_raw_body, _set_raw_body, _get_body, _set_body
 
     def get_url_values(self):
-        return ('blog/show_page',
-                {'key': self.key})
+        return self.key
 
     @property
     def ancestors(self):

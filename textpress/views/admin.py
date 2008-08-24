@@ -1897,8 +1897,8 @@ def do_show_pages(request):
 def do_write_page(request, page_id=None):
     """Show the "write page" dialog.
 
-    If `page_id` is given the form is updated with
-    already saved data so that you can edit a page.
+    If `page_id` is given the form is updated with already saved data so that
+    you can edit a page.
     """
     csrf_protector = CSRFProtector()
     form = {}
@@ -1907,6 +1907,7 @@ def do_write_page(request, page_id=None):
     if page_id is None:
         # new page
         new_page = True
+        page = None
         form.update(
             key=u'', title=u'',
             raw_body=u'',
@@ -1919,6 +1920,7 @@ def do_write_page(request, page_id=None):
         page = Page.objects.get(page_id)
         if page is None:
             raise NotFound()
+        old_key = page.key
         form.update(
             key=page.key,
             title=page.title,
@@ -1943,10 +1945,9 @@ def do_write_page(request, page_id=None):
         form['key'] = key = request.form.get('key') or None
         if key is None:
             key = gen_slug(title)
-        elif key:
-            key = gen_slug(key)
-        if u'/' in key:
-            errors.append(_("A key can't contain a slash"))
+        key = key.lstrip('/')
+        if not key:
+            errors.append(_('You have to provide a key'))
 
         form['navigation_pos'] = navigation_pos = \
             request.form.get('navigation_pos') or None
@@ -1960,6 +1961,10 @@ def do_write_page(request, page_id=None):
             parser = request.app.cfg['default_parser']
 
         form['parent_id'] = parent_id = request.form.get('parent_id')
+
+        if new_page or old_key != key:
+            if Page.objects.filter_by(key=key).first() is not None:
+                errors.append(_('This key is already in use'))
 
         try:
             parent_id = int(parent_id)
@@ -2002,8 +2007,10 @@ def do_write_page(request, page_id=None):
         'pages.write',
         parsers=request.app.list_parsers(),
         form=form,
+        page=page,
+        new_page=new_page,
         csrf_protector=csrf_protector,
-        all_pages=all_pages,
+        all_pages=all_pages
     )
 
 

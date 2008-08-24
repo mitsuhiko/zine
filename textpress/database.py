@@ -278,7 +278,7 @@ comments = db.Table('comments', metadata,
 
 pages = db.Table('pages', metadata,
     db.Column('page_id', db.Integer, primary_key=True),
-    db.Column('key', db.String(25)),
+    db.Column('key', db.String(25), unique=True),
     db.Column('title', db.String(200)),
     db.Column('body', db.Text),
     db.Column('extra', db.PickleType),

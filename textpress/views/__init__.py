@@ -23,7 +23,6 @@ all_views = {
     'blog/tag_cloud':           blog.do_show_tag_cloud,
     'blog/show_post':           blog.do_show_post,
     'blog/show_author':         blog.do_show_author,
-    'blog/show_page':           blog.do_show_page,
     'blog/authors':             blog.do_authors,
     'blog/service_rsd':         blog.do_service_rsd,
     'blog/json_service':        blog.do_json_service,

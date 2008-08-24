@@ -842,6 +842,7 @@ div.uploadstatus div.label {
 /* :::: HELP :::: */
 div.help {
     font-family: 'Georgia', serif;
+    max-width: 55em;
 }
 
 div.help p, div.help dl dd {
