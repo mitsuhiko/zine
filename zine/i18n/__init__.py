@@ -387,7 +387,7 @@ def list_languages(self_translated=False):
     else:
         locale = None
 
-    languages = [('en', Locale('en').get_display_name(locale))]
+    languages = [('en', Locale('en').get_display_name())]
 
     for filename in os.listdir(LOCALE_PATH):
         if filename == 'en' or not \
@@ -398,7 +398,7 @@ def list_languages(self_translated=False):
             l = Locale.parse(filename)
         except UnknownLocaleError:
             continue
-        languages.append((str(l), l.get_display_name(locale)))
+        languages.append((str(l), l.get_display_name()))
 
     languages.sort(key=lambda x: x[1].lower())
     return languages

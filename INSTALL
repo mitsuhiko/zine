@@ -6,7 +6,7 @@ installed:
 
   - Werkzeug from Mercurial: hg clone http://dev.pocoo.org/hg/werkzeug-main
   - Jinja2 from Mercurial: hg clone http://dev.pocoo.org/hg/jinja2-main
-  - SQLAlchemy 0.4 or higher*
+  - SQLAlchemy 0.5 or higher*
   - simplejson*
   - Python 2.4 or higher
   - A database (MySQL, SQLite or PostgreSQL and others are supported)
