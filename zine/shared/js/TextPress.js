@@ -15,7 +15,7 @@ var Zine = {
   LOCALE : 'unknown',
 
   getJSONServiceURL : function(identifier) {
-    return this.BLOG_URL + '/_services/json/' + identifier;
+    return this.ROOT_URL + '/_services/json/' + identifier;
   },
 
   callJSONService : function(identifier, values, callback) {

@@ -989,7 +989,10 @@ class Zine(object):
         # or calls to this method without a request.
         base_url = self.cfg['blog_url'].rstrip('/')
         request = get_request()
-        javascript = ['Zine.BLOG_URL = %s' % dump_json(base_url)]
+        javascript = [
+            'Zine.ROOT_URL = %s' % dump_json(base_url),
+            'Zine.BLOG_URL = %s' % dump_json(base_url + self.cfg['blog_url_prefix'])
+        ]
         if request is None or request.user.role >= ROLE_ADMIN:
             javascript.append('Zine.ADMIN_URL = %s' %
                               dump_json(base_url + self.cfg['admin_url_prefix']))
