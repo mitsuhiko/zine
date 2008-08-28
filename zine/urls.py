@@ -30,13 +30,7 @@ def make_urls(app):
             Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_tag'),
             Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_tag'),
             Rule('/<string:tag>/feed.atom', endpoint='blog/atom_feed'),
-        ]),
-        Rule('/_services/', endpoint='blog/service_rsd'),
-        Rule('/_services/json/<path:identifier>', endpoint='blog/json_service'),
-        Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service'),
-        Rule('/_translations.js', endpoint='blog/serve_translations'),
-        Rule('/_uploads/<filename>', endpoint='blog/get_uploaded_file'),
-        Rule('/_uploads/<filename>/delete', endpoint='admin/delete_upload')
+        ])
     ]
     admin_urls = [
         Rule('/', endpoint='admin/index'),
@@ -102,6 +96,14 @@ def make_urls(app):
         Rule('/system/help/<path:page>', endpoint='admin/help'),
         Rule('/change_password', endpoint='admin/change_password')
     ]
+    other_urls = [
+        Rule('/_services/', endpoint='blog/service_rsd'),
+        Rule('/_services/json/<path:identifier>', endpoint='blog/json_service'),
+        Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service'),
+        Rule('/_translations.js', endpoint='blog/serve_translations'),
+        Rule('/_uploads/<filename>', endpoint='blog/get_uploaded_file'),
+        Rule('/_uploads/<filename>/delete', endpoint='admin/delete_upload')
+    ]
 
     # add the more complex url rule for archive and show post
     tmp = '/'
@@ -120,7 +122,7 @@ def make_urls(app):
     return [
         Submount(app.cfg['blog_url_prefix'], blog_urls),
         Submount(app.cfg['admin_url_prefix'], admin_urls)
-    ]
+    ] + other_urls
 
 
 from views.blog import handle_user_pages
