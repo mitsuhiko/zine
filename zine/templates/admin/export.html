@@ -1,0 +1,20 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Export") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Export") }}</h1>
+  <p>{% trans %}
+    Here you can dump your Zine database information into an standardized
+    format (Atom) with Zine extensions which we call “Zine eXtended
+    Atom” (ZineXA).  You can use this file to import your posts into another
+    weblog software that supports Atom.  You should not use this file for
+    Zine migrations as this file will not include attachments, the blog
+    configuration and probably data stored by plugins.
+  {% endtrans %}</p>
+  <form action="" method="get">
+    <div class="actions">
+      {{ hidden_form_data }}
+      <input type="hidden" name="format" value="zxa">
+      <input type="submit" value="{{ _('Export') }}">
+    </div>
+  </form>
+{% endblock %}

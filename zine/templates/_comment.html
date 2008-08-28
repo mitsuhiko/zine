@@ -1,0 +1,54 @@
+{% macro render_comment(comment, add_reply_link=false) %}
+  {%- if comment.visible %}
+    <div class="comment{% if comment.is_pingback %} pingback{% endif %}{%
+      if comment.blocked %} blocked{% endif %}" id="comment-{{ comment.comment_id }}">
+      <div class="text">{{ comment.body }}</div>
+      <p class="meta">{% if comment.is_pingback %}{{ _("Pingback by") }}
+        {%- else %}{{ _("Comment by") }}{% endif %} {% if comment.www
+        %}<a href="{{ comment.www|e }}">{{ comment.author|e }}</a>{%
+        else %}{{ comment.author|e }}{% endif %} &mdash; {{
+        comment.pub_date|datetimeformat }} |
+        <a href="#comment-{{ comment.comment_id }}">#</a>
+      {%- if add_reply_link %}
+        - <a href="javascript:Zine.replyToComment({{ comment.comment_id
+          }})" title="{{ _('reply to this comment') }}">re</a>
+      {% endif -%}
+      </p>
+    </div>
+  {% else %}
+    {%- if comment.status %}<p><em>Comment waiting for approval</em></p>{%- endif %}
+  {%- endif %}
+{%- endmacro %}
+
+{% macro render_comment_editor(post, form, errors) %}
+  <form action="#leave-reply" class="comments" method="post">
+    {{ emit_event('before-comment-editor-rendered', post) }}
+    {%- if not request.user.is_manager %}
+    <dl>
+      <dt><label for="name">{{ _("Name*") }}</label></dt>
+      <dd>{{ h.input_field('name', form.name) }}</dd>
+      <dt><label for="email">{{ _("Mail* (not published)") }}</label></dt>
+      <dd>{{ h.input_field('email', form.email) }}</dd>
+      <dt><label for="www">{{ _("Website") }}</label></dt>
+      <dd>{{ h.input_field('www', form.www) }}</dd>
+    </dl>
+    {%- endif %}
+    <div>{{ h.textarea('body', form.body) }}
+         {{ h.input_field('parent', form.parent, 'hidden') }}</div>
+    <div id="comment-message">{# used for the reply callback #}</div>
+    {%- if errors %}
+      <div class="error">
+        <h3>{{ _('Could not Post Comment') }}</h3>
+        {%- for error in errors %}
+          <p>{{ error }}</p>
+        {%- endfor %}
+      </div>
+    {%- endif %}
+    {{ emit_event('before-comment-editor-buttons-rendered', post) }}
+    <div class="actions">
+      <input type="submit" value="{{ _('Submit Comment') }}">
+      <input type="reset" value="{{ _('Reset Form') }}">
+    </div>
+    {{ emit_event('after-comment-editor-rendered', post) }}
+  </form>
+{% endmacro %}

@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <title>{{ _('Zine Setup') }}</title>
+  <style type="text/css">
+    body {
+        font-family: 'Trebuchet MS', sans-serif;
+        letter-spacing: 0.04em;
+        background-color: #EEF5FA;
+        padding: 2em 0 2em 0;
+        margin: 0;
+        text-align: justify;
+    }
+
+    div.page {
+        background-color: white;
+        color: #0C1B2C;
+        border: 1px solid #316182;
+        width: 40em;
+        padding: 0 0 0.5em 0;
+        margin: 0 auto 0 auto;
+    }
+
+    div.header {
+        background-color: #316182;
+        margin: 0;
+        padding: 0;
+    }
+
+    div.header h1 {
+        font-family: 'Georgia', serif;
+        font-weight: normal;
+        font-size: 30px;
+        color: white;
+        margin: 0;
+        padding: 10px;
+    }
+
+    h2, a {
+        color: #316081;
+        font-weight: bold;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #143f47;
+        border-bottom: 1px solid #ccc;
+        background-color: #f2f2f2;
+    }
+
+    h2 {
+        color: #222e4b;
+        margin: 0.6em 0 0.9em -1em;
+        padding: 0;
+        font-weight: normal;
+        font-family: 'Georgia', serif;
+        font-size: 1.3em;
+        border-bottom: 1px solid #eee;
+    }
+
+    p {
+        margin: 0 0 0.8em 0;
+    }
+
+    div.contents {
+        margin: 0 2em 2em 3em;
+    }
+
+    dl dt {
+        font-weight: bold;
+        color: #444;
+    }
+
+    input {
+        font-family: 'Georgia', sans-serif;
+        font-size: 1em;
+        border-color: #999 #ccc #ccc #999;
+        border-style: solid;
+        border-width: 1px;
+        padding: 3px;
+    }
+
+    select {
+        font-family: 'Georgia', sans-serif;
+        font-size: 1em;
+    }
+
+    input:focus {
+        border: 1px solid #B4D2E7;
+        outline: 1px solid #729AB6;
+    }
+
+    input[type="submit"] {
+        background-color: #F7FAFD;
+        color: #224466;
+        border: 1px solid #ccc;
+        -moz-border-radius: 3px;
+        cursor: pointer;
+    }
+
+    input[type="submit"]:active {
+        border-color: #A5C3DA #6595B9 #A5C3DA #6595B9;
+        background-color: #f2f2f2;
+        outline: none;
+    }
+
+    input[type="submit"]:focus {
+        outline: none;
+    }
+
+    input[type="submit"]:hover {
+        border-color: #B4D2E7;
+        background-color: #fff;
+    }
+
+    form {
+        padding: 10px;
+    }
+
+    div.actions {
+        height: 1em;
+        margin: 1em 0 0 0;
+    }
+
+    div.actions input {
+        cursor: pointer;
+        float: right;
+        margin: 3px;
+    }
+
+    div.error {
+        background-color: #FCF7F7;
+        border: 1px solid #E8B5B5;
+        padding: 0.5em;
+        margin: 1em 0 1em 0;
+    }
+
+    div.error h3 {
+        margin: 0;
+        padding: 0;
+        color: #802424;
+        font-family: 'Georgia', serif;
+        font-weight: normal;
+        font-size: 1.1em;
+    }
+
+    div.error p {
+        padding: 0.3em 1em 0 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>{{ _('Zine Setup') }}</h1>
+    </div>
+    <div class="contents">
+      {% if not finished %}
+        <form action="" method="post">
+      {% endif %}
+      {% block body %}{% endblock %}
+      {% if error %}
+        <div class="error">
+          <h3>{{ _('An Error Occoured') }}</h3>
+          <p>{{ error|e }}</p>
+        </div>
+      {% endif %}
+      {% if not finished %}
+          <div class="actions">
+            <input type="submit" name="_next" value="{% if next %}{{ _('Next') }} &raquo;{% else %}{{ _('Install') }}{% endif %}">
+            {% if prev %}<input type="submit" name="_prev" value="&laquo; {{ _('Back') }}">{% endif %}
+          </div>
+
+          <div class="hidden">
+            {%- if values %}
+              {%- for key, value in values|dictsort %}
+              <input type="hidden" name="{{ key|e }}" value="{{ value|e }}">
+              {%- endfor %}
+            {%- endif %}
+            <input type="hidden" name="_current" value="{{ current|e }}">
+            <input type="hidden" name="_lang" value="{{ lang|e }}">
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

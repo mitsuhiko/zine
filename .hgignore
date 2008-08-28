@@ -4,8 +4,8 @@
 \.DS_Store$
 ^dumps/
 ^.*\.egg-info/
-^textpress/i18n/messages\.pot$
-^textpress/i18n/.*?/messages.catalog$
-^textpress/docs/.*?\.page$
+^zine/i18n/messages\.pot$
+^zine/i18n/.*?/messages.catalog$
+^zine/docs/.*?\.page$
 .coverage
 ^docs/_build/

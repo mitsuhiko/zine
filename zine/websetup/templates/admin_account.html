@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>{{ _('Administrator Account') }}</h2>
+  <p>{% trans %}
+    In order to log into your Zine installation you have to provide a
+    login name for the administration user. You can later rename or delete
+    that user if you want.
+  {% endtrans %}
+  <dl>
+    <dt>{{ _('Username') }}
+    <dd><input type="text" name="admin_username" value="{{ values.admin_username|e }}">
+    <dt>{{ _('Password') }}
+    <dd><input type="password" name="admin_password">
+    <dt>{{ _('Password (repeat)') }}
+    <dd><input type="password" name="admin_password2">
+    <dt>{{ _('E-Mail') }}
+    <dd><input type="text" name="admin_email" value="{{ values.admin_email|e }}">
+  </dl>
+{% endblock %}

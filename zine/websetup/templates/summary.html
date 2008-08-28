@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>{{ _('Setup Starting') }}</h2>
+  <p>{% trans %}
+    Zine knows now about all the information it needs to setup your
+    instance. After you click on the install button Zine will create
+    the database tables and insert the default information. Right after that
+    Zine will be online in maintenance mode which means that it's only
+    visible to the administrator, all other users will get a message that
+    shows that the blog is in maintenance mode right now.
+  {% endtrans %}
+  <input type="hidden" name="_startsetup" value="yes">
+{% endblock %}

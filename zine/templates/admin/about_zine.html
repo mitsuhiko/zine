@@ -1,0 +1,20 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("About Zine") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("About Zine") }}</h1>
+  <div class="text">
+    <p>{% trans %}
+      Zine is an open source content publishing platform emphasizing ease
+      of use and extensibility. It provides an powerful internal infrastructure,
+      an simple and an intuitive userinterface.
+    {% endtrans %}</p>
+    <p>{% trans %}
+      Zine is distributed under the GNU GPL 2 or any later version. The
+      complete text of the license can be found online as well as in the LICENSE
+      file included in the distribution.
+    {% endtrans %}</p>
+    <p>{% trans years="2007-2008" -%}
+      © Copyright {{ years }} by the Pocoo Team. Some rights reserved.
+    {%- endtrans %}</p>
+  </div>
+{% endblock %}

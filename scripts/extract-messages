@@ -23,7 +23,7 @@ KEYWORDS = {
     'lazy_gettext': None,
     'lazy_ngettext': (1, 2)
 }
-BUGS_ADDRESS = 'textpress-i18n@pocoo.org'
+BUGS_ADDRESS = 'zine-i18n@pocoo.org'
 COPYRIGHT = 'The Pocoo Team'
 METHODS = [
     ('**.py', 'python'),
@@ -46,7 +46,7 @@ def main():
     if not args:
         print 'Extracting core strings'
         root = path.abspath(path.join(path.dirname(__file__),
-                                      path.pardir, 'textpress'))
+                                      path.pardir, 'zine'))
     elif len(args) == 1:
         root = path.join(path.abspath(args[0]))
         if not path.isdir(root):

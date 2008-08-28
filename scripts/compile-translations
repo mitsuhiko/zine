@@ -25,7 +25,7 @@ def main():
     if not args:
         print 'Compiling builtin languages'
         root = path.abspath(path.join(path.dirname(__file__),
-                                      path.pardir, 'textpress', 'i18n'))
+                                      path.pardir, 'zine', 'i18n'))
     elif len(args) == 1:
         root = path.join(path.abspath(args[0]), 'i18n')
         if not path.isdir(root):

@@ -1,8 +1,8 @@
 """
-    TextPress Test Suite
-    ~~~~~~~~~~~~~~~~~~~~
+    Zine Test Suite
+    ~~~~~~~~~~~~~~~
 
-    This is the TextPress test suite. It collects all modules in the textpress
+    This is the Zine test suite. It collects all modules in the zine
     package, builds a TestSuite with their doctests and executes them. It also
     collects the tests from the text files in this directory (which are too
     extensive to put them into the code without cluttering it up).
@@ -23,9 +23,9 @@ from unittest import TestSuite, TextTestRunner
 from doctest import DocTestSuite, DocFileSuite
 
 #: the modules in this list are not tested in a full run
-untested = ['textpress.experimental_plugins.hyphenation_en',
-            'textpress.experimental_plugins.hyphenation_en.hyphenate',
-            'textpress.experimental_plugins.notification']
+untested = ['zine.experimental_plugins.hyphenation_en',
+            'zine.experimental_plugins.hyphenation_en.hyphenate',
+            'zine.experimental_plugins.notification']
 
 try:
     import coverage
@@ -37,7 +37,7 @@ def suite(modnames=[], return_covermods=False):
     """Generate the test suite.
 
     The first argument is a list of modules to be tested. If it is empty (which
-    it is by default), all sub-modules of the textpress package are tested.
+    it is by default), all sub-modules of the zine package are tested.
     If the second argument is True, this function returns two objects: a
     TestSuite instance and a list of the names of the tested modules. Otherwise
     (which is the default) it only returns the former. This is done so that
@@ -50,11 +50,11 @@ def suite(modnames=[], return_covermods=False):
     #    write >>> my_function(app, ...) in the tests
     # The instance directory of this object is located in the tests directory.
     #
-    # make_textpress isn't imported at module level because this way coverage
-    # can track the whole textpress imports
-    from textpress.application import make_textpress
+    # make_zine isn't imported at module level because this way coverage
+    # can track the whole zine imports
+    from zine.application import make_zine
     instance_path = join(dirname(__file__), 'instance')
-    app = make_textpress(instance_path, True)
+    app = make_zine(instance_path, True)
 
     if return_covermods:
         covermods = []
@@ -67,7 +67,7 @@ def suite(modnames=[], return_covermods=False):
         if modname in untested:
             continue
 
-        # the fromlist must contain something, otherwise the textpress
+        # the fromlist must contain something, otherwise the zine
         # package is returned, not our module
         try:
             mod = __import__(modname, None, None, [''])
@@ -100,12 +100,12 @@ def suite(modnames=[], return_covermods=False):
 
 
 def find_tp_modules():
-    """Find all sub-modules of the textpress package."""
+    """Find all sub-modules of the zine package."""
     modules = []
-    import textpress
-    base = dirname(textpress.__file__)
+    import zine
+    base = dirname(zine.__file__)
     start = len(dirname(base))
-    if base != 'textpress':
+    if base != 'zine':
         start += 1
 
     for path, dirnames, filenames in os.walk(base):
@@ -126,7 +126,7 @@ def main():
     from optparse import OptionParser
     usage = ('Usage: %prog [option] [modules to be tested]\n'
              'Modules names have to be given in the form utils.mail (without '
-             'textpress.)\nIf no module names are given, all tests are run')
+             'zine.)\nIf no module names are given, all tests are run')
     parser = OptionParser(usage=usage)
     parser.add_option('-c', '--coverage', action='store_true', dest='coverage',
                       help='show coverage information (slow!)')
@@ -134,7 +134,7 @@ def main():
                       default=False, help='show which tests are run')
 
     options, args = parser.parse_args(sys.argv[1:])
-    modnames = ['textpress.' + modname for modname in args]
+    modnames = ['zine.' + modname for modname in args]
     if options.coverage:
         if coverage is not None:
             use_coverage = True

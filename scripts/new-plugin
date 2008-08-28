@@ -21,8 +21,8 @@ _ident_re = re.compile(r'^[a-z][a-z0-9_]*$')
 init_template = Template('''\
 # -*- coding: utf-8 -*-
 """
-    textpress.plugins.{{ package }}
-    ~~~~~~~~~~~~~~~~~~{{ '~' * package|length }}
+    zine.plugins.{{ package }}
+    ~~~~~~~~~~~~~{{ '~' * package|length }}
 
     Plugin implementation description goes here.
 
@@ -44,10 +44,10 @@ Plugin documentation goes here...
 ''')
 
 sys.path.append(os.path.dirname(__file__))
-import _init_textpress
+import _init_zine
 
-from textpress.utils.admin import gen_slug
-from textpress.utils.mail import split_email
+from zine.utils.admin import gen_slug
+from zine.utils.mail import split_email
 
 
 def main():

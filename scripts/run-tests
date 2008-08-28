@@ -3,7 +3,7 @@
     Test Runner
     ~~~~~~~~~~~
 
-    This is a wrapper script for running the TextPress unittests.
+    This is a wrapper script for running the Zine unittests.
     Run it with the --help option for usage information.
 
     :copyright: 2008 by Lukas Meuser.

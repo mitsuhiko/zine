@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>{{ _('Setup Failed') }}</h2>
+  <p>{{ _('The websetup was not able to finish the Zine installation successfully.') }}
+  <p>{% trans %}
+    If you need help for setting up Zine have a look at the support
+    wepage that will be there once a beta is available :-)
+  {% endtrans %}
+{% endblock %}

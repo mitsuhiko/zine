@@ -16,7 +16,7 @@ from optparse import OptionParser
 
 
 sys.path.append(path.dirname(__file__))
-from _init_textpress import find_instance
+from _init_zine import find_instance
 
 
 def main():
@@ -24,7 +24,7 @@ def main():
     parser.add_option('--username', '-u', dest='username', default='admin')
     parser.add_option('--password', '-p', dest='password', default='default')
     parser.add_option('--blog-url', dest='blog_url', default='http://localhost:4000/')
-    parser.add_option('--database', dest='database_uri', default='sqlite:///textpress.db')
+    parser.add_option('--database', dest='database_uri', default='sqlite:///zine.db')
     parser.add_option('--language', dest='lang', default='en')
 
     options, args = parser.parse_args()
@@ -42,14 +42,14 @@ def main():
     rmtree(instance)
     mkdir(instance)
 
-    from textpress.application import make_textpress
-    from textpress.database import users, init_database, db
-    from textpress.utils.crypto import gen_pwhash, gen_secret_key
-    from textpress.config import Configuration
+    from zine.application import make_zine
+    from zine.database import users, init_database, db
+    from zine.utils.crypto import gen_pwhash, gen_secret_key
+    from zine.config import Configuration
     e = db.create_engine(options.database_uri, instance)
     init_database(e)
 
-    cfg = Configuration(path.join(instance, 'textpress.ini'))
+    cfg = Configuration(path.join(instance, 'zine.ini'))
     t = cfg.edit()
     t.update(
         maintenance_mode=False,
@@ -62,8 +62,8 @@ def main():
     )
     t.commit()
 
-    from textpress.models import User, ROLE_ADMIN
-    app = make_textpress(instance, True)
+    from zine.models import User, ROLE_ADMIN
+    app = make_zine(instance, True)
     User(options.username, options.password, 'admin@localhost', role=ROLE_ADMIN)
     db.commit()
 

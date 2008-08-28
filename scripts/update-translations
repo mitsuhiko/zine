@@ -26,7 +26,7 @@ def main():
     if not args:
         print 'Updating core strings'
         root = path.abspath(path.join(path.dirname(__file__),
-                                      path.pardir, 'textpress', 'i18n'))
+                                      path.pardir, 'zine', 'i18n'))
     elif len(args) == 1:
         root = path.join(path.abspath(args[0]), 'i18n')
         if not path.isdir(root):

@@ -4,7 +4,7 @@
     Add new Translation
     ~~~~~~~~~~~~~~~~~~~
 
-    This script adds a new translation to TextPress or a TextPress plugin.
+    This script adds a new translation to Zine or a Zine plugin.
 
     :copyright: 2008 by Armin Ronacher.
     :license: GNU GPL.
@@ -19,7 +19,7 @@ from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
 
 
-textpress = realpath(join(pardir, 'textpress'))
+zine = realpath(join(pardir, 'zine'))
 
 
 def main():
@@ -69,8 +69,8 @@ def write_catalog(catalog, folder):
 
 
 def create_application_lang(locale):
-    catalog = create_from_pot(locale, join(textpress, 'i18n', 'messages.pot'))
-    write_catalog(catalog, join(textpress, 'i18n'))
+    catalog = create_from_pot(locale, join(zine, 'i18n', 'messages.pot'))
+    write_catalog(catalog, join(zine, 'i18n'))
     print 'Created catalog for %s' % locale
 
 
@@ -78,7 +78,7 @@ def create_plugin_lang(locale, path):
     catalog = create_from_pot(locale, join(path, 'i18n', 'messages.pot'))
 
     # incorporate existing translations from the application
-    path = join(textpress, 'i18n', str(locale), 'LC_MESSAGES', 'messages.po')
+    path = join(zine, 'i18n', str(locale), 'LC_MESSAGES', 'messages.po')
     if isfile(path):
         f = file(path)
         try:

@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>{{ _('Welcome To The Zine Setup') }}</h2>
+  <p>{% trans %}
+    Welcome to the Zine Setup. This Wizard will ask you some
+    basic questions and setup Zine for you.
+  {% endtrans %}</p>
+  <p>{% trans %}
+    The setup tried to determine the language from your browser
+    settings.  If you want to step through the wizard in another
+    language select it from the dropdown menu below and press next.
+  {% endtrans %}</p>
+  <p><select name="_lang" onchange="this.form.submit()">
+  {%- for code, name in languages %}
+    <option value="{{ code }}"{% if code == lang %} selected{% endif %}>{{ name|e }}</option>
+  {%- endfor %}
+  </select></p>
+{% endblock %}

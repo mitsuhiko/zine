@@ -4,7 +4,7 @@
     Build the Event-Map
     ~~~~~~~~~~~~~~~~~~~
 
-    Lists all the events send in a given TextPress installation.
+    Lists all the events send in a given Zine installation.
 
     :copyright: 2008 by Armin Ronacher.
     :license: GNU GPL.
@@ -16,8 +16,8 @@ from optparse import OptionParser
 
 
 sys.path.append(os.path.dirname(__file__))
-from _init_textpress import find_instance
-import textpress
+from _init_zine import find_instance
+import zine
 
 
 try:
@@ -29,13 +29,13 @@ else:
 
 
 def build_eventmap(instance_folder):
-    app = textpress.make_textpress(instance_folder)
-    textpress_root = os.path.realpath(os.path.dirname(textpress.__file__))
-    searchpath = [(textpress_root, '__builtin__')]
+    app = zine.make_zine(instance_folder)
+    zine_root = os.path.realpath(os.path.dirname(zine.__file__))
+    searchpath = [(zine_root, '__builtin__')]
 
     for plugin in app.plugins.itervalues():
         path = os.path.realpath(plugin.path)
-        if os.path.commonprefix([textpress_root, path]) != textpress_root:
+        if os.path.commonprefix([zine_root, path]) != zine_root:
             searchpath.append((plugin.path, plugin.name))
 
     def walk_ast(ast):
@@ -94,7 +94,7 @@ def build_eventmap(instance_folder):
 def main():
     parser = OptionParser(usage='%prog')
     parser.add_option('--instance', '-I', dest='instance',
-                      help='Use the path provided as TextPress instance.')
+                      help='Use the path provided as Zine instance.')
     options, args = parser.parse_args()
     if args:
         parser.error('incorrect number of arguments')

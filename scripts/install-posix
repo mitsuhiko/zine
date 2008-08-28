@@ -1,8 +1,8 @@
 #!/bin/bash
-# This script copies textpress into PREFIX and compiles the python
+# This script copies zine into PREFIX and compiles the python
 # files with PYTHON.  If PREFIX is not defined /usr is assumed.
 
-SRC="`dirname $0`/../textpress"
+SRC="`dirname $0`/../zine"
 PACKAGES="_dynamic _ext importers parsers utils views websetup i18n"
 
 if [ x$PREFIX == x ]; then
@@ -16,29 +16,29 @@ echo "Installing to $PREFIX"
 echo "Using $PYTHON"
 
 # make sure the target folders exist
-mkdir -p $PREFIX/lib/textpress/textpress
-mkdir -p $PREFIX/share/textpress
+mkdir -p $PREFIX/lib/zine/zine
+mkdir -p $PREFIX/share/zine
 
 # the packages to copy
-cp $SRC/*.py $PREFIX/lib/textpress/textpress
+cp $SRC/*.py $PREFIX/lib/zine/zine
 for package in $PACKAGES; do
-  mkdir -p $PREFIX/lib/textpress/textpress/$package
-  cp -R $SRC/$package $PREFIX/lib/textpress/textpress/
+  mkdir -p $PREFIX/lib/zine/zine/$package
+  cp -R $SRC/$package $PREFIX/lib/zine/zine/
 done
 
 # all the plugins
-cp -R $SRC/{experimental_,}plugins $PREFIX/lib/textpress
+cp -R $SRC/{experimental_,}plugins $PREFIX/lib/zine
 
 # compile all files
-$PYTHON -O -mcompileall -qf $PREFIX/lib/textpress/{textpress,plugins}
+$PYTHON -O -mcompileall -qf $PREFIX/lib/zine/{zine,plugins}
 
 # templates and shared data
-cp -R $SRC/shared $PREFIX/share/textpress/htdocs
-cp -R $SRC/templates $PREFIX/share/textpress/templates
+cp -R $SRC/shared $PREFIX/share/zine/htdocs
+cp -R $SRC/templates $PREFIX/share/zine/templates
 
-# copy the server files and adjust the TEXTPRESS_LIB path
-cp -R $SRC/../servers $PREFIX/share/textpress
-sed -i'' -r "s|^TEXTPRESS_LIB\s*=.*$|TEXTPRESS_LIB = '$PREFIX/lib/textpress'|g" $PREFIX/share/textpress/servers/*
+# copy the server files and adjust the ZINE_LIB path
+cp -R $SRC/../servers $PREFIX/share/zine
+sed -i'' -r "s|^ZINE_LIB\s*=.*$|ZINE_LIB = '$PREFIX/lib/zine'|g" $PREFIX/share/zine/servers/*
 
 
 echo "All done."

@@ -1,12 +1,12 @@
 #!/bin/bash
-# This script uninstalls textpress from PREFIX which defaults
+# This script uninstalls zine from PREFIX which defaults
 # to /usr.
 
 if [ x$PREFIX == x ]; then
   PREFIX=/usr
 fi
 
-echo "Uninstalling TextPress from $PREFIX"
-rm -rf $PREFIX/lib/textpress
-rm -rf $PREFIX/share/textpress
+echo "Uninstalling Zine from $PREFIX"
+rm -rf $PREFIX/lib/zine
+rm -rf $PREFIX/share/zine
 echo "All done."

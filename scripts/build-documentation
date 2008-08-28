@@ -4,7 +4,7 @@
     Build the Documentation
     ~~~~~~~~~~~~~~~~~~~~~~~
 
-    This command builds the documentation for TextPress or a plugin.
+    This command builds the documentation for Zine or a plugin.
 
     :copyright: 2008 by Armin Ronacher.
     :license: GNU GPL.
@@ -15,15 +15,15 @@ from optparse import OptionParser
 
 
 sys.path.append(dirname(__file__))
-import _init_textpress
-from textpress.docs.builder import walk
+import _init_zine
+from zine.docs.builder import walk
 
 
 def main():
     parser = OptionParser(usage='%prog [options] [path]')
     options, args = parser.parse_args()
     if not args:
-        path = join(dirname(__file__), pardir, 'textpress', 'docs')
+        path = join(dirname(__file__), pardir, 'zine', 'docs')
     elif len(args) == 1:
         path = join(args[0], 'docs')
         if not isdir(path):

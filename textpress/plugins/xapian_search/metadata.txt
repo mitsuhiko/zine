@@ -1,9 +1,0 @@
-Name: Xapian Search
-Name[de]: Xapian Suche
-Author: Christoph Hack <tux21b@gmail.com>
-Author URL: http://www.tux21b.org/
-
-Version: 0.1
-License: GPL
-Description: Provides a full featured and fast search for TextPress using the popular xapian engine as back end.
-Description[de]: Stellt eine Suche für TextPress auf Basis von Xapian zur Verfügung.
