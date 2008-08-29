@@ -1087,3 +1087,7 @@ div.login-box input[type="submit"] {
 div.login-box input[type="submit"]:hover {
     background-color: white;
 }
+
+div.login-box input[type="submit"]:focus {
+    background: #D3E4EB;
+}
