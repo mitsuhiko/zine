@@ -11,6 +11,7 @@
 """
 from math import ceil, log
 from datetime import date, datetime, timedelta
+from urlparse import urljoin
 
 from zine.database import users, tags, posts, post_links, post_tags, \
      comments, db, pages
@@ -597,14 +598,15 @@ class Post(object):
     def find_urls(self):
         """Iterate over all urls in the text.  This will only work if the
         parser for this post is available.  If it's not the behavior is
-        undefined.
+        undefined.  The urls returned are absolute urls.
         """
         from zine.parsers import parse
         found = set()
+        this_url = url_for(self, _external=True)
         for text in self.raw_intro, self.raw_body:
             tree = parse(text, self.parser, 'linksearch', False)
             for node in tree.query('a[@href]'):
-                href = node.attributes['href']
+                href = urljoin(this_url, node.attributes['href'])
                 if href not in found:
                     found.add(href)
                     yield href
@@ -740,7 +742,10 @@ class TagManager(db.DatabaseManager):
         options = {'order_by': [db.asc(s.s_count)]}
         if max is not None:
             options['limit'] = max
-        q = db.select([s.slug, s.name, s.s_count], **options)
+
+        # the label statement circumvents a bug for sqlite3 on windows
+        # see #65
+        q = db.select([s.slug, s.name, s.s_count.label('s_count')], **options)
 
         items = [{
             'slug':     row.slug,

@@ -1006,7 +1006,7 @@ div.login-box:after {
 div.login-box h2 {
     background: transparent url(img/banner.png) no-repeat center top;
     margin: 0;
-    padding: 90px 0 0 0;
+    padding: 92px 0 0 0;
 }
 
 div.login-box h2 span {
@@ -1060,7 +1060,7 @@ div.login-box input {
 }
 
 div.login-box input:focus {
-    background: url(img/dialogbg.png) repeat-x left top;
+    background: url(img/dialogbg.png) repeat-x 0 -30px;
 }
 
 div.login-box input[type="checkbox"] {

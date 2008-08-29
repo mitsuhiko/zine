@@ -378,7 +378,7 @@ class Theme(object):
         if not url:
             if not email:
                 return escape(name)
-            url = 'mailto:%s' % quote(email)
+            url = 'mailto:%s' % url_quote(email)
         return u'<a href="%s">%s</a>' % (
             escape(url),
             escape(name)

@@ -29,6 +29,7 @@
 import re
 import urllib2
 import socket
+from urlparse import urljoin
 from xmlrpclib import ServerProxy, Fault
 from werkzeug.routing import RequestRedirect, NotFound
 from werkzeug import escape, unescape

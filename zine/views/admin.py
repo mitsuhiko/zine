@@ -339,10 +339,11 @@ def do_edit_post(request, post_id=None):
 
     # tick the "ping urls from text" checkbox if either we have a
     # new post or we edit an old post and the parser is available
-    form['ping_from_text'] = not post or not post.parser_missing
+    if request.method != 'POST':
+        form['ping_from_text'] = not post or not post.parser_missing
 
     # handle incoming data and create/update the post
-    if request.method == 'POST':
+    else:
         csrf_protector.assert_safe()
 
         # handle cancel
