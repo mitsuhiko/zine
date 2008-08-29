@@ -2115,7 +2115,7 @@ def do_thumbnailer(req):
                 (thumb_height and not thumb_height.isdigit()):
             errors.append(_('Thumbnail dimensions must be integers.'))
         form['keep_aspect_ratio'] = keep_aspect_ratio = \
-                req.form.get('keep_aspect_ratio') == 'yes'
+                'keep_aspect_ratio' in req.form
         form['thumb_filename'] = thumb_filename = \
                 req.form.get('thumb_filename')
         if not thumb_filename:
