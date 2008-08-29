@@ -1,5 +1,5 @@
-:mod:`textpress.cache`
+:mod:`zine.cache`
 ======================
 
-.. automodule:: textpress.cache
+.. automodule:: zine.cache
     :members:

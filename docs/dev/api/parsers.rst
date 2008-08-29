@@ -1,7 +1,7 @@
-:mod:`textpress.parsers`
+:mod:`zine.parsers`
 ========================
 
-.. automodule:: textpress.parsers
+.. automodule:: zine.parsers
 
 
 .. autofunction:: parse

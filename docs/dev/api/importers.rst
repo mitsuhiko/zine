@@ -1,5 +1,5 @@
-:mod:`textpress.importers`
+:mod:`zine.importers`
 ==========================
 
-.. automodule:: textpress.importers
+.. automodule:: zine.importers
     :members:

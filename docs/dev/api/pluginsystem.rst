@@ -1,5 +1,5 @@
-:mod:`textpress.pluginsystem`
+:mod:`zine.pluginsystem`
 =============================
 
-.. automodule:: textpress.pluginsystem
+.. automodule:: zine.pluginsystem
     :members:

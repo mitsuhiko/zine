@@ -1,4 +1,4 @@
-:mod:`textpress.database`
+:mod:`zine.database`
 =========================
 
-.. automodule:: textpress.database
+.. automodule:: zine.database

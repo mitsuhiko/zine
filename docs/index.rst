@@ -1,8 +1,7 @@
-Welcome to TextPress' documentation!
-====================================
+Welcome to Zine's documentation!
+================================
 
-The TextPress documentation is currently work in progress like textPress
-itself.
+The Zine documentation is currently work in progress like Zine itself.
 
 .. toctree::
    :maxdepth: 2

@@ -1,19 +1,19 @@
-:mod:`textpress.application`
+:mod:`zine.application`
 ============================
 
-.. automodule:: textpress.application
+.. automodule:: zine.application
 
 
 Factories
 ---------
 
 The factory functions provide different ways to create the central
-:class:`TextPress` object.  Depending on the execution context (shell script,
-web application) :func:`make_app` or :func:`make_textpress` is more suitable.
+:class:`Zine` object.  Depending on the execution context (shell script,
+web application) :func:`make_app` or :func:`make_zine` is more suitable.
 
 .. autofunction:: make_app
 
-.. autofunction:: make_textpress
+.. autofunction:: make_zine
 
 
 .. _dispatchers:
@@ -32,7 +32,7 @@ dispatchers is not guaranteed, always use the factory function to create them.
 Core Objects
 ------------
 
-.. autoclass:: TextPress
+.. autoclass:: Zine
    :members:
 
 .. autoclass:: Theme

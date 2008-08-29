@@ -1,5 +1,5 @@
-:mod:`textpress.models`
+:mod:`zine.models`
 =======================
 
-.. automodule:: textpress.models
+.. automodule:: zine.models
     :members:

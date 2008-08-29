@@ -1,10 +1,10 @@
-:mod:`textpress.database.db`
+:mod:`zine.database.db`
 ============================
 
-.. module:: textpress.database.db
+.. module:: zine.database.db
 
 This module is a virtual module that combines functions from SQLAlchemy,
-the SQLAlchemy ORM module and TextPress into one module that exports them
+the SQLAlchemy ORM module and Zine into one module that exports them
 all on one object.  If you are used to SQLAlchemy all you have to know is
 that all the important identifiers from the following objects are exposed:
 
@@ -116,7 +116,7 @@ Session Interface
 
     A scoped session object.  Usually you don't have to use this object
     unless an operation is required that is not exposed to the high level
-    :mod:`~textpress.database.db` module.
+    :mod:`~zine.database.db` module.
 
 Description Units
 -----------------

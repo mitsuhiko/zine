@@ -1,50 +1,50 @@
-:mod:`textpress.api`
+:mod:`zine.api`
 ====================
 
-.. module:: textpress.api
+.. module:: zine.api
 
 This module contains all the classes and functions from the core system that
-can be used by TextPress plugins.
+can be used by Zine plugins.
 
 
 Event Handling
 --------------
 
--   :func:`~textpress.application.emit_event`
--   :func:`~textpress.application.iter_listeners`
+-   :func:`~zine.application.emit_event`
+-   :func:`~zine.application.iter_listeners`
 
 Request/Response
 ----------------
--   :func:`~textpress.application.Response`
--   :func:`~textpress.application.redirect`
--   :func:`~textpress.application.get_request`
--   :func:`~textpress.application.url_for`
--   :func:`~textpress.application.add_link`
--   :func:`~textpress.application.add_meta`
--   :func:`~textpress.application.add_script`
--   :func:`~textpress.application.add_header_snippet`
+-   :func:`~zine.application.Response`
+-   :func:`~zine.application.redirect`
+-   :func:`~zine.application.get_request`
+-   :func:`~zine.application.url_for`
+-   :func:`~zine.application.add_link`
+-   :func:`~zine.application.add_meta`
+-   :func:`~zine.application.add_script`
+-   :func:`~zine.application.add_header_snippet`
 
 View Helpers
 ------------
--   :func:`~textpress.application.require_role`
+-   :func:`~zine.application.require_role`
 
 Templating
 ----------
 
--   :func:`~textpress.application.render_template`
--   :func:`~textpress.application.render_response`
+-   :func:`~zine.application.render_template`
+-   :func:`~zine.application.render_response`
 
 Application
 -----------
 
--   :func:`~textpress.application.get_application`
+-   :func:`~zine.application.get_application`
 
 Database
 --------
 
--   :mod:`~textpress.database.db`
+-   :mod:`~zine.database.db`
 
 Cache
 -----
 
--   :mod:`~textpress.cache`
+-   :mod:`~zine.cache`

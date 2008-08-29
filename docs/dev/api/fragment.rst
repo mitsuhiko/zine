@@ -1,5 +1,5 @@
-:mod:`textpress.fragment`
+:mod:`zine.fragment`
 =========================
 
-.. automodule:: textpress.fragment
+.. automodule:: zine.fragment
     :members:
