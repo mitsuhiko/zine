@@ -14,6 +14,7 @@
                              Ali Afshar.
     :license: GNU GPL.
 """
+import re
 import sys
 from os import path
 from datetime import datetime, timedelta
@@ -21,16 +22,21 @@ from types import ModuleType
 
 import sqlalchemy
 from sqlalchemy import orm
+from sqlalchemy.exc import ArgumentError
 from sqlalchemy.util import to_list
-from sqlalchemy.engine.url import make_url
+from sqlalchemy.engine.url import make_url, URL
+from werkzeug import url_decode
 
 from zine.utils import local, local_manager
+
+
+_sqlite_re = re.compile(r'sqlite:(?://(.*?)|memory)(?:\?(.*))?')
 
 
 def mapper(*args, **kwargs):
     """This works like the regular sqlalchemy mapper function but adds our
     own database manager extension.  Models mapped to tables with this mapper
-    are automatically saved on the session unless ``_tp_no_save=True`` is
+    are automatically saved on the session unless ``_no_save=True`` is
     passed to the constructor of a database model.
     """
     kwargs['extension'] = extensions = to_list(kwargs.get('extension', []))
@@ -56,17 +62,28 @@ def create_engine(uri, relative_to=None, echo=False):
 
     Furthermore the engine is created with `convert_unicode` by default.
     """
-    info = make_url(uri)
+    # special case sqlite.  We want nicer urls for that one.
+    if uri.startswith('sqlite:'):
+        match = _sqlite_re.match(uri)
+        if match is None:
+            raise ArgumentError('Could not parse rfc1738 URL')
+        path, query = match.groups()
+        if path is None:
+            database = ':memory:'
+        else:
+            database = path
+            if relative_to is not None:
+                database = path.join(relative_to, database)
+        query = url_decode(query).to_dict()
+        info = URL('sqlite', database=database, query=query)
 
-    # if we have the sqlite driver make the database relative to the
-    # instance folder
-    if info.drivername == 'sqlite' and relative_to is not None:
-        info.database = path.join(relative_to, info.database)
+    else:
+        info = make_url(uri)
 
-    # if mysql is the database engine and no connection encoding is
-    # provided we set it to utf-8
-    elif info.drivername == 'mysql':
-        info.query.setdefault('charset', 'utf8')
+        # if mysql is the database engine and no connection encoding is
+        # provided we set it to utf-8
+        if info.drivername == 'mysql':
+            info.query.setdefault('charset', 'utf8')
 
     return sqlalchemy.create_engine(info, convert_unicode=True, echo=echo)
 
@@ -98,7 +115,7 @@ class ManagerExtension(orm.MapperExtension):
         session = kwargs.pop('_sa_session', None)
         if session is None:
             session = self.get_session()
-        if not kwargs.pop('_tp_no_save', False):
+        if not kwargs.pop('_no_save', False):
             session._save_without_cascade(instance)
         return orm.EXT_CONTINUE
 

@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-08-28 22:32+0200\n"
+"PO-Revision-Date: 2008-09-02 13:59+0200\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -37,56 +37,56 @@ msgstr "Mein Zine Blog"
 msgid "just another Zine blog"
 msgstr "einfach nur ein weiteres Zine Blog"
 
-#: zine/models.py:97 zine/views/admin.py:1124
+#: zine/models.py:98 zine/views/admin.py:1125
 msgid "Administrator"
 msgstr "Administrator"
 
-#: zine/models.py:99 zine/views/admin.py:1125
+#: zine/models.py:100 zine/views/admin.py:1126
 msgid "Editor"
 msgstr "Editor"
 
-#: zine/models.py:101 zine/templates/admin/edit_comment.html:15
+#: zine/models.py:102 zine/templates/admin/edit_comment.html:15
 #: zine/templates/admin/edit_comment.html:28
 #: zine/templates/admin/edit_post.html:87
 #: zine/templates/admin/information.html:82
 #: zine/templates/admin/inspect_import.html:61
-#: zine/templates/admin/show_posts.html:19 zine/views/admin.py:1126
+#: zine/templates/admin/show_posts.html:19 zine/views/admin.py:1127
 msgid "Author"
 msgstr "Autor"
 
-#: zine/models.py:103 zine/views/admin.py:1127
+#: zine/models.py:104 zine/views/admin.py:1128
 msgid "Subscriber"
 msgstr "Abonent"
 
-#: zine/models.py:104
+#: zine/models.py:105
 msgid "Nobody"
 msgstr "Niemand"
 
-#: zine/pingback.py:62
+#: zine/pingback.py:63
 msgid "source URL does not exist"
 msgstr "Quell-URL existiert nicht."
 
-#: zine/pingback.py:63
+#: zine/pingback.py:64
 msgid "The source URL does not contain a link to the target URL"
 msgstr "Die Quell-URL verlint nicht auf die Ziel-URL"
 
-#: zine/pingback.py:64
+#: zine/pingback.py:65
 msgid "The specified target URL does not exist"
 msgstr "Die angebenene Ziel-URL existiert nicht."
 
-#: zine/pingback.py:65
+#: zine/pingback.py:66
 msgid "The specified target URL cannot be used as a target"
 msgstr "Die spezifizierte Ziel-URL kann nicht als Ziel verwendet werden."
 
-#: zine/pingback.py:66
+#: zine/pingback.py:67
 msgid "The pingback has already been registered"
 msgstr "Der Pingback wurde bereits registriert"
 
-#: zine/pingback.py:67 zine/templates/403.html:2 zine/templates/403.html:4
+#: zine/pingback.py:68 zine/templates/403.html:2 zine/templates/403.html:4
 msgid "Access Denied"
 msgstr "Zugriff verweigert"
 
-#: zine/pingback.py:68
+#: zine/pingback.py:69
 #, python-format
 msgid "An unknown server error (%s) occoured"
 msgstr "Ein unbekannter Fehler (%s) trat auf"
@@ -163,7 +163,7 @@ msgstr ""
 "  %(url)s\n"
 "%(signature)s"
 
-#: zine/i18n/__init__.py:435 zine/views/admin.py:334 zine/views/admin.py:384
+#: zine/i18n/__init__.py:435 zine/views/admin.py:334 zine/views/admin.py:385
 msgid "now"
 msgstr "jetzt"
 
@@ -615,12 +615,12 @@ msgstr "Daten wurden hochgeladen, bitte warten...."
 msgid "Starting upload..."
 msgstr "Upload wird gestartet..."
 
-#: zine/shared/js/TextPress.js:31
+#: zine/shared/js/Zine.js:31
 #, python-format
 msgid "Replying to comment by %s."
 msgstr "Antworte zu Kommentar von %s."
 
-#: zine/shared/js/TextPress.js:33
+#: zine/shared/js/Zine.js:33
 msgid "(Create as top level comment)"
 msgstr "(Erstelle als top-level Kommentar)"
 
@@ -828,12 +828,12 @@ msgstr "Bestätigen"
 msgid "Block"
 msgstr "Blocken"
 
-#: zine/templates/admin/about_textpress.html:2
-#: zine/templates/admin/about_textpress.html:4
+#: zine/templates/admin/about_zine.html:2
+#: zine/templates/admin/about_zine.html:4
 msgid "About Zine"
 msgstr "Über Zine"
 
-#: zine/templates/admin/about_textpress.html:6
+#: zine/templates/admin/about_zine.html:7
 msgid ""
 "\n"
 "      Zine is an open source content publishing platform emphasizing ease"
@@ -850,7 +850,7 @@ msgstr ""
 "      intuitiven Benutzeroberfläche.\n"
 "    "
 
-#: zine/templates/admin/about_textpress.html:11
+#: zine/templates/admin/about_zine.html:12
 msgid ""
 "\n"
 "      Zine is distributed under the GNU GPL 2 or any later version. The\n"
@@ -860,14 +860,13 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Zine wird under der GNU GPL 2 oder einer späteren Version"
-"       vertrieben.  Der komplette Lizenztext kann online gefunden werden,"
-"\n"
+"      Zine wird under der GNU GPL 2 oder einer späteren Version       "
+"vertrieben.  Der komplette Lizenztext kann online gefunden werden,\n"
 "      und in der Englishen Originalversion in der LICENSE Datei, die sich"
 "       im TextPress Ordner befindet.\n"
 "    "
 
-#: zine/templates/admin/about_textpress.html:16
+#: zine/templates/admin/about_zine.html:17
 #, python-format
 msgid "© Copyright %(years)s by the Pocoo Team. Some rights reserved."
 msgstr "© Copyright %(years)s by the Pocoo Team. Some rights reserved."
@@ -1084,8 +1083,7 @@ msgstr ""
 "\n"
 "    Zine bringt ein ausgeklügeltes Caching System mit, dass es dir\n"
 "    erlaubt einen plötzlichen Besuchersturm zu bewältigen.  Das Cache\n"
-"    System hat verschiedene Backends von denen du wählen kannst."
-"  "
+"    System hat verschiedene Backends von denen du wählen kannst.  "
 
 #: zine/templates/admin/cache.html:11
 msgid ""
@@ -1231,8 +1229,7 @@ msgstr ""
 "       Wenn der Dateisystem Cache verwendet ist kannst du einen Pfad\n"
 "       angeben in dem Zine die die Daten ablegt.  Beachte bitte, dass\n"
 "       das Ändern des Pfades die alten Cache Dateien in diesem Ordner\n"
-"       nicht automatisch löscht."
-"      "
+"       nicht automatisch löscht.      "
 
 #: zine/templates/admin/cache.html:78
 msgid ""
@@ -1745,10 +1742,10 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Von hier aus kannst du deine Zine Datenbank in ein "
-"standardisiertes\n"
+"    Von hier aus kannst du deine Zine Datenbank in ein standardisiertes\n"
 "    Format (Atom) mit Zine Erweiterungen exportieren.  Diese Zine\n"
-"    eXtended Atom (ZineXA) Dateien kannst du nutzen um die Daten an andere\n"
+"    eXtended Atom (ZineXA) Dateien kannst du nutzen um die Daten an "
+"andere\n"
 "    Weblog Anwendungen zu importieren.  Du solltest diese Datei nicht "
 "nutzen\n"
 "    um Backups deines Blogs zu erstellen.\n"
@@ -1889,10 +1886,11 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Dieser Importer erlaubt es dir Posts und Kommentare von einem WordPress\n"
-"    Blog in dieses Blog zu importieren.  Du kannst entweder eine WordPress\n"
-"    eXtended RSS (WXR) Datei hochladen oder die URL zu einer angeben."
-"  "
+"    Dieser Importer erlaubt es dir Posts und Kommentare von einem "
+"WordPress\n"
+"    Blog in dieses Blog zu importieren.  Du kannst entweder eine "
+"WordPress\n"
+"    eXtended RSS (WXR) Datei hochladen oder die URL zu einer angeben.  "
 
 #: zine/templates/admin/import_wordpress.html:14
 msgid "Dump Download URL"
@@ -2452,8 +2450,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"     Wenn du ein plugin als Zine <tt>.plugin</tt> Datei hast, kannst"
-"\n"
+"     Wenn du ein plugin als Zine <tt>.plugin</tt> Datei hast, kannst\n"
 "     du es in deine Zine Instanz importieren in dem du es hier\n"
 "     hochlädst.  Plugins die auf diese Weise hinzugefügt werden können\n"
 "     auch so wieder entfernt werden.\n"
@@ -2743,27 +2740,21 @@ msgid ""
 "\n"
 "      If you set the upload destination to a relative path it's\n"
 "      expanded for the instance folder. If the folder does not\n"
-"      exist TextPress will create a new one the first time you\n"
+"      exist Zine will create a new one the first time you\n"
 "      upload something into that folder.\n"
 "    "
 msgstr ""
-"\n"
-"      Wenn du den Zielordner für hochgeladene Dateien als relativen\n"
-"      Pfad angibst gilt dieser relativ zum TextPress Instanz-Ordner.\n"
-"      Wenn der Ordner noch nicht existiert wird ein neuer Ordner beim\n"
-"      Hochladen der ersten Datei erstellt.\n"
-"    "
 
 #: zine/templates/admin/file_uploads/config.html:15
 msgid ""
 "\n"
 "      The mimetype mapping is useful if you want to upload files\n"
-"      that have extensions that are unknown to the system TextPress\n"
+"      that have extensions that are unknown to the system Zine\n"
 "      is running on. The format for a rule is "
 "<code>pattern:mimetype</code>,\n"
 "      each rule must be on it's own line or separated by semicolons.\n"
 "      Patterns might use the asterisk for variable parts. Example:\n"
-"      <code>*.plugin:application/x-textpress-plugin</code>.\n"
+"      <code>*.plugin:application/x-zine-plugin</code>.\n"
 "    "
 msgstr ""
 "\n"
@@ -2780,19 +2771,12 @@ msgstr ""
 msgid ""
 "\n"
 "      If you want to create thumbnails you have to have ImageMagick\n"
-"      installed. Per default TextPress checks for ImageMagick on the\n"
+"      installed. Per default Zine checks for ImageMagick on the\n"
 "      system searchpath. If you don't have it installed there (for\n"
 "      example if you are on a Windows Server) you have to defined the\n"
 "      path to the executables below.\n"
 "    "
 msgstr ""
-"\n"
-"      Wenn du Vorschaubilder für hochgeladene Dateien erstellen willst\n"
-"      muss ImageMagick installiert sein.  In der Standardkonfiguration\n"
-"      sucht TextPress im Systempfad.  Wenn ImageMagick in einen anderen\n"
-"      Ordner installiert wurde (zum Beispiel auf einem Windows Server)\n"
-"      muss dieser unten angegeben werden.\n"
-"    "
 
 #: zine/templates/admin/file_uploads/config.html:33
 msgid "Upload files to"
@@ -3024,8 +3008,8 @@ msgid ""
 "Zine is in maintenance mode. Don't forget to <a href=\"%s\">turn it off "
 "again</a> once you finish your changes."
 msgstr ""
-"Zine ist im Wartungsmodus.  Vergiss nicht ihn <a href=\"%s\">wieder "
-"zu deaktivieren</a> wenn du fertig bist."
+"Zine ist im Wartungsmodus.  Vergiss nicht ihn <a href=\"%s\">wieder zu "
+"deaktivieren</a> wenn du fertig bist."
 
 #: zine/views/admin.py:177
 #, python-format
@@ -3056,23 +3040,23 @@ msgstr "Text hier..."
 msgid "Untitled Page"
 msgstr "Seite schreiben"
 
-#: zine/views/admin.py:358
+#: zine/views/admin.py:359
 msgid "You have to provide a title."
 msgstr "Du musst einen Titel angeben."
 
-#: zine/views/admin.py:360
+#: zine/views/admin.py:361
 msgid "Your title is too long."
 msgstr "Der Titel ist zu lang."
 
-#: zine/views/admin.py:363
+#: zine/views/admin.py:364
 msgid "You have to provide a body."
 msgstr "Du musst einen Text angeben."
 
-#: zine/views/admin.py:370
+#: zine/views/admin.py:371
 msgid "Invalid post status"
 msgstr "Ungültiger Status"
 
-#: zine/views/admin.py:377
+#: zine/views/admin.py:378
 msgid ""
 "You cannot change the text of a post which parser does not exist any "
 "longer."
@@ -3080,40 +3064,40 @@ msgstr ""
 "Du kannst den Text eines Posts nicht verändern dessen Parser nicht länger"
 " existiert."
 
-#: zine/views/admin.py:382 zine/views/admin.py:710
+#: zine/views/admin.py:383 zine/views/admin.py:711
 #, python-format
 msgid "Unknown parser “%s”."
 msgstr "Unbekannter parser \"%s\"."
 
-#: zine/views/admin.py:386
+#: zine/views/admin.py:387
 msgid "Invalid publication date."
 msgstr "Ungültiges Datum der Veröffentlichung"
 
-#: zine/views/admin.py:395
+#: zine/views/admin.py:396
 #, python-format
 msgid "Unknown author “%s”."
 msgstr "Unbekannter Author \"%s\"."
 
-#: zine/views/admin.py:400
+#: zine/views/admin.py:401
 msgid "A slug cannot contain a slash."
 msgstr "Ein URL Bezeichner darf keinen Schrägstrich beinhalten."
 
-#: zine/views/admin.py:402
+#: zine/views/admin.py:403
 msgid "Your slug is too long"
 msgstr "Der URL Bezeichner ist zu lang."
 
-#: zine/views/admin.py:411
+#: zine/views/admin.py:412
 #, python-format
 msgid "Unknown tag “%s”."
 msgstr "Unbekannte Markierung \"%s\"."
 
-#: zine/views/admin.py:462
+#: zine/views/admin.py:463
 msgid "No URLs pinged so far because the post is not publicly available"
 msgstr ""
 "Es wurden noch keine URLs gepingt, weil der Eintrag nicht öffentlich "
 "erreichbar ist"
 
-#: zine/views/admin.py:465
+#: zine/views/admin.py:466
 msgid ""
 "Could not ping URLs because the parser for the post is not available any "
 "longer."
@@ -3121,32 +3105,32 @@ msgstr ""
 "Konnte URLs nicht pingen weil der Parser für diesen Eintrag nicht mehr "
 "länger verfügbar ist."
 
-#: zine/views/admin.py:479
+#: zine/views/admin.py:480
 #, python-format
 msgid "Could not ping %(url)s: %(error)s"
 msgstr "Konnte %(url)s nicht pingen: %(error)s"
 
-#: zine/views/admin.py:484
+#: zine/views/admin.py:485
 #, python-format
 msgid "%s was pinged successfully."
 msgstr "%s wurde erfolgreich gepingt."
 
-#: zine/views/admin.py:488
+#: zine/views/admin.py:489
 #, python-format
 msgid "The post %s was created successfully."
 msgstr "Der Eintrag %s wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:491
+#: zine/views/admin.py:492
 #, python-format
 msgid "The post %s was updated successfully."
 msgstr "Der Eintrag %s wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:504 zine/views/admin.py:754
+#: zine/views/admin.py:505 zine/views/admin.py:755
 #, python-format
 msgid "Missing Parser “%s”"
 msgstr "Parser \"%s\" fehlt."
 
-#: zine/views/admin.py:506
+#: zine/views/admin.py:507
 #, python-format
 msgid ""
 "This post was created with the parser “%(parser)s” that is not installed "
@@ -3155,83 +3139,83 @@ msgid ""
 "provided that parser."
 msgstr ""
 "Der Eintrag wurde mit dem Parser \"%(parser)s\" erstellt, der nicht mehr "
-"installiert ist.  Aus diesem Grund erlaubt Zine keine Veränderungen "
-"am Text bis entweder der Parser für diesen Text geändert wurder oder der "
+"installiert ist.  Aus diesem Grund erlaubt Zine keine Veränderungen am "
+"Text bis entweder der Parser für diesen Text geändert wurder oder der "
 "Parser neu installiert wurde."
 
-#: zine/views/admin.py:521
+#: zine/views/admin.py:522
 msgid "Published"
 msgstr "Veröffentlicht"
 
-#: zine/views/admin.py:522
+#: zine/views/admin.py:523
 msgid "Draft"
 msgstr "Entwurf"
 
-#: zine/views/admin.py:523
+#: zine/views/admin.py:524
 msgid "Private"
 msgstr "Privat"
 
-#: zine/views/admin.py:557
+#: zine/views/admin.py:558
 #, python-format
 msgid "The post %s was deleted successfully."
 msgstr "Der Eintrag %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:599
+#: zine/views/admin.py:600
 msgid "Approved all the selected comments."
 msgstr "Alle markierten Kommentare wurden bestätigt."
 
-#: zine/views/admin.py:620
+#: zine/views/admin.py:621
 msgid "All Comments"
 msgstr "Alle Kommentare"
 
-#: zine/views/admin.py:627
+#: zine/views/admin.py:628
 msgid "Comments Awaiting Moderation"
 msgstr "Unmoderierte Kommentare"
 
-#: zine/views/admin.py:634
+#: zine/views/admin.py:635
 msgid "Spam"
 msgstr "Spam"
 
-#: zine/views/admin.py:647
+#: zine/views/admin.py:648
 #, python-format
 msgid "Comments for “%s”"
 msgstr "Kommentare für \"%s\""
 
-#: zine/views/admin.py:695
+#: zine/views/admin.py:696
 msgid "You have to give the comment an author."
 msgstr "Du musst dem Kommentar einen Author geben."
 
-#: zine/views/admin.py:698
+#: zine/views/admin.py:699
 msgid "You have to provide a valid mail address for the author."
 msgstr "Du musst eine gültige E-Mail Adresse für den Autor angeben."
 
-#: zine/views/admin.py:705
+#: zine/views/admin.py:706
 msgid "You cannot change the text of a comment if the parser is missing."
 msgstr "Du kannst den Text eines Kommentars nicht ändern wenn der Parser fehlt."
 
-#: zine/views/admin.py:712
+#: zine/views/admin.py:713
 msgid "Need a text for this comment."
 msgstr "Es muss ein Text für dieses Kommentar angegeben werden."
 
-#: zine/views/admin.py:714
+#: zine/views/admin.py:715
 msgid "You have to ommitt the url or provide a valid one."
 msgstr "Du musst die URL leer lassen oder eine gültige angeben."
 
-#: zine/views/admin.py:720
+#: zine/views/admin.py:721
 msgid "Invalid date for comment."
 msgstr "Ungültiges Datum für Kommentar."
 
-#: zine/views/admin.py:741 zine/views/admin.py:857
+#: zine/views/admin.py:742 zine/views/admin.py:858
 #, python-format
 msgid "blocked by %s"
 msgstr "geblockt von %s"
 
-#: zine/views/admin.py:745
+#: zine/views/admin.py:746
 #, python-format
 msgid "Comment by %s moderated successfully."
 msgstr "Kommentar von %s wurde erfolgreich moderiert."
 
-#: zine/views/admin.py:756
+#: zine/views/admin.py:757
 #, python-format
 msgid ""
 "This comment was submitted when the parser “%(parser)s” was the comment "
@@ -3241,146 +3225,145 @@ msgid ""
 msgstr ""
 "Das Kommentar wurde abgesendet als der Parser \"%(parser)s\" der Parser "
 "für Kommentare war.  Weil dieser nicht mehr länger verfügbar ist erlaubt "
-"Zine keine Veränderungen am Text bis der Parser wieder installiert "
-"wurde."
+"Zine keine Veränderungen am Text bis der Parser wieder installiert wurde."
 
-#: zine/views/admin.py:801
+#: zine/views/admin.py:802
 #, python-format
 msgid "Comment by %s deleted successfully."
 msgstr "Kommentar von %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:830
+#: zine/views/admin.py:831
 #, python-format
 msgid "Comment by %s approved successfully."
 msgstr "Kommentar von %s wurde erfolgreich bestätigt.."
 
-#: zine/views/admin.py:862
+#: zine/views/admin.py:863
 #, python-format
 msgid "Comment by %s blocked successfully."
 msgstr "Kommentar von %s wurde erfolgreich geblockt."
 
-#: zine/views/admin.py:926
+#: zine/views/admin.py:927
 msgid "You have to give the tag a name."
 msgstr "Du musst der Markierung einen Namen geben."
 
-#: zine/views/admin.py:928
+#: zine/views/admin.py:929
 #, python-format
 msgid "The slug \"%s\" is not unique."
 msgstr "Der Bezeichner \"%s\" ist nicht eindeutig."
 
-#: zine/views/admin.py:933
+#: zine/views/admin.py:934
 #, python-format
 msgid "Tag %s created successfully."
 msgstr "Markierung %s wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:940
+#: zine/views/admin.py:941
 #, python-format
 msgid "Tag %s updated successfully."
 msgstr "Markierung %s wurde erfolgreich verändert."
 
-#: zine/views/admin.py:981
+#: zine/views/admin.py:982
 #, python-format
 msgid "Tag %s deleted successfully."
 msgstr "Markierung %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:1042
+#: zine/views/admin.py:1043
 msgid "Username is required."
 msgstr "Der Benutzername ist verpflichtend."
 
-#: zine/views/admin.py:1045
+#: zine/views/admin.py:1046
 #, python-format
 msgid "Username “%s” is taken."
 msgstr "Der Benutzername \"%s\" ist bereits in Verwendung."
 
-#: zine/views/admin.py:1048
+#: zine/views/admin.py:1049
 msgid "You have to provide a password."
 msgstr "Du musst ein Passwort angeben."
 
-#: zine/views/admin.py:1055
+#: zine/views/admin.py:1056
 msgid "The user needs a valid mail address."
 msgstr "Der Benutzer benötigt eine gültige E-Mail Adresse."
 
-#: zine/views/admin.py:1062
+#: zine/views/admin.py:1063
 msgid "Invalid user role."
 msgstr "Ungültige Rolle für Benutzer."
 
-#: zine/views/admin.py:1069
+#: zine/views/admin.py:1070
 #, python-format
 msgid "User %s created successfully."
 msgstr "Benutzer %s erfolgreich erstellt"
 
-#: zine/views/admin.py:1082
+#: zine/views/admin.py:1083
 #, python-format
 msgid "User %s edited successfully."
 msgstr "Benutzer %s wurde erfolgreich bearbeitet."
 
-#: zine/views/admin.py:1143
+#: zine/views/admin.py:1144
 msgid "You cannot delete yourself."
 msgstr "Du kannst dich selbst nicht löschen."
 
-#: zine/views/admin.py:1172
+#: zine/views/admin.py:1173
 #, python-format
 msgid "User %s deleted successfully."
 msgstr "Benutzer %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:1199
+#: zine/views/admin.py:1200
 msgid "Configuration altered successfully."
 msgstr "Konfiguration wurde erfolgreich verändert."
 
-#: zine/views/admin.py:1225
+#: zine/views/admin.py:1226
 msgid "You have to provide a blog title"
 msgstr "Du musst einen Titel für das Blog angeben."
 
-#: zine/views/admin.py:1229
+#: zine/views/admin.py:1230
 msgid "You have to provide a valid e-mail address for the blog e-mail field."
 msgstr "Du musst eine E-Mail Adresse für das Blog E-Mail Feld angeben."
 
-#: zine/views/admin.py:1250 zine/views/admin.py:1254
+#: zine/views/admin.py:1251 zine/views/admin.py:1255
 #, python-format
 msgid "Unknown parser %s."
 msgstr "Unbekannter Parser %s."
 
-#: zine/views/admin.py:1259
+#: zine/views/admin.py:1260
 msgid "Posts per page must be at least 1"
 msgstr "Die Anzahl der Beiträge pro Seite muss zumindest 1 sein"
 
-#: zine/views/admin.py:1261
+#: zine/views/admin.py:1262
 msgid "Posts per page must be a valid integer"
 msgstr "Die Anzahl der Beiträge pro Seite muss eine Zahl sein"
 
-#: zine/views/admin.py:1328
+#: zine/views/admin.py:1329
 msgid "URL prefix may not contain greater than or smaller than signs."
 msgstr "Der URL Präfix darf nicht ein größer oder kleiner als Zeichen beinhalten."
 
-#: zine/views/admin.py:1331
+#: zine/views/admin.py:1332
 msgid "URL prefixes have to start with a slash."
 msgstr "URL Präfixe müssen mit einem Slash beginnen."
 
-#: zine/views/admin.py:1333
+#: zine/views/admin.py:1334
 msgid "URL prefixes may not end with a slash."
 msgstr "ein URL Präfix darf nicht mit einem Slash enden."
 
-#: zine/views/admin.py:1342
+#: zine/views/admin.py:1343
 msgid "URL configuration could not be changed."
 msgstr "Die URL Konfiguration konnte nicht geändert werden."
 
-#: zine/views/admin.py:1345
+#: zine/views/admin.py:1346
 msgid "URL configuration changed."
 msgstr "Die URL Konfiguration wurde geändert."
 
-#: zine/views/admin.py:1369
+#: zine/views/admin.py:1370
 msgid "Theme changed successfully."
 msgstr "Das Thema wurde erfolgreich geändert."
 
-#: zine/views/admin.py:1371
+#: zine/views/admin.py:1372
 msgid "Theme could not be changed."
 msgstr "Das Thema konnte nicht geändert werden."
 
-#: zine/views/admin.py:1385
+#: zine/views/admin.py:1386
 msgid "This theme is not configurable"
 msgstr "Dieses Thema kann nicht konfiguriert werden"
 
-#: zine/views/admin.py:1399
+#: zine/views/admin.py:1400
 msgid ""
 "Plugin guard enabled successfully. Errors occuring in plugins during "
 "setup are catched now."
@@ -3388,19 +3371,19 @@ msgstr ""
 "Die Plugin Wache wurde erfolgreich aktiviert.  Fehler im Plugin Setup "
 "werden nun abgefangen."
 
-#: zine/views/admin.py:1402
+#: zine/views/admin.py:1403
 msgid "Plugin guard could not be enabled."
 msgstr "Die Pluginwache konnte nicht aktiviert werden."
 
-#: zine/views/admin.py:1405
+#: zine/views/admin.py:1406
 msgid "Plugin guard disabled successfully."
 msgstr "Die Pluginwache wurde erfolgreich aktiviert."
 
-#: zine/views/admin.py:1407
+#: zine/views/admin.py:1408
 msgid "Plugin guard could not be disabled."
 msgstr "Die Pluginwache konnte nicht deaktiviert werden."
 
-#: zine/views/admin.py:1416
+#: zine/views/admin.py:1417
 #, python-format
 msgid ""
 "The Plugins <em>%(dependencies)s</em> are loaded as a dependency of "
@@ -3409,12 +3392,12 @@ msgstr ""
 "Die Plugins <em>%(dependencies)</em> wurden als Abhängigkein von "
 "\"%(plugin)s\" geladen."
 
-#: zine/views/admin.py:1420
+#: zine/views/admin.py:1421
 #, python-format
 msgid "Plugin “%s” activated."
 msgstr "Plugin \"%s\" aktiviert."
 
-#: zine/views/admin.py:1425
+#: zine/views/admin.py:1426
 #, python-format
 msgid ""
 "Plugin “%(plugin)s” has unresolved dependencies.  Please install "
@@ -3423,17 +3406,17 @@ msgstr ""
 "Das Plugin \"%(plugin)s\" hat unaufgelöste Abhängigkeiten.  Bitte "
 "installiere %(dependency)s."
 
-#: zine/views/admin.py:1430
+#: zine/views/admin.py:1431
 #, python-format
 msgid "Plugin “%s” could not be loaded"
 msgstr "Plugin \"%s\" konnte nicht geladen werden"
 
-#: zine/views/admin.py:1435
+#: zine/views/admin.py:1436
 #, python-format
 msgid "Plugin “%s” deactivated."
 msgstr "Plugin \"%s\" wurde deaktiviert."
 
-#: zine/views/admin.py:1446
+#: zine/views/admin.py:1447
 msgid ""
 "Could not install the plugin because the file uploaded is not a valid "
 "plugin file."
@@ -3441,19 +3424,19 @@ msgstr ""
 "Konnte das Plugin nicht installieren weil die hochgeladene keine gültige "
 "Plugin Datei ist."
 
-#: zine/views/admin.py:1450
+#: zine/views/admin.py:1451
 msgid ""
 "The plugin uploaded has a newer package version than this Zine "
 "installation can handle."
 msgstr ""
-"Das hochgeladene Plugin hat eine neuere Package Version als diese "
-"Zine installation verarbeiten kann."
+"Das hochgeladene Plugin hat eine neuere Package Version als diese Zine "
+"installation verarbeiten kann."
 
-#: zine/views/admin.py:1454
+#: zine/views/admin.py:1455
 msgid "A plugin with the same UID is already installed. Aborted."
 msgstr "Ein plugin mit der gleichen UID wurde bereits installiert. Abbruch."
 
-#: zine/views/admin.py:1457
+#: zine/views/admin.py:1458
 msgid ""
 "Could not install the package because the installer wasn't able to write "
 "the package information. Wrong permissions?"
@@ -3461,18 +3444,18 @@ msgstr ""
 "Konnte das Paket nicht installieren weil der Installer die Plugin "
 "Informationen nicht schreiben konnte.  Falsche Zugriffsrechte?"
 
-#: zine/views/admin.py:1461
+#: zine/views/admin.py:1462
 msgid "An unknown error occoured"
 msgstr "Ein unbekannter Fehler ist aufgetreten"
 
-#: zine/views/admin.py:1463
+#: zine/views/admin.py:1464
 #, python-format
 msgid "Plugin “%s” added succesfully. You can now enable it in the plugin list."
 msgstr ""
 "Plugin \"%s\" wurde erfolgreich hinzugefügt.  Du kannst das Plugin nun "
 "aktivieren."
 
-#: zine/views/admin.py:1493
+#: zine/views/admin.py:1494
 #, python-format
 msgid ""
 "Could not remove the plugin “%s” because an IO error occoured. Wrong "
@@ -3481,126 +3464,126 @@ msgstr ""
 "Konnte das Plugin \"%s\" nicht entfernen weil ein Fehler aufgetreten ist."
 "  Falsche Zugriffsrechte?"
 
-#: zine/views/admin.py:1496
+#: zine/views/admin.py:1497
 #, python-format
 msgid "The plugin “%s” was removed from the instance successfully."
 msgstr "Das Plugin \"%s\" wurde erfolgreich entfernt."
 
-#: zine/views/admin.py:1525
+#: zine/views/admin.py:1526
 msgid "The cache was cleared successfully."
 msgstr "Der cache wurde erfolgreich geleert."
 
-#: zine/views/admin.py:1531
+#: zine/views/admin.py:1532
 msgid "Invalid cache system selected."
 msgstr "Ungültiges Cache System ausgewählt."
 
-#: zine/views/admin.py:1535
+#: zine/views/admin.py:1536
 msgid "Cache timeout must be positive integer."
 msgstr "Cache-Timeout muss eine positive Ganzzahl sein."
 
-#: zine/views/admin.py:1539
+#: zine/views/admin.py:1540
 msgid "Cache timeout must be greater than 10 seconds."
 msgstr "Cache-Timeout muss größer als 10 Sekunden sein."
 
-#: zine/views/admin.py:1561
+#: zine/views/admin.py:1562
 msgid "Updated cache settings."
 msgstr "Cache Einstellungen aktualisiert."
 
-#: zine/views/admin.py:1569
+#: zine/views/admin.py:1570
 msgid "Simple Cache"
 msgstr "Einfacher Cache"
 
-#: zine/views/admin.py:1570
+#: zine/views/admin.py:1571
 msgid "memcached"
 msgstr "memcached"
 
-#: zine/views/admin.py:1571
+#: zine/views/admin.py:1572
 msgid "Filesystem"
 msgstr "Dateisystem"
 
-#: zine/views/admin.py:1572
+#: zine/views/admin.py:1573
 msgid "No Cache"
 msgstr "Kein Cache"
 
-#: zine/views/admin.py:1630
+#: zine/views/admin.py:1631
 msgid "Maintenance mode disabled.  The blog is now publicly available."
 msgstr "Wartungsmodus deaktiviert.  Das Blog ist nun öffentlich verfügbar."
 
-#: zine/views/admin.py:1709
+#: zine/views/admin.py:1710
 #, python-format
 msgid "The imported dump “%s” was deleted successfully."
 msgstr "Der Import \"%s\" wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:1809
+#: zine/views/admin.py:1810
 msgid "You have to enter your old password."
 msgstr "Du musst das alte Passwort eingeben."
 
-#: zine/views/admin.py:1811
+#: zine/views/admin.py:1812
 msgid "Your old password is wrong."
 msgstr "Das alte Passwort ist falsch."
 
-#: zine/views/admin.py:1814
+#: zine/views/admin.py:1815
 msgid "Your new password cannot be empty."
 msgstr "Das neue Passwort darf nicht leer sein."
 
-#: zine/views/admin.py:1817
+#: zine/views/admin.py:1818
 msgid "The passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-#: zine/views/admin.py:1821
+#: zine/views/admin.py:1822
 msgid "Password changed successfully."
 msgstr "Das Passwort wurde erfolgreich geändert."
 
-#: zine/views/admin.py:1922
+#: zine/views/admin.py:1923
 msgid "You have to provide a title"
 msgstr "Du musst einen Titel angeben"
 
-#: zine/views/admin.py:1929
+#: zine/views/admin.py:1930
 msgid "You have to provide a key"
 msgstr "Du musst einen Schlüssel angeben"
 
-#: zine/views/admin.py:1936
+#: zine/views/admin.py:1937
 msgid "You have to provide some content"
 msgstr "Du musst einen Inhalt angeben"
 
-#: zine/views/admin.py:1946
+#: zine/views/admin.py:1947
 msgid "This key is already in use"
 msgstr "Dieser Schlüssel wird bereits verwendet"
 
-#: zine/views/admin.py:2011
+#: zine/views/admin.py:2012
 #, python-format
 msgid "The page %s was deleted successfully."
 msgstr "Die Seite %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:2032
+#: zine/views/admin.py:2033
 #, python-format
 msgid "Could not create upload target folder %s."
 msgstr "Konnte den Ordner %s für hochgeladene Dateien nicht erstellen."
 
-#: zine/views/admin.py:2039
+#: zine/views/admin.py:2040
 msgid "No file uploaded."
 msgstr "Keine Datei hochgeladen"
 
-#: zine/views/admin.py:2041
+#: zine/views/admin.py:2042
 msgid "Invalid filename requested."
 msgstr "Ungültiger Dateinamen angefordert."
 
-#: zine/views/admin.py:2043
+#: zine/views/admin.py:2044
 #, python-format
 msgid "A file with the filename %s exists already."
 msgstr "Eine Datei mit den Namen %s existiert bereits."
 
-#: zine/views/admin.py:2051
+#: zine/views/admin.py:2052
 #, python-format
 msgid "File %s uploaded successfully."
 msgstr "Datei %s wurde erfolgreich hochgeladen."
 
-#: zine/views/admin.py:2057 zine/views/admin.py:2135
+#: zine/views/admin.py:2058 zine/views/admin.py:2136
 #, python-format
 msgid "Could not write file %s."
 msgstr "Konnte Datei %s nicht schreiben."
 
-#: zine/views/admin.py:2083
+#: zine/views/admin.py:2084
 #, python-format
 msgid ""
 "If you don't have ImageMagick installed system wide but in a different "
@@ -3610,7 +3593,7 @@ msgstr ""
 "Wenn du ImageMagick nicht systemweit installiert hast, kannst du den Pfad"
 " in der <a href=\"%(config)s\">Konfiguration</a> angeben."
 
-#: zine/views/admin.py:2087
+#: zine/views/admin.py:2088
 #, python-format
 msgid ""
 "There is no ImageMagick in the path defined installed. (<a "
@@ -3619,93 +3602,93 @@ msgstr ""
 "In dem angegebenen Pfad wurde ImageMagick nicht gefunden. (<a "
 "href\"%(config)s\">überprüfe die Konfiguration</a>)"
 
-#: zine/views/admin.py:2090
+#: zine/views/admin.py:2091
 #, python-format
 msgid "Cannot find <a href=\"%(im)s\">ImageMagick</a>."
 msgstr "Konnte <a href=\"%(im)s\">ImageMagick</a> nicht finden."
 
-#: zine/views/admin.py:2101
+#: zine/views/admin.py:2102
 msgid "You have to specify a source image"
 msgstr "Du musst ein Quellbild angeben"
 
-#: zine/views/admin.py:2106
+#: zine/views/admin.py:2107
 #, python-format
 msgid "The image %s does not exist."
 msgstr "Das Bild %s existiert nicht."
 
-#: zine/views/admin.py:2111
+#: zine/views/admin.py:2112
 msgid "You have to define at least the width of the thumbnail."
 msgstr "Du musst zumindest die Breite des Vorschaubilds angeben."
 
-#: zine/views/admin.py:2115
+#: zine/views/admin.py:2116
 msgid "Thumbnail dimensions must be integers."
 msgstr "Die Abmessungen des Vorschaubildes müssen Zahlen sein."
 
-#: zine/views/admin.py:2121
+#: zine/views/admin.py:2122
 msgid "You have to specify a filename for the thumbnail."
 msgstr "Du musst einen Dateinamen für das Vorschaubild angeben."
 
-#: zine/views/admin.py:2124
+#: zine/views/admin.py:2125
 msgid "Invalid filename for thumbnail."
 msgstr "Ungültiger Dateiname für Vorschaubild."
 
-#: zine/views/admin.py:2126
+#: zine/views/admin.py:2127
 msgid "An file with this name exists already."
 msgstr "Eine Datei mit diesem Namen existiert bereits."
 
-#: zine/views/admin.py:2144
+#: zine/views/admin.py:2145
 #, python-format
 msgid "Thumbnail %s was created successfully."
 msgstr "Das Vorschaubild %s wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:2186
+#: zine/views/admin.py:2187
 msgid "Upload folder changed successfully."
 msgstr "Der Ordner für Hochgeladene Dateien wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:2188
+#: zine/views/admin.py:2189
 msgid "Upload folder could not be changed."
 msgstr "Der Ordner für Hochgeladene Dateien konnte nicht geändert werden."
 
-#: zine/views/admin.py:2193
+#: zine/views/admin.py:2194
 msgid "Changed path to ImageMagick"
 msgstr "Pfad zu ImageMagick wurde geändert"
 
-#: zine/views/admin.py:2195
+#: zine/views/admin.py:2196
 msgid "ImageMagick is searched on the system path now."
 msgstr "ImageMagick wird nun systemweit gesucht."
 
-#: zine/views/admin.py:2197
+#: zine/views/admin.py:2198
 msgid "Path to ImageMagick could not be changed."
 msgstr "Der Pfad zu ImageMagick konnte nicht geändert werden."
 
-#: zine/views/admin.py:2202
+#: zine/views/admin.py:2203
 msgid "Upload mimetype mapping altered successfully."
 msgstr "Mimetype-Verknüpfungen für hochgeladene Dateien wurde geändert."
 
-#: zine/views/admin.py:2204
+#: zine/views/admin.py:2205
 msgid "Upload mimetype mapping could not be altered."
 msgstr "Mimetype-Verknüpfungen konnte nicht geändert werden."
 
-#: zine/views/admin.py:2230
+#: zine/views/admin.py:2231
 #, python-format
 msgid "Could not delete file %s."
 msgstr "Konnte Datei %s nicht löschen."
 
-#: zine/views/admin.py:2233
+#: zine/views/admin.py:2234
 #, python-format
 msgid "File %s deleted successfully."
 msgstr "Datei %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:2280
+#: zine/views/admin.py:2281
 #, python-format
 msgid "User %s does not exist."
 msgstr "Benutzer %s existiert nicht."
 
-#: zine/views/admin.py:2285
+#: zine/views/admin.py:2286
 msgid "Incorrect password."
 msgstr "Falsches Passwort"
 
-#: zine/views/admin.py:2287
+#: zine/views/admin.py:2288
 msgid "You have to enter a username."
 msgstr "Du musst einen Benutzernamen angeben."
 
@@ -3846,7 +3829,8 @@ msgid ""
 msgstr ""
 "\n"
 "    Zine benutzt eine Datenbank um die Einträge und andere Informationen\n"
-"    zu speicher.  Dazu musst du die URI für die Datenbank angeben.  Abhängig\n"
+"    zu speicher.  Dazu musst du die URI für die Datenbank angeben.  "
+"Abhängig\n"
 "    vom Datenbanksystem ist diese etwas unterschiedlich.\n"
 "  "
 
@@ -3855,43 +3839,38 @@ msgid "SQLite"
 msgstr "SQLite"
 
 #: zine/websetup/templates/database.html:12
-msgid "sqlite:///database.db"
-msgstr "sqlite:///datenbank.db"
+msgid "sqlite://database.db"
+msgstr "sqlite://datenbank.db"
 
 #: zine/websetup/templates/database.html:13
 msgid ""
 "\n"
-"        connect to a database that is located at a specific absolute path"
-"\n"
-"        on the file system of the server.  Note that on Mac OS X and "
-"Linux\n"
-"        systems three slashes mean relative to the instance folder and "
-"four\n"
-"        slashes represent an absolute path.  On Windows you have to use\n"
-"        three slashes, a drive letter and the full path.\n"
+"        The SQLite database path is either absolute (if it starts with "
+"three\n"
+"        slashes on OS X / Linux or two slashes and a drive letter on a\n"
+"        Windows system) or otherwise relative to the instance folder.\n"
 "      "
 msgstr ""
 "\n"
-"        verbindet zu einer Datenbank zu einem angegebenen Pfad auf dem\n"
-"        Dateisystem des Servers.  Beachte, dass auf Mac OS X und Linux\n"
-"        drei Schrägstriche einen Pfad relativ zum Instanzordner angeben\n"
-"        und vier einen absoluten Pfad.  Auf Windows werden hingegen drei\n"
-"        Slashes und ein Laufwerksbuchstabe benötigt.\n"
+"        Der Pfad zur SQLite Datenbank kann entweder absolut (drei\n"
+"        führende Schrägstriche auf OS X / Linux oder zwei Schrägstriche\n"
+"        gefolgt von einem Laufwerksbuchstaben auf Windows) oder relativ\n"
+"        zum Instanzordner angebenen werden.\n"
 "      "
 
-#: zine/websetup/templates/database.html:20
+#: zine/websetup/templates/database.html:18
 msgid "MySQL"
 msgstr "MySQL"
 
-#: zine/websetup/templates/database.html:21
+#: zine/websetup/templates/database.html:19
 msgid "mysql://username:password@host/database_name"
 msgstr "mysql://benutzername:passwort@server/datenbank_name"
 
-#: zine/websetup/templates/database.html:22
+#: zine/websetup/templates/database.html:20
 msgid "Postgres"
 msgstr "Postgres"
 
-#: zine/websetup/templates/database.html:23
+#: zine/websetup/templates/database.html:21
 msgid "postgres://username:password@host/database_name"
 msgstr "postgres://benutzername:passwort@server/datenbank_name"
 
@@ -4007,6 +3986,7 @@ msgid ""
 msgstr ""
 "\n"
 "    Zine kennt jetzt alle Informationen die es benötigt um dein Blog\n"
-"    anzulegen.  Nach der Installation wird Zine im Wartungsmodus online sein.\n"
-"    Solange dieser aktiviert ist kannst nur du das Blog betrachten."
-"  "
+"    anzulegen.  Nach der Installation wird Zine im Wartungsmodus online "
+"sein.\n"
+"    Solange dieser aktiviert ist kannst nur du das Blog betrachten.  "
+
