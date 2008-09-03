@@ -1783,7 +1783,7 @@ def do_information(request):
                           sorted(request.app.template_env.filters.items())
                           if name not in DEFAULT_FILTERS],
         instance_path=request.app.instance_folder,
-        database_uri=str(request.app.database_engine.url)
+        database_uri=request.app.cfg['database_uri']
     )
 
 

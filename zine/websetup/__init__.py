@@ -145,8 +145,8 @@ class WebSetup(object):
             # create database and all tables
             e = db.create_engine(database_uri, self.instance_folder)
             init_database(e)
-        except Exception, e:
-            error = str(e)
+        except Exception, error:
+            error = str(error)
         else:
             from zine.models import ROLE_ADMIN
             from zine.database import users

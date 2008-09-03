@@ -30,7 +30,7 @@ from werkzeug import url_decode
 from zine.utils import local, local_manager
 
 
-_sqlite_re = re.compile(r'sqlite:(?://(.*?)|memory)(?:\?(.*))?')
+_sqlite_re = re.compile(r'sqlite:(?:(?://(.*?))|memory)(?:\?(.*))?$')
 
 
 def mapper(*args, **kwargs):
@@ -67,14 +67,15 @@ def create_engine(uri, relative_to=None, echo=False):
         match = _sqlite_re.match(uri)
         if match is None:
             raise ArgumentError('Could not parse rfc1738 URL')
-        path, query = match.groups()
-        if path is None:
+        database, query = match.groups()
+        if database is None:
             database = ':memory:'
+        elif relative_to is not None:
+            database = path.join(relative_to, database)
+        if query:
+            query = url_decode(query).to_dict()
         else:
-            database = path
-            if relative_to is not None:
-                database = path.join(relative_to, database)
-        query = url_decode(query).to_dict()
+            query = {}
         info = URL('sqlite', database=database, query=query)
 
     else:
