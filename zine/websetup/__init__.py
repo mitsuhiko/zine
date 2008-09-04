@@ -19,7 +19,7 @@ from os import path
 from zine.config import Configuration
 from zine.api import db
 from zine.models import User, ROLE_ADMIN
-from zine.utils.crypto import gen_pwhash, gen_secret_key
+from zine.utils.crypto import gen_pwhash, gen_secret_key, new_iid
 from zine.utils.validators import is_valid_email
 from zine.i18n import load_translations, has_language, list_languages
 from werkzeug import Request, Response, redirect
@@ -174,6 +174,7 @@ class WebSetup(object):
                 secret_key=gen_secret_key(),
                 database_uri=database_uri,
                 language=request.translations.language,
+                iid=new_iid(),
                 # load one plugin by default for a better theme
                 plugins='vessel_theme',
                 theme='vessel'

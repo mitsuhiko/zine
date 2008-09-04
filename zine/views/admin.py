@@ -29,8 +29,8 @@ from zine.database import comments as comment_table, posts, \
      post_tags, post_links
 from zine.utils import dump_json, load_json
 from zine.utils.validators import is_valid_email, is_valid_url
-from zine.utils.admin import Pagination, flash, gen_slug, \
-     commit_config_change
+from zine.utils.admin import flash, gen_slug, commit_config_change
+from zine.utils.pagination import AdminPagination
 from zine.utils.xxx import make_hidden_fields, CSRFProtector, \
      IntelligentRedirect, StreamReporter
 from zine.utils.uploads import guess_mimetype, get_upload_folder, \
@@ -269,8 +269,8 @@ def do_bookmarklet(request):
 def do_show_posts(request, page):
     """Show a list of posts for post moderation."""
     posts = Post.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = Pagination('admin/show_posts', page, PER_PAGE,
-                            Post.objects.count())
+    pagination = AdminPagination('admin/show_posts', page, PER_PAGE,
+                                 Post.objects.count())
     if not posts and page != 1:
         raise NotFound()
     return render_admin_response('admin/show_posts.html', 'posts.overview',
@@ -601,8 +601,8 @@ def _handle_comments(identifier, title, query, page):
                 return simple_redirect('admin/show_comments')
 
     comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = Pagination('admin/show_comments', page, PER_PAGE,
-                            query.count())
+    pagination = AdminPagination('admin/show_comments', page, PER_PAGE,
+                                 query.count())
     if not comments and page != 1:
         raise NotFound()
     tab = 'comments'
@@ -877,8 +877,8 @@ def do_show_tags(request, page):
     normal comments.
     """
     tags = Tag.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = Pagination('admin/show_tags', page, PER_PAGE,
-                            Tag.objects.count())
+    pagination = AdminPagination('admin/show_tags', page, PER_PAGE,
+                                 Tag.objects.count())
     if not tags and page != 1:
         raise NotFound()
     return render_admin_response('admin/show_tags.html', 'posts.tags',
@@ -993,8 +993,8 @@ def do_delete_tag(request, tag_id):
 def do_show_users(request, page):
     """Show all users in a list."""
     users = User.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = Pagination('admin/show_users', page, PER_PAGE,
-                            User.objects.count())
+    pagination = AdminPagination('admin/show_users', page, PER_PAGE,
+                                 User.objects.count())
     if not posts and page != 1:
         raise NotFound()
     return render_admin_response('admin/show_users.html', 'users.overview',
@@ -1443,23 +1443,7 @@ def do_plugins(request):
             try:
                 plugin = install_package(request.app, new_plugin)
             except InstallationError, e:
-                if e.code == 'invalid':
-                    flash(_('Could not install the plugin because the '
-                            'file uploaded is not a valid plugin file.'),
-                          'error')
-                elif e.code == 'version':
-                    flash(_('The plugin uploaded has a newer package '
-                            'version than this Zine installation '
-                            'can handle.'), 'error')
-                elif e.code == 'exists':
-                    flash(_('A plugin with the same UID is already '
-                            'installed. Aborted.'), 'error')
-                elif e.code == 'ioerror':
-                    flash(_('Could not install the package because the '
-                            'installer wasn\'t able to write the package '
-                            'information. Wrong permissions?'), 'error')
-                else:
-                    flash(_('An unknown error occoured'), 'error')
+                flash(e.message, 'error')
             else:
                 flash(_(u'Plugin “%s” added succesfully. You can now '
                         u'enable it in the plugin list.') %

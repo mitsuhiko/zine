@@ -25,7 +25,7 @@ from jinja2 import Environment, BaseLoader, TemplateNotFound
 
 from werkzeug import Request as RequestBase, Response as ResponseBase, \
      SharedDataMiddleware, url_quote, routing, redirect as simple_redirect, \
-     escape
+     escape, cached_property
 from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
@@ -38,10 +38,27 @@ from zine.cache import get_cache
 from zine.utils import ClosingIterator, local, local_manager
 from zine.utils.validators import check_external_url
 from zine.utils.mail import split_email
+from zine.utils.datastructures import ReadOnlyMultiMapping
 
 
 #: the lock for the application setup.
 _setup_lock = allocate_lock()
+
+#: the default theme settings
+DEFAULT_THEME_SETTINGS = {
+    # pagination defaults
+    'pagination.normal':            '<a href="%(url)s">%(page)d</a>',
+    'pagination.active':            '<strong>%(page)d</strong>',
+    'pagination.commata':           '<span class="commata">,\n</span>',
+    'pagination.ellipsis':          u'<span class="ellipsis"> …\n</span>',
+    'pagination.threshold':         3,
+    'pagination.left_threshold':    2,
+    'pagination.right_threshold':   1,
+    'pagination.prev_link':         False,
+    'pagination.next_link':         False,
+    'pagination.gray_prev_link':    True,
+    'pagination.gray_next_link':    True
+}
 
 
 def get_request():
@@ -325,12 +342,13 @@ class Theme(object):
     """Represents a theme and is created automaticall by `add_theme`"""
 
     def __init__(self, app, name, template_path, metadata=None,
-                 configuration_page=None):
+                 settings=None, configuration_page=None):
         BaseLoader.__init__(self)
         self.app = app
         self.name = name
         self.template_path = template_path
         self.metadata = metadata or {}
+        self._settings = settings or {}
         self.configuration_page = configuration_page
 
     @property
@@ -399,6 +417,10 @@ class Theme(object):
     def author_url(self):
         """Return the URL of the author of the plugin."""
         return self.author_info[2]
+
+    @cached_property
+    def settings(self):
+        return ReadOnlyMultiMapping(self._settings, DEFAULT_THEME_SETTINGS)
 
     def get_url_values(self):
         if self.configurable:
@@ -556,6 +578,11 @@ class Zine(object):
         if not self.cfg.exists:
             raise InstanceNotInitialized()
 
+        # the iid of the application
+        self.iid = self.cfg['iid'].encode('utf-8')
+        if not self.iid:
+            self.iid = '%x' % id(self)
+
         # connect to the database
         self.database_engine = db.create_engine(self.cfg['database_uri'],
                                                 self.instance_folder)
@@ -618,10 +645,12 @@ class Zine(object):
         self.plugin_folder = path.join(instance_folder, 'plugins')
         self.plugin_searchpath = [self.plugin_folder]
         for folder in self.cfg['plugin_searchpath'].split(','):
-            self.plugin_searchpath.append(folder.strip())
+            folder = folder.strip()
+            if folder:
+                self.plugin_searchpath.append(folder)
         self.plugin_searchpath.append(BUILTIN_PLUGIN_FOLDER)
 
-        # register the application in the ihook
+        # register the application in the plugin system.
         register_application(self)
 
         # load the plugins
@@ -780,7 +809,7 @@ class Zine(object):
 
     @setuponly
     def add_theme(self, name, template_path, metadata=None,
-                  configuration_page=None):
+                  settings=None, configuration_page=None):
         """Add a theme. You have to provide the shortname for the theme
         which will be used in the admin panel etc. Then you have to provide
         the path for the templates. Usually this path is relative to the
@@ -790,7 +819,7 @@ class Zine(object):
         the admin panel is not available.
         """
         self.themes[name] = Theme(self, name, template_path, metadata,
-                                  configuration_page)
+                                  settings, configuration_page)
 
     @setuponly
     def add_shared_exports(self, name, path):
@@ -1237,9 +1266,6 @@ def make_zine(instance_folder, bind_to_thread=False):
         # make sure this thread has access to the variable so just set
         # up a partial class and call __init__ later.
         local.application = app = object.__new__(Zine)
-
-        # attach the iid
-        app.iid = 'tp_%x' % id(app)
 
         # now initialize the application
         app.__init__(instance_folder)

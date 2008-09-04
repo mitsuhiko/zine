@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-09-02 13:59+0200\n"
+"PO-Revision-Date: 2008-09-04 08:25+0300\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -16,15 +16,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.0dev-r444\n"
 
-#: zine/application.py:591
+#: zine/application.py:617
 msgid "Default Theme"
 msgstr "Standard Thema"
 
-#: zine/application.py:592
+#: zine/application.py:618
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Ein einfaches Standard Thema, dass keine Stilinformationen beinhaltet."
 
-#: zine/application.py:649
+#: zine/application.py:677
 #, python-format
 msgid "Copyright %(years)s by the Pocoo Team"
 msgstr "Copyright %(years)s by the Pocoo Team"
@@ -37,15 +37,15 @@ msgstr "Mein Zine Blog"
 msgid "just another Zine blog"
 msgstr "einfach nur ein weiteres Zine Blog"
 
-#: zine/models.py:98 zine/views/admin.py:1125
+#: zine/models.py:99 zine/views/admin.py:1125
 msgid "Administrator"
 msgstr "Administrator"
 
-#: zine/models.py:100 zine/views/admin.py:1126
+#: zine/models.py:101 zine/views/admin.py:1126
 msgid "Editor"
 msgstr "Editor"
 
-#: zine/models.py:102 zine/templates/admin/edit_comment.html:15
+#: zine/models.py:103 zine/templates/admin/edit_comment.html:15
 #: zine/templates/admin/edit_comment.html:28
 #: zine/templates/admin/edit_post.html:87
 #: zine/templates/admin/information.html:82
@@ -54,11 +54,11 @@ msgstr "Editor"
 msgid "Author"
 msgstr "Autor"
 
-#: zine/models.py:104 zine/views/admin.py:1128
+#: zine/models.py:105 zine/views/admin.py:1128
 msgid "Subscriber"
 msgstr "Abonent"
 
-#: zine/models.py:105
+#: zine/models.py:106
 msgid "Nobody"
 msgstr "Niemand"
 
@@ -90,6 +90,34 @@ msgstr "Zugriff verweigert"
 #, python-format
 msgid "An unknown server error (%s) occoured"
 msgstr "Ein unbekannter Fehler (%s) trat auf"
+
+#: zine/pluginsystem.py:412
+msgid ""
+"Could not install the plugin because the file uploaded is not a valid "
+"plugin file."
+msgstr ""
+"Konnte das Plugin nicht installieren weil die hochgeladene keine gültige "
+"Plugin Datei ist."
+
+#: zine/pluginsystem.py:414
+msgid ""
+"The plugin uploaded has a newer package version than this Zine "
+"installation can handle."
+msgstr ""
+"Das hochgeladene Plugin hat eine neuere Package Version als diese Zine "
+"installation verarbeiten kann."
+
+#: zine/pluginsystem.py:417
+msgid "A plugin with the same UID is already installed.  Aborted."
+msgstr "Ein Plugin mit der gleichen UID wurde bereits installiert. Abbruch."
+
+#: zine/pluginsystem.py:419
+msgid ""
+"Could not install the package because the installer wasn't able to write "
+"the package information. Wrong permissions?"
+msgstr ""
+"Konnte das Paket nicht installieren weil der Installer die Plugin "
+"Informationen nicht schreiben konnte.  Falsche Zugriffsrechte?"
 
 #: zine/widgets.py:98 zine/templates/tag_cloud.html:2
 #: zine/templates/tag_cloud.html:4
@@ -2450,7 +2478,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"     Wenn du ein plugin als Zine <tt>.plugin</tt> Datei hast, kannst\n"
+"     Wenn du ein Plugin als Zine <tt>.plugin</tt> Datei hast, kannst\n"
 "     du es in deine Zine Instanz importieren in dem du es hier\n"
 "     hochlädst.  Plugins die auf diese Weise hinzugefügt werden können\n"
 "     auch so wieder entfernt werden.\n"
@@ -2927,17 +2955,25 @@ msgstr "Navigation"
 msgid "Complete archive"
 msgstr "Vollständiges Archiv"
 
-#: zine/utils/admin.py:43
+#: zine/utils/admin.py:42
 msgid "Error"
 msgstr "Fehler"
 
-#: zine/utils/admin.py:129
+#: zine/utils/admin.py:64
 msgid "The configuration file could not be written."
 msgstr "Die Konfigurationsdatei konnte nicht geschrieben werden."
 
 #: zine/utils/mail.py:90
 msgid "TLS enabled but server does not support TLS"
 msgstr "TLS wurde aktiviert aber der Server unterstützt kein TLS"
+
+#: zine/utils/pagination.py:87 zine/utils/pagination.py:90
+msgid "Next »"
+msgstr "Weiter »"
+
+#: zine/utils/pagination.py:94 zine/utils/pagination.py:97
+msgid "« Previous"
+msgstr "« Zurück"
 
 #: zine/views/admin.py:84 zine/views/admin.py:89 zine/views/admin.py:108
 #: zine/views/admin.py:113
@@ -3416,46 +3452,14 @@ msgstr "Plugin \"%s\" konnte nicht geladen werden"
 msgid "Plugin “%s” deactivated."
 msgstr "Plugin \"%s\" wurde deaktiviert."
 
-#: zine/views/admin.py:1447
-msgid ""
-"Could not install the plugin because the file uploaded is not a valid "
-"plugin file."
-msgstr ""
-"Konnte das Plugin nicht installieren weil die hochgeladene keine gültige "
-"Plugin Datei ist."
-
-#: zine/views/admin.py:1451
-msgid ""
-"The plugin uploaded has a newer package version than this Zine "
-"installation can handle."
-msgstr ""
-"Das hochgeladene Plugin hat eine neuere Package Version als diese Zine "
-"installation verarbeiten kann."
-
-#: zine/views/admin.py:1455
-msgid "A plugin with the same UID is already installed. Aborted."
-msgstr "Ein plugin mit der gleichen UID wurde bereits installiert. Abbruch."
-
-#: zine/views/admin.py:1458
-msgid ""
-"Could not install the package because the installer wasn't able to write "
-"the package information. Wrong permissions?"
-msgstr ""
-"Konnte das Paket nicht installieren weil der Installer die Plugin "
-"Informationen nicht schreiben konnte.  Falsche Zugriffsrechte?"
-
-#: zine/views/admin.py:1462
-msgid "An unknown error occoured"
-msgstr "Ein unbekannter Fehler ist aufgetreten"
-
-#: zine/views/admin.py:1464
+#: zine/views/admin.py:1448
 #, python-format
 msgid "Plugin “%s” added succesfully. You can now enable it in the plugin list."
 msgstr ""
 "Plugin \"%s\" wurde erfolgreich hinzugefügt.  Du kannst das Plugin nun "
 "aktivieren."
 
-#: zine/views/admin.py:1494
+#: zine/views/admin.py:1478
 #, python-format
 msgid ""
 "Could not remove the plugin “%s” because an IO error occoured. Wrong "
@@ -3464,126 +3468,126 @@ msgstr ""
 "Konnte das Plugin \"%s\" nicht entfernen weil ein Fehler aufgetreten ist."
 "  Falsche Zugriffsrechte?"
 
-#: zine/views/admin.py:1497
+#: zine/views/admin.py:1481
 #, python-format
 msgid "The plugin “%s” was removed from the instance successfully."
 msgstr "Das Plugin \"%s\" wurde erfolgreich entfernt."
 
-#: zine/views/admin.py:1526
+#: zine/views/admin.py:1510
 msgid "The cache was cleared successfully."
 msgstr "Der cache wurde erfolgreich geleert."
 
-#: zine/views/admin.py:1532
+#: zine/views/admin.py:1516
 msgid "Invalid cache system selected."
 msgstr "Ungültiges Cache System ausgewählt."
 
-#: zine/views/admin.py:1536
+#: zine/views/admin.py:1520
 msgid "Cache timeout must be positive integer."
 msgstr "Cache-Timeout muss eine positive Ganzzahl sein."
 
-#: zine/views/admin.py:1540
+#: zine/views/admin.py:1524
 msgid "Cache timeout must be greater than 10 seconds."
 msgstr "Cache-Timeout muss größer als 10 Sekunden sein."
 
-#: zine/views/admin.py:1562
+#: zine/views/admin.py:1546
 msgid "Updated cache settings."
 msgstr "Cache Einstellungen aktualisiert."
 
-#: zine/views/admin.py:1570
+#: zine/views/admin.py:1554
 msgid "Simple Cache"
 msgstr "Einfacher Cache"
 
-#: zine/views/admin.py:1571
+#: zine/views/admin.py:1555
 msgid "memcached"
 msgstr "memcached"
 
-#: zine/views/admin.py:1572
+#: zine/views/admin.py:1556
 msgid "Filesystem"
 msgstr "Dateisystem"
 
-#: zine/views/admin.py:1573
+#: zine/views/admin.py:1557
 msgid "No Cache"
 msgstr "Kein Cache"
 
-#: zine/views/admin.py:1631
+#: zine/views/admin.py:1615
 msgid "Maintenance mode disabled.  The blog is now publicly available."
 msgstr "Wartungsmodus deaktiviert.  Das Blog ist nun öffentlich verfügbar."
 
-#: zine/views/admin.py:1710
+#: zine/views/admin.py:1694
 #, python-format
 msgid "The imported dump “%s” was deleted successfully."
 msgstr "Der Import \"%s\" wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:1810
+#: zine/views/admin.py:1794
 msgid "You have to enter your old password."
 msgstr "Du musst das alte Passwort eingeben."
 
-#: zine/views/admin.py:1812
+#: zine/views/admin.py:1796
 msgid "Your old password is wrong."
 msgstr "Das alte Passwort ist falsch."
 
-#: zine/views/admin.py:1815
+#: zine/views/admin.py:1799
 msgid "Your new password cannot be empty."
 msgstr "Das neue Passwort darf nicht leer sein."
 
-#: zine/views/admin.py:1818
+#: zine/views/admin.py:1802
 msgid "The passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-#: zine/views/admin.py:1822
+#: zine/views/admin.py:1806
 msgid "Password changed successfully."
 msgstr "Das Passwort wurde erfolgreich geändert."
 
-#: zine/views/admin.py:1923
+#: zine/views/admin.py:1907
 msgid "You have to provide a title"
 msgstr "Du musst einen Titel angeben"
 
-#: zine/views/admin.py:1930
+#: zine/views/admin.py:1914
 msgid "You have to provide a key"
 msgstr "Du musst einen Schlüssel angeben"
 
-#: zine/views/admin.py:1937
+#: zine/views/admin.py:1921
 msgid "You have to provide some content"
 msgstr "Du musst einen Inhalt angeben"
 
-#: zine/views/admin.py:1947
+#: zine/views/admin.py:1931
 msgid "This key is already in use"
 msgstr "Dieser Schlüssel wird bereits verwendet"
 
-#: zine/views/admin.py:2012
+#: zine/views/admin.py:1996
 #, python-format
 msgid "The page %s was deleted successfully."
 msgstr "Die Seite %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:2033
+#: zine/views/admin.py:2017
 #, python-format
 msgid "Could not create upload target folder %s."
 msgstr "Konnte den Ordner %s für hochgeladene Dateien nicht erstellen."
 
-#: zine/views/admin.py:2040
+#: zine/views/admin.py:2024
 msgid "No file uploaded."
 msgstr "Keine Datei hochgeladen"
 
-#: zine/views/admin.py:2042
+#: zine/views/admin.py:2026
 msgid "Invalid filename requested."
 msgstr "Ungültiger Dateinamen angefordert."
 
-#: zine/views/admin.py:2044
+#: zine/views/admin.py:2028
 #, python-format
 msgid "A file with the filename %s exists already."
 msgstr "Eine Datei mit den Namen %s existiert bereits."
 
-#: zine/views/admin.py:2052
+#: zine/views/admin.py:2036
 #, python-format
 msgid "File %s uploaded successfully."
 msgstr "Datei %s wurde erfolgreich hochgeladen."
 
-#: zine/views/admin.py:2058 zine/views/admin.py:2136
+#: zine/views/admin.py:2042 zine/views/admin.py:2120
 #, python-format
 msgid "Could not write file %s."
 msgstr "Konnte Datei %s nicht schreiben."
 
-#: zine/views/admin.py:2084
+#: zine/views/admin.py:2068
 #, python-format
 msgid ""
 "If you don't have ImageMagick installed system wide but in a different "
@@ -3593,7 +3597,7 @@ msgstr ""
 "Wenn du ImageMagick nicht systemweit installiert hast, kannst du den Pfad"
 " in der <a href=\"%(config)s\">Konfiguration</a> angeben."
 
-#: zine/views/admin.py:2088
+#: zine/views/admin.py:2072
 #, python-format
 msgid ""
 "There is no ImageMagick in the path defined installed. (<a "
@@ -3602,93 +3606,93 @@ msgstr ""
 "In dem angegebenen Pfad wurde ImageMagick nicht gefunden. (<a "
 "href\"%(config)s\">überprüfe die Konfiguration</a>)"
 
-#: zine/views/admin.py:2091
+#: zine/views/admin.py:2075
 #, python-format
 msgid "Cannot find <a href=\"%(im)s\">ImageMagick</a>."
 msgstr "Konnte <a href=\"%(im)s\">ImageMagick</a> nicht finden."
 
-#: zine/views/admin.py:2102
+#: zine/views/admin.py:2086
 msgid "You have to specify a source image"
 msgstr "Du musst ein Quellbild angeben"
 
-#: zine/views/admin.py:2107
+#: zine/views/admin.py:2091
 #, python-format
 msgid "The image %s does not exist."
 msgstr "Das Bild %s existiert nicht."
 
-#: zine/views/admin.py:2112
+#: zine/views/admin.py:2096
 msgid "You have to define at least the width of the thumbnail."
 msgstr "Du musst zumindest die Breite des Vorschaubilds angeben."
 
-#: zine/views/admin.py:2116
+#: zine/views/admin.py:2100
 msgid "Thumbnail dimensions must be integers."
 msgstr "Die Abmessungen des Vorschaubildes müssen Zahlen sein."
 
-#: zine/views/admin.py:2122
+#: zine/views/admin.py:2106
 msgid "You have to specify a filename for the thumbnail."
 msgstr "Du musst einen Dateinamen für das Vorschaubild angeben."
 
-#: zine/views/admin.py:2125
+#: zine/views/admin.py:2109
 msgid "Invalid filename for thumbnail."
 msgstr "Ungültiger Dateiname für Vorschaubild."
 
-#: zine/views/admin.py:2127
+#: zine/views/admin.py:2111
 msgid "An file with this name exists already."
 msgstr "Eine Datei mit diesem Namen existiert bereits."
 
-#: zine/views/admin.py:2145
+#: zine/views/admin.py:2129
 #, python-format
 msgid "Thumbnail %s was created successfully."
 msgstr "Das Vorschaubild %s wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:2187
+#: zine/views/admin.py:2171
 msgid "Upload folder changed successfully."
 msgstr "Der Ordner für Hochgeladene Dateien wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:2189
+#: zine/views/admin.py:2173
 msgid "Upload folder could not be changed."
 msgstr "Der Ordner für Hochgeladene Dateien konnte nicht geändert werden."
 
-#: zine/views/admin.py:2194
+#: zine/views/admin.py:2178
 msgid "Changed path to ImageMagick"
 msgstr "Pfad zu ImageMagick wurde geändert"
 
-#: zine/views/admin.py:2196
+#: zine/views/admin.py:2180
 msgid "ImageMagick is searched on the system path now."
 msgstr "ImageMagick wird nun systemweit gesucht."
 
-#: zine/views/admin.py:2198
+#: zine/views/admin.py:2182
 msgid "Path to ImageMagick could not be changed."
 msgstr "Der Pfad zu ImageMagick konnte nicht geändert werden."
 
-#: zine/views/admin.py:2203
+#: zine/views/admin.py:2187
 msgid "Upload mimetype mapping altered successfully."
 msgstr "Mimetype-Verknüpfungen für hochgeladene Dateien wurde geändert."
 
-#: zine/views/admin.py:2205
+#: zine/views/admin.py:2189
 msgid "Upload mimetype mapping could not be altered."
 msgstr "Mimetype-Verknüpfungen konnte nicht geändert werden."
 
-#: zine/views/admin.py:2231
+#: zine/views/admin.py:2215
 #, python-format
 msgid "Could not delete file %s."
 msgstr "Konnte Datei %s nicht löschen."
 
-#: zine/views/admin.py:2234
+#: zine/views/admin.py:2218
 #, python-format
 msgid "File %s deleted successfully."
 msgstr "Datei %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:2281
+#: zine/views/admin.py:2265
 #, python-format
 msgid "User %s does not exist."
 msgstr "Benutzer %s existiert nicht."
 
-#: zine/views/admin.py:2286
+#: zine/views/admin.py:2270
 msgid "Incorrect password."
 msgstr "Falsches Passwort"
 
-#: zine/views/admin.py:2288
+#: zine/views/admin.py:2272
 msgid "You have to enter a username."
 msgstr "Du musst einen Benutzernamen angeben."
 
@@ -3780,7 +3784,7 @@ msgstr "Du musst ein Passwort eingeben."
 msgid "The two passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-#: zine/websetup/__init__.py:185
+#: zine/websetup/__init__.py:186
 #, python-format
 msgid ""
 "The configuration file (%s) could not be opened for writing. Please "

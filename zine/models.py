@@ -16,7 +16,8 @@ from urlparse import urljoin
 from zine.database import users, tags, posts, post_links, post_tags, \
      comments, db, pages
 from zine.utils import build_tag_uri
-from zine.utils.admin import Pagination, gen_slug
+from zine.utils.admin import gen_slug
+from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash
 from zine.utils.validators import check_pwhash
 from zine.application import get_application, get_request, url_for

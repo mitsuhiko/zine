@@ -96,9 +96,9 @@
     :license: GNU GPL.
 """
 import __builtin__
-import sys
-import new
 import re
+import sys
+import imp
 from os import path, listdir, walk, makedirs
 from types import ModuleType
 from shutil import rmtree
@@ -107,17 +107,20 @@ from cStringIO import StringIO
 from base64 import b64encode
 
 from urllib import quote
-from werkzeug import cached_property, escape
+from werkzeug import cached_property, escape, find_modules, import_string
 
-import zine
 from zine.application import get_application
 from zine.utils.mail import split_email, is_valid_email
-from zine.i18n import Translations
+from zine.i18n import Translations, lazy_gettext
 
 
 _py_import = __builtin__.__import__
 _i18n_key_re = re.compile(r'^(.*?)\[([^\]]+)\]$')
 
+#: a dict of all managed applications by iid.
+#: every application in this dict has a plugin space this module
+#: controls.  This is only used internally
+_managed_applications = {}
 
 PACKAGE_VERSION = 1
 
@@ -131,22 +134,36 @@ def zine_import(name, *args):
     return _py_import(name, *args)
 
 
+def get_plugin_space(app):
+    """Return the plugin space for the given application."""
+    return _py_import('zine._space.' + app.iid, None, None, ['__name__'])
+
+
+def uncloak_path(path):
+    """Uncloak an import path."""
+    parts = path.split('.')
+    if parts[:2] == ['zine', '_space'] and len(parts) > 3:
+        return 'zine.plugins.' + '.'.join(parts[3:])
+    return path
+
+
 def register_application(app):
-    """Register the application on the plugin space."""
-    module = ModuleType('zine._space.%s' % app.iid)
-    module.__path__ = app.plugin_searchpath
+    """Register the application on the global plugin space."""
+    module = PluginSpace(app)
     sys.modules[module.__name__] = module
-    setattr(plugin_space, app.iid, module)
+    setattr(_global_plugin_space, app.iid, module)
+    _managed_applications[app.iid] = app
 
 
 def unregister_application(app):
     """Unregister the application on the plugin space."""
+    _managed_applications.pop(app.iid, None)
     prefix = 'zine._space.%s' % app.iid
     for module in sys.modules.keys():
         if module.startswith(prefix):
             sys.modules.pop(module, None)
     try:
-        delattr(plugin_space, app.iid)
+        delattr(_global_plugin_space, app.iid)
     except AttributeError:
         pass
 
@@ -292,6 +309,44 @@ def parse_metadata(string_or_fp):
     return MetaData(result, translations)
 
 
+class PluginSpace(ModuleType):
+    """A special module that holds all managed plugins.  It has an
+    attribute called app that is a reference to the application that owns
+    the plugin space.  If the application is already unregistered that
+    attribute is `None`.  There is also an attribute called `iid`
+    which is the internal identifier for the plugin space.
+
+    The plugin space is used internally only.  The public interface to
+    the plugin space is :attr:`zine.application.Zine.plugins` which is
+    a dict of :class:`Plugin` objects.
+    """
+
+    def __init__(self, app):
+        ModuleType.__init__(self, 'zine._space.%s' % app.iid)
+        self.__path__ = app.plugin_searchpath
+
+    @property
+    def app(self):
+        """Returns the application for this plugin space."""
+        return _managed_applications.get(self.iid)
+
+    @property
+    def iid(self):
+        """The internal ID of the application / plugin space."""
+        return self.__name__.split('.')[2]
+
+    def __iter__(self):
+        """Yields all modules this plugin space knows about.  This could also
+        yield modules that are importable but no plugins (eg: `metadata.txt`
+        is missing etc.)
+        """
+        for module_name in find_modules(self.__name__, include_packages=True):
+            yield module_name.rsplit('.', 1)[-1]
+
+    def __repr__(self):
+        return '<PluginSpace %r>' % self.iid
+
+
 class MetaData(object):
     """Holds metadata.  This object has a dict like interface to the metadata
     from the file and will return the values for the current language by
@@ -353,7 +408,21 @@ class MetaData(object):
 class InstallationError(ValueError):
     """Raised during plugin installation."""
 
+    MESSAGES = {
+        'invalid':  lazy_gettext('Could not install the plugin because the '
+                                 'file uploaded is not a valid plugin file.'),
+        'version':  lazy_gettext('The plugin uploaded has a newer package '
+                                 'version than this Zine installation '
+                                 'can handle.'),
+        'exists':   lazy_gettext('A plugin with the same UID is already '
+                                 'installed.  Aborted.'),
+        'ioerror':  lazy_gettext('Could not install the package because the '
+                                 'installer wasn\'t able to write the package '
+                                 'information. Wrong permissions?')
+    }
+
     def __init__(self, code):
+        self.message = self.MESSAGES[code]
         self.code = code
         ValueError.__init__(self, code)
 
@@ -630,7 +699,6 @@ class Plugin(object):
         )
 
 
-import zine
 __builtin__.__import__ = zine_import
-plugin_space = ModuleType('zine._space')
-sys.modules['zine._space'] = plugin_space
+_global_plugin_space = ModuleType('zine._space')
+sys.modules['zine._space'] = _global_plugin_space

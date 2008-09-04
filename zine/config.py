@@ -32,6 +32,7 @@ DEFAULT_VARS = {
     'secret_key':               (unicode, u''),
     'language':                 (unicode, u'en'),
     'plugin_searchpath':        (unicode, u''),
+    'iid':                      (unicode, u''),
 
     # url settings
     'blog_url_prefix':          (unicode, u''),

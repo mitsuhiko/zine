@@ -24,6 +24,19 @@ def gen_salt(length=6):
     return ''.join(choice(SALT_CHARS) for _ in xrange(length))
 
 
+def new_iid():
+    """Called by the websetup to get a unique uuid for the application iid."""
+    try:
+        import uuid
+    except ImportError:
+        # if there is no uuid support, we create a pseudo-unique id based
+        # on the current time.  This should be good enough to keep local
+        # installations apart.
+        import time
+        return '%x%x' % tuple(map(int, str(time.time()).split('.')))
+    return uuid.uuid4().hex
+
+
 def gen_activation_key(length=8):
     """Generate a ``length`` long string of KEY_CHARS, suitable as
     password or activation key.
