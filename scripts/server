@@ -38,7 +38,7 @@ def main():
     instance = options.instance or find_instance()
     if instance is None:
         parser.error('instance not found.  Specify path to instance')
-    
+
     app = make_app(instance)
     if options.profile:
         from werkzeug.contrib.profiler import ProfilerMiddleware

@@ -32,6 +32,11 @@ DEFAULT_VARS = {
     'secret_key':               (unicode, u''),
     'language':                 (unicode, u'en'),
     'plugin_searchpath':        (unicode, u''),
+
+    # the iid is an internal unique id for the instance.  The setup creates a
+    # uuid5 in hex format if possible (eg: uuid module is present), otherwise
+    # it takes the current timestamp and hexifies it.  Changing this value later
+    # will most likely break plugins with persistent data (pickles)
     'iid':                      (unicode, u''),
 
     # url settings

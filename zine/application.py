@@ -57,7 +57,19 @@ DEFAULT_THEME_SETTINGS = {
     'pagination.prev_link':         False,
     'pagination.next_link':         False,
     'pagination.gray_prev_link':    True,
-    'pagination.gray_next_link':    True
+    'pagination.gray_next_link':    True,
+
+    # datetime formatting settings
+    'date.date_format.default':     'medium',
+    'date.datetime_format.default': 'medium',
+    'date.date_format.short':       None,
+    'date.date_format.medium':      None,
+    'date.date_format.full':        None,
+    'date.date_format.long':        None,
+    'date.datetime_format.short':   None,
+    'date.datetime_format.medium':  None,
+    'date.datetime_format.full':    None,
+    'date.datetime_format.long':    None
 }
 
 
@@ -340,11 +352,11 @@ class TemplateEventResult(list):
 
 class Theme(object):
     """Represents a theme and is created automaticall by `add_theme`"""
+    app = None
 
-    def __init__(self, app, name, template_path, metadata=None,
+    def __init__(self, name, template_path, metadata=None,
                  settings=None, configuration_page=None):
         BaseLoader.__init__(self)
-        self.app = app
         self.name = name
         self.template_path = template_path
         self.metadata = metadata or {}
@@ -519,6 +531,28 @@ class Theme(object):
                                   replace(path.sep, '/'))
         return sorted(templates)
 
+    def format_datetime(self, datetime=None, format=None):
+        """Datetime formatting for the template.  the (`datetimeformat`
+        filter)
+        """
+        format = self._get_babel_format('datetime', format)
+        return i18n.format_datetime(datetime, format)
+
+    def format_date(self, date=None, format=None):
+        """Date formatting for the template.  (the `dateformat` filter)"""
+        format = self._get_babel_format('date', format)
+        return i18n.format_date(date, format)
+
+    def _get_babel_format(self, key, format):
+        """A small helper for the datetime formatting functions."""
+        if format is None:
+            format = self.settings['date.%s_format.default' % key]
+        if format in ('short', 'medium', 'full', 'long'):
+            rv = self.settings['date.%s_format.%s' % (key, format)]
+            if rv is not None:
+                format = rv
+        return format
+
 
 class ThemeLoader(BaseLoader):
     """Forwards theme lookups to the current active theme."""
@@ -596,7 +630,6 @@ class Zine(object):
         from zine.views import all_views
         from zine.services import all_services
         from zine.parsers import all_parsers
-        from zine import i18n
         self.views = all_views.copy()
         self.parsers = all_parsers.copy()
         self._url_rules = make_urls(self)
@@ -661,12 +694,20 @@ class Zine(object):
                 self.translations.merge(plugin.translations)
             self.plugins[plugin.name] = plugin
 
+        # set the active theme based on the config.
+        theme = self.cfg['theme']
+        if theme not in self.themes:
+            theme = 'default'
+            self.cfg.change_single('theme', theme)
+        self.theme = self.themes[theme]
+
         # init the template system with the core stuff
         from zine import htmlhelpers, models
         env = Environment(loader=ThemeLoader(self),
                           extensions=['jinja2.ext.i18n'])
         env.globals.update(
             cfg=self.cfg,
+            theme=self.theme,
             h=htmlhelpers,
             url_for=url_for,
             emit_event=self._event_manager.template_emit,
@@ -682,8 +723,8 @@ class Zine(object):
 
         env.filters.update(
             json=__import__('simplejson').dumps,
-            datetimeformat=i18n.format_datetime,
-            dateformat=i18n.format_date,
+            datetimeformat=self.theme.format_datetime,
+            dateformat=self.theme.format_date,
             monthformat=i18n.format_month
         )
 
@@ -738,16 +779,6 @@ class Zine(object):
         from zine.pluginsystem import unregister_application
         unregister_application(self)
         local.application = None
-
-    def generate_apache_config(self):
-        """Return a string with an apache config for shared data."""
-        buf = []
-        for alias, dst in self._shared_exports.iteritems():
-            dst = path.abspath(dst)
-            if len(dst.split()) != 1:
-                dst = '"%s"' % dst
-            buf.append('Alias %s %s' % (alias, dst))
-        return '\n'.join(buf)
 
     @setuponly
     def add_template_filter(self, name, callback):
@@ -808,7 +839,7 @@ class Zine(object):
         self.pingback_endpoints[endpoint] = callback
 
     @setuponly
-    def add_theme(self, name, template_path, metadata=None,
+    def add_theme(self, name, template_path=None, metadata=None,
                   settings=None, configuration_page=None):
         """Add a theme. You have to provide the shortname for the theme
         which will be used in the admin panel etc. Then you have to provide
@@ -817,9 +848,24 @@ class Zine(object):
 
         The metadata can be ommited but in that case some information in
         the admin panel is not available.
+
+        Alternatively a custom :class:`Theme` object can be passed to this
+        function as only argument.  This makes it possible to register
+        custom theme subclasses too.
         """
-        self.themes[name] = Theme(self, name, template_path, metadata,
-                                  settings, configuration_page)
+        if isinstance(name, Theme):
+            if template_path is not metadata is not settings \
+               is not configuration_page is not None:
+                raise TypeError('if a theme instance is provided extra '
+                                'arguments must be ommited or None.')
+            theme = name
+        else:
+            theme = Theme(name, template_path, metadata,
+                          settings, configuration_page)
+        if theme.app is not None:
+            raise TypeError('theme is already registered to an application.')
+        theme.app = self
+        self.themes[theme.name] = theme
 
     @setuponly
     def add_shared_exports(self, name, path):
@@ -975,15 +1021,6 @@ class Zine(object):
         application if necessary.
         """
         return self.cfg.changed_external
-
-    @property
-    def theme(self):
-        """Return the current :class:`Theme`."""
-        theme = self.cfg['theme']
-        if theme not in self.themes:
-            theme = 'default'
-            self.cfg.change_single('theme', theme)
-        return self.themes[theme]
 
     def bind_to_thread(self):
         """Bind the application to the current thread.  For more information
@@ -1278,3 +1315,7 @@ def make_zine(instance_folder, bind_to_thread=False):
         _setup_lock.release()
 
     return app
+
+
+# import here because of circular dependencies
+from zine import i18n

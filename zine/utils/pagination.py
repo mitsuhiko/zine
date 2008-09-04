@@ -36,7 +36,9 @@ class Pagination(object):
 
         def _getopt(name):
             if name in options:
-                return options.pop(name)
+                value = options.pop(name)
+                if value is not None:
+                    return value
             return settings['pagination.' + name]
         normal = _getopt('normal')
         active = _getopt('active')

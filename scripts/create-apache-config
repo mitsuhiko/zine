@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    Create an Apache Config
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    This creates an apache config for static exports.
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+import sys
+from os.path import abspath, dirname
+from optparse import OptionParser
+
+
+HELP_TEXT = '''\
+This script generates an Apache config for the static data Zine or
+Zine plugins export.  It's recommended to generate this configuration
+every time a plugin is enabled/disabled and included in the vhost
+of your regular Zine Apache configuration.
+
+This will greatly improve the performance of your Zine installation.\
+'''
+
+
+sys.path.append(dirname(__file__))
+from _init_zine import find_instance
+from zine import make_zine
+
+
+def main():
+    parser = OptionParser(usage='%prog [options]\n\n' + HELP_TEXT)
+    parser.add_option('--instance', '-I', dest='instance',
+                      help='Use the path provided as Zine instance.')
+    options, args = parser.parse_args()
+    if args:
+        parser.error('incorrect number of arguments')
+    instance = options.instance or find_instance()
+    if instance is None:
+        parser.error('instance not found.  Specify path to instance')
+
+    app = make_zine(instance)
+
+    for alias, dst in app._shared_exports.iteritems():
+        dst = abspath(dst)
+        if len(dst.split()) != 1:
+            dst = '"%s"' % dst
+        print 'Alias %s %s' % (alias, dst)
+
+
+if __name__ == '__main__':
+    main()
