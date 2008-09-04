@@ -3,7 +3,7 @@
 <html lang="{{ cfg.language|e }}">
 <head>
   <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('miniblog_theme/shared', filename='style.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ shared_url('miniblog_theme::style.css') }}">
   {{ get_page_metadata() }}
 </head>
 <body>

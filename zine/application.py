@@ -115,6 +115,12 @@ def url_for(endpoint, **args):
     return rv
 
 
+def shared_url(spec):
+    """Returns a URL to a shared resource."""
+    endpoint, filename = spec.split('::', 1)
+    return url_for(endpoint + '/shared', filename=filename)
+
+
 def redirect(url, code=302, allow_external_redirect=False):
     """Return a redirect response.  Like Werkzeug's redirect but this
     one checks for external redirects too.  If a redirect to an external
@@ -370,8 +376,7 @@ class Theme(object):
     @property
     def preview_url(self):
         if self.metadata.get('preview'):
-            endpoint, filename = self.metadata['preview'].split('::')
-            return url_for(endpoint + '/shared', filename=filename)
+            return shared_url(self.metadata['preview'])
 
     @property
     def has_preview(self):
@@ -647,12 +652,13 @@ class Zine(object):
 
         # init themes
         _ = i18n.gettext
-        default_theme = Theme(self, 'default', BUILTIN_TEMPLATE_PATH, {
+        default_theme = Theme('default', BUILTIN_TEMPLATE_PATH, {
             'name':         _('Default Theme'),
             'description':  _('Simple default theme that doesn\'t '
                               'contain any style information.'),
             'preview':      'core::default_preview.png'
         })
+        default_theme.app = self
         self.themes = {'default': default_theme}
 
         self.apis = {}
@@ -710,6 +716,7 @@ class Zine(object):
             theme=self.theme,
             h=htmlhelpers,
             url_for=url_for,
+            shared_url=shared_url,
             emit_event=self._event_manager.template_emit,
             request=local('request'),
             render_widgets=lambda: render_template('_widgets.html'),

@@ -31,8 +31,10 @@ import urllib2
 import socket
 from urlparse import urljoin
 from xmlrpclib import ServerProxy, Fault
+
 from werkzeug.routing import RequestRedirect, NotFound
 from werkzeug import escape, unescape
+
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment
 from zine.utils.xml import XMLRPC, strip_tags
@@ -184,12 +186,12 @@ def get_excerpt(url_info, url_hint, body_limit=1024 * 512):
         if body_match:
             break
     else:
-        return (title, None)
+        return title, None
 
     before, after = body_match.groups()
     link_text = strip_tags(match.group(1))
     if len(link_text) > 60:
-        link_text = link_text[:60] + u'…'
+        link_text = link_text[:60] + u' …'
 
     bits = before.split()
     bits.append(link_text)

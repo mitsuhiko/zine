@@ -44,3 +44,12 @@ input, select, textarea {
 div.actions input {
     background-color: #f2f2f2;
 }
+
+div.pagination a, div.pagination strong {
+    border: 1px solid #bbb;
+}
+
+div.pagination a:hover {
+    background-color: #eee;
+    color: #333;
+}

@@ -3,13 +3,14 @@
     zine.plugins.vessel_theme
     ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Very simple zine theme.
+    A simple default theme that also showcases some of the more advanced
+    features of the Zine theme system.
 
     :copyright: 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 from os.path import join, dirname
-from zine.api import redirect, url_for, lazy_gettext, _
+from zine.api import redirect, url_for, _
 from zine.views.admin import render_admin_response
 from zine.utils.admin import flash
 from zine.utils.xxx import CSRFProtector
@@ -17,11 +18,18 @@ from zine.utils.xxx import CSRFProtector
 
 TEMPLATE_FILES = join(dirname(__file__), 'templates')
 SHARED_FILES = join(dirname(__file__), 'shared')
-VARIATIONS = [
-    ('blue', lazy_gettext('Blue')),
-    ('gray', lazy_gettext('Gray')),
-    ('green', lazy_gettext('Green'))
+
+
+variations = [
+    ('vessel_theme::blue.css', _('Blue')),
+    ('vessel_theme::gray.css', _('Gray')),
+    ('vessel_theme::green.css', _('Green'))
 ]
+
+
+def add_variation(spec, title):
+    """Registers a new variation."""
+    variations.append((spec, title))
 
 
 def configure(request):
@@ -42,7 +50,8 @@ def configure(request):
     return render_admin_response('admin/configure_vessel_theme.html',
                                  'options.theme',
                                  current=cfg['vessel_theme/variation'],
-                                 variations=VARIATIONS,
+                                 variations=sorted(variations,
+                                                   key=lambda x: x[1].lower()),
                                  csrf_protector=csrf_protector)
 
 
@@ -50,4 +59,4 @@ def setup(app, plugin):
     app.add_theme('vessel', TEMPLATE_FILES, plugin.metadata,
                   configuration_page=configure)
     app.add_shared_exports('vessel_theme', SHARED_FILES)
-    app.add_config_var('vessel_theme/variation', unicode, 'blue')
+    app.add_config_var('vessel_theme/variation', unicode, variations[0][0])

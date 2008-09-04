@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-09-04 08:25+0300\n"
+"PO-Revision-Date: 2008-09-04 12:20+0300\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -16,15 +16,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.0dev-r444\n"
 
-#: zine/application.py:617
+#: zine/application.py:656
 msgid "Default Theme"
 msgstr "Standard Thema"
 
-#: zine/application.py:618
+#: zine/application.py:657
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Ein einfaches Standard Thema, dass keine Stilinformationen beinhaltet."
 
-#: zine/application.py:677
+#: zine/application.py:726
 #, python-format
 msgid "Copyright %(years)s by the Pocoo Team"
 msgstr "Copyright %(years)s by the Pocoo Team"
@@ -62,31 +62,31 @@ msgstr "Abonent"
 msgid "Nobody"
 msgstr "Niemand"
 
-#: zine/pingback.py:63
+#: zine/pingback.py:65
 msgid "source URL does not exist"
 msgstr "Quell-URL existiert nicht."
 
-#: zine/pingback.py:64
+#: zine/pingback.py:66
 msgid "The source URL does not contain a link to the target URL"
 msgstr "Die Quell-URL verlint nicht auf die Ziel-URL"
 
-#: zine/pingback.py:65
+#: zine/pingback.py:67
 msgid "The specified target URL does not exist"
 msgstr "Die angebenene Ziel-URL existiert nicht."
 
-#: zine/pingback.py:66
+#: zine/pingback.py:68
 msgid "The specified target URL cannot be used as a target"
 msgstr "Die spezifizierte Ziel-URL kann nicht als Ziel verwendet werden."
 
-#: zine/pingback.py:67
+#: zine/pingback.py:69
 msgid "The pingback has already been registered"
 msgstr "Der Pingback wurde bereits registriert"
 
-#: zine/pingback.py:68 zine/templates/403.html:2 zine/templates/403.html:4
+#: zine/pingback.py:70 zine/templates/403.html:2 zine/templates/403.html:4
 msgid "Access Denied"
 msgstr "Zugriff verweigert"
 
-#: zine/pingback.py:69
+#: zine/pingback.py:71
 #, python-format
 msgid "An unknown server error (%s) occoured"
 msgstr "Ein unbekannter Fehler (%s) trat auf"
@@ -339,6 +339,10 @@ msgstr "Titel anzeigen"
 msgid "Title"
 msgstr "Titel"
 
+#: zine/plugins/dark_vessel_colorscheme/__init__.py:21
+msgid "Dark"
+msgstr "Dunkel"
+
 #: zine/plugins/eric_the_fish/__init__.py:85
 #: zine/plugins/eric_the_fish/templates/admin/eric_the_fish.html:2
 #: zine/plugins/eric_the_fish/templates/admin/eric_the_fish.html:4
@@ -398,7 +402,7 @@ msgid "go to admin panel"
 msgstr "zur Administration"
 
 #: zine/plugins/miniblog_theme/templates/layout.html:26
-#: zine/plugins/vessel_theme/templates/layout.html:30
+#: zine/plugins/vessel_theme/templates/layout.html:27
 #: zine/templates/layout.html:19
 #, python-format
 msgid "Proudly powered by %(zine)s."
@@ -513,19 +517,19 @@ msgstr "Verwende häufige Zeichen"
 msgid "Save"
 msgstr "Speichern"
 
-#: zine/plugins/vessel_theme/__init__.py:21
+#: zine/plugins/vessel_theme/__init__.py:24
 msgid "Blue"
 msgstr "Blau"
 
-#: zine/plugins/vessel_theme/__init__.py:22
+#: zine/plugins/vessel_theme/__init__.py:25
 msgid "Gray"
 msgstr "Grau"
 
-#: zine/plugins/vessel_theme/__init__.py:23
+#: zine/plugins/vessel_theme/__init__.py:26
 msgid "Green"
 msgstr "Grün"
 
-#: zine/plugins/vessel_theme/__init__.py:39
+#: zine/plugins/vessel_theme/__init__.py:47
 msgid "Color variation changed successfully."
 msgstr "Farbvariation wurde erfolgreich geändert."
 
@@ -2967,11 +2971,11 @@ msgstr "Die Konfigurationsdatei konnte nicht geschrieben werden."
 msgid "TLS enabled but server does not support TLS"
 msgstr "TLS wurde aktiviert aber der Server unterstützt kein TLS"
 
-#: zine/utils/pagination.py:87 zine/utils/pagination.py:90
+#: zine/utils/pagination.py:89 zine/utils/pagination.py:92
 msgid "Next »"
 msgstr "Weiter »"
 
-#: zine/utils/pagination.py:94 zine/utils/pagination.py:97
+#: zine/utils/pagination.py:96 zine/utils/pagination.py:99
 msgid "« Previous"
 msgstr "« Zurück"
 
@@ -3421,11 +3425,9 @@ msgstr "Die Pluginwache konnte nicht deaktiviert werden."
 
 #: zine/views/admin.py:1417
 #, python-format
-msgid ""
-"The Plugins <em>%(dependencies)s</em> are loaded as a dependency of "
-"“%(plugin)s”"
+msgid "The Plugins %(dependencies)s are loaded as a dependency of “%(plugin)s”"
 msgstr ""
-"Die Plugins <em>%(dependencies)</em> wurden als Abhängigkein von "
+"Die Plugins %(dependencies)s wurden als Abhängigkeiten von "
 "\"%(plugin)s\" geladen."
 
 #: zine/views/admin.py:1421

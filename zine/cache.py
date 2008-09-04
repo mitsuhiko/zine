@@ -11,24 +11,19 @@
     :license: GNU GPL.
 """
 import os
+from time import time
+from cPickle import loads, dumps, load, dump, HIGHEST_PROTOCOL
+from thread import allocate_lock
+
+from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
+     MemcachedCache
+
+from zine.utils import local
+
 try:
     from hashlib import md5
 except ImportError:
     from md5 import new as md5
-from time import time
-from cPickle import loads, dumps, load, dump, HIGHEST_PROTOCOL
-have_memcache = True
-try:
-    from cmemcache import memcache
-except ImportError:
-    try:
-        import memcache
-    except ImportError:
-        have_memcache = False
-from thread import allocate_lock
-from zine.utils import local
-from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
-     MemcachedCache
 
 
 def get_cache(app):

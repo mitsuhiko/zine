@@ -1,23 +1,12 @@
 body {
     font-family: 'Georgia', serif;
-    background-color: #F8FCFD;
-    color: #222e4b;
     margin: 2em;
     padding: 0;
 }
 
-a {
-    color: #316182;
-}
-
-a:hover {
-    color: #588DA2;
-}
-
 div.header {
-    background: #EBF2FA;
     padding: 10px;
-    border-bottom: 1px solid #B4D2E7;
+    border-bottom: 1px solid #ccc;
 }
 
 div.header h1 {
@@ -33,7 +22,6 @@ div.header h1 a {
 div.header p.description {
     margin: 0 0 0 1.4em;
     padding: 0;
-    color: #0D3241;
 }
 
 div.footer {
@@ -70,7 +58,6 @@ div.sidebar {
 }
 
 div.sidebar h3 {
-    color: #222e4b;
     font-size: 1.2em;
     font-weight: normal;
 }
@@ -84,7 +71,6 @@ div.sidebar ol {
 h2 {
     font-size: 1.6em;
     margin: 20px 0 0.4em 0;
-    color: #222e4b;
 }
 
 h3 {
@@ -95,11 +81,6 @@ h3 {
 h3 a {
     text-decoration: none;
     display: block;
-}
-
-h3 a:hover {
-    color: #222e4b;
-    background-color: #F7FAFD;
 }
 
 p {
@@ -125,13 +106,10 @@ p.meta {
 p.related {
     font-size: 0.85em;
     margin: 1.5em 0 0 0;
-    background: #F7FAFD;
     padding: 4px;
-    border: 1px solid #B4D2E7;
 }
 
 input, select, textarea {
-    border: 1px solid #B4D2E7;
     font-family: 'Georgia', serif;
     font-size: 0.9em;
     padding: 0.2em;
@@ -163,10 +141,6 @@ form.comments div#comment-message {
     margin: 10px 0;
 }
 
-div.actions input {
-    background-color: #EBF2FA;
-}
-
 ul#comments, ol#comments {
     list-style: none;
     margin: 0.5em 0 0.5em 0;
@@ -191,10 +165,5 @@ div.pagination span.commata {
 div.pagination a, div.pagination strong {
     padding: 2px 5px;
     margin: 0 2px;
-    border: 1px solid #B4D2E7;
     text-decoration: none;
-}
-
-div.pagination a:hover {
-    background-color: #EBF2FA;
 }

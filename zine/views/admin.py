@@ -1410,11 +1410,14 @@ def do_plugins(request):
         for name, plugin in request.app.plugins.iteritems():
             active = 'plugin_' + name in request.form
 
+            # XXX: correct pluralization in the dependency loading message
+            # XXX: dependency tracking on plugin deactivating
+
             if active and not plugin.active:
                 loaded, loaded_dep, missing_dep = plugin.activate()
                 if loaded:
                     if loaded_dep:
-                        flash(_(u'The Plugins <em>%(dependencies)s</em> are '
+                        flash(_(u'The Plugins %(dependencies)s are '
                                 u'loaded as a dependency of “%(plugin)s”') % {
                                     'dependencies': u', '.join(loaded_dep),
                                     'plugin': plugin.html_display_name})
