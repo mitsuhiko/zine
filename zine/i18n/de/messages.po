@@ -1,13 +1,13 @@
-# German translations for TextPress.
+# German translations for Zine.
 # Copyright (C) 2008 The Pocoo Team
-# This file is distributed under the same license as the TextPress project.
+# This file is distributed under the same license as the Zine project.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-09-04 12:20+0300\n"
+"PO-Revision-Date: 2008-09-04 20:37+0300\n"
 "Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -16,15 +16,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.0dev-r444\n"
 
-#: zine/application.py:656
+#: zine/application.py:657
 msgid "Default Theme"
 msgstr "Standard Thema"
 
-#: zine/application.py:657
+#: zine/application.py:658
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Ein einfaches Standard Thema, dass keine Stilinformationen beinhaltet."
 
-#: zine/application.py:726
+#: zine/application.py:727
 #, python-format
 msgid "Copyright %(years)s by the Pocoo Team"
 msgstr "Copyright %(years)s by the Pocoo Team"
@@ -48,7 +48,7 @@ msgstr "Editor"
 #: zine/models.py:103 zine/templates/admin/edit_comment.html:15
 #: zine/templates/admin/edit_comment.html:28
 #: zine/templates/admin/edit_post.html:87
-#: zine/templates/admin/information.html:82
+#: zine/templates/admin/information.html:84
 #: zine/templates/admin/inspect_import.html:61
 #: zine/templates/admin/show_posts.html:19 zine/views/admin.py:1127
 msgid "Author"
@@ -517,19 +517,19 @@ msgstr "Verwende häufige Zeichen"
 msgid "Save"
 msgstr "Speichern"
 
-#: zine/plugins/vessel_theme/__init__.py:24
+#: zine/plugins/vessel_theme/__init__.py:25
 msgid "Blue"
 msgstr "Blau"
 
-#: zine/plugins/vessel_theme/__init__.py:25
+#: zine/plugins/vessel_theme/__init__.py:26
 msgid "Gray"
 msgstr "Grau"
 
-#: zine/plugins/vessel_theme/__init__.py:26
+#: zine/plugins/vessel_theme/__init__.py:27
 msgid "Green"
 msgstr "Grün"
 
-#: zine/plugins/vessel_theme/__init__.py:47
+#: zine/plugins/vessel_theme/__init__.py:48
 msgid "Color variation changed successfully."
 msgstr "Farbvariation wurde erfolgreich geändert."
 
@@ -729,20 +729,20 @@ msgstr "Kommentar absenden"
 msgid "Reset Form"
 msgstr "Formular zurücksetzen"
 
-#: zine/templates/_post.html:5
+#: zine/templates/_post.html:5 zine/templates/show_post.html:7
 #, python-format
 msgid "written by %(author)s, on %(pub_date)s."
 msgstr "geschrieben von %(author)s am %(pub_date)s."
 
-#: zine/templates/_post.html:17 zine/templates/show_post.html:15
+#: zine/templates/_post.html:17 zine/templates/show_post.html:17
 msgid "Tagged as"
 msgstr "Markiert als"
 
-#: zine/templates/_post.html:22 zine/templates/show_post.html:20
+#: zine/templates/_post.html:22 zine/templates/show_post.html:22
 msgid "nothing"
 msgstr "nichts"
 
-#: zine/templates/_post.html:27 zine/templates/show_post.html:24
+#: zine/templates/_post.html:27 zine/templates/show_post.html:26
 #: zine/templates/admin/_comment.html:12 zine/templates/admin/index.html:56
 msgid "Edit"
 msgstr "Bearbeiten"
@@ -801,16 +801,12 @@ msgstr "Einträge von diesem Benutzer"
 msgid "%(post)s, on %(date)s"
 msgstr "%(post)s, am %(date)s."
 
-#: zine/templates/show_post.html:7
-msgid "written by"
-msgstr "geschrieben von"
-
-#: zine/templates/show_post.html:29 zine/templates/admin/inspect_import.html:62
+#: zine/templates/show_post.html:31 zine/templates/admin/inspect_import.html:62
 #: zine/templates/admin/show_posts.html:21 zine/views/admin.py:88
 msgid "Comments"
 msgstr "Kommentare"
 
-#: zine/templates/show_post.html:48
+#: zine/templates/show_post.html:50
 msgid "Leave a Reply"
 msgstr "Hinterlasse eine Nachricht"
 
@@ -895,7 +891,7 @@ msgstr ""
 "      Zine wird under der GNU GPL 2 oder einer späteren Version       "
 "vertrieben.  Der komplette Lizenztext kann online gefunden werden,\n"
 "      und in der Englishen Originalversion in der LICENSE Datei, die sich"
-"       im TextPress Ordner befindet.\n"
+"       im Zine Ordner befindet.\n"
 "    "
 
 #: zine/templates/admin/about_zine.html:17
@@ -1278,7 +1274,7 @@ msgid ""
 msgstr ""
 "\n"
 "    Außerdem muss beachtet werden, dass der Cache Pfad ausschließlich\n"
-"    von Zine für Dateien verwendet wird.  TextPress wird von Zeit\n"
+"    von Zine für Dateien verwendet wird.  Zine wird von Zeit\n"
 "    zu Zeit den Cache leeren und würde ohne Nachfrage alle Dateien in\n"
 "    diesem Ordner löschen.  Nutze also nicht einfach nur "
 "<code>/tmp</code>\n"
@@ -2073,42 +2069,46 @@ msgid "Python Version"
 msgstr "Python Version"
 
 #: zine/templates/admin/information.html:28
+msgid "Platform"
+msgstr "Plattform"
+
+#: zine/templates/admin/information.html:30
 msgid "Persistent Environment"
 msgstr "Persistente Umgebung"
 
-#: zine/templates/admin/information.html:29
-#: zine/templates/admin/information.html:39
+#: zine/templates/admin/information.html:31
+#: zine/templates/admin/information.html:41
 msgid "yes"
 msgstr "ja"
 
-#: zine/templates/admin/information.html:29
-#: zine/templates/admin/information.html:35
-#: zine/templates/admin/information.html:39
+#: zine/templates/admin/information.html:31
+#: zine/templates/admin/information.html:37
+#: zine/templates/admin/information.html:41
 msgid "no"
 msgstr "nein"
 
-#: zine/templates/admin/information.html:30
+#: zine/templates/admin/information.html:32
 msgid "Multithreaded"
 msgstr "Mehrere Threads"
 
-#: zine/templates/admin/information.html:33
+#: zine/templates/admin/information.html:35
 #, python-format
 msgid "yes (%(count)s active threads)"
 msgstr "ja (%(count)s aktive Threads)"
 
-#: zine/templates/admin/information.html:38
+#: zine/templates/admin/information.html:40
 msgid "Multiprocess"
 msgstr "Mehrere Prozesse"
 
-#: zine/templates/admin/information.html:40
+#: zine/templates/admin/information.html:42
 msgid "WSGI Version"
 msgstr "WSGI Version"
 
-#: zine/templates/admin/information.html:43
+#: zine/templates/admin/information.html:45
 msgid "URL Endpoints"
 msgstr "URL Endpunkte"
 
-#: zine/templates/admin/information.html:44
+#: zine/templates/admin/information.html:46
 #, python-format
 msgid ""
 "\n"
@@ -2120,11 +2120,11 @@ msgstr ""
 "registriert:\n"
 "  "
 
-#: zine/templates/admin/information.html:52
+#: zine/templates/admin/information.html:54
 msgid "Services"
 msgstr "Services"
 
-#: zine/templates/admin/information.html:53
+#: zine/templates/admin/information.html:55
 msgid ""
 "\n"
 "    The following servicepoints are registered on this instance to be "
@@ -2137,11 +2137,11 @@ msgstr ""
 "    von einem der Services aufrufbar.\n"
 "    "
 
-#: zine/templates/admin/information.html:62
+#: zine/templates/admin/information.html:64
 msgid "Installed APIs"
 msgstr "Installierte APIs"
 
-#: zine/templates/admin/information.html:63
+#: zine/templates/admin/information.html:65
 msgid ""
 "\n"
 "    The following APIs are installed on this blog instance. APIs marked "
@@ -2154,41 +2154,41 @@ msgstr ""
 "    Stern (*) werden bevorzugt.\n"
 "  "
 
-#: zine/templates/admin/information.html:76 zine/views/admin.py:122
+#: zine/templates/admin/information.html:78 zine/views/admin.py:122
 msgid "Plugins"
 msgstr "Plugins"
 
-#: zine/templates/admin/information.html:80
+#: zine/templates/admin/information.html:82
 msgid "UID"
 msgstr "UID"
 
-#: zine/templates/admin/information.html:84
+#: zine/templates/admin/information.html:86
 msgid "Location"
 msgstr "Stelle"
 
-#: zine/templates/admin/information.html:89
+#: zine/templates/admin/information.html:91
 msgid "Configuration Variables"
 msgstr "Konfigurationsvariablen"
 
-#: zine/templates/admin/information.html:92
+#: zine/templates/admin/information.html:94
 #: zine/templates/admin/show_pages.html:8
 #: zine/templates/admin/write_page.html:11
 msgid "Key"
 msgstr "Schlüssel"
 
-#: zine/templates/admin/information.html:93
+#: zine/templates/admin/information.html:95
 msgid "Value"
 msgstr "Wert"
 
-#: zine/templates/admin/information.html:94
+#: zine/templates/admin/information.html:96
 msgid "Default"
 msgstr "Standard"
 
-#: zine/templates/admin/information.html:104
+#: zine/templates/admin/information.html:106
 msgid "Template Globals"
 msgstr "Template Globale"
 
-#: zine/templates/admin/information.html:110
+#: zine/templates/admin/information.html:112
 msgid "Template Filters"
 msgstr "Template Filter"
 
@@ -2796,7 +2796,7 @@ msgstr ""
 "      Jede Zordnung muss in ihrer eigenen Zeile sein oder mit "
 "Strichpunkten\n"
 "      getrennt.  Beispiel:\n"
-"      <code>*.plugin:application/x-textpress-plugin</code>.\n"
+"      <code>*.plugin:application/x-zine-plugin</code>.\n"
 "    "
 
 #: zine/templates/admin/file_uploads/config.html:23
@@ -2971,11 +2971,11 @@ msgstr "Die Konfigurationsdatei konnte nicht geschrieben werden."
 msgid "TLS enabled but server does not support TLS"
 msgstr "TLS wurde aktiviert aber der Server unterstützt kein TLS"
 
-#: zine/utils/pagination.py:89 zine/utils/pagination.py:92
+#: zine/utils/pagination.py:109 zine/utils/pagination.py:112
 msgid "Next »"
 msgstr "Weiter »"
 
-#: zine/utils/pagination.py:96 zine/utils/pagination.py:99
+#: zine/utils/pagination.py:116 zine/utils/pagination.py:119
 msgid "« Previous"
 msgstr "« Zurück"
 
@@ -3423,19 +3423,19 @@ msgstr "Die Pluginwache wurde erfolgreich aktiviert."
 msgid "Plugin guard could not be disabled."
 msgstr "Die Pluginwache konnte nicht deaktiviert werden."
 
-#: zine/views/admin.py:1417
+#: zine/views/admin.py:1420
 #, python-format
 msgid "The Plugins %(dependencies)s are loaded as a dependency of “%(plugin)s”"
 msgstr ""
-"Die Plugins %(dependencies)s wurden als Abhängigkeiten von "
-"\"%(plugin)s\" geladen."
+"Die Plugins %(dependencies)s wurden als Abhängigkeiten von \"%(plugin)s\""
+" geladen."
 
-#: zine/views/admin.py:1421
+#: zine/views/admin.py:1424
 #, python-format
 msgid "Plugin “%s” activated."
 msgstr "Plugin \"%s\" aktiviert."
 
-#: zine/views/admin.py:1426
+#: zine/views/admin.py:1429
 #, python-format
 msgid ""
 "Plugin “%(plugin)s” has unresolved dependencies.  Please install "
@@ -3444,24 +3444,24 @@ msgstr ""
 "Das Plugin \"%(plugin)s\" hat unaufgelöste Abhängigkeiten.  Bitte "
 "installiere %(dependency)s."
 
-#: zine/views/admin.py:1431
+#: zine/views/admin.py:1434
 #, python-format
 msgid "Plugin “%s” could not be loaded"
 msgstr "Plugin \"%s\" konnte nicht geladen werden"
 
-#: zine/views/admin.py:1436
+#: zine/views/admin.py:1439
 #, python-format
 msgid "Plugin “%s” deactivated."
 msgstr "Plugin \"%s\" wurde deaktiviert."
 
-#: zine/views/admin.py:1448
+#: zine/views/admin.py:1451
 #, python-format
 msgid "Plugin “%s” added succesfully. You can now enable it in the plugin list."
 msgstr ""
 "Plugin \"%s\" wurde erfolgreich hinzugefügt.  Du kannst das Plugin nun "
 "aktivieren."
 
-#: zine/views/admin.py:1478
+#: zine/views/admin.py:1481
 #, python-format
 msgid ""
 "Could not remove the plugin “%s” because an IO error occoured. Wrong "
@@ -3470,126 +3470,126 @@ msgstr ""
 "Konnte das Plugin \"%s\" nicht entfernen weil ein Fehler aufgetreten ist."
 "  Falsche Zugriffsrechte?"
 
-#: zine/views/admin.py:1481
+#: zine/views/admin.py:1484
 #, python-format
 msgid "The plugin “%s” was removed from the instance successfully."
 msgstr "Das Plugin \"%s\" wurde erfolgreich entfernt."
 
-#: zine/views/admin.py:1510
+#: zine/views/admin.py:1513
 msgid "The cache was cleared successfully."
 msgstr "Der cache wurde erfolgreich geleert."
 
-#: zine/views/admin.py:1516
+#: zine/views/admin.py:1519
 msgid "Invalid cache system selected."
 msgstr "Ungültiges Cache System ausgewählt."
 
-#: zine/views/admin.py:1520
+#: zine/views/admin.py:1523
 msgid "Cache timeout must be positive integer."
 msgstr "Cache-Timeout muss eine positive Ganzzahl sein."
 
-#: zine/views/admin.py:1524
+#: zine/views/admin.py:1527
 msgid "Cache timeout must be greater than 10 seconds."
 msgstr "Cache-Timeout muss größer als 10 Sekunden sein."
 
-#: zine/views/admin.py:1546
+#: zine/views/admin.py:1549
 msgid "Updated cache settings."
 msgstr "Cache Einstellungen aktualisiert."
 
-#: zine/views/admin.py:1554
+#: zine/views/admin.py:1557
 msgid "Simple Cache"
 msgstr "Einfacher Cache"
 
-#: zine/views/admin.py:1555
+#: zine/views/admin.py:1558
 msgid "memcached"
 msgstr "memcached"
 
-#: zine/views/admin.py:1556
+#: zine/views/admin.py:1559
 msgid "Filesystem"
 msgstr "Dateisystem"
 
-#: zine/views/admin.py:1557
+#: zine/views/admin.py:1560
 msgid "No Cache"
 msgstr "Kein Cache"
 
-#: zine/views/admin.py:1615
+#: zine/views/admin.py:1618
 msgid "Maintenance mode disabled.  The blog is now publicly available."
 msgstr "Wartungsmodus deaktiviert.  Das Blog ist nun öffentlich verfügbar."
 
-#: zine/views/admin.py:1694
+#: zine/views/admin.py:1697
 #, python-format
 msgid "The imported dump “%s” was deleted successfully."
 msgstr "Der Import \"%s\" wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:1794
+#: zine/views/admin.py:1799
 msgid "You have to enter your old password."
 msgstr "Du musst das alte Passwort eingeben."
 
-#: zine/views/admin.py:1796
+#: zine/views/admin.py:1801
 msgid "Your old password is wrong."
 msgstr "Das alte Passwort ist falsch."
 
-#: zine/views/admin.py:1799
+#: zine/views/admin.py:1804
 msgid "Your new password cannot be empty."
 msgstr "Das neue Passwort darf nicht leer sein."
 
-#: zine/views/admin.py:1802
+#: zine/views/admin.py:1807
 msgid "The passwords do not match."
 msgstr "Die Passwörter stimmen nicht überein."
 
-#: zine/views/admin.py:1806
+#: zine/views/admin.py:1811
 msgid "Password changed successfully."
 msgstr "Das Passwort wurde erfolgreich geändert."
 
-#: zine/views/admin.py:1907
+#: zine/views/admin.py:1912
 msgid "You have to provide a title"
 msgstr "Du musst einen Titel angeben"
 
-#: zine/views/admin.py:1914
+#: zine/views/admin.py:1919
 msgid "You have to provide a key"
 msgstr "Du musst einen Schlüssel angeben"
 
-#: zine/views/admin.py:1921
+#: zine/views/admin.py:1926
 msgid "You have to provide some content"
 msgstr "Du musst einen Inhalt angeben"
 
-#: zine/views/admin.py:1931
+#: zine/views/admin.py:1936
 msgid "This key is already in use"
 msgstr "Dieser Schlüssel wird bereits verwendet"
 
-#: zine/views/admin.py:1996
+#: zine/views/admin.py:2001
 #, python-format
 msgid "The page %s was deleted successfully."
 msgstr "Die Seite %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:2017
+#: zine/views/admin.py:2022
 #, python-format
 msgid "Could not create upload target folder %s."
 msgstr "Konnte den Ordner %s für hochgeladene Dateien nicht erstellen."
 
-#: zine/views/admin.py:2024
+#: zine/views/admin.py:2029
 msgid "No file uploaded."
 msgstr "Keine Datei hochgeladen"
 
-#: zine/views/admin.py:2026
+#: zine/views/admin.py:2031
 msgid "Invalid filename requested."
 msgstr "Ungültiger Dateinamen angefordert."
 
-#: zine/views/admin.py:2028
+#: zine/views/admin.py:2033
 #, python-format
 msgid "A file with the filename %s exists already."
 msgstr "Eine Datei mit den Namen %s existiert bereits."
 
-#: zine/views/admin.py:2036
+#: zine/views/admin.py:2041
 #, python-format
 msgid "File %s uploaded successfully."
 msgstr "Datei %s wurde erfolgreich hochgeladen."
 
-#: zine/views/admin.py:2042 zine/views/admin.py:2120
+#: zine/views/admin.py:2047 zine/views/admin.py:2125
 #, python-format
 msgid "Could not write file %s."
 msgstr "Konnte Datei %s nicht schreiben."
 
-#: zine/views/admin.py:2068
+#: zine/views/admin.py:2073
 #, python-format
 msgid ""
 "If you don't have ImageMagick installed system wide but in a different "
@@ -3599,7 +3599,7 @@ msgstr ""
 "Wenn du ImageMagick nicht systemweit installiert hast, kannst du den Pfad"
 " in der <a href=\"%(config)s\">Konfiguration</a> angeben."
 
-#: zine/views/admin.py:2072
+#: zine/views/admin.py:2077
 #, python-format
 msgid ""
 "There is no ImageMagick in the path defined installed. (<a "
@@ -3608,93 +3608,93 @@ msgstr ""
 "In dem angegebenen Pfad wurde ImageMagick nicht gefunden. (<a "
 "href\"%(config)s\">überprüfe die Konfiguration</a>)"
 
-#: zine/views/admin.py:2075
+#: zine/views/admin.py:2080
 #, python-format
 msgid "Cannot find <a href=\"%(im)s\">ImageMagick</a>."
 msgstr "Konnte <a href=\"%(im)s\">ImageMagick</a> nicht finden."
 
-#: zine/views/admin.py:2086
+#: zine/views/admin.py:2091
 msgid "You have to specify a source image"
 msgstr "Du musst ein Quellbild angeben"
 
-#: zine/views/admin.py:2091
+#: zine/views/admin.py:2096
 #, python-format
 msgid "The image %s does not exist."
 msgstr "Das Bild %s existiert nicht."
 
-#: zine/views/admin.py:2096
+#: zine/views/admin.py:2101
 msgid "You have to define at least the width of the thumbnail."
 msgstr "Du musst zumindest die Breite des Vorschaubilds angeben."
 
-#: zine/views/admin.py:2100
+#: zine/views/admin.py:2105
 msgid "Thumbnail dimensions must be integers."
 msgstr "Die Abmessungen des Vorschaubildes müssen Zahlen sein."
 
-#: zine/views/admin.py:2106
+#: zine/views/admin.py:2111
 msgid "You have to specify a filename for the thumbnail."
 msgstr "Du musst einen Dateinamen für das Vorschaubild angeben."
 
-#: zine/views/admin.py:2109
+#: zine/views/admin.py:2114
 msgid "Invalid filename for thumbnail."
 msgstr "Ungültiger Dateiname für Vorschaubild."
 
-#: zine/views/admin.py:2111
+#: zine/views/admin.py:2116
 msgid "An file with this name exists already."
 msgstr "Eine Datei mit diesem Namen existiert bereits."
 
-#: zine/views/admin.py:2129
+#: zine/views/admin.py:2134
 #, python-format
 msgid "Thumbnail %s was created successfully."
 msgstr "Das Vorschaubild %s wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:2171
+#: zine/views/admin.py:2176
 msgid "Upload folder changed successfully."
 msgstr "Der Ordner für Hochgeladene Dateien wurde erfolgreich erstellt."
 
-#: zine/views/admin.py:2173
+#: zine/views/admin.py:2178
 msgid "Upload folder could not be changed."
 msgstr "Der Ordner für Hochgeladene Dateien konnte nicht geändert werden."
 
-#: zine/views/admin.py:2178
+#: zine/views/admin.py:2183
 msgid "Changed path to ImageMagick"
 msgstr "Pfad zu ImageMagick wurde geändert"
 
-#: zine/views/admin.py:2180
+#: zine/views/admin.py:2185
 msgid "ImageMagick is searched on the system path now."
 msgstr "ImageMagick wird nun systemweit gesucht."
 
-#: zine/views/admin.py:2182
+#: zine/views/admin.py:2187
 msgid "Path to ImageMagick could not be changed."
 msgstr "Der Pfad zu ImageMagick konnte nicht geändert werden."
 
-#: zine/views/admin.py:2187
+#: zine/views/admin.py:2192
 msgid "Upload mimetype mapping altered successfully."
 msgstr "Mimetype-Verknüpfungen für hochgeladene Dateien wurde geändert."
 
-#: zine/views/admin.py:2189
+#: zine/views/admin.py:2194
 msgid "Upload mimetype mapping could not be altered."
 msgstr "Mimetype-Verknüpfungen konnte nicht geändert werden."
 
-#: zine/views/admin.py:2215
+#: zine/views/admin.py:2220
 #, python-format
 msgid "Could not delete file %s."
 msgstr "Konnte Datei %s nicht löschen."
 
-#: zine/views/admin.py:2218
+#: zine/views/admin.py:2223
 #, python-format
 msgid "File %s deleted successfully."
 msgstr "Datei %s wurde erfolgreich gelöscht."
 
-#: zine/views/admin.py:2265
+#: zine/views/admin.py:2270
 #, python-format
 msgid "User %s does not exist."
 msgstr "Benutzer %s existiert nicht."
 
-#: zine/views/admin.py:2270
+#: zine/views/admin.py:2275
 msgid "Incorrect password."
 msgstr "Falsches Passwort"
 
-#: zine/views/admin.py:2272
+#: zine/views/admin.py:2277
 msgid "You have to enter a username."
 msgstr "Du musst einen Benutzernamen angeben."
 
@@ -3953,7 +3953,7 @@ msgid ""
 msgstr ""
 "\n"
 "    Willkommen zur Zine Installation.  Dieser Assistent wird\n"
-"    dir ein paar einfache Fragen stellen und TextPress für dich\n"
+"    dir ein paar einfache Fragen stellen und Zine für dich\n"
 "    konfigurieren.\n"
 "  "
 

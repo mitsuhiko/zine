@@ -1,5 +1,9 @@
-{% extends "admin/layout.html" %}
-{% block title %}{{ _("About The System") }}{% endblock %}
+{% if not export %}{% extends "admin/layout.html" %}{% endif -%}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
+<title>{% block title %}{{ _("About The System") }}{% endblock %}</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<body>
 {% block contents %}
   <h1>{{ _("About The System") }}</h1>
   <h2>{{ _('Zine Environment') }}</h2>
@@ -25,6 +29,8 @@
   <dl>
     <dt>{{ _('Python Version') }}</dt>
     <dd>{{ python_version }}</dd>
+    <dt>{{ _('Platform') }}</dt>
+    <dd>{{ platform|e }}</dd>
     <dt>{{ _('Persistent Environment') }}</dt>
     <dd>{{ _('yes') if hosting_env.persistent else _('no') }}</dd>
     <dt>{{ _('Multithreaded') }}</dt>
@@ -96,8 +102,8 @@
   {%- for item in configuration %}
     <tr>
       <td><strong>{{ item.key|e }}</strong></td>
-      <td>{{ item.value|pprint|e }}</td>
-      <td><small>{{ item.default|pprint|e }}</small></td>
+      <td>{{ item.value|e }}</td>
+      <td><small>{{ item.default|e }}</small></td>
     </tr>
   {%- endfor %}
   </table>
@@ -113,4 +119,18 @@
     <li><strong>{{ filter_|e }}</strong></li>
   {%- endfor %}
   </ul>
+  {%- if not export %}
+  <div class="text">{% trans %}
+    You can export this list and share it for troubleshooting by clicking
+    on the button below.  The resulting file is stripped of confidental
+    information such as passwords.
+  {% endtrans %}</div>
+  <form action="" method="get">
+    <div class="actions">
+      <input type="hidden" name="do" value="export">
+      <input type="submit" value="{{ _('Export')|e }}">
+    </div>
+  </form>
+  {%- endif %}
 {% endblock %}
+</body>

@@ -20,16 +20,17 @@ TEMPLATE_FILES = join(dirname(__file__), 'templates')
 SHARED_FILES = join(dirname(__file__), 'shared')
 
 
-variations = [
-    ('vessel_theme::blue.css', _('Blue')),
-    ('vessel_theme::gray.css', _('Gray')),
-    ('vessel_theme::green.css', _('Green'))
-]
+blue_variation = 'vessel_theme::blue.css'
+variations = {
+    blue_variation:             _('Blue'),
+    'vessel_theme::gray.css':   _('Gray'),
+    'vessel_theme::green.css':  _('Green')
+}
 
 
 def add_variation(spec, title):
     """Registers a new variation."""
-    variations.append((spec, title))
+    variations[spec] = title
 
 
 def configure(request):
@@ -50,7 +51,7 @@ def configure(request):
     return render_admin_response('admin/configure_vessel_theme.html',
                                  'options.theme',
                                  current=cfg['vessel_theme/variation'],
-                                 variations=sorted(variations,
+                                 variations=sorted(variations.items(),
                                                    key=lambda x: x[1].lower()),
                                  csrf_protector=csrf_protector)
 
@@ -59,4 +60,4 @@ def setup(app, plugin):
     app.add_theme('vessel', TEMPLATE_FILES, plugin.metadata,
                   configuration_page=configure)
     app.add_shared_exports('vessel_theme', SHARED_FILES)
-    app.add_config_var('vessel_theme/variation', unicode, variations[0][0])
+    app.add_config_var('vessel_theme/variation', unicode, blue_variation)

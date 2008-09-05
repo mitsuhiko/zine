@@ -14,6 +14,7 @@
 import os
 from os import path
 from threading import Lock
+
 from zine.i18n import lazy_gettext
 
 
@@ -92,6 +93,9 @@ DEFAULT_VARS = {
     # importer settings
     'blogger_auth_token':       (unicode, u'')
 }
+
+HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',
+                   'smtp_password'))
 
 #: header for the config file
 CONFIG_HEADER = '''\
@@ -316,6 +320,44 @@ class Configuration(object):
             'name':     key
         } for key, children in sorted(categories.items(), key=sort_func)]
 
+    def get_public_list(self, hide_insecure=False):
+        """Return a list of publicly available information about the
+        configuration.  This list is save to share because dangerous keys
+        are either hidden or cloaked.
+        """
+        from zine.application import emit_event
+        from zine.database import secure_database_uri
+        result = []
+        for key, (_, default) in self.config_vars.iteritems():
+            value = self[key]
+            if hide_insecure:
+                if key in HIDDEN_KEYS:
+                    value = '****'
+                elif key == 'database_uri':
+                    value = repr(secure_database_uri(value))
+                else:
+                    #! this event is emitted if the application wants to
+                    #! display a configuration value in a publicly.  The
+                    #! return value of the listener is used as new value.
+                    #! A listener should return None if the return value
+                    #! is not used.
+                    for rv in emit_event('cloak-insecure-configuration-var',
+                                         key, value):
+                        if rv is not None:
+                            value = rv
+                            break
+                    else:
+                        value = repr(value)
+            else:
+                value = repr(value)
+            result.append({
+                'key':          key,
+                'default':      repr(default),
+                'value':        value
+            })
+        result.sort(key=lambda x: x['key'].lower())
+        return result
+
     def __len__(self):
         return len(self.config_vars)
 
@@ -354,11 +396,8 @@ class ConfigTransaction(object):
             raise KeyError(key)
         if isinstance(value, str):
             value = value.decode('utf-8')
-        if value == self.cfg.config_vars[key][1]:
-            self._remove.append(key)
-        else:
-            self._values[key] = unicode(value)
-            self._converted_values[key] = value
+        self._values[key] = unicode(value)
+        self._converted_values[key] = value
 
     def _assert_uncommitted(self):
         if self._committed:

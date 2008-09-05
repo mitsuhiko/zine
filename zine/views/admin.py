@@ -26,7 +26,7 @@ from zine.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from zine.database import comments as comment_table, posts, \
-     post_tags, post_links
+     post_tags, post_links, secure_database_uri
 from zine.utils import dump_json, load_json
 from zine.utils.validators import is_valid_email, is_valid_url
 from zine.utils.admin import flash, gen_slug, commit_config_change
@@ -1728,14 +1728,18 @@ def do_information(request):
     installation occour it's a good idea to dump this page and attach it to
     a bug report mail.
     """
+    from platform import platform
     from sys import version as python_version
     from threading import activeCount
     from jinja2.defaults import DEFAULT_NAMESPACE, DEFAULT_FILTERS
     from zine import environment, __version__ as zine_version
 
-    thread_count = activeCount()
+    export = request.args.get('do') == 'export'
+    database_uri = request.app.cfg['database_uri']
+    if export:
+        database_uri = secure_database_uri(database_uri)
 
-    return render_admin_response('admin/information.html', 'system.information',
+    response = render_admin_response('admin/information.html', 'system.information',
         apis=[{
             'name':         name,
             'blog_id':      blog_id,
@@ -1747,15 +1751,11 @@ def do_information(request):
             'rule':         unicode(rule)
         } for rule in sorted(request.app.url_map._rules, key=lambda x: x.endpoint)],
         servicepoints=sorted(request.app._services.keys()),
-        configuration=[{
-            'key':          key,
-            'default':      default,
-            'value':        request.app.cfg[key]
-        } for key, (_, default) in sorted(request.app.cfg.config_vars.iteritems())],
+        configuration=request.app.cfg.get_public_list(export),
         hosting_env={
             'persistent':       not request.is_run_once,
             'multithreaded':    request.is_multithread,
-            'thread_count':     thread_count,
+            'thread_count':     activeCount(),
             'multiprocess':     request.is_multiprocess,
             'wsgi_version':     '.'.join(map(str, request.environ['wsgi.version']))
         },
@@ -1770,8 +1770,16 @@ def do_information(request):
                           sorted(request.app.template_env.filters.items())
                           if name not in DEFAULT_FILTERS],
         instance_path=request.app.instance_folder,
-        database_uri=request.app.cfg['database_uri']
+        database_uri=database_uri,
+        platform=platform(),
+        export=export
     )
+
+    if export:
+        response.headers['Content-Disposition'] = 'attachment; ' \
+            'filename="textpress-environment.html"'
+
+    return response
 
 
 @require_role(ROLE_AUTHOR)

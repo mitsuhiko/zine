@@ -1,0 +1,58 @@
+body {
+    background-color: #F8FCFD;
+    color: #222e4b;
+}
+
+a {
+    color: #316182;
+}
+
+a:hover {
+    color: #588DA2;
+}
+
+div.header {
+    background: #EBF2FA;
+    border-bottom-color: #BECDBC;
+}
+
+div.header p.description {
+    color: #0D3241;
+}
+
+div.page {
+    border-color: #BECDBC;
+}
+
+div.sidebar h3 {
+    color: #222e4b;
+}
+
+h2, h3 a:hover {
+    color: #222e4b;
+}
+
+h3 a:hover {
+    background-color: #F7FAFD;
+}
+
+p.related {
+    background: #F7FAFD;
+    border: 1px solid #B4D2E7;
+}
+
+input, select, textarea {
+    border: 1px solid #B4D2E7;
+}
+
+div.actions input {
+    background-color: #EBF2FA;
+}
+
+div.pagination a, div.pagination strong {
+    border: 1px solid #B4D2E7;
+}
+
+div.pagination a:hover {
+    background-color: #EBF2FA;
+}

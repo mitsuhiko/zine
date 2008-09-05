@@ -4,9 +4,11 @@
 {% block contents %}
   <div class="post">
     <h2>{{ post.title|e }}</h2>
-    <p class="meta">{{ _("written by") }} <a href="{{ url_for(post.author)|e
-      }}">{{ post.author.display_name|e }}</a>, on {{
-      post.pub_date|datetimeformat|e }}.</p>
+    <p class="meta">{% trans author='<a href="%s">%s</a>' %
+      (url_for(post.author), post.author.display_name|e),
+      pub_date=post.pub_date|datetimeformat|e -%}
+        written by {{ author }}, on {{ pub_date }}.
+    {%- endtrans %}</p>
     {% if post.intro %}
       <div class="intro">{{ post.intro }}</div>
     {% endif %}

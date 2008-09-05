@@ -16,6 +16,7 @@
 """
 import re
 import sys
+import urlparse
 from os import path
 from datetime import datetime, timedelta
 from types import ModuleType
@@ -87,6 +88,12 @@ def create_engine(uri, relative_to=None, echo=False):
             info.query.setdefault('charset', 'utf8')
 
     return sqlalchemy.create_engine(info, convert_unicode=True, echo=echo)
+
+
+def secure_database_uri(uri):
+    scheme, netloc, path, params, query, fragment = urlparse.urlparse(uri)
+    netloc = re.sub('([^:]*):([^@]*)@(.*)', r'\1:***@\3', netloc)
+    return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
 
 
 class ManagerExtension(orm.MapperExtension):

@@ -184,3 +184,13 @@ ul.sub_comments, ol.sub_comments {
     margin: 0.5em 0 0.5em 0;
     padding: 0 0 0 1.5em;
 }
+
+div.pagination {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+div.pagination span.disabled {
+    color: #444;
+}

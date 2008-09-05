@@ -58,6 +58,7 @@ DEFAULT_THEME_SETTINGS = {
     'pagination.next_link':         False,
     'pagination.gray_prev_link':    True,
     'pagination.gray_next_link':    True,
+    'pagination.simple':            False,
 
     # datetime formatting settings
     'date.date_format.default':     'medium',
