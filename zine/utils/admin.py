@@ -72,7 +72,7 @@ def load_zine_reddit():
     try:
         if _reddit_cache[0] is None or \
            _reddit_cache[1] < time() - 3600:
-            reddit_url = 'http://www.reddit.com/r/programming'
+            reddit_url = 'http://www.reddit.com/r/zine'
             try:
                 f = urllib.urlopen(reddit_url + '.json')
                 data = load_json(f.read())
