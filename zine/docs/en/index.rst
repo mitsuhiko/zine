@@ -1,7 +1,7 @@
-TextPress Help
-==============
+Zine Help
+=========
 
-Welcome to the TextPress help.
+Welcome to the Zine help.
 
 Tutorials
 ---------

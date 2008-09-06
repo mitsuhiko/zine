@@ -1,9 +1,9 @@
-Introduction to TextPress
-=========================
+Introduction to Zine
+====================
 
-TextPress is a content publishing platform with the focus on extensibility
+Zine is a content publishing platform with the focus on extensibility
 and a user friendly interface.  This chapter of the help gives you a basic
-introduction to TextPress.
+introduction to Zine.
 
 Creating your First Post
 ------------------------

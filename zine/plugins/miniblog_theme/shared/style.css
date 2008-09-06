@@ -124,6 +124,15 @@ p.meta {
     font-size: 0.85em;
 }
 
+#comments li.comment div.blocked {
+    background: #E9F3F8;
+    opacity: 0.5;
+}
+
+#comments li.comment div.blocked:hover {
+    opacity: 0.8;
+}
+
 p.related {
     font-size: 0.85em;
     margin: 1.5em 0 0 0;

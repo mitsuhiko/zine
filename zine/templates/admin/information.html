@@ -3,8 +3,20 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <title>{% block title %}{{ _("About The System") }}{% endblock %}</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+  body { font-family: monospace; margin: 0; padding: 20px; }
+  ul.plugin-table { list-style: none; padding: 0; }
+  ul.plugin-table li dl { margin-left: 20px; }
+  h1, h2 { color: white; font-family: 'Trebuchet MS', sans-serif; }
+  h1 { background: #222e4b; margin: -20px; padding: 20px; }
+  h2 { background: #316182; margin: 20px -20px 10px -20px; padding: 5px 20px; }
+  dl dt { font-weight: bold; }
+  table { border-collapse: collapse; width: 100%; }
+  table th, table td { padding: 2px; }
+  table th { text-align: left; border-bottom: 1px solid black; }
+</style>
 <body>
-{% block contents %}
+{%- block contents %}
   <h1>{{ _("About The System") }}</h1>
   <h2>{{ _('Zine Environment') }}</h2>
   <dl>
@@ -132,5 +144,5 @@
     </div>
   </form>
   {%- endif %}
-{% endblock %}
+{% endblock -%}
 </body>

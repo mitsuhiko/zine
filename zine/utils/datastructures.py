@@ -14,10 +14,15 @@ class ReadOnlyMultiMapping(object):
     """Provides a read only view to multiple mappings."""
 
     def __init__(self, *mappings):
-        self._mappings = mappings
+        self.__dict__['mappings'] = mappings
+
+    @property
+    def mappings(self):
+        """The tuple of mappings this multi mapping looks up."""
+        return self.__dict__['mappings']
 
     def __getitem__(self, name):
-        for mapping in self._mappings:
+        for mapping in self.mappings:
             if name in mapping:
                 return mapping[name]
         raise KeyError(name)
@@ -54,6 +59,6 @@ class ReadOnlyMultiMapping(object):
 
     def as_dict(self):
         result = {}
-        for mapping in self._mappings:
+        for mapping in reversed(self.mappings):
             result.update(mapping)
         return result

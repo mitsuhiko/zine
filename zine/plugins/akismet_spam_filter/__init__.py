@@ -208,7 +208,7 @@ class AkismetBlockedCommentsCounterWidget(Widget):
 
 def setup(app, plugin):
     app.add_config_var('akismet_spam_filter/apikey', unicode, u'')
-    app.add_url_rule('/comments/akismet', prefix='admin',
+    app.add_url_rule('/options/akismet', prefix='admin',
                      endpoint='akismet_spam_filter/config',
                      view=show_akismet_config)
     app.connect_event('before-comment-saved', do_spamcheck)

@@ -147,6 +147,15 @@ ul#comments, ol#comments {
     padding: 0;
 }
 
+#comments li.comment div.blocked {
+    background: #eee;
+    opacity: 0.5;
+}
+
+#comments li.comment div.blocked:hover {
+    opacity: 0.8;
+}
+
 ul.sub_comments, ol.sub_comments {
     list-style: none;
     margin: 0.5em 0 0.5em 0;

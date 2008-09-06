@@ -255,7 +255,7 @@ def do_show_post(request, year, month, day, slug):
             author = request.user
             email = www = None
         form['body'] = body = request.form.get('body')
-        if not body or len(body) < 10:
+        if not body or len(body) < 2:
             errors.append(_('Your comment is too short.'))
         elif len(body) > 6000:
             errors.append(_('Your comment is too long.'))

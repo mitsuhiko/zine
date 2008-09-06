@@ -84,7 +84,6 @@ def make_urls(app):
         Rule('/options/plugins/', endpoint='admin/plugins'),
         Rule('/options/plugins/<plugin>/remove', endpoint='admin/remove_plugin'),
         Rule('/options/cache', endpoint='admin/cache'),
-        Rule('/options/configuration', endpoint='admin/configuration'),
         Rule('/system/', endpoint='admin/information'),
         Rule('/system/maintenance/', endpoint='admin/maintenance'),
         Rule('/system/import/', endpoint='admin/import'),
@@ -94,6 +93,7 @@ def make_urls(app):
         Rule('/system/about', endpoint='admin/about_zine'),
         Rule('/system/help/', endpoint='admin/help'),
         Rule('/system/help/<path:page>', endpoint='admin/help'),
+        Rule('/system/configuration', endpoint='admin/configuration'),
         Rule('/change_password', endpoint='admin/change_password')
     ]
     other_urls = [

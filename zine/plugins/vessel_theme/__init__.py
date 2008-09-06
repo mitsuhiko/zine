@@ -20,11 +20,11 @@ TEMPLATE_FILES = join(dirname(__file__), 'templates')
 SHARED_FILES = join(dirname(__file__), 'shared')
 
 
-blue_variation = 'vessel_theme::blue.css'
+blue_variation = u'vessel_theme::blue.css'
 variations = {
     blue_variation:             _('Blue'),
-    'vessel_theme::gray.css':   _('Gray'),
-    'vessel_theme::green.css':  _('Green')
+    u'vessel_theme::gray.css':  _('Gray'),
+    u'vessel_theme::green.css': _('Green')
 }
 
 

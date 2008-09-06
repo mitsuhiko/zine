@@ -18,4 +18,4 @@ SHARED_FILES = join(dirname(__file__), 'shared')
 
 def setup(app, plugin):
     app.add_shared_exports('dark_vessel_colorscheme', SHARED_FILES)
-    vessel_theme.add_variation('dark_vessel_colorscheme::dark.css', _('Dark'))
+    vessel_theme.add_variation(u'dark_vessel_colorscheme::dark.css', _('Dark'))
