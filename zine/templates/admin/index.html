@@ -71,10 +71,14 @@
       </ul>
       {% endif %}
     </div>
-    <div class="planet">
-      <h2>{{ _('Planet Zine') }}</h2>
+    <div class="reddit">
+      <h2>{{ _('Zine at Reddit') }}</h2>
+      <p>{% trans reddit='<a href="http://www.reddit.com/r/zine/">reddit</a>' %}
+        Zine is present at {{ reddit }}.  The latest popular items in the Zine
+        subreddit are listed below:
+        {% endtrans %}
       <script type="text/javascript">
-        $('div.planet').append($('<div>').load('?load=planet'));
+        $('div.reddit').append($('<div>').load('?load=reddit'));
       </script>
     </div>
   </div>

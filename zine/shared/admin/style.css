@@ -450,8 +450,48 @@ div.dashboard div.links {
     width: 55%;
 }
 
-div.dashboard div.planet {
+div.dashboard div.reddit {
     clear: both;
+}
+
+div.dashboard div.reddit div.table {
+    width: 100%;
+    margin: 5px 0 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+div.dashboard div.reddit div.table div.item {
+    float: left;
+    width: 200px;
+    height: 120px;
+    font-size: 13px;
+    margin: 10px 10px 0 0;
+    padding: 10px 10px 0 10px;
+    overflow: auto;
+    border: 1px solid #AAC6E2;
+    background-color: #EFF7FF;
+}
+
+div.dashboard div.reddit div.table div.item p.meta {
+    margin: 0;
+    padding: 10px 0 10px 10px;
+    font-size: 12px;
+    text-align: right;
+    color: #3E71A5;
+}
+
+div.dashboard div.reddit div.table div.item p.meta a {
+    color: #325980;
+}
+
+div.dashboard div.reddit div.table div.item p.meta em {
+    font-style: normal;
+    text-transform: uppercase;
+}
+
+div.dashboard div.reddit a {
+    color: #102F4E;
 }
 
 div.dashboard h1 {

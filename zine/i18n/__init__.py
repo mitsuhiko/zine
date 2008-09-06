@@ -53,7 +53,6 @@
     :license: GNU GPL.
 """
 import os
-import simplejson
 import cPickle as pickle
 from gettext import c2py
 from datetime import datetime
@@ -67,6 +66,7 @@ from werkzeug.exceptions import NotFound
 
 import zine.application
 from zine.environment import LOCALE_PATH
+from zine.utils import dump_json
 
 
 __all__ = ['_', 'gettext', 'ngettext', 'lazy_gettext', 'lazy_ngettext']
@@ -503,7 +503,7 @@ def serve_javascript(request):
     code = _js_translations.get(request.app)
     if code is None:
         t = request.app.translations
-        code = 'Zine.addTranslations(%s)' % simplejson.dumps(dict(
+        code = 'Zine.addTranslations(%s)' % dump_json(dict(
             messages=dict((k, t.messages[k]) for k in t.client_keys),
             plural_expr=t.plural_expr,
             locale=str(t.locale)

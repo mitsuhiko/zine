@@ -10,7 +10,11 @@
 import os
 from urlparse import urlparse
 
-from simplejson import dumps as dump_json, loads as load_json
+try:
+    from simplejson import dumps as dump_json, loads as load_json
+except ImportError:
+    from json import dumps as dump_json, loads as load_json
+
 from werkzeug import url_quote, Local, LocalManager, ClosingIterator
 
 from zine.i18n import _

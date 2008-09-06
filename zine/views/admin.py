@@ -20,6 +20,11 @@
 from datetime import datetime
 from os import remove, sep as pathsep
 from os.path import exists
+from urlparse import urlparse
+
+from werkzeug import escape
+from werkzeug.exceptions import NotFound, BadRequest
+
 from zine.api import *
 from zine.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
@@ -29,7 +34,8 @@ from zine.database import comments as comment_table, posts, \
      post_tags, post_links, secure_database_uri
 from zine.utils import dump_json, load_json
 from zine.utils.validators import is_valid_email, is_valid_url
-from zine.utils.admin import flash, gen_slug, commit_config_change
+from zine.utils.admin import flash, gen_slug, commit_config_change, \
+     load_zine_reddit
 from zine.utils.pagination import AdminPagination
 from zine.utils.xxx import make_hidden_fields, CSRFProtector, \
      IntelligentRedirect, StreamReporter
@@ -44,9 +50,6 @@ from zine.importers import list_import_queue, load_import_dump, \
 from zine.pluginsystem import install_package, InstallationError, \
      SetupError
 from zine.pingback import pingback, PingbackError
-from urlparse import urlparse
-from werkzeug import escape
-from werkzeug.exceptions import NotFound, BadRequest
 
 
 #: how many posts / comments should be displayed per page?
@@ -230,10 +233,10 @@ def do_index(request):
     such as "new post", etc. and the recent blog activity (unmoderated
     comments etc.)
     """
-    # the template loads the planet with a separate http request via
+    # the template loads the reddit with a separate http request via
     # javascript to not slow down the page loading
-    if request.args.get('load') == 'planet':
-        return Response('<p>XXX: not supported yet :-(</p>')
+    if request.args.get('load') == 'reddit':
+        return render_response('admin/reddit.html', items=load_zine_reddit())
 
     return render_admin_response('admin/index.html', 'dashboard',
         drafts=Post.objects.drafts().all(),

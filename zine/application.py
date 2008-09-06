@@ -35,7 +35,7 @@ from zine.environment import SHARED_DATA, BUILTIN_TEMPLATE_PATH, \
 from zine.database import db, cleanup_session
 from zine.config import Configuration
 from zine.cache import get_cache
-from zine.utils import ClosingIterator, local, local_manager
+from zine.utils import ClosingIterator, local, local_manager, dump_json
 from zine.utils.validators import check_external_url
 from zine.utils.mail import split_email
 from zine.utils.datastructures import ReadOnlyMultiMapping
@@ -730,7 +730,7 @@ class Zine(object):
         )
 
         env.filters.update(
-            json=__import__('simplejson').dumps,
+            json=dump_json,
             datetimeformat=self.theme.format_datetime,
             dateformat=self.theme.format_date,
             monthformat=i18n.format_month
