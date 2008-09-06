@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# TextPress documentation build configuration file, created by
+# Zine documentation build configuration file, created by
 # sphinx-quickstart on Sat Jun 28 21:39:52 2008.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -24,7 +24,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'textpressext']
+extensions = ['sphinx.ext.autodoc', 'zineext']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -36,7 +36,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General substitutions.
-project = 'TextPress'
+project = 'Zine'
 copyright = '2008, Armin Ronacher'
 
 # The default replacements for |version| and |release|, also used in various
@@ -143,7 +143,7 @@ html_use_modindex = False
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'TextPressdoc'
+htmlhelp_basename = 'Zinedoc'
 
 
 # Options for LaTeX output
@@ -158,7 +158,7 @@ htmlhelp_basename = 'TextPressdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'TextPress.tex', 'TextPress Documentation', 'Armin Ronacher', 'manual'),
+  ('index', 'Zine.tex', 'Zine Documentation', 'Armin Ronacher', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -179,4 +179,4 @@ latex_documents = [
 #latex_use_modindex = True
 
 # use jinja2 for templates
-template_bridge = 'textpressext.Jinja2Bridge'
+template_bridge = 'zineext.Jinja2Bridge'

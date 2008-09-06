@@ -25,7 +25,7 @@ help:
 
 clean:
 	-rm -rf _build/*
-	-rm -rf ../textpress/docs/*
+	-rm -rf ../zine/docs/*
 
 html:
 	mkdir -p _build/html _build/doctrees

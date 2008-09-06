@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    TextPress Documentation Extensions
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Zine Documentation Extensions
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Support for automatically documenting filters and tests.
 
