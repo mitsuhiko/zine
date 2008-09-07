@@ -14,7 +14,6 @@ import unicodedata
 from time import time
 from itertools import islice
 from datetime import datetime
-from threading import Lock
 
 from werkzeug import url_quote
 
@@ -22,8 +21,6 @@ from zine.utils import _, local, load_json
 
 
 _punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|}]+')
-_reddit_lock = Lock()
-_reddit_cache = (None, 0)
 
 _tagify_replacement_table = {
     u'\xdf': 'ss',
@@ -66,38 +63,30 @@ def gen_slug(text, delim='-'):
 
 def load_zine_reddit():
     """Load the zine reddit."""
-    global _reddit_cache
     import urllib
-    _reddit_lock.acquire()
+    reddit_url = 'http://www.reddit.com/r/zine'
     try:
-        if _reddit_cache[0] is None or \
-           _reddit_cache[1] < time() - 3600:
-            reddit_url = 'http://www.reddit.com/r/zine'
-            try:
-                f = urllib.urlopen(reddit_url + '.json')
-                data = load_json(f.read())
-            finally:
-                f.close()
-
-            result = []
-            for item in islice(data['data']['children'], 20):
-                d = item['data']
-                result.append({
-                    'author':       d['author'],
-                    'created':      datetime.utcfromtimestamp(d['created']),
-                    'score':        d['score'],
-                    'title':        d['title'],
-                    'comments':     d['num_comments'],
-                    'url':          d['url'],
-                    'domain':       d['domain'],
-                    'author_url':   'http://www.reddit.com/user/%s/' %
-                                    url_quote(d['author']),
-                    'comment_url':  '%s/comments/%s' % (reddit_url, d['id'])
-                })
-            _reddit_cache = (result, time())
-        return _reddit_cache[0][:]
+        f = urllib.urlopen(reddit_url + '.json')
+        data = load_json(f.read())
     finally:
-        _reddit_lock.release()
+        f.close()
+
+    result = []
+    for item in islice(data['data']['children'], 20):
+        d = item['data']
+        result.append({
+            'author':       d['author'],
+            'created':      datetime.utcfromtimestamp(d['created']),
+            'score':        d['score'],
+            'title':        d['title'],
+            'comments':     d['num_comments'],
+            'url':          d['url'],
+            'domain':       d['domain'],
+            'author_url':   'http://www.reddit.com/user/%s/' %
+                            url_quote(d['author']),
+            'comment_url':  '%s/comments/%s' % (reddit_url, d['id'])
+        })
+    return result
 
 
 def commit_config_change(t):
