@@ -1,0 +1,21 @@
+{%- if items %}
+  <div class="table">
+  {%- for item in items %}
+    <div class="item">
+      <a class="title" href="{{ item.url|e }}">{{ item.title|e }}</a>
+      <p class="meta">
+      {% trans
+        author = '<a href="%s">%s</a>' % (item.author_url|e, item.author|e),
+        domain = item.domain|e,
+        submitted = item.created|datetimeformat('short'),
+        comments = '<a href="%s">%s</a>' % (
+          item.comment_url, ngettext('%d comment', '%d comments', item.comments)
+          % item.comments)
+      %}from <em>{{ domain }}</em>, submitted by {{ author }} @ {{
+        submitted }}, {{ comments }}{% endtrans %}</div>
+  {%- endfor %}
+    <div style="clear: both"></div>
+  </div>
+{%- else %}
+  <em>{{ _('No items on the frontpage') }}</em>
+{%- endif %}
