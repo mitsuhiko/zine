@@ -35,7 +35,8 @@ from zine.environment import SHARED_DATA, BUILTIN_TEMPLATE_PATH, \
 from zine.database import db, cleanup_session
 from zine.config import Configuration
 from zine.cache import get_cache
-from zine.utils import ClosingIterator, local, local_manager, dump_json
+from zine.utils import ClosingIterator, local, local_manager, dump_json, \
+     htmlhelpers
 from zine.utils.validators import check_external_url
 from zine.utils.mail import split_email
 from zine.utils.datastructures import ReadOnlyMultiMapping
@@ -709,7 +710,7 @@ class Zine(object):
         self.theme = self.themes[theme]
 
         # init the template system with the core stuff
-        from zine import htmlhelpers, models
+        from zine import models
         env = Environment(loader=ThemeLoader(self),
                           extensions=['jinja2.ext.i18n'])
         env.globals.update(
@@ -1046,17 +1047,16 @@ class Zine(object):
         called by the layout template to get the metadata for the head section.
         """
         from zine.models import ROLE_ADMIN
-        from zine.htmlhelpers import script, meta, link
         from zine.utils import dump_json
-        generators = {'script': script, 'meta': meta, 'link': link,
-                      'snippet': lambda html: html}
+        generators = {'script': htmlhelpers.script, 'meta': htmlhelpers.meta,
+                      'link': htmlhelpers.link, 'snippet': lambda html: html}
         result = [
-            meta(name='generator', content='Zine'),
-            link('EditURI', url_for('blog/service_rsd'),
-                 type='application/rsd+xml', title='RSD'),
-            script(url_for('core/shared', filename='js/jQuery.js')),
-            script(url_for('core/shared', filename='js/Zine.js')),
-            script(url_for('blog/serve_translations'))
+            htmlhelpers.meta(name='generator', content='Zine'),
+            htmlhelpers.link('EditURI', url_for('blog/service_rsd'),
+                             type='application/rsd+xml', title='RSD'),
+            htmlhelpers.script(url_for('core/shared', filename='js/jQuery.js')),
+            htmlhelpers.script(url_for('core/shared', filename='js/Zine.js')),
+            htmlhelpers.script(url_for('blog/serve_translations'))
         ]
 
         # the url information.  Only expose the admin url for admin users

@@ -61,7 +61,7 @@ from xml.sax.saxutils import quoteattr, escape
 from zine.application import iter_listeners
 
 
-#: list of self closing html tags for *rendering*
+#: list of self closing html tags
 SELF_CLOSING_TAGS = ['br', 'img', 'area', 'hr', 'param', 'meta',
                      'link', 'base', 'input', 'embed', 'col']
 

@@ -439,8 +439,8 @@ def parse_datetime(string, rebase=True):
         """Helper that parses the string and convers the timezone."""
         rv = datetime(*strptime(string, format)[:7])
         if rebase:
-            return to_utc(rv)
-        return rv
+            rv = to_utc(rv)
+        return rv.replace(microsecond=0)
     cfg = zine.application.get_application().cfg
 
     # first of all try the following format because this is the format

@@ -1,9 +1,13 @@
 """
-    zine.utils
-    ~~~~~~~~~~
+    zine.utils.validators
+    ~~~~~~~~~~~~~~~~~~~~~
 
     This module implements various functions for validation of miscellaneous
     things, e.g. urls.
+
+    TODO: convert most of the functions in this module into functions that
+          raise `forms.ValidationError`\s.  They are used in hand validated
+          forms currently which should be replaced by real forms soon.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
     :license: GNU GPL.
@@ -14,7 +18,7 @@ from urlparse import urlparse, urljoin, urlsplit
 
 
 def check_external_url(app, url, check=False):
-    """Check if a URl is on the application server."""
+    """Check if a URL is on the application server."""
     blog_url = app.cfg['blog_url']
     check = urljoin(blog_url, url)
 
