@@ -47,7 +47,7 @@ def decode(data):
     result = {}
     lists = []
 
-    for key, value in data.items():
+    for key, value in data.iteritems():
         pos = key.find('[')
         if pos == -1:
             result[key] = value
@@ -91,7 +91,7 @@ def encode(data):
     """
     def _encode(data=data, prefix='', result={}):
         if isinstance(data, dict):
-            for key, value in data.items():
+            for key, value in data.iteritems():
                 if key is None:
                     name = prefix
                 elif not prefix:
@@ -218,7 +218,7 @@ class FormAsField(Mapping):
     """If a form is converted into a field the returned field object is an
     instance of this class.  The behavior is mostly equivalent to a normal
     :class:`Mapping` field with the difference that it as an attribute called
-    :attr:`form` that points to the form it was created from.
+    :attr:`form_class` that points to the form class it was created from.
     """
 
     def __init__(self):
@@ -448,6 +448,13 @@ class FormMeta(type):
     def add_validator(cls, validator):
         cls._converter.add_validator(validator)
 
+    def as_field(cls):
+        """Returns a field object for this form."""
+        field = cls._converter.clone()
+        field.__class__ = FormAsField
+        field.form_class = cls
+        return field
+
 
 class Form(object):
     """Form base class.
@@ -459,9 +466,9 @@ class Form(object):
     >>> form = PersonForm()
     >>> form.validate({'name': 'johnny', 'age': '42'})
     True
-    >>> form['name']
+    >>> form.data['name']
     u'johnny'
-    >>> form['age']
+    >>> form.data['age']
     42
 
     Let's cause a simple validation error:
@@ -512,6 +519,16 @@ class Form(object):
     False
     >>> form.errors
     {None: ['The two passwords don\'t match']}
+
+    Forms can be used as fields for other forms.  To create a form field of
+    a form you can call the `as_field` class method::
+
+    >>> field = RegisterForm.as_field()
+
+    This field can be used like any other field class.  What's important about
+    forms as fields is that validators don't get an instance of `RegisterForm`
+    passed as `form` / `self` but the form where it's used in if the field is
+    used from a form.
     """
     __metaclass__ = FormMeta
 
@@ -522,13 +539,6 @@ class Form(object):
             defaults = {}
         self.defaults = defaults
         self.reset()
-
-    def as_field(self):
-        """Returns a field object for this form."""
-        field = self._converter.clone()
-        field.__class__ = FormAsField
-        field.form = self
-        return field
 
     @property
     def fields(self):
@@ -543,6 +553,7 @@ class Form(object):
         return not self.errors
 
     def validate(self, data):
+        """Validate the form against the data passed."""
         d = self.data.copy()
         d.update(decode(data))
         errors = {}
