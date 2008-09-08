@@ -14,14 +14,16 @@ from os.path import exists
 from time import asctime, gmtime, time
 from datetime import date
 
-from zine.api import *
+from zine import cache, pingback
+from zine.i18n import _
+from zine.application import add_link, url_for, render_response
 from zine.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
     COMMENT_UNMODERATED
 from zine.utils import dump_json, build_tag_uri, ClosingIterator
 from zine.utils.uploads import get_filename, guess_mimetype
 from zine.utils.validators import is_valid_email, is_valid_url
 from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
-from zine import pingback
+from zine.utils.http import redirect_to
 from werkzeug.exceptions import NotFound, Forbidden
 
 
@@ -303,7 +305,7 @@ def do_show_post(request, year, month, day, slug):
             if comment.blocked:
                 comment.make_visible_for_request(request)
 
-            return redirect(url_for(post))
+            return redirect_to(post)
 
     add_link('alternate', post.comment_feed_url, 'application/atom+xml',
              _('Comments Feed'))
@@ -462,7 +464,7 @@ def handle_user_pages(req):
         if not page_key.endswith('/'):
             real_page = Page.objects.filter_by(key=page_key + '/').first()
             if real_page is not None:
-                return redirect(url_for(real_page))
+                return redirect_to(real_page)
         raise NotFound()
     cfg = get_application().cfg
     return render_response(

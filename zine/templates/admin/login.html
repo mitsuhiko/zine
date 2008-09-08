@@ -9,30 +9,27 @@
 <body class="login">
   <div class="login-box">
     <h2><span>{{ _("Login") }}</span></h2>
-    {%- if logged_out %}
-      <div class="notice">{{ _("Successfully logged out") }}</div>
-    {%- elif error %}
-      <div class="error">{{ error|e }}</div>
+    {%- if form.all_errors %}
+      <div class="error">{{ form.all_errors[0]|e }}</div>
     {%- endif %}
-    <form action="{{ url_for('admin/login') }}" method="post">
+    {% call form(action=url_for('admin/login')) %}
       <dl>
         <dt>{{ _("Username") }}</dt>
-        <dd>{{ h.input_field('username', username) }}</dd>
+        <dd>{{ form.user }}</dd>
         <dt>{{ _("Password") }}</dt>
-        <dd>{{ h.input_field('password', '', 'password') }}</dd>
+        <dd>{{ form.password }}</dd>
       </dl>
       <p>
-        {{ h.checkbox('permanent') }}
-        <label for="permanent">{{ _('Remember me') }}</label>
+        {{ form.permanent() }}
+        <label for="f_permanent">{{ _('Remember me') }}</label>
       </p>
       <script type="text/javascript">
         $('input[name="username"]').focus();
       </script>
       <div class="actions">
-        {{ hidden_redirect_field }}
         <input type="submit" value="{{ _('Login') }}">
       </div>
-    </form>
+    {%- endcall %}
   </div>
 </body>
 </html>

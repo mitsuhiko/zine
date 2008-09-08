@@ -10,9 +10,10 @@
     :license: GNU GPL.
 """
 from os.path import join, dirname
-from zine.api import redirect, url_for, _
+from zine.api import url_for, _
 from zine.views.admin import render_admin_response
 from zine.utils.admin import flash
+from zine.utils.http import redirect_to
 from zine.utils.xxx import CSRFProtector
 
 
@@ -47,7 +48,7 @@ def configure(request):
         if 'save' in request.form:
             flash(_('Color variation changed successfully.'), 'configure')
             cfg.change_single('vessel_theme/variation', request.form['variation'])
-        return redirect(url_for('admin/theme'))
+        return redirect_to('admin/theme')
     return render_admin_response('admin/configure_vessel_theme.html',
                                  'options.theme',
                                  current=cfg['vessel_theme/variation'],

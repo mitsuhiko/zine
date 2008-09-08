@@ -24,9 +24,9 @@ from babel import Locale
 from jinja2 import Environment, BaseLoader, TemplateNotFound
 
 from werkzeug import Request as RequestBase, Response as ResponseBase, \
-     SharedDataMiddleware, url_quote, routing, redirect as simple_redirect, \
+     SharedDataMiddleware, url_quote, routing, redirect as _redirect, \
      escape, cached_property
-from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
+from werkzeug.exceptions import HTTPException, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
 
@@ -37,7 +37,6 @@ from zine.config import Configuration
 from zine.cache import get_cache
 from zine.utils import ClosingIterator, local, local_manager, dump_json, \
      htmlhelpers
-from zine.utils.validators import check_external_url
 from zine.utils.mail import split_email
 from zine.utils.datastructures import ReadOnlyMultiMapping
 
@@ -121,22 +120,6 @@ def shared_url(spec):
     """Returns a URL to a shared resource."""
     endpoint, filename = spec.split('::', 1)
     return url_for(endpoint + '/shared', filename=filename)
-
-
-def redirect(url, code=302, allow_external_redirect=False):
-    """Return a redirect response.  Like Werkzeug's redirect but this
-    one checks for external redirects too.  If a redirect to an external
-    target was requested `BadRequest` is raised unless
-    `allow_external_redirect` was explicitly set to `True`.
-    """
-    if not allow_external_redirect:
-        #: check if the url is on the same server
-        #: and make it an external one
-        try:
-            url = check_external_url(local.application, url, True)
-        except ValueError:
-            raise BadRequest()
-    return simple_redirect(url, code)
 
 
 def emit_event(event, *args, **kwargs):
@@ -1151,8 +1134,8 @@ class Zine(object):
                     response = render_response('403.html')
                     response.status_code = 403
                 else:
-                    response = simple_redirect(url_for('admin/login',
-                                                       next=request.path))
+                    response = _redirect(url_for('admin/login',
+                                                 next=request.path))
         except HTTPException, e:
             response = e.get_response(environ)
 

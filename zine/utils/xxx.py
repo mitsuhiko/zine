@@ -22,6 +22,7 @@ from werkzeug.exceptions import Forbidden
 from werkzeug.contrib.reporterstream import BaseReporterStream
 
 from zine.utils import local
+from zine.utils.http import get_redirect_target
 
 
 class HiddenFormField(object):
@@ -107,6 +108,9 @@ class IntelligentRedirect(HiddenFormField):
                 return
 
         return check_target
+
+    def get_redirect_target(self):
+        return get_redirect_target(self.invalid_targets, self.request)
 
     def __call__(self, *args, **kwargs):
         """Trigger the redirect."""

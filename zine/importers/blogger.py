@@ -98,11 +98,12 @@ try:
 except ImportError:
     service = None
 
-from zine.application import redirect, url_for
+from zine.application import url_for
 from zine.importers import Importer, Blog, Label, Author, Post, Comment
 from zine.api import _
 from zine.utils.admin import flash
 from zine.utils.dates import parse_iso8601
+from zine.utils.http import redirect_to
 
 
 GDATA_DOWNLOAD_URL = 'http://code.google.com/p/gdata-python-client/'
@@ -312,7 +313,7 @@ class BloggerImporter(Importer):
                   '<p>Please visit: %(download_link)s</p>') %
                     {'download_link': GDATA_DOWNLOAD_LINK},
                   type='error')
-            return redirect(url_for('admin/import'))
+            return redirect_to('admin/import')
 
         auth_token = self.app.cfg['blogger_auth_token']
         blogger_service = _create_blogger_service()
@@ -325,7 +326,7 @@ class BloggerImporter(Importer):
                 blogger_service.UpgradeToSessionToken()
                 self.app.cfg.change_single('blogger_auth_token',
                                            blogger_service.auth_token)
-                return redirect(url_for('import/blogger'))
+                return redirect_to('import/blogger')
             # We should display the "log in to google"
             proxy_auth_url=get_auth_sub_url(blogger_service)
             return self.render_admin_page('admin/import_blogger.html',
@@ -349,7 +350,7 @@ class BloggerImporter(Importer):
             # Log out of google
             blogger_service.RevokeAuthSubToken()
             self.app.cfg.change_single('blogger_auth_token', '')
-            return redirect(url_for('import/blogger'))
+            return redirect_to('import/blogger')
         else:
             # Perform the import
             blog_id = request.form.get('blog_id')

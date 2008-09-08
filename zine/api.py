@@ -15,8 +15,8 @@ from zine.application import (
     emit_event, iter_listeners,
 
     # Request/Response
-    Response, redirect, get_request, url_for, shared_url, add_link,
-    add_meta, add_script, add_header_snippet,
+    Response, get_request, url_for, shared_url, add_link, add_meta,
+    add_script, add_header_snippet,
 
     # View helpers
     require_role,

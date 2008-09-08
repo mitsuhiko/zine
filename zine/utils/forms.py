@@ -3,23 +3,33 @@
     zine.utils.forms
     ~~~~~~~~~~~~~~~~
 
-    The Zine form handling.
+    This module implements a sophisticated form validation and rendering
+    system that is based on diva with concepts from django newforms and
+    wtforms incorporated.
 
-    License notice: largely based on diva's form handling.
+    It can validate nested structures and works in both ways.  It can also
+    handle intelligent backredirects (via :mod:`zine.utils.http`) and supports
+    basic CSRF protection.
+
+    For usage informations see :class:`Form`
 
     :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Lenz.
     :license: GNU GPL.
 """
 import re
-from copy import copy
 from datetime import datetime
 from unicodedata import normalize
 from itertools import chain
+try:
+    from hashlib import sha1
+except ImportError:
+    from sha import new as sha1
 
 from werkzeug import html
 
-from zine.i18n import gettext, ngettext, parse_datetime, \
-     format_system_datetime
+from zine.application import get_request, url_for
+from zine.i18n import _, ngettext, parse_datetime, format_system_datetime
+from zine.utils.http import get_redirect_target, redirect
 
 
 class DataIntegrityError(ValueError):
@@ -83,6 +93,20 @@ def _decode(data):
         return data
 
     return _convert(result)
+
+
+def _bind(obj, form, memo):
+    """Helper for the field binding.  This is inspired by the way `deepcopy`
+    is implemented.
+    """
+    if memo is None:
+        memo = {}
+    obj_id = id(obj)
+    if obj_id in memo:
+        return memo[obj_id]
+    rv = obj._bind(form, memo)
+    memo[obj_id] = rv
+    return rv
 
 
 def _force_dict(value, silent=False):
@@ -192,9 +216,16 @@ class Widget(object):
 
 class InputWidget(Widget):
     """A widget that is a HTML input field."""
+    hide_value = False
+    type = None
 
     def __call__(self, **attrs):
-        return html.input(name=self.name, value=self.value, type=self.type,
+        value = self.value
+        if self.hide_value:
+            value = u''
+        if 'id' not in attrs:
+            attrs['id'] = 'f_' + self.name
+        return html.input(name=self.name, value=value, type=self.type,
                           **attrs)
 
 
@@ -206,11 +237,32 @@ class TextWidget(InputWidget):
 class PasswordWidget(TextWidget):
     """A widget that holds a password."""
     type = 'password'
+    hide_value = True
 
 
-class CheckboxWidget(InputWidget):
+class CheckboxWidget(Widget):
     """A simple checkbox."""
-    type = 'checkbox'
+
+    def __call__(self, **attrs):
+        if 'id' not in attrs:
+            attrs['id'] = 'f_' + self.name
+        return html.input(name=self.name, type='checkbox',
+                          checked=self.value, **attrs)
+
+
+class SelectBoxWidget(Widget):
+    """A select box."""
+
+    def __call__(self, **attrs):
+        items = []
+        for choice in self._field.choices:
+            if isinstance(choice, tuple):
+                key, value = choice
+            else:
+                key = value = choice
+            items.append(html.option(unicode(value), value=unicode(key),
+                                     selected=key == self.value))
+        return html.select(name=self.name, *items, **attrs)
 
 
 class MappingWidget(Widget):
@@ -245,14 +297,50 @@ class MappingWidget(Widget):
 class FormWidget(MappingWidget):
     """A widget for forms."""
 
-    def __call__(self, action='', method='post', enctype=None, **attrs):
+    def get_hidden_fields(self):
+        """This method is called by the `hidden_fields` property to return
+        a list of (key, value) pairs for the special hidden fields.
+        """
+        fields = []
+        if self._field.form.request is not None:
+            if self._field.form.csrf_protected:
+                fields.append(('_csrf_token', self.csrf_token))
+            if self._field.form.redirect_tracking:
+                target = self.redirect_target
+                if target is not None:
+                    fields.append(('_redirect_target', target))
+        return fields
+
+    @property
+    def hidden_fields(self):
+        """The hidden fields as string."""
+        return u''.join(html.input(type='hidden', name=name, value=value)
+                        for name, value in self.get_hidden_fields())
+
+    @property
+    def csrf_token(self):
+        """Forward the CSRF check token for templates."""
+        return self._field.form.csrf_token
+
+    @property
+    def redirect_target(self):
+        """The redirect target for this form."""
+        return self._field.form.redirect_target
+
+    def __call__(self, action='', method='post', **attrs):
         # support jinja's caller
         caller = attrs.pop('caller', None)
         if caller is not None:
             body = caller()
         else:
-            body = self.as_dl(**attrs)
-        return html.form(body, action=action, method=method, enctype=enctype)
+            body = self.as_dl()
+        hidden = self.hidden_fields
+        if hidden:
+            # if there are hidden fields we put an invisible div around
+            # it.  the HTML standard doesn't allow input fields as direct
+            # childs of a <form> tag...
+            body = '<div style="display: none">%s</div>%s' % (hidden, body)
+        return html.form(body, action=action, method=method, **attrs)
 
 
 class ListWidget(Widget, _HTMLSequence):
@@ -338,24 +426,28 @@ class MultipleValidationErrors(ValidationError):
         return rv
 
 
-class Converter(object):
-    """Internal baseclass for fields."""
+class Field(object):
+    """Abstract field base class."""
 
-    def __init__(self, validators=None):
+    widget = TextWidget
+    form = None
+
+    def __init__(self, validators=None, widget=None):
         if validators is None:
             validators = []
         self.validators = validators
+        if widget is not None:
+            self.widget = widget
 
-    def __call__(self, value, form=None):
-        value = self.convert(value, form)
+    def __call__(self, value):
+        value = self.convert(value)
         for validator in self.validators:
-            validator(form, value)
+            validator(self.form, value)
         return value
 
-    def convert(self, value, form):
+    def convert(self, value):
         """This can be overridden by subclasses and performs the value
-        conversion.  If the converting process is triggered without a form
-        the form parameter will be `None`.
+        conversion.
         """
         return unicode(value)
 
@@ -367,27 +459,26 @@ class Converter(object):
         """
         return _to_string(value)
 
-    def clone(self):
-        """Creates a clone of the converter."""
+    def _bind(self, form, memo):
+        """Method that binds a field to a form."""
+        if self.bound:
+            raise TypeError('%r already bound' % type(obj).__name__)
         rv = object.__new__(self.__class__)
-        for key, value in self.__dict__.iteritems():
-            rv.__dict__[key] = copy(value)
+        rv.__dict__.update(self.__dict__)
+        rv.validators = self.validators[:]
+        rv.form = form
         return rv
 
-    def __copy__(self):
-        return self.clone()
+    @property
+    def bound(self):
+        """True if the form is bound."""
+        return 'form' in self.__dict__
 
-
-class Field(Converter):
-    """Abstract field base class."""
-
-    # set later for all classes
-    widget = TextWidget
-
-    def __init__(self, validators=None, widget=None):
-        Converter.__init__(self, validators)
-        if widget is not None:
-            self.widget = widget
+    def __repr__(self):
+        rv = object.__repr__(self)
+        if self.bound:
+            rv = rv[:-1] + ' [bound]>'
+        return rv
 
 
 class Mapping(Field):
@@ -404,12 +495,13 @@ class Mapping(Field):
         Field.__init__(self)
         self.fields = fields
 
-    def convert(self, value, form):
+    def convert(self, value):
+        value = _force_dict(value)
         errors = {}
         result = {}
         for name, field in self.fields.iteritems():
             try:
-                result[name] = field(value.get(name, u''), form)
+                result[name] = field(value.get(name))
             except ValidationError, e:
                 errors[name] = e
         if errors:
@@ -417,17 +509,34 @@ class Mapping(Field):
         return result
 
     def to_primitive(self, value):
-        # whoops.  that value is not a dict.  We have no idea how to
-        # fall back here, return an empty mapping
-        if not isinstance(value, dict):
-            return {}
+        value = _force_dict(value, silent=True)
         result = {}
         for key, field in self.fields.iteritems():
-            result[key] = field.to_primitive(value.get(name, u''))
+            result[key] = field.to_primitive(value.get(name))
         return result
 
-    def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.fields)
+    def _bind(self, form, memo):
+        rv = Field._bind(self, form, memo)
+        rv.fields = {}
+        for key, field in self.fields.iteritems():
+            rv.fields[key] = _bind(field, form, memo)
+        return rv
+
+
+class FormMapping(Mapping):
+    """Like a mapping but does csrf protection and stuff."""
+
+    widget = FormWidget
+
+    def convert(self, value):
+        if self.form is None:
+            raise TypeError('form mapping without form passed is unable '
+                            'to convert data')
+        if self.form.csrf_protected and self.form.request is not None:
+            token = self.form.request.values.get('_csrf_token')
+            if token != self.form.csrf_token:
+                raise ValidationError(_('Invalid security token submitted.'))
+        return Mapping.convert(self, value)
 
 
 class FormAsField(Mapping):
@@ -436,8 +545,6 @@ class FormAsField(Mapping):
     :class:`Mapping` field with the difference that it as an attribute called
     :attr:`form_class` that points to the form class it was created from.
     """
-
-    widget = FormWidget
 
     def __init__(self):
         raise TypeError('can\'t create %r instances' %
@@ -460,7 +567,8 @@ class Multiple(Field):
         self.min_size = min_size
         self.max_size = max_size
 
-    def convert(self, value, form):
+    def convert(self, value):
+        value = _force_list(value)
         errors = {}
         if self.min_size is not None and len(value) < self.min_size:
             errors.append(ValidationError(
@@ -477,7 +585,7 @@ class Multiple(Field):
         result = []
         for idx, item in enumerate(value):
             try:
-                result.append(self.field(item, form))
+                result.append(self.field(item))
             except ValidationError, e:
                 errors[idx] = e
         if errors:
@@ -487,8 +595,10 @@ class Multiple(Field):
     def to_primitive(self, value):
         return map(self.field.to_primitive, _force_list(value, silent=True))
 
-    def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.field)
+    def _bind(self, form, memo):
+        rv = Field._bind(self, form, memo)
+        rv.field = _bind(self.field, form, memo)
+        return rv
 
 
 class TextField(Field):
@@ -510,10 +620,10 @@ class TextField(Field):
         self.min_length = min_length
         self.max_length = max_length
 
-    def convert(self, value, form):
+    def convert(self, value):
         value = _to_string(value)
         if self.required and not value:
-            raise ValidationError(gettext('This field is required.'))
+            raise ValidationError(_('This field is required.'))
         if self.min_length is not None and len(value) < self.min_length:
             raise ValidationError(
                 ngettext('Please enter at least %d character.',
@@ -548,13 +658,13 @@ class DateTimeField(Field):
         self.required = required
         self.rebase = rebase
 
-    def convert(self, value, form):
+    def convert(self, value):
         if isinstance(value, datetime):
             return value
         value = _to_string(value)
         if not value:
-            if requried:
-                raise ValidationError(gettext('This field is required.'))
+            if self.required:
+                raise ValidationError(_('This field is required.'))
             return None
         try:
             return parse_datetime(value, rebase=self.rebase)
@@ -565,6 +675,108 @@ class DateTimeField(Field):
         if isinstance(value, datetime):
             value = format_system_datetime(value, rebase=self.rebase)
         return value
+
+
+class ModelField(Field):
+    """A field that queries for a model.
+
+    The first argument is the name of the model, the second the named
+    argument for `filter_by` (eg: `User` and ``'username'``).
+
+    The error message that is raised if the model does not exist is pretty
+    generic by default.  It can be modified by providing a `message` argument
+    to the constructor.  ``%(value)s`` is replaced with the value the user
+    entered.
+    """
+
+    def __init__(self, model, key, required=False, message=None,
+                 validators=None, widget=None):
+        Field.__init__(self, validators, widget)
+        self.model = model
+        self.key = key
+        self.required = required
+        self.message = message
+
+    def convert(self, value):
+        if isinstance(value, self.model):
+            return value
+        if not value:
+            if self.required:
+                raise ValidationError(_('This field is required.'))
+            return None
+
+        rv = self.model.objects.filter_by(**{self.key: value}).first()
+        message = self.message
+        if message is None:
+            message = _('"%(value)s" does not exist.')
+        if rv is None:
+            raise ValidationError(message % {'value': value})
+        return rv
+
+
+class ChoiceField(Field):
+    """A field for multiple choices.
+
+    A choice field accepts some choices that are valid values for it.
+    Values are compared after converting to unicode which means that
+    ``1 == "1"``:
+
+    >>> field = ChoiceField(choices=[1, 2, 3])
+    >>> field('1')
+    1
+    >>> field('42')
+    Traceback (most recent call last):
+      ...
+    ValidationError: Select a valid choice.
+
+    A choice field also accepts lists of tuples as argument where the
+    first item is used for comparing and the second for displaying
+    (which is used by the `SelectBoxWidget`):
+
+    >>> field = ChoiceField(choices=[(0, 'inactive', 1, 'active')])
+    >>> field('0')
+    0
+
+    Because all fields are bound to the form before validation it's
+    possible to assign the choices later:
+
+    >>> class MyForm(Form):
+    ...     status = ChoiceField()
+    ...
+    >>> form = MyForm()
+    >>> form.fields['status'].choices = [(0, 'inactive', 1, 'active')]
+    >>> form.validate({'status': '0'})
+    True
+    >>> form.data
+    {'status': 0}
+    """
+
+    widget = SelectBoxWidget
+
+    def __init__(self, required=False, choices=None, validators=None,
+                 widget=None):
+        Field.__init__(self, validators, widget)
+        self.required = required
+        self.choices = choices
+
+    def convert(self, value):
+        if not value and not self.required:
+            return
+        for choice in self.choices:
+            if isinstance(choice, tuple):
+                choice = choice[0]
+            # perform type interpolation.  If the key from the choices
+            # is a integer (42) and the value is a string ("42") we
+            # return the integer.
+            if value == choice or unicode(value) == unicode(choice):
+                return choice
+        raise ValidationError(_('Select a valid choice.'))
+
+    def _bind(self, form, memo):
+        rv = Field._bind(self, form, memo)
+        if self.choices is not None:
+            rv.choices = list(self.choices)
+        return rv
 
 
 class IntegerField(Field):
@@ -592,27 +804,23 @@ class IntegerField(Field):
         self.min_value = min_value
         self.max_value = max_value
 
-    def convert(self, value, form):
+    def convert(self, value):
         value = _to_string(value)
         if not value:
             if self.required:
-                raise ValidationError(gettext('This field is required.'))
+                raise ValidationError(_('This field is required.'))
             return None
         try:
             value = int(value)
         except ValueError:
-            raise ValidationError(gettext('Please enter a whole number.'))
+            raise ValidationError(_('Please enter a whole number.'))
 
         if self.min_value is not None and value < self.min_value:
-            raise ValidationError(
-                gettext('Ensure this value is greater than or equal to '
-                        '%s.') % self.min_value
-            )
+            raise ValidationError(_('Ensure this value is greater than or '
+                                    'equal to %s.') % self.min_value)
         if self.max_value is not None and value > self.max_value:
-            raise ValidationError(
-                gettext('Ensure this value is less than or equal to '
-                        '%s.') % self.max_value
-            )
+            raise ValidationError(_('Ensure this value is less than or equal '
+                                    'to %s.') % self.max_value)
 
         return int(value)
 
@@ -631,7 +839,7 @@ class BooleanField(Field):
 
     widget = CheckboxWidget
 
-    def convert(self, value, form):
+    def convert(self, value):
         return bool(value)
 
     def to_primitive(self, value):
@@ -648,11 +856,13 @@ class FormMeta(type):
     def __new__(cls, name, bases, d):
         fields = {}
         validator_functions = {}
+        root_validator_functions = []
 
         for base in bases:
             if hasattr(base, '_root_field'):
-                # base._root_field is always a Mapping field
+                # base._root_field is always a FormMapping field
                 fields.update(base._root_field.fields)
+                root_validator_functions.extend(base._root_field.validators)
 
         for key, value in d.iteritems():
             if key.startswith('validate_') and callable(value):
@@ -664,19 +874,33 @@ class FormMeta(type):
             if field_name in fields:
                 fields[field_name].validators.append(func)
 
-        d['_root_field'] = root = Mapping(**fields)
+        d['_root_field'] = root = FormMapping(**fields)
         context_validate = d.get('context_validate')
+        root.validators.extend(root_validator_functions)
         if context_validate is not None:
             root.validators.append(context_validate)
 
         return type.__new__(cls, name, bases, d)
 
     def as_field(cls):
-        """Returns a field object for this form."""
-        field = cls._root_field.clone()
-        field.__class__ = FormAsField
+        """Returns a field object for this form.  The field object returned
+        is independent of the form and can be modified in the same manner as
+        a bound field.
+        """
+        field = object.__new__(FormAsField)
+        field.__dict__.update(cls._root_field.__dict__)
         field.form_class = cls
+        field.validators = cls._root_field.validators[:]
+        field.fields = cls._root_field.fields.copy()
         return field
+
+    @property
+    def validators(cls):
+        return cls._root_field.validators
+
+    @property
+    def fields(cls):
+        return cls._root_field.fields
 
 
 class Form(object):
@@ -755,15 +979,29 @@ class Form(object):
     """
     __metaclass__ = FormMeta
 
-    def __init__(self, data=None, id=None, name=None, defaults=None):
+    def __init__(self, data=None, id=None, name=None, defaults=None,
+                 csrf_protected=True, redirect_tracking=True):
+        self.request = get_request()
         self.id = id
         self.name = name
         if defaults is None:
             defaults = {}
         self.defaults = defaults
+        self.csrf_protected = csrf_protected
+        self.redirect_tracking = redirect_tracking
+        self.invalid_redirect_targets = set()
+
+        self._root_field = _bind(self.__class__._root_field, self, {})
         self.reset()
+
         if data is not None:
             self.validate(raw_data)
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __contains__(self, key):
+        return key in self.data
 
     def as_widget(self):
         """Return the form as widget."""
@@ -773,20 +1011,65 @@ class Form(object):
         # otherwise go with the data from the source (eg: database)
         else:
             data = self.data
-        return FormWidget(self._root_field, None, data, self.errors)
+        return _make_widget(self._root_field, None, data, self.errors)
+
+    def add_invalid_redirect_target(self, *args, **kwargs):
+        """Add an invalid target. Invalid targets are URLs we don't want to
+        visit again. For example if a post is deleted from the post edit page
+        it's a bad idea to redirect back to the edit page because in that
+        situation the edit page would return a page not found.
+
+        This function accepts the same parameters as `url_for`.
+        """
+        self.invalid_redirect_targets.add(url_for(*args, **kwargs))
+
+    @property
+    def redirect_target(self):
+        """The back-redirect target for this form."""
+        return get_redirect_target(self.invalid_redirect_targets,
+                                   self.request)
+
+    def redirect(self, *args, **kwargs):
+        """Redirects to the url rule given or back to the URL where we are
+        comming from if `redirect_tracking` is enabled.
+        """
+        target = None
+        if self.redirect_tracking:
+            target = self.redirect_target
+        if target is None:
+            target = url_for(*args, **kwargs)
+        return redirect(target)
+
+    @property
+    def csrf_token(self):
+        """The unique CSRF security token for this form."""
+        if self.request is None:
+            raise AttributeError('no csrf token because form not bound '
+                                 'to request')
+        path = self.request.path
+        user_id = -1
+        if self.request.user.is_somebody:
+            user_id = self.request.user.user_id
+        key = self.request.app.cfg['secret_key']
+        return sha1(('%s|%s|%s|%s' % (path, self.id, user_id, key))
+                     .encode('utf-8')).hexdigest()
+
+    @property
+    def is_valid(self):
+        return not self.errors
 
     @property
     def fields(self):
         return self._root_field.fields
 
+    @property
+    def validators(self):
+        return self._root_field.validators
+
     def reset(self):
         self.data = self.defaults.copy()
         self.errors = {}
         self.raw_data = None
-
-    @property
-    def is_valid(self):
-        return not self.errors
 
     def validate(self, data):
         """Validate the form against the data passed."""

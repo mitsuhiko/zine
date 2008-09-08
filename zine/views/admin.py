@@ -25,7 +25,9 @@ from urlparse import urlparse
 from werkzeug import escape
 from werkzeug.exceptions import NotFound, BadRequest
 
-from zine.api import *
+from zine.i18n import _
+from zine.application import require_role, get_request, url_for, emit_event, \
+     render_response
 from zine.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
@@ -43,6 +45,7 @@ from zine.utils.uploads import guess_mimetype, get_upload_folder, \
      list_files, list_images, get_im_version, get_im_path, \
      touch_upload_folder, upload_file, create_thumbnail, file_exists, \
      get_filename
+from zine.utils.http import redirect_back, redirect_to
 from zine.i18n import parse_datetime, format_system_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from zine.importers import list_import_queue, load_import_dump, \
@@ -50,19 +53,11 @@ from zine.importers import list_import_queue, load_import_dump, \
 from zine.pluginsystem import install_package, InstallationError, \
      SetupError
 from zine.pingback import pingback, PingbackError
+from zine.forms import LoginForm
 
 
 #: how many posts / comments should be displayed per page?
 PER_PAGE = 20
-
-
-def simple_redirect(*args, **kwargs):
-    """A function "simple redirect" that works like the redirect function
-    in the views, just that it doesn't use the `IntelligentRedirect` which
-    sometimes doesn't do what we want. (like redirecting to target pages
-    and not using backredirects)
-    """
-    return redirect(url_for(*args, **kwargs))
 
 
 def render_admin_response(template_name, _active_menu_item=None, **values):
@@ -262,7 +257,7 @@ def do_bookmarklet(request):
         request.args['url'],
         request.args.get('title', _('Untitled Page'))
     )
-    return simple_redirect('admin/new_post',
+    return redirect_to('admin/new_post',
         title=request.args.get('title'),
         body=body
     )
@@ -355,7 +350,7 @@ def do_edit_post(request, post_id=None):
 
         # handle delete, redirect to confirmation page
         if request.form.get('delete') and post_id is not None:
-            return simple_redirect('admin/delete_post', post_id=post_id)
+            return redirect_to('admin/delete_post', post_id=post_id)
 
         form['title'] = title = request.form.get('title')
         if not title:
@@ -497,7 +492,7 @@ def do_edit_post(request, post_id=None):
 
             if request.form.get('save'):
                 return redirect('admin/new_post')
-            return simple_redirect('admin/edit_post', post_id=post.post_id)
+            return redirect_to('admin/edit_post', post_id=post.post_id)
 
     for error in errors:
         flash(error, 'error')
@@ -588,7 +583,7 @@ def _handle_comments(identifier, title, query, page):
                 if 'confirm' in request.form:
                     db.execute(comment_table.delete(query))
                     db.commit()
-                    return simple_redirect('admin/show_comments')
+                    return redirect_to('admin/show_comments')
                 return render_admin_response('admin/delete_comments.html',
                                              hidden_form_data=csrf_protector,
                                              comment_list=comments)
@@ -601,7 +596,7 @@ def _handle_comments(identifier, title, query, page):
                 ))
                 db.commit()
                 flash(_('Approved all the selected comments.'))
-                return simple_redirect('admin/show_comments')
+                return redirect_to('admin/show_comments')
 
     comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/show_comments', page, PER_PAGE,
@@ -691,7 +686,7 @@ def do_edit_comment(request, comment_id):
 
         # delete
         if request.form.get('delete'):
-            return simple_redirect('admin/delete_comment', comment_id=comment_id)
+            return redirect_to('admin/delete_comment', comment_id=comment_id)
 
         if comment.anonymous:
             form['author'] = author = request.form.get('author')
@@ -920,7 +915,7 @@ def do_edit_tag(request, tag_id=None):
 
         # delete
         if request.form.get('delete'):
-            return simple_redirect('admin/delete_tag', tag_id=tag.tag_id)
+            return redirect_to('admin/delete_tag', tag_id=tag.tag_id)
 
         form['slug'] = slug = request.form.get('slug')
         form['name'] = name = request.form.get('name')
@@ -1039,7 +1034,7 @@ def do_edit_user(request, user_id=None):
         if request.form.get('cancel'):
             return redirect('admin/show_users')
         elif request.form.get('delete') and user:
-            return simple_redirect('admin/delete_user', user_id=user.user_id)
+            return redirect_to('admin/delete_user', user_id=user.user_id)
 
         username = form['username'] = request.form.get('username')
         if not username:
@@ -1093,7 +1088,7 @@ def do_edit_user(request, user_id=None):
             flash(msg % html_user_detail, icon)
             if request.form.get('save'):
                 return redirect('admin/show_users')
-            return simple_redirect('admin/edit_user', user_id=user.user_id)
+            return redirect_to('admin/edit_user', user_id=user.user_id)
 
     if not new_user:
         display_names = [
@@ -1191,7 +1186,7 @@ def do_options(request):
     a page that shows all the links to configuration things in form of
     a simple table.
     """
-    return simple_redirect('admin/basic_options')
+    return redirect_to('admin/basic_options')
 
 
 @require_role(ROLE_ADMIN)
@@ -1201,7 +1196,7 @@ def do_basic_options(request):
     # see the comment that redirects to the url below.
     if request.args.get('altered') == 'true':
         flash(_('Configuration altered successfully.'), 'configure')
-        return simple_redirect('admin/basic_options')
+        return redirect_to('admin/basic_options')
 
     cfg = request.app.cfg
     form = {
@@ -1298,7 +1293,7 @@ def do_basic_options(request):
                 # new language rather than the old.  As a matter of fact we have
                 # to wait for Zine to reload first which is why we do the
                 # actual flashing after one reload.
-                return simple_redirect('admin/basic_options', altered='true')
+                return redirect_to('admin/basic_options', altered='true')
 
         for error in errors:
             flash(error, 'error')
@@ -1365,7 +1360,7 @@ def do_theme(request):
     """Allow the user to select one of the themes that are available."""
     csrf_protector = CSRFProtector()
     if 'configure' in request.args:
-        return simple_redirect('admin/configure_theme')
+        return redirect_to('admin/configure_theme')
     new_theme = request.args.get('select')
     if new_theme in request.app.themes:
         csrf_protector.assert_safe()
@@ -1373,7 +1368,7 @@ def do_theme(request):
             flash(_('Theme changed successfully.'), 'configure')
         else:
             flash(_('Theme could not be changed.'), 'error')
-        return simple_redirect('admin/theme')
+        return redirect_to('admin/theme')
 
     return render_admin_response('admin/theme.html', 'options.theme',
         themes=sorted(request.app.themes.values(),
@@ -1387,7 +1382,7 @@ def do_theme(request):
 def do_configure_theme(request):
     if not request.app.theme.configurable:
         flash(_('This theme is not configurable'), 'error')
-        return simple_redirect('admin/theme')
+        return redirect_to('admin/theme')
     return request.app.theme.configuration_page(request)
 
 
@@ -1455,7 +1450,7 @@ def do_plugins(request):
                         u'enable it in the plugin list.') %
                       plugin.html_display_name, 'add')
 
-        return simple_redirect('admin/plugins')
+        return redirect_to('admin/plugins')
 
     return render_admin_response('admin/plugins.html', 'options.plugins',
         plugins=sorted(request.app.plugins.values(), key=lambda x: x.name),
@@ -1592,7 +1587,7 @@ def do_configuration(request):
                 elif key in request.app.cfg and key not in already_default:
                     t.set_from_string(key, value)
             commit_config_change(t)
-        return simple_redirect('admin/configuration')
+        return redirect_to('admin/configuration')
 
     # html does not allow slashes.  Convert them to dots
     categories = []
@@ -1620,7 +1615,7 @@ def do_maintenance(request):
         if not cfg['maintenance_mode']:
             flash(_('Maintenance mode disabled.  The blog is now '
                     'publicly available.'), 'configure')
-        return simple_redirect('admin/maintenance')
+        return redirect_to('admin/maintenance')
 
     return render_admin_response('admin/maintenance.html',
                                  'system.maintenance',
@@ -1661,9 +1656,9 @@ def do_inspect_import(request, id):
     if request.method == 'POST':
         csrf_protector.assert_safe()
         if 'cancel' in request.form:
-            return simple_redirect('admin/maintenance')
+            return redirect_to('admin/maintenance')
         elif 'delete' in request.form:
-            return simple_redirect('admin/delete_import', id=id)
+            return redirect_to('admin/delete_import', id=id)
         return render_admin_response('admin/perform_import.html',
                                      'system.import',
             live_log=perform_import(request.app, blog, request.form,
@@ -2255,7 +2250,7 @@ def do_help(req, page=''):
     parts, is_index = rv
     ends_with_slash = not page or page.endswith('/')
     if is_index and not ends_with_slash:
-        return simple_redirect('admin/help', page=page + '/')
+        return redirect_to('admin/help', page=page + '/')
     elif not is_index and ends_with_slash:
         raise NotFound()
 
@@ -2265,33 +2260,17 @@ def do_help(req, page=''):
 def do_login(request):
     """Show a login page."""
     if request.user.is_somebody:
-        return simple_redirect('admin/index')
-    error = None
-    username = ''
-    redirect = IntelligentRedirect()
+        return redirect_to('admin/index')
+    form = LoginForm()
 
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password', '')
-        if username:
-            user = User.objects.filter_by(username=username).first()
-            if user is None:
-                error = _('User %s does not exist.') % escape(username)
-            elif user.check_password(password):
-                request.login(user, 'permanent' in request.form)
-                return redirect('admin/index')
-            else:
-                error = _('Incorrect password.')
-        else:
-            error = _('You have to enter a username.')
+    if request.method == 'POST' and form.validate(request.form):
+        request.login(form['user'], form['permanent'])
+        return form.redirect('admin/index')
 
-    return render_response('admin/login.html', error=error,
-                           username=username,
-                           logged_out=request.values.get('logout') == 'yes',
-                           hidden_redirect_field=redirect)
+    return render_response('admin/login.html', form=form.as_widget())
 
 
 def do_logout(request):
     """Just logout and redirect to the login screen."""
     request.logout()
-    return IntelligentRedirect()('admin/login', logout='yes')
+    return redirect_back('admin/login')

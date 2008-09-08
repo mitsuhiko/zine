@@ -12,10 +12,10 @@ import re
 import urllib
 from time import strptime
 from datetime import datetime
-from zine.api import *
 from zine.importers import Importer, Blog, Label, Author, Post, Comment
 from zine.utils.admin import flash
 from zine.utils.xml import _html_entities, get_etree, escape
+from zine.utils.http import redirect_to
 from zine.utils.xxx import CSRFProtector, StreamReporter, \
      make_hidden_fields
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED
@@ -161,7 +161,7 @@ class WordPressImporter(Importer):
                 except Exception, e:
                     error = _('Error downloading from URL: %s') % e
             elif not dump:
-                return redirect(url_for('import/wordpress'))
+                return redirect_to('import/wordpress')
 
             if error is not None:
                 flash(error, 'error')
@@ -173,7 +173,7 @@ class WordPressImporter(Importer):
                 else:
                     self.enqueue_dump(blog)
                     flash('Added imported items to queue.')
-                    return redirect(url_for('admin/import'))
+                    return redirect_to('admin/import')
 
         return self.render_admin_page('admin/import_wordpress.html',
             form=form,
