@@ -618,8 +618,9 @@ class FormWidget(MappingWidget):
         """The redirect target for this form."""
         return self._field.form.redirect_target
 
-    def __call__(self, action='', method='post', **attrs):
+    def render(self, action='', method='post', **attrs):
         self._attr_setdefault(attrs)
+        with_errors = attrs.pop('with_errors', False)
 
         # support jinja's caller
         caller = attrs.pop('caller', None)
@@ -627,13 +628,21 @@ class FormWidget(MappingWidget):
             body = caller()
         else:
             body = self.as_dl()
+
         hidden = self.hidden_fields
         if hidden:
             # if there are hidden fields we put an invisible div around
             # it.  the HTML standard doesn't allow input fields as direct
             # childs of a <form> tag...
             body = '<div style="display: none">%s</div>%s' % (hidden, body)
+
+        if with_errors:
+            body = self.errors() + body
         return html.form(body, action=action, method=method, **attrs)
+
+    def __call__(self, *args, **attrs):
+        attrs.setdefault('with_errors', True)
+        return self.render(*args, **attrs)
 
 
 class ListWidget(Widget, _ListSupport):
@@ -675,13 +684,13 @@ class ListWidget(Widget, _ListSupport):
 class ErrorList(_Renderable, _ListSupport, list):
     """The class that is used to display the errors."""
 
-    def render(self, **attr):
-        return self.as_ul(**attr)
+    def render(self, **attrs):
+        return self.as_ul(**attrs)
 
-    def __call__(self, **attr):
-        attr.setdefault('class', attr.pop('class_', 'errors'))
-        attr.setdefault('if_not_empty', True)
-        return self.render(**attr)
+    def __call__(self, **attrs):
+        attrs.setdefault('class', attrs.pop('class_', 'errors'))
+        attrs.setdefault('if_not_empty', True)
+        return self.render(**attrs)
 
 
 class ValidationError(ValueError):
@@ -1048,7 +1057,7 @@ class ChoiceField(Field):
     widget = SelectBox
     multiple_choices = False
 
-    def __init__(self, required=False, choices=None, validators=None,
+    def __init__(self, required=True, choices=None, validators=None,
                  widget=None):
         Field.__init__(self, validators, widget)
         self.required = required
@@ -1316,12 +1325,12 @@ class Form(object):
     """
     __metaclass__ = FormMeta
 
-    def __init__(self, data=None, defaults=None,
+    def __init__(self, data=None, initial=None,
                  csrf_protected=True, redirect_tracking=True):
         self.request = get_request()
-        if defaults is None:
-            defaults = {}
-        self.defaults = defaults
+        if initial is None:
+            initial = {}
+        self.initial = initial
         self.csrf_protected = csrf_protected
         self.redirect_tracking = redirect_tracking
         self.invalid_redirect_targets = set()
@@ -1337,6 +1346,11 @@ class Form(object):
 
     def __contains__(self, key):
         return key in self.data
+
+    def on_init(self):
+        """This method is called before validation in the constructor.
+        It is not called if the form is used as a form field!
+        """
 
     def as_widget(self):
         """Return the form as widget."""
@@ -1402,7 +1416,9 @@ class Form(object):
         return self._root_field.validators
 
     def reset(self):
-        self.data = self.defaults.copy()
+        """Resets the form."""
+        self.on_init()
+        self.data = self.initial.copy()
         self.errors = {}
         self.raw_data = None
 

@@ -27,7 +27,7 @@ from werkzeug.exceptions import NotFound, BadRequest
 
 from zine.i18n import _
 from zine.application import require_role, get_request, url_for, emit_event, \
-     render_response
+     render_response, get_application
 from zine.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \

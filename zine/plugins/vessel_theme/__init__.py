@@ -15,6 +15,7 @@ from zine.views.admin import render_admin_response
 from zine.utils.admin import flash
 from zine.utils.http import redirect_to
 from zine.utils.xxx import CSRFProtector
+from zine.utils import forms
 
 
 TEMPLATE_FILES = join(dirname(__file__), 'templates')
@@ -27,6 +28,16 @@ variations = {
     u'vessel_theme::gray.css':  _('Gray'),
     u'vessel_theme::green.css': _('Green')
 }
+
+
+class ConfigurationForm(forms.Form):
+    """Very simple form for the variation selection."""
+    variation = forms.ChoiceField()
+
+    def on_init(self):
+        """If the form is initialized, populate the variations."""
+        choices = sorted(variations.items(), key=lambda x: x[1].lower())
+        self.fields['variation'].choices = choices
 
 
 def add_variation(spec, title):
@@ -42,19 +53,20 @@ def configure(request):
     just for the admin panel template.
     """
     cfg = request.app.cfg
-    csrf_protector = CSRFProtector()
+    form = ConfigurationForm(initial=dict(
+        variation=cfg['vessel_theme/variation']
+    ))
+
     if request.method == 'POST':
-        csrf_protector.assert_safe()
-        if 'save' in request.form:
+        if 'cancel' in request.form:
+            return form.redirect('admin/theme')
+        elif form.validate(request.form):
             flash(_('Color variation changed successfully.'), 'configure')
-            cfg.change_single('vessel_theme/variation', request.form['variation'])
-        return redirect_to('admin/theme')
+            cfg.change_single('vessel_theme/variation', form['variation'])
+            return form.redirect('admin/theme')
+
     return render_admin_response('admin/configure_vessel_theme.html',
-                                 'options.theme',
-                                 current=cfg['vessel_theme/variation'],
-                                 variations=sorted(variations.items(),
-                                                   key=lambda x: x[1].lower()),
-                                 csrf_protector=csrf_protector)
+                                 'options.theme', form=form.as_widget())
 
 
 def setup(app, plugin):

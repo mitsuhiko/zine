@@ -5,20 +5,14 @@
   <p>{% trans %}
     This theme comes with various color variations you can chose from.
   {% endtrans %}
-  <form action="" method="post">
+  {%- call form() %}
     <dl>
-      <dt>{{ _('Color Variation') }}</dt>
-      <dd><select name="variation">
-      {%- for key, value in variations %}
-        <option value="{{ key }}"{% if key == current %} selected{% endif
-          %}>{{ value }}</option>
-      {%- endfor %}
-      </select></dd>
+      <dt>{{ _('Color Variation') }}
+      <dd>{{ form.variation }}
     </dl>
     <div class="actions">
-      {{ csrf_protector }}
       <input type="submit" name="save" value="{{ _('Save') }}">
       <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
-  </form>
+  {%- endcall %}
 {% endblock %}
