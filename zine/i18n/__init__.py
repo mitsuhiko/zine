@@ -129,7 +129,7 @@ class Translations(object):
     def gettext(self, string):
         msg = self._lookup(string)
         if msg is None:
-            return string
+            return unicode(string)
         elif msg.__class__ is tuple:
             return msg[0]
         return msg
@@ -138,8 +138,8 @@ class Translations(object):
         msgs = self._lookup(singular)
         if msgs is None or msgs.__class__ is not tuple:
             if n == 1:
-                return singular
-            return plural
+                return unicode(singular)
+            return unicode(plural)
         return msgs[self.plural_func(n)]
 
     # unicode aliases for gettext compatibility.  Jinja for example
@@ -170,7 +170,7 @@ def gettext(string):
     """Translate the given string to the language of the application."""
     app = zine.application.get_application()
     if app is None:
-        return string
+        return unicode(string)
     return app.translations.gettext(string)
 
 
@@ -181,8 +181,8 @@ def ngettext(singular, plural, n):
     app = zine.application.get_application()
     if app is None:
         if n == 1:
-            return singular
-        return plrual
+            return unicode(singular)
+        return unicode(plural)
     return app.translations.ngettext(singular, plural, n)
 
 

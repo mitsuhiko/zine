@@ -13,6 +13,8 @@ from random import choice, randrange
 
 
 KEY_CHARS = string.ascii_letters + string.digits
+IDENTIFIER_START = string.ascii_letters + '_'
+IDENTIFIER_CHAR = IDENTIFIER_START + string.digits
 SALT_CHARS = string.ascii_lowercase + string.digits
 SECRET_KEY_CHARS = string.ascii_letters + string.digits + string.punctuation
 
@@ -44,6 +46,14 @@ def gen_activation_key(length=8):
     if length <= 0:
         raise ValueError('requested key of length <= 0')
     return ''.join(choice(KEY_CHARS) for _ in xrange(length))
+
+
+def gen_random_identifier(length=8):
+    """Generate a random identifier."""
+    if length <= 0:
+        raise ValueError('requested key of length <= 0')
+    return choice(IDENTIFIER_START) + \
+           ''.join(choice(IDENTIFIER_CHAR) for _ in xrange(length - 1))
 
 
 def gen_secret_key():

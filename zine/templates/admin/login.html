@@ -14,10 +14,10 @@
     {%- endif %}
     {% call form(action=url_for('admin/login')) %}
       <dl>
-        <dt>{{ _("Username") }}</dt>
-        <dd>{{ form.user }}</dd>
-        <dt>{{ _("Password") }}</dt>
-        <dd>{{ form.password }}</dd>
+        <dt>{{ _("Username") }}
+        <dd>{{ form.user }}
+        <dt>{{ _("Password") }}
+        <dd>{{ form.password }}
       </dl>
       <p>
         {{ form.permanent() }}

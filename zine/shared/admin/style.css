@@ -412,6 +412,19 @@ div.formbox ul {
     padding: 5px 0 5px 10px;
 }
 
+ul.errors {
+    background-color: #FCF7F7;
+    border: 1px solid #E8B5B5;
+    padding: 0.4em;
+    margin: 0.5em 0 0.5em 0;
+    list-style: none;
+}
+
+ul.errors li {
+    color: #802424;
+    font-size: 0.9em;
+}
+
 /* :::: PAGINATION :::: */
 div.pagination span.commata {
     display: none;

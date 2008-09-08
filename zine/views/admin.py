@@ -32,7 +32,7 @@ from zine.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
-from zine.database import comments as comment_table, posts, \
+from zine.database import db, comments as comment_table, posts, \
      post_tags, post_links, secure_database_uri
 from zine.utils import dump_json, load_json
 from zine.utils.validators import is_valid_email, is_valid_url
@@ -53,7 +53,7 @@ from zine.importers import list_import_queue, load_import_dump, \
 from zine.pluginsystem import install_package, InstallationError, \
      SetupError
 from zine.pingback import pingback, PingbackError
-from zine.forms import LoginForm
+from zine.forms import LoginForm, ChangePasswordForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -1790,37 +1790,19 @@ def do_about_zine(request):
 @require_role(ROLE_AUTHOR)
 def do_change_password(request):
     """Allow the current user to change his password."""
-    errors = []
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
+    form = ChangePasswordForm()
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
         if request.form.get('cancel'):
-            return redirect('admin/index')
-        old_password = request.form.get('old_password')
-        if not old_password:
-            errors.append(_('You have to enter your old password.'))
-        if not request.user.check_password(old_password):
-            errors.append(_('Your old password is wrong.'))
-        new_password = request.form.get('new_password')
-        if not new_password:
-            errors.append(_('Your new password cannot be empty.'))
-        check_password = request.form.get('check_password')
-        if new_password != check_password:
-            errors.append(_('The passwords do not match.'))
-        if not errors:
-            request.user.set_password(new_password)
+            return form.redirect('admin/index')
+        if form.validate(request.form):
+            request.user.set_password(form['new_password'])
             db.commit()
             flash(_('Password changed successfully.'), 'configure')
-            return redirect('admin/index')
-
-    # just flash the first error, that's enough for the user
-    if errors:
-        flash(errors[0], 'error')
+            return form.redirect('admin/index')
 
     return render_admin_response('admin/change_password.html',
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+        form=form.as_widget()
     )
 
 

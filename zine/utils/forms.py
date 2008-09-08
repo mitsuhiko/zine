@@ -25,11 +25,12 @@ try:
 except ImportError:
     from sha import new as sha1
 
-from werkzeug import html
+from werkzeug import html, escape, MultiDict
 
 from zine.application import get_request, url_for
 from zine.i18n import _, ngettext, parse_datetime, format_system_datetime
 from zine.utils.http import get_redirect_target, redirect
+from zine.utils.crypto import gen_random_identifier
 
 
 class DataIntegrityError(ValueError):
@@ -43,54 +44,92 @@ def _decode(data):
 
     >>> _decode({'foo': 'bar'})
     {'foo': 'bar'}
-
     >>> _decode({'foo.0': 'bar', 'foo.1': 'baz'})
     {'foo': ['bar', 'baz']}
-
     >>> data = _decode({'foo.bar': '1', 'foo.baz': '2'})
-    >>> assert data == {'foo': {'bar': '1', 'baz': '2'}}
+    >>> data == {'foo': {'bar': '1', 'baz': '2'}}
+    True
+
+    More complex mappings work too:
 
     >>> _decode({'foo.bar.0': 'baz', 'foo.bar.1': 'buzz'})
     {'foo': {'bar': ['baz', 'buzz']}}
-
     >>> _decode({'foo.0.bar': '23', 'foo.1.baz': '42'})
     {'foo': [{'bar': '23'}, {'baz': '42'}]}
-
     >>> _decode({'foo.0.0': '23', 'foo.0.1': '42'})
     {'foo': [['23', '42']]}
-
     >>> _decode({'foo': ['23', '42']})
     {'foo': ['23', '42']}
+
+    Missing items in lists are ignored for convenience reasons:
+
+    >>> _decode({'foo.42': 'a', 'foo.82': 'b'})
+    {'foo': ['a', 'b']}
+
+    This can be used for help client side DOM processing (inserting and
+    deleting rows in dynamic forms).
+
+    It also supports werkzeug's multi dicts:
+
+    >>> _decode(MultiDict({"foo": ['1', '2']}))
+    {'foo': ['1', '2']}
+    >>> _decode(MultiDict({"foo.0": '1', "foo.1": '2'}))
+    {'foo': ['1', '2']}
+
+    Those two submission ways can also be used combined:
+
+    >>> _decode(MultiDict({"foo": ['1'], "foo.0": '2', "foo.1": '3'}))
+    {'foo': ['1', '2', '3']}
+
+    This function will never raise exceptions except for argument errors
+    but the recovery behavior for invalid form data is undefined.
     """
     list_marker = object()
-    result = {}
-    lists = []
+    value_marker = object()
 
-    for key, value in data.iteritems():
-        if '.' not in key:
-            result[key] = value
-        else:
-            names = key.split('.')
-            container = result
-            end = len(names) - 1
-            for idx in xrange(end):
-                curname = names[idx]
-                if curname not in container:
-                    nextname = names[idx + 1]
-                    container[curname] = {}
-                    if nextname.isdigit():
-                        container[curname][list_marker] = True
-                container = container[curname]
-            if isinstance(container, dict):
-                container[names[-1]] = value
+    if isinstance(data, MultiDict):
+        listiter = data.iterlists()
+    else:
+        listiter = ((k, [v]) for k, v in data.iteritems())
 
-    def _convert(data):
-        if type(data) is dict:
-            if data.pop(list_marker, False):
-                data = [_convert(v) for k, v in sorted(data.items())]
-            else:
-                data = dict((k, _convert(v)) for k, v in data.iteritems())
-        return data
+    def _split_key(name):
+        result = name.split('.')
+        for idx, part in enumerate(result):
+            if part.isdigit():
+                result[idx] = int(part)
+        return result
+
+    def _enter_container(container, key):
+        if key not in container:
+            return container.setdefault(key, {list_marker: False})
+        return container[key]
+
+    def _convert(container):
+        if value_marker in container:
+            force_list = False
+            values = container.pop(value_marker)
+            if container.pop(list_marker):
+                force_list = True
+                values.extend(_convert(x[1]) for x in
+                              sorted(container.items()))
+            if not force_list and len(values) == 1:
+                values = values[0]
+            return values
+        elif container.pop(list_marker):
+            return [_convert(x[1]) for x in sorted(container.items())]
+        return dict((k, _convert(v)) for k, v in container.iteritems())
+
+    result = {list_marker: False}
+    for key, values in listiter:
+        parts = _split_key(key)
+        if not parts:
+            continue
+        container = result
+        for part in parts:
+            last_container = container
+            container = _enter_container(container, part)
+            last_container[list_marker] = isinstance(part, (int, long))
+        container[value_marker] = values[:]
 
     return _convert(result)
 
@@ -144,15 +183,15 @@ def _make_widget(field, name, value, errors):
 def _make_name(parent, child):
     """Joins a name."""
     if parent is None:
-        result = unicode(child)
+        result = child
     else:
-        result = u'%s.%s' % (parent, child)
+        result = '%s.%s' % (parent, child)
 
-    # try to return a ascii only bytestring
+    # try to return a ascii only bytestring if possible
     try:
         return str(result)
     except UnicodeError:
-        return result
+        return unicode(result)
 
 
 def _to_string(value):
@@ -162,18 +201,144 @@ def _to_string(value):
     return unicode(value)
 
 
-class _HTMLSequence(object):
+def _to_list(value):
+    """Similar to `_force_list` but always succeeds and never drops data."""
+    if isinstance(value, basestring):
+        return [value]
+    try:
+        return list(value)
+    except TypeError:
+        return [value]
+
+
+def _iter_choices(choices):
+    """Iterate over choices."""
+    if choices is not None:
+        for choice in choices:
+            if not isinstance(choice, tuple):
+                choice = (choice, choice)
+            yield choice
+
+
+class _ListSupport(object):
     """A mixin for iterable objects that yield html."""
 
-    def as_ul(self, **attr):
-        return html.ul(*(html.li(unicode(item)) for item in self), **attr)
+    def as_ul(self, **attrs):
+        if attrs.pop('if_not_empty', False) and not self:
+            return u''
+        return html.ul(*(html.li(unicode(item)) for item in self), **attrs)
 
-    def as_ol(self, **attr):
-        return html.ol(*(html.li(unicode(item)) for item in self), **attr)
+    def as_ol(self, **attrs):
+        if attrs.pop('if_not_empty', False) and not self:
+            return u''
+        return html.ol(*(html.li(unicode(item)) for item in self), **attrs)
 
 
-class Widget(object):
-    """Baseclass for all widgets."""
+class _Renderable(object):
+    """Mixin for renderable HTML objects."""
+
+    def render(self):
+        return u''
+
+    def __call__(self, *args, **kwargs):
+        return self.render(*args, **kwargs)
+
+    def __unicode__(self):
+        return self()
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
+
+class Widget(_Renderable):
+    """Baseclass for all widgets.  All widgets share a common interface
+    that can be used from within templates.
+
+    Take this form as an example:
+
+    >>> class LoginForm(Form):
+    ...     username = TextField(required=True)
+    ...     password = TextField(widget=PasswordInput)
+    ...     flags = MultiChoiceField(choices=[1, 2, 3])
+    ...
+    >>> form = LoginForm({'username': '', 'password': '',
+    ...                  'flags': [1, 3]}).as_widget()
+
+    You can get the subwidgets by using the normal indexing operators:
+
+    >>> username = form['username']
+    >>> password = form['password']
+
+    The conversion to unicode calls the widget which renders it and displays
+    an error list as unordered list next to it.
+
+    >>> unicode(username) == username()
+    True
+
+    To render a widget you can usually invoke the `render()` method.  All
+    keyword parameters are used as HTML attribute in the resulting tag.
+    You can also call the widget itself (``username()`` instead of
+    ``username.render()``) which does the same if there are no errors for
+    the field but adds the default error list after the widget if there
+    are errors.
+
+    Widgets have some public attributes:
+
+    `errors`
+
+        gives the list of errors:
+
+        >>> username.errors
+        [u'This field is required.']
+
+        This error list is printable:
+
+        >>> print username.errors
+        <ul class="errors"><li>This field is required.</li></ul>
+
+        Like any other sequence that yields list items it provides
+        `as_ul` and `as_ol` methods:
+
+        >>> print username.errors.as_ul()
+        <ul><li>This field is required.</li></ul>
+
+        Keep in mind that ``widget.errors()`` is equivalent to
+        ``widget.errors.as_ul(class_='errors')``.
+
+    `value`
+
+        returns the value of the widget as primitive.  For basic
+        widgets this is always a string, for widgets with subwidgets or
+        widgets with multiple values a dict or a list:
+
+        >>> username.value
+        u''
+        >>> form['flags'].value
+        [u'1', u'3']
+
+    `name` gives you the name of the field for form submissions:
+
+        >>> username.name
+        'username'
+
+        Please keep in mind that the name is not always that obvious.  Zine
+        supports nested form fields so it's a good idea to always use the
+        name attribute.
+
+    `id`
+
+        gives you the default domain for the widget.  This is either none
+        if there is no idea for the field or `f_` + the field name with
+        underscores instead of dots:
+
+        >>> username.id
+        'f_username'
+
+    `all_errors`
+
+        like `errors` but also contains the errors of child
+        widgets.
+    """
 
     def __init__(self, field, name, value, all_errors):
         self._field = field
@@ -182,7 +347,14 @@ class Widget(object):
         self.name = name
 
     @property
+    def id(self):
+        """The proposed id for this widget."""
+        if self.name is not None:
+            return 'f_' + self.name.replace('.', '_')
+
+    @property
     def value(self):
+        """The primitive value for this widget."""
         return self._field.to_primitive(self._value)
 
     @property
@@ -204,56 +376,83 @@ class Widget(object):
                 result.extend(value)
         return result
 
-    def __call__(self):
-        return u''
+    def _attr_setdefault(self, attrs):
+        """Add an ID to the attrs if there is none."""
+        if 'id' not in attrs and self.id is not None:
+            attrs['id'] = self.id
 
-    def __unicode__(self):
-        return self()
-
-    def __str__(self):
-        return unicode(self).encode('utf-8')
+    def __call__(self, **attrs):
+        """The default display is the form + error list as ul if needed."""
+        return self.render(**attrs) + self.errors()
 
 
-class InputWidget(Widget):
+class Label(_Renderable):
+    """Holds a label."""
+
+    def __init__(self, text, linked_to=None):
+        self.text = text
+        self.linked_to = linked_to
+
+    def render(self, **attrs):
+        attrs.setdefault('for', self.linked_to)
+        return html.label(escape(self.text), **attrs)
+
+
+class InternalWidget(Widget):
+    """Special widgets are widgets that can't be used on arbitrary
+    form fields but belong to others.
+    """
+
+    def __init__(self, parent):
+        self._parent = parent
+
+    value = name = None
+    errors = all_errors = property(lambda: ErrorList())
+
+
+class Input(Widget):
     """A widget that is a HTML input field."""
     hide_value = False
     type = None
 
-    def __call__(self, **attrs):
+    def render(self, **attrs):
+        self._attr_setdefault(attrs)
         value = self.value
         if self.hide_value:
             value = u''
-        if 'id' not in attrs:
-            attrs['id'] = 'f_' + self.name
         return html.input(name=self.name, value=value, type=self.type,
                           **attrs)
 
 
-class TextWidget(InputWidget):
+class TextInput(Input):
     """A widget that holds text."""
     type = 'text'
 
 
-class PasswordWidget(TextWidget):
+class PasswordInput(TextInput):
     """A widget that holds a password."""
     type = 'password'
     hide_value = True
 
 
-class CheckboxWidget(Widget):
+class Checkbox(Widget):
     """A simple checkbox."""
 
-    def __call__(self, **attrs):
-        if 'id' not in attrs:
-            attrs['id'] = 'f_' + self.name
+    def render(self, **attrs):
+        self._attr_setdefault(attrs)
         return html.input(name=self.name, type='checkbox',
                           checked=self.value, **attrs)
 
 
-class SelectBoxWidget(Widget):
+class SelectBox(Widget):
     """A select box."""
 
-    def __call__(self, **attrs):
+    def _attr_setdefault(self, attrs):
+        Widget._attr_setdefault(self, attrs)
+        attrs.setdefault('multiple', self._field.multiple_choices)
+
+    def render(self, **attrs):
+        self._attr_setdefault(attrs)
         items = []
         for choice in self._field.choices:
             if isinstance(choice, tuple):
@@ -263,6 +462,98 @@ class SelectBoxWidget(Widget):
             items.append(html.option(unicode(value), value=unicode(key),
                                      selected=key == self.value))
         return html.select(name=self.name, *items, **attrs)
+
+
+class _InputGroupMember(InternalWidget):
+    """A widget that is a single radio button."""
+
+    def __init__(self, parent, value, label):
+        InternalWidget.__init__(self, parent)
+        self.value = unicode(value)
+        self.label = Label(label, self.id)
+
+    @property
+    def name(self):
+        return self._parent.name
+
+    @property
+    def id(self):
+        return 'f_%s_%s' % (self._parent.name, self.value)
+
+    @property
+    def checked(self):
+        if self._parent._field.multiple_choices:
+            return self.value in self._parent.value
+        return self._parent.value == self.value
+
+    def render(self, **attrs):
+        self._attr_setdefault(attrs)
+        return html.input(type=self.type, name=self.name, value=self.value,
+                          checked=self.checked, **attrs)
+
+
+class RadioButton(_InputGroupMember):
+    """A radio button in an input group."""
+    type = 'radio'
+
+
+class GroupCheckbox(_InputGroupMember):
+    """A checkbox in an input group."""
+    type = 'checkbox'
+
+
+class _InputGroup(Widget):
+
+    def __init__(self, field, name, value, all_errors):
+        Widget.__init__(self, field, name, value, all_errors)
+        self.choices = []
+        self._subwidgets = {}
+        for value, label in _iter_choices(self._field.choices):
+            widget = self.subwidget(self, value, label)
+            self.choices.append(widget)
+            self._subwidgets[value] = widget
+
+    def __getitem__(self, value):
+        """Return a subwidget."""
+        return self._subwidgets[value]
+
+    def _as_list(self, list_type, attrs):
+        if attrs.pop('if_not_empty', False) and not self.choices:
+            return u''
+        self._attr_setdefault(attrs)
+        return list_type(*[u'<li>%s %s</li>' % (
+            choice,
+            choice.label
+        ) for choice in self.choices], **attrs)
+
+    def as_ul(self, **attrs):
+        """Render the radio buttons widget as <ul>"""
+        return self._as_list(html.ul, attrs)
+
+    def as_ol(self, **attrs):
+        """Render the radio buttons widget as <ol>"""
+        return self._as_list(html.ol, attrs)
+
+    def as_table(self, **attrs):
+        """Render the radio buttons widget as <table>"""
+        self._attr_setdefault(attrs)
+        return list_type(*[u'<tr><td>%s</td><td>%s</td></tr>' % (
+            choice,
+            choice.label
+        ) for choice in self.choices], **attrs)
+
+    def render(self, **attrs):
+        return self.as_ul(**attrs)
+
+
+class RadioButtonGroup(_InputGroup):
+    """A group of radio buttons."""
+    subwidget = RadioButton
+
+
+class CheckboxGroup(_InputGroup):
+    """A group of checkboxes."""
+    subwidget = GroupCheckbox
 
 
 class MappingWidget(Widget):
@@ -283,9 +574,9 @@ class MappingWidget(Widget):
             self._subwidgets[name] = subwidget
         return subwidget
 
-    def as_dl(self, **attr):
+    def as_dl(self, **attrs):
         return html.dl(*(html.dt(key.title()) + html.dd(self[key]())
-                         for key in self), **attr)
+                         for key in self), **attrs)
 
     def __call__(self, *args, **kwargs):
         return self.as_dl(*args, **kwargs)
@@ -328,6 +619,8 @@ class FormWidget(MappingWidget):
         return self._field.form.redirect_target
 
     def __call__(self, action='', method='post', **attrs):
+        self._attr_setdefault(attrs)
+
         # support jinja's caller
         caller = attrs.pop('caller', None)
         if caller is not None:
@@ -343,7 +636,7 @@ class FormWidget(MappingWidget):
         return html.form(body, action=action, method=method, **attrs)
 
 
-class ListWidget(Widget, _HTMLSequence):
+class ListWidget(Widget, _ListSupport):
     """Special widget for list-like fields."""
 
     def __init__(self, field, name, value, all_errors):
@@ -379,17 +672,16 @@ class ListWidget(Widget, _HTMLSequence):
         return self.as_ul(*args, **kwargs)
 
 
-class ErrorList(list, _HTMLSequence):
+class ErrorList(_Renderable, _ListSupport, list):
     """The class that is used to display the errors."""
 
-    def __call__(self, *args, **kwargs):
-        return self.as_ul(*args, **kwargs)
+    def render(self, **attr):
+        return self.as_ul(**attr)
 
-    def __unicode__(self):
-        return self()
-
-    def __str__(self):
-        return unicode(self).encode('utf-8')
+    def __call__(self, **attr):
+        attr.setdefault('class', attr.pop('class_', 'errors'))
+        attr.setdefault('if_not_empty', True)
+        return self.render(**attr)
 
 
 class ValidationError(ValueError):
@@ -429,7 +721,7 @@ class MultipleValidationErrors(ValidationError):
 class Field(object):
     """Abstract field base class."""
 
-    widget = TextWidget
+    widget = TextInput
     form = None
 
     def __init__(self, validators=None, widget=None):
@@ -438,6 +730,8 @@ class Field(object):
         self.validators = validators
         if widget is not None:
             self.widget = widget
+        assert not issubclass(self.widget, InternalWidget), \
+            'can\'t use internal widgets as widgets for fields'
 
     def __call__(self, value):
         value = self.convert(value)
@@ -569,20 +863,20 @@ class Multiple(Field):
 
     def convert(self, value):
         value = _force_list(value)
-        errors = {}
         if self.min_size is not None and len(value) < self.min_size:
-            errors.append(ValidationError(
+            raise ValidationError(
                 ngettext('Please provide at least %d item.',
                          'Please provide at least %d items.',
                          self.min_size) % self.min_size
-            ))
+            )
         if self.max_size is not None and len(value) > self.max_size:
-            errors.append(ValidationError(
+            raise ValidationError(
                 ngettext('Please provide no more than %d item.',
                          'Please provide no more than %d items.',
                          self.max_size) % self.max_size
-            ))
+            )
         result = []
+        errors = {}
         for idx, item in enumerate(value):
             try:
                 result.append(self.field(item))
@@ -715,7 +1009,7 @@ class ModelField(Field):
 
 
 class ChoiceField(Field):
-    """A field for multiple choices.
+    """A field that lets a user select one out of many choices.
 
     A choice field accepts some choices that are valid values for it.
     Values are compared after converting to unicode which means that
@@ -751,7 +1045,8 @@ class ChoiceField(Field):
     {'status': 0}
     """
 
-    widget = SelectBoxWidget
+    widget = SelectBox
+    multiple_choices = False
 
     def __init__(self, required=False, choices=None, validators=None,
                  widget=None):
@@ -777,6 +1072,48 @@ class ChoiceField(Field):
         if self.choices is not None:
             rv.choices = list(self.choices)
         return rv
+
+
+class MultiChoiceField(ChoiceField):
+    """A field that lets a user select multiple choices."""
+
+    multiple_choices = True
+
+    def __init__(self, choices=None, min_size=None,
+                 max_size=None, validators=None, widget=None):
+        ChoiceField.__init__(self, min_size > 0, choices, validators, widget)
+        self.min_size = min_size
+        self.max_size = max_size
+
+    def convert(self, value):
+        values = _to_list(value)
+        container = set(values) | set(map(unicode, values))
+        result = []
+
+        for choice in self.choices:
+            if isinstance(choice, tuple):
+                choice = choice[0]
+            if choice not in container:
+                raise ValidationError(_('Select a valid choice.'))
+            result.append(choice)
+
+        if self.min_size is not None and len(result) < self.min_size:
+            raise ValidationError(
+                ngettext('Please provide at least %d item.',
+                         'Please provide at least %d items.',
+                         self.min_size) % self.min_size
+            )
+        if self.max_size is not None and len(result) > self.max_size:
+            raise ValidationError(
+                ngettext('Please provide no more than %d item.',
+                         'Please provide no more than %d items.',
+                         self.max_size) % self.max_size
+            )
+
+        return result
+
+    def to_primitive(self, value):
+        return map(unicode, _force_list(value, silent=True))
 
 
 class IntegerField(Field):
@@ -837,7 +1174,7 @@ class BooleanField(Field):
     False
     """
 
-    widget = CheckboxWidget
+    widget = Checkbox
 
     def convert(self, value):
         return bool(value)
@@ -979,11 +1316,9 @@ class Form(object):
     """
     __metaclass__ = FormMeta
 
-    def __init__(self, data=None, id=None, name=None, defaults=None,
+    def __init__(self, data=None, defaults=None,
                  csrf_protected=True, redirect_tracking=True):
         self.request = get_request()
-        self.id = id
-        self.name = name
         if defaults is None:
             defaults = {}
         self.defaults = defaults
@@ -995,7 +1330,7 @@ class Form(object):
         self.reset()
 
         if data is not None:
-            self.validate(raw_data)
+            self.validate(data)
 
     def __getitem__(self, key):
         return self.data[key]
@@ -1051,7 +1386,7 @@ class Form(object):
         if self.request.user.is_somebody:
             user_id = self.request.user.user_id
         key = self.request.app.cfg['secret_key']
-        return sha1(('%s|%s|%s|%s' % (path, self.id, user_id, key))
+        return sha1(('%s|%s|%s' % (path, user_id, key))
                      .encode('utf-8')).hexdigest()
 
     @property

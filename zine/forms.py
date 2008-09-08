@@ -21,11 +21,28 @@ class LoginForm(forms.Form):
     """
     user = forms.ModelField(User, 'username', message=
                             lazy_gettext('User "%(value)s" does not exist.'))
-    password = forms.TextField(widget=forms.PasswordWidget)
+    password = forms.TextField(widget=forms.PasswordInput)
     permanent = forms.BooleanField()
 
     def context_validate(self, data):
         if not data['user']:
             raise forms.ValidationError(_('You have to enter a username'))
-        elif not data['user'].check_password(data['password']):
+        if not data['user'].check_password(data['password']):
             raise forms.ValidationError(_('Incorrect password.'))
+
+
+class ChangePasswordForm(forms.Form):
+    """The form used on the password-change dialog in the admin panel."""
+    old_password = forms.TextField(required=True, widget=forms.PasswordInput)
+    new_password = forms.TextField(required=True, widget=forms.PasswordInput)
+    check_password = forms.TextField(required=True,
+                                     widget=forms.PasswordInput)
+
+    def validate_old_password(self, value):
+        if not self.request.user.check_password(value):
+            raise forms.ValidationError(_('The old password you\'ve '
+                                          'entered is wrong.'))
+
+    def context_validate(self, data):
+        if data['new_password'] != data['check_password']:
+            raise forms.ValidationError(_('The two passwords don\'t match.'))
