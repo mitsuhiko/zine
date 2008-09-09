@@ -115,25 +115,15 @@ div.actions input {
     cursor: pointer;
 }
 
-/* :::: ERROR DIALOG :::: */
-div.error {
+/* :::: ERROR LISTS :::: */
+ul.errors {
     background-color: #ddd;
     border: 1px solid #aaa;
+    color: #111;
     padding: 5px;
     margin: 10px 0 10px 0;
     font-size: 0.9em;
-}
-
-div.error h3 {
-    color: #111;
-    margin: 0 0 5px 0;
-    padding: 0;
-    font-size: 1.4em;
-}
-
-div.error p {
-    margin: 0;
-    padding: 3px 0 3px 20px;
+    list-style: none;
 }
 
 /* ::: INFORMATION DIALOG :::: */

@@ -28,6 +28,7 @@ except ImportError:
 from werkzeug import html, escape, MultiDict
 
 from zine.application import get_request, url_for
+from zine.database import db
 from zine.i18n import _, ngettext, lazy_gettext, parse_datetime, \
      format_system_datetime
 from zine.utils.http import get_redirect_target, redirect
@@ -437,10 +438,16 @@ class PasswordInput(TextInput):
     hide_value = True
 
 
+class HiddenInput(Input):
+    """A hidden input field for text."""
+    type = 'hidden'
+
+
 class Textarea(Widget):
     """Displays a textarea."""
 
     def _attr_setdefault(self, attrs):
+        Widget._attr_setdefault(self, attrs)
         attrs.setdefault('rows', 8)
         attrs.setdefault('cols', 40)
 
@@ -753,6 +760,7 @@ class Field(object):
         if validators is None:
             validators = []
         self.validators = validators
+        self.custom_converter = None
         if widget is not None:
             self.widget = widget
         if messages:
@@ -770,7 +778,7 @@ class Field(object):
         """Applies all validators on the value."""
         if self.should_validate(value):
             for validate in self.validators:
-                validate(self, value)
+                validate(self.form, value)
 
     def should_validate(self, value):
         """Per default validate if the value is not None.  This method is
@@ -968,13 +976,13 @@ class TextField(Field):
     def convert(self, value):
         value = _to_string(value)
         if self.required and not value:
-            raise ValidationError(_('This field is required.'))
+            raise ValidationError(self.messages['required'])
         if self.min_length is not None and len(value) < self.min_length:
             message = self.messages['too_short']
             if message is None:
-                message =ngettext('Please enter at least %d character.',
-                                  'Please enter at least %d characters.',
-                                  self.min_length) % self.min_length
+                message = ngettext('Please enter at least %d character.',
+                                   'Please enter at least %d characters.',
+                                   self.min_length) % self.min_length
             raise ValidationError(message)
         if self.max_length is not None and len(value) > self.max_length:
             message = self.messages['too_long']
@@ -1053,12 +1061,53 @@ class ModelField(Field):
             if self.required:
                 raise ValidationError(self.messages['required'])
             return None
+        value = self._coerce_value(value)
 
         rv = self.model.objects.filter_by(**{self.key: value}).first()
         if rv is None:
             raise ValidationError(self.messages['not_found'] %
                                   {'value': value})
         return rv
+
+    def _coerce_value(self, value):
+        return value
+
+    def to_primitive(self, value):
+        if value is None:
+            return u''
+        elif isinstance(value, self.model):
+            value = getattr(value, self.key)
+        return unicode(value)
+
+
+class HiddenModelField(ModelField):
+    """A hidden field that points to a model identified by primary key.
+    Can be used to pass models through a form.
+    """
+    widget = HiddenInput
+
+    # these messages should never show up unless ...
+    #   ... the user tempered with the form data
+    #   ... or the object went away in the meantime.
+    messages = dict(
+        invalid=lazy_gettext('Invalid value.'),
+        not_found=lazy_gettext('Key does not exist.')
+    )
+
+    def __init__(self, model, key=None, required=False, message=None,
+                 validators=None, widget=None, messages=None):
+        if key is None:
+            keys = db.class_mapper(model).primary_key
+            assert len(keys) == 1, 'Model has multiple primary keys'
+            key = keys[0].name
+        ModelField.__init__(self, model, key, required=False, message=None,
+                            validators=None, widget=None, messages=None)
+
+    def _coerce_value(self, value):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            raise ValidationError(self.messages['invalid'])
 
 
 class ChoiceField(Field):
@@ -1388,32 +1437,24 @@ class Form(object):
     """
     __metaclass__ = FormMeta
 
-    def __init__(self, data=None, initial=None,
-                 csrf_protected=True, redirect_tracking=True):
+    csrf_protected = True
+    redirect_tracking = True
+
+    def __init__(self, initial=None):
         self.request = get_request()
         if initial is None:
             initial = {}
         self.initial = initial
-        self.csrf_protected = csrf_protected
-        self.redirect_tracking = redirect_tracking
         self.invalid_redirect_targets = set()
 
         self._root_field = _bind(self.__class__._root_field, self, {})
         self.reset()
-
-        if data is not None:
-            self.validate(data)
 
     def __getitem__(self, key):
         return self.data[key]
 
     def __contains__(self, key):
         return key in self.data
-
-    def on_init(self):
-        """This method is called before validation in the constructor.
-        It is not called if the form is used as a form field!
-        """
 
     def as_widget(self):
         """Return the form as widget."""
@@ -1480,7 +1521,6 @@ class Form(object):
 
     def reset(self):
         """Resets the form."""
-        self.on_init()
         self.data = self.initial.copy()
         self.errors = {}
         self.raw_data = None

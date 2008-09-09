@@ -16,7 +16,9 @@ from datetime import date
 
 from zine import cache, pingback
 from zine.i18n import _
-from zine.application import add_link, url_for, render_response
+from zine.database import db
+from zine.application import add_link, url_for, render_response, emit_event, \
+     iter_listeners, Response
 from zine.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
     COMMENT_UNMODERATED
 from zine.utils import dump_json, build_tag_uri, ClosingIterator
@@ -24,13 +26,13 @@ from zine.utils.uploads import get_filename, guess_mimetype
 from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
 from zine.utils.http import redirect_to
+from zine.forms import NewCommentForm
 from werkzeug.exceptions import NotFound, Forbidden
 
 
 @cache.response(vary=('user',))
 def do_index(request, page=1):
-    """
-    Render the most recent posts.
+    """Render the most recent posts.
 
     Available template variables:
 
@@ -53,8 +55,7 @@ def do_index(request, page=1):
 
 
 def do_archive(request, year=None, month=None, day=None, page=1):
-    """
-    Render the monthly archives.
+    """Render the monthly archives.
 
     Available template variables:
 
@@ -89,8 +90,7 @@ def do_archive(request, year=None, month=None, day=None, page=1):
 
 
 def do_show_tag(request, slug, page=1):
-    """
-    Show all posts tagged with a given tag slug.
+    """Show all posts tagged with a given tag slug.
 
     Available template variables:
 
@@ -120,8 +120,7 @@ def do_show_tag(request, slug, page=1):
 
 
 def do_show_tag_cloud(request):
-    """
-    Show all posts tagged with a given tag slug.
+    """Show all posts tagged with a given tag slug.
 
     Available template variables:
 
@@ -137,8 +136,7 @@ def do_show_tag_cloud(request):
 
 
 def do_show_author(request, username, page=1):
-    """
-    Show the user profile of an author / editor or administrator.
+    """Show the user profile of an author / editor or administrator.
 
     Available template variables:
 
@@ -171,8 +169,7 @@ def do_show_author(request, username, page=1):
 
 
 def do_authors(request):
-    """
-    Show a list of authors.
+    """Show a list of authors.
 
     Available template variables:
 
@@ -188,8 +185,7 @@ def do_authors(request):
 @cache.response(vary=('user',))
 @pingback.inject_header
 def do_show_post(request, year, month, day, slug):
-    """
-    Show as post and give users the possibility to comment to this
+    """Show as post and give users the possibility to comment to this
     story if comments are enabled.
 
     Available template variables:
@@ -233,39 +229,10 @@ def do_show_post(request, year, month, day, slug):
     elif not post.can_access():
         raise Forbidden()
 
-    # handle comment posting
-    errors = []
-    form = {'name': '', 'email': '', 'www': '', 'body': '', 'parent': ''}
-    if request.method == 'POST' and post.comments_enabled:
-        form['name'] = author = request.form.get('name')
-        if not request.user.is_somebody:
-            if not author:
-                errors.append(_('You have to enter your name.'))
-            elif len(author) > 100:
-                errors.append(_('Your name is too long.'))
-            form['email'] = email = request.form.get('email')
-            if not (email and check(is_valid_email, email)):
-                errors.append(_('You have to enter a valid mail address.'))
-            elif len(email) > 250:
-                errors.append(_('Your E-Mail address is too long.'))
-            form['www'] = www = request.form.get('www')
-            if www and not check(is_valid_url, www):
-                errors.append(_('You have to enter a valid URL or omit the field.'))
-            elif len(www) > 200:
-                errors.append(_('The URL is too long.'))
-        else:
-            author = request.user
-            email = www = None
-        form['body'] = body = request.form.get('body')
-        if not body or len(body) < 2:
-            errors.append(_('Your comment is too short.'))
-        elif len(body) > 6000:
-            errors.append(_('Your comment is too long.'))
-        form['parent'] = parent = request.form.get('parent')
-        if parent:
-            parent = Comment.objects.get(parent)
-        else:
-            parent = None
+    form = NewCommentForm(post, request.user)
+
+    if request.method == 'POST' and post.comments_enabled and \
+       form.validate(request.form):
 
         #! allow plugins to do additional comment validation.
         #! the return value should be an iterable with error strings that
@@ -279,48 +246,43 @@ def do_show_post(request, year, month, day, slug):
         # if we don't have errors let's save it and emit an
         # `before-comment-saved` event so that plugins can do
         # block comments so that administrators have to approve it
-        if not errors:
-            ip = request.environ.get('REMOTE_ADDR') or '0.0.0.0'
-            comment = Comment(post, author, body, email, www, parent,
-                              submitter_ip=ip)
+        comment = form.make_comment()
 
-            #! use this event to block comments before they are saved.  This
-            #! is useful for antispam and other ways of moderation.
-            emit_event('before-comment-saved', request, comment)
+        #! use this event to block comments before they are saved.  This
+        #! is useful for antispam and other ways of moderation.
+        emit_event('before-comment-saved', request, comment)
 
-            # Moderate Comment?  Now that the spam check any everything
-            # went through the processing we explicitly set it to
-            # unmodereated if the blog configuration demands that
-            if not comment.blocked and comment.requires_moderation:
-                comment.status = COMMENT_UNMODERATED
-                comment.blocked_msg = _('Comment waiting for approval')
+        # Moderate Comment?  Now that the spam check any everything
+        # went through the processing we explicitly set it to
+        # unmodereated if the blog configuration demands that
+        if not comment.blocked and comment.requires_moderation:
+            comment.status = COMMENT_UNMODERATED
+            comment.blocked_msg = _('Comment waiting for approval')
 
-            db.commit()
+        db.commit()
 
-            #! this is sent directly after the comment was saved.  Useful if
-            #! you want to send mail notifications or whatever.
-            emit_event('after-comment-saved', request, comment)
+        #! this is sent directly after the comment was saved.  Useful if
+        #! you want to send mail notifications or whatever.
+        emit_event('after-comment-saved', request, comment)
 
-            # Still allow the user to see his comment
-            if comment.blocked:
-                comment.make_visible_for_request(request)
+        # Still allow the user to see his comment
+        if comment.blocked:
+            comment.make_visible_for_request(request)
 
-            return redirect_to(post)
+        return redirect_to(post)
 
     add_link('alternate', post.comment_feed_url, 'application/atom+xml',
              _('Comments Feed'))
 
     return render_response('show_post.html',
         post=post,
-        form=form,
-        errors=errors
+        form=form.as_widget()
     )
 
 
 def do_service_rsd(request):
-    """
-    Serves and RSD definition (really simple discovery) so that blog frontends
-    can query the apis that are available.
+    """Serves and RSD definition (really simple discovery) so that blog
+    frontends can query the apis that are available.
 
     :URL endpoint: ``blog/service_rsd``
     """
@@ -328,9 +290,7 @@ def do_service_rsd(request):
 
 
 def do_json_service(request, identifier):
-    """
-    Handle a JSON service request.
-    """
+    """Handle a JSON service request."""
     handler = request.app._services.get(identifier)
     if handler is None:
         raise NotFound()
@@ -353,9 +313,7 @@ def do_json_service(request, identifier):
 
 
 def do_xml_service(request, identifier):
-    """
-    Handle a XML service request.
-    """
+    """Handle a XML service request."""
     handler = request.app._services.get(identifier)
     if handler is None:
         raise NotFound()
@@ -382,8 +340,7 @@ def do_xml_service(request, identifier):
 @cache.response(vary=('user',))
 def do_atom_feed(request, author=None, year=None, month=None, day=None,
                  tag=None, post_slug=None):
-    """
-    Renders an atom feed requested.
+    """Renders an atom feed requested.
 
     :URL endpoint: ``blog/atom_feed``
     """

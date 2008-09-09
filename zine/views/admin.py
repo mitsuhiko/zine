@@ -1790,13 +1790,13 @@ def do_about_zine(request):
 @require_role(ROLE_AUTHOR)
 def do_change_password(request):
     """Allow the current user to change his password."""
-    form = ChangePasswordForm()
+    form = ChangePasswordForm(request.user)
 
     if request.method == 'POST':
         if request.form.get('cancel'):
             return form.redirect('admin/index')
         if form.validate(request.form):
-            request.user.set_password(form['new_password'])
+            form.user.set_password(form['new_password'])
             db.commit()
             flash(_('Password changed successfully.'), 'configure')
             return form.redirect('admin/index')

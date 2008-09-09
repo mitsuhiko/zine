@@ -61,27 +61,6 @@ def get_cache_context(vary, eager_caching=False, request=None):
     )
 
 
-def make_metaclass(vary=(), cache_key=None, eager_caching=False,
-                   timeout=None, admix_arguments=True, parent=type):
-    """This metaclass factory returns a new type that can be used as metaclass
-    for classes that are cached.  If the parent of the class has already a
-    metaclass you have to pass this class to the factory function using the
-    `parent` keyword argument.
-    """
-    class CachedClass(parent):
-        def __call__(cls, *args, **kwargs):
-            if cache_key is None:
-                module =  cls.__module__
-                if module.startswith('zine.'):
-                    module = module[10:]
-                key = 'instance/%s.%s' % (module, cls.__name__)
-            else:
-                key = cache_key
-            return result(key, vary, eager_caching, timeout, admix_arguments,
-                          1)(parent.__call__)(cls, *args, **kwargs)
-    return CachedClass
-
-
 def result(cache_key, vary=(), eager_caching=False, timeout=None,
            admix_arguments=True, skip_posargs=0):
     """Cache the result of the function for a given timeout.  The `vary`

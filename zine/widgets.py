@@ -85,7 +85,6 @@ class TagCloud(Widget):
     A tag cloud. What else?
     """
 
-    __metaclass__ = cache.make_metaclass(vary=('user',))
     NAME = 'get_tag_cloud'
     TEMPLATE = 'widgets/tagcloud.html'
 
@@ -124,7 +123,6 @@ class PostArchiveSummary(Widget):
     Show the last n months/years/days with posts.
     """
 
-    __metaclass__ = cache.make_metaclass(vary=('user',))
     NAME = 'get_post_archive_summary'
     TEMPLATE = 'widgets/post_archive_summary.html'
 
@@ -165,7 +163,6 @@ class LatestPosts(Widget):
     Show the latest n posts.
     """
 
-    __metaclass__ = cache.make_metaclass(vary=('user',))
     NAME = 'get_latest_posts'
     TEMPLATE = 'widgets/latest_posts.html'
 
@@ -202,7 +199,6 @@ class LatestComments(Widget):
     Show the latest n comments.
     """
 
-    __metaclass__ = cache.make_metaclass(vary=('user',))
     NAME = 'get_latest_comments'
     TEMPLATE = 'widgets/latest_comments.html'
 

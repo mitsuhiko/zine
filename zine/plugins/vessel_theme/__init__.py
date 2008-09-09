@@ -13,8 +13,6 @@ from os.path import join, dirname
 from zine.api import url_for, _
 from zine.views.admin import render_admin_response
 from zine.utils.admin import flash
-from zine.utils.http import redirect_to
-from zine.utils.xxx import CSRFProtector
 from zine.utils import forms
 
 
@@ -34,8 +32,8 @@ class ConfigurationForm(forms.Form):
     """Very simple form for the variation selection."""
     variation = forms.ChoiceField()
 
-    def on_init(self):
-        """If the form is initialized, populate the variations."""
+    def __init__(self, initial=None):
+        forms.Form.__init__(self, initial)
         choices = sorted(variations.items(), key=lambda x: x[1].lower())
         self.fields['variation'].choices = choices
 

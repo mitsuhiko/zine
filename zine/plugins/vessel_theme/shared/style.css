@@ -176,3 +176,12 @@ div.pagination a, div.pagination strong {
     margin: 0 2px;
     text-decoration: none;
 }
+
+ul.errors {
+    list-style: none;
+    margin: 0.5em 0;
+    padding: 0.3em;
+    background-color: #F8E6E6;
+    border: 1px solid #D87F7F;
+    color: #5A1111;
+}

@@ -15,7 +15,7 @@
 import re
 from urlparse import urlparse, urljoin, urlsplit
 
-from zine.i18n import _
+from zine.i18n import lazy_gettext
 
 
 _mail_re = re.compile(r'''(?xi)
@@ -61,82 +61,60 @@ def check_external_url(app, url, check=False):
     return check
 
 
-def check(validator, value, form=None):
-    """Call a validator and return True if it's valid, False otherwise:
+def check(validator, value, *args, **kwargs):
+    """Call a validator and return True if it's valid, False otherwise.
+    The first argument is the validator, the second a value.  All other
+    arguments are forwarded to the validator function.
 
     >>> check(is_valid_email, 'foo@bar.com')
     True
     """
     try:
-        validator(form, value)
+        validator(*args, **kwargs)(None, value)
     except ValidationError:
         return False
     return True
 
 
-def is_valid_email(form, mail):
+def is_valid_email(message=None):
     """Check if the string passed is a valid mail address.
 
-    >>> is_valid_email('somebody@example.com')
+    >>> check(is_valid_email, 'somebody@example.com')
     True
-    >>> is_valid_email('somebody AT example DOT com')
-    Traceback (most recent call last):
-      ...
-    ValidationError: You have to enter a valid e-mail address.
-    >>> is_valid_email('some random string')
-    Traceback (most recent call last):
-      ...
-    ValidationError: You have to enter a valid e-mail address.
+    >>> check(is_valid_email, 'somebody AT example DOT com')
+    False
+    >>> check(is_valid_email, 'some random string')
+    False
 
     Because e-mail validation is painfully complex we just check the first
     part of the email if it looks okay (comments are not handled!) and ignore
     the second.
     """
-    if len(email) > 250 or _mail_re.match(email) is None:
-        raise ValidationError(_('You have to enter a valid e-mail address.'))
+    if message is None:
+        message = lazy_gettext('You have to enter a valid e-mail address.')
+    def validator(form, value):
+        if len(value) > 250 or _mail_re.match(value) is None:
+            raise ValidationError(message)
+    return validator
 
 
-def is_valid_url(form, url):
+def is_valid_url(message=None):
     """Check if the string passed is a valid URL.  We also blacklist some
     url schemes like javascript for security reasons.
 
-    >>> is_valid_url(None, 'http://pocoo.org/')
-    >>> is_valid_url(None, 'http://zine.pocoo.org/archive')
-    >>> is_valid_url(None, 'zine.pocoo.org/archive')
-    Traceback (most recent call last):
-      ...
-    ValidationError: You have to enter a valid URL.
-    >>> is_valid_url(None, 'javascript:alert("Zine rocks!");')
-    Traceback (most recent call last):
-      ...
-    ValidationError: You have to enter a valid URL.
+    >>> check(is_valid_url, 'http://pocoo.org/')
+    True
+    >>> check(is_valid_url, 'http://zine.pocoo.org/archive')
+    True
+    >>> check(is_valid_url, 'zine.pocoo.org/archive')
+    False
+    >>> check(is_valid_ur, 'javascript:alert("Zine rocks!");')
+    False
     """
-    protocol = urlparse(url)[0]
-    if not protocol or protocol == 'javascript':
-        raise ValidationError(_('You have to enter a valid URL.'))
-
-
-def is_valid_ip(form, value):
-    """Check if the string provided is a valid IP.
-
-    >>> is_valid_ip(None, '192.168.10.99')
-    >>> is_valid_ip(None, '255.0.23.1')
-    >>> is_valid_ip(None, '255.0.23')
-    Traceback (most recent call last):
-      ...
-    ValidationError: You have to enter a valid IP.
-    >>> is_valid_ip(None, '255.-0.23.5')
-    Traceback (most recent call last):
-      ...
-    ValidationError: You have to enter a valid IP.
-    >>> is_valid_ip(None, '256.17.23.5')
-    Traceback (most recent call last):
-      ...
-    ValidationError: You have to enter a valid IP.
-    """
-    # XXX: ipv6!
-    idx = 0
-    for idx, bit in enumerate(value.split('.')):
-        if not bit.isdigit() or not 0 <= int(bit) <= 255:
-            raise ValidationError(_('You have to enter a valid IP.'))
-    return idx == 3
+    if message is None:
+        message = lazy_gettext('You have to enter a valid URL.')
+    def validator(form, value):
+        protocol = urlparse(value)[0]
+        if not protocol or protocol == 'javascript':
+            raise ValidationError(message)
+    return validator

@@ -85,5 +85,5 @@ def redirect_back(*args, **kwargs):
     """
     target = get_redirect_target()
     if target is None:
-        target = get_url(*args, **kwargs)
+        target = url_for(*args, **kwargs)
     return redirect(target)

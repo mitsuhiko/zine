@@ -114,7 +114,8 @@ class IntelligentRedirect(HiddenFormField):
 
     def __call__(self, *args, **kwargs):
         """Trigger the redirect."""
-        from zine.application import redirect, url_for
+        from zine.application import url_for
+        from zine.utils.http import redirect
         target = self.get_redirect_target()
         if target is None:
             target = url_for(*args, **kwargs)

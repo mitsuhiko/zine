@@ -20,35 +20,26 @@
   {%- endif %}
 {%- endmacro %}
 
-{% macro render_comment_editor(post, form, errors) %}
-  <form action="#leave-reply" class="comments" method="post">
+{% macro render_comment_editor(post, form) %}
+  {%- call form(class='comments') %}
     {{ emit_event('before-comment-editor-rendered', post) }}
-    {%- if not request.user.is_manager %}
+    {%- if not form.small_form %}
     <dl>
-      <dt><label for="name">{{ _("Name*") }}</label></dt>
-      <dd>{{ h.input_field('name', form.name) }}</dd>
-      <dt><label for="email">{{ _("Mail* (not published)") }}</label></dt>
-      <dd>{{ h.input_field('email', form.email) }}</dd>
-      <dt><label for="www">{{ _("Website") }}</label></dt>
-      <dd>{{ h.input_field('www', form.www) }}</dd>
+      <dt><label for="f_author">{{ _("Name*") }}</label></dt>
+      <dd>{{ form.author }}</dd>
+      <dt><label for="f_email">{{ _("Mail* (not published)") }}</label></dt>
+      <dd>{{ form.email }}</dd>
+      <dt><label for="f_www">{{ _("Website") }}</label></dt>
+      <dd>{{ form.www }}</dd>
     </dl>
     {%- endif %}
-    <div>{{ h.textarea('body', form.body) }}
-         {{ h.input_field('parent', form.parent, 'hidden') }}</div>
+    <div>{{ form.body }}{{ form.parent }}</div>
     <div id="comment-message">{# used for the reply callback #}</div>
-    {%- if errors %}
-      <div class="error">
-        <h3>{{ _('Could not Post Comment') }}</h3>
-        {%- for error in errors %}
-          <p>{{ error }}</p>
-        {%- endfor %}
-      </div>
-    {%- endif %}
     {{ emit_event('before-comment-editor-buttons-rendered', post) }}
     <div class="actions">
       <input type="submit" value="{{ _('Submit Comment') }}">
       <input type="reset" value="{{ _('Reset Form') }}">
     </div>
     {{ emit_event('after-comment-editor-rendered', post) }}
-  </form>
+  {%- endcall %}
 {% endmacro %}
