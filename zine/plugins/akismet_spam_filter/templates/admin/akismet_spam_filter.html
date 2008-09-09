@@ -8,9 +8,10 @@
     get one at <a href="{{ api_link }}">WordPress.com</a>.
   {% endtrans %}</p>
   <h2>API Key</h2>
-  <form action="" method="post">
-    {{ csrf_protector }}
-    {{ h.input_field('api_key', api_key) }}
+  {%- call form() %}
+  <p>{{ form.api_key }}</p>
+  <div class="actions">
     <input type="submit" value="{{ _('Update Key') }}">
-  </form>
+  </div>
+  {%- endcall %}
 {% endblock %}

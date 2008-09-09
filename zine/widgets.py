@@ -23,9 +23,6 @@ from os import path
 from zine.api import *
 from zine.database import pages as pages_table
 from zine.models import Post, Tag, Comment, Page
-from zine.utils.xxx import CSRFProtector
-
-from jinja2 import nodes
 
 
 _format_re = re.compile(r'(?<!%)%s')
@@ -67,11 +64,6 @@ class Widget(object):
             return args
         return dict(zip(args, (None,) * (len(rv[3]) - len(args) - 1) + rv[3]))
 
-    @staticmethod
-    def configure_widget(initial_args, request):
-        """Display the configuration page."""
-        return None, None
-
     def render(self):
         """Render the template."""
         return render_template(self.TEMPLATE, widget=self)
@@ -96,27 +88,6 @@ class TagCloud(Widget):
     def get_display_name():
         return _('Tag Cloud')
 
-    @staticmethod
-    def configure_widget(initial_args, request):
-        args = form = initial_args.copy()
-        error = None
-        if request.method == 'POST':
-            args['max'] = max = request.form.get('max', '')
-            if not max:
-                args['max'] = None
-            elif not max.isdigit():
-                error = _('Maximum number of tags must be empty '
-                          'or a number.')
-            else:
-                args['max'] = int(max)
-            args['show_title'] = request.form.get('show_title') == 'yes'
-        if error is not None:
-            args = None
-        return args, render_template('admin/widgets/tagcloud.html',
-            error=error,
-            form=form
-        )
-
 
 class PostArchiveSummary(Widget):
     """
@@ -134,29 +105,6 @@ class PostArchiveSummary(Widget):
     def get_display_name():
         return _('Post Archive Summary')
 
-    @staticmethod
-    def configure_widget(initial_args, request):
-        args = form = initial_args.copy()
-        errors = []
-        if request.method == 'POST':
-            args['detail'] = detail = request.form.get('detail')
-            if detail not in ('years', 'months', 'days'):
-                errors.append(_('Detail must be years, months or days.'))
-            args['limit'] = limit = request.form.get('limit')
-            if not limit:
-                args['limit'] = None
-            elif not limit.isdigit():
-                errors.append(_('Limit must be omited or a valid number.'))
-            else:
-                args['limit'] = int(limit)
-            args['show_title'] = request.form.get('show_title') == 'yes'
-        if errors:
-            args = None
-        return args, render_template('admin/widgets/post_archive_summary.html',
-            errors=errors,
-            form=form
-        )
-
 
 class LatestPosts(Widget):
     """
@@ -173,24 +121,6 @@ class LatestPosts(Widget):
     @staticmethod
     def get_display_name():
         return _('Latest Posts')
-
-    @staticmethod
-    def configure_widget(initial_args, request):
-        args = form = initial_args.copy()
-        errors = []
-        if request.method == 'POST':
-            args['limit'] = limit = request.form.get('limit')
-            if not limit:
-                args['limit'] = None
-            elif not limit.isdigit():
-                errors.append(_('Limit must be omited or a valid number.'))
-            else:
-                args['limit'] = int(limit)
-            args['show_title'] = request.form.get('show_title') == 'yes'
-        if errors:
-            args = None
-        return args, render_template('admin/widgets/latest_posts.html',
-                                     errors=errors, form=form)
 
 
 
@@ -210,25 +140,6 @@ class LatestComments(Widget):
     @staticmethod
     def get_display_name():
         return _('Latest Comments')
-
-    @staticmethod
-    def configure_widget(initial_args, request):
-        args = form = initial_args.copy()
-        errors = []
-        if request.method == 'POST':
-            args['limit'] = limit = request.form.get('limit')
-            if not limit:
-                args['limit'] = None
-            elif not limit.isdigit():
-                errors.append(_('Limit must be omited or a valid number.'))
-            else:
-                args['limit'] = int(limit)
-            args['show_title'] = request.form.get('show_title') == 'yes'
-            args['ignore_blocked'] = request.form.get('ignore_blocked') == 'yes'
-        if errors:
-            args = None
-        return args, render_template('admin/widgets/latest_comments.html',
-                                     errors=errors, form=form)
 
 
 class PagesNavigation(Widget):

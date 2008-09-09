@@ -859,7 +859,7 @@ class Mapping(Field):
         value = _force_dict(value, silent=True)
         result = {}
         for key, field in self.fields.iteritems():
-            result[key] = field.to_primitive(value.get(name))
+            result[key] = field.to_primitive(value.get(key))
         return result
 
     def _bind(self, form, memo):
@@ -1509,7 +1509,14 @@ class Form(object):
 
     @property
     def is_valid(self):
+        """True if the form is valid."""
         return not self.errors
+
+    @property
+    def has_changed(self):
+        """True if the form has changed."""
+        return self._root_field.to_primitive(self.initial) != \
+               self._root_field.to_primitive(self.data)
 
     @property
     def fields(self):
