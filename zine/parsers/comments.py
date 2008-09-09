@@ -12,7 +12,7 @@
 """
 import re
 from zine.fragment import Fragment, Node, TextNode
-from zine.utils.validators import is_valid_url
+from zine.utils.validators import is_valid_url, check
 from zine.parsers import BaseParser
 
 
@@ -133,7 +133,7 @@ class CommentParser(BaseParser):
                     href, caption = data.split(' ', 1)
                 else:
                     href = caption = data
-                if is_valid_url(href):
+                if check(is_valid_url, href):
                     new_node = Node('a', {
                         'href':     href,
                         'rel':      'nofollow',

@@ -110,7 +110,7 @@ from urllib import quote
 from werkzeug import cached_property, escape, find_modules, import_string
 
 from zine.application import get_application
-from zine.utils.mail import split_email, is_valid_email
+from zine.utils.mail import split_email, is_valid_email, check
 from zine.i18n import Translations, lazy_gettext
 
 
@@ -633,8 +633,8 @@ class Plugin(object):
                 result.append(escape(name))
             else:
                 result.append('<a href="%s">%s</a>' % (
-                    escape(is_valid_email(contact) and 'mailto:'+contact or
-                           contact),
+                    escape(check(is_valid_email, contact) and
+                           'mailto:' + contact or contact),
                     escape(name)
                 ))
         return u', '.join(result)

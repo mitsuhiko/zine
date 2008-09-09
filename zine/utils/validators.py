@@ -12,9 +12,36 @@
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
     :license: GNU GPL.
 """
-import md5
-import sha
+import re
 from urlparse import urlparse, urljoin, urlsplit
+
+from zine.i18n import _
+
+
+_mail_re = re.compile(r'''(?xi)
+    (?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+
+        (?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|
+        "(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|
+          \\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@.
+''')
+
+
+class ValidationError(ValueError):
+    """Exception raised when invalid data is encountered."""
+
+    def __init__(self, message):
+        if not isinstance(message, (list, tuple)):
+            messages = [message]
+        # make all items in the list unicode (this also evaluates
+        # lazy translations in there)
+        messages = map(unicode, messages)
+        Exception.__init__(self, messages[0])
+
+        from zine.utils.forms import ErrorList
+        self.messages = ErrorList(messages)
+
+    def unpack(self, key=None):
+        return {key: self.messages}
 
 
 def check_external_url(app, url, check=False):
@@ -34,109 +61,82 @@ def check_external_url(app, url, check=False):
     return check
 
 
-def check_pwhash(pwhash, password):
-    """Check a password against a given hash value. Since
-    many forums save md5 passwords with no salt and it's
-    technically impossible to convert this to an sha hash
-    with a salt we use this to be able to check for
-    plain passwords::
+def check(validator, value, form=None):
+    """Call a validator and return True if it's valid, False otherwise:
 
-        plain$$default
-
-    md5 passwords without salt::
-
-        md5$$c21f969b5f03d33d43e04f8f136e7682
-
-    md5 passwords with salt::
-
-        md5$123456$7faa731e3365037d264ae6c2e3c7697e
-
-    sha passwords::
-
-        sha$123456$118083bd04c79ab51944a9ef863efcd9c048dd9a
-
-    Note that the integral passwd column in the table is
-    only 60 chars long. If you have a very large salt
-    or the plaintext password is too long it will be
-    truncated.
-
-    >>> check_pwhash('plain$$default', 'default')
+    >>> check(is_valid_email, 'foo@bar.com')
     True
-    >>> check_pwhash('sha$$5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8', 'password')
-    True
-    >>> check_pwhash('sha$$5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8', 'wrong')
-    False
-    >>> check_pwhash('md5$xyz$bcc27016b4fdceb2bd1b369d5dc46c3f', u'example')
-    True
-    >>> check_pwhash('sha$5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8', 'password')
-    False
-    >>> check_pwhash('md42$xyz$bcc27016b4fdceb2bd1b369d5dc46c3f', 'example')
-    False
     """
-    if isinstance(password, unicode):
-        password = password.encode('utf-8')
-    if pwhash.count('$') < 2:
+    try:
+        validator(form, value)
+    except ValidationError:
         return False
-    method, salt, hashval = pwhash.split('$', 2)
-    if method == 'plain':
-        return hashval == password
-    elif method == 'md5':
-        h = md5.new()
-    elif method == 'sha':
-        h = sha.new()
-    else:
-        return False
-    h.update(salt)
-    h.update(password)
-    return h.hexdigest() == hashval
+    return True
 
 
-def is_valid_email(mail):
+def is_valid_email(form, mail):
     """Check if the string passed is a valid mail address.
 
     >>> is_valid_email('somebody@example.com')
     True
     >>> is_valid_email('somebody AT example DOT com')
-    False
+    Traceback (most recent call last):
+      ...
+    ValidationError: You have to enter a valid e-mail address.
     >>> is_valid_email('some random string')
-    False
+    Traceback (most recent call last):
+      ...
+    ValidationError: You have to enter a valid e-mail address.
+
+    Because e-mail validation is painfully complex we just check the first
+    part of the email if it looks okay (comments are not handled!) and ignore
+    the second.
     """
-    return '@' in mail
+    if len(email) > 250 or _mail_re.match(email) is None:
+        raise ValidationError(_('You have to enter a valid e-mail address.'))
 
 
-def is_valid_url(url):
-    """Check if the string passed is a valid url.
+def is_valid_url(form, url):
+    """Check if the string passed is a valid URL.  We also blacklist some
+    url schemes like javascript for security reasons.
 
-    >>> is_valid_url('http://pocoo.org/')
-    True
-    >>> is_valid_url('http://zine.pocoo.org/archive')
-    True
-    >>> is_valid_url('zine.pocoo.org/archive')
-    False
-    >>> is_valid_url('javascript:alert("Zine rocks!");')
-    False
+    >>> is_valid_url(None, 'http://pocoo.org/')
+    >>> is_valid_url(None, 'http://zine.pocoo.org/archive')
+    >>> is_valid_url(None, 'zine.pocoo.org/archive')
+    Traceback (most recent call last):
+      ...
+    ValidationError: You have to enter a valid URL.
+    >>> is_valid_url(None, 'javascript:alert("Zine rocks!");')
+    Traceback (most recent call last):
+      ...
+    ValidationError: You have to enter a valid URL.
     """
     protocol = urlparse(url)[0]
-    return bool(protocol and protocol != 'javascript')
+    if not protocol or protocol == 'javascript':
+        raise ValidationError(_('You have to enter a valid URL.'))
 
 
-def is_valid_ip(value):
+def is_valid_ip(form, value):
     """Check if the string provided is a valid IP.
 
-    >>> is_valid_ip('192.168.10.99')
-    True
-    >>> is_valid_ip('255.0.23.1')
-    True
-    >>> is_valid_ip('255.0.23')
-    False
-    >>> is_valid_ip('255.-0.23.5')
-    False
-    >>> is_valid_ip('256.17.23.5')
-    False
+    >>> is_valid_ip(None, '192.168.10.99')
+    >>> is_valid_ip(None, '255.0.23.1')
+    >>> is_valid_ip(None, '255.0.23')
+    Traceback (most recent call last):
+      ...
+    ValidationError: You have to enter a valid IP.
+    >>> is_valid_ip(None, '255.-0.23.5')
+    Traceback (most recent call last):
+      ...
+    ValidationError: You have to enter a valid IP.
+    >>> is_valid_ip(None, '256.17.23.5')
+    Traceback (most recent call last):
+      ...
+    ValidationError: You have to enter a valid IP.
     """
     # XXX: ipv6!
     idx = 0
     for idx, bit in enumerate(value.split('.')):
         if not bit.isdigit() or not 0 <= int(bit) <= 255:
-            return False
+            raise ValidationError(_('You have to enter a valid IP.'))
     return idx == 3

@@ -13,7 +13,7 @@ from smtplib import SMTP, SMTPException
 from urlparse import urlparse
 
 from zine.utils import _, local
-from zine.utils.validators import is_valid_email
+from zine.utils.validators import is_valid_email, check
 
 
 _mail_split_re = re.compile(r'^(.*?)(?:\s+<(.+)>)?$')
@@ -32,7 +32,7 @@ def split_email(s):
     p1, p2 = _mail_split_re.search(s).groups()
     if p2:
         return p1, p2
-    elif is_valid_email(p1):
+    elif check(is_valid_email, p1):
         return None, p1
     return p1, None
 

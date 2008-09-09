@@ -35,7 +35,7 @@ from zine.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
 from zine.database import db, comments as comment_table, posts, \
      post_tags, post_links, secure_database_uri
 from zine.utils import dump_json, load_json
-from zine.utils.validators import is_valid_email, is_valid_url
+from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.admin import flash, gen_slug, commit_config_change, \
      load_zine_reddit
 from zine.utils.pagination import AdminPagination
@@ -693,7 +693,7 @@ def do_edit_comment(request, comment_id):
             if not author:
                 errors.append(_('You have to give the comment an author.'))
             form['email'] = email = request.form.get('email', '')
-            if email and not is_valid_email(email):
+            if email and not check(is_valid_email, email):
                 errors.append(_('You have to provide a valid mail address for '
                                 'the author.'))
             form['www'] = www = request.form.get('www')
@@ -709,7 +709,7 @@ def do_edit_comment(request, comment_id):
             errors.append(_(u'Unknown parser “%s”.') % parser)
         if not body:
             errors.append(_('Need a text for this comment.'))
-        if www and not is_valid_url(www):
+        if www and not check(is_valid_url, www):
             errors.append(_('You have to ommitt the url or provide a '
                             'valid one.'))
         form['pub_date'] = pub_date = request.form.get('pub_date')
@@ -1050,7 +1050,7 @@ def do_edit_user(request, user_id=None):
         display_name = form['display_name'] = request.form.get('display_name')
         description = form['description'] = request.form.get('description')
         email = form['email'] = request.form.get('email', '')
-        if not is_valid_email(email):
+        if not check(is_valid_email, email):
             errors.append(_('The user needs a valid mail address.'))
         www = form['www'] = request.form.get('www', '')
         try:
@@ -1224,7 +1224,7 @@ def do_basic_options(request):
             errors.append(_('You have to provide a blog title'))
         form['blog_tagline'] = blog_tagline = request.form.get('blog_tagline')
         form['blog_email'] = blog_email = request.form.get('blog_email', '')
-        if blog_email and not is_valid_email(blog_email):
+        if blog_email and not check(is_valid_email, blog_email):
             errors.append(_('You have to provide a valid e-mail address '
                             'for the blog e-mail field.'))
         form['language'] = language = request.form.get('language')

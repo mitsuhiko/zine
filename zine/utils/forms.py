@@ -28,9 +28,11 @@ except ImportError:
 from werkzeug import html, escape, MultiDict
 
 from zine.application import get_request, url_for
-from zine.i18n import _, ngettext, parse_datetime, format_system_datetime
+from zine.i18n import _, ngettext, lazy_gettext, parse_datetime, \
+     format_system_datetime
 from zine.utils.http import get_redirect_target, redirect
 from zine.utils.crypto import gen_random_identifier
+from zine.utils.validators import ValidationError
 
 
 class DataIntegrityError(ValueError):
@@ -303,7 +305,7 @@ class Widget(_Renderable):
         <ul><li>This field is required.</li></ul>
 
         Keep in mind that ``widget.errors()`` is equivalent to
-        ``widget.errors.as_ul(class_='errors')``.
+        ``widget.errors.as_ul(class_='errors', if_not_empty=True)``.
 
     `value`
 
@@ -433,6 +435,18 @@ class PasswordInput(TextInput):
     """A widget that holds a password."""
     type = 'password'
     hide_value = True
+
+
+class Textarea(Widget):
+    """Displays a textarea."""
+
+    def _attr_setdefault(self, attrs):
+        attrs.setdefault('rows', 8)
+        attrs.setdefault('cols', 40)
+
+    def render(self, **attrs):
+        self._attr_setdefault(attrs)
+        return html.textarea(self.value, name=self.name, **attrs)
 
 
 class Checkbox(Widget):
@@ -693,19 +707,6 @@ class ErrorList(_Renderable, _ListSupport, list):
         return self.render(**attrs)
 
 
-class ValidationError(ValueError):
-    """Exception raised when invalid data is encountered."""
-
-    def __init__(self, message):
-        if not isinstance(message, (list, tuple)):
-            messages = [message]
-        Exception.__init__(self, messages[0])
-        self.messages = ErrorList(messages)
-
-    def unpack(self, key=None):
-        return {key: self.messages}
-
-
 class MultipleValidationErrors(ValidationError):
     """A validation error subclass for multiple errors raised by
     subfields.  This is used by the mapping and list fields.
@@ -727,26 +728,60 @@ class MultipleValidationErrors(ValidationError):
         return rv
 
 
+class FieldMeta(type):
+
+    def __new__(cls, name, bases, d):
+        messages = {}
+        for base in reversed(bases):
+            if hasattr(base, 'messages'):
+                messages.update(base.messages)
+        if 'messages' in d:
+            messages.update(d['messages'])
+        d['messages'] = messages
+        return type.__new__(cls, name, bases, d)
+
+
 class Field(object):
     """Abstract field base class."""
 
+    __metaclass__ = FieldMeta
     widget = TextInput
+    messages = dict(required=lazy_gettext('This field is required.'))
     form = None
 
-    def __init__(self, validators=None, widget=None):
+    def __init__(self, validators=None, widget=None, messages=None):
         if validators is None:
             validators = []
         self.validators = validators
         if widget is not None:
             self.widget = widget
+        if messages:
+            self.messages = self.messages.copy()
+            self.messages.update(messages)
         assert not issubclass(self.widget, InternalWidget), \
             'can\'t use internal widgets as widgets for fields'
 
     def __call__(self, value):
         value = self.convert(value)
-        for validator in self.validators:
-            validator(self.form, value)
+        self.apply_validators(value)
         return value
+
+    def apply_validators(self, value):
+        """Applies all validators on the value."""
+        if self.should_validate(value):
+            for validate in self.validators:
+                validate(self, value)
+
+    def should_validate(self, value):
+        """Per default validate if the value is not None.  This method is
+        called before the custom validators are applied to not perform
+        validation if the field is empty and not required.
+
+        For example a validator like `is_valid_ip` is never alled if the
+        value is an empty string and the field hasn't raised a validation
+        error when checking if the field is required.
+        """
+        return value is not None
 
     def convert(self, value):
         """This can be overridden by subclasses and performs the value
@@ -769,6 +804,7 @@ class Field(object):
         rv = object.__new__(self.__class__)
         rv.__dict__.update(self.__dict__)
         rv.validators = self.validators[:]
+        rv.messages = self.messages.copy()
         rv.form = form
         return rv
 
@@ -863,9 +899,11 @@ class Multiple(Field):
     """
 
     widget = ListWidget
+    messages = dict(too_small=None, too_big=None)
 
-    def __init__(self, field, min_size=None, max_size=None):
-        Field.__init__(self)
+    def __init__(self, field, min_size=None, max_size=None,
+                 messages=None):
+        Field.__init__(self, messages=messages)
         self.field = field
         self.min_size = min_size
         self.max_size = max_size
@@ -873,17 +911,19 @@ class Multiple(Field):
     def convert(self, value):
         value = _force_list(value)
         if self.min_size is not None and len(value) < self.min_size:
-            raise ValidationError(
-                ngettext('Please provide at least %d item.',
-                         'Please provide at least %d items.',
-                         self.min_size) % self.min_size
-            )
+            message = self.messages['too_small']
+            if message is None:
+                message = ngettext('Please provide at least %d item.',
+                                   'Please provide at least %d items.',
+                                    self.min_size) % self.min_size
+            raise ValidationError(message)
         if self.max_size is not None and len(value) > self.max_size:
-            raise ValidationError(
-                ngettext('Please provide no more than %d item.',
-                         'Please provide no more than %d items.',
-                         self.max_size) % self.max_size
-            )
+            message = self.messages['too_big']
+            if message is None:
+                message = ngettext('Please provide no more than %d item.',
+                                   'Please provide no more than %d items.',
+                                    self.min_size) % self.min_size
+            raise ValidationError(message)
         result = []
         errors = {}
         for idx, item in enumerate(value):
@@ -916,9 +956,11 @@ class TextField(Field):
     ValidationError: This field is required.
     """
 
+    messages = dict(too_short=None, too_long=None)
+
     def __init__(self, required=False, min_length=None, max_length=None,
-                 validators=None, widget=None):
-        Field.__init__(self, validators, widget)
+                 validators=None, widget=None, messages=None):
+        Field.__init__(self, validators, widget, messages)
         self.required = required
         self.min_length = min_length
         self.max_length = max_length
@@ -928,18 +970,24 @@ class TextField(Field):
         if self.required and not value:
             raise ValidationError(_('This field is required.'))
         if self.min_length is not None and len(value) < self.min_length:
-            raise ValidationError(
-                ngettext('Please enter at least %d character.',
-                         'Please enter at least %d characters.',
-                         self.min_length) % self.min_length
-            )
+            message = self.messages['too_short']
+            if message is None:
+                message =ngettext('Please enter at least %d character.',
+                                  'Please enter at least %d characters.',
+                                  self.min_length) % self.min_length
+            raise ValidationError(message)
         if self.max_length is not None and len(value) > self.max_length:
-            raise ValidationError(
-                ngettext('Please enter no more than %d character.',
-                         'Please enter no more than %d characters.',
-                         self.max_length) % self.max_length
-            )
+            message = self.messages['too_long']
+            if message is None:
+                message = ngettext('Please enter no more than %d character.',
+                                   'Please enter no more than %d characters.',
+                                   self.max_length) % self.max_length
+            raise ValidationError(message)
         return value
+
+    def should_validate(self, value):
+        """Validate if the string is not empty."""
+        return bool(value)
 
 
 class DateTimeField(Field):
@@ -955,9 +1003,11 @@ class DateTimeField(Field):
     ValidationError: Please enter a valid date.
     """
 
+    messages = dict(invalid_date=lazy_gettext('Please enter a valid date.'))
+
     def __init__(self, required=False, rebase=True,
-                 validators=None, widget=None):
-        Field.__init__(self, validators, widget)
+                 validators=None, widget=None, messages=None):
+        Field.__init__(self, validators, widget, messages)
         self.required = required
         self.rebase = rebase
 
@@ -967,12 +1017,12 @@ class DateTimeField(Field):
         value = _to_string(value)
         if not value:
             if self.required:
-                raise ValidationError(_('This field is required.'))
+                raise ValidationError(self.messages['required'])
             return None
         try:
             return parse_datetime(value, rebase=self.rebase)
         except ValueError:
-            raise ValidationError('Please enter a valid date.')
+            raise ValidationError(self.messages['invalid_date'])
 
     def to_primitive(self, value):
         if isinstance(value, datetime):
@@ -985,16 +1035,12 @@ class ModelField(Field):
 
     The first argument is the name of the model, the second the named
     argument for `filter_by` (eg: `User` and ``'username'``).
-
-    The error message that is raised if the model does not exist is pretty
-    generic by default.  It can be modified by providing a `message` argument
-    to the constructor.  ``%(value)s`` is replaced with the value the user
-    entered.
     """
+    messages = dict(not_found=lazy_gettext('"%(value)s" does not exist'))
 
     def __init__(self, model, key, required=False, message=None,
-                 validators=None, widget=None):
-        Field.__init__(self, validators, widget)
+                 validators=None, widget=None, messages=None):
+        Field.__init__(self, validators, widget, messages)
         self.model = model
         self.key = key
         self.required = required
@@ -1005,15 +1051,13 @@ class ModelField(Field):
             return value
         if not value:
             if self.required:
-                raise ValidationError(_('This field is required.'))
+                raise ValidationError(self.messages['required'])
             return None
 
         rv = self.model.objects.filter_by(**{self.key: value}).first()
-        message = self.message
-        if message is None:
-            message = _('"%(value)s" does not exist.')
         if rv is None:
-            raise ValidationError(message % {'value': value})
+            raise ValidationError(self.messages['not_found'] %
+                                  {'value': value})
         return rv
 
 
@@ -1056,10 +1100,13 @@ class ChoiceField(Field):
 
     widget = SelectBox
     multiple_choices = False
+    messages = dict(
+        invalid_choice=lazy_gettext('Please enter a valid choice.')
+    )
 
     def __init__(self, required=True, choices=None, validators=None,
-                 widget=None):
-        Field.__init__(self, validators, widget)
+                 widget=None, messages=None):
+        Field.__init__(self, validators, widget, messages)
         self.required = required
         self.choices = choices
 
@@ -1074,7 +1121,7 @@ class ChoiceField(Field):
             # return the integer.
             if value == choice or unicode(value) == unicode(choice):
                 return choice
-        raise ValidationError(_('Select a valid choice.'))
+        raise ValidationError(self.messages['invalid_choice'])
 
     def _bind(self, form, memo):
         rv = Field._bind(self, form, memo)
@@ -1087,10 +1134,12 @@ class MultiChoiceField(ChoiceField):
     """A field that lets a user select multiple choices."""
 
     multiple_choices = True
+    messages = dict(too_small=None, too_big=None)
 
-    def __init__(self, choices=None, min_size=None,
-                 max_size=None, validators=None, widget=None):
-        ChoiceField.__init__(self, min_size > 0, choices, validators, widget)
+    def __init__(self, choices=None, min_size=None, max_size=None,
+                 validators=None, widget=None, messages=None):
+        ChoiceField.__init__(self, min_size > 0, choices, validators,
+                             widget, messages)
         self.min_size = min_size
         self.max_size = max_size
 
@@ -1107,17 +1156,19 @@ class MultiChoiceField(ChoiceField):
             result.append(choice)
 
         if self.min_size is not None and len(result) < self.min_size:
-            raise ValidationError(
-                ngettext('Please provide at least %d item.',
-                         'Please provide at least %d items.',
-                         self.min_size) % self.min_size
-            )
+            message = self.messages['too_small']
+            if message is None:
+                message = ngettext('Please provide at least %d item.',
+                                   'Please provide at least %d items.',
+                                    self.min_size) % self.min_size
+            raise ValidationError(message)
         if self.max_size is not None and len(result) > self.max_size:
-            raise ValidationError(
-                ngettext('Please provide no more than %d item.',
-                         'Please provide no more than %d items.',
-                         self.max_size) % self.max_size
-            )
+            message = self.messages['too_big']
+            if message is None:
+                message = ngettext('Please provide no more than %d item.',
+                                   'Please provide no more than %d items.',
+                                    self.min_size) % self.min_size
+            raise ValidationError(message)
 
         return result
 
@@ -1143,9 +1194,15 @@ class IntegerField(Field):
     ValidationError: Ensure this value is less than or equal to 99.
     """
 
+    messages = dict(
+        too_small=None,
+        too_big=None,
+        no_integer=lazy_gettext('Please enter a whole number.')
+    )
+
     def __init__(self, required=False, min_value=None, max_value=None,
-                 validators=None, widget=None):
-        Field.__init__(self, validators, widget)
+                 validators=None, widget=None, messages=None):
+        Field.__init__(self, validators, widget, messages=None)
         self.required = required
         self.min_value = min_value
         self.max_value = max_value
@@ -1154,19 +1211,25 @@ class IntegerField(Field):
         value = _to_string(value)
         if not value:
             if self.required:
-                raise ValidationError(_('This field is required.'))
+                raise ValidationError(self.messages['required'])
             return None
         try:
             value = int(value)
         except ValueError:
-            raise ValidationError(_('Please enter a whole number.'))
+            raise ValidationError(self.messages['no_integer'])
 
         if self.min_value is not None and value < self.min_value:
-            raise ValidationError(_('Ensure this value is greater than or '
-                                    'equal to %s.') % self.min_value)
+            message = self.messages['too_small']
+            if message is None:
+                message = _('Ensure this value is greater than or '
+                            'equal to %s.') % self.min_value
+            raise ValidationError(message)
         if self.max_value is not None and value > self.max_value:
-            raise ValidationError(_('Ensure this value is less than or equal '
-                                    'to %s.') % self.max_value)
+            message = self.messages['too_big']
+            if message is None:
+                message = _('Ensure this value is less than or '
+                            'equal to %s.') % self.max_value
+            raise ValidationError(message)
 
         return int(value)
 
@@ -1204,7 +1267,7 @@ class FormMeta(type):
         validator_functions = {}
         root_validator_functions = []
 
-        for base in bases:
+        for base in reversed(bases):
             if hasattr(base, '_root_field'):
                 # base._root_field is always a FormMapping field
                 fields.update(base._root_field.fields)

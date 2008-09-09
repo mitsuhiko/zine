@@ -12,15 +12,17 @@
     {%- if form.all_errors %}
       <div class="error">{{ form.all_errors[0]|e }}</div>
     {%- endif %}
-    {% call form(action=url_for('admin/login')) %}
+    {# we use render rather than just calling because we want
+       our own stylish error reporting on this page. #}
+    {% call form.render(action=url_for('admin/login')) %}
       <dl>
         <dt>{{ _("Username") }}
-        <dd>{{ form.user }}
+        <dd>{{ form.user.render() }}
         <dt>{{ _("Password") }}
-        <dd>{{ form.password }}
+        <dd>{{ form.password.render() }}
       </dl>
       <p>
-        {{ form.permanent() }}
+        {{ form.permanent.render() }}
         <label for="f_permanent">{{ _('Remember me') }}</label>
       </p>
       <script type="text/javascript">

@@ -21,7 +21,7 @@ from zine.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
     COMMENT_UNMODERATED
 from zine.utils import dump_json, build_tag_uri, ClosingIterator
 from zine.utils.uploads import get_filename, guess_mimetype
-from zine.utils.validators import is_valid_email, is_valid_url
+from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
 from zine.utils.http import redirect_to
 from werkzeug.exceptions import NotFound, Forbidden
@@ -244,12 +244,12 @@ def do_show_post(request, year, month, day, slug):
             elif len(author) > 100:
                 errors.append(_('Your name is too long.'))
             form['email'] = email = request.form.get('email')
-            if not (email and is_valid_email(email)):
+            if not (email and check(is_valid_email, email)):
                 errors.append(_('You have to enter a valid mail address.'))
             elif len(email) > 250:
                 errors.append(_('Your E-Mail address is too long.'))
             form['www'] = www = request.form.get('www')
-            if www and not is_valid_url(www):
+            if www and not check(is_valid_url, www):
                 errors.append(_('You have to enter a valid URL or omit the field.'))
             elif len(www) > 200:
                 errors.append(_('The URL is too long.'))
