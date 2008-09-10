@@ -7,12 +7,6 @@
     available for admins, editors and authors but not for subscribers. For
     subscribers a simplified account management system exists at /account.
 
-    The admin panel tries it's best to avoid CSRF attacks and some similar
-    problems by using the hidden form fields from the utils package.  For
-    more details see the docstrings of the `CSRFProtector` and
-    `IntelligentRedirect` classes located there.  Do this before you try to
-    add your own admin panel pages!
-
     :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs, Pedro Algarvio,
                              Ali Afshar.
     :license: GNU GPL.

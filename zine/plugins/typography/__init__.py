@@ -18,11 +18,11 @@ from zine.api import *
 from zine.models import ROLE_ADMIN
 from zine.views.admin import require_role, render_admin_response, \
      flash
-from zine.utils.xxx import CSRFProtector
+from zine.utils.http import redirect_to
+from zine.utils import forms
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
-SHARED_FILES = join(dirname(__file__), 'shared')
 
 _ignored_nodes = set(['pre', 'code'])
 _rules = [
@@ -43,9 +43,16 @@ _rules = [
 ]
 
 
+class ConfigurationForm(forms.Form):
+    """The configuration form for the quotes."""
+    double_opening_quote = forms.TextField(required=True)
+    double_closing_quote = forms.TextField(required=True)
+    single_opening_quote = forms.TextField(required=True)
+    single_closing_quote = forms.TextField(required=True)
+
+
 def process_doc_tree(doctree, input_data, reason):
-    """
-    Parse time callback function that replaces all pre blocks with a
+    """Parse time callback function that replaces all pre blocks with a
     'syntax' attribute the highlighted sourcecode.
     """
     def handle_match(m):
@@ -82,31 +89,25 @@ def add_config_link(req, navigation_bar):
 
 
 def show_config(req):
-    add_script(url_for('typography/shared', filename='script.js'))
-    add_link('stylesheet', url_for('typography/shared',
-                                   filename='style.css'), 'text/css')
-    form = dict((k, req.app.cfg['typography/' + k])
-                for ignore, k, ignore in _rules)
-    csrf_protector = CSRFProtector()
+    """The configuration form."""
+    form = ConfigurationForm(initial=dict((k, req.app.cfg['typography/' + k])
+                                          for k in ConfigurationForm.fields))
 
-    if req.method == 'POST':
-        csrf_protector.assert_safe()
-        altered = False
-        for ignore, key, ignore in _rules:
-            value = req.form.get(key)
-            if value:
-                if req.app.change_single('typography/' + key, value):
-                    altered = True
-                else:
-                    flash(_('Typography settings could not be changed.'), 'error')
-        if altered:
-            flash(_('Typography settings changed.'), 'configure')
-        return redirect(url_for('typography/config'))
+    if req.method == 'POST' and form.validate(req.form):
+        if form.has_changed:
+            t = req.app.cfg.edit()
+            for key, value in form.data.iteritems():
+                t['typography/' + key] = value
+            try:
+                t.commit()
+            except IOError:
+                flash(_('Typography settings could not be changed.'), 'error')
+            else:
+                flash(_('Typography settings changed.'), 'configure')
+        return redirect_to('typography/config')
+
     return render_admin_response('admin/typography.html',
-                                 'options.typography',
-        form=form,
-        csrf_protector=csrf_protector
-    )
+                                 'options.typography', form=form.as_widget())
 
 
 def setup(app, plugin):
@@ -116,6 +117,5 @@ def setup(app, plugin):
                      endpoint='typography/config')
     app.add_view('typography/config', show_config)
     app.add_template_searchpath(TEMPLATES)
-    app.add_shared_exports('typography', SHARED_FILES)
     for ignore, name, default in _rules:
         app.add_config_var('typography/' + name, unicode, default)

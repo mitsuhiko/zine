@@ -1,5 +1,34 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Typography") }}{% endblock %}
+{% block html_head %}
+  {{ super() }}
+  <style type="text/css">
+    #char-select { padding: 0 0 0 20px; }
+    #char-select a { padding: 0 10px 0 10px; line-height: 40px; color: #111;
+                     font-weight: bold; font-size: 32px;
+                     text-decoration: none; }
+    #char-select a:hover { border: 1px solid #222; padding: 0 9px 0 9px;
+                           background-color: #eee; }
+    form dd input { text-align: center; font-size: 2em!important; }
+  </style>
+  <script type="text/javascript">
+    var $active_field = null;
+
+    $(function() {
+      $('form dd input').focus(function() {
+        $active_field = $(this);
+        $('#char-select').fadeIn('fast');
+      }).blur(function() {
+        $('#char-select').fadeOut('fast');
+      });
+    });
+
+    function insertChar(char) {
+      if ($active_field)
+        $active_field.val(char);
+    }
+  </script>
+{% endblock %}
 {% block contents %}
   <h1>{{ _("Typography") }}</h1>
   <p>{% trans %}
@@ -7,21 +36,17 @@
     typography plugin has hardcoded semantics at the moment, so there is
     no way to change the algorithm from this config panel.
   {% endtrans %}</p>
-  <form action="" method="post">
+  {%- call form() %}
     <dl>
       <dt>{{ _("Double Quote Pairs") }}</dt>
       <dd>
-        {{ h.input_field('double_opening_quote',
-                         form.double_opening_quote, size=1) }}
-        {{ h.input_field('double_closing_quote',
-                         form.double_closing_quote, size=1) }}
+        {{ form.double_opening_quote(size=1) }}
+        {{ form.double_closing_quote(size=1) }}
       </dd>
       <dt>{{ _("Single Quote Pairs") }}</dt>
       <dd>
-        {{ h.input_field('single_opening_quote',
-                         form.single_opening_quote, size=1) }}
-        {{ h.input_field('single_closing_quote',
-                         form.single_closing_quote, size=1) }}
+        {{ form.single_opening_quote(size=1) }}
+        {{ form.single_closing_quote(size=1) }}
       </dd>
     </dl>
     <div id="char-select" style="display: none">
@@ -31,8 +56,7 @@
     {%- endfor %}
     </div>
     <div class="actions">
-      {{ csrf_protector }}
       <input type="submit" value="{{ _('Save') }}">
     </div>
-  </form>
+  {%- endcall %}
 {% endblock %}

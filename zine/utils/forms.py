@@ -1327,6 +1327,7 @@ class FormMeta(type):
                 validator_functions[key[9:]] = value
             elif isinstance(value, Field):
                 fields[key] = value
+                d[key] = FieldDescriptor(key)
 
         for field_name, func in validator_functions.iteritems():
             if field_name in fields:
@@ -1359,6 +1360,18 @@ class FormMeta(type):
     @property
     def fields(cls):
         return cls._root_field.fields
+
+
+class FieldDescriptor(object):
+
+    def __init__(self, name):
+        self.name = name
+
+    def __get__(self, obj, type=None):
+        return (obj or type).fields[self.name]
+
+    def __set__(self, obj, value):
+        obj.fields[self.name] = value
 
 
 class Form(object):

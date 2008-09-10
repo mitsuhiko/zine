@@ -11,10 +11,11 @@
 from os.path import join, dirname
 from time import time, asctime, gmtime
 from zine.api import *
-from zine.utils.xxx import CSRFProtector
 from zine.views.admin import render_admin_response, flash
 from zine.models import ROLE_ADMIN
 from zine.fragment import DataNode
+from zine.utils import forms
+from zine.utils.http import redirect_to
 from werkzeug import escape
 from werkzeug.exceptions import NotFound
 try:
@@ -55,6 +56,10 @@ EXAMPLE = '''\
   </body>
 </html>\
 '''
+
+
+class ConfigurationForm(forms.Form):
+    style = forms.ChoiceField(required=True)
 
 
 def get_current_style():
@@ -124,19 +129,20 @@ def show_config(req):
     """Request handler that provides an admin page with the configuration
     for the pygments plugin. So far this only allows changing the style.
     """
-    csrf_protector = CSRFProtector()
-    all_styles = set(get_all_styles())
-    active_style = req.form.get('style')
-    if not active_style or active_style not in all_styles:
-        active_style = get_current_style()
+    active_style = get_current_style()
+    styles = set(get_all_styles())
+    form = ConfigurationForm(initial=dict(style=active_style))
+    form.fields['style'].choices = sorted(styles)
 
-    if req.form.get('apply'):
-        csrf_protector.assert_safe()
-        if req.app.cfg.change_single('pygments_support/style', active_style):
-            flash(_('Pygments theme changed successfully.'), 'configure')
-        else:
-            flash(_('Pygments theme could not be changed.'), 'error')
-        return redirect(url_for('pygments_support/config'))
+    if req.method == 'POST' and form.validate(req.form):
+        active_style = form['style']
+        if 'apply' in req.form:
+            if req.app.cfg.change_single('pygments_support/style',
+                                         active_style):
+                flash(_('Pygments theme changed successfully.'), 'configure')
+            else:
+                flash(_('Pygments theme could not be changed.'), 'error')
+            return redirect_to('pygments_support/config')
 
     preview_formatter = get_formatter(active_style, preview=True)
     add_header_snippet('<style type="text/css">\n%s\n</style>' %
@@ -146,13 +152,7 @@ def show_config(req):
 
     return render_admin_response('admin/pygments_support.html',
                                  'options.pygments_support',
-        styles=[{
-            'name':         style,
-            'active':       style == active_style
-        } for style in sorted(all_styles)],
-        example=example,
-        csrf_protector=csrf_protector
-    )
+                                 example=example, form=form.as_widget())
 
 
 def inject_style(req):

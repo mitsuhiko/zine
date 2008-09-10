@@ -28,10 +28,8 @@ from zine.views.admin import render_admin_response
 from zine.utils.admin import flash
 
 # Because our fish uses JSON and JavaScript we use the dump_json function
-# from the utils module. We also use the CSRFProtector which helps us to
-# avoid CSRF attacks.
+# from the utils module.
 from zine.utils import dump_json
-from zine.utils.xxx import CSRFProtector
 
 # we only want the admin to be able to configure eric. so we need the
 # admin role
@@ -90,7 +88,6 @@ def show_eric_options(req):
     """This renders the eric admin panel. Allow switching the skin and show
     the available skins.
     """
-    csrf_protector = CSRFProtector()
     new_skin = req.args.get('select')
     if new_skin in SKINS:
         if not req.app.cfg.change_single('eric_the_fish/skin', new_skin):
@@ -102,8 +99,7 @@ def show_eric_options(req):
         skins=[{
             'name':     skin,
             'active':   skin == req.app.cfg['eric_the_fish/skin']
-        } for skin in SKINS],
-        csrf_protector=csrf_protector
+        } for skin in SKINS]
     )
 
 

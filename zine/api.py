@@ -6,7 +6,7 @@
     Module for plugins and core. Star import this to get
     access to all the important helper functions.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 
