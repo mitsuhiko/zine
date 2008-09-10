@@ -1371,10 +1371,19 @@ class FieldDescriptor(object):
         self.name = name
 
     def __get__(self, obj, type=None):
-        return (obj or type).fields[self.name]
+        try:
+            return (obj or type).fields[self.name]
+        except KeyError:
+            raise AttributeError(self.name)
 
     def __set__(self, obj, value):
         obj.fields[self.name] = value
+
+    def __delete__(self, obj):
+        if self.name not in obj.fields:
+            raise AttributeError('%r has no attribute %r' %
+                                 (type(obj).__name__, self.name))
+        del obj.fields[self.name]
 
 
 class Form(object):
