@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Zine Test Suite
     ~~~~~~~~~~~~~~~
@@ -23,9 +24,9 @@ from unittest import TestSuite, TextTestRunner
 from doctest import DocTestSuite, DocFileSuite
 
 #: the modules in this list are not tested in a full run
-untested = ['zine.experimental_plugins.hyphenation_en',
-            'zine.experimental_plugins.hyphenation_en.hyphenate',
-            'zine.experimental_plugins.notification']
+untested = ['zine.broken_plugins.hyphenation_en',
+            'zine.broken_plugins.hyphenation_en.hyphenate',
+            'zine.broken_plugins.notification']
 
 try:
     import coverage

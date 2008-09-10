@@ -227,12 +227,12 @@ class _ListSupport(object):
     """A mixin for iterable objects that yield html."""
 
     def as_ul(self, **attrs):
-        if attrs.pop('if_not_empty', False) and not self:
+        if attrs.pop('hide_empty', False) and not self:
             return u''
         return html.ul(*(html.li(unicode(item)) for item in self), **attrs)
 
     def as_ol(self, **attrs):
-        if attrs.pop('if_not_empty', False) and not self:
+        if attrs.pop('hide_empty', False) and not self:
             return u''
         return html.ol(*(html.li(unicode(item)) for item in self), **attrs)
 
@@ -264,13 +264,16 @@ class Widget(_Renderable):
     ...     password = TextField(widget=PasswordInput)
     ...     flags = MultiChoiceField(choices=[1, 2, 3])
     ...
-    >>> form = LoginForm({'username': '', 'password': '',
-    ...                  'flags': [1, 3]}).as_widget()
+    >>> form = LoginForm()
+    >>> form.validate({'username': '', 'password': '',
+    ...                'flags': [1, 3]})
+    False
+    >>> widget = form.as_widget()
 
     You can get the subwidgets by using the normal indexing operators:
 
-    >>> username = form['username']
-    >>> password = form['password']
+    >>> username = widget['username']
+    >>> password = widget['password']
 
     The conversion to unicode calls the widget which renders it and displays
     an error list as unordered list next to it.
@@ -306,7 +309,7 @@ class Widget(_Renderable):
         <ul><li>This field is required.</li></ul>
 
         Keep in mind that ``widget.errors()`` is equivalent to
-        ``widget.errors.as_ul(class_='errors', if_not_empty=True)``.
+        ``widget.errors.as_ul(class_='errors', hide_empty=True)``.
 
     `value`
 
@@ -316,7 +319,7 @@ class Widget(_Renderable):
 
         >>> username.value
         u''
-        >>> form['flags'].value
+        >>> widget['flags'].value
         [u'1', u'3']
 
     `name` gives you the name of the field for form submissions:
@@ -539,7 +542,7 @@ class _InputGroup(Widget):
         return self._subwidgets[value]
 
     def _as_list(self, list_type, attrs):
-        if attrs.pop('if_not_empty', False) and not self.choices:
+        if attrs.pop('hide_empty', False) and not self.choices:
             return u''
         self._attr_setdefault(attrs)
         return list_type(*[u'<li>%s %s</li>' % (
@@ -710,7 +713,7 @@ class ErrorList(_Renderable, _ListSupport, list):
 
     def __call__(self, **attrs):
         attrs.setdefault('class', attrs.pop('class_', 'errors'))
-        attrs.setdefault('if_not_empty', True)
+        attrs.setdefault('hide_empty', True)
         return self.render(**attrs)
 
 
@@ -1123,7 +1126,7 @@ class ChoiceField(Field):
     >>> field('42')
     Traceback (most recent call last):
       ...
-    ValidationError: Select a valid choice.
+    ValidationError: Please enter a valid choice.
 
     A choice field also accepts lists of tuples as argument where the
     first item is used for comparing and the second for displaying
@@ -1409,13 +1412,13 @@ class Form(object):
     ...
     ...     def validate_name(self, value):
     ...         if not value.isalpha():
-    ...             raise ValidationError('The value must only contain letters')
+    ...             raise ValidationError(u'The value must only contain letters')
 
     >>> form = PersonForm()
     >>> form.validate({'name': 'mr.t', 'age': '42'})
     False
     >>> form.errors
-    {'name': ['The value must only contain letters']}
+    {'name': [u'The value must only contain letters']}
 
     You can also validate multiple fields in the context of other fields.
     That validation is performed after all other validations.  Just add a
@@ -1428,7 +1431,7 @@ class Form(object):
     ...
     ...     def context_validate(self, data):
     ...         if data['password'] != data['password_again']:
-    ...             raise ValidationError('The two passwords must be the same')
+    ...             raise ValidationError(u'The two passwords must be the same')
 
     >>> form = RegisterForm()
     >>> form.validate({'username': 'admin', 'password': 'blah',
@@ -1436,7 +1439,7 @@ class Form(object):
     ...
     False
     >>> form.errors
-    {None: ['The two passwords must be the same']}
+    {None: [u'The two passwords must be the same']}
 
     Forms can be used as fields for other forms.  To create a form field of
     a form you can call the `as_field` class method::
@@ -1447,6 +1450,30 @@ class Form(object):
     forms as fields is that validators don't get an instance of `RegisterForm`
     passed as `form` / `self` but the form where it's used in if the field is
     used from a form.
+
+    Form fields are bound to the form on form instanciation.  This makes it
+    possible to modify a particular instance of the form.  For example you
+    can create an instance of it and drop some fiels by using
+    ``del form.fields['name']`` or reassign choices of choice fields.  It's
+    however not easily possible to add new fields to an instance because newly
+    added fields wouldn't be bound.  The fields that are stored directly on
+    the form can also be accessed with their name like a regular attribute.
+
+    Example usage::
+
+    >>> class StatusForm(Form):
+    ...     status = ChoiceField()
+    ...
+    >>> StatusForm.status.bound
+    False
+    >>> form = StatusForm()
+    >>> form.status.bound
+    True
+    >>> form.status.choices = [u'happy', u'unhappy']
+    >>> form.validate({'status': u'happy'})
+    True
+    >>> form['status']
+    u'happy'
     """
     __metaclass__ = FormMeta
 

@@ -108,7 +108,7 @@ def is_valid_url(message=None):
     True
     >>> check(is_valid_url, 'zine.pocoo.org/archive')
     False
-    >>> check(is_valid_ur, 'javascript:alert("Zine rocks!");')
+    >>> check(is_valid_url, 'javascript:alert("Zine rocks!");')
     False
     """
     if message is None:
