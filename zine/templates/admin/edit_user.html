@@ -28,12 +28,8 @@
       {{ h.input_field('www', form.www, size=30) }}
     </div>
     <div class="formbox">
-      <h3>{{ _("First Name") }}</h3>
-      {{ h.input_field('first_name', form.first_name, size=30) }}
-    </div>
-    <div class="formbox">
-      <h3>{{ _("Last Name") }}</h3>
-      {{ h.input_field('last_name', form.last_name, size=30) }}
+      <h3>{{ _("Realname") }}</h3>
+      {{ h.input_field('real_name', form.real_name, size=30) }}
     </div>
     {%- if not new_user %}
     <div class="formbox">

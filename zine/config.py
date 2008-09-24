@@ -57,8 +57,8 @@ DEFAULT_VARS = {
     # htmlprocessor module bypasses this test when falling back to
     # the default parser. If there plans to change the default parser
     # for future Zine versions that code must be altered first.
-    'default_parser':           (unicode, u'default'),
-    'comment_parser':           (unicode, u'comment'),
+    'default_parser':           (unicode, u'zeml'),
+    'comment_parser':           (unicode, u'text'),
 
     # comments and pingback
     'comments_enabled':         (bool, True),

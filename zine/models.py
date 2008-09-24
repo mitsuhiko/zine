@@ -15,7 +15,7 @@ from urlparse import urljoin
 
 from zine.database import users, tags, posts, post_links, post_tags, \
      comments, db, pages
-from zine.utils import build_tag_uri
+from zine.utils import build_tag_uri, zeml
 from zine.utils.admin import gen_slug
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
@@ -47,6 +47,88 @@ MODERATE_ALL = 1
 MODERATE_UNKNOWN = 2
 
 
+class _ZEMLContainer(object):
+    """A mixin for objects that have ZEML markup stored."""
+
+    parser_reason = None
+
+    @property
+    def parser_missing(self):
+        """If the parser for this post is not available this property will
+        be `True`.  If such as post is edited the text area is grayed out
+        and tells the user to reinstall the plugin that provides that
+        parser.  Because it doesn't know the name of the plugin, the
+        preferred was is telling it the parser which is available using
+        the `parser` property.
+        """
+        app = get_application()
+        return self.parser not in app.parsers
+
+    def _get_parser(self):
+        if self.parser_data is not None:
+            return self.parser_data.get('parser')
+
+    def _set_parser(self, value):
+        if self.parser_data is None:
+            self.parser_data = {}
+        self.parser_data['parser'] = value
+
+    parser = property(_get_parser, _set_parser, doc="The name of the parser.")
+    del _get_parser, _set_parser
+
+    @property
+    def body(self):
+        """The body as ZEML element."""
+        if self.parser_data is not None:
+            return self.parser_data.get('body')
+
+    def _parse_text(self, text):
+        from zine.parsers import parse
+        self.parser_data['body'] = parse(text, self.parser, 'post')
+
+    def _get_text(self):
+        return self._text
+
+    def _set_text(self, value):
+        if self.parser_data is None:
+            self.parser_data = {}
+        self._text = value
+        self._parse_text(value)
+
+    text = property(_get_text, _set_text, doc="The raw text.")
+    del _get_text, _set_text
+
+    def find_urls(self):
+        """Iterate over all urls in the text.  This will only work if the
+        parser for this post is available.  If it's not the behavior is
+        undefined.  The urls returned are absolute urls.
+        """
+        from zine.parsers import parse
+        found = set()
+        this_url = url_for(self, _external=True)
+        tree = parse(self.text, self.parser, 'linksearch')
+        for node in tree.query('a[href]'):
+            href = urljoin(this_url, node.attributes['href'])
+            if href not in found:
+                found.add(href)
+                yield href
+
+
+class _ZEMLDualContainer(_ZEMLContainer):
+    """Like the ZEML mixin but with intro and body sections."""
+
+    def _parse_text(self, text):
+        from zine.parsers import parse
+        self.parser_data['intro'], self.parser_data['body'] = \
+            zeml.split_intro(parse(text, self.parser, self.parser_reason))
+
+    @property
+    def intro(self):
+        """The intro as zeml element."""
+        if self.parser_data is not None:
+            return self.parser_data.get('intro')
+
+
 class UserManager(db.DatabaseManager):
     """Add some extra query methods to the user object."""
 
@@ -69,9 +151,8 @@ class User(object):
     objects = UserManager()
     is_somebody = True
 
-    def __init__(self, username, password, email, first_name=u'',
-                 last_name=u'', description=u'', www=u'',
-                 role=ROLE_SUBSCRIBER):
+    def __init__(self, username, password, email, real_name=u'',
+                 description=u'', www=u'', role=ROLE_SUBSCRIBER):
         self.username = username
         if password is not None:
             self.set_password(password)
@@ -79,8 +160,7 @@ class User(object):
             self.disable()
         self.email = email
         self.www = www
-        self.first_name = first_name
-        self.last_name = last_name
+        self.real_name = real_name
         self.description = description
         self.extra = {}
         self.display_name = u'$nick'
@@ -110,18 +190,11 @@ class User(object):
     def _get_display_name(self):
         from string import Template
         return Template(self._display_name).safe_substitute(
-            nick=self.username,
-            first=self.first_name,
-            last=self.last_name
+            username=self.username,
+            real_name=self.real_name
         )
 
     display_name = property(_get_display_name, _set_display_name)
-
-    @property
-    def real_name(self):
-        if self.first_name and self.last_name:
-            return '%s %s' % (self.first_name, self.last_name)
-        return self.first_name or self.last_name
 
     def set_password(self, password):
         self.pw_hash = gen_pwhash(password)
@@ -152,7 +225,7 @@ class AnonymousUser(User):
     """Fake model for anonymous users."""
     is_somebody = False
     display_name = 'Nobody'
-    first_name = last_name = description = username = ''
+    real_name = description = username = ''
     role = ROLE_NOBODY
     objects = UserManager()
 
@@ -443,13 +516,14 @@ class PostManager(db.DatabaseManager):
         return q.all()
 
 
-class Post(object):
+class Post(_ZEMLDualContainer):
     """Represents one blog post."""
 
     objects = PostManager()
+    parser_reason = 'post'
 
-    def __init__(self, title, author, body, intro=None, slug=None,
-                 pub_date=None, last_update=None, comments_enabled=True,
+    def __init__(self, title, author, text, slug=None, pub_date=None,
+                 last_update=None, comments_enabled=True,
                  pings_enabled=True, status=STATUS_PUBLISHED,
                  parser=None, uid=None):
         app = get_application()
@@ -458,13 +532,8 @@ class Post(object):
         if parser is None:
             parser = app.cfg['default_parser']
 
-        #: this holds the parsing cache and the name of the parser in use.
-        #: in fact the intro and body cached data is not assigned right here
-        #: but by the `raw_intro` and `raw_body` property callback a few lines
-        #: below.
-        self.parser_data = {'parser': parser}
-        self.raw_intro = intro or ''
-        self.raw_body = body or ''
+        self.parser = parser
+        self.text = text or u''
         self.extra = {}
 
         if pub_date is None:
@@ -518,109 +587,11 @@ class Post(object):
         """True if this post is unpublished."""
         return self.status == STATUS_DRAFT
 
-    @property
-    def parser_missing(self):
-        """If the parser for this post is not available this property will
-        be `True`.  If such as post is edited the text area is grayed out
-        and tells the user to reinstall the plugin that provides that
-        parser.  Because it doesn't know the name of the plugin, the
-        preferred was is telling it the parser which is available using
-        the `parser` property.
-        """
-        app = get_application()
-        return self.parser not in app.parsers
-
-    def _get_parser(self):
-        return self.parser_data['parser']
-
-    def _set_parser(self, value):
-        self.parser_data['parser'] = value
-
-    parser = property(_get_parser, _set_parser)
-    del _get_parser, _set_parser
-
-    def _get_raw_intro(self):
-        return self._raw_intro
-
-    def _set_raw_intro(self, value):
-        from zine.parsers import parse
-        from zine.fragment import dump_tree
-        tree = parse(value, self.parser, 'post-intro')
-        self._raw_intro = value
-        self._intro_cache = tree
-        self.parser_data['intro'] = dump_tree(tree)
-
-    def _get_intro(self):
-        if not hasattr(self, '_intro_cache'):
-            from zine.fragment import load_tree
-            self._intro_cache = load_tree(self.parser_data['intro'])
-        return self._intro_cache
-
-    def _set_intro(self, value):
-        from zine.fragment import Fragment, dump_tree
-        if not isinstance(value, Fragment):
-            raise TypeError('fragment required, otherwise use raw_intro')
-        self._intro_cache = value
-        self.parser_data['intro'] = dump_tree(value)
-
-    raw_intro = property(_get_raw_intro, _set_raw_intro)
-    intro = property(_get_intro, _set_intro)
-    del _get_raw_intro, _set_raw_intro, _get_intro, _set_intro
-
-    def _get_raw_body(self):
-        return self._raw_body
-
-    def _set_raw_body(self, value):
-        from zine.parsers import parse
-        from zine.fragment import dump_tree
-        tree = parse(value, self.parser, 'post-body')
-        self._raw_body = value
-        self._body_cache = tree
-        self.parser_data['body'] = dump_tree(tree)
-
-    def _get_body(self):
-        if not hasattr(self, '_body_cache'):
-            from zine.fragment import load_tree
-            self._body_cache = load_tree(self.parser_data['body'])
-        return self._body_cache
-
-    def _set_body(self, value):
-        from zine.fragment import Fragment, dump_tree
-        if not isinstance(value, Fragment):
-            raise TypeError('fragment required, otherwise use raw_body')
-        self._body_cache = value
-        self.parser_data['body'] = dump_tree(value)
-
-    raw_body = property(_get_raw_body, _set_raw_body)
-    body = property(_get_body, _set_body)
-    del _get_raw_body, _set_raw_body, _get_body, _set_body
-
-    def find_urls(self):
-        """Iterate over all urls in the text.  This will only work if the
-        parser for this post is available.  If it's not the behavior is
-        undefined.  The urls returned are absolute urls.
-        """
-        from zine.parsers import parse
-        found = set()
-        this_url = url_for(self, _external=True)
-        for text in self.raw_intro, self.raw_body:
-            tree = parse(text, self.parser, 'linksearch', False)
-            for node in tree.query('a[@href]'):
-                href = urljoin(this_url, node.attributes['href'])
-                if href not in found:
-                    found.add(href)
-                    yield href
-
     def auto_slug(self):
         """Generate a slug for this post."""
         self.slug = gen_slug(self.title)
         if not self.slug:
             self.slug = self.pub_date.strftime('%H:%M')
-
-    def refresh_cache(self):
-        """Update the cache."""
-        self.raw_body = self.raw_body
-        self.raw_intro = self.raw_intro
 
     def can_access(self, user=None):
         """Check if the current user or the user provided can access
@@ -838,12 +809,13 @@ class CommentManager(db.DatabaseManager):
         return self.query.filter(Comment.post_id == post_id)
 
 
-class Comment(object):
+class Comment(_ZEMLContainer):
     """Represent one comment."""
 
     objects = CommentManager()
+    parser_reason = 'comment'
 
-    def __init__(self, post, author, body, email=None, www=None, parent=None,
+    def __init__(self, post, author, text, email=None, www=None, parent=None,
                  pub_date=None, submitter_ip='0.0.0.0', parser=None,
                  is_pingback=False, status=COMMENT_MODERATED):
         self.post = post
@@ -860,8 +832,8 @@ class Comment(object):
 
         if parser is None:
             parser = get_application().cfg['comment_parser']
-        self.parser_data = {'parser': parser}
-        self.raw_body = body or ''
+        self.parser = parser
+        self.text = text or ''
         self.parent = parent
         if pub_date is None:
             pub_date = datetime.utcnow()
@@ -954,46 +926,9 @@ class Comment(object):
         return self.status == COMMENT_BLOCKED_SPAM
 
     @property
-    def parser_missing(self):
-        app = get_application()
-        return self.parser not in app.parsers
-
-    def _get_parser(self):
-        return self.parser_data['parser']
-
-    def _set_parser(self, value):
-        self.parser_data['parser'] = value
-
-    parser = property(_get_parser, _set_parser)
-    del _get_parser, _set_parser
-
-    def _get_raw_body(self):
-        return self._raw_body
-
-    def _set_raw_body(self, value):
-        from zine.parsers import parse
-        from zine.fragment import dump_tree
-        tree = parse(value, self.parser, 'comment')
-        self._raw_body = value
-        self._body_cache = tree
-        self.parser_data['body'] = dump_tree(tree)
-
-    def _get_body(self):
-        if not hasattr(self, '_body_cache'):
-            from zine.fragment import load_tree
-            self._body_cache = load_tree(self.parser_data['body'])
-        return self._body_cache
-
-    def _set_body(self, value):
-        from zine.fragment import Fragment, dump_tree
-        if not isinstance(value, Fragment):
-            raise TypeError('fragment required, otherwise use raw_body')
-        self._body_cache = value
-        self.parser_data['body'] = dump_tree(value)
-
-    raw_body = property(_get_raw_body, _set_raw_body)
-    body = property(_get_body, _set_body)
-    del _get_raw_body, _set_raw_body, _get_body, _set_body
+    def is_unmoderated(self):
+        """True if the comment is not yet approved."""
+        return self.status == COMMENT_UNMODERATED
 
     def get_url_values(self):
         endpoint, args = self.post.get_url_values()
@@ -1007,57 +942,23 @@ class Comment(object):
         )
 
 
-class Page(object):
+class Page(_ZEMLContainer):
 
-    def __init__(self, key, title, body, parser=None, navigation_pos=None,
+    parser_reason = 'page'
+
+    def __init__(self, key, title, text, parser=None, navigation_pos=None,
                  parent_id=None):
         self.key = key
         self.title = title
         if parser is None:
             parser = get_application().cfg['default_parser']
-        # the extra attribute holds various data for fragment processing
-        self.extra = {'parser': parser}
+        self.parser = parser
         if navigation_pos is not None:
             if isinstance(navigation_pos, (float, long, basestring)):
                 navigation_pos = int(navigation_pos)
         self.navigation_pos = navigation_pos
-        self.raw_body = body
+        self.text = text or u''
         self.parent_id = parent_id
-
-    def _get_parser(self):
-        return self.extra['parser']
-
-    def _set_parser(self, value):
-        self.extra['parser'] = value
-    parser = property(_get_parser, _set_parser)
-    del _get_parser, _set_parser
-
-    def _get_raw_body(self):
-        return self._raw_body
-
-    def _set_raw_body(self, value):
-        from zine.parsers import parse
-        from zine.fragment import dump_tree
-        tree = parse(value, self.extra['parser'], 'page-body')
-        self._raw_body = value
-        self._body_cache = tree
-        self.extra['body'] = dump_tree(tree)
-    raw_body = property(_get_raw_body, _set_raw_body)
-
-    def _get_body(self):
-        if not hasattr(self, '_body_cache'):
-            from zine.fragment import load_tree
-            self._body_cache = load_tree(self.extra['body'])
-        return self._body_cache
-
-    def _set_body(self, value):
-        from zine.fragment import Fragment, dump_tree
-        if not isinstance(value, Fragment):
-            raise TypeError('fragment required, otherwise use raw_body')
-        self._body_cache = value
-        self.extra['body'] = dump_tree(value)
-    body = property(_get_body, _set_body)
-    del _get_raw_body, _set_raw_body, _get_body, _set_body
 
     def get_url_values(self):
         return self.key
@@ -1091,7 +992,7 @@ db.mapper(Tag, tags, properties={
     'posts':            db.dynamic_loader(Post, secondary=post_tags)
 })
 db.mapper(Comment, comments, properties={
-    '_raw_body':    comments.c.body,
+    '_text':        comments.c.text,
     'author':       db.synonym('_author', map_column=True),
     'email':        db.synonym('_email', map_column=True),
     'www':          db.synonym('_www', map_column=True),
@@ -1105,8 +1006,7 @@ db.mapper(Comment, comments, properties={
 }, order_by=comments.c.pub_date.desc())
 db.mapper(PostLink, post_links)
 db.mapper(Post, posts, properties={
-    '_raw_body':        posts.c.body,
-    '_raw_intro':       posts.c.intro,
+    '_text':            posts.c.text,
     'comments':         db.relation(Comment, backref='post',
                                     primaryjoin=posts.c.post_id ==
                                         comments.c.post_id,
@@ -1119,7 +1019,7 @@ db.mapper(Post, posts, properties={
                                     order_by=[db.asc(tags.c.name)])
 }, order_by=posts.c.pub_date.desc())
 db.mapper(Page, pages, properties={
-    '_raw_body':    pages.c.body,
+    '_text':        pages.c.text,
     'parent':       db.relation(Page,
         remote_side=[pages.c.page_id],
         backref=db.backref('children', order_by=[pages.c.navigation_pos])),

@@ -621,7 +621,8 @@ class Zine(object):
         from zine.services import all_services
         from zine.parsers import all_parsers
         self.views = all_views.copy()
-        self.parsers = all_parsers.copy()
+        self.parsers = dict((k, v(self)) for k, v in all_parsers.iteritems())
+        self.zeml_element_handlers = []
         self._url_rules = make_urls(self)
         self._absolute_url_handlers = absolute_url_handlers[:]
         self._services = all_services.copy()
@@ -638,8 +639,8 @@ class Zine(object):
         # init themes
         _ = i18n.gettext
         default_theme = Theme('default', BUILTIN_TEMPLATE_PATH, {
-            'name':         _('Default Theme'),
-            'description':  _('Simple default theme that doesn\'t '
+            'name':         _(u'Default Theme'),
+            'description':  _(u'Simple default theme that doesn\'t '
                               'contain any style information.'),
             'preview':      'core::default_preview.png'
         })
@@ -708,7 +709,7 @@ class Zine(object):
             get_page_metadata=self.get_page_metadata,
             zine={
                 'version':      zine.__version__,
-                'copyright':    _('Copyright %(years)s by the Pocoo Team')
+                'copyright':    _(u'Copyright %(years)s by the Pocoo Team')
                                 % {'years': '2007-2008'}
             }
         )
@@ -972,7 +973,12 @@ class Zine(object):
         """Add a new parser class.  This parser has to be a subclass of
         :class:`zine.parsers.BaseParser`.
         """
-        self.parsers[name] = class_
+        self.parsers[name] = class_(self)
+
+    @setuponly
+    def add_zeml_element_handler(self, element_handler):
+        """Register a new ZEML element handler."""
+        self.zeml_element_handlers.append(element_handler(self))
 
     @setuponly
     def add_widget(self, widget):
@@ -1022,7 +1028,9 @@ class Zine(object):
 
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""
-        return sorted([(key, parser.get_name()) for key, parser in
+        # we call unicode to resolve the translations once.  parser.name
+        # will very likely be a lazy translation
+        return sorted([(key, unicode(parser.name)) for key, parser in
                        self.parsers.iteritems()], key=lambda x: x[1].lower())
 
     def get_page_metadata(self):
@@ -1234,7 +1242,7 @@ class DynamicDispatcher(object):
 
     def __init__(self):
         self.dispatchers = {}
-        self.init_lock = Lock()
+        self.init_lock = allocate_lock()
 
     def __call__(self, environ, start_response):
         instance_folder = path.realpath(environ['zine.instance_folder'])

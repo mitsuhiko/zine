@@ -26,12 +26,14 @@ def textarea(name, value='', cols=50, rows=10, **attr):
 
 def checkbox(name, checked=False, value='yes', **attr):
     """Render a checkbox."""
-    return html.input(type='checkbox', name=name, checked=checked, **attr)
+    return html.input(type='checkbox', name=name, value=value,
+                      checked=checked, **attr)
 
 
-def radio_button(name, checked=False, value='yes', **attr):
+def radio_button(name, value='yes', checked=False, **attr):
     """Render a checkbox."""
-    return html.input(type='radio', name=name, checked=checked, **attr)
+    return html.input(type='radio', value=value, name=name,
+                      checked=checked, **attr)
 
 
 def script(src, type='text/javascript', **attr):

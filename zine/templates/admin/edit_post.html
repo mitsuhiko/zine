@@ -24,7 +24,7 @@
     </div>
     <div class="formbox">
       <h3>{{ _("Post") }}</h3>
-      {{ h.textarea('body', form.body, rows=20) }}
+      {{ h.textarea('text', form.text, rows=20) }}
     </div>
     <div class="formbox toggleable">
       <h3>{{ _("Post Status") }}</h3>
@@ -35,10 +35,6 @@
                state }}">{{ caption|e }}</label></li>
       {%- endfor %}
       </ul>
-    </div>
-    <div class="formbox toggleable collapsed">
-      <h3>{{ _("Intro") }}</h3>
-      {{ h.textarea('intro', form.intro, rows=5) }}
     </div>
     <div class="formbox toggleable collapsed">
       <h3>{{ _("Tags") }}</h3>

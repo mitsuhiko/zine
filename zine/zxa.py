@@ -216,8 +216,7 @@ class Writer(object):
         self.z('role', text=str(user.role), parent=rv)
         self.z('pw_hash', text=user.pw_hash.encode('base64'), parent=rv)
         self.z('display_name', text=user._display_name, parent=rv)
-        self.z('first_name', text=user.first_name, parent=rv)
-        self.z('last_name', text=user.last_name, parent=rv)
+        self.z('real_name', text=user.real_name, parent=rv)
         self.z('description', text=user.description, parent=rv)
         for participant in self.participants:
             participant.process_user(rv, user)

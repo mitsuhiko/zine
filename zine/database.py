@@ -26,6 +26,7 @@ from sqlalchemy import orm
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.util import to_list
 from sqlalchemy.engine.url import make_url, URL
+from sqlalchemy.types import MutableType, TypeDecorator
 from werkzeug import url_decode
 
 from zine.utils import local, local_manager
@@ -191,6 +192,26 @@ class DatabaseManager(object):
     del _name, _obj
 
 
+class ZEMLParserData(MutableType, TypeDecorator):
+    """Holds parser data."""
+
+    impl = sqlalchemy.Binary
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return
+        from zine.utils.zeml import dump_parser_data
+        return dump_parser_data(value)
+
+    def process_result_value(self, value, dialect):
+        from zine.utils.zeml import load_parser_data
+        return load_parser_data(value)
+
+    def copy_value(self, value):
+        from copy import deepcopy
+        return deepcopy(value)
+
+
 #: a new scoped session
 session = orm.scoped_session(lambda: orm.create_session(
                              local.application.database_engine,
@@ -218,6 +239,7 @@ for name in 'delete', 'save', 'flush', 'execute', 'begin', \
     public_names.add(name)
 db.session = session
 db.DatabaseManager = DatabaseManager
+db.ZEMLParserData = ZEMLParserData
 
 #: these members help documentation tools
 db.__all__ = sorted(public_names)
@@ -233,8 +255,7 @@ metadata = db.MetaData()
 users = db.Table('users', metadata,
     db.Column('user_id', db.Integer, primary_key=True),
     db.Column('username', db.String(30)),
-    db.Column('first_name', db.String(40)),
-    db.Column('last_name', db.String(80)),
+    db.Column('real_name', db.String(180)),
     db.Column('display_name', db.String(130)),
     db.Column('description', db.Text),
     db.Column('extra', db.PickleType),
@@ -258,12 +279,11 @@ posts = db.Table('posts', metadata,
     db.Column('slug', db.String(150)),
     db.Column('uid', db.String(250)),
     db.Column('title', db.String(150)),
-    db.Column('intro', db.Text),
-    db.Column('body', db.Text),
+    db.Column('text', db.Text),
     db.Column('author_id', db.Integer, db.ForeignKey('users.user_id')),
     db.Column('comments_enabled', db.Boolean, nullable=False),
     db.Column('pings_enabled', db.Boolean, nullable=False),
-    db.Column('parser_data', db.PickleType),
+    db.Column('parser_data', db.ZEMLParserData),
     db.Column('extra', db.PickleType),
     db.Column('status', db.Integer)
 )
@@ -291,9 +311,9 @@ comments = db.Table('comments', metadata,
     db.Column('author', db.String(100)),
     db.Column('email', db.String(250)),
     db.Column('www', db.String(200)),
-    db.Column('body', db.Text),
+    db.Column('text', db.Text),
     db.Column('is_pingback', db.Boolean, nullable=False),
-    db.Column('parser_data', db.PickleType),
+    db.Column('parser_data', db.ZEMLParserData),
     db.Column('parent_id', db.Integer, db.ForeignKey('comments.comment_id')),
     db.Column('pub_date', db.DateTime),
     db.Column('blocked_msg', db.String(250)),
@@ -305,8 +325,8 @@ pages = db.Table('pages', metadata,
     db.Column('page_id', db.Integer, primary_key=True),
     db.Column('key', db.String(25), unique=True),
     db.Column('title', db.String(200)),
-    db.Column('body', db.Text),
-    db.Column('extra', db.PickleType),
+    db.Column('text', db.Text),
+    db.Column('parser_data', db.ZEMLParserData),
     db.Column('navigation_pos', db.Integer),
     db.Column('parent_id', db.Integer, db.ForeignKey('pages.page_id')),
 )

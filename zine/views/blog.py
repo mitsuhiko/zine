@@ -18,7 +18,7 @@ from zine import cache, pingback
 from zine.i18n import _
 from zine.database import db
 from zine.application import add_link, url_for, render_response, emit_event, \
-     iter_listeners, Response
+     iter_listeners, Response, get_application
 from zine.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
     COMMENT_UNMODERATED
 from zine.utils import dump_json, build_tag_uri, ClosingIterator
@@ -50,7 +50,7 @@ def do_index(request, page=1):
         raise NotFound()
 
     add_link('alternate', url_for('blog/atom_feed'), 'application/atom+xml',
-             _('Recent Posts Feed'))
+             _(u'Recent Posts Feed'))
     return render_response('index.html', **data)
 
 
@@ -83,7 +83,7 @@ def do_archive(request, year=None, month=None, day=None, page=1):
         if value is not None:
             feed_parameters[name] = value
     add_link('alternate', url_for('blog/atom_feed', **feed_parameters),
-             'application/atom+xml', _('Recent Posts Feed'))
+             'application/atom+xml', _(u'Recent Posts Feed'))
     return render_response('archive.html', year=year, month=month, day=day,
                            date=date(year, month or 1, day or 1),
                            month_list=False, **data)
@@ -115,7 +115,7 @@ def do_show_tag(request, slug, page=1):
         raise NotFound()
 
     add_link('alternate', url_for('blog/atom_feed', tag=slug),
-             'application/atom+xml', _('All posts tagged %s') % tag.name)
+             'application/atom+xml', _(u'All posts tagged %s') % tag.name)
     return render_response('show_tag.html', tag=tag, **data)
 
 
@@ -162,7 +162,7 @@ def do_show_author(request, username, page=1):
         raise NotFound()
 
     add_link('alternate', url_for('blog/atom_feed', author=username),
-             'application/atom+xml', _('All posts written by %s') %
+             'application/atom+xml', _(u'All posts written by %s') %
              user.display_name)
 
     return render_response('show_author.html', user=user, **data)
@@ -257,7 +257,7 @@ def do_show_post(request, year, month, day, slug):
         # unmodereated if the blog configuration demands that
         if not comment.blocked and comment.requires_moderation:
             comment.status = COMMENT_UNMODERATED
-            comment.blocked_msg = _('Comment waiting for approval')
+            comment.blocked_msg = _(u'Comment waiting for approval')
 
         db.commit()
 
@@ -272,7 +272,7 @@ def do_show_post(request, year, month, day, slug):
         return redirect_to(post)
 
     add_link('alternate', post.comment_feed_url, 'application/atom+xml',
-             _('Comments Feed'))
+             _(u'Comments Feed'))
 
     return render_response('show_post.html',
         post=post,
@@ -374,7 +374,7 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
                 continue
             uid = build_tag_uri(request.app, comment.pub_date, 'comment',
                                 comment.comment_id)
-            title = _('Comment %(num)d on %(post)s') % {
+            title = _(u'Comment %(num)d on %(post)s') % {
                 'num':  comment_num,
                 'post': post.title
             }
@@ -427,7 +427,7 @@ def handle_user_pages(req):
     return render_response(
         'page_base.html',
         page=page,
-        blog_title=get_application().cfg['blog_title'],
+        blog_title=cfg['blog_title'],
         show_title=cfg['show_page_title'],
         show_children=cfg['show_page_children']
     )

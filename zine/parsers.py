@@ -6,27 +6,29 @@
     This module holds the base parser informations and the dict of
     default parsers.
 
-    :copyright: Copyright 2007 by Armin Ronacher
+    :copyright: Copyright 2007-2008 by Armin Ronacher
     :license: GNU GPL, see LICENSE for more details.
 """
+from werkzeug import escape
+
 from zine.application import iter_listeners, get_application
+from zine.utils.zeml import parse_html, parse_zeml, sanitize
+from zine.i18n import lazy_gettext
 
 
-def parse(input_data, parser=None, reason='unknown', optimize=True):
-    """Generate a doc tree out of the data provided. If we are not in unbound
+def parse(input_data, parser=None, reason='unknown'):
+    """Generate a doc tree out of the data provided.  If we are not in unbound
     mode the `process-doc-tree` event is sent so that plugins can modify
     the tree in place. The reason is useful for plugins to find out if they
     want to render it or now. For example a normal blog post would have the
     reason 'post-body' or 'post-intro', an isolated page from a plugin maybe
     'page' etc.
-
-    If optimize is enabled the return value might be a non queryable fragment.
     """
     input_data = u'\n'.join(input_data.splitlines())
     app = get_application()
     if parser is None:
         try:
-            parser_cls = app.parsers[app.cfg['default_parser']]
+            parser = app.parsers[app.cfg['default_parser']]
         except KeyError:
             # the plugin that provided the default parser is not
             # longer available.  reset the config value to the builtin
@@ -34,14 +36,13 @@ def parse(input_data, parser=None, reason='unknown', optimize=True):
             t = app.cfg.edit()
             t.revert_to_default('default_parser')
             t.commit()
-            parser_cls = SimpleHTMLParser
+            parser = app.parsers[app.cfg['default_parser']]
     else:
         try:
-            parser_cls = app.parsers[parser]
+            parser = app.parsers[parser]
         except KeyError:
             raise ValueError('parser %r does not exist' % (parser,))
 
-    parser = parser_cls()
     tree = parser.parse(input_data, reason)
 
     #! allow plugins to alter the doctree.
@@ -50,30 +51,56 @@ def parse(input_data, parser=None, reason='unknown', optimize=True):
         if item is not None:
             tree = item
 
-    if optimize:
-        return tree.optimize()
     return tree
 
 
 class BaseParser(object):
     """Baseclass for all kinds of parsers."""
 
-    @staticmethod
-    def get_name():
-        """Return the (localized) name of the parser."""
-        return self.__class__.__name__
+    #: the localized name of the parser.
+    name = None
+
+    def __init__(self, app):
+        self.app = app
 
     def parse(self, input_data, reason):
-        """Return a fragment."""
+        """Return a ZEML tree."""
 
 
-from zine.parsers.simplehtml import HTMLParser, SimpleHTMLParser, \
-     AutoParagraphHTMLParser
-from zine.parsers.comments import CommentParser
+class ZEMLParser(BaseParser):
+    """The parser for the ZEML Markup language."""
+
+    name = lazy_gettext('Zine-Markup')
+
+    def parse(self, input_data, reason):
+        rv = parse_zeml(input_data, self.app.zeml_element_handlers)
+        if reason == 'comment':
+            rv = sanitize(rv)
+        return rv
+
+
+class HTMLParser(BaseParser):
+    """A parser that understands plain old HTML."""
+
+    name = lazy_gettext('HTML')
+
+    def parse(self, input_data, reason):
+        rv = parse_html(input_data)
+        if reason == 'comment':
+            rv = sanitize(rv)
+        return rv
+
+
+class PlainTextParser(BaseParser):
+
+    name = lazy_gettext('Text')
+
+    def parse(self, input_data, reason):
+        return escape(input_data)
+
 
 all_parsers = {
-    'plain':            HTMLParser,
-    'default':          SimpleHTMLParser,
-    'autop':            AutoParagraphHTMLParser,
-    'comment':          CommentParser
+    'zeml':             ZEMLParser,
+    'html':             HTMLParser,
+    'text':             PlainTextParser
 }

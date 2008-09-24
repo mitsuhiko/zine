@@ -5,23 +5,26 @@
 
     Use Markdown for your blog posts.
 
-    :copyright: 2007 by Armin Ronacher.
+    TODO: this parser does not support `<intro>` sections and has a
+          very bad implementation as it requires multiple parsing steps.
+
+    :copyright: 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 from zine.api import *
 from zine.parsers import BaseParser
-from zine.parsers.simplehtml import HTMLParser
+from zine.utils.zeml import parse_html
 from zine.plugins.markdown_parser import markdown as md
 
 
 class MarkdownParser(BaseParser):
+    """A simple markdown parser."""
 
-    get_name = staticmethod(lambda: u'Markdown')
+    name = _(u'Markdown')
 
     def parse(self, input_data, reason):
         parser = md.Markdown(safe_mode=reason == 'comment' and 'escape')
-        html_parser = HTMLParser()
-        return html_parser.parse(parser.convert(input_data), None)
+        return parse_html(parser.convert(input_data))
 
 
 def setup(app, plugin):

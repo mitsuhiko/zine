@@ -5,7 +5,7 @@
     <h1>{{ _("Dashboard") }}</h1>
     <div class="panel">
       <div class="text">
-        <p>{% trans user=(request.user.first_name or request.user.username)|e -%}
+        <p>{% trans user=request.user.display_name|e -%}
           Howdy.  Welcome to the Zine administration interface {{ user }}.
         {%- endtrans %}
         {% trans -%}

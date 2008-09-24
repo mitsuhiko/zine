@@ -10,14 +10,10 @@
 """
 from os.path import join, dirname
 from time import time, asctime, gmtime
-from zine.api import *
-from zine.views.admin import render_admin_response, flash
-from zine.models import ROLE_ADMIN
-from zine.fragment import DataNode
-from zine.utils import forms
-from zine.utils.http import redirect_to
+
 from werkzeug import escape
 from werkzeug.exceptions import NotFound
+
 try:
     from pygments import highlight
     from pygments.lexers import get_lexer_by_name
@@ -27,9 +23,15 @@ try:
 except ImportError:
     have_pygments = False
 
+from zine.api import *
+from zine.views.admin import render_admin_response, flash
+from zine.models import ROLE_ADMIN
+from zine.utils import forms
+from zine.utils.zeml import HTMLElement, ElementHandler
+from zine.utils.http import redirect_to
+
 
 _formatters = {}
-_disabled_for = set(['comment'])
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
@@ -56,6 +58,21 @@ EXAMPLE = '''\
   </body>
 </html>\
 '''
+
+
+class SourcecodeHandler(ElementHandler):
+    """Provides a ``<sourcecode>`` tag."""
+    tag = 'sourcecode'
+    is_isolated = True
+    is_block_level = True
+
+    def process(self, element):
+        lexer_name = element.attributes.get('syntax', 'text')
+        try:
+            lexer = get_lexer_by_name(lexer_name)
+        except ValueError:
+            lexer = get_lexer_by_name('text')
+        return HTMLElement(highlight(element.text, lexer, get_formatter()))
 
 
 class ConfigurationForm(forms.Form):
@@ -92,21 +109,6 @@ def get_formatter(style=None, preview=False):
     if not preview:
         _formatters[style] = formatter
     return formatter
-
-
-def process_doc_tree(doctree, input_data, reason):
-    """Parse time callback function that replaces all pre blocks with a
-    'syntax' attribute the highlighted sourcecode.
-    """
-    if reason in _disabled_for:
-        return
-    for node in doctree.query('pre[@syntax]'):
-        try:
-            lexer = get_lexer_by_name(node.attributes.pop('syntax'))
-        except ValueError:
-            return
-        output = highlight(node.text, lexer, get_formatter())
-        node.parent.children.replace(node, DataNode(output))
 
 
 def get_style(req, style):
@@ -176,10 +178,10 @@ def setup(app, plugin):
     if not have_pygments:
         raise SetupError('The pygments plugin requires the pygments library '
                          'to be installed.')
-    app.add_config_var('pygments_support/style', unicode, u'default')
     app.connect_event('modify-admin-navigation-bar', add_pygments_link)
-    app.connect_event('process-doc-tree', process_doc_tree)
     app.connect_event('after-request-setup', inject_style)
+    app.add_config_var('pygments_support/style', unicode, u'default')
+    app.add_zeml_element_handler(SourcecodeHandler)
     app.add_url_rule('/options/pygments', prefix='admin',
                      view=show_config, endpoint='pygments_support/config')
     app.add_url_rule('/_shared/pygments_support/<style>.css',

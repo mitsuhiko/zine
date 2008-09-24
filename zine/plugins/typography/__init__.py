@@ -24,7 +24,7 @@ from zine.utils import forms
 
 TEMPLATES = join(dirname(__file__), 'templates')
 
-_ignored_nodes = set(['pre', 'code'])
+_ignored_elements = set(['pre', 'code'])
 _rules = [
     (re.compile(r'(?<!\.)\.\.\.(?!\.)'), 'ellipsis', u'…'),
     (re.compile(r'(?<!-)---(?!-)'), 'emdash', u'—'),
@@ -55,27 +55,33 @@ def process_doc_tree(doctree, input_data, reason):
     """Parse time callback function that replaces all pre blocks with a
     'syntax' attribute the highlighted sourcecode.
     """
-    def handle_match(m):
-        all = m.group()
-        if not m.groups():
-            return used_signs[sign]
-        offset = m.start()
-        return all[:m.start(1) - offset] + \
-               used_signs[sign] + \
-               all[m.end(1) - offset:]
+    def apply_typography(text):
+        def handle_match(m):
+            all = m.group()
+            if not m.groups():
+                return used_signs[sign]
+            offset = m.start()
+            return all[:m.start(1) - offset] + \
+                   used_signs[sign] + \
+                   all[m.end(1) - offset:]
+        for regex, sign, ignore in _rules:
+            text = regex.sub(handle_match, text)
+        return text
 
     cfg = get_application().cfg
     used_signs = dict((k, cfg['typography/' + k]) for ignore, k, ignore in _rules)
-    for node in doctree.query('#'):
-        handle_typography = node.parent and \
-                            node.parent.attributes.pop('typography', None)
+    for element in doctree.walk():
+        handle_typography = element.attributes.pop('typography', None)
         if handle_typography is None:
-            handle_typography = node.parent.name not in _ignored_nodes
+            handle_typography = element.name not in _ignored_elements
         else:
             handle_typography = handle_typography.lower() == 'true'
         if handle_typography:
-            for regex, sign, ignore in _rules:
-                node.value = regex.sub(handle_match, node.value)
+            if element.text:
+                element.text = apply_typography(element.text)
+            for child in element.children:
+                if child.tail:
+                    child.tail = apply_typography(child.tail)
 
 
 def add_config_link(req, navigation_bar):

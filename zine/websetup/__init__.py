@@ -146,7 +146,7 @@ class WebSetup(object):
             e = db.create_engine(database_uri, self.instance_folder)
             init_database(e)
         except Exception, error:
-            error = str(error)
+            error = str(error).decode('utf-8', 'ignore')
         else:
             from zine.models import ROLE_ADMIN
             from zine.database import users
@@ -156,11 +156,10 @@ class WebSetup(object):
                 username=value('admin_username'),
                 pw_hash=gen_pwhash(value('admin_password')),
                 email=value('admin_email'),
-                first_name='',
-                last_name='',
-                description='',
+                real_name=u'',
+                description=u'',
                 extra={},
-                display_name='$nick',
+                display_name='$username',
                 role=ROLE_ADMIN
             )
 

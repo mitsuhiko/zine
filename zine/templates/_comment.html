@@ -15,8 +15,8 @@
       {% endif -%}
       </p>
     </div>
-  {% else %}
-    {%- if comment.status %}<p><em>Comment waiting for approval</em></p>{%- endif %}
+  {% elif comment.is_unmoderated -%}
+    <p><em>{{ _('Comment waiting for approval.') }}</em></p>
   {%- endif %}
 {%- endmacro %}
 
@@ -25,12 +25,9 @@
     {{ emit_event('before-comment-editor-rendered', post) }}
     {%- if not form.small_form %}
     <dl>
-      <dt><label for="f_author">{{ _("Name*") }}</label></dt>
-      <dd>{{ form.author }}</dd>
-      <dt><label for="f_email">{{ _("Mail* (not published)") }}</label></dt>
-      <dd>{{ form.email }}</dd>
-      <dt><label for="f_www">{{ _("Website") }}</label></dt>
-      <dd>{{ form.www }}</dd>
+      {{ form.author.as_dd() }}
+      {{ form.email.as_dd() }}
+      {{ form.www.as_dd() }}
     </dl>
     {%- endif %}
     <div>{{ form.body }}{{ form.parent }}</div>
