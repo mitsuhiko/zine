@@ -188,21 +188,6 @@ _opcodes = map(intern, 'NISLMRED')
 del _struct
 
 _empty_set = frozenset()
-_isolated_elements = set(['script', 'style', 'noscript', 'iframe'])
-_autoparagraphed_elements = set([None, 'div', 'blockquote'])
-_semi_isolated_elements = set(['textarea'])
-_void_elements = set(['br', 'img', 'area', 'hr', 'param', 'input',
-                              'embed', 'col'])
-_block_elements = set(['div', 'p', 'form', 'ul', 'ol', 'li', 'table', 'tr',
-                       'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'tl',
-                       'dt', 'dd'])
-_breaking_rules = [
-    (['p'], set(['#block'])),
-    (['li'], set(['li'])),
-    (['td', 'tr'], set(['td', 'th', 'tr', 'tbody', 'thead', 'tfoot'])),
-    (['tr'], set(['tr', 'tbody', 'thead', 'tfoot'])),
-    (['dd', 'dt'], set(['dl', 'dt', 'dd']))
-]
 
 
 def dumps(obj):
@@ -513,7 +498,13 @@ class _BaseElement(object):
         return unicode(self).encode('utf-8')
 
     def __nonzero__(self):
-        return bool(self.children or self.text or self.tail)
+        return bool(self.children or self.text or self.tail or
+                    self.attributes)
+
+    @property
+    def non_blank(self):
+        return bool(self.children or self.text.strip() or
+                    self.tail.strip() or self.attributes)
 
     def query(self, expr):
         return _query(self.children, expr)
@@ -607,14 +598,19 @@ class DynamicElement(_BaseElement):
     in common with element that is the tail text.
 
     The serializer calls the `to_html` method when it wants to display the
-    element.
+    element but subclasses have to override `render()` to not break the tail
+    rendering.
     """
 
     is_dynamic = True
 
+    def render(self):
+        """Classes have to overide the render method to output something."""
+        raise NotImplementedError()
+
     def to_html(self):
         """Converts the element to HTML."""
-        raise NotImplementedError()
+        return self.render() + self.tail
 
     def __nonzero__(self):
         return True
@@ -638,7 +634,7 @@ class BrokenElement(DynamicElement):
         self.obj_name = obj_name
         self.message = message
 
-    def to_html(self):
+    def render(self):
         return u'<div class="error"><strong>%s</strong>: %s</div>' % (
             _('Error loading dynamic element %s') % self.obj_name,
             escape(self.message)
@@ -651,7 +647,7 @@ class HTMLElement(DynamicElement):
     def __init__(self, value):
         self.value = value
 
-    def to_html(self):
+    def render(self):
         return self.value
 
 
@@ -893,6 +889,22 @@ class Parser(object):
     `br` element.
     """
 
+    isolated_elements = set(['script', 'style', 'noscript', 'iframe'])
+    autoparagraphed_elements = set(['div', 'blockquote'])
+    semi_isolated_elements = set(['textarea'])
+    void_elements = set(['br', 'img', 'area', 'hr', 'param', 'input',
+                         'embed', 'col'])
+    block_elements = set(['div', 'p', 'form', 'ul', 'ol', 'li', 'table', 'tr',
+                          'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'tl',
+                          'dt', 'dd', 'blockquote'])
+    breaking_rules = [
+        (['p'], set(['#block'])),
+        (['li'], set(['li'])),
+        (['td', 'tr'], set(['td', 'th', 'tr', 'tbody', 'thead', 'tfoot'])),
+        (['tr'], set(['tr', 'tbody', 'thead', 'tfoot'])),
+        (['dd', 'dt'], set(['dl', 'dt', 'dd']))
+    ]
+
     def __init__(self, string, element_handlers=None):
         self.string = unicode(string)
         self.end = len(self.string)
@@ -901,13 +913,15 @@ class Parser(object):
         self.state = 'data'
         self.stack = [self.result]
 
-        self.isolated_elements = _isolated_elements.copy()
-        self.autoparagraphed_elements = _autoparagraphed_elements.copy()
-        self.semi_isolated_elements = _semi_isolated_elements.copy()
-        self.void_elements = _void_elements.copy()
-        self.block_elements = _block_elements.copy()
+        self.isolated_elements = self.isolated_elements.copy()
+        self.autoparagraphed_elements = self.autoparagraphed_elements.copy()
+        self.semi_isolated_elements = self.semi_isolated_elements.copy()
+        self.void_elements = self.void_elements.copy()
+        self.block_elements = self.block_elements.copy()
+
+        breaking_rules = self.breaking_rules
         self.breaking_rules = {}
-        for elements, breakers in _breaking_rules:
+        for elements, breakers in breaking_rules:
             for element in elements:
                 self.breaking_rules[element] = breakers.copy()
 
@@ -1094,89 +1108,12 @@ class Parser(object):
         else:
             self.current.text += text
 
-    def attach_paragraphs(self):
-        """Attaches automatic paragraphs to elements that want them."""
-        def joined_text_iter(node):
-            text_buf = [node.text]
-            node.text = u''
-
-            def flush_text_buf():
-                if text_buf:
-                    text = u''.join(text_buf)
-                    del text_buf[:]
-                    if text:
-                        return text
-
-            for child in node.children:
-                text = flush_text_buf()
-                if text is not None:
-                    yield text
-                yield child
-                text_buf.append(child.tail)
-                child.tail = u''
-
-            text = flush_text_buf()
-            if text is not None:
-                yield text
-
-        def make_paragraph(children):
-            element = Element('p')
-            for child in children:
-                if isinstance(child, unicode):
-                    if element.children:
-                        element.children[-1].tail += child
-                    else:
-                        element.text += child
-                elif child:
-                    element.children.append(child)
-            return element
-
-        # XXX: the tail of the element before is ignored
-
-        def transform(parent):
-            for node in parent.children[:]:
-                transform(node)
-            if parent.name not in self.autoparagraphed_elements:
-                return
-            paragraphs = [[]]
-
-            for item in joined_text_iter(parent):
-                if isinstance(item, unicode):
-                    blockiter = iter(_paragraph_re.split(item))
-                    for block in blockiter:
-                        try:
-                            is_paragraph = blockiter.next()
-                        except StopIteration:
-                            is_paragraph = False
-                        if block:
-                            paragraphs[-1].append(block)
-                        if is_paragraph:
-                            paragraphs.append([])
-                elif item.name in self.block_elements:
-                    paragraphs.extend((item, []))
-                else:
-                    paragraphs[-1].append(item)
-
-            del parent.children[:]
-            for paragraph in paragraphs:
-                if not isinstance(paragraph, list):
-                    parent.children.append(paragraph)
-                else:
-                    for item in paragraph:
-                        if not isinstance(item, unicode) or item:
-                            parent.children.append(make_paragraph(paragraph))
-                            break
-
-        transform(self.result)
-
     def parse(self):
         """Parses the whole string into a element tree."""
         while not self.finished:
             self.state = getattr(self, 'parse_' + self.state)()
         while not self.in_root_tag:
             self.leave(None)
-        # XXX: doesn't work properly
-        #self.attach_paragraphs()
 
     def parse_data(self):
         """Parses everything up to the next tag."""
