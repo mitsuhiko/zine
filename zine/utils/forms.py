@@ -712,6 +712,14 @@ class FormWidget(MappingWidget):
         """The redirect target for this form."""
         return self._field.form.redirect_target
 
+    def default_actions(self, **attrs):
+        """Returns a default action div with a submit button."""
+        label = attrs.pop('label', None)
+        if label is None:
+            label = _('Submit')
+        attrs.setdefault('class', 'actions')
+        return html.div(html.input(type='submit', value=label), **attrs)
+
     def render(self, action='', method='post', **attrs):
         self._attr_setdefault(attrs)
         with_errors = attrs.pop('with_errors', False)
@@ -721,7 +729,7 @@ class FormWidget(MappingWidget):
         if caller is not None:
             body = caller()
         else:
-            body = self.as_dl()
+            body = self.as_dl() + self.default_actions()
 
         hidden = self.hidden_fields
         if hidden:
@@ -818,7 +826,6 @@ class FieldMeta(type):
         if 'messages' in d:
             messages.update(d['messages'])
         d['messages'] = messages
-        d['_position_hint'] = _next_position_hint()
         return type.__new__(cls, name, bases, d)
 
 
@@ -832,6 +839,7 @@ class Field(object):
 
     def __init__(self, label=None, help_text=None, validators=None,
                  widget=None, messages=None):
+        self._position_hint = _next_position_hint()
         self.label = label
         self.help_text = help_text
         if validators is None:

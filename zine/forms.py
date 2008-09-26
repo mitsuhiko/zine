@@ -136,7 +136,7 @@ class PluginForm(forms.Form):
     def apply(self):
         """Apply the changes."""
         t = self.app.cfg.edit()
-        t['plugins'] = ', '.join(sorted(self.data['active_plugins']))
+        t['plugins'] = u', '.join(sorted(self.data['active_plugins']))
         t['plugin_guard'] = not self.data['disable_guard']
         t.commit()
 
