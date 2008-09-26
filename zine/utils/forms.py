@@ -263,12 +263,6 @@ class _Renderable(object):
     def __call__(self, *args, **kwargs):
         return self.render(*args, **kwargs)
 
-    def __unicode__(self):
-        return self()
-
-    def __str__(self):
-        return unicode(self).encode('utf-8')
-
 
 class Widget(_Renderable):
     """Baseclass for all widgets.  All widgets share a common interface
@@ -363,6 +357,8 @@ class Widget(_Renderable):
         widgets.
     """
 
+    disable_dt = False
+
     def __init__(self, field, name, value, all_errors):
         self._field = field
         self._value = value
@@ -414,9 +410,10 @@ class Widget(_Renderable):
     def as_dd(self, **attrs):
         """Return a dt/dd item."""
         rv = []
-        label = self.label
-        if label:
-            rv.append(html.dt(label()))
+        if not self.disable_dt:
+            label = self.label
+            if label:
+                rv.append(html.dt(label()))
         rv.append(html.dd(self(**attrs)))
         if self.help_text:
             rv.append(html.dd(self.help_text, class_='explanation'))
@@ -453,7 +450,7 @@ class InternalWidget(Widget):
         self._parent = parent
 
     value = name = None
-    errors = all_errors = property(lambda: ErrorList())
+    errors = all_errors = property(lambda x: ErrorList())
 
 
 class Input(Widget):
@@ -502,10 +499,40 @@ class Textarea(Widget):
 class Checkbox(Widget):
     """A simple checkbox."""
 
+    def as_dd(self, **attrs):
+        """Return a dt/dd item."""
+        rv = []
+        label = self.label
+        if label:
+            rv.append(html.dt(label()))
+        data = self(**attrs)
+        if self.help_text:
+            data += u' ' + html.label(self.help_text, class_='explanation',
+                                      for_=self.id)
+        rv.append(html.dd(data))
+        return u''.join(rv)
+
     def render(self, **attrs):
         self._attr_setdefault(attrs)
         return html.input(name=self.name, type='checkbox',
                           checked=self.value, **attrs)
+
+
+class Button(Widget):
+    """A widget that's a submit button.  This widget is special and can be
+    used as a replacement widget for boolen fields but only one can be
+    clicked.
+    """
+
+    disable_dt = True
+
+    def _attr_setdefault(self, attrs):
+        Widget._attr_setdefault(self, attrs)
+        attrs.setdefault('label', self.label)
+
+    def render(self, **attrs):
+        self._attr_setdefault(attrs)
+        return html.input(name=self.name, type='submit', **attrs)
 
 
 class SelectBox(Widget):
@@ -530,6 +557,10 @@ class SelectBox(Widget):
 
 class _InputGroupMember(InternalWidget):
     """A widget that is a single radio button."""
+
+    # override the label descriptor
+    label = None
+    inline_label = True
 
     def __init__(self, parent, value, label):
         InternalWidget.__init__(self, parent)
@@ -586,8 +617,8 @@ class _InputGroup(Widget):
             return u''
         self._attr_setdefault(attrs)
         return list_type(*[u'<li>%s %s</li>' % (
-            choice,
-            choice.label
+            choice(),
+            choice.label()
         ) for choice in self.choices], **attrs)
 
     def as_ul(self, **attrs):
@@ -1243,12 +1274,15 @@ class MultiChoiceField(ChoiceField):
 
     def convert(self, value):
         values = _to_list(value)
-        container = set(values) | set(map(unicode, values))
         result = []
 
+        container = set()
         for choice in self.choices:
             if isinstance(choice, tuple):
                 choice = choice[0]
+            container.update((choice, unicode(choice)))
+
+        for choice in values:
             if choice not in container:
                 raise ValidationError(_(u'Select a valid choice.'))
             result.append(choice)

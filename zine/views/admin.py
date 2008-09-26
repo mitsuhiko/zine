@@ -30,8 +30,7 @@ from zine.database import db, comments as comment_table, posts, \
      post_tags, post_links, secure_database_uri
 from zine.utils import dump_json, load_json
 from zine.utils.validators import is_valid_email, is_valid_url, check
-from zine.utils.admin import flash, gen_slug, commit_config_change, \
-     load_zine_reddit
+from zine.utils.admin import flash, gen_slug, load_zine_reddit
 from zine.utils.pagination import AdminPagination
 from zine.utils.xxx import make_hidden_fields, CSRFProtector, \
      IntelligentRedirect, StreamReporter
@@ -47,7 +46,8 @@ from zine.importers import list_import_queue, load_import_dump, \
 from zine.pluginsystem import install_package, InstallationError, \
      SetupError
 from zine.pingback import pingback, PingbackError
-from zine.forms import LoginForm, ChangePasswordForm
+from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
+     LogForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -128,6 +128,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
              _(u'Maintenance')),
              ('import', url_for('admin/import'), _(u'Import')),
              ('export', url_for('admin/export'), _(u'Export')),
+             ('log', url_for('admin/log'), _('Log')),
              ('configuration', url_for('admin/configuration'),
               _(u'Configuration Editor'))
         ]
@@ -1260,13 +1261,13 @@ def do_basic_options(request):
             if use_flat_comments != cfg['use_flat_comments']:
                 t['use_flat_comments'] = use_flat_comments
 
-            if commit_config_change(t):
-                # because the configuration page could change the language and
-                # we want to flash the message "configuration changed" in the
-                # new language rather than the old.  As a matter of fact we have
-                # to wait for Zine to reload first which is why we do the
-                # actual flashing after one reload.
-                return redirect_to('admin/basic_options', altered='true')
+            t.commit()
+            # because the configuration page could change the language and
+            # we want to flash the message "configuration changed" in the
+            # new language rather than the old.  As a matter of fact we have
+            # to wait for Zine to reload first which is why we do the
+            # actual flashing after one reload.
+            return redirect_to('admin/basic_options', altered='true')
 
         for error in errors:
             flash(error, 'error')
@@ -1362,55 +1363,11 @@ def do_configure_theme(request):
 @require_role(ROLE_ADMIN)
 def do_plugins(request):
     """Load and unload plugins and reload Zine if required."""
-    csrf_protector = CSRFProtector()
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
+    form = PluginForm()
 
-        if request.form.get('enable_guard'):
-            if request.app.cfg.change_single('plugin_guard', True):
-                flash(_(u'Plugin guard enabled successfully. Errors '
-                        'occuring in plugins during setup are catched now.'))
-            else:
-                flash(_(u'Plugin guard could not be enabled.'), 'error')
-        elif request.form.get('disable_guard'):
-            if request.app.cfg.change_single('plugin_guard', False):
-                flash(_(u'Plugin guard disabled successfully.'))
-            else:
-                flash(_(u'Plugin guard could not be disabled.'), 'error')
-
-        for name, plugin in request.app.plugins.iteritems():
-            active = 'plugin_' + name in request.form
-
-            # XXX: correct pluralization in the dependency loading message
-            # XXX: dependency tracking on plugin deactivating
-
-            if active and not plugin.active:
-                loaded, loaded_dep, missing_dep = plugin.activate()
-                if loaded:
-                    if loaded_dep:
-                        flash(_(u'The Plugins %(dependencies)s are '
-                                u'loaded as a dependency of “%(plugin)s”') % {
-                                    'dependencies': u', '.join(loaded_dep),
-                                    'plugin': plugin.html_display_name})
-                    flash(_(u'Plugin “%s” activated.') % plugin.html_display_name,
-                         'configure')
-
-                else:
-                    if missing_dep:
-                        flash(_(u'Plugin “%(plugin)s” has unresolved '
-                                u'dependencies.  Please install %(dependency)s.')
-                                % {'plugin': plugin.html_display_name,
-                                   'dependency': u', '.join(missing_dep)}, 'error')
-                    else:
-                        flash(_(u'Plugin “%s” could not be loaded')
-                                % plugin.html_display_name)
-
-            elif not active and plugin.active:
-                plugin.deactivate()
-                flash(_(u'Plugin “%s” deactivated.') %
-                      plugin.html_display_name, 'configure')
-            else:
-                continue
+    if request.method == 'POST' and form.validate(request.form):
+        form.apply()
+        flash(_('Plugin configuration changed'), 'configure')
 
         new_plugin = request.files.get('new_plugin')
         if new_plugin:
@@ -1426,9 +1383,8 @@ def do_plugins(request):
         return redirect_to('admin/plugins')
 
     return render_admin_response('admin/plugins.html', 'options.plugins',
-        plugins=sorted(request.app.plugins.values(), key=lambda x: x.name),
-        csrf_protector=csrf_protector,
-        guard_enabled=request.app.cfg['plugin_guard']
+        form=form.as_widget(),
+        plugins=sorted(request.app.plugins.values(), key=lambda x: x.name)
     )
 
 
@@ -1516,8 +1472,8 @@ def do_cache(request):
                 t['memcached_servers'] = memcached_servers
             if filesystem_cache_path != cfg['filesystem_cache_path']:
                 t['filesystem_cache_path'] = filesystem_cache_path
-            if commit_config_change(t):
-                flash(_(u'Updated cache settings.'), 'configure')
+            t.commit()
+            flash(_(u'Updated cache settings.'), 'configure')
         else:
             flash(errors[0], 'error')
 
@@ -1559,7 +1515,7 @@ def do_configuration(request):
                     already_default.add(key)
                 elif key in request.app.cfg and key not in already_default:
                     t.set_from_string(key, value)
-            commit_config_change(t)
+            t.commit()
         return redirect_to('admin/configuration')
 
     # html does not allow slashes.  Convert them to dots
@@ -1753,6 +1709,18 @@ def do_information(request):
     return response
 
 
+@require_role(ROLE_ADMIN)
+def do_log(request, page):
+    page = request.app.log.view().get_page(page)
+    form = LogForm()
+    if request.method == 'POST' and form.validate(request.form):
+        form.apply()
+        flash(_('Log changes saved.'), 'configure')
+        return redirect_to('admin/log', page=page.number)
+    return render_admin_response('admin/log.html', 'system.log',
+                                 page=page, form=form.as_widget())
+
+
 @require_role(ROLE_AUTHOR)
 def do_about_zine(request):
     """Just show the zine license and some other legal stuff."""
@@ -1800,8 +1768,8 @@ def do_pages_config(request):
             t['show_page_title'] = show_title
         if show_children != cfg['show_page_children']:
             t['show_page_children'] = show_children
-        if commit_config_change(t):
-            flash(u'Pages configuration updated successfull.')
+        t.commit()
+        flash(u'Pages configuration updated successful.')
 
     return render_admin_response(
         'admin/pages_config.html',

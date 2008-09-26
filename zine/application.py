@@ -33,7 +33,6 @@ from werkzeug.contrib.securecookie import SecureCookie
 from zine.environment import SHARED_DATA, BUILTIN_TEMPLATE_PATH, \
      BUILTIN_PLUGIN_FOLDER
 from zine.database import db, cleanup_session
-from zine.config import Configuration
 from zine.cache import get_cache
 from zine.utils import ClosingIterator, local, local_manager, dump_json, \
      htmlhelpers
@@ -212,6 +211,10 @@ def require_role(role):
         decorated.__doc__ = f.__doc__
         return decorated
     return wrapped
+
+
+class InternalError(Exception):
+    pass
 
 
 class Request(RequestBase):
@@ -589,7 +592,7 @@ class Zine(object):
             raise TypeError('cannot create %r instances. use the '
                             'make_zine factory function.' %
                             self.__class__.__name__)
-        self.instance_folder = instance_folder
+        self.instance_folder = path.abspath(instance_folder)
 
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup
@@ -601,6 +604,10 @@ class Zine(object):
         self.cfg = Configuration(path.join(instance_folder, 'zine.ini'))
         if not self.cfg.exists:
             raise InstanceNotInitialized()
+
+        # and hook in the logger
+        self.log = Logger(path.join(instance_folder, self.cfg['log_file']),
+                          self.cfg['log_level'])
 
         # the iid of the application
         self.iid = self.cfg['iid'].encode('utf-8')
@@ -1318,3 +1325,5 @@ def make_zine(instance_folder, bind_to_thread=False):
 
 # import here because of circular dependencies
 from zine import i18n
+from zine.config import Configuration
+from zine.utils.log import Logger

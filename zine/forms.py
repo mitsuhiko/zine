@@ -9,8 +9,9 @@
     :license: GNU GPL.
 """
 from zine.i18n import _, lazy_gettext
+from zine.application import get_application
 from zine.models import User, Comment
-from zine.utils import forms
+from zine.utils import forms, log
 from zine.utils.validators import ValidationError, is_valid_email, \
      is_valid_url
 
@@ -26,6 +27,8 @@ class LoginForm(forms.Form):
 
     def context_validate(self, data):
         if not data['user'].check_password(data['password']):
+            log.warning(_('Failed login attempt from "%s", invalid password')
+                        % data['user'].username, 'auth')
             raise ValidationError(_('Incorrect password.'))
 
 
@@ -108,3 +111,56 @@ class NewCommentForm(forms.Form):
             www = self['www']
         return Comment(self.post, author, self['body'], email, www,
                        self['parent'], submitter_ip=ip)
+
+
+class PluginForm(forms.Form):
+    """The form for plugin activation and deactivation."""
+    active_plugins = forms.MultiChoiceField(widget=forms.CheckboxGroup)
+    disable_guard = forms.BooleanField(lazy_gettext(u'Disable plugin guard'),
+        help_text=lazy_gettext(u'If the plugin guard is disabled errors '
+                               u'on plugin setup are not catched.'))
+
+    def __init__(self, initial=None):
+        self.app = app = get_application()
+        self.active_plugins.choices = sorted([(x.name, x.display_name)
+                                              for x in app.plugins.values()],
+                                             key=lambda x: x[1].lower())
+        if initial is None:
+            initial = dict(
+                active_plugins=[x.name for x in app.plugins.itervalues()
+                                if x.active],
+                disable_guard=not app.cfg['plugin_guard']
+            )
+        forms.Form.__init__(self, initial)
+
+    def apply(self):
+        """Apply the changes."""
+        t = self.app.cfg.edit()
+        t['plugins'] = ', '.join(sorted(self.data['active_plugins']))
+        t['plugin_guard'] = not self.data['disable_guard']
+        t.commit()
+
+
+class LogForm(forms.Form):
+    """A form for the logfiles."""
+    filename = forms.TextField(lazy_gettext('Filename'))
+    level = forms.ChoiceField(lazy_gettext('Log Level'),
+                              choices=[(k, lazy_gettext(k)) for k, v
+                                       in sorted(log.LEVELS.items(),
+                                                 key=lambda x: x[1])])
+
+    def __init__(self, initial=None):
+        self.app = app = get_application()
+        if initial is None:
+            initial = dict(
+                filename=app.cfg['log_file'],
+                level=app.cfg['log_level']
+            )
+        forms.Form.__init__(self, initial)
+
+    def apply(self):
+        """Apply the changes."""
+        t = self.app.cfg.edit()
+        t['log_file'] = self.data['filename']
+        t['log_level'] = self.data['level']
+        t.commit()

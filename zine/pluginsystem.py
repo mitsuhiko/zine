@@ -446,49 +446,6 @@ class Plugin(object):
             app.plugin_folder
         self.setup_error = None
 
-    def activate(self):
-        """Activate the plugin.
-
-        :return: A tuple in the form of ``(loaded_successfully,
-                 loaded_dependences, missing_dependences)`` where the first
-                 item represents if the plugin was loaded and the latter ones
-                 represents loaded/missing dependences.
-        """
-        plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
-        loaded_dependences = set()
-        missing_dependences = set()
-
-        # handle dependences
-        if self.depends:
-            for dep in self.depends:
-                if (dep in self.app.plugins and
-                    not self.app.plugins[dep].active):
-                    loaded_dependences.add(dep)
-                elif dep not in self.app.plugins:
-                    missing_dependences.add(dep)
-
-        if not missing_dependences:
-            for dep_to_load in loaded_dependences:
-                dep_obj = self.app.plugins[dep_to_load]
-                if not dep_obj.active:
-                    dep_obj.activate()
-
-            loaded = loaded_dependences.copy()
-            loaded.update([self.name])
-            plugins.update(loaded)
-            self.app.cfg.change_single('plugins',
-                ', '.join(x for x in sorted(plugins) if x))
-
-        return not missing_dependences, loaded_dependences, \
-                   missing_dependences
-
-    def deactivate(self):
-        """Deactivate this plugin."""
-        plugins = set(x.strip() for x in self.app.cfg['plugins'].split(','))
-        plugins.discard(self.name)
-        self.app.cfg.change_single('plugins',
-            ', '.join(x for x in sorted(plugins) if x))
-
     def remove(self):
         """Remove the plugin from the instance folder."""
         if not self.instance_plugin:

@@ -1144,3 +1144,103 @@ div.login-box input[type="submit"]:hover {
 div.login-box input[type="submit"]:focus {
     background: #D3E4EB;
 }
+
+/* :::: LOGFILE VIEWER :::: */
+table.logfile {
+    margin-bottom: 1em!important;
+}
+
+table.logfile td.detail {
+    width: 12em;
+    padding-left: 10px;
+}
+
+table.logfile td.detail div.time {
+    color: #555;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+table.logfile td.detail div.location {
+    font-size: 11px;
+    color: #555;
+}
+
+table.logfile td.level {
+    width: 4em;
+    font-size: 12px;
+}
+
+table.logfile td.message pre {
+    vertical-align: top;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+table.logfile td.level {
+    border-left: 1px solid #B4D2E7;
+    border-right: 1px solid #B4D2E7;
+    font-weight: bold;
+    text-align: center;
+}
+
+table.logfile td.level-critical {
+    background-color: #333;
+    color: #FFD000;
+}
+
+table.logfile tr.even td.level-critical {
+    background-color: #111;
+}
+
+table.logfile td.level-error {
+    background-color: #FCE7E7;
+    color: #922121;
+}
+
+table.logfile tr.even td.level-error {
+    background-color: #F7D7D7;
+}
+
+table.logfile td.level-debug {
+    background-color: #F3FCE8;
+    color: #5E9120;
+}
+
+table.logfile tr.even td.level-debug {
+    background-color: #E1F1CC;
+}
+
+table.logfile td.level-info {
+    background-color: #F2FAFC;
+    color: #237488;
+}
+
+table.logfile tr.even td.level-info {
+    background-color: #D7F1F7;
+}
+
+table.logfile td.level-notice {
+    background-color: #f2f2f2;
+    color: #777;
+}
+
+table.logfile tr.even td.level-notice {
+    background-color: #ddd;
+}
+
+table.logfile td.level-warning {
+    background-color: #FFFBEB;
+    color: #998429;
+}
+
+table.logfile tr.even td.level-warning {
+    background-color: #EBE6D0;
+}
+
+table.logfile td.module {
+    width: 5em;
+    font-size: 13px;
+    text-align: right;
+}

@@ -1256,7 +1256,7 @@ class Sanitizer(object):
     acceptable_protocols = set([
         'ed2k', 'ftp', 'http', 'https', 'irc', 'mailto', 'news', 'gopher',
         'nntp', 'telnet', 'webcal', 'xmpp', 'callto', 'feed', 'urn',
-        'aim', 'rsync', 'tag', 'ssh', 'sftp', 'rtsp', 'afs', 'git'
+        'aim', 'rsync', 'tag', 'ssh', 'sftp', 'rtsp', 'afs', 'git', 'msn'
     ])
 
     _css_url_re = re.compile(r'url\s*\(\s*[^\s)]+?\s*\)\s*')

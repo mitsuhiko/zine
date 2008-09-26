@@ -2,7 +2,8 @@
 {% block title %}{{ _("Plugin Management") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Plugin Management") }}</h1>
-  <form action="" method="post" enctype="multipart/form-data">
+  {%- call form(enctype="multipart/form-data") %}
+    {{ form.all_errors() }}
     <p>{% trans %}
       Plugins extend the functionality of the Zine system. Because of
       security and convinience reasons you have to enable plugins by hand.
@@ -37,11 +38,17 @@
               }}">{{ _("Remove plugin") }}</a>]
           {% endif -%}
         </td>
-        <td class="active">{{ h.checkbox('plugin_' + plugin.name, plugin.active) }}
-            <label for="plugin_{{ plugin.name }}"></label></td>
+        <td class="active">{{ form.active_plugins[plugin.name]() }}</td>
       </tr>
     {%- endfor %}
     </table>
+    <h2>{{ _("Plugin Guard") }}</h2>
+    <p>{% trans %}
+      Normally the plugin guard is enabled and catches exceptions during
+      plugin setup.  In some situations however this is not wanted, for
+      example if you want to debug a broken plugin.
+    {% endtrans %}
+    <dl>{{ form.disable_guard.as_dd() }}</dl>
     <h2>{{ _("Add New Plugin") }}</h2>
     <p>{% trans %}
       If you have a plugin as Zine <tt>.plugin</tt> file you can upload it
@@ -50,13 +57,7 @@
     {% endtrans %}</p>
     <p><input type="file" name="new_plugin"></p>
     <div class="actions">
-      {{ csrf_protector }}
-      <input type="submit" value="{{ _('Update') }}">
-      {%- if guard_enabled %}
-      <input type="submit" name="disable_guard" value="{{ _('Disable Plugin Guard') }}">
-      {%- else %}
-      <input type="submit" name="enable_guard" value="{{ _('Enable Plugin Guard') }}">
-      {%- endif %}
+      <input type="submit" value="{{ _('Apply') }}">
     </div>
-  </form>
+  {%- endcall %}
 {% endblock %}

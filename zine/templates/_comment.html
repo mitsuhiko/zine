@@ -30,7 +30,7 @@
       {{ form.www.as_dd() }}
     </dl>
     {%- endif %}
-    <div>{{ form.body }}{{ form.parent }}</div>
+    <div>{{ form.body() }}{{ form.parent() }}</div>
     <div id="comment-message">{# used for the reply callback #}</div>
     {{ emit_event('before-comment-editor-buttons-rendered', post) }}
     <div class="actions">

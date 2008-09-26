@@ -18,6 +18,7 @@ import sys
 from os import path
 from zine.config import Configuration
 from zine.api import db
+from zine.config import ConfigurationTransactionError
 from zine.models import User, ROLE_ADMIN
 from zine.utils.crypto import gen_pwhash, gen_secret_key, new_iid
 from zine.utils.validators import is_valid_email, check
@@ -180,7 +181,7 @@ class WebSetup(object):
             )
             try:
                 t.commit()
-            except IOError:
+            except ConfigurationTransactionError:
                 _ = request.translations.gettext
                 error = _('The configuration file (%s) could not be opened '
                           'for writing. Please adjust your permissions and '

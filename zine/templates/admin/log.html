@@ -1,0 +1,43 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Log") }}{% endblock %}
+{%- block contents %}
+  <h1>{{ _('Log') }}</h1>
+  <p>{% trans %}
+    The log shows you important information about your system.  Whenever
+    problems happen, you can see it here.
+  {% endtrans %}</p>
+  <h2>{{ _('Recorded Events') }}</h2>
+  <table class="logfile">
+  {%- for item in page.items %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+      <td class="level level-{{ item.internal_level }}">{{ item.level }}
+      <td class="detail">
+        <div class="time">{{ item.timestamp|datetimeformat('short') }}</div>
+        <div class="location">{{ item.location|e }}</div>
+      <td class="message"><pre>{{ item.text|e }}</pre>
+      <td class="module">{{ item.module|e }}
+  {%- else %}
+    <tr><td><em>{{ _('The logfile is empty') }}</em>
+  {%- endfor %}
+  </table>
+  {%- if page.has_prev or page.has_next %}
+  <div class="pagination">
+    {% if page.has_prev %}
+      <a href="{{ url_for('admin/log', page=page.number - 1)
+        }}" class="prev">{{ _('« Previous') }}</a>
+    {% endif %}
+    <strong>{{ page.number }}</strong>
+    {% if page.has_next %}
+      <a href="{{ url_for('admin/log', page=page.number + 1)
+        }}" class="next">{{ _('Next »') }}</a>
+    {% endif %}
+  </div>
+  {%- endif %}
+  <h2>{{ _('Log Settings') }}</h2>
+  {% call form() %}
+    {{ form.as_dl() }}
+    <div class="actions">
+      <input type="submit" value="{{ _('Apply') }}">
+    </div>
+  {% endcall %}
+{% endblock -%}

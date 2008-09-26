@@ -16,6 +16,7 @@ from os import path
 from threading import Lock
 
 from zine.i18n import lazy_gettext
+from zine.application import InternalError
 
 
 #: variables the zine core uses
@@ -39,6 +40,10 @@ DEFAULT_VARS = {
     # it takes the current timestamp and hexifies it.  Changing this value later
     # will most likely break plugins with persistent data (pickles)
     'iid':                      (unicode, u''),
+
+    # logger settings
+    'log_file':                 (unicode, u'zine.log'),
+    'log_level':                (unicode, u'warning'),
 
     # url settings
     'blog_url_prefix':          (unicode, u''),
@@ -150,6 +155,22 @@ def get_converter_name(conv):
     }.get(conv, 'string')
 
 
+class ConfigurationTransactionError(InternalError):
+    """An exception that is raised if the transaction was unable to
+    write the changes to the config file.
+    """
+
+    def __init__(self, message_or_exception):
+        if isinstance(message_or_exception, basestring):
+            message = message_or_exception
+            error = None
+        else:
+            message = str(message_or_exception)
+            error = message_or_exception
+        Exception.__init__(self, message)
+        self.original_exception = error
+
+
 class Configuration(object):
     """Helper class that manages configuration values in a INI configuration
     file.
@@ -220,16 +241,10 @@ class Configuration(object):
         return value
 
     def change_single(self, key, value):
-        """Create and commit a transaction for a single key-value-pair. Return
-        True on success, otherwise False.
-        """
+        """Create and commit a transaction for a single key-value-pair."""
         t = self.edit()
         t[key] = value
-        try:
-            t.commit()
-            return True
-        except IOError:
-            return False
+        t.commit()
 
     def edit(self):
         """Return a new transaction object."""
@@ -453,17 +468,20 @@ class ConfigTransaction(object):
             for section in sections:
                 section[1].sort()
 
-            f = file(self.cfg.filename, 'w')
-            f.write(CONFIG_HEADER)
             try:
-                for idx, (section, items) in enumerate(sections):
-                    if idx:
-                        f.write('\n')
-                    f.write('[%s]\n' % section.encode('utf-8'))
-                    for key, value in items:
-                        f.write('%s = %s\n' % (key, quote_value(value)))
-            finally:
-                f.close()
+                f = file(self.cfg.filename, 'w')
+                f.write(CONFIG_HEADER)
+                try:
+                    for idx, (section, items) in enumerate(sections):
+                        if idx:
+                            f.write('\n')
+                        f.write('[%s]\n' % section.encode('utf-8'))
+                        for key, value in items:
+                            f.write('%s = %s\n' % (key, quote_value(value)))
+                finally:
+                    f.close()
+            except IOError, e:
+                raise ConfigurationTransactionError(e)
             self.cfg._values.update(self._values)
             self.cfg._converted_values.update(self._converted_values)
             for key in self._remove:

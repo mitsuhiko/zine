@@ -9,9 +9,9 @@
   {% endtrans %}</p>
   <h2>API Key</h2>
   {%- call form() %}
-  <p>{{ form.api_key }}</p>
-  <div class="actions">
-    <input type="submit" value="{{ _('Update Key') }}">
-  </div>
+    <p>{{ form.api_key() }}</p>
+    <div class="actions">
+      <input type="submit" value="{{ _('Update Key') }}">
+    </div>
   {%- endcall %}
 {% endblock %}

@@ -86,6 +86,8 @@ def make_urls(app):
         Rule('/options/cache', endpoint='admin/cache'),
         Rule('/system/', endpoint='admin/information'),
         Rule('/system/maintenance/', endpoint='admin/maintenance'),
+        Rule('/system/log', defaults={'page': 1}, endpoint='admin/log'),
+        Rule('/system/log/page/<int:page>', endpoint='admin/log'),
         Rule('/system/import/', endpoint='admin/import'),
         Rule('/system/import/<int:id>', endpoint='admin/inspect_import'),
         Rule('/system/import/<int:id>/delete', endpoint='admin/delete_import'),

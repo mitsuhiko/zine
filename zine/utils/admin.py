@@ -87,12 +87,3 @@ def load_zine_reddit():
             'comment_url':  '%s/comments/%s' % (reddit_url, d['id'])
         })
     return result
-
-
-def commit_config_change(t):
-    try:
-        t.commit()
-        return True
-    except IOError, e:
-        flash(_('The configuration file could not be written.'), 'error')
-        return False
