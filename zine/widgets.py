@@ -20,7 +20,8 @@
 import re
 import inspect
 from os import path
-from zine.api import *
+from zine.application import render_template
+from zine.i18n import lazy_gettext
 from zine.database import pages as pages_table
 from zine.models import Post, Tag, Comment, Page
 
@@ -35,41 +36,22 @@ class Widget(object):
     #: the name of the widget when called from a template.  This is also used
     #: if widgets are configured from the admin panel to have a unique
     #: identifier.
-    NAME = None
-
-    #: Set this to true if you don't want the widget to appear in the template
-    #: context.  This is always a bad idea and only used in the special HTML
-    #: widget or similar widgets in the future.
-    INVISIBLE = False
+    name = None
 
     #: name of the template for this widget. Please prefix those template
     #: names with an underscore to mark it as partial. The widget is available
     #: in the template as `widget`.
-    TEMPLATE = None
+    template = None
 
-    @classmethod
-    def get_display_name(cls):
-        return cls.__name__
-
-    @classmethod
-    def list_arguments(cls, extended=False):
-        """Get a tuple of the arguments this widget uses."""
-        try:
-            init = cls.__init__.im_func
-        except AttributeError:
-            return ()
-        rv = inspect.getargspec(init)
-        args = rv[0][1:]
-        if not extended:
-            return args
-        return dict(zip(args, (None,) * (len(rv[3]) - len(args) - 1) + rv[3]))
-
-    def render(self):
-        """Render the template."""
-        return render_template(self.TEMPLATE, widget=self)
+    #: the display name
+    display_name = None
 
     def __unicode__(self):
-        return self.render()
+        """Render the template."""
+        return render_template(self.template, widget=self)
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
 
 
 class TagCloud(Widget):
@@ -77,16 +59,13 @@ class TagCloud(Widget):
     A tag cloud. What else?
     """
 
-    NAME = 'get_tag_cloud'
-    TEMPLATE = 'widgets/tagcloud.html'
+    name = 'tagcloud'
+    template = 'widgets/tagcloud.html'
+    display_name = lazy_gettext(u'Tag Cloud')
 
     def __init__(self, max=None, show_title=False):
         self.tags = Tag.objects.get_cloud(max)
         self.show_title = show_title
-
-    @staticmethod
-    def get_display_name():
-        return _('Tag Cloud')
 
 
 class PostArchiveSummary(Widget):
@@ -94,16 +73,13 @@ class PostArchiveSummary(Widget):
     Show the last n months/years/days with posts.
     """
 
-    NAME = 'get_post_archive_summary'
-    TEMPLATE = 'widgets/post_archive_summary.html'
+    name = 'post_archive_summary'
+    template = 'widgets/post_archive_summary.html'
+    display_name = lazy_gettext(u'Post Archive Summary')
 
     def __init__(self, detail='months', limit=6, show_title=False):
         self.__dict__.update(Post.objects.get_archive_summary(detail, limit))
         self.show_title = show_title
-
-    @staticmethod
-    def get_display_name():
-        return _('Post Archive Summary')
 
 
 class LatestPosts(Widget):
@@ -111,17 +87,13 @@ class LatestPosts(Widget):
     Show the latest n posts.
     """
 
-    NAME = 'get_latest_posts'
-    TEMPLATE = 'widgets/latest_posts.html'
+    name = 'latest_posts'
+    template = 'widgets/latest_posts.html'
+    display_name = lazy_gettext(u'Latest Posts')
 
     def __init__(self, limit=5, show_title=False):
         self.posts = Post.objects.latest(limit).all()
         self.show_title = show_title
-
-    @staticmethod
-    def get_display_name():
-        return _('Latest Posts')
-
 
 
 class LatestComments(Widget):
@@ -129,17 +101,14 @@ class LatestComments(Widget):
     Show the latest n comments.
     """
 
-    NAME = 'get_latest_comments'
-    TEMPLATE = 'widgets/latest_comments.html'
+    name = 'latest_comments'
+    template = 'widgets/latest_comments.html'
+    display_name = lazy_gettext(u'Latest Comments')
 
     def __init__(self, limit=5, show_title=False, ignore_blocked=False):
         self.comments = Comment.objects. \
             latest(limit, ignore_blocked=ignore_blocked).all()
         self.show_title = show_title
-
-    @staticmethod
-    def get_display_name():
-        return _('Latest Comments')
 
 
 class PagesNavigation(Widget):
@@ -147,8 +116,9 @@ class PagesNavigation(Widget):
     A little navigation widget.
     """
 
-    NAME = 'get_pages_navigation'
-    TEMPLATE = 'widgets/pages_navigation.html'
+    name = 'pages_navigation'
+    template = 'widgets/pages_navigation.html'
+    display_name = lazy_gettext(u'Pages Navigation')
 
     def __init__(self):
         pages = Page.objects.query
@@ -156,10 +126,6 @@ class PagesNavigation(Widget):
         self.pages = pages.filter(pages_table.c.navigation_pos!=None) \
             .order_by(pages_table.c.navigation_pos.asc()).all()
         self.pages.extend(to_append.all())
-
-    @staticmethod
-    def get_display_name():
-        return _(u'Pages Navigation')
 
 
 #: list of all core widgets

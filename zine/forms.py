@@ -19,8 +19,8 @@ from zine.utils.validators import ValidationError, is_valid_email, \
 class LoginForm(forms.Form):
     """The form for the login page."""
     user = forms.ModelField(User, 'username', required=True, messages=dict(
-        not_found=lazy_gettext('User "%(value)s" does not exist.'),
-        required=lazy_gettext('You have to enter a username.')
+        not_found=lazy_gettext(u'User "%(value)s" does not exist.'),
+        required=lazy_gettext(u'You have to enter a username.')
     ))
     password = forms.TextField(widget=forms.PasswordInput)
     permanent = forms.BooleanField()
@@ -34,11 +34,11 @@ class LoginForm(forms.Form):
 
 class ChangePasswordForm(forms.Form):
     """The form used on the password-change dialog in the admin panel."""
-    old_password = forms.TextField(lazy_gettext('Old password'), required=True,
+    old_password = forms.TextField(lazy_gettext(u'Old password'), required=True,
                                    widget=forms.PasswordInput)
-    new_password = forms.TextField(lazy_gettext('New password'), required=True,
+    new_password = forms.TextField(lazy_gettext(u'New password'), required=True,
                                    widget=forms.PasswordInput)
-    check_password = forms.TextField(lazy_gettext('Repeat password'),
+    check_password = forms.TextField(lazy_gettext(u'Repeat password'),
                                      required=True,
                                      widget=forms.PasswordInput)
 
@@ -58,24 +58,24 @@ class ChangePasswordForm(forms.Form):
 
 class NewCommentForm(forms.Form):
     """New comment form for authors."""
-    author = forms.TextField(lazy_gettext('Name*'), required=True,
+    author = forms.TextField(lazy_gettext(u'Name*'), required=True,
                              max_length=100, messages=dict(
-        too_long=lazy_gettext('Your name is too long.'),
-        required=lazy_gettext('You have to enter your name.')
+        too_long=lazy_gettext(u'Your name is too long.'),
+        required=lazy_gettext(u'You have to enter your name.')
     ))
-    email = forms.TextField(lazy_gettext('Mail* (not published)'),
+    email = forms.TextField(lazy_gettext(u'Mail* (not published)'),
                             required=True, validators=[is_valid_email()],
                             messages=dict(
-        required=lazy_gettext('You have to enter a valid e-mail address.')
+        required=lazy_gettext(u'You have to enter a valid e-mail address.')
     ))
-    www = forms.TextField(lazy_gettext('Website'), validators=[is_valid_url(
-        message=lazy_gettext('You have to enter a valid URL or omit the field.')
+    www = forms.TextField(lazy_gettext(u'Website'), validators=[is_valid_url(
+        message=lazy_gettext(u'You have to enter a valid URL or omit the field.')
     )])
-    body = forms.TextField(lazy_gettext('Text'), min_length=2, max_length=6000,
+    body = forms.TextField(lazy_gettext(u'Text'), min_length=2, max_length=6000,
                            messages=dict(
-        too_short=lazy_gettext('Your comment is too short.'),
-        too_long=lazy_gettext('Your comment is too long.'),
-        required=lazy_gettext('You have to enter a comment.')
+        too_short=lazy_gettext(u'Your comment is too short.'),
+        too_long=lazy_gettext(u'Your comment is too long.'),
+        required=lazy_gettext(u'You have to enter a comment.')
     ), widget=forms.Textarea)
     parent = forms.HiddenModelField(Comment)
 
@@ -143,8 +143,8 @@ class PluginForm(forms.Form):
 
 class LogForm(forms.Form):
     """A form for the logfiles."""
-    filename = forms.TextField(lazy_gettext('Filename'))
-    level = forms.ChoiceField(lazy_gettext('Log Level'),
+    filename = forms.TextField(lazy_gettext(u'Filename'))
+    level = forms.ChoiceField(lazy_gettext(u'Log Level'),
                               choices=[(k, lazy_gettext(k)) for k, v
                                        in sorted(log.LEVELS.items(),
                                                  key=lambda x: x[1])])

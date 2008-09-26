@@ -669,7 +669,7 @@ class Zine(object):
 
         # insert list of widgets
         from zine.widgets import all_widgets
-        self.widgets = dict((x.NAME, x) for x in all_widgets)
+        self.widgets = dict((x.name, x) for x in all_widgets)
 
         # load plugins
         from zine.pluginsystem import find_plugins, \
@@ -714,6 +714,7 @@ class Zine(object):
             request=local('request'),
             render_widgets=lambda: render_template('_widgets.html'),
             get_page_metadata=self.get_page_metadata,
+            widgets=self.widgets,
             zine={
                 'version':      zine.__version__,
                 'copyright':    _(u'Copyright %(years)s by the Pocoo Team')
@@ -729,11 +730,6 @@ class Zine(object):
         )
 
         env.install_gettext_translations(self.translations)
-
-        # copy the widgets into the global namespace
-        for name, widget in self.widgets.iteritems():
-            if not widget.INVISIBLE:
-                self._template_globals[name] = widget
 
         # set up plugin template extensions
         env.globals.update(self._template_globals)
@@ -990,7 +986,7 @@ class Zine(object):
     @setuponly
     def add_widget(self, widget):
         """Add a widget."""
-        self.widgets[widget.NAME] = widget
+        self.widgets[widget.name] = widget
 
     @setuponly
     def add_servicepoint(self, identifier, callback):
