@@ -12,7 +12,8 @@ from email.MIMEText import MIMEText
 from smtplib import SMTP, SMTPException
 from urlparse import urlparse
 
-from zine.utils import _, local
+from zine.utils import local
+from zine.i18n import _
 from zine.utils.validators import is_valid_email, check
 
 

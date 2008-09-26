@@ -11,9 +11,6 @@
     :license: GNU GPL.
 """
 import os
-from time import time
-from cPickle import loads, dumps, load, dump, HIGHEST_PROTOCOL
-from thread import allocate_lock
 
 from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
      MemcachedCache

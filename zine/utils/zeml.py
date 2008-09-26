@@ -23,6 +23,7 @@ from urlparse import urlparse
 from werkzeug import escape
 
 from zine.i18n import _
+from zine.utils import log
 from zine.utils.datastructures import OrderedDict
 
 
@@ -294,6 +295,9 @@ def load(stream):
             try:
                 rv = pickle.loads(_get(_read_struct(_long_struct)))
             except Exception, e:
+                log.exception(_(u'Error when loading dynamic ZEML element. '
+                                u'The system ignored the element.  Maybe a '
+                                u'disabled plugin caused the problem.'))
                 return BrokenElement(obj_name, e)
             rv.parent = parent
             return rv

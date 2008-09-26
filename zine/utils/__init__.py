@@ -17,8 +17,6 @@ except ImportError:
 
 from werkzeug import url_quote, Local, LocalManager, ClosingIterator
 
-from zine.i18n import _
-
 # load dynamic constants
 from zine._dynamic import *
 

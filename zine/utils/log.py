@@ -23,10 +23,11 @@ from traceback import print_exception, format_exception
 
 from werkzeug.exceptions import NotFound
 
-from zine.application import local, InternalError
+from zine.application import InternalError
 from zine.i18n import gettext
-from zine.utils.dates import format_iso8601, parse_iso8601
+from zine.utils import local
 from zine.utils.io import tail
+from zine.utils.dates import format_iso8601, parse_iso8601
 
 
 _ = lambda x: x

@@ -17,7 +17,8 @@ from datetime import datetime
 
 from werkzeug import url_quote
 
-from zine.utils import _, local, load_json
+from zine.utils import local, load_json
+from zine.i18n import _
 
 
 _punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|}]+')

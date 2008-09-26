@@ -17,17 +17,9 @@
                                        Christopher Grebs, Ali Afshar.
     :license: GNU GPL.
 """
-import re
-import inspect
-from os import path
 from zine.application import render_template
-from zine.i18n import lazy_gettext
 from zine.database import pages as pages_table
 from zine.models import Post, Tag, Comment, Page
-
-
-_format_re = re.compile(r'(?<!%)%s')
-_instruction_re = re.compile(r'\{\{|\}\}|\{%|%\}')
 
 
 class Widget(object):
@@ -43,9 +35,6 @@ class Widget(object):
     #: in the template as `widget`.
     template = None
 
-    #: the display name
-    display_name = None
-
     def __unicode__(self):
         """Render the template."""
         return render_template(self.template, widget=self)
@@ -55,13 +44,10 @@ class Widget(object):
 
 
 class TagCloud(Widget):
-    """
-    A tag cloud. What else?
-    """
+    """A tag cloud. What else?"""
 
     name = 'tagcloud'
     template = 'widgets/tagcloud.html'
-    display_name = lazy_gettext(u'Tag Cloud')
 
     def __init__(self, max=None, show_title=False):
         self.tags = Tag.objects.get_cloud(max)
@@ -69,13 +55,10 @@ class TagCloud(Widget):
 
 
 class PostArchiveSummary(Widget):
-    """
-    Show the last n months/years/days with posts.
-    """
+    """Show the last n months/years/days with posts."""
 
     name = 'post_archive_summary'
     template = 'widgets/post_archive_summary.html'
-    display_name = lazy_gettext(u'Post Archive Summary')
 
     def __init__(self, detail='months', limit=6, show_title=False):
         self.__dict__.update(Post.objects.get_archive_summary(detail, limit))
@@ -83,13 +66,10 @@ class PostArchiveSummary(Widget):
 
 
 class LatestPosts(Widget):
-    """
-    Show the latest n posts.
-    """
+    """Show the latest n posts."""
 
     name = 'latest_posts'
     template = 'widgets/latest_posts.html'
-    display_name = lazy_gettext(u'Latest Posts')
 
     def __init__(self, limit=5, show_title=False):
         self.posts = Post.objects.latest(limit).all()
@@ -97,13 +77,10 @@ class LatestPosts(Widget):
 
 
 class LatestComments(Widget):
-    """
-    Show the latest n comments.
-    """
+    """Show the latest n comments."""
 
     name = 'latest_comments'
     template = 'widgets/latest_comments.html'
-    display_name = lazy_gettext(u'Latest Comments')
 
     def __init__(self, limit=5, show_title=False, ignore_blocked=False):
         self.comments = Comment.objects. \
@@ -112,13 +89,10 @@ class LatestComments(Widget):
 
 
 class PagesNavigation(Widget):
-    """
-    A little navigation widget.
-    """
+    """A little navigation widget."""
 
     name = 'pages_navigation'
     template = 'widgets/pages_navigation.html'
-    display_name = lazy_gettext(u'Pages Navigation')
 
     def __init__(self):
         pages = Page.objects.query
