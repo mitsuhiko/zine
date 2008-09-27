@@ -144,7 +144,7 @@ class Writer(object):
 
     def _generate(self):
         now = datetime.utcnow()
-        posts = iter(Post.objects.order_by(Post.last_update.desc()))
+        posts = iter(Post.query.order_by(Post.last_update.desc()))
         try:
             first_post = posts.next()
             last_update = first_post.last_update
@@ -188,7 +188,7 @@ class Writer(object):
                 yield dump_node(rv)
 
         # look up all the users and add them as dependencies
-        for user in User.objects.all():
+        for user in User.query.all():
             self._register_user(user)
 
         # dump all the posts

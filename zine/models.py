@@ -129,7 +129,7 @@ class _ZEMLDualContainer(_ZEMLContainer):
             return self.parser_data.get('intro')
 
 
-class UserManager(db.DatabaseManager):
+class UserQuery(db.Query):
     """Add some extra query methods to the user object."""
 
     def get_nobody(self):
@@ -148,7 +148,7 @@ class User(object):
     the code in `zine.websetup.WebSetup.start_setup`.
     """
 
-    objects = UserManager()
+    query = db.query_property(UserQuery)
     is_somebody = True
 
     def __init__(self, username, password, email, real_name=u'',
@@ -227,7 +227,6 @@ class AnonymousUser(User):
     display_name = 'Nobody'
     real_name = description = username = ''
     role = ROLE_NOBODY
-    objects = UserManager()
 
     def __init__(self):
         pass
@@ -239,37 +238,32 @@ class AnonymousUser(User):
         return False
 
 
-class PostManager(db.DatabaseManager):
+class PostQuery(db.Query):
     """Add some extra methods to the post model."""
 
-    def published(self, query=None, ignore_role=None):
+    def published(self, ignore_role=None):
         """Return a queryset for only published posts."""
         role = ROLE_NOBODY
-        if query is None:
-            query = self.query
         if not ignore_role:
             req = get_request()
             if req is not None:
                 role = req.user.role
         p = posts.c
 
-        if query is None:
-            query = self.query
-
         if role <= ROLE_SUBSCRIBER:
-            return query.filter(
+            return self.filter(
                 (p.status == STATUS_PUBLISHED) |
                 (p.pub_date >= datetime.utcnow())
             )
         elif role == ROLE_AUTHOR:
             # it's safe to access req here because we only have
             # a non ROLE_NOBODY role if there was a request.
-            return query.filter(
+            return self.filter(
                 (p.status == STATUS_PUBLISHED) |
                 (p.author_id == req.user.user_id)
             )
         else:
-            return query
+            return self
 
     def filter_by_timestamp_and_slug(self, year, month, day, slug):
         """Filter by year, month, day, and the post slug."""
@@ -284,8 +278,7 @@ class PostManager(db.DatabaseManager):
         """Get an item by year, month, day, and the post slug."""
         return self.filter_by_timestamp_and_slug(year, month, day, slug).first()
 
-    def drafts(self, query=None, exclude=None, ignore_user=False,
-               user=None):
+    def drafts(self, exclude=None, ignore_user=False, user=None):
         """Return a query that returns all drafts for the current user.
         or the user provided or no user at all if `ignore_user` is set.
         """
@@ -293,9 +286,7 @@ class PostManager(db.DatabaseManager):
             req = get_request()
             if req and req.user:
                 user = req.user
-        if query is None:
-            query = self.query
-        query = query.filter(Post.status == STATUS_DRAFT)
+        query = self.filter(Post.status == STATUS_DRAFT)
         if user is not None:
             query = query.filter(Post.author_id == user.user_id)
         if exclude is not None:
@@ -401,14 +392,14 @@ class PostManager(db.DatabaseManager):
         # send the query
         q = db.and_(*conditions)
         offset = per_page * (page - 1)
-        postlist = Post.objects.filter(q).order_by(Post.pub_date.desc()) \
+        postlist = Post.query.filter(q).order_by(Post.pub_date.desc()) \
                                .offset(offset).limit(per_page)
 
         if as_list:
             return postlist.all()
 
         pagination = Pagination(endpoint, page, per_page,
-                                Post.objects.filter(q).count(), url_args)
+                                Post.query.filter(q).count(), url_args)
 
         return {
             'pagination':       pagination,
@@ -506,7 +497,7 @@ class PostManager(db.DatabaseManager):
     def search(self, query):
         """Search for posts by a query."""
         # XXX: use a sophisticated search
-        q = self.query
+        q = self
         for word in query.split():
             q = q.filter(
                 posts.c.body.like('%%%s%%' % word) |
@@ -519,7 +510,7 @@ class PostManager(db.DatabaseManager):
 class Post(_ZEMLDualContainer):
     """Represents one blog post."""
 
-    objects = PostManager()
+    query = db.query_property(PostQuery)
     parser_reason = 'post'
 
     def __init__(self, title, author, text, slug=None, pub_date=None,
@@ -668,7 +659,7 @@ class PostLink(object):
         )
 
 
-class TagManager(db.DatabaseManager):
+class TagQuery(db.Query):
     """Also tags have their own manager."""
 
     def get_or_create(self, slug, name=None):
@@ -732,7 +723,7 @@ class TagManager(db.DatabaseManager):
 class Tag(object):
     """Represents a tag."""
 
-    objects = TagManager()
+    query = db.query_property(TagQuery)
 
     def __init__(self, name, description='', slug=None):
         self.name = name
@@ -758,33 +749,27 @@ class Tag(object):
         )
 
 
-class CommentManager(db.DatabaseManager):
+class CommentQuery(db.Query):
     """The manager for comments"""
 
-    def blocked(self, query=None):
+    def blocked(self):
         """Filter all blocked comments.  Blocked comments are all comments but
         unmoderated and moderated comments.
         """
-        if query is None:
-            query = self.query
-        return query.filter(Comment.status.in_([COMMENT_BLOCKED_USER,
-                                                COMMENT_BLOCKED_SPAM,
-                                                COMMENT_BLOCKED_SYSTEM]))
-    def unmoderated(self, query=None):
+        return self.filter(Comment.status.in_([COMMENT_BLOCKED_USER,
+                                               COMMENT_BLOCKED_SPAM,
+                                               COMMENT_BLOCKED_SYSTEM]))
+    def unmoderated(self):
         """Filter all the unmoderated comments and comments blocked by a user
         or system.
         """
-        if query is None:
-            query = self.query
-        return query.filter(Comment.status.in_([COMMENT_UNMODERATED,
-                                                COMMENT_BLOCKED_USER,
-                                                COMMENT_BLOCKED_SYSTEM]))
+        return self.filter(Comment.status.in_([COMMENT_UNMODERATED,
+                                               COMMENT_BLOCKED_USER,
+                                               COMMENT_BLOCKED_SYSTEM]))
 
-    def spam(self, query=None):
+    def spam(self):
         """Filter all the spam comments."""
-        if query is None:
-            query = self.query
-        return query.filter(Comment.status == COMMENT_BLOCKED_SPAM)
+        return self.filter(Comment.status == COMMENT_BLOCKED_SPAM)
 
     def latest(self, limit=None, ignore_role=False, ignore_blocked=True):
         """Filter the list of non blocked comments for anonymous users or
@@ -796,7 +781,7 @@ class CommentManager(db.DatabaseManager):
             if req is not None:
                 role = req.user.role
 
-        query = self.query
+        query = self
         if role <= ROLE_SUBSCRIBER or ignore_blocked:
             query = self.blocked(query)
 
@@ -806,13 +791,13 @@ class CommentManager(db.DatabaseManager):
 
     def comments_for_post(self, post_id):
         """Return all comments for the blog post."""
-        return self.query.filter(Comment.post_id == post_id)
+        return self.filter(Comment.post_id == post_id)
 
 
 class Comment(_ZEMLContainer):
     """Represent one comment."""
 
-    objects = CommentManager()
+    query = db.query_property(CommentQuery)
     parser_reason = 'comment'
 
     def __init__(self, post, author, text, email=None, www=None, parent=None,

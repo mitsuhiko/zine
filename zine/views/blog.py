@@ -45,7 +45,7 @@ def do_index(request, page=1):
     :Template name: ``index.html``
     :URL endpoint: ``blog/index``
     """
-    data = Post.objects.get_list(page=page)
+    data = Post.query.get_list(page=page)
     if data.pop('probably_404'):
         raise NotFound()
 
@@ -73,8 +73,8 @@ def do_archive(request, year=None, month=None, day=None, page=1):
     """
     if not year:
         return render_response('archive.html', month_list=True,
-                               **Post.objects.get_archive_summary())
-    data = Post.objects.get_list(year, month, day, page=page)
+                               **Post.query.get_archive_summary())
+    data = Post.query.get_list(year, month, day, page=page)
     if data.pop('probably_404'):
         raise NotFound()
 
@@ -106,11 +106,11 @@ def do_show_tag(request, slug, page=1):
     :Template name: ``show_tag.html``
     :URL endpoint: ``blog/show_tag``
     """
-    tag = Tag.objects.filter_by(slug=slug).first()
+    tag = Tag.query.filter_by(slug=slug).first()
     if not tag:
         raise NotFound()
 
-    data = Post.objects.get_list(tag=slug, page=page)
+    data = Post.query.get_list(tag=slug, page=page)
     if data.pop('probably_404'):
         raise NotFound()
 
@@ -132,7 +132,7 @@ def do_show_tag_cloud(request):
     :URL endpoint: ``blog/tag_cloud``
     """
     return render_response('tag_cloud.html',
-                           tag_cloud=Tag.objects.get_cloud())
+                           tag_cloud=Tag.query.get_cloud())
 
 
 def do_show_author(request, username, page=1):
@@ -153,11 +153,11 @@ def do_show_author(request, username, page=1):
     :Template name: ``show_author.html``
     :URL endpoint: ``blog/show_author``
     """
-    user = User.objects.filter((User.username == username) &
+    user = User.query.filter((User.username == username) &
                                (User.role >= ROLE_AUTHOR)).first()
     if user is None:
         raise NotFound()
-    data = Post.objects.get_list(author=user, page=page, per_page=30)
+    data = Post.query.get_list(author=user, page=page, per_page=30)
     if data.pop('probably_404'):
         raise NotFound()
 
@@ -179,7 +179,7 @@ def do_authors(request):
     :Template name: ``authors.html``
     :URL endpoint: ``blog/authors``
     """
-    return render_response('authors.html', authors=User.objects.authors().all())
+    return render_response('authors.html', authors=User.query.authors().all())
 
 
 @cache.response(vary=('user',))
@@ -223,7 +223,7 @@ def do_show_post(request, year, month, day, slug):
     :Template name: ``show_post.html``
     :URL endpoint: ``blog/show_post``
     """
-    post = Post.objects.get_by_timestamp_and_slug(year, month, day, slug)
+    post = Post.query.get_by_timestamp_and_slug(year, month, day, slug)
     if post is None:
         raise NotFound()
     elif not post.can_access():
@@ -351,7 +351,7 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
     # if no post slug is given we filter the posts by the cretereons
     # provided and pass them to the feed builder
     if post_slug is None:
-        for post in Post.objects.get_list(year, month, day, tag, author,
+        for post in Post.query.get_list(year, month, day, tag, author,
                                           per_page=10, as_list=True):
             links = [link.as_dict() for link in post.links]
             feed.add(post.title, unicode(post.body), content_type='html',
@@ -361,7 +361,7 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
 
     # otherwise we create a feed for all the comments of a post.
     else:
-        post = Post.objects.get_by_timestamp_and_slug(year, month, day,
+        post = Post.query.get_by_timestamp_and_slug(year, month, day,
                                                       post_slug)
         if post is None:
             raise NotFound()
@@ -413,13 +413,13 @@ def handle_user_pages(req):
     """Show a user page."""
     page_key = req.path.lstrip('/')
 
-    page = Page.objects.filter_by(key=page_key).first()
+    page = Page.query.filter_by(key=page_key).first()
     if page is None:
         # if the page does not exist, check if a page with a trailing slash
         # exists.  If it does, redirect to that page.  This is allows users
         # to emulate folders and to get relative links working.
         if not page_key.endswith('/'):
-            real_page = Page.objects.filter_by(key=page_key + '/').first()
+            real_page = Page.query.filter_by(key=page_key + '/').first()
             if real_page is not None:
                 return redirect_to(real_page)
         raise NotFound()

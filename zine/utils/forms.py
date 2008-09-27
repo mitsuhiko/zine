@@ -771,7 +771,6 @@ class ListWidget(Widget, _ListSupport):
             self._subwidgets[index] = subwidget
         return subwidget
 
-
     def __iter__(self):
         for index in xrange(len(self)):
             yield self[index]
@@ -1150,7 +1149,7 @@ class ModelField(Field):
             return None
         value = self._coerce_value(value)
 
-        rv = self.model.objects.filter_by(**{self.key: value}).first()
+        rv = self.model.query.filter_by(**{self.key: value}).first()
         if rv is None:
             raise ValidationError(self.messages['not_found'] %
                                   {'value': value})

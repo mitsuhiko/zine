@@ -198,7 +198,7 @@ def search(request):
     # TODO: add pagination
     mdecider = PostAuthDecider(request.user)
     for match in enq.get_mset(0, 10, None, mdecider):
-        post = Post.objects.get(match.get_document().get_value(1))
+        post = Post.query.get(match.get_document().get_value(1))
         if post:
             posts.append(post)
     data = {

@@ -50,7 +50,7 @@ class TagCloud(Widget):
     template = 'widgets/tagcloud.html'
 
     def __init__(self, max=None, show_title=False):
-        self.tags = Tag.objects.get_cloud(max)
+        self.tags = Tag.query.get_cloud(max)
         self.show_title = show_title
 
 
@@ -61,7 +61,7 @@ class PostArchiveSummary(Widget):
     template = 'widgets/post_archive_summary.html'
 
     def __init__(self, detail='months', limit=6, show_title=False):
-        self.__dict__.update(Post.objects.get_archive_summary(detail, limit))
+        self.__dict__.update(Post.query.get_archive_summary(detail, limit))
         self.show_title = show_title
 
 
@@ -72,7 +72,7 @@ class LatestPosts(Widget):
     template = 'widgets/latest_posts.html'
 
     def __init__(self, limit=5, show_title=False):
-        self.posts = Post.objects.latest(limit).all()
+        self.posts = Post.query.latest(limit).all()
         self.show_title = show_title
 
 
@@ -83,7 +83,7 @@ class LatestComments(Widget):
     template = 'widgets/latest_comments.html'
 
     def __init__(self, limit=5, show_title=False, ignore_blocked=False):
-        self.comments = Comment.objects. \
+        self.comments = Comment.query. \
             latest(limit, ignore_blocked=ignore_blocked).all()
         self.show_title = show_title
 
@@ -95,9 +95,8 @@ class PagesNavigation(Widget):
     template = 'widgets/pages_navigation.html'
 
     def __init__(self):
-        pages = Page.objects.query
-        to_append = pages.filter_by(navigation_pos=None)
-        self.pages = pages.filter(pages_table.c.navigation_pos!=None) \
+        to_append = Page.query.filter_by(navigation_pos=None)
+        self.pages = Page.query.filter(pages_table.c.navigation_pos!=None) \
             .order_by(pages_table.c.navigation_pos.asc()).all()
         self.pages.extend(to_append.all())
 

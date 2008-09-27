@@ -217,7 +217,7 @@ def inject_header(f):
 
 def pingback_post(url_info, target_uri, year, month, day, slug):
     """This is the pingback handler for `zine.views.blog.show_post`."""
-    post = Post.objects.get_by_timestamp_and_slug(year, month, day, slug)
+    post = Post.query.get_by_timestamp_and_slug(year, month, day, slug)
     if post is None or not post.pings_enabled:
         return 33, 'no such post'
     elif not post.can_access():
@@ -227,7 +227,7 @@ def pingback_post(url_info, target_uri, year, month, day, slug):
         return 17, 'no title provided'
     elif not excerpt:
         return 17, 'no useable link to target'
-    old_pingback = Comment.objects.filter(
+    old_pingback = Comment.query.filter(
         (Comment.is_pingback == True) &
         (Comment.www == url_info.url)
     ).first()

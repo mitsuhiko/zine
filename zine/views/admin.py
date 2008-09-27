@@ -81,9 +81,9 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('overview', url_for('admin/show_comments'), _(u'Overview')),
             ('unmoderated', url_for('admin/show_unmoderated_comments'),
              _(u'Awaiting Moderation (%d)') %
-             Comment.objects.unmoderated().count()),
+             Comment.query.unmoderated().count()),
             ('spam', url_for('admin/show_spam_comments'),
-             _(u'Spam (%d)') % Comment.objects.spam().count())
+             _(u'Spam (%d)') % Comment.query.spam().count())
         ]),
         ('file_uploads', url_for('admin/browse_uploads'), _(u'Uploads'), [
             ('browse', url_for('admin/browse_uploads'), _(u'Browse')),
@@ -229,12 +229,12 @@ def do_index(request):
         return render_response('admin/reddit.html', items=load_zine_reddit())
 
     return render_admin_response('admin/index.html', 'dashboard',
-        drafts=Post.objects.drafts().all(),
-        unmoderated_comments=Comment.objects.unmoderated().all(),
-        your_posts=Post.objects.filter(
+        drafts=Post.query.drafts().all(),
+        unmoderated_comments=Comment.query.unmoderated().all(),
+        your_posts=Post.query.filter(
             Post.author_id == request.user.user_id
         ).count(),
-        last_posts=Post.objects.published(ignore_role=True)
+        last_posts=Post.query.published(ignore_role=True)
             .order_by(Post.pub_date.desc()).limit(5).all()
     )
 
@@ -261,13 +261,13 @@ def do_bookmarklet(request):
 @require_role(ROLE_AUTHOR)
 def do_show_posts(request, page):
     """Show a list of posts for post moderation."""
-    posts = Post.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    posts = Post.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/show_posts', page, PER_PAGE,
-                                 Post.objects.count())
+                                 Post.query.count())
     if not posts and page != 1:
         raise NotFound()
     return render_admin_response('admin/show_posts.html', 'posts.overview',
-                                 drafts=Post.objects.drafts().all(),
+                                 drafts=Post.query.drafts().all(),
                                  posts=posts,
                                  pagination=pagination)
 
@@ -292,7 +292,7 @@ def do_edit_post(request, post_id=None):
     # edit existing post
     if post_id is not None:
         new_post = False
-        post = Post.objects.get(post_id)
+        post = Post.query.get(post_id)
         exclude = post.post_id
         if post is None:
             raise NotFound()
@@ -381,7 +381,7 @@ def do_edit_post(request, post_id=None):
             author = post and post.author or request.user
             username = author.username
         else:
-            author = User.objects.filter_by(username=username).first()
+            author = User.query.filter_by(username=username).first()
             if author is None:
                 errors.append(_(u'Unknown author “%s”.') % username)
         form['author'] = username
@@ -394,7 +394,7 @@ def do_edit_post(request, post_id=None):
         form['tags'] = []
         tags = []
         for tag in request.form.getlist('tags'):
-            t = Tag.objects.filter_by(slug=tag).first()
+            t = Tag.query.filter_by(slug=tag).first()
             if t is not None:
                 tags.append(t)
                 form['tags'].append(tag)
@@ -501,9 +501,9 @@ def do_edit_post(request, post_id=None):
     return render_admin_response('admin/edit_post.html', 'posts.write',
         new_post=new_post,
         form=form,
-        tags=Tag.objects.all(),
+        tags=Tag.query.all(),
         post=post,
-        drafts=list(Post.objects.drafts(exclude=exclude).all()),
+        drafts=list(Post.query.drafts(exclude=exclude).all()),
         can_change_author=request.user.role >= ROLE_EDITOR,
         post_status_choices=[
             (STATUS_PUBLISHED, _(u'Published')),
@@ -524,7 +524,7 @@ def do_delete_post(request, post_id):
     deleted but if the referrer is the edit page. Then the user is taken back to
     the index so that he doesn't end up an a "page not found" error page.
     """
-    post = Post.objects.get(post_id)
+    post = Post.query.get(post_id)
     if post is None:
         raise NotFound()
     csrf_protector = CSRFProtector()
@@ -606,26 +606,26 @@ def _handle_comments(identifier, title, query, page):
 def do_show_comments(request, page):
     """Show all the comments."""
     return _handle_comments('overview', _(u'All Comments'),
-                            Comment.objects.query, page)
+                            Comment.query, page)
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_unmoderated_comments(request, page):
     """Show all unmoderated and user-blocked comments."""
     return _handle_comments('unmoderated', _(u'Comments Awaiting Moderation'),
-                            Comment.objects.unmoderated(), page)
+                            Comment.query.unmoderated(), page)
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_spam_comments(request, page):
     """Show all spam comments."""
-    return _handle_comments('spam', _(u'Spam'), Comment.objects.spam(), page)
+    return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page)
 
 
 @require_role(ROLE_AUTHOR)
 def do_show_post_comments(request, page, post_id):
     """Show all comments for a single post."""
-    post = Post.objects.get(post_id)
+    post = Post.query.get(post_id)
     if post is None:
         raise NotFound()
     link = '<a href="%s">%s</a>' % (
@@ -633,7 +633,7 @@ def do_show_post_comments(request, page, post_id):
         escape(post.title)
     )
     return _handle_comments(None, _(u'Comments for “%s”') % link,
-                            Comment.objects.comments_for_post(post_id), page)
+                            Comment.query.comments_for_post(post_id), page)
 
 
 @require_role(ROLE_AUTHOR)
@@ -641,7 +641,7 @@ def do_edit_comment(request, comment_id):
     """Edit a comment.  Unlike the post edit screen it's not possible to
     create new comments from here, that has to happen from the post page.
     """
-    comment = Comment.objects.get(comment_id)
+    comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
 
@@ -765,7 +765,7 @@ def do_delete_comment(request, comment_id):
     was deleted but if the referrer is the edit page. Then the user is taken
     back to the index so that he doesn't end up an a "page not found" error page.
     """
-    comment = Comment.objects.get(comment_id)
+    comment = Comment.query.get(comment_id)
     if comment is None:
         return redirect_to('admin/show_comments')
     csrf_protector = CSRFProtector()
@@ -800,7 +800,7 @@ def do_delete_comment(request, comment_id):
 @require_role(ROLE_AUTHOR)
 def do_approve_comment(request, comment_id):
     """Approve a comment"""
-    comment = Comment.objects.get(comment_id)
+    comment = Comment.query.get(comment_id)
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
     if comment is None:
@@ -829,7 +829,7 @@ def do_approve_comment(request, comment_id):
 @require_role(ROLE_AUTHOR)
 def do_block_comment(request, comment_id):
     """Block a comment."""
-    comment = Comment.objects.get(comment_id)
+    comment = Comment.query.get(comment_id)
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
     if comment is None:
@@ -863,9 +863,9 @@ def do_show_tags(request, page):
     """Show a list of used post tag.  Tags can be used as web2.0 like tags or
     normal comments.
     """
-    tags = Tag.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    tags = Tag.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/show_tags', page, PER_PAGE,
-                                 Tag.objects.count())
+                                 Tag.query.count())
     if not tags and page != 1:
         raise NotFound()
     return render_admin_response('admin/show_tags.html', 'posts.tags',
@@ -883,7 +883,7 @@ def do_edit_tag(request, tag_id=None):
     redirect = IntelligentRedirect()
 
     if tag_id is not None:
-        tag = Tag.objects.get(tag_id)
+        tag = Tag.query.get(tag_id)
         if tag is None:
             raise NotFound()
         form.update(
@@ -912,7 +912,7 @@ def do_edit_tag(request, tag_id=None):
 
         if not name:
             errors.append(_(u'You have to give the tag a name.'))
-        elif old_slug != slug and Tag.objects.filter_by(slug=slug).first() is not None:
+        elif old_slug != slug and Tag.query.filter_by(slug=slug).first() is not None:
             errors.append(_(u'The slug "%s" is not unique.') % slug)
 
         if not errors:
@@ -948,7 +948,7 @@ def do_edit_tag(request, tag_id=None):
 @require_role(ROLE_AUTHOR)
 def do_delete_tag(request, tag_id):
     """Works like the other delete pages, just that it deletes tags."""
-    tag = Tag.objects.get(tag_id)
+    tag = Tag.query.get(tag_id)
     if tag is None:
         return redirect_to('admin/show_tags')
     csrf_protector = CSRFProtector()
@@ -979,9 +979,9 @@ def do_delete_tag(request, tag_id):
 @require_role(ROLE_ADMIN)
 def do_show_users(request, page):
     """Show all users in a list."""
-    users = User.objects.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    users = User.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/show_users', page, PER_PAGE,
-                                 User.objects.count())
+                                 User.query.count())
     if not posts and page != 1:
         raise NotFound()
     return render_admin_response('admin/show_users.html', 'users.overview',
@@ -1003,7 +1003,7 @@ def do_edit_user(request, user_id=None):
     redirect = IntelligentRedirect()
 
     if user_id is not None:
-        user = User.objects.get(user_id)
+        user = User.query.get(user_id)
         if user is None:
             raise NotFound()
         form.update(
@@ -1027,7 +1027,7 @@ def do_edit_user(request, user_id=None):
         username = form['username'] = request.form.get('username')
         if not username:
             errors.append(_(u'Username is required.'))
-        elif new_user and User.objects.filter_by(username=username).first() \
+        elif new_user and User.query.filter_by(username=username).first() \
              is not None:
             errors.append(_(u'Username “%s” is taken.') % username)
         password = form['password'] = request.form.get('password')
@@ -1106,7 +1106,7 @@ def do_edit_user(request, user_id=None):
 @require_role(ROLE_ADMIN)
 def do_delete_user(request, user_id):
     """Like all other delete screens just that it deletes a user."""
-    user = User.objects.get(user_id)
+    user = User.query.get(user_id)
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -1149,7 +1149,7 @@ def do_delete_user(request, user_id):
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
         user=user,
-        other_users=User.objects.filter(User.user_id != user_id).all(),
+        other_users=User.query.filter(User.user_id != user_id).all(),
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
@@ -1599,7 +1599,7 @@ def do_inspect_import(request, id):
                                  'system.import',
         form=form,
         blog=blog,
-        users=User.objects.order_by('username').all(),
+        users=User.query.order_by('username').all(),
         hidden_form_data=make_hidden_fields(csrf_protector),
         dump_id=id
     )
@@ -1785,7 +1785,7 @@ def do_show_pages(request):
     return render_admin_response(
         'admin/show_pages.html',
         'pages.overview',
-        pages=Page.objects.all()
+        pages=Page.query.all()
     )
 
 
@@ -1813,7 +1813,7 @@ def do_write_page(request, page_id=None):
     else:
         # edit a page
         new_page = False
-        page = Page.objects.get(page_id)
+        page = Page.query.get(page_id)
         if page is None:
             raise NotFound()
         old_key = page.key
@@ -1859,7 +1859,7 @@ def do_write_page(request, page_id=None):
         form['parent_id'] = parent_id = request.form.get('parent_id')
 
         if new_page or old_key != key:
-            if Page.objects.filter_by(key=key).first() is not None:
+            if Page.query.filter_by(key=key).first() is not None:
                 errors.append(_(u'This key is already in use'))
 
         try:
@@ -1896,7 +1896,7 @@ def do_write_page(request, page_id=None):
                 flash(error, 'error')
 
     all_pages = [(0, 'No Parent')] + [(p.page_id, p.title) for p in
-                                      Page.objects.all()]
+                                      Page.query.all()]
 
     return render_admin_response(
         'admin/write_page.html',
@@ -1913,7 +1913,7 @@ def do_write_page(request, page_id=None):
 @require_role(ROLE_ADMIN)
 def do_delete_page(request, page_id):
     """Shows the confirm dialog if the user deletes a page"""
-    page = Page.objects.get(page_id)
+    page = Page.query.get(page_id)
     if page is None:
         raise NotFound()
     csrf_protector = CSRFProtector()

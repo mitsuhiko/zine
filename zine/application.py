@@ -236,9 +236,9 @@ class Request(RequestBase):
                                            app.cfg['secret_key'])
         user_id = session.get('uid')
         if user_id:
-            user = User.objects.get(user_id)
+            user = User.query.get(user_id)
         if user is None:
-            user = User.objects.get_nobody()
+            user = User.query.get_nobody()
         self.user = user
         self.session = session
 
@@ -248,9 +248,9 @@ class Request(RequestBase):
         """
         from zine.models import User
         if isinstance(user, (int, long)):
-            user = User.objects.get(user)
+            user = User.query.get(user)
         elif isinstance(user, basestring):
-            user = User.objects.filter_by(username=user).first()
+            user = User.query.filter_by(username=user).first()
         if user is None:
             raise RuntimeError('User does not exist')
         self.user = user
@@ -264,7 +264,7 @@ class Request(RequestBase):
         """Log the current user out."""
         from zine.models import User
         user = self.user
-        self.user = User.objects.get_nobody()
+        self.user = User.query.get_nobody()
         self.session.clear()
         #! called after a user was logged out and the session cleared.
         emit_event('after-user-logout', user)
