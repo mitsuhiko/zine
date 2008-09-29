@@ -82,6 +82,7 @@ def create_engine(uri, relative_to=None, echo=False):
 
 
 def secure_database_uri(uri):
+    """Returns the database uri with confidental information stripped."""
     scheme, netloc, path, params, query, fragment = urlparse.urlparse(uri)
     netloc = re.sub('([^:]*):([^@]*)@(.*)', r'\1:***@\3', netloc)
     return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
@@ -169,8 +170,8 @@ users = db.Table('users', metadata,
     db.Column('role', db.Integer)
 )
 
-tags = db.Table('tags', metadata,
-    db.Column('tag_id', db.Integer, primary_key=True),
+categories = db.Table('categories', metadata,
+    db.Column('category_id', db.Integer, primary_key=True),
     db.Column('slug', db.String(50)),
     db.Column('name', db.String(50)),
     db.Column('description', db.Text)
@@ -180,14 +181,15 @@ posts = db.Table('posts', metadata,
     db.Column('post_id', db.Integer, primary_key=True),
     db.Column('pub_date', db.DateTime),
     db.Column('last_update', db.DateTime),
-    db.Column('slug', db.String(150)),
+    db.Column('slug', db.String(200), index=True, nullable=False),
     db.Column('uid', db.String(250)),
     db.Column('title', db.String(150)),
     db.Column('text', db.Text),
     db.Column('author_id', db.Integer, db.ForeignKey('users.user_id')),
-    db.Column('comments_enabled', db.Boolean, nullable=False),
-    db.Column('pings_enabled', db.Boolean, nullable=False),
     db.Column('parser_data', db.ZEMLParserData),
+    db.Column('comments_enabled', db.Boolean),
+    db.Column('pings_enabled', db.Boolean),
+    db.Column('content_type', db.String(40), index=True),
     db.Column('extra', db.PickleType),
     db.Column('status', db.Integer)
 )
@@ -201,6 +203,17 @@ post_links = db.Table('post_links', metadata,
     db.Column('hreflang', db.String(30)),
     db.Column('title', db.String(200)),
     db.Column('length', db.Integer)
+)
+
+tags = db.Table('tags', metadata,
+    db.Column('tag_id', db.Integer, primary_key=True),
+    db.Column('slug', db.String(150), unique=True, nullable=False),
+    db.Column('name', db.String(100), index=True, nullable=False)
+)
+
+post_categories = db.Table('post_categories', metadata,
+    db.Column('post_id', db.Integer, db.ForeignKey('posts.post_id')),
+    db.Column('category_id', db.Integer, db.ForeignKey('categories.category_id'))
 )
 
 post_tags = db.Table('post_tags', metadata,
@@ -223,16 +236,6 @@ comments = db.Table('comments', metadata,
     db.Column('blocked_msg', db.String(250)),
     db.Column('submitter_ip', db.String(100)),
     db.Column('status', db.Integer, nullable=False)
-)
-
-pages = db.Table('pages', metadata,
-    db.Column('page_id', db.Integer, primary_key=True),
-    db.Column('key', db.String(25), unique=True),
-    db.Column('title', db.String(200)),
-    db.Column('text', db.Text),
-    db.Column('parser_data', db.ZEMLParserData),
-    db.Column('navigation_pos', db.Integer),
-    db.Column('parent_id', db.Integer, db.ForeignKey('pages.page_id')),
 )
 
 

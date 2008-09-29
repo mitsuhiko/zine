@@ -37,16 +37,16 @@
       </ul>
     </div>
     <div class="formbox toggleable collapsed">
-      <h3>{{ _("Tags") }}</h3>
-      {{ h.input_field('add_tag') }}
+      <h3>{{ _("Categories") }}</h3>
+      {{ h.input_field('add_category') }}
       <input type="submit" value="{{ _('Add') }}">
       <ul>
-      {%- for tag in tags %}
-        <li>{{ h.checkbox('tags', tag.slug in form.tags, tag.slug,
-               id='tags_' + tag.slug) }} <label for="tags_{{
-          tag.slug }}">{{ tag.name|e }}</label></li>
+      {%- for category in categories %}
+        <li>{{ h.checkbox('categories', category.slug in form.categories, category.slug,
+               id='categories_' + category.slug) }} <label for="categories_{{
+          category.slug }}">{{ category.name|e }}</label></li>
       {%- else %}
-        <li><em>{{ _('no tags created yet') }}</em></li>
+        <li><em>{{ _('no categories created yet') }}</em></li>
       {%- endfor %}
       </ul>
     </div>

@@ -18,8 +18,7 @@
     :license: GNU GPL.
 """
 from zine.application import render_template
-from zine.database import pages as pages_table
-from zine.models import Post, Tag, Comment, Page
+from zine.models import Post, Category, Comment
 
 
 class Widget(object):
@@ -41,17 +40,6 @@ class Widget(object):
 
     def __str__(self):
         return unicode(self).encode('utf-8')
-
-
-class TagCloud(Widget):
-    """A tag cloud. What else?"""
-
-    name = 'tagcloud'
-    template = 'widgets/tagcloud.html'
-
-    def __init__(self, max=None, show_title=False):
-        self.tags = Tag.query.get_cloud(max)
-        self.show_title = show_title
 
 
 class PostArchiveSummary(Widget):
@@ -88,19 +76,5 @@ class LatestComments(Widget):
         self.show_title = show_title
 
 
-class PagesNavigation(Widget):
-    """A little navigation widget."""
-
-    name = 'pages_navigation'
-    template = 'widgets/pages_navigation.html'
-
-    def __init__(self):
-        to_append = Page.query.filter_by(navigation_pos=None)
-        self.pages = Page.query.filter(pages_table.c.navigation_pos!=None) \
-            .order_by(pages_table.c.navigation_pos.asc()).all()
-        self.pages.extend(to_append.all())
-
-
 #: list of all core widgets
-all_widgets = [TagCloud, PostArchiveSummary, LatestPosts, LatestComments,
-               PagesNavigation]
+all_widgets = [PostArchiveSummary, LatestPosts, LatestComments]

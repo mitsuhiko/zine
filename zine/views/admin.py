@@ -22,12 +22,12 @@ from werkzeug.exceptions import NotFound, BadRequest
 from zine.i18n import _
 from zine.application import require_role, get_request, url_for, emit_event, \
      render_response, get_application
-from zine.models import User, Post, Tag, Comment, Page, ROLE_ADMIN, \
+from zine.models import User, Post, Category, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from zine.database import db, comments as comment_table, posts, \
-     post_tags, post_links, secure_database_uri
+     post_categories, post_links, secure_database_uri
 from zine.utils import dump_json, load_json
 from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.admin import flash, gen_slug, load_zine_reddit
@@ -75,7 +75,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         ('posts', url_for('admin/show_posts'), _(u'Posts'), [
             ('overview', url_for('admin/show_posts'), _(u'Overview')),
             ('write', url_for('admin/new_post'), _(u'Write Post')),
-            ('tags', url_for('admin/show_tags'), _(u'Tags'))
+            ('categories', url_for('admin/show_categories'), _(u'Categories'))
         ]),
         ('comments', url_for('admin/show_comments'), _(u'Comments'), [
             ('overview', url_for('admin/show_comments'), _(u'Overview')),
@@ -95,11 +95,6 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
 
     # set up the administration menu bar
     if request.user.role == ROLE_ADMIN:
-        navigation_bar.insert(3,
-            ('pages', url_for('admin/show_pages'), _(u'Pages'), [
-                ('overview', url_for('admin/show_pages'), _(u'Overview')),
-                ('write', url_for('admin/write_page'), _(u'Write Page')),
-        ]))
         navigation_bar += [
             ('users', url_for('admin/show_users'), _(u'Users'), [
                 ('overview', url_for('admin/show_users'), _(u'Overview')),
@@ -109,7 +104,6 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('basic', url_for('admin/basic_options'), _(u'Basic')),
                 ('urls', url_for('admin/urls'), _(u'URLs')),
                 ('theme', url_for('admin/theme'), _(u'Theme')),
-                ('pages', url_for('admin/pages_config'), _(u'Pages')),
                 ('uploads', url_for('admin/upload_config'), _(u'Uploads')),
                 ('plugins', url_for('admin/plugins'), _(u'Plugins')),
                 ('cache', url_for('admin/cache'), _(u'Cache'))
@@ -278,7 +272,7 @@ def do_edit_post(request, post_id=None):
     although it would be a good idea to allow plugins to add custom fields
     into the template.
     """
-    tags = []
+    categories = []
     errors = []
     form = {}
     post = exclude = None
@@ -299,7 +293,7 @@ def do_edit_post(request, post_id=None):
         form.update(
             title=post.title,
             text=post.text,
-            tags=[t.slug for t in post.tags],
+            categories=[t.slug for t in post.categories],
             post_status=post.status,
             comments_enabled=post.comments_enabled,
             pings_enabled=post.pings_enabled,
@@ -318,7 +312,7 @@ def do_edit_post(request, post_id=None):
         form.update(
             title=request.args.get('title', ''),
             text=request.args.get('text', ''),
-            tags=[],
+            categories=[],
             post_status=STATUS_DRAFT,
             comments_enabled=request.app.cfg['comments_enabled'],
             pings_enabled=request.app.cfg['pings_enabled'],
@@ -391,27 +385,27 @@ def do_edit_post(request, post_id=None):
                 errors.append(_(u'A slug cannot contain a slash.'))
             elif len(slug) > 150:
                 errors.append(_(u'Your slug is too long'))
-        form['tags'] = []
-        tags = []
-        for tag in request.form.getlist('tags'):
-            t = Tag.query.filter_by(slug=tag).first()
+        form['categories'] = []
+        categories = []
+        for category in request.form.getlist('categories'):
+            t = Category.query.filter_by(slug=category).first()
             if t is not None:
-                tags.append(t)
-                form['tags'].append(tag)
+                categories.append(t)
+                form['categories'].append(category)
             else:
-                errors.append(_(u'Unknown tag “%s”.') % tag)
+                errors.append(_(u'Unknown category “%s”.') % category)
 
-        # if someone adds a tag we don't save the post but just add
-        # a tag to the list and assign it to the post list.
-        add_tag = request.form.get('add_tag')
-        if add_tag:
+        # if someone adds a category we don't save the post but just add
+        # a category to the list and assign it to the post list.
+        add_category = request.form.get('add_category')
+        if add_category:
             # XXX: what happens if the slug is empty or the slug
             #      exists already?
-            form['tags'].append(Tag(add_tag).slug)
+            form['categories'].append(Category(add_category).slug)
             db.commit()
             del errors[:]
 
-        # if there is no need tag and there are no errors we save the post
+        # if there is no need category and there are no errors we save the post
         elif not errors:
             if new_post:
                 post = Post(title, author, text, slug,
@@ -427,7 +421,7 @@ def do_edit_post(request, post_id=None):
                 else:
                     post.auto_slug()
                 post.pub_date = pub_date
-            post.tags[:] = tags
+            post.categories[:] = categories
             post.comments_enabled = form['comments_enabled']
             post.pings_enabled = form['pings_enabled']
             post.status = post_status
@@ -501,7 +495,7 @@ def do_edit_post(request, post_id=None):
     return render_admin_response('admin/edit_post.html', 'posts.write',
         new_post=new_post,
         form=form,
-        tags=Tag.query.all(),
+        categories=Category.query.all(),
         post=post,
         drafts=list(Post.query.drafts(exclude=exclude).all()),
         can_change_author=request.user.role >= ROLE_EDITOR,
@@ -859,39 +853,37 @@ def do_block_comment(request, comment_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_tags(request, page):
-    """Show a list of used post tag.  Tags can be used as web2.0 like tags or
-    normal comments.
-    """
-    tags = Tag.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/show_tags', page, PER_PAGE,
-                                 Tag.query.count())
-    if not tags and page != 1:
+def do_show_categories(request, page):
+    """Show a list of used post category."""
+    categories = Category.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    pagination = AdminPagination('admin/show_categories', page, PER_PAGE,
+                                 Category.query.count())
+    if not categories and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_tags.html', 'posts.tags',
-                                 tags=tags,
+    return render_admin_response('admin/show_categories.html', 'posts.categories',
+                                 categories=categories,
                                  pagination=pagination)
 
 
 @require_role(ROLE_AUTHOR)
-def do_edit_tag(request, tag_id=None):
-    """Edit a tag."""
+def do_edit_category(request, category_id=None):
+    """Edit a category."""
     errors = []
     form = dict.fromkeys(['slug', 'name', 'description'], u'')
-    new_tag = True
+    new_category = True
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
-    if tag_id is not None:
-        tag = Tag.query.get(tag_id)
-        if tag is None:
+    if category_id is not None:
+        category = Category.query.get(category_id)
+        if category is None:
             raise NotFound()
         form.update(
-            slug=tag.slug,
-            name=tag.name,
-            description=tag.description
+            slug=category.slug,
+            name=category.name,
+            description=category.description
         )
-        new_tag = False
+        new_category = False
 
     old_slug = form['slug']
 
@@ -900,57 +892,57 @@ def do_edit_tag(request, tag_id=None):
 
         # cancel
         if request.form.get('cancel'):
-            return redirect('admin/show_tags')
+            return redirect('admin/show_categories')
 
         # delete
         if request.form.get('delete'):
-            return redirect_to('admin/delete_tag', tag_id=tag.tag_id)
+            return redirect_to('admin/delete_category', category_id=category.category_id)
 
         form['slug'] = slug = request.form.get('slug')
         form['name'] = name = request.form.get('name')
         form['description'] = description = request.form.get('description')
 
         if not name:
-            errors.append(_(u'You have to give the tag a name.'))
-        elif old_slug != slug and Tag.query.filter_by(slug=slug).first() is not None:
+            errors.append(_(u'You have to give the category a name.'))
+        elif old_slug != slug and Category.query.filter_by(slug=slug).first() is not None:
             errors.append(_(u'The slug "%s" is not unique.') % slug)
 
         if not errors:
-            if new_tag:
-                tag = Tag(name, description, slug or None)
-                msg = _(u'Tag %s created successfully.')
+            if new_category:
+                category = Category(name, description, slug or None)
+                msg = _(u'Category %s created successfully.')
                 msg_type = 'add'
             else:
-                if tag.slug is not None:
-                    tag.slug = slug
-                tag.name = name
-                tag.description = description
-                msg = _(u'Tag %s updated successfully.')
+                if category.slug is not None:
+                    category.slug = slug
+                category.name = name
+                category.description = description
+                msg = _(u'Category %s updated successfully.')
                 msg_type = 'info'
 
             db.commit()
-            html_tag_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(tag)),
-                escape(tag.name)
+            html_category_detail = u'<a href="%s">%s</a>' % (
+                escape(url_for(category)),
+                escape(category.name)
             )
-            flash(msg % html_tag_detail, msg_type)
-            return redirect('admin/show_tags')
+            flash(msg % html_category_detail, msg_type)
+            return redirect('admin/show_categories')
 
     for error in errors:
         flash(error, 'error')
 
-    return render_admin_response('admin/edit_tag.html', 'posts.tags',
+    return render_admin_response('admin/edit_category.html', 'posts.categories',
         form=form,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
 @require_role(ROLE_AUTHOR)
-def do_delete_tag(request, tag_id):
-    """Works like the other delete pages, just that it deletes tags."""
-    tag = Tag.query.get(tag_id)
-    if tag is None:
-        return redirect_to('admin/show_tags')
+def do_delete_category(request, category_id):
+    """Works like the other delete pages, just that it deletes categories."""
+    category = Category.query.get(category_id)
+    if category is None:
+        return redirect_to('admin/show_categories')
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
 
@@ -958,20 +950,20 @@ def do_delete_tag(request, tag_id):
         csrf_protector.assert_safe()
 
         if request.form.get('cancel'):
-            return redirect('admin/edit_tag', tag_id=tag.tag_id)
+            return redirect('admin/edit_category', category_id=category.category_id)
         elif request.form.get('confirm'):
-            redirect.add_invalid('admin/edit_tag', tag_id=tag.tag_id)
-            #! plugins can use this to react to tag deletes.  They can't stop
-            #! the deleting of the tag but they can delete information in
+            redirect.add_invalid('admin/edit_category', category_id=category.category_id)
+            #! plugins can use this to react to category deletes.  They can't stop
+            #! the deleting of the category but they can delete information in
             #! their own tables so that the database is consistent afterwards.
-            emit_event('before-tag-deleted', tag)
-            db.delete(tag)
-            flash(_(u'Tag %s deleted successfully.') % escape(tag.name))
+            emit_event('before-category-deleted', category)
+            db.delete(category)
+            flash(_(u'Category %s deleted successfully.') % escape(category.name))
             db.commit()
-            return redirect('admin/show_tags')
+            return redirect('admin/show_categories')
 
-    return render_admin_response('admin/delete_tag.html', 'posts.tags',
-        tag=tag,
+    return render_admin_response('admin/delete_category.html', 'posts.categories',
+        category=category,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
@@ -1287,7 +1279,7 @@ def do_urls(request):
     form = {
         'blog_url_prefix':      request.app.cfg['blog_url_prefix'],
         'admin_url_prefix':     request.app.cfg['admin_url_prefix'],
-        'tags_url_prefix':      request.app.cfg['tags_url_prefix'],
+        'category_url_prefix':  request.app.cfg['category_url_prefix'],
         'profiles_url_prefix':  request.app.cfg['profiles_url_prefix']
     }
     errors = []
@@ -1744,195 +1736,6 @@ def do_change_password(request):
 
     return render_admin_response('admin/change_password.html',
         form=form.as_widget()
-    )
-
-
-@require_role(ROLE_ADMIN)
-def do_pages_config(request):
-    """Show the configuration page for pages"""
-    cfg = get_application().cfg
-    csrf_protector = CSRFProtector()
-    form = {
-        'show_title': cfg['show_page_title'],
-        'show_children': cfg['show_page_children'],
-    }
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-        rform = request.form
-        form['show_title'] = show_title = 'show_title' in request.form
-        form['show_children'] = show_children = 'show_children' in request.form
-
-        # update the configuration
-        t = cfg.edit()
-        if show_title != cfg['show_page_title']:
-            t['show_page_title'] = show_title
-        if show_children != cfg['show_page_children']:
-            t['show_page_children'] = show_children
-        t.commit()
-        flash(u'Pages configuration updated successful.')
-
-    return render_admin_response(
-        'admin/pages_config.html',
-        'options.pages',
-        form=form,
-        csrf_protector=csrf_protector,
-    )
-
-
-@require_role(ROLE_ADMIN)
-def do_show_pages(request):
-    """Shows all saved pages"""
-    return render_admin_response(
-        'admin/show_pages.html',
-        'pages.overview',
-        pages=Page.query.all()
-    )
-
-
-@require_role(ROLE_ADMIN)
-def do_write_page(request, page_id=None):
-    """Show the "write page" dialog.
-
-    If `page_id` is given the form is updated with already saved data so that
-    you can edit a page.
-    """
-    csrf_protector = CSRFProtector()
-    form = {}
-    errors = []
-
-    if page_id is None:
-        # new page
-        new_page = True
-        page = None
-        form.update(
-            key=u'', title=u'',
-            text=u'',
-            navigation_pos=u'',
-            parser=request.app.cfg['default_parser'],
-        )
-    else:
-        # edit a page
-        new_page = False
-        page = Page.query.get(page_id)
-        if page is None:
-            raise NotFound()
-        old_key = page.key
-        form.update(
-            key=page.key,
-            title=page.title,
-            text=page.text,
-            navigation_pos=page.navigation_pos,
-            parser=page.parser,
-            parent_id=page.parent_id or 0,
-        )
-
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-
-        if request.form.get('cancel'):
-            return redirect_to('admin/show_pages')
-        if request.form.get('delete') and not new_page:
-            return redirect_to('admin/delete_page', page_id=page_id)
-
-        form['title'] = title = request.form.get('title')
-        if not title:
-            errors.append(_(u'You have to provide a title'))
-
-        form['key'] = key = request.form.get('key') or None
-        if key is None:
-            key = gen_slug(title)
-        key = key.lstrip('/')
-        if not key:
-            errors.append(_(u'You have to provide a key'))
-
-        form['navigation_pos'] = navigation_pos = \
-            request.form.get('navigation_pos') or None
-
-        form['text'] = text = request.form.get('text', u'')
-        if not text:
-            errors.append(_(u'You have to provide some content'))
-
-        form['parser'] = parser = request.form.get('parser')
-        if not parser:
-            parser = request.app.cfg['default_parser']
-
-        form['parent_id'] = parent_id = request.form.get('parent_id')
-
-        if new_page or old_key != key:
-            if Page.query.filter_by(key=key).first() is not None:
-                errors.append(_(u'This key is already in use'))
-
-        try:
-            parent_id = int(parent_id)
-        except (ValueError, TypeError):
-            parent_id = None
-        if parent_id == 0:
-            parent_id = None
-
-        if not errors:
-            if new_page:
-                page = Page(key, title, text, parser, navigation_pos,
-                            parent_id)
-            else:
-                page.key = key
-                page.title = title
-                page.parser = parser
-                page.text = text
-                page.navigation_pos = navigation_pos
-                page.parent_id = parent_id
-
-            db.commit()
-            html_detail = '<a href="%s">%s</a>' % (
-                escape(url_for(page)),
-                escape(title)
-            )
-            if new_page:
-                flash('The page %s was created successfully.' % html_detail)
-            else:
-                flash('The page %s was updated successfully.' % html_detail)
-            return redirect_to('admin/show_pages')
-        else:
-            for error in errors:
-                flash(error, 'error')
-
-    all_pages = [(0, 'No Parent')] + [(p.page_id, p.title) for p in
-                                      Page.query.all()]
-
-    return render_admin_response(
-        'admin/write_page.html',
-        'pages.write',
-        parsers=request.app.list_parsers(),
-        form=form,
-        page=page,
-        new_page=new_page,
-        csrf_protector=csrf_protector,
-        all_pages=all_pages
-    )
-
-
-@require_role(ROLE_ADMIN)
-def do_delete_page(request, page_id):
-    """Shows the confirm dialog if the user deletes a page"""
-    page = Page.query.get(page_id)
-    if page is None:
-        raise NotFound()
-    csrf_protector = CSRFProtector()
-
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-
-        if request.form.get('cancel'):
-            return redirect_to('admin/write_page', page_id=page.page_id)
-        elif request.form.get('confirm'):
-            db.delete(page)
-            flash(_(u'The page %s was deleted successfully.') %
-                  escape(page.title), 'remove')
-            db.commit()
-            return redirect_to('admin/show_pages')
-
-    return render_admin_response('admin/delete_page.html', 'page.write',
-        page=page,
-        csrf_protector=csrf_protector,
     )
 
 

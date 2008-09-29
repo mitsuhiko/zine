@@ -25,11 +25,10 @@ def make_urls(app):
             Rule('/<string:username>/page/<int:page>', endpoint='blog/show_author'),
             Rule('/<string:author>/feed.atom', endpoint='blog/atom_feed'),
         ]),
-        Submount(app.cfg['tags_url_prefix'], [
-            Rule('/', endpoint='blog/tag_cloud'),
-            Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_tag'),
-            Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_tag'),
-            Rule('/<string:tag>/feed.atom', endpoint='blog/atom_feed'),
+        Submount(app.cfg['category_url_prefix'], [
+            Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_category'),
+            Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_category'),
+            Rule('/<string:category>/feed.atom', endpoint='blog/atom_feed'),
         ])
     ]
     admin_urls = [
@@ -44,10 +43,6 @@ def make_urls(app):
         Rule('/posts/<int:post_id>/delete', endpoint='admin/delete_post'),
         Rule('/posts/<int:post_id>/comments',
              endpoint='admin/show_post_comments', defaults={'page': 1}),
-        Rule('/pages/', endpoint='admin/show_pages'),
-        Rule('/pages/write/', endpoint='admin/write_page'),
-        Rule('/pages/write/<int:page_id>/', endpoint='admin/write_page'),
-        Rule('/pages/delete/<int:page_id>/', endpoint='admin/delete_page'),
         Rule('/comments/', endpoint='admin/show_comments', defaults={'page': 1}),
         Rule('/comments/page/<int:page>', endpoint='admin/show_comments'),
         Rule('/comments/unmoderated', defaults={'page': 1},
@@ -61,11 +56,11 @@ def make_urls(app):
         Rule('/comments/<int:comment_id>/delete', endpoint='admin/delete_comment'),
         Rule('/comments/<int:comment_id>/approve', endpoint='admin/approve_comment'),
         Rule('/comments/<int:comment_id>/block', endpoint='admin/block_comment'),
-        Rule('/posts/tags/', endpoint='admin/show_tags', defaults={'page': 1}),
-        Rule('/posts/tags/page/<int:page>', endpoint='admin/show_tags'),
-        Rule('/posts/tags/new', endpoint='admin/new_tag'),
-        Rule('/posts/tags/<int:tag_id>', endpoint='admin/edit_tag'),
-        Rule('/posts/tags/<int:tag_id>/delete', endpoint='admin/delete_tag'),
+        Rule('/posts/categories/', endpoint='admin/show_categories', defaults={'page': 1}),
+        Rule('/posts/categories/page/<int:page>', endpoint='admin/show_categories'),
+        Rule('/posts/categories/new', endpoint='admin/new_category'),
+        Rule('/posts/categories/<int:category_id>', endpoint='admin/edit_category'),
+        Rule('/posts/categories/<int:category_id>/delete', endpoint='admin/delete_category'),
         Rule('/users/', endpoint='admin/show_users', defaults={'page': 1}),
         Rule('/users/page/<int:page>', endpoint='admin/show_users'),
         Rule('/users/new', endpoint='admin/new_user'),
@@ -79,7 +74,6 @@ def make_urls(app):
         Rule('/options/urls', endpoint='admin/urls'),
         Rule('/options/theme/', endpoint='admin/theme'),
         Rule('/options/theme/configure', endpoint='admin/configure_theme'),
-        Rule('/options/pages', endpoint='admin/pages_config'),
         Rule('/options/uploads', endpoint='admin/upload_config'),
         Rule('/options/plugins/', endpoint='admin/plugins'),
         Rule('/options/plugins/<plugin>/remove', endpoint='admin/remove_plugin'),
@@ -127,5 +121,4 @@ def make_urls(app):
     ] + other_urls
 
 
-from views.blog import handle_user_pages
-absolute_url_handlers = [handle_user_pages]
+absolute_url_handlers = []

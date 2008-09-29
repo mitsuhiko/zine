@@ -19,8 +19,8 @@ from zine.i18n import _
 from zine.database import db
 from zine.application import add_link, url_for, render_response, emit_event, \
      iter_listeners, Response, get_application
-from zine.models import Post, Tag, User, Comment, Page, ROLE_AUTHOR, \
-    COMMENT_UNMODERATED
+from zine.models import Post, Category, User, Comment, ROLE_AUTHOR, \
+     COMMENT_UNMODERATED
 from zine.utils import dump_json, build_tag_uri, ClosingIterator
 from zine.utils.uploads import get_filename, guess_mimetype
 from zine.utils.validators import is_valid_email, is_valid_url, check
@@ -89,8 +89,8 @@ def do_archive(request, year=None, month=None, day=None, page=1):
                            month_list=False, **data)
 
 
-def do_show_tag(request, slug, page=1):
-    """Show all posts tagged with a given tag slug.
+def do_show_category(request, slug, page=1):
+    """Show all posts categoryged with a given category slug.
 
     Available template variables:
 
@@ -100,39 +100,23 @@ def do_show_tag(request, slug, page=1):
         `pagination`:
             a pagination object to render a pagination
 
-        `tag`
-            the tag object for this page.
+        `category`
+            the category object for this page.
 
-    :Template name: ``show_tag.html``
-    :URL endpoint: ``blog/show_tag``
+    :Template name: ``show_category.html``
+    :URL endpoint: ``blog/show_category``
     """
-    tag = Tag.query.filter_by(slug=slug).first()
-    if not tag:
+    category = Category.query.filter_by(slug=slug).first()
+    if not category:
         raise NotFound()
 
-    data = Post.query.get_list(tag=slug, page=page)
+    data = Post.query.get_list(category=slug, page=page)
     if data.pop('probably_404'):
         raise NotFound()
 
-    add_link('alternate', url_for('blog/atom_feed', tag=slug),
-             'application/atom+xml', _(u'All posts tagged %s') % tag.name)
-    return render_response('show_tag.html', tag=tag, **data)
-
-
-def do_show_tag_cloud(request):
-    """Show all posts tagged with a given tag slug.
-
-    Available template variables:
-
-        `tagcloud`:
-            list of tag summaries that contain the size of the cloud
-            item, the name of the tag and it's slug
-
-    :Template name: ``tag_cloud.html``
-    :URL endpoint: ``blog/tag_cloud``
-    """
-    return render_response('tag_cloud.html',
-                           tag_cloud=Tag.query.get_cloud())
+    add_link('alternate', url_for('blog/atom_feed', category=slug),
+             'application/atom+xml', _(u'All posts categoryged %s') % category.name)
+    return render_response('show_category.html', category=category, **data)
 
 
 def do_show_author(request, username, page=1):
@@ -339,7 +323,7 @@ def do_xml_service(request, identifier):
 
 @cache.response(vary=('user',))
 def do_atom_feed(request, author=None, year=None, month=None, day=None,
-                 tag=None, post_slug=None):
+                 category=None, post_slug=None):
     """Renders an atom feed requested.
 
     :URL endpoint: ``blog/atom_feed``
@@ -351,8 +335,8 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
     # if no post slug is given we filter the posts by the cretereons
     # provided and pass them to the feed builder
     if post_slug is None:
-        for post in Post.query.get_list(year, month, day, tag, author,
-                                          per_page=10, as_list=True):
+        for post in Post.query.get_list(year, month, day, category, author,
+                                        per_page=10, as_list=True):
             links = [link.as_dict() for link in post.links]
             feed.add(post.title, unicode(post.body), content_type='html',
                      author=post.author.display_name, links=links,

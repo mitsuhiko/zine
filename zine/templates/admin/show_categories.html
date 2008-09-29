@@ -1,0 +1,34 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Manage Categories") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Manage Categories") }}</h1>
+  <table>
+    <tr>
+      <th>{{ _("ID") }}</th>
+      <th>{{ _("Slug") }}</th>
+      <th>{{ _("Name") }}</th>
+      <th>{{ _("Number of Posts") }}</th>
+    </tr>
+  {%- for category in categories %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+      <td>{{ category.category_id }}</td>
+      <td><a href="{{ url_for('admin/edit_category', category_id=category.category_id)|e }}">{{
+          category.slug|e }}</a></td>
+      <td>{{ category.name|e }}</td>
+      <td>{{ category.posts.count() }}</td>
+    </tr>
+  {%- else %}
+    <tr><td colspan="4">{{ _("No categories.") }}</td></tr>
+  {%- endfor %}
+  </table>
+  <form action="{{ url_for('admin/new_category')|e }}" method="get">
+    <div class="actions">
+      <input type="submit" value="{{ _('New Category') }}">
+    </div>
+  </form>
+  {%- if pagination.necessary %}
+  <div class="pagination">
+    {{ pagination.generate() }}
+  </div>
+  {%- endif %}
+{% endblock %}

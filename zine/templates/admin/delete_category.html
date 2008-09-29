@@ -1,12 +1,12 @@
 {% extends "admin/layout.html" %}
-{% block title %}{{ _("Delete Tag") }}{% endblock %}
+{% block title %}{{ _("Delete Category") }}{% endblock %}
 {% block contents %}
-  <h1>{{ _("Delete Tag") }}</h1>
+  <h1>{{ _("Delete Category") }}</h1>
   <form action="" method="post">
     <div>
       {{ hidden_form_data }}
-      <p>{% trans tag_name=tag.name|e %}
-        Do you really want to delete tag "{{ tag_name }}"?.
+      <p>{% trans category_name=category.name|e %}
+        Do you really want to delete category "{{ category_name }}"?.
       {% endtrans %}</p>
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="confirm" value="{{ _('Yes') }}">

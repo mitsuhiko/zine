@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
-{% block title %}{% trans tag=tag.name|e %}Show Tag "{{ tag }}"{% endtrans %}{% endblock %}
+{% block title %}{% trans category=category.name|e %}Show "{{ category }}"{% endtrans %}{% endblock %}
 {% from "_post.html" import render_post %}
 {% block contents %}
-  <h2>{% trans tag=tag.name|e %}Entries tagged "{{ tag }}"{% endtrans %}</h2>
+  <h2>{% trans category=category.name|e %}Entries in the Category "{{ category }}"{% endtrans %}</h2>
   {% if posts %}
   {%- for post in posts %}
     {{ render_post(post) }}

@@ -48,7 +48,7 @@ DEFAULT_VARS = {
     # url settings
     'blog_url_prefix':          (unicode, u''),
     'admin_url_prefix':         (unicode, u'/admin'),
-    'tags_url_prefix':          (unicode, u'/tags'),
+    'category_url_prefix':      (unicode, u'/categories'),
     'profiles_url_prefix':      (unicode, u'/authors'),
 
     # cache settings

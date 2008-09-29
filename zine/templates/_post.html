@@ -14,9 +14,9 @@
       {%- endif %}
     </div>
     <p class="related">
-      {{ _('Tagged as') }}:
-      {% for tag in post.tags -%}
-        <a href="{{ url_for(tag)|e }}">{{ tag.name|e }}</a>
+      {{ _('Categories') }}:
+      {% for category in post.categories -%}
+        <a href="{{ url_for(category)|e }}">{{ category.name|e }}</a>
         {%- if not loop.last %}, {% endif %}
       {%- else -%}
         {{ _("nothing") }}

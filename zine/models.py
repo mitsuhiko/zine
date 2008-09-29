@@ -13,8 +13,8 @@ from math import ceil, log
 from datetime import date, datetime, timedelta
 from urlparse import urljoin
 
-from zine.database import users, tags, posts, post_links, post_tags, \
-     comments, db, pages
+from zine.database import users, categories, posts, post_links, \
+     post_categories, post_tags, tags, comments,  db
 from zine.utils import build_tag_uri, zeml
 from zine.utils.admin import gen_slug
 from zine.utils.pagination import Pagination
@@ -295,13 +295,13 @@ class PostQuery(db.Query):
             query = query.filter(Post.post_id != exclude)
         return query
 
-    def get_list(self, year=None, month=None, day=None, tag=None, author=None,
+    def get_list(self, year=None, month=None, day=None, category=None, author=None,
                  page=1, per_page=None, ignore_role=False, as_list=False):
         """Return a dict with pagination, the current posts, number of pages,
         total posts and all that stuff for further processing.  the triple of
-        year, month and day are mutually exclusive to either tag or author.
+        year, month and day are mutually exclusive to either category or author.
 
-        The behavior if both a date *and* tag or *author* are specified is
+        The behavior if both a date *and* category or *author* are specified is
         undefined and will probably not raise an exception.
 
         If the role is ignored only published items are returned, otherwise the
@@ -317,10 +317,10 @@ class PostQuery(db.Query):
             per_page = app.cfg['posts_per_page']
         url_args = {}
 
-        # show all posts for a tag
-        if tag is not None:
-            url_args['slug'] = tag
-            endpoint = 'blog/show_tag'
+        # show all posts for a category
+        if category is not None:
+            url_args['slug'] = category
+            endpoint = 'blog/show_category'
         # show all posts for an author
         elif author is not None:
             url_args['username'] = author.username
@@ -372,14 +372,14 @@ class PostQuery(db.Query):
                 conditions.append((p.pub_date >= datetime(year, month, day)) &
                                   (p.pub_date < datetime(year, month, day) +
                                                 timedelta(days=1)))
-        # all posts for a tag
-        elif tag is not None:
-            if isinstance(tag, basestring):
-                tag_join = tags.c.slug == tag
+        # all posts for a category
+        elif category is not None:
+            if isinstance(category, basestring):
+                category_join = categories.c.slug == category
             else:
-                tag_join = tags.c.tag_id == tag.tag_id
-            conditions.append((post_tags.c.post_id == p.post_id) &
-                              (post_tags.c.tag_id == tags.c.tag_id) & tag_join)
+                category_join = categories.c.category_id == category.category_id
+            conditions.append((post_categories.c.post_id == p.post_id) &
+                              (post_categories.c.category_id == categories.c.category_id) & category_join)
 
         # all posts for an author
         elif author is not None:
@@ -516,7 +516,7 @@ class Post(_ZEMLDualContainer):
     def __init__(self, title, author, text, slug=None, pub_date=None,
                  last_update=None, comments_enabled=True,
                  pings_enabled=True, status=STATUS_PUBLISHED,
-                 parser=None, uid=None):
+                 parser=None, uid=None, content_type='entry'):
         app = get_application()
         self.title = title
         self.author = author
@@ -541,7 +541,7 @@ class Post(_ZEMLDualContainer):
         # calculate a slug it will fall back to the time of the post, and
         # this requires pub_date to be assigned.
         if not slug:
-            self.auto_slug()
+            self.set_auto_slug()
         else:
             self.slug = slug
 
@@ -549,6 +549,8 @@ class Post(_ZEMLDualContainer):
         if uid is None:
             uid = build_tag_uri(app, self.pub_date, 'post', self.slug)
         self.uid = uid
+
+        self.content_type = content_type
 
     @property
     def root_comments(self):
@@ -578,11 +580,17 @@ class Post(_ZEMLDualContainer):
         """True if this post is unpublished."""
         return self.status == STATUS_DRAFT
 
-    def auto_slug(self):
+    def set_auto_slug(self):
         """Generate a slug for this post."""
-        self.slug = gen_slug(self.title)
-        if not self.slug:
-            self.slug = self.pub_date.strftime('%H:%M')
+        slug = gen_slug(self.title)
+        if not slug:
+            slug = self.pub_date.strftime('%H:%M')
+        self.slug = u'%s/%s/%s/%s' % (
+            self.pub_date.year,
+            self.pub_date.month,
+            self.pub_date.day,
+            slug
+        )
 
     def can_access(self, user=None):
         """Check if the current user or the user provided can access
@@ -630,7 +638,7 @@ class Post(_ZEMLDualContainer):
 
 class PostLink(object):
     """Represents a link in a post.  This can be used for podcasts or other
-    resources that require ``<link>`` tags.
+    resources that require ``<link>`` categories.
     """
 
     def __init__(self, post, href, rel='alternate', type=None, hreflang=None,
@@ -659,20 +667,20 @@ class PostLink(object):
         )
 
 
-class TagQuery(db.Query):
-    """Also tags have their own manager."""
+class CategoryQuery(db.Query):
+    """Also categories have their own manager."""
 
     def get_or_create(self, slug, name=None):
-        """Get the tag for this slug or create it if it does not exist."""
-        tag = self.filter_by(slug=slug).first()
-        if tag is None:
+        """Get the category for this slug or create it if it does not exist."""
+        category = self.filter_by(slug=slug).first()
+        if category is None:
             if name is None:
                 name = slug
-            tag = Tag(name, slug=slug)
-        return tag
+            category = Category(name, slug=slug)
+        return category
 
     def get_cloud(self, max=None, ignore_role=False):
-        """Get a tagcloud."""
+        """Get a categorycloud."""
         role = ROLE_NOBODY
         if ignore_role:
             req = get_request()
@@ -680,11 +688,11 @@ class TagQuery(db.Query):
                 role = req.user.role
 
         # get a query
-        p = post_tags.c
+        p = post_categories.c
         p2 = posts.c
-        t = tags.c
+        t = categories.c
 
-        q = (p.tag_id == t.tag_id) & (p.post_id == p2.post_id)
+        q = (p.category_id == t.category_id) & (p.post_id == p2.post_id)
 
         # do the role checking
         if role <= ROLE_SUBSCRIBER:
@@ -698,7 +706,7 @@ class TagQuery(db.Query):
                   (p2.author_id == req.user.user_id))
 
         s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
-                      p.tag_id == t.tag_id,
+                      p.category_id == t.category_id,
                       group_by=[t.slug, t.name]).alias('post_count_query').c
 
         options = {'order_by': [db.asc(s.s_count)]}
@@ -720,25 +728,25 @@ class TagQuery(db.Query):
         return items
 
 
-class Tag(object):
-    """Represents a tag."""
+class Category(object):
+    """Represents a category."""
 
-    query = db.query_property(TagQuery)
+    query = db.query_property(CategoryQuery)
 
     def __init__(self, name, description='', slug=None):
         self.name = name
         if slug is None:
-            self.auto_slug()
+            self.set_auto_slug()
         else:
             self.slug = slug
         self.description = description
 
-    def auto_slug(self):
-        """Generate a slug for this tag."""
+    def set_auto_slug(self):
+        """Generate a slug for this category."""
         self.slug = gen_slug(self.name)
 
     def get_url_values(self):
-        return 'blog/show_tag', {
+        return 'blog/show_category', {
             'slug':     self.slug
         }
 
@@ -927,42 +935,22 @@ class Comment(_ZEMLContainer):
         )
 
 
-class Page(_ZEMLContainer):
+class Tag(object):
+    """A single tag."""
+    query = db.query_property(db.Query)
 
-    parser_reason = 'page'
+    def __init__(self, name, slug=None):
+        self.name = name
+        if slug is None:
+            slug = self.set_auto_slug()
+        else:
+            self.slug = slug
 
-    def __init__(self, key, title, text, parser=None, navigation_pos=None,
-                 parent_id=None):
-        self.key = key
-        self.title = title
-        if parser is None:
-            parser = get_application().cfg['default_parser']
-        self.parser = parser
-        if navigation_pos is not None:
-            if isinstance(navigation_pos, (float, long, basestring)):
-                navigation_pos = int(navigation_pos)
-        self.navigation_pos = navigation_pos
-        self.text = text or u''
-        self.parent_id = parent_id
+    def set_auto_slug(self):
+        self.slug = gen_slug(self.name)
 
     def get_url_values(self):
-        return self.key
-
-    @property
-    def ancestors(self):
-        anc = [self]
-        p = self.parent
-        while p:
-            anc.append(p)
-            p = p.parent
-        return reversed(anc)
-
-    @property
-    def siblings(self):
-        if self.parent:
-            return self.parent.children
-        else:
-            return [self]
+        return 'tags', {'slug': self.slug}
 
 
 # connect the tables.
@@ -973,8 +961,8 @@ db.mapper(User, users, properties={
     'comments':         db.dynamic_loader(Comment, backref='user',
                                           cascade='all, delete, delete-orphan')
 })
-db.mapper(Tag, tags, properties={
-    'posts':            db.dynamic_loader(Post, secondary=post_tags)
+db.mapper(Category, categories, properties={
+    'posts':            db.dynamic_loader(Post, secondary=post_categories)
 })
 db.mapper(Comment, comments, properties={
     '_text':        comments.c.text,
@@ -990,6 +978,7 @@ db.mapper(Comment, comments, properties={
     )
 }, order_by=comments.c.pub_date.desc())
 db.mapper(PostLink, post_links)
+db.mapper(Tag, tags)
 db.mapper(Post, posts, properties={
     '_text':            posts.c.text,
     'comments':         db.relation(Comment, backref='post',
@@ -1000,12 +989,8 @@ db.mapper(Post, posts, properties={
                                     cascade='all, delete, delete-orphan'),
     'links':            db.relation(PostLink, backref='post',
                                     cascade='all, delete, delete-orphan'),
+    'categories':       db.relation(Category, secondary=post_categories, lazy=False,
+                                    order_by=[db.asc(categories.c.name)]),
     'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
-                                    order_by=[db.asc(tags.c.name)])
+                                    order_by=[tags.c.name])
 }, order_by=posts.c.pub_date.desc())
-db.mapper(Page, pages, properties={
-    '_text':        pages.c.text,
-    'parent':       db.relation(Page,
-        remote_side=[pages.c.page_id],
-        backref=db.backref('children', order_by=[pages.c.navigation_pos])),
-})
