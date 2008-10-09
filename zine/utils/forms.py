@@ -1640,8 +1640,9 @@ class Form(object):
         user_id = -1
         if self.request.user.is_somebody:
             user_id = self.request.user.user_id
+        login_time = self.request.session.get('lt', -1)
         key = self.request.app.cfg['secret_key']
-        return sha1(('%s|%s|%s' % (path, user_id, key))
+        return sha1(('%s|%s|%s|%s' % (path, login_time, user_id, key))
                      .encode('utf-8')).hexdigest()
 
     @property

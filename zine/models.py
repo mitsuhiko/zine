@@ -241,6 +241,10 @@ class AnonymousUser(User):
 class PostQuery(db.Query):
     """Add some extra methods to the post model."""
 
+    def type(self, content_type):
+        """Filter all posts by a given type."""
+        return self.filter_by(content_type=content_type)
+
     def published(self, ignore_role=None):
         """Return a queryset for only published posts."""
         role = ROLE_NOBODY
