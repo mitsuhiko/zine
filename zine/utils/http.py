@@ -58,6 +58,11 @@ def get_redirect_target(invalid_targets=(), request=None):
     return check_target
 
 
+def make_external_url(path):
+    """Return an external url for the given path."""
+    return urljoin(get_application().cfg['blog_url'], path.lstrip('/'))
+
+
 def redirect(url, code=302, allow_external_redirect=False):
     """Return a redirect response.  Like Werkzeug's redirect but this
     one checks for external redirects too.  If a redirect to an external

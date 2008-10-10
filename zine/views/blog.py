@@ -31,7 +31,7 @@ from werkzeug.exceptions import NotFound, Forbidden
 
 
 @cache.response(vary=('user',))
-def do_index(request, page=1):
+def do_index(req, page=1):
     """Render the most recent posts.
 
     Available template variables:
@@ -45,7 +45,7 @@ def do_index(request, page=1):
     :Template name: ``index.html``
     :URL endpoint: ``blog/index``
     """
-    data = Post.query.get_list(page=page)
+    data = Post.query.for_index().get_list(page=page)
     if data.pop('probably_404'):
         raise NotFound()
 
@@ -54,7 +54,7 @@ def do_index(request, page=1):
     return render_response('index.html', **data)
 
 
-def do_archive(request, year=None, month=None, day=None, page=1):
+def do_archive(req, year=None, month=None, day=None, page=1):
     """Render the monthly archives.
 
     Available template variables:
@@ -89,7 +89,7 @@ def do_archive(request, year=None, month=None, day=None, page=1):
                            month_list=False, **data)
 
 
-def do_show_category(request, slug, page=1):
+def do_show_category(req, slug, page=1):
     """Show all posts categoryged with a given category slug.
 
     Available template variables:
@@ -119,7 +119,7 @@ def do_show_category(request, slug, page=1):
     return render_response('show_category.html', category=category, **data)
 
 
-def do_show_author(request, username, page=1):
+def do_show_author(req, username, page=1):
     """Show the user profile of an author / editor or administrator.
 
     Available template variables:
@@ -152,7 +152,7 @@ def do_show_author(request, username, page=1):
     return render_response('show_author.html', user=user, **data)
 
 
-def do_authors(request):
+def do_authors(req):
     """Show a list of authors.
 
     Available template variables:
@@ -168,7 +168,7 @@ def do_authors(request):
 
 @cache.response(vary=('user',))
 @pingback.inject_header
-def do_show_post(request, year, month, day, slug):
+def show_entry(req, post, comment_form):
     """Show as post and give users the possibility to comment to this
     story if comments are enabled.
 
@@ -207,75 +207,45 @@ def do_show_post(request, year, month, day, slug):
     :Template name: ``show_post.html``
     :URL endpoint: ``blog/show_post``
     """
-    post = Post.query.get_by_timestamp_and_slug(year, month, day, slug)
-    if post is None:
-        raise NotFound()
-    elif not post.can_access():
-        raise Forbidden()
-
-    form = NewCommentForm(post, request.user)
-
-    if request.method == 'POST' and post.comments_enabled and \
-       form.validate(request.form):
-
-        #! allow plugins to do additional comment validation.
-        #! the return value should be an iterable with error strings that
-        #! are displayed below the comment form.  If an error ends up there
-        #! the post is not saved.  Do not use this for antispam, that should
-        #! accept the comment and just mark it as blocked.  For that have
-        #! a look at the `before-comment-saved` event.
-        for result in emit_event('before-comment-created', request, form):
-            errors.extend(result or ())
-
-        # if we don't have errors let's save it and emit an
-        # `before-comment-saved` event so that plugins can do
-        # block comments so that administrators have to approve it
-        comment = form.make_comment()
-
-        #! use this event to block comments before they are saved.  This
-        #! is useful for antispam and other ways of moderation.
-        emit_event('before-comment-saved', request, comment)
-
-        # Moderate Comment?  Now that the spam check any everything
-        # went through the processing we explicitly set it to
-        # unmodereated if the blog configuration demands that
-        if not comment.blocked and comment.requires_moderation:
-            comment.status = COMMENT_UNMODERATED
-            comment.blocked_msg = _(u'Comment waiting for approval')
-
-        db.commit()
-
-        #! this is sent directly after the comment was saved.  Useful if
-        #! you want to send mail notifications or whatever.
-        emit_event('after-comment-saved', request, comment)
-
-        # Still allow the user to see his comment
-        if comment.blocked:
-            comment.make_visible_for_request(request)
-
-        return redirect_to(post)
-
-    add_link('alternate', post.comment_feed_url, 'application/atom+xml',
-             _(u'Comments Feed'))
+    response = comment_form.create_if_valid(req)
+    if response is not None:
+        return response
 
     return render_response('show_post.html',
         post=post,
-        form=form.as_widget()
+        form=comment_form.as_widget()
     )
 
 
-def do_service_rsd(request):
+def show_page(req, post, comment_form):
+    """Shows a post that is a page."""
+    response = comment_form.create_if_valid(req)
+    if response is not None:
+        return response
+
+    cfg = req.app.cfg
+    return render_response(['pages/%s.html' % post.slug.strip('/'),
+                            post.extra.get('page_template'), 'page.html'],
+        page=post,
+        form=comment_form.as_widget(),
+        blog_title=cfg['blog_title'],
+        show_title=cfg['show_page_title'],
+        show_children=cfg['show_page_children']
+    )
+
+
+def do_service_rsd(req):
     """Serves and RSD definition (really simple discovery) so that blog
     frontends can query the apis that are available.
 
     :URL endpoint: ``blog/service_rsd``
     """
-    return Response(generate_rsd(request.app), mimetype='application/xml')
+    return Response(generate_rsd(req.app), mimetype='application/xml')
 
 
-def do_json_service(request, identifier):
-    """Handle a JSON service request."""
-    handler = request.app._services.get(identifier)
+def do_json_service(req, identifier):
+    """Handle a JSON service req."""
+    handler = req.app._services.get(identifier)
     if handler is None:
         raise NotFound()
 
@@ -285,10 +255,10 @@ def do_json_service(request, identifier):
         rv = callback(identifier, handler)
         if rv is not None:
             handler = rv
-    result = handler(request)
+    result = handler(req)
 
     #! called right after json callback returned some data with the identifier
-    #! of the request method and the result object.  Note that events *have*
+    #! of the req method and the result object.  Note that events *have*
     #! to return an object, even if it's just changed in place, otherwise the
     #! return value will be `null` (None).
     for callback in iter_listeners('after-json-service-called'):
@@ -296,9 +266,9 @@ def do_json_service(request, identifier):
     return Response(dump_json(result), mimetype='text/javascript')
 
 
-def do_xml_service(request, identifier):
-    """Handle a XML service request."""
-    handler = request.app._services.get(identifier)
+def do_xml_service(req, identifier):
+    """Handle a XML service req."""
+    handler = req.app._services.get(identifier)
     if handler is None:
         raise NotFound()
 
@@ -308,10 +278,10 @@ def do_xml_service(request, identifier):
         rv = callback(identifier, handler)
         if rv is not None:
             handler = rv
-    result = handler(request)
+    result = handler(req)
 
     #! called right after xml callback returned some data with the identifier
-    #! of the request method and the result object.  Note that events *have*
+    #! of the req method and the result object.  Note that events *have*
     #! to return an object, even if it's just changed in place, otherwise the
     #! return value will be None.
     for callback in iter_listeners('after-xml-service-called'):
@@ -322,21 +292,24 @@ def do_xml_service(request, identifier):
 
 
 @cache.response(vary=('user',))
-def do_atom_feed(request, author=None, year=None, month=None, day=None,
-                 category=None, post_slug=None):
+def do_atom_feed(req, author=None, year=None, month=None, day=None,
+                 category=None, post=None):
     """Renders an atom feed requested.
 
     :URL endpoint: ``blog/atom_feed``
     """
-    feed = AtomFeed(request.app.cfg['blog_title'], feed_url=request.url,
-                    url=request.app.cfg['blog_url'],
-                    subtitle=request.app.cfg['blog_tagline'])
+    feed = AtomFeed(req.app.cfg['blog_title'], feed_url=req.url,
+                    url=req.app.cfg['blog_url'],
+                    subtitle=req.app.cfg['blog_tagline'])
 
     # if no post slug is given we filter the posts by the cretereons
-    # provided and pass them to the feed builder
-    if post_slug is None:
-        for post in Post.query.get_list(year, month, day, category, author,
-                                        per_page=10, as_list=True):
+    # provided and pass them to the feed builder.  This will only return
+    # a feed for posts with a content type listed in `index_content_types`
+    if post is None:
+        for post in Post.query.for_index().get_list(year, month, day,
+                                                    category, author,
+                                                    per_page=10,
+                                                    as_list=True):
             links = [link.as_dict() for link in post.links]
             feed.add(post.title, unicode(post.body), content_type='html',
                      author=post.author.display_name, links=links,
@@ -344,19 +317,13 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
                      updated=post.last_update, published=post.pub_date)
 
     # otherwise we create a feed for all the comments of a post.
+    # the function is called this way by `dispatch_content_type`.
     else:
-        post = Post.query.get_by_timestamp_and_slug(year, month, day,
-                                                      post_slug)
-        if post is None:
-            raise NotFound()
-        elif not post.can_access():
-            raise Forbidden()
-
         comment_num = 1
         for comment in post.comments:
             if not comment.visible:
                 continue
-            uid = build_tag_uri(request.app, comment.pub_date, 'comment',
+            uid = build_tag_uri(req.app, comment.pub_date, 'comment',
                                 comment.comment_id)
             title = _(u'Comment %(num)d on %(post)s') % {
                 'num':  comment_num,
@@ -374,6 +341,10 @@ def do_atom_feed(request, author=None, year=None, month=None, day=None,
 
 
 def do_get_upload(req, filename):
+    """Stream an uploaded file to the user.  XXX: put something into werkzeug
+    that can do that similar to the shared data middleware and make it more
+    flexible.
+    """
     filename = get_filename(filename)
     if not exists(filename):
         raise NotFound()
@@ -393,25 +364,48 @@ def do_get_upload(req, filename):
 
 
 @cache.response(vary=('user',))
-def handle_user_pages(req):
-    """Show a user page."""
-    page_key = req.path.lstrip('/')
+def dispatch_content_type(req):
+    """Show the post for a specific content type."""
+    slug = req.path[1:]
 
-    page = Page.query.filter_by(key=page_key).first()
-    if page is None:
-        # if the page does not exist, check if a page with a trailing slash
-        # exists.  If it does, redirect to that page.  This is allows users
+    # feed for the post
+    if slug.endswith('/feed.atom'):
+        slug = slug[:-10]
+        want_feed = True
+    else:
+        want_feed = False
+
+    post = Post.query.filter_by(slug=slug).first()
+
+    if post is None:
+        # if the post does not exist, check if a post with a trailing slash
+        # exists.  If it does, redirect to that post.  This is allows users
         # to emulate folders and to get relative links working.
-        if not page_key.endswith('/'):
-            real_page = Page.query.filter_by(key=page_key + '/').first()
-            if real_page is not None:
-                return redirect_to(real_page)
-        raise NotFound()
-    cfg = get_application().cfg
-    return render_response(
-        'page_base.html',
-        page=page,
-        blog_title=cfg['blog_title'],
-        show_title=cfg['show_page_title'],
-        show_children=cfg['show_page_children']
-    )
+        if not slug.endswith('/'):
+            real_post = Post.query.filter_by(slug=slug + '/').first()
+            if real_post is None:
+                raise NotFound()
+            # if we want the feed, we don't want a redirect
+            elif want_feed:
+                post = real_post
+            else:
+                return redirect_to(real_post)
+        else:
+            raise NotFound()
+
+    # make sure the current user can access that page.
+    if not post.can_access():
+        raise Forbidden()
+
+    # feed requested?  jump to the feed page
+    if want_feed:
+        return do_atom_feed(req, post=post)
+
+    # create the comment form
+    form = NewCommentForm(post, req.user)
+    if post.comments_enabled or post.comments:
+        add_link('alternate', post.comment_feed_url, 'application/atom+xml',
+                 _(u'Comments Feed'))
+
+    # now dispatch to the correct view
+    return req.app.content_type_handlers[post.content_type](req, post, form)

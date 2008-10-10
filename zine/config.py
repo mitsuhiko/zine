@@ -73,6 +73,7 @@ DEFAULT_VARS = {
     # post view
     'posts_per_page':           (int, 10),
     'use_flat_comments':        (bool, False),
+    'index_content_types':      (unicode, 'entry'),
 
     # pages
     'show_page_title':          (bool, True),

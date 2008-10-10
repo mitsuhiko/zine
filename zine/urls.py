@@ -110,10 +110,6 @@ def make_urls(app):
             Rule(tmp + 'page/<int:page>', endpoint='blog/archive'),
             Rule(tmp + 'feed.atom', endpoint='blog/atom_feed')
         ])
-    blog_urls.extend([
-        Rule(tmp + '<slug>', endpoint='blog/show_post'),
-        Rule(tmp + '<post_slug>/feed.atom', endpoint='blog/atom_feed')
-    ])
 
     return [
         Submount(app.cfg['blog_url_prefix'], blog_urls),
@@ -121,4 +117,5 @@ def make_urls(app):
     ] + other_urls
 
 
-absolute_url_handlers = []
+from zine.views.blog import dispatch_content_type
+absolute_url_handlers = [dispatch_content_type]

@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% from "_comment.html" import render_comments, render_comment_editor %}
+{% block title %}{{ page.title|e }}{% endblock %}
+{% block contents %}
+  {% if show_title %}<h2>{{ page.title }}</h2>{% endif %}
+
+  {{ page.body }}
+
+  {%- if page.comments %}
+    <h3>{{ _("Comments") }}</h3>
+    {{ render_comments(page) }}
+  {%- endif %}
+
+  {%- if page.comments_enabled %}
+    <h3 id="leave-reply">{{ _("Leave a Reply") }}</h3>
+    {{ render_comment_editor(page, form) }}
+  {%- endif %}
+
+  {% if show_children and page.children %}
+    <h3>{{ _("Children") }}</h3>
+    <ul class="page_children">
+    {% for child in page.children %}
+      <li><a href="{{ url_for(child) }}">{{ child.title }}</a></li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}

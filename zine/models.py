@@ -19,6 +19,7 @@ from zine.utils import build_tag_uri, zeml
 from zine.utils.admin import gen_slug
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
+from zine.utils.http import make_external_url
 from zine.application import get_application, get_request, url_for
 
 
@@ -245,6 +246,13 @@ class PostQuery(db.Query):
         """Filter all posts by a given type."""
         return self.filter_by(content_type=content_type)
 
+    def for_index(self):
+        """Return all the types for the index."""
+        types = get_application().cfg['index_content_types'].split(',')
+        if len(types) == 1:
+            return self.filter_by(content_type=types[0].strip())
+        return self.filter(Post.content_type.in_([x.strip() for x in types]))
+
     def published(self, ignore_role=None):
         """Return a queryset for only published posts."""
         role = ROLE_NOBODY
@@ -268,19 +276,6 @@ class PostQuery(db.Query):
             )
         else:
             return self
-
-    def filter_by_timestamp_and_slug(self, year, month, day, slug):
-        """Filter by year, month, day, and the post slug."""
-        start = datetime(year, month, day)
-        return self.filter(
-            (Post.pub_date >= start) &
-            (Post.pub_date < start + timedelta(days=1)) &
-            (Post.slug == slug)
-        )
-
-    def get_by_timestamp_and_slug(self, year, month, day, slug):
-        """Get an item by year, month, day, and the post slug."""
-        return self.filter_by_timestamp_and_slug(year, month, day, slug).first()
 
     def drafts(self, exclude=None, ignore_user=False, user=None):
         """Return a query that returns all drafts for the current user.
@@ -342,72 +337,62 @@ class PostQuery(db.Query):
             if year is not None:
                 url_args['year'] = year
 
-        conditions = []
-        p = posts.c
+        q = self
 
         # subcribers and normal users can just view the page if it was published
         if role <= ROLE_SUBSCRIBER:
-            conditions.append((p.status == STATUS_PUBLISHED) |
-                              (p.pub_date >= datetime.utcnow()))
+            q = q.filter((Post.status == STATUS_PUBLISHED) |
+                         (Post.pub_date >= datetime.utcnow()))
 
         # otherwise check if we are an author, in that case only show
         # the own posts.
         elif role == ROLE_AUTHOR:
             # it's safe to access req here because we only have
             # a non ROLE_NOBODY role if there was a request.
-            conditions.append((p.status == STATUS_PUBLISHED) |
-                              (p.author_id == req.user.user_id))
+            q = q.filter((Post.status == STATUS_PUBLISHED) |
+                                 (Post.author == req.user))
 
         # limit the posts to match the criteria passed to the function
         # if there is at least the year defined.
         if year is not None:
             # show a whole year
             if month is None:
-                conditions.append((p.pub_date >= datetime(year, 1, 1)) &
-                                  (p.pub_date < datetime(year + 1, 1, 1)))
+                q = q.filter((Post.pub_date >= datetime(year, 1, 1)) &
+                             (Post.pub_date < datetime(year + 1, 1, 1)))
             # show one month
             elif day is None:
-                conditions.append((p.pub_date >= datetime(year, month, 1)) &
-                                  (p.pub_date < (month == 12 and
-                                                 datetime(year + 1, 1, 1) or
-                                                 datetime(year, month + 1, 1))))
+                q = q.filter((Post.pub_date >= datetime(year, month, 1)) &
+                             (Post.pub_date < (month == 12 and
+                                               datetime(year + 1, 1, 1) or
+                                               datetime(year, month + 1, 1))))
             # show one day
             else:
-                conditions.append((p.pub_date >= datetime(year, month, day)) &
-                                  (p.pub_date < datetime(year, month, day) +
-                                                timedelta(days=1)))
+                q = q.filter((Post.pub_date >= datetime(year, month, day)) &
+                             (Post.pub_date < datetime(year, month, day) +
+                                              timedelta(days=1)))
         # all posts for a category
         elif category is not None:
-            if isinstance(category, basestring):
-                category_join = categories.c.slug == category
-            else:
-                category_join = categories.c.category_id == category.category_id
-            conditions.append((post_categories.c.post_id == p.post_id) &
-                              (post_categories.c.category_id == categories.c.category_id) & category_join)
+            # XXX: missing
+            pass
 
         # all posts for an author
         elif author is not None:
-            if isinstance(author, basestring):
-                conditions.append((p.author_id == users.c.user_id) &
-                                  (users.c.username == author))
-            else:
-                conditions.append(p.author_id == author.user_id)
+            q = q.filter(Post.author == author)
 
         # send the query
-        q = db.and_(*conditions)
         offset = per_page * (page - 1)
-        postlist = Post.query.filter(q).order_by(Post.pub_date.desc()) \
-                               .offset(offset).limit(per_page)
+        postlist = q.order_by(Post.pub_date.desc()) \
+                    .offset(offset).limit(per_page).all()
 
         if as_list:
-            return postlist.all()
+            return postlist
 
         pagination = Pagination(endpoint, page, per_page,
-                                Post.query.filter(q).count(), url_args)
+                                q.count(), url_args)
 
         return {
             'pagination':       pagination,
-            'posts':            postlist.all(),
+            'posts':            postlist,
             'probably_404':     page != 1 and not postlist,
         }
 
@@ -551,7 +536,7 @@ class Post(_ZEMLDualContainer):
 
         # generate a UID if none is given
         if uid is None:
-            uid = build_tag_uri(app, self.pub_date, 'post', self.slug)
+            uid = build_tag_uri(app, self.pub_date, content_type, self.slug)
         self.uid = uid
 
         self.content_type = content_type
@@ -572,12 +557,7 @@ class Post(_ZEMLDualContainer):
     @property
     def comment_feed_url(self):
         """The link to the comment feed."""
-        return url_for('blog/atom_feed',
-            year=self.pub_date.year,
-            month=self.pub_date.month,
-            day=self.pub_date.day,
-            post_slug=self.slug
-        )
+        return make_external_url(self.slug + '/feed.atom')
 
     @property
     def is_draft(self):
@@ -626,12 +606,7 @@ class Post(_ZEMLDualContainer):
         return self.can_access(AnonymousUser())
 
     def get_url_values(self):
-        return 'blog/show_post', {
-            'year':     self.pub_date.year,
-            'month':    self.pub_date.month,
-            'day':      self.pub_date.day,
-            'slug':     self.slug
-        }
+        return self.slug
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -928,9 +903,7 @@ class Comment(_ZEMLContainer):
         return self.status == COMMENT_UNMODERATED
 
     def get_url_values(self):
-        endpoint, args = self.post.get_url_values()
-        args['_anchor'] = 'comment-%d' % self.comment_id
-        return endpoint, args
+        return url_for(self.post) + '#comment-%d' % self.comment_id
 
     def __repr__(self):
         return '<%s %r>' % (

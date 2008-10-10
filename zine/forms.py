@@ -9,9 +9,11 @@
     :license: GNU GPL.
 """
 from zine.i18n import _, lazy_gettext
-from zine.application import get_application
+from zine.application import get_application, emit_event
+from zine.database import db
 from zine.models import User, Comment
 from zine.utils import forms, log
+from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
      is_valid_url
 
@@ -99,6 +101,10 @@ class NewCommentForm(forms.Form):
         if value.post != self.post:
             raise ValidationError(_('Invalid object referenced.'))
 
+    def context_validate(self, data):
+        if not self.post.comments_enabled:
+            raise ValidationError(_('Post is closed for commenting.'))
+
     def make_comment(self):
         """A handy helper to create a comment from the validated form."""
         ip = self.request and self.request.remote_addr or '0.0.0.0'
@@ -111,6 +117,43 @@ class NewCommentForm(forms.Form):
             www = self['www']
         return Comment(self.post, author, self['body'], email, www,
                        self['parent'], submitter_ip=ip)
+
+    def create_if_valid(self, req):
+        """The one-trick pony for commenting.  Passed a request it tries to
+        use the request data to submit a comment to the post.  If the request
+        is not a post request or the form is invalid the return value is None,
+        otherwise a redirect response to the new comment.
+        """
+        if req.method != 'POST' or not self.validate(req.form):
+            return
+
+        # if we don't have errors let's save it and emit an
+        # `before-comment-saved` event so that plugins can do
+        # block comments so that administrators have to approve it
+        comment = self.make_comment()
+
+        #! use this event to block comments before they are saved.  This
+        #! is useful for antispam and other ways of moderation.
+        emit_event('before-comment-saved', req, comment)
+
+        # Moderate Comment?  Now that the spam check any everything
+        # went through the processing we explicitly set it to
+        # unmodereated if the blog configuration demands that
+        if not comment.blocked and comment.requires_moderation:
+            comment.status = COMMENT_UNMODERATED
+            comment.blocked_msg = _(u'Comment waiting for approval')
+
+        db.commit()
+
+        #! this is sent directly after the comment was saved.  Useful if
+        #! you want to send mail notifications or whatever.
+        emit_event('after-comment-saved', req, comment)
+
+        # Still allow the user to see his comment if it's blocked
+        if comment.blocked:
+            comment.make_visible_for_request(req)
+
+        return redirect_to(self.post)
 
 
 class PluginForm(forms.Form):

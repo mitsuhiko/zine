@@ -20,7 +20,6 @@ all_views = {
     'blog/index':               blog.do_index,
     'blog/archive':             blog.do_archive,
     'blog/show_category':       blog.do_show_category,
-    'blog/show_post':           blog.do_show_post,
     'blog/show_author':         blog.do_show_author,
     'blog/authors':             blog.do_authors,
     'blog/service_rsd':         blog.do_service_rsd,
@@ -79,4 +78,10 @@ all_views = {
     'admin/help':               admin.do_help,
     'admin/login':              admin.do_login,
     'admin/logout':             admin.do_logout
+}
+
+
+all_handlers = {
+    'entry':                    blog.show_entry,
+    'page':                     blog.show_page
 }

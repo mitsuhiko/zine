@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "_comment.html" import render_comment, render_comment_editor %}
+{% from "_comment.html" import render_comments, render_comment_editor %}
 {% block title %}{{ post.title|e }}{% endblock %}
 {% block contents %}
   <div class="post">
@@ -29,22 +29,7 @@
   </div>
   {%- if post.comments %}
     <h3>{{ _("Comments") }}</h3>
-    {%- if cfg.use_flat_comments %}
-      <ol id="comments">
-      {%- for comment in post.comments %}
-        <li class="comment">{{ render_comment(comment) }}</li>
-      {%- endfor %}
-      </ol>
-    {%- else %}
-      <ul id="comments">
-      {%- for comment in post.root_comments recursive %}
-        <li class="comment">{{ render_comment(comment, post.comments_enabled
-          and not cfg.use_flat_comments) }}{% if
-          comment.children %}<ul class="sub_comments">{{
-            loop(comment.children) }}</ul>{% endif %}</li>
-      {%- endfor %}
-      </ul>
-    {%- endif %}
+    {{ render_comments(post) }}
   {%- endif %}
   {%- if post.comments_enabled %}
     <h3 id="leave-reply">{{ _("Leave a Reply") }}</h3>

@@ -20,6 +20,25 @@
   {%- endif %}
 {%- endmacro %}
 
+{% macro render_comments(post) %}
+  {%- if cfg.use_flat_comments %}
+    <ol id="comments">
+    {%- for comment in post.comments %}
+      <li class="comment">{{ render_comment(comment) }}</li>
+    {%- endfor %}
+    </ol>
+  {%- else %}
+    <ul id="comments">
+    {%- for comment in post.root_comments recursive %}
+      <li class="comment">{{ render_comment(comment, post.comments_enabled
+        and not cfg.use_flat_comments) }}{% if
+        comment.children %}<ul class="sub_comments">{{
+          loop(comment.children) }}</ul>{% endif %}</li>
+    {%- endfor %}
+    </ul>
+  {%- endif %}
+{% endmacro %}
+
 {% macro render_comment_editor(post, form) %}
   {%- call form(class='comments') %}
     {{ emit_event('before-comment-editor-rendered', post) }}

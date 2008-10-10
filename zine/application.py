@@ -103,7 +103,7 @@ def url_for(endpoint, **args):
         rv = endpoint.get_url_values()
         if rv is not None:
             if isinstance(rv, basestring):
-                return urljoin(local.application.cfg['blog_url'], rv)
+                return make_external_url(rv)
             endpoint, updated_args = rv
             args.update(updated_args)
     anchor = args.pop('_anchor', None)
@@ -176,15 +176,34 @@ def add_header_snippet(html):
     }))
 
 
+def select_template(templates):
+    """Selects the first template from a list of templates that exists."""
+    env = local.application.template_env
+    for template in templates:
+        if template is not None:
+            try:
+                return env.get_template(template)
+            except TemplateNotFound:
+                pass
+    raise TemplateNotFound('<multiple-choices>')
+
+
 def render_template(template_name, _stream=False, **context):
     """Renders a template. If `_stream` is ``True`` the return value will be
     a Jinja template stream and not an unicode object.
-    This is used by `render_response`.
+    This is used by `render_response`.  If the `template_name` is a list of
+    strings the first template that exists is selected.
     """
+    if not isinstance(template_name, basestring):
+        tmpl = select_template(template_name)
+        template_name = tmpl.name
+    else:
+        tmpl = local.application.template_env.get_template(template_name)
+
     #! called right before a template is rendered, the return value is
     #! ignored but the context can be modified in place.
     emit_event('before-render-template', template_name, _stream, context)
-    tmpl = local.application.template_env.get_template(template_name)
+
     if _stream:
         return tmpl.stream(context)
     return tmpl.render(context)
@@ -625,10 +644,11 @@ class Zine(object):
         # setup core package urls and shared stuff
         import zine
         from zine.urls import make_urls, absolute_url_handlers
-        from zine.views import all_views
+        from zine.views import all_views, all_handlers
         from zine.services import all_services
         from zine.parsers import all_parsers
         self.views = all_views.copy()
+        self.content_type_handlers = all_handlers.copy()
         self.parsers = dict((k, v(self)) for k, v in all_parsers.iteritems())
         self.zeml_element_handlers = []
         self._url_rules = make_urls(self)
@@ -1324,3 +1344,4 @@ def make_zine(instance_folder, bind_to_thread=False):
 from zine import i18n
 from zine.config import Configuration
 from zine.utils.log import Logger
+from zine.utils.http import make_external_url
