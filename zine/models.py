@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta
 from urlparse import urljoin
 
 from zine.database import users, categories, posts, post_links, \
-     post_categories, post_tags, tags, comments,  db
+     post_categories, post_tags, tags, comments, db
 from zine.utils import build_tag_uri, zeml
 from zine.utils.admin import gen_slug
 from zine.utils.pagination import Pagination
@@ -31,7 +31,6 @@ ROLE_SUBSCRIBER = 1
 ROLE_NOBODY = 0
 
 #: all kind of states for a post
-STATUS_PRIVATE = 0
 STATUS_DRAFT = 1
 STATUS_PUBLISHED = 2
 
@@ -277,7 +276,7 @@ class PostQuery(db.Query):
         else:
             return self
 
-    def drafts(self, exclude=None, ignore_user=False, user=None):
+    def drafts(self, ignore_user=False, user=None):
         """Return a query that returns all drafts for the current user.
         or the user provided or no user at all if `ignore_user` is set.
         """
@@ -288,10 +287,6 @@ class PostQuery(db.Query):
         query = self.filter(Post.status == STATUS_DRAFT)
         if user is not None:
             query = query.filter(Post.author_id == user.user_id)
-        if exclude is not None:
-            if isinstance(exclude, Post):
-                exclude = Post.post_id
-            query = query.filter(Post.post_id != exclude)
         return query
 
     def get_list(self, year=None, month=None, day=None, category=None, author=None,
@@ -337,20 +332,18 @@ class PostQuery(db.Query):
             if year is not None:
                 url_args['year'] = year
 
-        q = self
+        q = self.filter(Post.status == STATUS_PUBLISHED)
 
-        # subcribers and normal users can just view the page if it was published
+        # subcribers and normal users can not see sheduled items
         if role <= ROLE_SUBSCRIBER:
-            q = q.filter((Post.status == STATUS_PUBLISHED) |
-                         (Post.pub_date >= datetime.utcnow()))
+            q = q.filter(Post.pub_date < datetime.utcnow())
 
-        # otherwise check if we are an author, in that case only show
-        # the own posts.
+        # otherwise check if we are an author, in that case show the
+        # the sheduled, own posts.
         elif role == ROLE_AUTHOR:
             # it's safe to access req here because we only have
             # a non ROLE_NOBODY role if there was a request.
-            q = q.filter((Post.status == STATUS_PUBLISHED) |
-                                 (Post.author == req.user))
+            q = q.filter(Post.author == req.user)
 
         # limit the posts to match the criteria passed to the function
         # if there is at least the year defined.
@@ -411,16 +404,13 @@ class PostQuery(db.Query):
         now = datetime.utcnow()
 
         # do the role checking
+        q = p.status == STATUS_PUBLISHED
         if role <= ROLE_SUBSCRIBER:
-            q = ((p.status == STATUS_PUBLISHED) |
-                 (p.pub_date >= now))
+            q &= p.pub_date >= now
         elif role == ROLE_AUTHOR:
             # it's safe to access req here because we only have
             # a non ROLE_NOBODY role if there was a request.
-            q = ((p.status == STATUS_PUBLISHED) |
-                 (p.author_id == req.user.user_id))
-        else:
-            q = None
+            q &= p.author_id == req.user.user_id
 
         # XXX: currently we also return months without articles in it.
         # other blog systems do not, but because we use sqlalchemy we have
@@ -516,7 +506,7 @@ class Post(_ZEMLDualContainer):
         self.text = text or u''
         self.extra = {}
 
-        if pub_date is None:
+        if pub_date is None and status == STATUS_PUBLISHED:
             pub_date = datetime.utcnow()
         self.pub_date = pub_date
         if last_update is None:
@@ -557,7 +547,7 @@ class Post(_ZEMLDualContainer):
     @property
     def comment_feed_url(self):
         """The link to the comment feed."""
-        return make_external_url(self.slug + '/feed.atom')
+        return make_external_url(self.slug.rstrip('/') + '/feed.atom')
 
     @property
     def is_draft(self):
@@ -575,6 +565,35 @@ class Post(_ZEMLDualContainer):
             self.pub_date.day,
             slug
         )
+
+    def bind_tags(self, tags):
+        """Rebinds the tags to a list of tags (strings, not tag objects)."""
+        current_map = dict((x.name, x) for x in self.tags)
+        currently_attached = set(x.name for x in self.tags)
+        new_tags = set(tags)
+
+        # delete outdated tags
+        for name in currently_attached.difference(new_tags):
+            self.tags.remove(current_map[name])
+
+        # add new tags
+        for name in new_tags.difference(currently_attached):
+            self.tags.append(Tag.get_or_create(name))
+
+    def bind_categories(self, categories):
+        """Rebinds the categories to the list passed.  The list of objects
+        must be a list of category objects.
+        """
+        currently_attached = set(self.categories)
+        new_categories = set(categories)
+
+        # delete outdated categories
+        for category in currently_attached.difference(new_categories):
+            self.categories.remove(category)
+
+        # attach new categories
+        for category in new_categories.difference(currently_attached):
+            self.categories.append(category)
 
     def can_access(self, user=None):
         """Check if the current user or the user provided can access
@@ -604,6 +623,12 @@ class Post(_ZEMLDualContainer):
     def is_published(self):
         """`True` if the post is visible for everyone."""
         return self.can_access(AnonymousUser())
+
+    @property
+    def is_sheduled(self):
+        """True if the item is sheduled for appearing."""
+        return self.status == STATUS_PUBLISHED and \
+               self.pub_date > datetime.utcnow()
 
     def get_url_values(self):
         return self.slug
@@ -732,7 +757,7 @@ class Category(object):
     def __repr__(self):
         return '<%s %r>' % (
             self.__class__.__name__,
-            self.slug
+            self.name
         )
 
 
@@ -919,15 +944,28 @@ class Tag(object):
     def __init__(self, name, slug=None):
         self.name = name
         if slug is None:
-            slug = self.set_auto_slug()
+            self.set_auto_slug()
         else:
             self.slug = slug
+
+    @staticmethod
+    def get_or_create(name):
+        tag = Tag.query.filter_by(name=name).first()
+        if tag is not None:
+            return tag
+        return Tag(name)
 
     def set_auto_slug(self):
         self.slug = gen_slug(self.name)
 
     def get_url_values(self):
         return 'tags', {'slug': self.slug}
+
+    def __repr__(self):
+        return u'<%s %r>' % (
+            self.__class__.__name__,
+            self.name
+        )
 
 
 # connect the tables.

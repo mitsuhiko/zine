@@ -14,7 +14,17 @@ from werkzeug import redirect as _redirect
 from werkzeug.exceptions import BadRequest
 
 from zine.application import get_application, get_request, url_for
-from zine.utils.validators import check_external_url
+
+
+def check_external_url(app, url):
+    """Check if a URL is on the application server and return the canonical
+    URL (eg: it externalizes a passed in path)
+    """
+    blog_url = app.cfg['blog_url']
+    check_url = urljoin(blog_url, url.lstrip('/'))
+    if urlparse(blog_url)[:2] != urlparse(check_url)[:2]:
+        raise ValueError('The URL %s is not on the same server' % check_url)
+    return check_url
 
 
 def get_redirect_target(invalid_targets=(), request=None):
@@ -73,7 +83,7 @@ def redirect(url, code=302, allow_external_redirect=False):
         #: check if the url is on the same server
         #: and make it an external one
         try:
-            url = check_external_url(get_application(), url, True)
+            url = check_external_url(get_application(), url)
         except ValueError:
             raise BadRequest()
     return _redirect(url, code)

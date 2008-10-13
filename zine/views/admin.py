@@ -23,7 +23,7 @@ from zine.i18n import _
 from zine.application import require_role, get_request, url_for, emit_event, \
      render_response, get_application
 from zine.models import User, Post, Category, Comment, ROLE_ADMIN, \
-     ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, STATUS_PRIVATE, \
+     ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from zine.database import db, comments as comment_table, posts, \
@@ -47,7 +47,7 @@ from zine.pluginsystem import install_package, InstallationError, \
      SetupError
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
-     LogForm
+     LogForm, EntryForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -72,10 +72,14 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # set up the core navigation bar
     navigation_bar = [
         ('dashboard', url_for('admin/index'), _(u'Dashboard'), []),
-        ('posts', url_for('admin/show_posts'), _(u'Posts'), [
-            ('overview', url_for('admin/show_posts'), _(u'Overview')),
-            ('write', url_for('admin/new_post'), _(u'Write Post')),
-            ('categories', url_for('admin/show_categories'), _(u'Categories'))
+        ('write', url_for('admin/new_entry'), _(u'Write'), [
+            ('entry', url_for('admin/new_entry'), _(u'Entry')),
+            ('page', url_for('admin/new_page'), _(u'Page'))
+        ]),
+        ('manage', url_for('admin/manage_entries'), _(u'Manage'), [
+            ('entries', url_for('admin/manage_entries'), _(u'Entries')),
+            ('pages', url_for('admin/manage_pages'), _(u'Pages')),
+            ('categories', url_for('admin/manage_categories'), _(u'Categories'))
         ]),
         ('comments', url_for('admin/show_comments'), _(u'Comments'), [
             ('overview', url_for('admin/show_comments'), _(u'Overview')),
@@ -84,12 +88,6 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
              Comment.query.unmoderated().count()),
             ('spam', url_for('admin/show_spam_comments'),
              _(u'Spam (%d)') % Comment.query.spam().count())
-        ]),
-        ('file_uploads', url_for('admin/browse_uploads'), _(u'Uploads'), [
-            ('browse', url_for('admin/browse_uploads'), _(u'Browse')),
-            ('upload', url_for('admin/new_upload'), _(u'Upload')),
-            ('thumbnailer', url_for('admin/upload_thumbnailer'),
-             _(u'Create Thumbnails'))
         ])
     ]
 
@@ -208,8 +206,37 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     return render_response(template_name, **values)
 
 
+def ping_post_links(request, post):
+    """A helper that pings the links in a post."""
+    if request.app.cfg['maintenance_mode'] or not post.is_published:
+        flash(_(u'No URLs pinged so far because the post is not '
+                u'publicly available'))
+    elif post.parser_missing:
+        flash(_(u'Could not ping URLs because the parser for the '
+                u'post is not available any longer.'), 'error')
+    else:
+        this_url = url_for(post, _external=True)
+        for url in post.find_urls():
+            host = urlparse(url)[1].decode('utf-8', 'ignore')
+            html_url = '<a href="%s">%s</a>' % (
+                escape(url, True),
+                escape(host)
+            )
+            try:
+                pingback(this_url, url)
+            except PingbackError, e:
+                if not e.ignore_silently:
+                    flash(_(u'Could not ping %(url)s: %(error)s') % {
+                        'url': html_url,
+                        'error': e.description
+                    }, 'error')
+            else:
+                flash(_(u'%s was pinged successfully.') %
+                        html_url)
+
+
 @require_role(ROLE_AUTHOR)
-def do_index(request):
+def index(request):
     """Show the admin interface index page which is a wordpress inspired
     dashboard (doesn't exist right now).
 
@@ -233,7 +260,7 @@ def do_index(request):
     )
 
 
-def do_bookmarklet(request):
+def bookmarklet(request):
     """Requests to this view are usually triggered by the bookmarklet
     from the edit-post page.  Currently this is a redirect to the new-post
     page with some small modifications but in the future this could be
@@ -246,271 +273,86 @@ def do_bookmarklet(request):
         request.args['url'],
         request.args.get('title', _(u'Untitled Page'))
     )
-    return redirect_to('admin/new_post',
+    return redirect_to('admin/new_entry',
         title=request.args.get('title'),
         body=body
     )
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_posts(request, page):
-    """Show a list of posts for post moderation."""
-    posts = Post.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/show_posts', page, PER_PAGE,
-                                 Post.query.count())
+def manage_entries(request, page):
+    """Show a list of entries."""
+    entry_query = Post.query.type('entry')
+    entries = entry_query.order_by([Post.status, Post.pub_date.desc()]) \
+                         .limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    pagination = AdminPagination('admin/manage_entries', page, PER_PAGE,
+                                 entry_query.count())
     if not posts and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_posts.html', 'posts.overview',
-                                 drafts=Post.query.drafts().all(),
-                                 posts=posts,
-                                 pagination=pagination)
+    return render_admin_response('admin/manage_entries.html', 'manage.entries',
+                                 entries=entries, pagination=pagination)
+
+
+def dispatch_post_edit(request, post_id):
+    """Dispatch to the request handler for a post."""
+    post = Post.query.get(post_id)
+    if post is None:
+        raise NotFound()
+    try:
+        handler = request.app.admin_content_type_handlers[post.content_type]
+    except KeyError:
+        raise NotFound()
+    return handler(request, post)
 
 
 @require_role(ROLE_AUTHOR)
-def do_edit_post(request, post_id=None):
-    """Edit or create a new post.  So far this dialog doesn't emit any events
-    although it would be a good idea to allow plugins to add custom fields
-    into the template.
-    """
-    categories = []
-    errors = []
-    form = {}
-    post = exclude = None
-    missing_parser = None
-    keep_post_texts = False
-    parsers = request.app.list_parsers()
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-    old_text = None
+def edit_entry(request, post=None):
+    """Edit an existing entry or create a new one."""
+    active_tab = post and 'manage.entries' or 'write.entry'
+    form = EntryForm(post)
 
-    # edit existing post
-    if post_id is not None:
-        new_post = False
-        post = Post.query.get(post_id)
-        exclude = post.post_id
-        if post is None:
-            raise NotFound()
-        form.update(
-            title=post.title,
-            text=post.text,
-            categories=[t.slug for t in post.categories],
-            post_status=post.status,
-            comments_enabled=post.comments_enabled,
-            pings_enabled=post.pings_enabled,
-            pub_date=format_system_datetime(post.pub_date),
-            slug=post.slug,
-            author=post.author.username,
-            parser=post.parser
-        )
-        old_text = form['text']
-        if post.parser_missing:
-            missing_parser = post.parser
-
-    # create new post
-    else:
-        new_post = True
-        form.update(
-            title=request.args.get('title', ''),
-            text=request.args.get('text', ''),
-            categories=[],
-            post_status=STATUS_DRAFT,
-            comments_enabled=request.app.cfg['comments_enabled'],
-            pings_enabled=request.app.cfg['pings_enabled'],
-            pub_date=_(u'now'),
-            slug='',
-            author=request.user.username,
-            parser=request.app.cfg['default_parser']
-        )
-
-    # tick the "ping urls from text" checkbox if either we have a
-    # new post or we edit an old post and the parser is available
-    if request.method != 'POST':
-        form['ping_from_text'] = not post or not post.parser_missing
-
-    # handle incoming data and create/update the post
-    else:
-        csrf_protector.assert_safe()
-
-        # handle cancel
-        if request.form.get('cancel'):
-            return redirect('admin/show_posts')
-
-        # handle delete, redirect to confirmation page
-        if request.form.get('delete') and post_id is not None:
-            return redirect_to('admin/delete_post', post_id=post_id)
-
-        form['title'] = title = request.form.get('title')
-        if not title:
-            errors.append(_(u'You have to provide a title.'))
-        elif len(title) > 150:
-            errors.append(_(u'Your title is too long.'))
-        form['text'] = text = request.form.get('text', '')
-        if not text:
-            errors.append(_(u'You have to provide a text.'))
-        try:
-            form['post_status'] = post_status = int(request.form['post_status'])
-            if post_status < 0 or post_status > 2:
-                raise ValueError()
-        except (TypeError, ValueError, KeyError):
-            errors.append(_(u'Invalid post status'))
-        form['comments_enabled'] = 'comments_enabled' in request.form
-        form['pings_enabled'] = 'pings_enabled' in request.form
-        form['ping_from_text'] = 'ping_from_text' in request.form
-        form['parser'] = parser = request.form.get('parser')
-        if missing_parser and parser == post.parser:
-            if old_text != text:
-                errors.append(_(u'You cannot change the text of a post which '
-                                u'parser does not exist any longer.'))
+    if request.method == 'POST':
+        if 'cancel' in request.form:
+            return form.redirect('admin/manage_entries')
+        elif form.validate(request.form):
+            if post is None:
+                post = form.make_post()
+                post_info = u'<a href="%s">%s</a>' % (escape(url_for(post)),
+                                                      escape(post.title))
+                flash(_('The post %s was created successfully.') % post_info)
             else:
-                keep_post_texts = True
-        elif parser not in request.app.parsers:
-            errors.append(_(u'Unknown parser “%s”.') % parser)
-        try:
-            pub_date = parse_datetime(request.form.get('pub_date') or _(u'now'))
-        except ValueError:
-            errors.append(_(u'Invalid publication date.'))
+                form.save_changes()
+                post_info = u'<a href="%s">%s</a>' % (escape(url_for(post)),
+                                                      escape(post.title))
+                flash(_('The post %s was updated successfully.') % post_info)
 
-        username = request.form.get('author')
-        if not username:
-            author = post and post.author or request.user
-            username = author.username
-        else:
-            author = User.query.filter_by(username=username).first()
-            if author is None:
-                errors.append(_(u'Unknown author “%s”.') % username)
-        form['author'] = username
-        form['slug'] = slug = request.form.get('slug') or None
-        if slug:
-            if '/' in slug:
-                errors.append(_(u'A slug cannot contain a slash.'))
-            elif len(slug) > 150:
-                errors.append(_(u'Your slug is too long'))
-        form['categories'] = []
-        categories = []
-        for category in request.form.getlist('categories'):
-            t = Category.query.filter_by(slug=category).first()
-            if t is not None:
-                categories.append(t)
-                form['categories'].append(category)
-            else:
-                errors.append(_(u'Unknown category “%s”.') % category)
-
-        # if someone adds a category we don't save the post but just add
-        # a category to the list and assign it to the post list.
-        add_category = request.form.get('add_category')
-        if add_category:
-            # XXX: what happens if the slug is empty or the slug
-            #      exists already?
-            form['categories'].append(Category(add_category).slug)
             db.commit()
-            del errors[:]
-
-        # if there is no need category and there are no errors we save the post
-        elif not errors:
-            if new_post:
-                post = Post(title, author, text, slug,
-                            pub_date, parser=parser)
-            else:
-                post.title = title
-                post.author_id = author.user_id
-                if not keep_post_texts:
-                    post.parser = parser
-                    post.text = text
-                if slug:
-                    post.slug = slug
-                else:
-                    post.auto_slug()
-                post.pub_date = pub_date
-            post.categories[:] = categories
-            post.comments_enabled = form['comments_enabled']
-            post.pings_enabled = form['pings_enabled']
-            post.status = post_status
-            post.last_update = max(datetime.utcnow(), pub_date)
-            db.commit()
-            #! a after-post-saved event is always extremely useful. plugins can
-            #! use it to update search indexes / feeds or whatever
             emit_event('after-post-saved', post)
-
-            html_post_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(post)),
-                escape(post.title)
-            )
-
-            # do automatic pingbacking if we can get all the links
-            # by parsing the post, that is wanted and the post is
-            # published.
-            if form['ping_from_text']:
-                if request.app.cfg['maintenance_mode'] or not post.is_published:
-                    flash(_(u'No URLs pinged so far because the post is not '
-                            u'publicly available'))
-                elif post.parser_missing:
-                    flash(_(u'Could not ping URLs because the parser for the '
-                            u'post is not available any longer.'), 'error')
-                else:
-                    this_url = url_for(post, _external=True)
-                    for url in post.find_urls():
-                        host = urlparse(url)[1].decode('utf-8', 'ignore')
-                        html_url = '<a href="%s">%s</a>' % (
-                            escape(url, True),
-                            escape(host)
-                        )
-                        try:
-                            pingback(this_url, url)
-                        except PingbackError, e:
-                            if not e.ignore_silently:
-                                flash(_(u'Could not ping %(url)s: %(error)s') % {
-                                    'url': html_url,
-                                    'error': e.description
-                                }, 'error')
-                        else:
-                            flash(_(u'%s was pinged successfully.') %
-                                    html_url)
-
-            if new_post:
-                flash(_(u'The post %s was created successfully.') %
-                      html_post_detail, 'add')
-            else:
-                flash(_(u'The post %s was updated successfully.') %
-                      html_post_detail)
-
-            if request.form.get('save'):
-                return redirect('admin/new_post')
-            return redirect_to('admin/edit_post', post_id=post.post_id)
-
-    for error in errors:
-        flash(error, 'error')
-
-    # tell the user if the parser is missing and we reinsert the
-    # parser into the list.
-    if missing_parser:
-        parsers.insert(0, (missing_parser, _(u'Missing Parser “%s”') %
-                           missing_parser))
-        flash(_(u'This post was created with the parser “%(parser)s” that is '
-                u'not installed any longer.  Because of that Zine '
-                u'doesn\'t allow modifcations on the text until you either '
-                u'change the parser or reinstall/activate the plugin that '
-                u'provided that parser.') % {'parser': escape(missing_parser)},
-              'error')
-
-    return render_admin_response('admin/edit_post.html', 'posts.write',
-        new_post=new_post,
-        form=form,
-        categories=Category.query.all(),
-        post=post,
-        drafts=list(Post.query.drafts(exclude=exclude).all()),
-        can_change_author=request.user.role >= ROLE_EDITOR,
-        post_status_choices=[
-            (STATUS_PUBLISHED, _(u'Published')),
-            (STATUS_DRAFT, _(u'Draft')),
-            (STATUS_PRIVATE, _(u'Private'))
-        ],
-        parsers=parsers,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+            if form['ping_links']:
+                ping_post_links(request, post)
+            if 'save_and_continue' in request.form:
+                return redirect_to('admin/edit_post', post_id=post.post_id)
+            return form.redirect('admin/new_entry')
+    return render_admin_response('admin/edit_entry.html', active_tab,
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)
-def do_delete_post(request, post_id):
+def manage_pages(request, page):
+    """Show a list of pages."""
+    page_query = Post.query.type('page')
+    pages = page_query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
+    pagination = AdminPagination('admin/manage_pages', page, PER_PAGE,
+                                 page_query.count())
+    if not posts and page != 1:
+        raise NotFound()
+    return render_admin_response('admin/manage_pages.html', 'manage.pages',
+                                 drafts=page_query.drafts().all(),
+                                 pages=pages, pagination=pagination)
+
+
+@require_role(ROLE_AUTHOR)
+def delete_post(request, post_id):
     """This dialog deletes a post.  Usually users are redirected here from the
     edit post view or the post index page.  If the post was not deleted the
     user is taken back to the page he's coming from or back to the edit
@@ -597,27 +439,27 @@ def _handle_comments(identifier, title, query, page):
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_comments(request, page):
+def show_comments(request, page):
     """Show all the comments."""
     return _handle_comments('overview', _(u'All Comments'),
                             Comment.query, page)
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_unmoderated_comments(request, page):
+def show_unmoderated_comments(request, page):
     """Show all unmoderated and user-blocked comments."""
     return _handle_comments('unmoderated', _(u'Comments Awaiting Moderation'),
                             Comment.query.unmoderated(), page)
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_spam_comments(request, page):
+def show_spam_comments(request, page):
     """Show all spam comments."""
     return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page)
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_post_comments(request, page, post_id):
+def show_post_comments(request, page, post_id):
     """Show all comments for a single post."""
     post = Post.query.get(post_id)
     if post is None:
@@ -631,7 +473,7 @@ def do_show_post_comments(request, page, post_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_edit_comment(request, comment_id):
+def edit_comment(request, comment_id):
     """Edit a comment.  Unlike the post edit screen it's not possible to
     create new comments from here, that has to happen from the post page.
     """
@@ -751,7 +593,7 @@ def do_edit_comment(request, comment_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_delete_comment(request, comment_id):
+def delete_comment(request, comment_id):
     """This dialog delets a comment.  Usually users are redirected here from the
     comment moderation page or the comment edit page.  If the comment was not
     deleted, the user is taken back to the page he's coming from or back to
@@ -792,7 +634,7 @@ def do_delete_comment(request, comment_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_approve_comment(request, comment_id):
+def approve_comment(request, comment_id):
     """Approve a comment"""
     comment = Comment.query.get(comment_id)
     csrf_protector = CSRFProtector()
@@ -821,7 +663,7 @@ def do_approve_comment(request, comment_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_block_comment(request, comment_id):
+def block_comment(request, comment_id):
     """Block a comment."""
     comment = Comment.query.get(comment_id)
     csrf_protector = CSRFProtector()
@@ -853,20 +695,20 @@ def do_block_comment(request, comment_id):
 
 
 @require_role(ROLE_AUTHOR)
-def do_show_categories(request, page):
-    """Show a list of used post category."""
+def manage_categories(request, page):
+    """Show a list of used post categories."""
     categories = Category.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/show_categories', page, PER_PAGE,
                                  Category.query.count())
     if not categories and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_categories.html', 'posts.categories',
+    return render_admin_response('admin/show_categories.html', 'manage.categories',
                                  categories=categories,
                                  pagination=pagination)
 
 
 @require_role(ROLE_AUTHOR)
-def do_edit_category(request, category_id=None):
+def edit_category(request, category_id=None):
     """Edit a category."""
     errors = []
     form = dict.fromkeys(['slug', 'name', 'description'], u'')
@@ -931,14 +773,14 @@ def do_edit_category(request, category_id=None):
     for error in errors:
         flash(error, 'error')
 
-    return render_admin_response('admin/edit_category.html', 'posts.categories',
+    return render_admin_response('admin/edit_category.html', 'manage.categories',
         form=form,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
 @require_role(ROLE_AUTHOR)
-def do_delete_category(request, category_id):
+def delete_category(request, category_id):
     """Works like the other delete pages, just that it deletes categories."""
     category = Category.query.get(category_id)
     if category is None:
@@ -962,14 +804,14 @@ def do_delete_category(request, category_id):
             db.commit()
             return redirect('admin/show_categories')
 
-    return render_admin_response('admin/delete_category.html', 'posts.categories',
+    return render_admin_response('admin/delete_category.html', 'manage.categories',
         category=category,
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 
 
 @require_role(ROLE_ADMIN)
-def do_show_users(request, page):
+def show_users(request, page):
     """Show all users in a list."""
     users = User.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/show_users', page, PER_PAGE,
@@ -982,7 +824,7 @@ def do_show_users(request, page):
 
 
 @require_role(ROLE_ADMIN)
-def do_edit_user(request, user_id=None):
+def edit_user(request, user_id=None):
     """Edit a user.  This can also create a user.  If a new user is created
     the dialog is simplified, some unimportant details are left out.
     """
@@ -1096,7 +938,7 @@ def do_edit_user(request, user_id=None):
 
 
 @require_role(ROLE_ADMIN)
-def do_delete_user(request, user_id):
+def delete_user(request, user_id):
     """Like all other delete screens just that it deletes a user."""
     user = User.query.get(user_id)
     csrf_protector = CSRFProtector()
@@ -1147,7 +989,7 @@ def do_delete_user(request, user_id):
 
 
 @require_role(ROLE_ADMIN)
-def do_options(request):
+def options(request):
     """So far just a redirect page, later it would be a good idea to have
     a page that shows all the links to configuration things in form of
     a simple table.
@@ -1156,7 +998,7 @@ def do_options(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_basic_options(request):
+def basic_options(request):
     """The dialog for basic options such as the blog title etc."""
     # flash an altered message if the url is ?altered=true.  For more information
     # see the comment that redirects to the url below.
@@ -1274,7 +1116,7 @@ def do_basic_options(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_urls(request):
+def urls(request):
     """A config page for URL depending settings."""
     form = {
         'blog_url_prefix':      request.app.cfg['blog_url_prefix'],
@@ -1322,7 +1164,7 @@ def do_urls(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_theme(request):
+def theme(request):
     """Allow the user to select one of the themes that are available."""
     csrf_protector = CSRFProtector()
     if 'configure' in request.args:
@@ -1345,7 +1187,7 @@ def do_theme(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_configure_theme(request):
+def configure_theme(request):
     if not request.app.theme.configurable:
         flash(_(u'This theme is not configurable'), 'error')
         return redirect_to('admin/theme')
@@ -1353,7 +1195,7 @@ def do_configure_theme(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_plugins(request):
+def plugins(request):
     """Load and unload plugins and reload Zine if required."""
     form = PluginForm()
 
@@ -1381,7 +1223,7 @@ def do_plugins(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_remove_plugin(request, plugin):
+def remove_plugin(request, plugin):
     """Remove an inactive, instance installed plugin completely."""
     plugin = request.app.plugins.get(plugin)
     if plugin is None or \
@@ -1411,7 +1253,7 @@ def do_remove_plugin(request, plugin):
 
 
 @require_role(ROLE_ADMIN)
-def do_cache(request):
+def cache(request):
     """Configure the cache."""
     csrf_protector = CSRFProtector()
     cfg = request.app.cfg
@@ -1482,7 +1324,7 @@ def do_cache(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_configuration(request):
+def configuration(request):
     """Advanced configuration editor.  This is useful for development or if a
     plugin doesn't ship an editor for the configuration values.  Because all
     the values are not further checked it could easily be that Zine is
@@ -1526,7 +1368,7 @@ def do_configuration(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_maintenance(request):
+def maintenance(request):
     """Enable / Disable maintenance mode."""
     cfg = request.app.cfg
     csrf_protector = CSRFProtector()
@@ -1546,7 +1388,7 @@ def do_maintenance(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_import(request):
+def import_dump(request):
     """Show the current import queue or add new items."""
     return render_admin_response('admin/import.html', 'system.import',
         importers=sorted(request.app.importers.values(),
@@ -1556,7 +1398,7 @@ def do_import(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_inspect_import(request, id):
+def inspect_import(request, id):
     """Inspect a database dump."""
     blog = load_import_dump(request.app, id)
     if blog is None:
@@ -1598,7 +1440,7 @@ def do_inspect_import(request, id):
 
 
 @require_role(ROLE_ADMIN)
-def do_delete_import(request, id):
+def delete_import(request, id):
     """Delete an imported file."""
     dump = load_import_dump(request.app, id)
     if dump is None:
@@ -1625,7 +1467,7 @@ def do_delete_import(request, id):
 
 
 @require_role(ROLE_ADMIN)
-def do_export(request):
+def export(request):
     """Not yet implemented."""
     csrf_protector = CSRFProtector()
     if request.args.get('format') == 'zxa':
@@ -1641,7 +1483,7 @@ def do_export(request):
 
 
 @require_role(ROLE_AUTHOR)
-def do_information(request):
+def information(request):
     """Shows some details about this Zine installation.  It's useful for
     debugging and checking configurations.  If severe errors in a Zine
     installation occour it's a good idea to dump this page and attach it to
@@ -1702,7 +1544,7 @@ def do_information(request):
 
 
 @require_role(ROLE_ADMIN)
-def do_log(request, page):
+def log(request, page):
     page = request.app.log.view().get_page(page)
     form = LogForm()
     if request.method == 'POST' and form.validate(request.form):
@@ -1714,14 +1556,14 @@ def do_log(request, page):
 
 
 @require_role(ROLE_AUTHOR)
-def do_about_zine(request):
+def about_zine(request):
     """Just show the zine license and some other legal stuff."""
     return render_admin_response('admin/about_zine.html',
                                  'system.about')
 
 
 @require_role(ROLE_AUTHOR)
-def do_change_password(request):
+def change_password(request):
     """Allow the current user to change his password."""
     form = ChangePasswordForm(request.user)
 
@@ -1740,7 +1582,7 @@ def do_change_password(request):
 
 
 @require_role(ROLE_AUTHOR)
-def do_upload(req):
+def upload(req):
     csrf_protector = CSRFProtector()
     reporter = StreamReporter()
 
@@ -1785,7 +1627,7 @@ def do_upload(req):
 
 
 @require_role(ROLE_AUTHOR)
-def do_thumbnailer(req):
+def thumbnailer(req):
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
     form = {
@@ -1882,7 +1724,7 @@ def do_thumbnailer(req):
 
 
 @require_role(ROLE_AUTHOR)
-def do_browse_uploads(req):
+def browse_uploads(req):
     return render_admin_response('admin/file_uploads/browse.html',
                                  'file_uploads.browse',
         files=list_files()
@@ -1890,7 +1732,7 @@ def do_browse_uploads(req):
 
 
 @require_role(ROLE_ADMIN)
-def do_upload_config(req):
+def upload_config(req):
     csrf_protector = CSRFProtector()
     form = {
         'upload_dest':  req.app.cfg['upload_folder'],
@@ -1933,7 +1775,7 @@ def do_upload_config(req):
 
 
 @require_role(ROLE_AUTHOR)
-def do_delete_upload(req, filename):
+def delete_upload(req, filename):
     fs_filename = get_filename(filename)
     if not exists(fs_filename):
         raise NotFound()
@@ -1962,7 +1804,7 @@ def do_delete_upload(req, filename):
 
 
 @require_role(ROLE_AUTHOR)
-def do_help(req, page=''):
+def help(req, page=''):
     """Show help page."""
     from zine.docs import load_page, get_resource
 
@@ -1983,7 +1825,7 @@ def do_help(req, page=''):
     return render_admin_response('admin/help.html', 'system.help', **parts)
 
 
-def do_login(request):
+def login(request):
     """Show a login page."""
     if request.user.is_somebody:
         return redirect_to('admin/index')
@@ -1996,7 +1838,7 @@ def do_login(request):
     return render_response('admin/login.html', form=form.as_widget())
 
 
-def do_logout(request):
+def logout(request):
     """Just logout and redirect to the login screen."""
     request.logout()
     return redirect_back('admin/login')

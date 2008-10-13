@@ -222,9 +222,9 @@ def render_response(template_name, **context):
 def require_role(role):
     """Wrap a view so that it requires a given role to access."""
     def wrapped(f):
-        def decorated(request, **kwargs):
+        def decorated(request, *args, **kwargs):
             if request.user.role >= role:
-                return f(request, **kwargs)
+                return f(request, *args, **kwargs)
             raise Forbidden()
         decorated.__name__ = f.__name__
         decorated.__doc__ = f.__doc__
@@ -643,12 +643,14 @@ class Zine(object):
 
         # setup core package urls and shared stuff
         import zine
-        from zine.urls import make_urls, absolute_url_handlers
-        from zine.views import all_views, all_handlers
+        from zine.urls import make_urls
+        from zine.views import all_views, content_type_handlers, \
+             admin_content_type_handlers, absolute_url_handlers
         from zine.services import all_services
         from zine.parsers import all_parsers
         self.views = all_views.copy()
-        self.content_type_handlers = all_handlers.copy()
+        self.content_type_handlers = content_type_handlers.copy()
+        self.admin_content_type_handlers = admin_content_type_handlers.copy()
         self.parsers = dict((k, v(self)) for k, v in all_parsers.iteritems())
         self.zeml_element_handlers = []
         self._url_rules = make_urls(self)
@@ -747,7 +749,8 @@ class Zine(object):
             json=dump_json,
             datetimeformat=self.theme.format_datetime,
             dateformat=self.theme.format_date,
-            monthformat=i18n.format_month
+            monthformat=i18n.format_month,
+            timedeltaformat=i18n.format_timedelta
         )
 
         env.install_gettext_translations(self.translations)
@@ -991,6 +994,13 @@ class Zine(object):
         :meth:`add_url_rule`.
         """
         self.views[endpoint] = callback
+
+    @setuponly
+    def add_content_type(self, content_type, callback, admin_callback=None):
+        """Register a view handler for a content type."""
+        self.content_type_handlers[content_type] = callback
+        if admin_callback is not None:
+            self.admin_content_type_handlers[content_type] = admin_callback
 
     @setuponly
     def add_parser(self, name, class_):

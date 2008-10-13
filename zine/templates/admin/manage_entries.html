@@ -1,0 +1,18 @@
+{% extends "admin/layout.html" %}
+{% from "admin/_post_helpers.html" import render_post_list, render_drafts_box %}
+{% block title %}{{ _("Manage Entries") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Manage Entries") }}</h1>
+  {{ render_drafts_box(drafts) }}
+  {{ render_post_list(entries) }}
+  <form action="{{ url_for('admin/new_entry') }}" method="get">
+    <div class="actions">
+      <input type="submit" value="{{ _('New Entry') }}">
+    </div>
+  </form>
+  {%- if pagination.necessary %}
+  <div class="pagination">
+    {{ pagination.generate() }}
+  </div>
+  {%- endif %}
+{% endblock %}

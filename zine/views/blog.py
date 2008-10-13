@@ -21,17 +21,18 @@ from zine.application import add_link, url_for, render_response, emit_event, \
      iter_listeners, Response, get_application
 from zine.models import Post, Category, User, Comment, ROLE_AUTHOR, \
      COMMENT_UNMODERATED
-from zine.utils import dump_json, build_tag_uri, ClosingIterator
+from zine.utils import dump_json, build_tag_uri, ClosingIterator, log
 from zine.utils.uploads import get_filename, guess_mimetype
 from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
-from zine.utils.http import redirect_to
+from zine.utils.http import redirect_to, redirect
+from zine.utils.redirects import lookup_redirect
 from zine.forms import NewCommentForm
 from werkzeug.exceptions import NotFound, Forbidden
 
 
 @cache.response(vary=('user',))
-def do_index(req, page=1):
+def index(req, page=1):
     """Render the most recent posts.
 
     Available template variables:
@@ -54,7 +55,7 @@ def do_index(req, page=1):
     return render_response('index.html', **data)
 
 
-def do_archive(req, year=None, month=None, day=None, page=1):
+def archive(req, year=None, month=None, day=None, page=1):
     """Render the monthly archives.
 
     Available template variables:
@@ -89,7 +90,7 @@ def do_archive(req, year=None, month=None, day=None, page=1):
                            month_list=False, **data)
 
 
-def do_show_category(req, slug, page=1):
+def show_category(req, slug, page=1):
     """Show all posts categoryged with a given category slug.
 
     Available template variables:
@@ -119,7 +120,7 @@ def do_show_category(req, slug, page=1):
     return render_response('show_category.html', category=category, **data)
 
 
-def do_show_author(req, username, page=1):
+def show_author(req, username, page=1):
     """Show the user profile of an author / editor or administrator.
 
     Available template variables:
@@ -152,7 +153,7 @@ def do_show_author(req, username, page=1):
     return render_response('show_author.html', user=user, **data)
 
 
-def do_authors(req):
+def authors(req):
     """Show a list of authors.
 
     Available template variables:
@@ -228,13 +229,11 @@ def show_page(req, post, comment_form):
                             post.extra.get('page_template'), 'page.html'],
         page=post,
         form=comment_form.as_widget(),
-        blog_title=cfg['blog_title'],
-        show_title=cfg['show_page_title'],
-        show_children=cfg['show_page_children']
+        show_title=cfg['show_page_title']
     )
 
 
-def do_service_rsd(req):
+def service_rsd(req):
     """Serves and RSD definition (really simple discovery) so that blog
     frontends can query the apis that are available.
 
@@ -243,7 +242,7 @@ def do_service_rsd(req):
     return Response(generate_rsd(req.app), mimetype='application/xml')
 
 
-def do_json_service(req, identifier):
+def json_service(req, identifier):
     """Handle a JSON service req."""
     handler = req.app._services.get(identifier)
     if handler is None:
@@ -266,7 +265,7 @@ def do_json_service(req, identifier):
     return Response(dump_json(result), mimetype='text/javascript')
 
 
-def do_xml_service(req, identifier):
+def xml_service(req, identifier):
     """Handle a XML service req."""
     handler = req.app._services.get(identifier)
     if handler is None:
@@ -292,7 +291,7 @@ def do_xml_service(req, identifier):
 
 
 @cache.response(vary=('user',))
-def do_atom_feed(req, author=None, year=None, month=None, day=None,
+def atom_feed(req, author=None, year=None, month=None, day=None,
                  category=None, post=None):
     """Renders an atom feed requested.
 
@@ -309,6 +308,7 @@ def do_atom_feed(req, author=None, year=None, month=None, day=None,
         for post in Post.query.for_index().get_list(year, month, day,
                                                     category, author,
                                                     per_page=10,
+                                                    ignore_role=True,
                                                     as_list=True):
             links = [link.as_dict() for link in post.links]
             feed.add(post.title, unicode(post.body), content_type='html',
@@ -340,7 +340,7 @@ def do_atom_feed(req, author=None, year=None, month=None, day=None,
     return feed.get_response()
 
 
-def do_get_upload(req, filename):
+def get_upload(req, filename):
     """Stream an uploaded file to the user.  XXX: put something into werkzeug
     that can do that similar to the shared data middleware and make it more
     flexible.
@@ -399,7 +399,7 @@ def dispatch_content_type(req):
 
     # feed requested?  jump to the feed page
     if want_feed:
-        return do_atom_feed(req, post=post)
+        return atom_feed(req, post=post)
 
     # create the comment form
     form = NewCommentForm(post, req.user)
@@ -408,4 +408,16 @@ def dispatch_content_type(req):
                  _(u'Comments Feed'))
 
     # now dispatch to the correct view
-    return req.app.content_type_handlers[post.content_type](req, post, form)
+    handler = req.app.content_type_handlers.get(post.content_type)
+    if handler is None:
+        log.warn('No handler for the content type %r found.' % post.content_type)
+        raise NotFound()
+
+    return handler(req, post, form)
+
+
+def handle_redirect(req):
+    """Handles redirects from the redirect table."""
+    new_url = lookup_redirect(req.path)
+    if new_url is not None:
+        return redirect(new_url, 301)

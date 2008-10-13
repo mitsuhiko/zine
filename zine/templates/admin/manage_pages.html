@@ -1,0 +1,18 @@
+{% extends "admin/layout.html" %}
+{% from "admin/_post_helpers.html" import render_post_list, render_drafts_box %}
+{% block title %}{{ _("Manage Pages") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Manage Pages") }}</h1>
+  {{ render_drafts_box(drafts) }}
+  {{ render_post_list(pages) }}
+  <form action="{{ url_for('admin/new_page') }}" method="get">
+    <div class="actions">
+      <input type="submit" value="{{ _('New Page') }}">
+    </div>
+  </form>
+  {%- if pagination.necessary %}
+  <div class="pagination">
+    {{ pagination.generate() }}
+  </div>
+  {%- endif %}
+{% endblock %}

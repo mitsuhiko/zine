@@ -2,11 +2,18 @@
   <div class="post">
     {{ emit_event('before-post-rendered', post) }}
     <h3><a href="{{ url_for(post)|e }}">{{ post.title|e }}</a></h3>
-    <p class="meta">{% trans author='<a href="%s">%s</a>' %
-      (url_for(post.author), post.author.display_name|e),
-      pub_date=post.pub_date|datetimeformat|e -%}
-        written by {{ author }}, on {{ pub_date }}.
-    {%- endtrans %}</p>
+    <p class="meta">
+      {%- trans author='<a href="%s">%s</a>' %
+        (url_for(post.author), post.author.display_name|e),
+        pub_date=post.pub_date|datetimeformat|e -%}
+          written by {{ author }}, on {{ pub_date }}.
+      {%- endtrans %}
+      {%- if post.is_sheduled %}<br>[ {% trans
+        time_span=post.pub_date|timedeltaformat
+        %}<strong>Sheduled Post:</strong> This post will appear in {{
+          time_span }}.{% endtrans %}
+      {% endif -%}]
+    </p>
     <div class="text">
       {{ post.intro or post.body }}
       {% if post.intro -%}

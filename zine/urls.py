@@ -36,12 +36,15 @@ def make_urls(app):
         Rule('/login', endpoint='admin/login'),
         Rule('/logout', endpoint='admin/logout'),
         Rule('/_bookmarklet', endpoint='admin/bookmarklet'),
-        Rule('/posts/', endpoint='admin/show_posts', defaults={'page': 1}),
-        Rule('/posts/page/<int:page>', endpoint='admin/show_posts'),
-        Rule('/posts/new', endpoint='admin/new_post'),
-        Rule('/posts/<int:post_id>', endpoint='admin/edit_post'),
-        Rule('/posts/<int:post_id>/delete', endpoint='admin/delete_post'),
-        Rule('/posts/<int:post_id>/comments',
+        Rule('/entries/', endpoint='admin/manage_entries', defaults={'page': 1}),
+        Rule('/entries/page/<int:page>', endpoint='admin/manage_entries'),
+        Rule('/entries/new', endpoint='admin/new_entry'),
+        Rule('/pages/', endpoint='admin/manage_pages', defaults={'page': 1}),
+        Rule('/pages/page/<int:page>', endpoint='admin/manage_pages'),
+        Rule('/pages/new', endpoint='admin/new_page'),
+        Rule('/p/<int:post_id>', endpoint='admin/edit_post'),
+        Rule('/p/<int:post_id>/delete', endpoint='admin/delete_post'),
+        Rule('/p/<int:post_id>/comments',
              endpoint='admin/show_post_comments', defaults={'page': 1}),
         Rule('/comments/', endpoint='admin/show_comments', defaults={'page': 1}),
         Rule('/comments/page/<int:page>', endpoint='admin/show_comments'),
@@ -56,11 +59,11 @@ def make_urls(app):
         Rule('/comments/<int:comment_id>/delete', endpoint='admin/delete_comment'),
         Rule('/comments/<int:comment_id>/approve', endpoint='admin/approve_comment'),
         Rule('/comments/<int:comment_id>/block', endpoint='admin/block_comment'),
-        Rule('/posts/categories/', endpoint='admin/show_categories', defaults={'page': 1}),
-        Rule('/posts/categories/page/<int:page>', endpoint='admin/show_categories'),
-        Rule('/posts/categories/new', endpoint='admin/new_category'),
-        Rule('/posts/categories/<int:category_id>', endpoint='admin/edit_category'),
-        Rule('/posts/categories/<int:category_id>/delete', endpoint='admin/delete_category'),
+        Rule('/categories/', endpoint='admin/manage_categories', defaults={'page': 1}),
+        Rule('/categories/page/<int:page>', endpoint='admin/manage_categories'),
+        Rule('/categories/new', endpoint='admin/new_category'),
+        Rule('/categories/<int:category_id>', endpoint='admin/edit_category'),
+        Rule('/categories/<int:category_id>/delete', endpoint='admin/delete_category'),
         Rule('/users/', endpoint='admin/show_users', defaults={'page': 1}),
         Rule('/users/page/<int:page>', endpoint='admin/show_users'),
         Rule('/users/new', endpoint='admin/new_user'),
@@ -115,7 +118,3 @@ def make_urls(app):
         Submount(app.cfg['blog_url_prefix'], blog_urls),
         Submount(app.cfg['admin_url_prefix'], admin_urls)
     ] + other_urls
-
-
-from zine.views.blog import dispatch_content_type
-absolute_url_handlers = [dispatch_content_type]

@@ -208,7 +208,7 @@ post_links = db.Table('post_links', metadata,
 tags = db.Table('tags', metadata,
     db.Column('tag_id', db.Integer, primary_key=True),
     db.Column('slug', db.String(150), unique=True, nullable=False),
-    db.Column('name', db.String(100), index=True, nullable=False)
+    db.Column('name', db.String(100), unique=True, nullable=False)
 )
 
 post_categories = db.Table('post_categories', metadata,
@@ -236,6 +236,12 @@ comments = db.Table('comments', metadata,
     db.Column('blocked_msg', db.String(250)),
     db.Column('submitter_ip', db.String(100)),
     db.Column('status', db.Integer, nullable=False)
+)
+
+redirects = db.Table('redirects', metadata,
+    db.Column('redirect_id', db.Integer, primary_key=True),
+    db.Column('original', db.String(200), unique=True),
+    db.Column('new', db.String(200))
 )
 
 

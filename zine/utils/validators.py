@@ -13,7 +13,7 @@
     :license: GNU GPL.
 """
 import re
-from urlparse import urlparse, urljoin, urlsplit
+from urlparse import urlparse
 
 from zine.i18n import lazy_gettext
 
@@ -42,23 +42,6 @@ class ValidationError(ValueError):
 
     def unpack(self, key=None):
         return {key: self.messages}
-
-
-def check_external_url(app, url, check=False):
-    """Check if a URL is on the application server."""
-    blog_url = app.cfg['blog_url']
-    check = urljoin(blog_url, url)
-
-    if check:
-        # check if the url is on the same server
-        # as configured
-        c1 = urlsplit(blog_url)[:2]
-        c2 = urlsplit(check)[:2]
-        if c1 != c2:
-            raise ValueError('The url %s is not on the same server'
-                             'as configured. Please notify the administrator'
-                             % check)
-    return check
 
 
 def check(validator, value, *args, **kwargs):
@@ -117,4 +100,25 @@ def is_valid_url(message=None):
         protocol = urlparse(value)[0]
         if not protocol or protocol == 'javascript':
             raise ValidationError(message)
+    return validator
+
+
+def is_valid_slug(allow_slash=True):
+    """Check if the value given is a valid slug:
+
+    >>> check(is_valid_slug, '/foo')
+    False
+    >>> check(is_valid_slug, 'foo/bar')
+    True
+    >>> check(is_valid_slug, '<foo>')
+    False
+    """
+    def validator(form, value):
+        if '<' in value or '>' in value or \
+           (not allow_slash and '/' in value):
+            raise ValidationError('Invalid characters in slug')
+        elif len(value) > 200:
+            raise ValidationError('The slug is too long')
+        elif value.startswith('/'):
+            raise ValidationError('The slug must not start with a slash')
     return validator

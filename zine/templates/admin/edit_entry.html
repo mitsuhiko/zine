@@ -1,0 +1,47 @@
+{% extends "admin/layout.html" %}
+{% from "admin/_form_helpers.html" import render_formbox %}
+{% block title %}{{
+  _("New Entry") if form.new else _("Edit Entry “%s”") % form.post.title
+}}{% endblock %}
+{% block contents %}
+  <h1>{{ self.title() }}</h1>
+  {% call form() %}
+    <div class="formbox formbox-title">
+      <h3>{{ form.title.label() }}</h3>
+      {{ form.title(size=36) }}
+    </div>
+    <div class="formbox">
+      <h3>{{ form.text.label() }}</h3>
+      {{ form.text(rows=12) }}
+    </div>
+    {{ render_formbox(form.status, collapsed=false) }}
+    {{ render_formbox(form.tags) }}
+    {{ render_formbox(form.categories) }}
+    {{ render_formbox(form.parser) }}
+    <div class="formbox toggleable collapsed">
+      <h3>{{ _("Discussion") }}</h3>
+      <ul>
+        {{ form.comments_enabled.as_li() }}
+        {{ form.pings_enabled.as_li() }}
+        {{ form.ping_links.as_li() }}
+      </ul>
+    </div>
+    {{ render_formbox(form.pub_date) }}
+    {{ render_formbox(form.slug) }}
+    {{ render_formbox(form.author) }}
+    {% if not form.new %}
+      <p class="preview">
+        <a href="{{ url_for(form.post) }}">{{ _("View Entry") }}</a>
+      </p>
+    {% endif %}
+    <div class="entry-bookmarklets"></div>
+    <div class="actions">
+      <input type="submit" name="save" value="{{ _('Save') }}">
+      <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">
+      {%- if not form.new %}
+        <input type="submit" name="delete" value="{{ _('Delete') }}">
+      {%- endif %}
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
+    </div>
+  {% endcall %}
+{% endblock %}

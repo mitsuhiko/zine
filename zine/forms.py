@@ -8,14 +8,16 @@
     :copyright: 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
+from datetime import datetime
 from zine.i18n import _, lazy_gettext
-from zine.application import get_application, emit_event
+from zine.application import get_application, get_request, emit_event
 from zine.database import db
-from zine.models import User, Comment
+from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
+     STATUS_PUBLISHED
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
-     is_valid_url
+     is_valid_url, is_valid_slug
 
 
 class LoginForm(forms.Form):
@@ -107,7 +109,7 @@ class NewCommentForm(forms.Form):
 
     def make_comment(self):
         """A handy helper to create a comment from the validated form."""
-        ip = self.request and self.request.remote_addr or '0.0.0.0'
+        ip = self.req and self.req.remote_addr or '0.0.0.0'
         if self.user.is_somebody:
             author = self.user
             email = www = None
@@ -119,9 +121,9 @@ class NewCommentForm(forms.Form):
                        self['parent'], submitter_ip=ip)
 
     def create_if_valid(self, req):
-        """The one-trick pony for commenting.  Passed a request it tries to
-        use the request data to submit a comment to the post.  If the request
-        is not a post request or the form is invalid the return value is None,
+        """The one-trick pony for commenting.  Passed a req it tries to
+        use the req data to submit a comment to the post.  If the req
+        is not a post req or the form is invalid the return value is None,
         otherwise a redirect response to the new comment.
         """
         if req.method != 'POST' or not self.validate(req.form):
@@ -182,6 +184,134 @@ class PluginForm(forms.Form):
         t['plugins'] = u', '.join(sorted(self.data['active_plugins']))
         t['plugin_guard'] = not self.data['disable_guard']
         t.commit()
+
+
+class PostForm(forms.Form):
+    """This is the baseclass for all forms that deal with posts.  There are
+    two builtin subclasses for the builtin content types 'entry' and 'page'.
+    """
+    title = forms.TextField(lazy_gettext(u'Title'), max_length=150,
+                            required=True)
+    text = forms.TextField(lazy_gettext(u'Text'), max_length=65000,
+                           widget=forms.Textarea)
+    status = forms.ChoiceField(lazy_gettext(u'Publication status'), choices=[
+                               (STATUS_DRAFT, lazy_gettext(u'Draft')),
+                               (STATUS_PUBLISHED, lazy_gettext(u'Published'))])
+    pub_date = forms.DateTimeField(lazy_gettext(u'Publication date'))
+    slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()])
+    author = forms.ModelField(User, 'username', lazy_gettext('Author'),
+                              widget=forms.SelectBox)
+    tags = forms.CommaSeparated(forms.TextField(), lazy_gettext(u'Tags'))
+    categories = forms.Multiple(forms.ModelField(Category, 'category_id'),
+                                lazy_gettext(u'Categories'),
+                                widget=forms.CheckboxGroup)
+    parser = forms.ChoiceField(lazy_gettext(u'Parser'))
+    comments_enabled = forms.BooleanField(lazy_gettext(u'Enable comments'))
+    pings_enabled = forms.BooleanField(lazy_gettext(u'Enable pingbacks'))
+    ping_links = forms.BooleanField(lazy_gettext(u'Ping links'))
+
+    #: the content type for this field.
+    content_type = None
+
+    # TODO: graceful handling of missing parsers
+
+    def __init__(self, post=None, initial=None):
+        self.app = get_application()
+        self.post = post
+
+        if post is not None:
+            if initial:
+                raise TypeError('you can\'t provide a post and initial values')
+            initial = forms.fill_dict(initial,
+                title=post.title,
+                text=post.text,
+                status=post.status,
+                pub_date=post.pub_date,
+                slug=post.slug,
+                author=post.author,
+                tags=[x.name for x in post.tags],
+                categories=[x.category_id for x in post.categories],
+                parser=post.parser,
+                comments_enabled=post.comments_enabled,
+                pings_enabled=post.pings_enabled,
+                ping_links=not post.parser_missing
+            )
+        else:
+            initial = forms.fill_dict(initial,
+                status=STATUS_DRAFT,
+                comments_enabled=self.app.cfg['comments_enabled'],
+                pings_enabled=self.app.cfg['pings_enabled'],
+                parser=self.app.cfg['default_parser'],
+                ping_links=True
+            )
+
+            # if we have a request, we can use the current user as a default
+            req = get_request()
+            if req and req.user:
+                initial['author'] = req.user
+
+        self.author.choices = [x.username for x in User.query.all()]
+        self.parser.choices = self.app.list_parsers()
+        self.categories.choices = [(c.category_id, c.name) for c in
+                                   Category.query.all()]
+
+        forms.Form.__init__(self, initial)
+
+    def validate_slug(self, value):
+        """Make sure the slug is unique."""
+        query = Post.query.filter_by(slug=value)
+        if self.post is not None:
+            query = query.filter(Post.post_id != self.post.post_id)
+        existing = query.first()
+        if existing is not None:
+            raise ValidationError(_('This slug is already in use'))
+
+    def as_widget(self):
+        widget = forms.Form.as_widget(self)
+        widget.new = self.post is None
+        widget.post = self.post
+        return widget
+
+    def make_post(self):
+        """A helper function that creates a post object from the data."""
+        data = self.data
+        post = Post(data['title'], data['author'], data['text'], data['slug'],
+                    content_type=self.content_type)
+        post.bind_categories(data['categories'])
+        post.bind_tags(data['tags'])
+        self._set_common_attributes(post)
+        return post
+
+    def save_changes(self):
+        """Save the changes back to the database."""
+        for key in 'title', 'author', 'text', 'slug':
+            value = self.data[key]
+            if getattr(self.post, key) != value:
+                setattr(self.post, key, value)
+        self._set_common_attributes(self.post)
+
+    def _set_common_attributes(self, post):
+        for key in 'comments_enabled', 'pings_enabled', 'status', 'parser':
+            value = self.data[key]
+            if getattr(post, key) != value:
+                setattr(post, key, value)
+        post.bind_categories(self.data['categories'])
+        post.bind_tags(self.data['tags'])
+
+        now = datetime.utcnow()
+        pub_date = self.data['pub_date']
+        if pub_date is None and post.status == STATUS_PUBLISHED:
+            pub_date = now
+        post.pub_date = pub_date
+        post.last_update = now
+
+
+class EntryForm(PostForm):
+    content_type = 'entry'
+
+
+class PageForm(PostForm):
+    content_type = 'page'
 
 
 class LogForm(forms.Form):

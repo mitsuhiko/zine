@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     zine.i18n
-    ~~~~~~~~~~~~~~
+    ~~~~~~~~~
 
     i18n tools for Zine.  This module provides various helpers for
     internationalization.  That is a translation system (with an API,
@@ -367,6 +367,16 @@ def format_time(time=None, format='medium', rebase=True):
     return _date_format(dates.format_time, time, format, rebase)
 
 
+def format_timedelta(datetime_or_timedelta, granularity='second'):
+    """Format the elapsed time from the given date to now of the given
+    timedelta.
+    """
+    if isinstance(datetime_or_timedelta, datetime):
+        datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
+    return dates.format_timedelta(datetime_or_timedelta, granularity,
+                                  locale=get_locale())
+
+
 def list_timezones():
     """Return a list of all timezones."""
     from pytz import common_timezones
@@ -379,11 +389,7 @@ def list_timezones():
 def list_languages(self_translated=False):
     """Return a list of all languages."""
     if not self_translated:
-        app = zine.application.get_application()
-        if app:
-            locale = app.locale
-        else:
-            locale = Locale('en')
+        locale = get_locale()
     else:
         locale = None
 
@@ -478,11 +484,7 @@ def parse_datetime(string, rebase=True):
 
 def _date_format(formatter, obj, format, rebase, **extra):
     """Internal helper that formats the date."""
-    app = zine.application.get_application()
-    if app is None:
-        locale = Locale('en')
-    else:
-        locale = app.locale
+    locale = get_locale()
     extra = {}
     if formatter is not dates.format_date and rebase:
         extra['tzinfo'] = get_timezone()
@@ -496,6 +498,14 @@ def get_timezone(name=None):
     if name is None:
         name = zine.application.get_application().cfg['timezone']
     return timezone(name)
+
+
+def get_locale():
+    """Return the current locale."""
+    app = zine.application.get_application()
+    if app is None:
+        return Locale('en')
+    return app.locale
 
 
 def serve_javascript(request):

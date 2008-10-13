@@ -48,6 +48,31 @@ class DataIntegrityError(ValueError):
     """
 
 
+def fill_dict(_dict, **kwargs):
+    """A helper to fill the dict passed with the items passed as keyword
+    arguments if they are not yet in the dict.  If the dict passed was
+    `None` a new dict is created and returned.
+
+    This can be used to prepopulate initial dicts in overriden constructors:
+
+        class MyForm(forms.Form):
+            foo = forms.TextField()
+            bar = forms.TextField()
+
+            def __init__(self, initial=None):
+                forms.Form.__init__(self, forms.fill_dict(initial,
+                    foo="nothing",
+                    bar="nothing"
+                ))
+    """
+    if _dict is None:
+        return kwargs
+    for key, value in kwargs.iteritems():
+        if key not in _dict:
+            _dict[key] = value
+    return _dict
+
+
 def _next_position_hint():
     """Return the next position hint."""
     global _last_position_hint
@@ -180,8 +205,8 @@ def _force_dict(value, silent=False):
     return value
 
 
-def _force_list(value, silent=False):
-    """If the value is not a list, raise an exception"""
+def _force_list(value):
+    """If the value is not a list, make it one."""
     if value is None:
         return []
     try:
@@ -189,10 +214,7 @@ def _force_list(value, silent=False):
             raise TypeError()
         return list(value)
     except TypeError:
-        if silent:
-            return []
-        raise DataIntegrityError('expected a list, got %r' %
-                                 value.__class__.__name__)
+        return [value]
 
 
 def _make_widget(field, name, value, errors):
@@ -231,6 +253,14 @@ def _to_list(value):
         return [value]
 
 
+def _value_matches_choice(value, choice):
+    """Checks if a given value matches a choice."""
+    # this algorithm is also implemented in `MultiChoiceField.convert`
+    # for better scaling with multiple items.  If it's changed here, it
+    # must be changed for the multi choice field too.
+    return choice == value or _to_string(choice) == _to_string(value)
+
+
 def _iter_choices(choices):
     """Iterate over choices."""
     if choices is not None:
@@ -240,18 +270,17 @@ def _iter_choices(choices):
             yield choice
 
 
-class _ListSupport(object):
-    """A mixin for iterable objects that yield html."""
-
-    def as_ul(self, **attrs):
-        if attrs.pop('hide_empty', False) and not self:
-            return u''
-        return html.ul(*(html.li(unicode(item)) for item in self), **attrs)
-
-    def as_ol(self, **attrs):
-        if attrs.pop('hide_empty', False) and not self:
-            return u''
-        return html.ol(*(html.li(unicode(item)) for item in self), **attrs)
+def _is_choice_selected(field, value, choice):
+    """Checks if a choice is selected.  If the field is a multi select
+    field it's checked if the choice is in the passed iterable of values,
+    otherwise it's checked if the value matches the choice.
+    """
+    if field.multiple_choices:
+        for value in value:
+            if _value_matches_choice(value, choice):
+                return True
+        return False
+    return _value_matches_choice(value, choice)
 
 
 class _Renderable(object):
@@ -286,12 +315,6 @@ class Widget(_Renderable):
     >>> username = widget['username']
     >>> password = widget['password']
 
-    The conversion to unicode calls the widget which renders it and displays
-    an error list as unordered list next to it.
-
-    >>> unicode(username) == username()
-    True
-
     To render a widget you can usually invoke the `render()` method.  All
     keyword parameters are used as HTML attribute in the resulting tag.
     You can also call the widget itself (``username()`` instead of
@@ -305,12 +328,12 @@ class Widget(_Renderable):
 
         gives the list of errors:
 
-        >>> username.errors
+        >>> username.errors()
         [u'This field is required.']
 
         This error list is printable:
 
-        >>> print username.errors
+        >>> print username.errors()
         <ul class="errors"><li>This field is required.</li></ul>
 
         Like any other sequence that yields list items it provides
@@ -512,6 +535,16 @@ class Checkbox(Widget):
         rv.append(html.dd(data))
         return u''.join(rv)
 
+    def as_li(self, **attrs):
+        """Return a li item."""
+        rv = [self.render(**attrs)]
+        if self.label:
+            rv.append(u' ' + self.label())
+        if self.help_text:
+            rv.append(html.div(self.help_text, class_='explanation'))
+        rv.append(self.errors())
+        return html.li(u''.join(rv))
+
     def render(self, **attrs):
         self._attr_setdefault(attrs)
         return html.input(name=self.name, type='checkbox',
@@ -550,8 +583,9 @@ class SelectBox(Widget):
                 key, value = choice
             else:
                 key = value = choice
+            selected = _is_choice_selected(self._field, self.value, key)
             items.append(html.option(unicode(value), value=unicode(key),
-                                     selected=key == self.value))
+                                     selected=selected))
         return html.select(name=self.name, *items, **attrs)
 
 
@@ -577,9 +611,8 @@ class _InputGroupMember(InternalWidget):
 
     @property
     def checked(self):
-        if self._parent._field.multiple_choices:
-            return self.value in self._parent.value
-        return self._parent.value == self.value
+        return _is_choice_selected(self._parent._field, self._parent.value,
+                                   self.value)
 
     def render(self, **attrs):
         self._attr_setdefault(attrs)
@@ -747,12 +780,25 @@ class FormWidget(MappingWidget):
         return self.render(*args, **attrs)
 
 
-class ListWidget(Widget, _ListSupport):
+class ListWidget(Widget):
     """Special widget for list-like fields."""
 
     def __init__(self, field, name, value, all_errors):
         Widget.__init__(self, field, name, _force_list(value), all_errors)
         self._subwidgets = {}
+
+    def as_ul(self, **attrs):
+        return self._as_list(html.ul, attrs)
+
+    def as_ol(self, **attrs):
+        return self._as_list(html.ol, attrs)
+
+    def _as_list(self, factory, attrs):
+        if attrs.pop('hide_empty', False) and not self:
+            return u''
+        for index in xrange(len(self) + attrs.pop('extra_rows', 1)):
+            items.append(self[index]() for item in self)
+        return factory(*items, **attrs)
 
     def __getitem__(self, index):
         if not isinstance(index, (int, long)):
@@ -782,11 +828,22 @@ class ListWidget(Widget, _ListSupport):
         return self.as_ul(*args, **kwargs)
 
 
-class ErrorList(_Renderable, _ListSupport, list):
+class ErrorList(_Renderable, list):
     """The class that is used to display the errors."""
 
     def render(self, **attrs):
         return self.as_ul(**attrs)
+
+    def as_ul(self, **attrs):
+        return self._as_list(html.ul, attrs)
+
+    def as_ol(self, **attrs):
+        return self._as_list(html.ol, attrs)
+
+    def _as_list(self, factory, attrs):
+        if attrs.pop('hide_empty', False) and not self:
+            return u''
+        return factory(*(item for item in self), **attrs)
 
     def __call__(self, **attrs):
         attrs.setdefault('class', attrs.pop('class_', 'errors'))
@@ -832,9 +889,19 @@ class Field(object):
     """Abstract field base class."""
 
     __metaclass__ = FieldMeta
-    widget = TextInput
     messages = dict(required=lazy_gettext('This field is required.'))
     form = None
+    widget = TextInput
+
+    # these attributes are used by the widgets to get an idea what
+    # choices to display.  Not every field will also validate them.
+    multiple_choices = False
+    choices = ()
+
+    # fields that have this attribute set get special treatment on
+    # validation.  It means that even though a value was not in the
+    # submitted data it's validated against a default value.
+    validate_on_omission = False
 
     def __init__(self, label=None, help_text=None, validators=None,
                  widget=None, messages=None):
@@ -918,6 +985,10 @@ class Mapping(Field):
     >>> field = Mapping(name=TextField(), age=IntegerField())
     >>> field({'name': u'John Doe', 'age': u'42'})
     {'age': 42, 'name': u'John Doe'}
+
+    Although it's possible to reassign the widget after field construction
+    it's not recommended because the `MappingWidget` is the only builtin
+    widget that is able to handle mapping structures.
     """
 
     widget = MappingWidget
@@ -949,7 +1020,7 @@ class Mapping(Field):
 
     def _bind(self, form, memo):
         rv = Field._bind(self, form, memo)
-        rv.fields = {}
+        rv.fields = OrderedDict()
         for key, field in self.fields.iteritems():
             rv.fields[key] = _bind(field, form, memo)
         return rv
@@ -989,17 +1060,29 @@ class Multiple(Field):
     >>> field = Multiple(IntegerField())
     >>> field([u'1', u'2', u'3'])
     [1, 2, 3]
+
+    Recommended widgets:
+
+    -   `ListWidget` -- the default one and useful if multiple complex
+        fields are in use.
+    -   `CheckboxGroup` -- useful in combination with choices
+    -   `SelectBoxWidget` -- useful in combination with choices
     """
 
     widget = ListWidget
     messages = dict(too_small=None, too_big=None)
+    validate_on_omission = True
 
-    def __init__(self, field, min_size=None, max_size=None,
-                 messages=None):
-        Field.__init__(self, messages=messages)
+    def __init__(self, field, label=None, help_text=None, min_size=None,
+                 max_size=None, validators=None, widget=None, messages=None):
+        Field.__init__(self, label, help_text, validators, widget, messages)
         self.field = field
         self.min_size = min_size
         self.max_size = max_size
+
+    @property
+    def multiple_choices(self):
+        return self.max_size is None or self.max_size > 1
 
     def convert(self, value):
         value = _force_list(value)
@@ -1029,12 +1112,45 @@ class Multiple(Field):
         return result
 
     def to_primitive(self, value):
-        return map(self.field.to_primitive, _force_list(value, silent=True))
+        return map(self.field.to_primitive, _force_list(value))
 
     def _bind(self, form, memo):
         rv = Field._bind(self, form, memo)
         rv.field = _bind(self.field, form, memo)
         return rv
+
+
+class CommaSeparated(Multiple):
+    """Works like the multiple field but for comma separated values:
+
+    >>> field = CommaSeparated(IntegerField())
+    >>> field(u'1, 2, 3')
+    [1, 2, 3]
+
+    The default widget is a `TextInput` but `Textarea` would be a possible
+    choices as well.
+    """
+
+    widget = TextInput
+
+    def __init__(self, field, label=None, help_text=None, min_size=None,
+                 max_size=None, sep=u',', validators=None, widget=None,
+                 messages=None):
+        Multiple.__init__(self, field, label, help_text, min_size,
+                          max_size, validators, widget, messages)
+        self.sep = sep
+
+    def convert(self, value):
+        if isinstance(value, basestring):
+            value = filter(None, [x.strip() for x in value.split(self.sep)])
+        return Multiple.convert(self, value)
+
+    def to_primitive(self, value):
+        if value is None:
+            return u''
+        if isinstance(value, basestring):
+            return value
+        return (self.sep + u' ').join(map(unicode, value))
 
 
 class TextField(Field):
@@ -1211,11 +1327,18 @@ class ChoiceField(Field):
       ...
     ValidationError: Please enter a valid choice.
 
+    Two values `a` and `b` are considered equal if either ``a == b`` or
+    ``primitive(a) == primitive(b)`` where `primitive` is the primitive
+    of the value.  Primitives are created with the following algorithm:
+
+        1.  if the object is `None` the primitive is the empty string
+        2.  otherwise the primitive is the string value of the object
+
     A choice field also accepts lists of tuples as argument where the
     first item is used for comparing and the second for displaying
     (which is used by the `SelectBoxWidget`):
 
-    >>> field = ChoiceField(choices=[(0, 'inactive', 1, 'active')])
+    >>> field = ChoiceField(choices=[(0, 'inactive'), (1, 'active')])
     >>> field('0')
     0
 
@@ -1226,15 +1349,21 @@ class ChoiceField(Field):
     ...     status = ChoiceField()
     ...
     >>> form = MyForm()
-    >>> form.fields['status'].choices = [(0, 'inactive', 1, 'active')]
+    >>> form.status.choices = [(0, 'inactive', 1, 'active')]
     >>> form.validate({'status': '0'})
     True
     >>> form.data
     {'status': 0}
+
+    If a choice field is set to "not required" and a `SelectBox` is used
+    as widget you have to provide an empty choice or the field cannot be
+    left blank.
+
+    >>> field = ChoiceField(required=False, choices=[('', _('Nothing')),
+    ...                                              ('1', _('Something'))])
     """
 
     widget = SelectBox
-    multiple_choices = False
     messages = dict(
         invalid_choice=lazy_gettext('Please enter a valid choice.')
     )
@@ -1251,10 +1380,7 @@ class ChoiceField(Field):
         for choice in self.choices:
             if isinstance(choice, tuple):
                 choice = choice[0]
-            # perform type interpolation.  If the key from the choices
-            # is a integer (42) and the value is a string ("42") we
-            # return the integer.
-            if value == choice or unicode(value) == unicode(choice):
+            if _value_matches_choice(value, choice):
                 return choice
         raise ValidationError(self.messages['invalid_choice'])
 
@@ -1270,6 +1396,7 @@ class MultiChoiceField(ChoiceField):
 
     multiple_choices = True
     messages = dict(too_small=None, too_big=None)
+    validate_on_omission = True
 
     def __init__(self, label=None, help_text=None, choices=None,
                  min_size=None, max_size=None, validators=None,
@@ -1280,19 +1407,22 @@ class MultiChoiceField(ChoiceField):
         self.max_size = max_size
 
     def convert(self, value):
-        values = _to_list(value)
         result = []
-
-        container = set()
+        known_choices = {}
         for choice in self.choices:
             if isinstance(choice, tuple):
                 choice = choice[0]
-            container.update((choice, unicode(choice)))
+            known_choices[choice] = choice
+            known_choices.setdefault(_to_string(choice), choice)
 
-        for choice in values:
-            if choice not in container:
-                raise ValidationError(_(u'Select a valid choice.'))
-            result.append(choice)
+        for value in _to_string(values):
+            for version in value, _to_string(value):
+                if version in known_choices:
+                    result.append(known_choices[version])
+                    break
+            else:
+                raise ValidationError(_(u'“%s” is not a valid choice') %
+                                      value)
 
         if self.min_size is not None and len(result) < self.min_size:
             message = self.messages['too_small']
@@ -1312,7 +1442,7 @@ class MultiChoiceField(ChoiceField):
         return result
 
     def to_primitive(self, value):
-        return map(unicode, _force_list(value, silent=True))
+        return map(unicode, _force_list(value))
 
 
 class IntegerField(Field):
@@ -1387,6 +1517,7 @@ class BooleanField(Field):
     """
 
     widget = Checkbox
+    validate_on_omission = True
 
     def convert(self, value):
         return bool(value)
@@ -1673,6 +1804,16 @@ class Form(object):
     def validate(self, data):
         """Validate the form against the data passed."""
         self.raw_data = _decode(data)
+
+        # for each field in the root that requires validation on value
+        # omission we add `None` into the raw data dict.  Because the
+        # implicit switch between initial data and user submitted data
+        # only happens on the "root level" for obvious reasons we only
+        # have to hook the data in here.
+        for name, field in self._root_field.fields.iteritems():
+            if field.validate_on_omission and name not in self.raw_data:
+                self.raw_data.setdefault(name)
+
         d = self.data.copy()
         d.update(self.raw_data)
         errors = {}
@@ -1683,5 +1824,6 @@ class Form(object):
         self.errors = errors
         if errors:
             return False
+
         self.data.update(data)
         return True
