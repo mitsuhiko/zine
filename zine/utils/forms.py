@@ -1415,7 +1415,7 @@ class MultiChoiceField(ChoiceField):
             known_choices[choice] = choice
             known_choices.setdefault(_to_string(choice), choice)
 
-        for value in _to_string(values):
+        for value in _to_list(value):
             for version in value, _to_string(value):
                 if version in known_choices:
                     result.append(known_choices[version])

@@ -111,7 +111,7 @@ def show_category(req, slug, page=1):
     if not category:
         raise NotFound()
 
-    data = Post.query.get_list(category=slug, page=page)
+    data = Post.query.get_list(category=category, page=page)
     if data.pop('probably_404'):
         raise NotFound()
 
@@ -205,15 +205,15 @@ def show_entry(req, post, comment_form):
 
     This view supports pingbacks via `zine.pingback.pingback_post`
 
-    :Template name: ``show_post.html``
+    :Template name: ``show_entry.html``
     :URL endpoint: ``blog/show_post``
     """
     response = comment_form.create_if_valid(req)
     if response is not None:
         return response
 
-    return render_response('show_post.html',
-        post=post,
+    return render_response('show_entry.html',
+        entry=post,
         form=comment_form.as_widget()
     )
 
@@ -292,14 +292,26 @@ def xml_service(req, identifier):
 
 @cache.response(vary=('user',))
 def atom_feed(req, author=None, year=None, month=None, day=None,
-                 category=None, post=None):
+              category=None, post=None):
     """Renders an atom feed requested.
 
     :URL endpoint: ``blog/atom_feed``
     """
+    def query_or_fail(_model, **kwargs):
+        rv = _model.query.filter_by(**kwargs).first()
+        if rv is None:
+            raise NotFound()
+        return rv
+
     feed = AtomFeed(req.app.cfg['blog_title'], feed_url=req.url,
                     url=req.app.cfg['blog_url'],
                     subtitle=req.app.cfg['blog_tagline'])
+
+    # load category and author if requested.
+    if category is not None:
+        category = query_or_fail(Category, slug=category)
+    if author is not None:
+        author = query_or_fail(User, username=author)
 
     # if no post slug is given we filter the posts by the cretereons
     # provided and pass them to the feed builder.  This will only return

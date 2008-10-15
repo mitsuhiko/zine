@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% from "_comment.html" import render_comments, render_comment_editor %}
+{% from "_entry.html" import render_entry_related %}
+{% block title %}{{ entry.title|e }}{% endblock %}
+{% block contents %}
+  <div class="entry">
+    <h2>{{ entry.title|e }}</h2>
+    <p class="meta">{% trans author='<a href="%s">%s</a>' %
+      (url_for(entry.author), entry.author.display_name|e),
+      pub_date=entry.pub_date|datetimeformat|e -%}
+        written by {{ author }}, on {{ pub_date }}.
+    {%- endtrans %}</p>
+    {% if entry.intro %}
+      <div class="intro">{{ entry.intro }}</div>
+    {% endif %}
+    <div class="text" id="extended">{{ entry.body }}</div>
+    <p class="related">
+      {{ render_entry_related(entry, comment_count=false) }}
+    </p>
+  </div>
+  {%- if entry.comments %}
+    <h3>{{ _("Comments") }}</h3>
+    {{ render_comments(entry) }}
+  {%- endif %}
+  {%- if entry.comments_enabled %}
+    <h3 id="leave-reply">{{ _("Leave a Reply") }}</h3>
+    {{ render_comment_editor(entry, form) }}
+  {%- endif %}
+{% endblock %}

@@ -1,0 +1,53 @@
+{% macro render_entry_related(entry, comment_count=true) %}
+  {% set pipe = joiner('|') %}
+  {%- if entry.categories %} {{ pipe() }}
+    {{ _('Categories') }}:
+    {% for category in entry.categories -%}
+      <a href="{{ url_for(category)|e }}">{{ category.name|e }}</a>
+      {%- if not loop.last %}, {% endif %}
+    {%- endfor %}
+  {%- endif %}
+  {%- if entry.tags %} {{ pipe() }}
+    {{ _('Tagged as') }}:
+    {% for tag in entry.tags -%}
+      <a href="{{ url_for(tag)|e }}">{{ tag.name|e }}</a>
+      {%- if not loop.last %}, {% endif %}
+    {%- endfor %}
+  {% endif %}
+  {%- if comment_count %} {{ pipe() }}
+    <a href="{{ url_for(entry)|e }}#comments">{% trans comments=entry.comment_count
+       %}{{ comments }} comment{% pluralize %}{{ comments}} comments{% endtrans -%}</a>
+  {% endif %}
+  {%- if request.user.is_manager %} {{ pipe() }}
+    <a href="{{ url_for('admin/edit_post', post_id=entry.post_id) }}">{{ _('Edit') }}</a>
+  {%- endif %}
+{% endmacro %}
+
+{% macro render_entry(entry) -%}
+  <div class="entry">
+    {{ emit_event('before-entry-rendered', entry) }}
+    <h3><a href="{{ url_for(entry)|e }}">{{ entry.title|e }}</a></h3>
+    <p class="meta">
+      {%- trans author='<a href="%s">%s</a>' %
+        (url_for(entry.author), entry.author.display_name|e),
+        pub_date=entry.pub_date|datetimeformat|e -%}
+          written by {{ author }}, on {{ pub_date }}.
+      {%- endtrans %}
+      {%- if entry.is_sheduled %}<br>[ {% trans
+        time_span=entry.pub_date|timedeltaformat
+        %}<strong>Sheduled Post:</strong> This entry will appear in {{
+          time_span }}.{% endtrans %}
+      ]{% endif -%}
+    </p>
+    <div class="text">
+      {{ entry.intro or entry.body }}
+      {% if entry.intro -%}
+        <p><a href="{{ url_for(entry)|e }}#extended">{{ _("Read on") }}...</a></p>
+      {%- endif %}
+    </div>
+    <p class="related">
+      {{ render_entry_related(entry) }}
+    </p>
+    {{ emit_event('after-entry-rendered', entry) }}
+  </div>
+{%- endmacro %}

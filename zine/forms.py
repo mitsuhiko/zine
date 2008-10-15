@@ -18,6 +18,7 @@ from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
      is_valid_url, is_valid_slug
+from zine.utils.redirects import register_redirect
 
 
 class LoginForm(forms.Form):
@@ -213,8 +214,6 @@ class PostForm(forms.Form):
     #: the content type for this field.
     content_type = None
 
-    # TODO: graceful handling of missing parsers
-
     def __init__(self, post=None, initial=None):
         self.app = get_application()
         self.post = post
@@ -237,21 +236,22 @@ class PostForm(forms.Form):
                 ping_links=not post.parser_missing
             )
         else:
-            initial = forms.fill_dict(initial,
-                status=STATUS_DRAFT,
-                comments_enabled=self.app.cfg['comments_enabled'],
-                pings_enabled=self.app.cfg['pings_enabled'],
-                parser=self.app.cfg['default_parser'],
-                ping_links=True
-            )
+            initial = forms.fill_dict(initial, status=STATUS_DRAFT)
 
             # if we have a request, we can use the current user as a default
             req = get_request()
             if req and req.user:
                 initial['author'] = req.user
 
+        initial.setdefault('parser', self.app.cfg['default_parser'])
+
         self.author.choices = [x.username for x in User.query.all()]
         self.parser.choices = self.app.list_parsers()
+        self.parser_missing = post and post.parser_missing
+        if self.parser_missing:
+            self.parser.choices.append((post.parser, _('%s (missing)') %
+                                        post.parser.title()))
+
         self.categories.choices = [(c.category_id, c.name) for c in
                                    Category.query.all()]
 
@@ -266,10 +266,17 @@ class PostForm(forms.Form):
         if existing is not None:
             raise ValidationError(_('This slug is already in use'))
 
+    def validate_parser(self, value):
+        """Make sure the missing parser is not selected."""
+        if self.parser_missing and value == self.post.parser:
+            raise ValidationError(_('The selected parser is no longer '
+                                    'available on the system.'))
+
     def as_widget(self):
         widget = forms.Form.as_widget(self)
         widget.new = self.post is None
         widget.post = self.post
+        widget.parser_missing = self.parser_missing
         return widget
 
     def make_post(self):
@@ -283,12 +290,22 @@ class PostForm(forms.Form):
         return post
 
     def save_changes(self):
-        """Save the changes back to the database."""
-        for key in 'title', 'author', 'text', 'slug':
+        """Save the changes back to the database.  This also adds a redirect
+        if the slug changes.
+        """
+        old_slug = self.post.slug
+        for key in 'title', 'author', 'text':
             value = self.data[key]
             if getattr(self.post, key) != value:
                 setattr(self.post, key, value)
+        if self.data['slug']:
+            self.post.slug = self.data['slug']
+        else:
+            self.post.set_auto_slug()
+        add_redirect = self.post.is_published and old_slug != self.post.slug
         self._set_common_attributes(self.post)
+        if add_redirect:
+            register_redirect(old_slug, self.post.slug)
 
     def _set_common_attributes(self, post):
         for key in 'comments_enabled', 'pings_enabled', 'status', 'parser':
@@ -308,6 +325,14 @@ class PostForm(forms.Form):
 
 class EntryForm(PostForm):
     content_type = 'entry'
+
+    def __init__(self, post=None, initial=None):
+        app = get_application()
+        PostForm.__init__(self, post, forms.fill_dict(initial,
+            comments_enabled=app.cfg['comments_enabled'],
+            pings_enabled=app.cfg['pings_enabled'],
+            ping_links=True
+        ))
 
 
 class PageForm(PostForm):

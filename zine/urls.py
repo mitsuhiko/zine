@@ -28,7 +28,12 @@ def make_urls(app):
         Submount(app.cfg['category_url_prefix'], [
             Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_category'),
             Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_category'),
-            Rule('/<string:category>/feed.atom', endpoint='blog/atom_feed'),
+            Rule('/<string:category>/feed.atom', endpoint='blog/atom_feed')
+        ]),
+        Submount(app.cfg['tags_url_prefix'], [
+            Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_tag'),
+            Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_tag'),
+            Rule('/<string:tag>/feed.atom', endpoint='blog/atom_feed')
         ])
     ]
     admin_urls = [

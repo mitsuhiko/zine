@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block title %}{{ _("Index") }}{% endblock %}
-{% from "_post.html" import render_post %}
+{% from "_entry.html" import render_entry %}
 {% block contents %}
   {%- for post in posts %}
-    {{ render_post(post) }}
+    {{ render_entry(post) }}
   {%- else %}
     <h2>{% trans %}Welcome{% endtrans %}</h2>
     <div class="notification">
-      <p>{% trans %}So far there are no posts in this blog.{% endtrans %}</p>
+      <p>{% trans %}So far there are no entries in this blog.{% endtrans %}</p>
     </div>
   {%- endfor %}
   {%- if pagination.necessary %}

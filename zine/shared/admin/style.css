@@ -388,6 +388,10 @@ div.formbox h3 {
     font-size: 1em;
 }
 
+div.formbox h3 label {
+    display: block;
+}
+
 div.toggleable h3:hover {
     cursor: pointer;
     background-color: #D9E6F0;

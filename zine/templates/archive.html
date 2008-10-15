@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}{{ _("Archive") }}{% endblock %}
-{% include "_post.html" %}
-{% from "_post.html" import render_post %}
+{% from "_entry.html" import render_entry %}
 {% block contents %}
   {%- if month_list %}
     <h2>{% trans %}Archive{% endtrans %}</h2>
@@ -22,7 +21,7 @@
       <h2>{% trans day=date|dateformat('full') %}Archive for {{ day }}{% endtrans %}</h2>
     {%- endif %}
     {%- for post in posts %}
-      {{ render_post(post) }}
+      {{ render_entry(post) }}
     {%- endfor %}
     {%- if pagination.necessary %}
     <div class="pagination">

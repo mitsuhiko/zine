@@ -38,7 +38,7 @@ def register_redirect(original, new_url):
     """Register a new redirect."""
     db.execute(redirects.insert(), dict(
         original=_strip_url(original),
-        new_url=_strip_url(new_url)
+        new=_strip_url(new_url)
     ))
 
 

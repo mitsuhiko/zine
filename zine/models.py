@@ -365,8 +365,7 @@ class PostQuery(db.Query):
                                               timedelta(days=1)))
         # all posts for a category
         elif category is not None:
-            # XXX: missing
-            pass
+            q = q.filter(Post.categories.contains(category))
 
         # all posts for an author
         elif author is not None:
@@ -959,7 +958,7 @@ class Tag(object):
         self.slug = gen_slug(self.name)
 
     def get_url_values(self):
-        return 'tags', {'slug': self.slug}
+        return 'blog/show_tag', {'slug': self.slug}
 
     def __repr__(self):
         return u'<%s %r>' % (

@@ -34,6 +34,7 @@ all_views = {
     'admin/bookmarklet':        admin.bookmarklet,
     'admin/new_entry':          admin.edit_entry,
     'admin/manage_entries':     admin.manage_entries,
+    'admin/new_page':           admin.edit_page,
     'admin/manage_pages':       admin.manage_pages,
     'admin/edit_post':          admin.dispatch_post_edit,
     'admin/delete_post':        admin.delete_post,
@@ -87,7 +88,8 @@ content_type_handlers = {
 }
 
 admin_content_type_handlers = {
-    'entry':                    admin.edit_entry
+    'entry':                    admin.edit_entry,
+    'page':                     admin.edit_page
 }
 
 absolute_url_handlers = [blog.dispatch_content_type, blog.handle_redirect]

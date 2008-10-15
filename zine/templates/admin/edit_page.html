@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% from "admin/_form_helpers.html" import render_formbox %}
 {% block title %}{{
-  _("New Entry") if form.new else _("Edit Entry “%s”") % form.post.title
+  _("New Page") if form.new else _("Edit Page “%s”") % form.post.title
 }}{% endblock %}
 {% block contents %}
   <h1>{{ self.title() }}</h1>
@@ -18,6 +18,7 @@
       <h3>{{ form.title.label() }}</h3>
       {{ form.title(size=36) }}
     </div>
+    {{ render_formbox(form.slug, collapsed=false) }}
     <div class="formbox">
       <h3>{{ form.text.label() }}</h3>
       {{ form.text(rows=12) }}
@@ -35,14 +36,12 @@
       </ul>
     </div>
     {{ render_formbox(form.pub_date) }}
-    {{ render_formbox(form.slug) }}
     {{ render_formbox(form.author) }}
     {% if not form.new %}
       <p class="preview">
-        <a href="{{ url_for(form.post) }}">{{ _("View Entry") }}</a>
+        <a href="{{ url_for(form.post) }}">{{ _("View Page") }}</a>
       </p>
     {% endif %}
-    <div class="post-bookmarklets"></div>
     <div class="actions">
       <input type="submit" name="save" value="{{ _('Save') }}">
       <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">

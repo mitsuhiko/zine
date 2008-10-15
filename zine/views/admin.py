@@ -47,7 +47,7 @@ from zine.pluginsystem import install_package, InstallationError, \
      SetupError
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
-     LogForm, EntryForm
+     LogForm, EntryForm, PageForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -317,14 +317,13 @@ def edit_entry(request, post=None):
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
-                post_info = u'<a href="%s">%s</a>' % (escape(url_for(post)),
-                                                      escape(post.title))
-                flash(_('The post %s was created successfully.') % post_info)
+                msg = _('The entry %s was created successfully.')
             else:
                 form.save_changes()
-                post_info = u'<a href="%s">%s</a>' % (escape(url_for(post)),
-                                                      escape(post.title))
-                flash(_('The post %s was updated successfully.') % post_info)
+                msg = _('The entry %s was updated successfully.')
+
+            flash(msg % u'<a href="%s">%s</a>' % (escape(url_for(post)),
+                                                  escape(post.title)))
 
             db.commit()
             emit_event('after-post-saved', post)
@@ -347,8 +346,38 @@ def manage_pages(request, page):
     if not posts and page != 1:
         raise NotFound()
     return render_admin_response('admin/manage_pages.html', 'manage.pages',
-                                 drafts=page_query.drafts().all(),
                                  pages=pages, pagination=pagination)
+
+
+@require_role(ROLE_AUTHOR)
+def edit_page(request, post=None):
+    """Edit an existing entry or create a new one."""
+    active_tab = post and 'manage.pages' or 'write.page'
+    form = PageForm(post)
+
+    if request.method == 'POST':
+        if 'cancel' in request.form:
+            return form.redirect('admin/manage_pages')
+        elif form.validate(request.form):
+            if post is None:
+                post = form.make_post()
+                msg = _('The page %s was created successfully.')
+            else:
+                form.save_changes()
+                msg = _('The page %s was updated successfully.')
+
+            flash(msg % u'<a href="%s">%s</a>' % (escape(url_for(post)),
+                                                  escape(post.title)))
+
+            db.commit()
+            emit_event('after-post-saved', post)
+            if form['ping_links']:
+                ping_post_links(request, post)
+            if 'save_and_continue' in request.form:
+                return redirect_to('admin/edit_post', post_id=post.post_id)
+            return form.redirect('admin/new_page')
+    return render_admin_response('admin/edit_page.html', active_tab,
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)
