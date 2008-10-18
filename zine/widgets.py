@@ -59,8 +59,12 @@ class LatestPosts(Widget):
     name = 'latest_posts'
     template = 'widgets/latest_posts.html'
 
-    def __init__(self, limit=5, show_title=False):
-        self.posts = Post.query.latest(limit).all()
+    def __init__(self, limit=5, show_title=False, content_types=None):
+        if content_types is None:
+            query = Post.query.for_index()
+        else:
+            query = Post.query.filter(Post.content_type.in_(content_types))
+        self.posts = query.latest(limit).all()
         self.show_title = show_title
 
 

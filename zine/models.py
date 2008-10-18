@@ -13,6 +13,8 @@ from math import ceil, log
 from datetime import date, datetime, timedelta
 from urlparse import urljoin
 
+from werkzeug.exceptions import NotFound
+
 from zine.database import users, categories, posts, post_links, \
      post_categories, post_tags, tags, comments, db
 from zine.utils import build_tag_uri, zeml
@@ -261,20 +263,17 @@ class PostQuery(db.Query):
                 role = req.user.role
         p = posts.c
 
+        query = self.filter(p.status == STATUS_PUBLISHED)
         if role <= ROLE_SUBSCRIBER:
-            return self.filter(
-                (p.status == STATUS_PUBLISHED) |
-                (p.pub_date >= datetime.utcnow())
-            )
+            return query.filter(p.pub_date <= datetime.utcnow())
         elif role == ROLE_AUTHOR:
             # it's safe to access req here because we only have
             # a non ROLE_NOBODY role if there was a request.
-            return self.filter(
-                (p.status == STATUS_PUBLISHED) |
-                (p.author_id == req.user.user_id)
+            return query.filter(
+                (p.pub_date <= datetime.utcnow()) |
+                (p.author == req.user)
             )
-        else:
-            return self
+        return query
 
     def drafts(self, ignore_user=False, user=None):
         """Return a query that returns all drafts for the current user.
@@ -289,103 +288,30 @@ class PostQuery(db.Query):
             query = query.filter(Post.author_id == user.user_id)
         return query
 
-    def get_list(self, year=None, month=None, day=None, category=None, author=None,
-                 page=1, per_page=None, ignore_role=False, as_list=False):
+    def get_list(self, endpoint=None, page=1, per_page=None,
+                 url_args=None, raise_if_empty=True):
         """Return a dict with pagination, the current posts, number of pages,
-        total posts and all that stuff for further processing.  the triple of
-        year, month and day are mutually exclusive to either category or author.
-
-        The behavior if both a date *and* category or *author* are specified is
-        undefined and will probably not raise an exception.
-
-        If the role is ignored only published items are returned, otherwise the
-        items the current user can see.
+        total posts and all that stuff for further processing.
         """
-        role = ROLE_NOBODY
-        if not ignore_role:
-            req = get_request()
-            if req is not None:
-                role = req.user.role
-        app = get_application()
         if per_page is None:
+            app = get_application()
             per_page = app.cfg['posts_per_page']
-        url_args = {}
-
-        # show all posts for a category
-        if category is not None:
-            url_args['slug'] = category
-            endpoint = 'blog/show_category'
-        # show all posts for an author
-        elif author is not None:
-            url_args['username'] = author.username
-            endpoint = 'blog/show_author'
-        # show the blog index
-        elif day is month is year is None:
-            endpoint = 'blog/index'
-        # or an archive page
-        else:
-            endpoint = 'blog/archive'
-            if day is not None:
-                url_args['day'] = day
-            if month is not None:
-                url_args['month'] = month
-            if year is not None:
-                url_args['year'] = year
-
-        q = self.filter(Post.status == STATUS_PUBLISHED)
-
-        # subcribers and normal users can not see sheduled items
-        if role <= ROLE_SUBSCRIBER:
-            q = q.filter(Post.pub_date < datetime.utcnow())
-
-        # otherwise check if we are an author, in that case show the
-        # the sheduled, own posts.
-        elif role == ROLE_AUTHOR:
-            # it's safe to access req here because we only have
-            # a non ROLE_NOBODY role if there was a request.
-            q = q.filter(Post.author == req.user)
-
-        # limit the posts to match the criteria passed to the function
-        # if there is at least the year defined.
-        if year is not None:
-            # show a whole year
-            if month is None:
-                q = q.filter((Post.pub_date >= datetime(year, 1, 1)) &
-                             (Post.pub_date < datetime(year + 1, 1, 1)))
-            # show one month
-            elif day is None:
-                q = q.filter((Post.pub_date >= datetime(year, month, 1)) &
-                             (Post.pub_date < (month == 12 and
-                                               datetime(year + 1, 1, 1) or
-                                               datetime(year, month + 1, 1))))
-            # show one day
-            else:
-                q = q.filter((Post.pub_date >= datetime(year, month, day)) &
-                             (Post.pub_date < datetime(year, month, day) +
-                                              timedelta(days=1)))
-        # all posts for a category
-        elif category is not None:
-            q = q.filter(Post.categories.contains(category))
-
-        # all posts for an author
-        elif author is not None:
-            q = q.filter(Post.author == author)
 
         # send the query
         offset = per_page * (page - 1)
-        postlist = q.order_by(Post.pub_date.desc()) \
-                    .offset(offset).limit(per_page).all()
+        postlist = self.order_by(Post.pub_date.desc()) \
+                       .offset(offset).limit(per_page).all()
 
-        if as_list:
-            return postlist
+        # if raising exceptions is wanted, raise it
+        if raise_if_empty and (page != 1 and not postlist):
+            raise NotFound()
 
         pagination = Pagination(endpoint, page, per_page,
-                                q.count(), url_args)
+                                self.count(), url_args)
 
         return {
             'pagination':       pagination,
-            'posts':            postlist,
-            'probably_404':     page != 1 and not postlist,
+            'posts':            postlist
         }
 
     def get_archive_summary(self, detail='months', limit=None,
@@ -393,37 +319,21 @@ class PostQuery(db.Query):
         """Query function to get the archive of the blog. Usually used
         directly from the templates to add some links to the sidebar.
         """
-        role = ROLE_NOBODY
-        if not ignore_role:
-            req = get_request()
-            if req is not None:
-                role = req.user.role
-
-        p = posts.c
-        now = datetime.utcnow()
-
-        # do the role checking
-        q = p.status == STATUS_PUBLISHED
-        if role <= ROLE_SUBSCRIBER:
-            q &= p.pub_date >= now
-        elif role == ROLE_AUTHOR:
-            # it's safe to access req here because we only have
-            # a non ROLE_NOBODY role if there was a request.
-            q &= p.author_id == req.user.user_id
-
         # XXX: currently we also return months without articles in it.
         # other blog systems do not, but because we use sqlalchemy we have
         # to go with the functionality provided.  Currently there is no way
         # to do date truncating in a database agnostic way.
-        row = db.execute(db.select([p.pub_date], q,
-                order_by=[db.asc(p.pub_date)], limit=1)).fetchone()
+        last = self.filter(Post.pub_date != None) \
+                   .order_by(Post.pub_date.asc()).first()
+        now = datetime.utcnow()
 
         there_are_more = False
         result = []
 
-        if row is not None:
+        if last is not None:
             now = date(now.year, now.month, now.day)
-            oldest = date(row.pub_date.year, row.pub_date.month, row.pub_date.day)
+            oldest = date(last.pub_date.year, last.pub_date.month,
+                          last.pub_date.day)
             result = [now]
 
             there_are_more = False
@@ -471,6 +381,26 @@ class PostQuery(db.Query):
         if limit is not None:
             query = query.limit(limit)
         return query
+
+    def date_filter(self, year, month=None, day=None):
+        """Filter all the items that match the given date."""
+        if month is None:
+            return self.filter(
+                (Post.pub_date >= datetime(year, 1, 1)) &
+                (Post.pub_date < datetime(year + 1, 1, 1))
+            )
+        elif day is None:
+            return self.filter(
+                (Post.pub_date >= datetime(year, month, 1)) &
+                (Post.pub_date < (month == 12 and
+                               datetime(year + 1, 1, 1) or
+                               datetime(year, month + 1, 1)))
+            )
+        return self.filter(
+            (Post.pub_date >= datetime(year, month, day)) &
+            (Post.pub_date < datetime(year, month, day) +
+                             timedelta(days=1))
+        )
 
     def search(self, query):
         """Search for posts by a query."""
@@ -979,7 +909,7 @@ db.mapper(Category, categories, properties={
     'posts':            db.dynamic_loader(Post, secondary=post_categories)
 })
 db.mapper(Comment, comments, properties={
-    '_text':        comments.c.text,
+    'text':         db.synonym('_text', map_column=True),
     'author':       db.synonym('_author', map_column=True),
     'email':        db.synonym('_email', map_column=True),
     'www':          db.synonym('_www', map_column=True),
@@ -994,7 +924,7 @@ db.mapper(Comment, comments, properties={
 db.mapper(PostLink, post_links)
 db.mapper(Tag, tags)
 db.mapper(Post, posts, properties={
-    '_text':            posts.c.text,
+    'text':             db.synonym('_text', map_column=True),
     'comments':         db.relation(Comment, backref='post',
                                     primaryjoin=posts.c.post_id ==
                                         comments.c.post_id,

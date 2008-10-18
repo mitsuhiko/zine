@@ -46,9 +46,7 @@ def index(req, page=1):
     :Template name: ``index.html``
     :URL endpoint: ``blog/index``
     """
-    data = Post.query.for_index().get_list(page=page)
-    if data.pop('probably_404'):
-        raise NotFound()
+    data = Post.query.published().for_index().get_list(page=page)
 
     add_link('alternate', url_for('blog/atom_feed'), 'application/atom+xml',
              _(u'Recent Posts Feed'))
@@ -74,17 +72,17 @@ def archive(req, year=None, month=None, day=None, page=1):
     """
     if not year:
         return render_response('archive.html', month_list=True,
-                               **Post.query.get_archive_summary())
-    data = Post.query.get_list(year, month, day, page=page)
-    if data.pop('probably_404'):
-        raise NotFound()
+                               **Post.query.published().for_index()
+                                     .get_archive_summary())
 
-    feed_parameters = {}
-    for name, value in [('year', year), ('month', month), ('day', day)]:
-        if value is not None:
-            feed_parameters[name] = value
-    add_link('alternate', url_for('blog/atom_feed', **feed_parameters),
+    url_args = dict(year=year, month=month, day=day)
+    data = Post.query.published().for_index().date_filter(year, month, day) \
+                     .get_list(page=page, endpoint='blog/archive',
+                               url_args=url_args)
+
+    add_link('alternate', url_for('blog/atom_feed', **url_args),
              'application/atom+xml', _(u'Recent Posts Feed'))
+
     return render_response('archive.html', year=year, month=month, day=day,
                            date=date(year, month or 1, day or 1),
                            month_list=False, **data)
@@ -107,13 +105,10 @@ def show_category(req, slug, page=1):
     :Template name: ``show_category.html``
     :URL endpoint: ``blog/show_category``
     """
-    category = Category.query.filter_by(slug=slug).first()
-    if not category:
-        raise NotFound()
-
-    data = Post.query.get_list(category=category, page=page)
-    if data.pop('probably_404'):
-        raise NotFound()
+    category = Category.query.published().filter_by(slug=slug).first(True)
+    data = Post.query.published().get_list(category=category, page=page,
+                                           endpoint='blog/show_category',
+                                           url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', category=slug),
              'application/atom+xml', _(u'All posts categoryged %s') % category.name)
@@ -139,12 +134,9 @@ def show_author(req, username, page=1):
     :URL endpoint: ``blog/show_author``
     """
     user = User.query.filter((User.username == username) &
-                               (User.role >= ROLE_AUTHOR)).first()
-    if user is None:
-        raise NotFound()
-    data = Post.query.get_list(author=user, page=page, per_page=30)
-    if data.pop('probably_404'):
-        raise NotFound()
+                             (User.role >= ROLE_AUTHOR)).first(True)
+    data = Post.query.published().filter_by(author=user) \
+               .get_list(page=page, per_page=30)
 
     add_link('alternate', url_for('blog/atom_feed', author=username),
              'application/atom+xml', _(u'All posts written by %s') %
@@ -297,31 +289,32 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
 
     :URL endpoint: ``blog/atom_feed``
     """
-    def query_or_fail(_model, **kwargs):
-        rv = _model.query.filter_by(**kwargs).first()
-        if rv is None:
-            raise NotFound()
-        return rv
-
     feed = AtomFeed(req.app.cfg['blog_title'], feed_url=req.url,
                     url=req.app.cfg['blog_url'],
                     subtitle=req.app.cfg['blog_tagline'])
 
-    # load category and author if requested.
+    # the feed only contains published items
+    query = Post.query.published()
+
+    # feed for a category
     if category is not None:
-        category = query_or_fail(Category, slug=category)
+        category = Category.query.filter_by(slug=category).first(True)
+        query = query.filter(Post.categories.contains(category))
+
+    # feed for an author
     if author is not None:
-        author = query_or_fail(User, username=author)
+        author = Category.query.filter_by(username=author).first(True)
+        query = query.filter(Post.author == author)
+
+    # feed for dates
+    if year is not None:
+        query = query.for_index().date_filter(year, month, day)
 
     # if no post slug is given we filter the posts by the cretereons
     # provided and pass them to the feed builder.  This will only return
     # a feed for posts with a content type listed in `index_content_types`
     if post is None:
-        for post in Post.query.for_index().get_list(year, month, day,
-                                                    category, author,
-                                                    per_page=10,
-                                                    ignore_role=True,
-                                                    as_list=True):
+        for post in query.order_by(Post.pub_date.desc()).limit(15).all():
             links = [link.as_dict() for link in post.links]
             feed.add(post.title, unicode(post.body), content_type='html',
                      author=post.author.display_name, links=links,

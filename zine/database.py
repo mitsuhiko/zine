@@ -28,7 +28,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.util import to_list
 from sqlalchemy.engine.url import make_url, URL
 from sqlalchemy.types import MutableType, TypeDecorator
+
 from werkzeug import url_decode
+from werkzeug.exceptions import NotFound
 
 from zine.utils import local, local_manager
 
@@ -110,6 +112,16 @@ class ZEMLParserData(MutableType, TypeDecorator):
 
 class Query(orm.Query):
     """Default query class."""
+
+    def first(self, raise_if_missing=False):
+        """Return the first result of this `Query` or None if the result
+        doesn't contain any row.  If `raise_if_missing` is set to `True`
+        a `NotFound` exception is raised if no row is found.
+        """
+        rv = orm.Query.first(self)
+        if rv is None and raise_if_missing:
+            raise NotFound()
+        return rv
 
 
 session = orm.scoped_session(lambda: orm.create_session(

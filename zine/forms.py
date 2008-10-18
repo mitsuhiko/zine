@@ -86,6 +86,7 @@ class NewCommentForm(forms.Form):
 
     def __init__(self, post, user, initial=None):
         forms.Form.__init__(self, initial)
+        self.req = get_request()
         self.post = post
         self.user = user
 
@@ -219,8 +220,6 @@ class PostForm(forms.Form):
         self.post = post
 
         if post is not None:
-            if initial:
-                raise TypeError('you can\'t provide a post and initial values')
             initial = forms.fill_dict(initial,
                 title=post.title,
                 text=post.text,
