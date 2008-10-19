@@ -24,12 +24,12 @@
   <div class="pagination">
     {% if page.has_prev %}
       <a href="{{ url_for('admin/log', page=page.number - 1)
-        }}" class="prev">{{ _('« Previous') }}</a>
+        }}" class="prev">{{ _('▼ Down') }}</a>
     {% endif %}
     <strong>{{ page.number }}</strong>
     {% if page.has_next %}
       <a href="{{ url_for('admin/log', page=page.number + 1)
-        }}" class="next">{{ _('Next »') }}</a>
+        }}" class="next">{{ _('Up ▲') }}</a>
     {% endif %}
   </div>
   {%- endif %}

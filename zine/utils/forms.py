@@ -245,6 +245,8 @@ def _to_string(value):
 
 def _to_list(value):
     """Similar to `_force_list` but always succeeds and never drops data."""
+    if value is None:
+        return []
     if isinstance(value, basestring):
         return [value]
     try:
@@ -551,23 +553,6 @@ class Checkbox(Widget):
                           checked=self.value, **attrs)
 
 
-class Button(Widget):
-    """A widget that's a submit button.  This widget is special and can be
-    used as a replacement widget for boolen fields but only one can be
-    clicked.
-    """
-
-    disable_dt = True
-
-    def _attr_setdefault(self, attrs):
-        Widget._attr_setdefault(self, attrs)
-        attrs.setdefault('label', self.label)
-
-    def render(self, **attrs):
-        self._attr_setdefault(attrs)
-        return html.input(name=self.name, type='submit', **attrs)
-
-
 class SelectBox(Widget):
     """A select box."""
 
@@ -649,6 +634,10 @@ class _InputGroup(Widget):
         if attrs.pop('hide_empty', False) and not self.choices:
             return u''
         self._attr_setdefault(attrs)
+        class_ = attrs.pop('class_', attrs.pop('class', None))
+        if class_ is None:
+            class_ = 'choicegroup'
+        attrs['class'] = class_
         return list_type(*[u'<li>%s %s</li>' % (
             choice(),
             choice.label()
@@ -1150,7 +1139,7 @@ class CommaSeparated(Multiple):
             return u''
         if isinstance(value, basestring):
             return value
-        return (self.sep + u' ').join(map(unicode, value))
+        return (self.sep + u' ').join(map(self.field.to_primitive, value))
 
 
 class TextField(Field):
@@ -1249,12 +1238,14 @@ class ModelField(Field):
     messages = dict(not_found=lazy_gettext('"%(value)s" does not exist'))
 
     def __init__(self, model, key, label=None, help_text=None, required=False,
-                 message=None, validators=None, widget=None, messages=None):
+                 message=None, validators=None, widget=None, messages=None,
+                 on_not_found=None):
         Field.__init__(self, label, help_text, validators, widget, messages)
         self.model = model
         self.key = key
         self.required = required
         self.message = message
+        self.on_not_found = on_not_found
 
     def convert(self, value):
         if isinstance(value, self.model):
@@ -1267,6 +1258,8 @@ class ModelField(Field):
 
         rv = self.model.query.filter_by(**{self.key: value}).first()
         if rv is None:
+            if self.on_not_found is not None:
+                self.on_not_found(value)
             raise ValidationError(self.messages['not_found'] %
                                   {'value': value})
         return rv
@@ -1415,6 +1408,7 @@ class MultiChoiceField(ChoiceField):
             known_choices[choice] = choice
             known_choices.setdefault(_to_string(choice), choice)
 
+        x = _to_list(value)
         for value in _to_list(value):
             for version in value, _to_string(value):
                 if version in known_choices:

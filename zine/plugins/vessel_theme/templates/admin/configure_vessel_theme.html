@@ -6,10 +6,7 @@
     This theme comes with various color variations you can chose from.
   {% endtrans %}
   {%- call form() %}
-    <dl>
-      <dt>{{ _('Color Variation') }}
-      <dd>{{ form.variation }}
-    </dl>
+    {{ form.as_dl() }}
     <div class="actions">
       <input type="submit" name="save" value="{{ _('Save') }}">
       <input type="submit" name="cancel" value="{{ _('Cancel') }}">

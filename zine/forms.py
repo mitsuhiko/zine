@@ -9,7 +9,8 @@
     :license: GNU GPL.
 """
 from datetime import datetime
-from zine.i18n import _, lazy_gettext
+
+from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.database import db
 from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
@@ -17,7 +18,7 @@ from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
-     is_valid_url, is_valid_slug
+     is_valid_url, is_valid_slug, is_valid_url_prefix
 from zine.utils.redirects import register_redirect
 
 
@@ -26,7 +27,10 @@ class LoginForm(forms.Form):
     user = forms.ModelField(User, 'username', required=True, messages=dict(
         not_found=lazy_gettext(u'User "%(value)s" does not exist.'),
         required=lazy_gettext(u'You have to enter a username.')
-    ))
+    ), on_not_found=lambda user:
+        log.warning(_('Failed login attempt, user "%s" does not exist')
+                      % user, 'auth')
+    )
     password = forms.TextField(widget=forms.PasswordInput)
     permanent = forms.BooleanField()
 
@@ -338,26 +342,72 @@ class PageForm(PostForm):
     content_type = 'page'
 
 
-class LogForm(forms.Form):
-    """A form for the logfiles."""
-    filename = forms.TextField(lazy_gettext(u'Filename'))
-    level = forms.ChoiceField(lazy_gettext(u'Log Level'),
-                              choices=[(k, lazy_gettext(k)) for k, v
-                                       in sorted(log.LEVELS.items(),
-                                                 key=lambda x: x[1])])
+class ConfigForm(forms.Form):
 
     def __init__(self, initial=None):
-        self.app = app = get_application()
+        self.app = get_application()
         if initial is None:
-            initial = dict(
-                filename=app.cfg['log_file'],
-                level=app.cfg['log_level']
-            )
+            initial = {}
+            for name in self.fields:
+                initial[name] = self.app.cfg[name]
         forms.Form.__init__(self, initial)
 
     def apply(self):
-        """Apply the changes."""
         t = self.app.cfg.edit()
-        t['log_file'] = self.data['filename']
-        t['log_level'] = self.data['level']
+        for key, value in self.data.iteritems():
+            if t[key] != value:
+                t[key] = value
         t.commit()
+
+
+class LogForm(ConfigForm):
+    """A form for the logfiles."""
+    log_file = forms.TextField(lazy_gettext(u'Filename'))
+    log_level = forms.ChoiceField(lazy_gettext(u'Log Level'),
+                                  choices=[(k, lazy_gettext(k)) for k, v
+                                           in sorted(log.LEVELS.items(),
+                                                     key=lambda x: x[1])])
+
+
+class BasicOptionsForm(ConfigForm):
+    """The form where the basic options are changed."""
+    blog_title = forms.TextField(lazy_gettext(u'Blog title'))
+    blog_tagline = forms.TextField(lazy_gettext(u'Blog tagline'))
+    blog_email = forms.TextField(lazy_gettext(u'Blog email'))
+    language = forms.ChoiceField(lazy_gettext(u'Language'))
+    session_cookie_name = forms.TextField(lazy_gettext(u'Cookie Name'))
+    comments_enabled = forms.BooleanField(lazy_gettext(u'Comments enabled'),
+        help_text=lazy_gettext(u'enable comments per default'))
+    moderate_comments = forms.ChoiceField(lazy_gettext(u'Comment Moderation'),
+                                          choices=[
+        (0, lazy_gettext(u'Automatically approve all comments')),
+        (1, lazy_gettext(u'An administrator must always aprove the comment')),
+        (2, lazy_gettext(u'Automatically approve comments by known comment authors'))
+    ], widget=forms.RadioButtonGroup)
+    pings_enabled = forms.BooleanField(lazy_gettext(u'Pingbacks enabled'),
+        help_text=lazy_gettext(u'enable pingbacks per default'))
+    use_flat_comments = forms.BooleanField(lazy_gettext(u'Use flat comments'),
+        help_text=lazy_gettext(u'All comments are posted top-level'))
+    default_parser = forms.ChoiceField(lazy_gettext(u'Default parser'))
+    comment_parser = forms.ChoiceField(lazy_gettext(u'Comment parser'))
+    posts_per_page = forms.IntegerField(lazy_gettext(u'Posts per page'))
+
+    def __init__(self, initial=None):
+        ConfigForm.__init__(self, initial)
+        self.language.choices = list_languages()
+        self.default_parser.choices = self.comment_parser.choices = \
+            self.app.list_parsers()
+
+
+class URLOptionsForm(ConfigForm):
+    """The form for url changes."""
+    blog_url_prefix = forms.TextField(lazy_gettext(u'Blog URL prefix'),
+                                      validators=[is_valid_url_prefix()])
+    admin_url_prefix = forms.TextField(lazy_gettext(u'Admin URL prefix'),
+                                       validators=[is_valid_url_prefix()])
+    category_url_prefix = forms.TextField(lazy_gettext(u'Category URL prefix'),
+                                          validators=[is_valid_url_prefix()])
+    tags_url_prefix = forms.TextField(lazy_gettext(u'Tag URL prefix'),
+                                      validators=[is_valid_url_prefix()])
+    profiles_url_prefix = forms.TextField(lazy_gettext(u'Author Profiles URL prefix'),
+                                          validators=[is_valid_url_prefix()])

@@ -15,7 +15,7 @@
 import re
 from urlparse import urlparse
 
-from zine.i18n import lazy_gettext
+from zine.i18n import lazy_gettext, _
 
 
 _mail_re = re.compile(r'''(?xi)
@@ -74,7 +74,7 @@ def is_valid_email(message=None):
     the second.
     """
     if message is None:
-        message = lazy_gettext('You have to enter a valid e-mail address.')
+        message = lazy_gettext(u'You have to enter a valid e-mail address.')
     def validator(form, value):
         if len(value) > 250 or _mail_re.match(value) is None:
             raise ValidationError(message)
@@ -95,7 +95,7 @@ def is_valid_url(message=None):
     False
     """
     if message is None:
-        message = lazy_gettext('You have to enter a valid URL.')
+        message = lazy_gettext(u'You have to enter a valid URL.')
     def validator(form, value):
         protocol = urlparse(value)[0]
         if not protocol or protocol == 'javascript':
@@ -114,11 +114,23 @@ def is_valid_slug(allow_slash=True):
     False
     """
     def validator(form, value):
-        if '<' in value or '>' in value or \
-           (not allow_slash and '/' in value):
-            raise ValidationError('Invalid characters in slug')
-        elif len(value) > 200:
-            raise ValidationError('The slug is too long')
+        if len(value) > 200:
+            raise ValidationError(_(u'The slug is too long'))
         elif value.startswith('/'):
-            raise ValidationError('The slug must not start with a slash')
+            raise ValidationError(_(u'The slug must not start with a slash'))
+    return validator
+
+
+def is_valid_url_prefix():
+    """Validates URL parts."""
+    def validator(form, value):
+        if '<' in value or '>' in value:
+            raise ValidationError(_(u'Invalid character, < or > are not allowed.'))
+        if value == '/':
+            raise ValidationError(_(u'URL prefix must not be a sole slash.'))
+        if value:
+            if value[:1] != '/':
+                raise ValidationError(_(u'URL prefix must start with a slash.'))
+            if value[-1:] == '/':
+                raise ValidationError(_(u'URL prefix must not end with a slash.'))
     return validator

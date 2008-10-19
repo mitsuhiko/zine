@@ -227,13 +227,30 @@ def require_role(role):
                 return f(request, *args, **kwargs)
             raise Forbidden()
         decorated.__name__ = f.__name__
+        decorated.__module__ = f.__module__
         decorated.__doc__ = f.__doc__
         return decorated
     return wrapped
 
 
 class InternalError(Exception):
-    pass
+    """Subclasses of this exception are used to signal internal errors that
+    should not happen, but may do if the configuration is garbage.  If an
+    internal error is raised during request handling they are converted into
+    normal server errors for anonymous users (but not logged!!!), but if the
+    current user is an administrator, the error is displayed.
+    """
+
+    help_text = None
+
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
+    def __unicode__(self):
+        return unicode(self.message)
 
 
 class Request(RequestBase):
@@ -626,8 +643,8 @@ class Zine(object):
             raise InstanceNotInitialized()
 
         # and hook in the logger
-        self.log = Logger(path.join(instance_folder, self.cfg['log_file']),
-                          self.cfg['log_level'])
+        self.log = log.Logger(path.join(instance_folder, self.cfg['log_file']),
+                              self.cfg['log_level'])
 
         # the iid of the application
         self.iid = self.cfg['iid'].encode('utf-8')
@@ -719,6 +736,8 @@ class Zine(object):
         # set the active theme based on the config.
         theme = self.cfg['theme']
         if theme not in self.themes:
+            log.warning(_(u'Theme "%s" is no longer available, falling back '
+                          u'to default theme.') % theme, 'core')
             theme = 'default'
             self.cfg.change_single('theme', theme)
         self.theme = self.themes[theme]
@@ -914,7 +933,7 @@ class Zine(object):
 
         The newly applied middleware wraps an internal WSGI application.
         """
-        self.dispatch_request = middleware_factory(self.dispatch_request,
+        self.dispatch_wsgi = middleware_factory(self.dispatch_wsgi,
                                                    *args, **kwargs)
 
     @setuponly
@@ -1126,7 +1145,55 @@ class Zine(object):
         response.status_code = 404
         return response
 
-    def dispatch_request(self, environ, start_response):
+    def handle_server_error(self, request, exc_info=None, suppress_log=False):
+        """Called if a server error happens.  Logs the error and returns a
+        response with an error message.
+        """
+        if not suppress_log:
+            log.exception('Exception happened at "%s"' % request.path,
+                          'core', exc_info)
+        response = render_response('500.html')
+        response.status_code = 500
+        return response
+
+    def handle_internal_error(self, request, error):
+        """Called if internal errors are cought."""
+        from zine.models import ROLE_ADMIN
+        if request.user.role >= ROLE_ADMIN:
+            response = render_response('internal_error.html', error=error)
+            response.status_code = 500
+            return response
+        return self.handle_server_error(request, suppress_log=True)
+
+    def dispatch_request(self, request):
+        #! the after-request-setup event can return a response
+        #! or modify the request object in place. If we have a
+        #! response we just send it, no other modifications are done.
+        for callback in iter_listeners('after-request-setup'):
+            result = callback(request)
+            if result is not None:
+                return result(environ, start_response)
+
+        # normal request dispatching
+        try:
+            try:
+                endpoint, args = self.url_adapter.match(request.path)
+                response = self.views[endpoint](request, **args)
+            except NotFound, e:
+                response = self.handle_not_found(request, e)
+            except Forbidden, e:
+                if request.user.is_somebody:
+                    response = render_response('403.html')
+                    response.status_code = 403
+                else:
+                    response = _redirect(url_for('admin/login',
+                                                 next=request.path))
+        except HTTPException, e:
+            response = e.get_response(request)
+
+        return response
+
+    def dispatch_wsgi(self, environ, start_response):
         """This method is the internal WSGI request and is overridden by
         middlewares applied with :meth:`add_middleware`.  It handles the
         actual request dispatching.
@@ -1156,39 +1223,25 @@ class Zine(object):
                 response.status_code = 503
                 return response(environ, start_response)
 
-        #! the after-request-setup event can return a response
-        #! or modify the request object in place. If we have a
-        #! response we just send it, no other modifications are done.
-        for callback in iter_listeners('after-request-setup'):
-            result = callback(request)
-            if result is not None:
-                return result(environ, start_response)
-
-        # normal request dispatching
+        # wrap the real dispatching in a try/except so that we can
+        # intercept exceptions that happen in the application.
         try:
-            try:
-                endpoint, args = self.url_adapter.match(request.path)
-                response = self.views[endpoint](request, **args)
-            except NotFound, e:
-                response = self.handle_not_found(request, e)
-            except Forbidden, e:
-                if request.user.is_somebody:
-                    response = render_response('403.html')
-                    response.status_code = 403
-                else:
-                    response = _redirect(url_for('admin/login',
-                                                 next=request.path))
-        except HTTPException, e:
-            response = e.get_response(environ)
+            response = self.dispatch_request(request)
 
-        # make sure the response object is one of ours
-        response = Response.force_type(response, environ)
+            # make sure the response object is one of ours
+            response = Response.force_type(response, environ)
 
-        #! allow plugins to change the response object
-        for callback in iter_listeners('before-response-processed'):
-            result = callback(response)
-            if result is not None:
-                response = result
+            #! allow plugins to change the response object
+            for callback in iter_listeners('before-response-processed'):
+                result = callback(response)
+                if result is not None:
+                    response = result
+        except InternalError, e:
+            response = self.handle_internal_error(request, e)
+        except:
+            if self.cfg['passthrough_errors']:
+                raise
+            response = self.handle_server_error(request)
 
         # update the session cookie at the request end if the
         # session data requires an update.
@@ -1206,7 +1259,7 @@ class Zine(object):
 
     def __call__(self, environ, start_response):
         """Make the application object a WSGI application."""
-        return ClosingIterator(self.dispatch_request(environ, start_response),
+        return ClosingIterator(self.dispatch_wsgi(environ, start_response),
                                [local_manager.cleanup, cleanup_session])
 
     def __repr__(self):
@@ -1353,5 +1406,5 @@ def make_zine(instance_folder, bind_to_thread=False):
 # import here because of circular dependencies
 from zine import i18n
 from zine.config import Configuration
-from zine.utils.log import Logger
+from zine.utils import log
 from zine.utils.http import make_external_url

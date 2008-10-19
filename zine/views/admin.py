@@ -38,16 +38,16 @@ from zine.utils.uploads import guess_mimetype, get_upload_folder, \
      list_files, list_images, get_im_version, get_im_path, \
      touch_upload_folder, upload_file, create_thumbnail, file_exists, \
      get_filename
-from zine.utils.http import redirect_back, redirect_to
+from zine.utils.http import redirect_back, redirect_to, redirect
 from zine.i18n import parse_datetime, format_system_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from zine.importers import list_import_queue, load_import_dump, \
      delete_import_dump, perform_import
 from zine.pluginsystem import install_package, InstallationError, \
-     SetupError
+     SetupError, get_object_name
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
-     LogForm, EntryForm, PageForm
+     LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -1035,161 +1035,36 @@ def basic_options(request):
         flash(_(u'Configuration altered successfully.'), 'configure')
         return redirect_to('admin/basic_options')
 
-    cfg = request.app.cfg
-    form = {
-        'blog_title':           cfg['blog_title'],
-        'blog_tagline':         cfg['blog_tagline'],
-        'blog_email':           cfg['blog_email'],
-        'language':             cfg['language'],
-        'timezone':             cfg['timezone'],
-        'session_cookie_name':  cfg['session_cookie_name'],
-        'comments_enabled':     cfg['comments_enabled'],
-        'moderate_comments':    cfg['moderate_comments'],
-        'pings_enabled':        cfg['pings_enabled'],
-        'default_parser':       cfg['default_parser'],
-        'comment_parser':       cfg['comment_parser'],
-        'posts_per_page':       cfg['posts_per_page'],
-        'use_flat_comments':    cfg['use_flat_comments']
-    }
-    errors = []
-    csrf_protector = CSRFProtector()
+    form = BasicOptionsForm()
 
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-        form['blog_title'] = blog_title = request.form.get('blog_title')
-        if not blog_title:
-            errors.append(_(u'You have to provide a blog title'))
-        form['blog_tagline'] = blog_tagline = request.form.get('blog_tagline')
-        form['blog_email'] = blog_email = request.form.get('blog_email', '')
-        if blog_email and not check(is_valid_email, blog_email):
-            errors.append(_(u'You have to provide a valid e-mail address '
-                            'for the blog e-mail field.'))
-        form['language'] = language = request.form.get('language')
-        if not has_language(language):
-            raise BadRequest()
-        form['timezone'] = timezone = request.form.get('timezone')
-        if not has_timezone(timezone):
-            raise BadRequest()
-        form['session_cookie_name'] = session_cookie_name = \
-            request.form.get('session_cookie_name')
-        form['comments_enabled'] = comments_enabled = \
-            'comments_enabled' in request.form
-        form['moderate_comments'] = moderate_comments = \
-            request.form.get('moderate_comments', type=int)
-        if moderate_comments not in (0, 1, 2):
-            raise BadRequest()
-        form['pings_enabled'] = pings_enabled = \
-            'pings_enabled' in request.form
-        form['default_parser'] = default_parser = \
-            request.form.get('default_parser')
-        if default_parser not in request.app.parsers:
-            errors.append(_(u'Unknown parser %s.') % default_parser)
-        form['comment_parser'] = comment_parser = \
-            request.form.get('comment_parser')
-        if comment_parser not in request.app.parsers:
-            errors.append(_(u'Unknown parser %s.') % comment_parser)
-        form['posts_per_page'] = request.form.get('posts_per_page', '')
-        try:
-            posts_per_page = int(form['posts_per_page'])
-            if posts_per_page < 1:
-                errors.append(_(u'Posts per page must be at least 1'))
-        except ValueError:
-            errors.append(_(u'Posts per page must be a valid integer'))
-        form['use_flat_comments'] = use_flat_comments = \
-            'use_flat_comments' in request.form
-        if not errors:
-            t = cfg.edit()
-            if blog_title != cfg['blog_title']:
-                t['blog_title'] = blog_title
-            if blog_tagline != cfg['blog_tagline']:
-                t['blog_tagline'] = blog_tagline
-            if language != cfg['language']:
-                t['language'] = language
-            if timezone != cfg['timezone']:
-                t['timezone'] = timezone
-            if session_cookie_name != cfg['session_cookie_name']:
-                t['session_cookie_name'] = session_cookie_name
-            if comments_enabled != cfg['comments_enabled']:
-                t['comments_enabled'] = comments_enabled
-            if pings_enabled != cfg['pings_enabled']:
-                t['pings_enabled'] = pings_enabled
-            if moderate_comments != cfg['moderate_comments']:
-                t['moderate_comments'] = moderate_comments
-            if default_parser != cfg['default_parser']:
-                t['default_parser'] = default_parser
-            if comment_parser != cfg['comment_parser']:
-                t['comment_parser'] = comment_parser
-            if posts_per_page != cfg['posts_per_page']:
-                t['posts_per_page'] = posts_per_page
-            if use_flat_comments != cfg['use_flat_comments']:
-                t['use_flat_comments'] = use_flat_comments
+    if request.method == 'POST' and form.validate(request.form):
+        form.apply()
 
-            t.commit()
-            # because the configuration page could change the language and
-            # we want to flash the message "configuration changed" in the
-            # new language rather than the old.  As a matter of fact we have
-            # to wait for Zine to reload first which is why we do the
-            # actual flashing after one reload.
-            return redirect_to('admin/basic_options', altered='true')
-
-        for error in errors:
-            flash(error, 'error')
+        # because the configuration page could change the language and
+        # we want to flash the message "configuration changed" in the
+        # new language rather than the old.  As a matter of fact we have
+        # to wait for Zine to reload first which is why we do the
+        # actual flashing after one reload.
+        return redirect_to('admin/basic_options', altered='true')
 
     return render_admin_response('admin/basic_options.html', 'options.basic',
-        form=form,
-        timezones=list_timezones(),
-        languages=list_languages(),
-        parsers=request.app.list_parsers(),
-        hidden_form_data=make_hidden_fields(csrf_protector)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)
 def urls(request):
     """A config page for URL depending settings."""
-    form = {
-        'blog_url_prefix':      request.app.cfg['blog_url_prefix'],
-        'admin_url_prefix':     request.app.cfg['admin_url_prefix'],
-        'category_url_prefix':  request.app.cfg['category_url_prefix'],
-        'profiles_url_prefix':  request.app.cfg['profiles_url_prefix']
-    }
-    errors = []
-    csrf_protector = CSRFProtector()
+    form = URLOptionsForm()
 
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-        for key in form:
-            form[key] = value = request.form.get(key, '')
-            if '<' in value or '>' in value:
-                errors.append(_(u'URL prefix may not contain greater than or '
-                                'smaller than signs.'))
-            elif value and not value.startswith('/'):
-                errors.append(_(u'URL prefixes have to start with a slash.'))
-            elif value.endswith('/'):
-                errors.append(_(u'URL prefixes may not end with a slash.'))
-
-        if not errors:
-            changed = False
-            for key, value in form.iteritems():
-                if value != request.app.cfg[key]:
-                    if request.app.cfg.change_single(key, value):
-                        changed = True
-                    else:
-                        flash(_(u'URL configuration could not be changed.'),
-                              'error')
-            if changed:
-                flash(_(u'URL configuration changed.'), 'configure')
-
-            # because the next request could reload the application and move
-            # the admin interface we construct the URL to this page by hand.
-            return redirect(form['admin_url_prefix'][1:] + '/options/urls')
-        else:
-            flash(errors[0], 'error')
+    if request.method == 'POST' and form.validate(request.form):
+        form.apply()
+        flash(_(u'URL configuration changed.'), 'configure')
+        # because the next request could reload the application and move
+        # the admin interface we construct the URL to this page by hand.
+        return redirect(form['admin_url_prefix'][1:] + '/options/urls')
 
     return render_admin_response('admin/url_options.html', 'options.urls',
-        form=form,
-        hidden_form_data=make_hidden_fields(csrf_protector)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)
@@ -1201,10 +1076,8 @@ def theme(request):
     new_theme = request.args.get('select')
     if new_theme in request.app.themes:
         csrf_protector.assert_safe()
-        if request.app.cfg.change_single('theme', new_theme):
-            flash(_(u'Theme changed successfully.'), 'configure')
-        else:
-            flash(_(u'Theme could not be changed.'), 'error')
+        request.app.cfg.change_single('theme', new_theme)
+        flash(_(u'Theme changed successfully.'), 'configure')
         return redirect_to('admin/theme')
 
     return render_admin_response('admin/theme.html', 'options.theme',
@@ -1529,6 +1402,15 @@ def information(request):
     if export:
         database_uri = secure_database_uri(database_uri)
 
+    content_types = {}
+    for name, func in request.app.content_type_handlers.iteritems():
+        content_types[name] = {'name': name, 'show': get_object_name(func),
+                               'edit': None}
+    for name, func in request.app.admin_content_type_handlers.iteritems():
+        if name in content_types:
+            content_types[name]['edit'] = get_object_name(func)
+    content_types = sorted(content_types.values(), key=lambda x: x['name'])
+
     response = render_admin_response('admin/information.html', 'system.information',
         apis=[{
             'name':         name,
@@ -1540,7 +1422,29 @@ def information(request):
             'name':         rule.endpoint,
             'rule':         unicode(rule)
         } for rule in sorted(request.app.url_map._rules, key=lambda x: x.endpoint)],
-        servicepoints=sorted(request.app._services.keys()),
+        views=sorted([{
+            'endpoint':     endpoint,
+            'handler':      get_object_name(view)
+        } for endpoint, view
+            in request.app.views.iteritems()], key=lambda x: x['endpoint']),
+        zeml_element_handlers=[{
+            'tag':          handler.tag,
+            'name':         get_object_name(handler)
+        } for handler in sorted(request.app.zeml_element_handlers,
+                                key=lambda x: x.tag)],
+        parsers=[{
+            'key':          key,
+            'name':         parser.name,
+            'id':           get_object_name(parser)
+        } for key, parser in request.app.parsers.iteritems()],
+        absolute_url_handlers=[get_object_name(handler) for handler
+                               in request.app._absolute_url_handlers],
+        content_types=content_types,
+        servicepoints=sorted([{
+            'name':         name,
+            'handler':      get_object_name(service)
+        } for name, service in request.app._services.iteritems()],
+            key=lambda x: x['name']),
         configuration=request.app.cfg.get_public_list(export),
         hosting_env={
             'persistent':       not request.is_run_once,
@@ -1549,7 +1453,7 @@ def information(request):
             'multiprocess':     request.is_multiprocess,
             'wsgi_version':     '.'.join(map(str, request.environ['wsgi.version']))
         },
-        plugins=sorted(request.app.plugins.values(), key=lambda x: x.name),
+        plugins=sorted(request.app.plugins.values(), key=lambda x: not x.active and x.name),
         python_version='<br>'.join(map(escape, python_version.splitlines())),
         zine_env=environment,
         zine_version=zine_version,

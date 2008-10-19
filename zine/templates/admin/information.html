@@ -59,12 +59,40 @@
     <dd>{{ hosting_env.wsgi_version|e }}</dd>
   </dl>
   <h2>{{ _("URL Endpoints") }}</h2>
-  <p>{% trans count=endpoints|count %}
-    The following {{ count }} endpoints are registered on this instance:
+  <p>{% trans %}
+    The following endpoints are registered on this instance:
   {% endtrans %}</p>
   <ul>
   {%- for endpoint in endpoints %}
     <li><strong>{{ endpoint.name|e }}</strong> -&gt; <small>{{ endpoint.rule|e }}</small></li>
+  {%- endfor %}
+  </ul>
+  <h2>{{ _("Absolute URL Handlers") }}</h2>
+  <p>{% trans %}
+    The following absolute URL handlers are registered on this instance:
+  {% endtrans %}</p>
+  <ul>
+  {%- for handler in absolute_url_handlers %}
+    <li><code>{{ handler|e }}</code>
+  {%- endfor %}
+  </ul>
+  <h2>{{ _("View Handlers") }}</h2>
+  <p>{% trans %}
+    The following view handlers for endpoints are registered on this instance:
+  {% endtrans %}</p>
+  <ul>
+  {%- for view in views %}
+    <li><strong>{{ view.endpoint|e }}</strong> by <code>{{ view.handler|e }}</code></li>
+  {%- endfor %}
+  </ul>
+  <h2>{{ _("Content Types") }}</h2>
+  <p>{% trans %}
+    The following content types are registered on this instance:
+  {% endtrans %}</p>
+  <ul>
+  {%- for type in content_types %}
+    <li><strong>{{ type.name|e }}</strong> by <code>{{ type.show }}</code>
+    {% if type.edit %}/ <code>{{ type.edit }}</code>{% endif %}
   {%- endfor %}
   </ul>
   <h2>{{ _("Services") }}</h2>
@@ -74,7 +102,7 @@
     {% endtrans %}</p>
   <ul>
   {%- for service in servicepoints %}
-    <li><strong>{{ service|e }}</strong></li>
+    <li><strong>{{ service.name|e }}</strong> by <code>{{ service.handler }}</code>
   {%- endfor %}
   </ul>
   <h2>{{ _("Installed APIs") }}</h2>
@@ -91,10 +119,32 @@
     <li><em>no APIs installed</em></li>
   {%- endfor %}
   </ul>
+  <h2>{{ _("ZEML Element Handlers") }}</h2>
+  <p>{% trans %}
+    The following ZEML element handlers are registered on this instance:
+  {% endtrans %}</p>
+  <ul>
+  {%- for handler in zeml_element_handlers %}
+    <li><strong>{{ handler.tag }}</strong> by <code>{{ handler.name }}</code>
+  {%- else %}
+    <li><em>{{ _('no ZEML element handlers installed.') }}</em>
+  {%- endfor %}
+  </ul>
+  <h2>{{ _("Parsers") }}</h2>
+  <p>{% trans %}
+    The following parsers are currently installed:
+  {% endtrans %}</p>
+  <ul>
+  {%- for parser in parsers %}
+    <li><strong>{{ parser.name }}</strong>: <code>{{ parser.id }}</code>
+      [<small>{{ parser.key }}</small>]
+  {%- endfor %}
+  </ul>
   <h2>{{ _("Plugins") }}</h2>
   <ul class="plugin-table">
   {%- for plugin in plugins %}
-    <li><h3>{{ plugin.metadata.name|e }}</h3><dl>
+    <li><h3>{{ plugin.metadata.name|e }}{% if plugin.active
+      %} [{{_('active') }}]{% endif %}</h3><dl>
       <dt>{{ _("UID") }}</dt>
       <dd>{{ plugin.name }}</dd>
       <dt>{{ _("Author") }}</dt>

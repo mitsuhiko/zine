@@ -7,20 +7,10 @@
     useful if you have plugins installed that that add a new index page or if you
     want to move the administration to a different location.
   {% endtrans %}</p>
-  <form action="" method="post">
-    <dl>
-      <dt>{{ _("Blog URL Prefix") }}</dt>
-      <dd>{{ h.input_field('blog_url_prefix', form.blog_url_prefix) }}</dd>
-      <dt>{{ _("Admin URL Prefix") }}</dt>
-      <dd>{{ h.input_field('admin_url_prefix', form.admin_url_prefix) }}</dd>
-      <dt>{{ _("Category URL Prefix") }}</dt>
-      <dd>{{ h.input_field('category_url_prefix', form.category_url_prefix) }}</dd>
-      <dt>{{ _("Author Profiles URL Prefix") }}</dt>
-      <dd>{{ h.input_field('profiles_url_prefix', form.profiles_url_prefix) }}</dd>
-    </dl>
+  {% call form() %}
+    {{ form.as_dl() }}
     <div class="actions">
       <input type="submit" value="{{ _('Save') }}">
-      {{ hidden_form_data }}
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

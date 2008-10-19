@@ -30,7 +30,7 @@ variations = {
 
 class ConfigurationForm(forms.Form):
     """Very simple form for the variation selection."""
-    variation = forms.ChoiceField()
+    variation = forms.ChoiceField(_('Color variation'))
 
     def __init__(self, initial=None):
         forms.Form.__init__(self, initial)

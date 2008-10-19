@@ -99,6 +99,7 @@ import __builtin__
 import re
 import sys
 import imp
+import inspect
 from os import path, listdir, walk, makedirs
 from types import ModuleType
 from shutil import rmtree
@@ -145,6 +146,21 @@ def uncloak_path(path):
     if parts[:2] == ['zine', '_space'] and len(parts) > 3:
         return 'zine.plugins.' + '.'.join(parts[3:])
     return path
+
+
+def get_object_name(obj):
+    """Return a human readable name for the object."""
+    if inspect.isclass(obj) or inspect.isfunction(obj):
+        cls = obj
+    else:
+        cls = obj.__class__
+    if cls.__module__.startswith('zine._space.'):
+        prefix = cls.__module__.split('.', 3)[-1]
+    elif cls.__module__.startswith('zine.'):
+        prefix = cls.__module__
+    else:
+        prefix = 'external.' + cls.__module__
+    return prefix + '.' + cls.__name__
 
 
 def register_application(app):
