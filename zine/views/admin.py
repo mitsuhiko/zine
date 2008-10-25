@@ -38,7 +38,7 @@ from zine.utils.uploads import guess_mimetype, get_upload_folder, \
      list_files, list_images, get_im_version, get_im_path, \
      touch_upload_folder, upload_file, create_thumbnail, file_exists, \
      get_filename
-from zine.utils.http import redirect_back, redirect_to
+from zine.utils.http import redirect_back, redirect_to, redirect
 from zine.i18n import parse_datetime, format_system_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from zine.importers import list_import_queue, load_import_dump, \
@@ -154,9 +154,10 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
 
     # check for broken plugins if we have the plugin guard enabled
     if request.app.cfg['plugin_guard']:
+        plugins_to_deactivate = []
         for plugin in request.app.plugins.itervalues():
             if plugin.active and plugin.setup_error is not None:
-                plugin.deactivate()
+                plugins_to_deactivate.append(plugin.name)
                 exc_type, exc_value, tb = plugin.setup_error
                 if exc_type is SetupError:
                     msg = _(u'Could not activate plugin “%(name)s”: %(error)s') % {
@@ -176,6 +177,18 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                         'line': plugin.setup_error[2].tb_lineno
                     }
                 flash(msg, 'error')
+
+        if plugins_to_deactivate:
+            #TODO: it's quite tricky – it needs at least two reloads to
+            #      deactivate the plugin (which is in fact a application reload)
+            cfg = request.app.cfg.edit()
+            cfg['plugins'] = u', '.join(sorted(set(request.app.cfg['plugins']) - \
+                                               set(plugins_to_deactivate)))
+            cfg.commit()
+            # we change the plugins inline so that the user get somewhat more
+            # informations
+            request.app.cfg.touch()
+
 
     #! used to flash messages, add links to stylesheets, modify the admin
     #! context etc.
