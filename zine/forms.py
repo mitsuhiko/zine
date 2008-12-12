@@ -151,8 +151,6 @@ class NewCommentForm(forms.Form):
             comment.status = COMMENT_UNMODERATED
             comment.blocked_msg = _(u'Comment waiting for approval')
 
-        db.commit()
-
         #! this is sent directly after the comment was saved.  Useful if
         #! you want to send mail notifications or whatever.
         emit_event('after-comment-saved', req, comment)
@@ -340,6 +338,25 @@ class EntryForm(PostForm):
 
 class PageForm(PostForm):
     content_type = 'page'
+
+
+class PostDeleteForm(forms.Form):
+    """Baseclass for deletion forms of posts."""
+
+    def __init__(self, post=None, initial=None):
+        self.app = get_application()
+        self.post = post
+        forms.Form.__init__(self, initial)
+
+    def as_widget(self):
+        widget = forms.Form.as_widget(self)
+        widget.post = self.post
+        return widget
+
+    def delete_post(self):
+        """Deletes the post from the db."""
+        emit_event('before-post-deleted', self.post)
+        db.delete(self.post)
 
 
 class ConfigForm(forms.Form):

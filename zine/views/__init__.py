@@ -37,7 +37,7 @@ all_views = {
     'admin/new_page':           admin.edit_page,
     'admin/manage_pages':       admin.manage_pages,
     'admin/edit_post':          admin.dispatch_post_edit,
-    'admin/delete_post':        admin.delete_post,
+    'admin/delete_post':        admin.dispatch_post_delete,
     'admin/show_comments':      admin.show_comments,
     'admin/show_unmoderated_comments': admin.show_unmoderated_comments,
     'admin/show_spam_comments': admin.show_spam_comments,
@@ -88,8 +88,14 @@ content_type_handlers = {
 }
 
 admin_content_type_handlers = {
-    'entry':                    admin.edit_entry,
-    'page':                     admin.edit_page
+    'entry': {
+        'edit':                 admin.edit_entry,
+        'delete':               admin.delete_entry
+    },
+    'page': {
+        'edit':                 admin.edit_page,
+        'delete':               admin.delete_page
+    }
 }
 
 absolute_url_handlers = [blog.dispatch_content_type, blog.handle_redirect]

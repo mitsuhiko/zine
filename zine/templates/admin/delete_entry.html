@@ -1,10 +1,10 @@
 {% extends "admin/layout.html" %}
-{% block title %}{{ _("Delete Page") }}{% endblock %}
+{% block title %}{{ _("Delete Entry") }}{% endblock %}
 {% block contents %}
-  <h1>{{ _("Delete Page") }}</h1>
+  <h1>{{ _("Delete Entry") }}</h1>
   {%- call form() %}
     <p>{% trans entry_title=form.post.title|e %}
-      Do you really want to delete page “{{ entry_title }}”?
+      Do you really want to delete entry “{{ entry_title }}”?.
     {% endtrans %}</p>
     {%- if form.post.comments %}
     <p>{% trans comment_count=form.post.comments|count %}

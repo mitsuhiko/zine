@@ -47,7 +47,8 @@ from zine.pluginsystem import install_package, InstallationError, \
      SetupError, get_object_name
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
-     LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm
+     LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
+     PostDeleteForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -293,16 +294,24 @@ def manage_entries(request, page):
                                  entries=entries, pagination=pagination)
 
 
-def dispatch_post_edit(request, post_id):
-    """Dispatch to the request handler for a post."""
-    post = Post.query.get(post_id)
-    if post is None:
-        raise NotFound()
-    try:
-        handler = request.app.admin_content_type_handlers[post.content_type]
-    except KeyError:
-        raise NotFound()
-    return handler(request, post)
+def _make_post_dispatcher(action):
+    def func(request, post_id):
+        """Dispatch to the request handler for a post."""
+        post = Post.query.get(post_id)
+        if post is None:
+            raise NotFound()
+        try:
+            handler = request.app.admin_content_type_handlers \
+                [post.content_type][action]
+        except KeyError:
+            raise NotFound()
+        return handler(request, post)
+    func.__name__ = 'dispatch_post_' + action
+    return func
+
+
+dispatch_post_edit = _make_post_dispatcher('edit')
+dispatch_post_delete = _make_post_dispatcher('delete')
 
 
 @require_role(ROLE_AUTHOR)
@@ -314,6 +323,8 @@ def edit_entry(request, post=None):
     if request.method == 'POST':
         if 'cancel' in request.form:
             return form.redirect('admin/manage_entries')
+        elif 'delete' in request.form:
+            return redirect_to('admin/delete_post', post_id=post.post_id)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
@@ -333,6 +344,30 @@ def edit_entry(request, post=None):
                 return redirect_to('admin/edit_post', post_id=post.post_id)
             return form.redirect('admin/new_entry')
     return render_admin_response('admin/edit_entry.html', active_tab,
+                                 form=form.as_widget())
+
+
+@require_role(ROLE_AUTHOR)
+def delete_entry(request, post):
+    """This dialog deletes an entry.  Usually users are redirected here from the
+    edit post view or the post index page.  If the entry was not deleted the
+    user is taken back to the page he's coming from or back to the edit
+    page if the information is invalid.
+    """
+    form = PostDeleteForm(post)
+
+    if request.method == 'POST' and form.validate(request.form):
+        if request.form.get('cancel'):
+            return form.redirect('admin/edit_post', post_id=post.post_id)
+        elif request.form.get('confirm'):
+            form.add_invalid_redirect_target('admin/edit_post', post_id=post.post_id)
+            form.delete_post()
+            flash(_(u'The entry %s was deleted successfully.') %
+                  escape(post.title), 'remove')
+            db.commit()
+            return form.redirect('admin/manage_entries')
+
+    return render_admin_response('admin/delete_entry.html', 'manage.entries',
                                  form=form.as_widget())
 
 
@@ -358,6 +393,8 @@ def edit_page(request, post=None):
     if request.method == 'POST':
         if 'cancel' in request.form:
             return form.redirect('admin/manage_pages')
+        elif 'delete' in request.form:
+            return redirect_to('admin/delete_post', post_id=post.post_id)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
@@ -381,41 +418,27 @@ def edit_page(request, post=None):
 
 
 @require_role(ROLE_AUTHOR)
-def delete_post(request, post_id):
-    """This dialog deletes a post.  Usually users are redirected here from the
-    edit post view or the post index page.  If the post was not deleted the
+def delete_page(request, post):
+    """This dialog deletes a page.  Usually users are redirected here from the
+    edit post view or the page indexpage.  If the page was not deleted the
     user is taken back to the page he's coming from or back to the edit
-    page if the information is invalid.  The same happens if the post was
-    deleted but if the referrer is the edit page. Then the user is taken back to
-    the index so that he doesn't end up an a "page not found" error page.
+    page if the information is invalid.
     """
-    post = Post.query.get(post_id)
-    if post is None:
-        raise NotFound()
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
+    form = PostDeleteForm(post)
 
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return redirect('admin/edit_post', post_id=post.post_id)
+            return form.redirect('admin/edit_post', post_id=post.post_id)
         elif request.form.get('confirm'):
-            redirect.add_invalid('admin/edit_post', post_id=post.post_id)
-            #! plugins can use this to react to post deletes.  They can't stop
-            #! the deleting of the post but they can delete information in
-            #! their own tables so that the database is consistent afterwards.
-            emit_event('before-post-deleted', post)
-            db.delete(post)
-            flash(_(u'The post %s was deleted successfully.') %
+            form.add_invalid_redirect_target('admin/edit_post', post_id=post.post_id)
+            form.delete_post()
+            flash(_(u'The page %s was deleted successfully.') %
                   escape(post.title), 'remove')
             db.commit()
-            return redirect('admin/show_posts')
+            return form.redirect('admin/manage_pages')
 
-    return render_admin_response('admin/delete_post.html', 'posts.write',
-        post=post,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+    return render_admin_response('admin/delete_page.html', 'manage.pages',
+                                 form=form.as_widget())
 
 
 def _handle_comments(identifier, title, query, page):
@@ -1404,11 +1427,11 @@ def information(request):
 
     content_types = {}
     for name, func in request.app.content_type_handlers.iteritems():
-        content_types[name] = {'name': name, 'show': get_object_name(func),
-                               'edit': None}
-    for name, func in request.app.admin_content_type_handlers.iteritems():
+        content_types[name] = {'name': name, 'show': get_object_name(func)}
+    for name, funcs in request.app.admin_content_type_handlers.iteritems():
         if name in content_types:
-            content_types[name]['edit'] = get_object_name(func)
+            for action, func in funcs.iteritems():
+                content_types[name][action] = get_object_name(func)
     content_types = sorted(content_types.values(), key=lambda x: x['name'])
 
     response = render_admin_response('admin/information.html', 'system.information',

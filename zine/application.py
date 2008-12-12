@@ -1015,11 +1015,11 @@ class Zine(object):
         self.views[endpoint] = callback
 
     @setuponly
-    def add_content_type(self, content_type, callback, admin_callback=None):
+    def add_content_type(self, content_type, callback, admin_callbacks=None):
         """Register a view handler for a content type."""
         self.content_type_handlers[content_type] = callback
-        if admin_callback is not None:
-            self.admin_content_type_handlers[content_type] = admin_callback
+        if admin_callbacks is not None:
+            self.admin_content_type_handlers[content_type] = admin_callbacks
 
     @setuponly
     def add_parser(self, name, class_):
