@@ -1,0 +1,9 @@
+{% extends "error_layout.html" %}
+{% block title %}{{ _('Zine Internal Server Error') }}{% endblock %}
+{% block body %}
+  <h1>{{ _('Internal Server Error') }}</h1>
+  <p>{% trans %}
+    An internal error happened in the application.  The blog administrator
+    was informed about the problem.
+  {% endtrans %}
+{% endblock %}

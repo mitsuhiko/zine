@@ -15,7 +15,8 @@ import os
 from os import path
 from threading import Lock
 
-from zine.i18n import lazy_gettext
+from zine.i18n import lazy_gettext, _
+from zine.utils import log
 from zine.application import InternalError
 
 
@@ -44,6 +45,10 @@ DEFAULT_VARS = {
     # logger settings
     'log_file':                 (unicode, u'zine.log'),
     'log_level':                (unicode, u'warning'),
+
+    # if set to true, internal errors are not catched.  This is useful for
+    # debugging tools such as werkzeug.debug
+    'passthrough_errors':       (bool, False),
 
     # url settings
     'blog_url_prefix':          (unicode, u''),
@@ -162,14 +167,22 @@ class ConfigurationTransactionError(InternalError):
     write the changes to the config file.
     """
 
+    help_text = lazy_gettext(u'''
+    <p>
+      This error can happen if the configuration file is not writeable.
+      Make sure the folder of the configuration file is writeable and
+      that the file itself is writeable as well.
+    ''')
+
     def __init__(self, message_or_exception):
         if isinstance(message_or_exception, basestring):
             message = message_or_exception
             error = None
         else:
-            message = str(message_or_exception)
+            message = _(u'Could not save configuration file: %s') % \
+                      str(message_or_exception).decode('utf-8', 'ignore')
             error = message_or_exception
-        Exception.__init__(self, message)
+        InternalError.__init__(self, message)
         self.original_exception = error
 
 
@@ -180,7 +193,6 @@ class Configuration(object):
     >>> app.cfg['blog_title']
     iu'My Zine Blog'
     >>> app.cfg.change_single('blog_title', 'Test Blog')
-    True
     >>> app.cfg['blog_title']
     u'Test Blog'
     >>> t = app.cfg.edit(); t.revert_to_default('blog_title'); t.commit()
@@ -483,6 +495,7 @@ class ConfigTransaction(object):
                 finally:
                     f.close()
             except IOError, e:
+                log.error('Could not write configuration: %s' % e, 'config')
                 raise ConfigurationTransactionError(e)
             self.cfg._values.update(self._values)
             self.cfg._converted_values.update(self._converted_values)

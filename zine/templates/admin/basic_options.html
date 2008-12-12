@@ -6,69 +6,10 @@
     From here you can configure the basic blog settings like the blog
     title and tagline.
   {% endtrans %}</p>
-  <form action="" method="post">
-    <dl>
-      <dt>{{ _("Blog Title") }}</dt>
-      <dd>{{ h.input_field('blog_title', form.blog_title, size="40") }}</dd>
-      <dt>{{ _("Blog Tagline") }}</dt>
-      <dd>{{ h.input_field('blog_tagline', form.blog_tagline, size="40") }}</dd>
-      <dt>{{ _("Blog E-Mail") }}</dt>
-      <dd>{{ h.input_field('blog_email', form.blog_email, size="40") }}</dd>
-      <dt>{{ _("Language") }}</dt>
-      <dd><select name="language">
-      {%- for key, value in languages %}
-        <option{% if key == form.language %} selected{% endif %} value="{{ key|e
-          }}">{{ value|e }}</option>
-      {%- endfor %}
-      </select></dd>
-      <dt>{{ _("Timezone") }}</dt>
-      <dd><select name="timezone">
-      {%- for key, value in timezones %}
-        <option{% if key == form.timezone %} selected{% endif %} value="{{ key|e
-          }}">{{ value|e }}</option>
-      {%- endfor %}
-      </select></dd>
-      <dt>{{ _("Cookie Name") }}</dt>
-      <dd>{{ h.input_field('session_cookie_name', form.session_cookie_name, size="20") }}</dd>
-      <dt>{{ _("Comments Enabled") }}</dt>
-      <dd>{{ h.checkbox('comments_enabled', form.comments_enabled) }}
-          <label for="comments_enabled">{{ _("enable comments per default") }}</label></dd>
-      <dt>{{ _('Comment Moderation') }}</dt>
-      {%- for id, label in [
-        (0, _('Automatically approve all commments')),
-        (1, _('An administrator must always approve the comment')),
-        (2, _('Automatically approve comments by known comment authors'))
-      ] %}
-        <dd>{{ h.radio_button('moderate_comments', id, form.moderate_comments == id,
-                              id='moderate_comments_' ~ id) }}
-            <label for="moderate_comments_{{ id }}">{{ label }}</label></dd>
-      {%- endfor %}
-      <dt>{{ _("Pingbacks Enabled") }}</dt>
-      <dd>{{ h.checkbox('pings_enabled', form.pings_enabled) }}
-          <label for="pings_enabled">{{ _("enable pingbacks per default") }}</label></dd>
-      <dt>{{ _("Use Flat Comments") }}</dt>
-      <dd>{{ h.checkbox('use_flat_comments', form.use_flat_comments) }}
-          <label for="pings_enabled">{{ _("use flat comments") }}</label></dd>
-      <dt>{{ _("Default Parser") }}</dt>
-      <dd><select name="default_parser">
-      {%- for parser_id, name in parsers %}
-        <option value="{{ parser_id|e }}"{% if parser_id == form.default_parser
-          %} selected{% endif %}>{{ name|e }}</option>
-      {%- endfor %}
-      </select></dd>
-      <dt>{{ _("Comment Parser") }}</dt>
-      <dd><select name="comment_parser">
-      {%- for parser_id, name in parsers %}
-        <option value="{{ parser_id|e }}"{% if parser_id == form.comment_parser
-          %} selected{% endif %}>{{ name|e }}</option>
-      {%- endfor %}
-      </select></dd>
-      <dt>{{ _("Posts Per Page") }}</dt>
-      <dd>{{ h.input_field('posts_per_page', form.posts_per_page) }}</dd>
-    </dl>
+  {% call form() %}
+    {{ form.as_dl() }}
     <div class="actions">
       <input type="submit" value="{{ _('Save') }}">
-      {{ hidden_form_data }}
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

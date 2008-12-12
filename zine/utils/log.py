@@ -23,7 +23,6 @@ from traceback import print_exception, format_exception
 
 from werkzeug.exceptions import NotFound
 
-from zine.application import InternalError
 from zine.i18n import gettext
 from zine.utils import local
 from zine.utils.io import tail
@@ -72,7 +71,7 @@ class Logger(object):
             self.log('error', u'Logger configuration got invalid level "%s", '
                      u'fallen back to "warning' % level, 'logger')
 
-    def view(self, per_page=100):
+    def view(self, per_page=200):
         """Returns a logfile view for the log."""
         return LogfileView(self.logfile, per_page)
 
@@ -90,8 +89,8 @@ class Logger(object):
             try:
                 self._file = file(self.logfile, 'a+')
             except IOError:
-                # grml.  log file not writable.  abort
-                raise LogfileNotWriteable()
+                # grml.  log file not writable.  return a dummy
+                return file(os.nulldev, 'w')
             if self._file.tell() > 0:
                 self._file.seek(-1, 2)
                 char = self._file.read()
@@ -125,10 +124,6 @@ class Logger(object):
 
 class NoSuchPage(NotFound):
     """That page just does not exist."""
-
-
-class LogfileNotWriteable(InternalError):
-    """Raised if the logfile is not writable."""
 
 
 class LogfileItem(object):
@@ -181,8 +176,6 @@ class LogfilePage(object):
                 last_prefix = d.pop('prefix')
                 item = LogfileItem(**d)
                 self.items.append(item)
-
-        self.items.reverse()
 
 
 class LogfileView(object):

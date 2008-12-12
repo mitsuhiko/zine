@@ -374,6 +374,11 @@ p.preview {
 }
 
 /* :::: FORM CONTROLS :::: */
+ul.choicegroup, ol.choicegroup {
+    list-style: none;
+    padding: 0;
+}
+
 div.formbox {
     border: 1px solid #eee;
     padding: 2px;
