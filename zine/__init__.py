@@ -28,5 +28,10 @@ __version__ = '0.1 alpha'
 __url__ = 'http://zine.pocoo.org/'
 
 
+# implementation detail.  Stuff in __all__ and the initial import has to be
+# the same.  Everything that is not listed in `__all__` or everything that
+# does not start with two leading underscores is wiped out on reload and
+# the core module is *not* reloaded, thus stuff will get lost if it's not
+# properly listed.
 from zine._core import setup, get_wsgi_app
 __all__ = ('setup', 'get_wsgi_app')

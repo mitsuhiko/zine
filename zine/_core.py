@@ -70,11 +70,13 @@ def _unload_zine():
 
         for name, module in sys.modules.items():
             # in the main module delete everything but the stuff
-            # that we want to have there.
+            # that we want to have there.  Also make sure that
+            # zine._core (which python internally imports) is not
+            # removed.
             if name == 'zine':
-                preserve = set(module.__all__)
+                preserve = set(module.__all__) | set(['_core'])
                 for key, value in module.__dict__.items():
-                    if key not in preserve and not key.startswith('_'):
+                    if key not in preserve and not key.startswith('__'):
                         module.__dict__.pop(key, None)
             elif name.startswith('zine.') and name != 'zine._core':
                 # get rid of the module
