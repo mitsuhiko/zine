@@ -105,6 +105,8 @@ div.body ul.navbar li a {
     font-size: 13px!important;
     line-height: 24px!important;
     height: 24px!important;
+    -moz-border-radius: 2px 2px 0 0;
+    -webkit-border-radius: 2px 2px 0 0;
 }
 
 div.body ul.navbar li a:hover {
@@ -142,6 +144,8 @@ div.body ul.ctxnavbar li a {
     font-size: 12px!important;
     line-height: 21px!important;
     height: 21px!important;
+    -moz-border-radius: 2px 2px 0 0;
+    -webkit-border-radius: 2px 2px 0 0;
 }
 
 div.body ul.ctxnavbar li a:hover {
