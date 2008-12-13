@@ -17,7 +17,7 @@ from werkzeug import run_simple
 
 sys.path.append(dirname(__file__))
 from _init_zine import find_instance
-from zine import make_app
+from zine import get_wsgi_app
 
 
 def main():
@@ -39,7 +39,7 @@ def main():
     if instance is None:
         parser.error('instance not found.  Specify path to instance')
 
-    app = make_app(instance)
+    app = get_wsgi_app(instance)
     if options.profile:
         from werkzeug.contrib.profiler import ProfilerMiddleware
         app = ProfilerMiddleware(app, stream=sys.stderr)

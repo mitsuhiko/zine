@@ -21,7 +21,7 @@ from werkzeug import escape, url_quote
 from werkzeug.exceptions import Forbidden
 from werkzeug.contrib.reporterstream import BaseReporterStream
 
-from zine.utils import local
+from zine.application import get_request, get_application
 from zine.utils.http import get_redirect_target
 
 
@@ -59,7 +59,7 @@ class IntelligentRedirect(HiddenFormField):
     """
 
     def __init__(self):
-        self.request = local.request
+        self.request = get_request()
         self.invalid_targets = []
 
     def add_invalid(self, *args, **kwargs):
@@ -158,10 +158,10 @@ class CSRFProtector(HiddenFormField):
     """
 
     def __init__(self):
-        self.request = request = local.request
+        self.request = request = get_request()
         self.token = sha.new('%s|%s|%s|%s' % (
             request.path,
-            local.application.cfg['secret_key'],
+            get_application().cfg['secret_key'],
             request.user.user_id,
             request.user.is_somebody
         )).hexdigest()
@@ -205,7 +205,7 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
     """
 
     def __init__(self, transport_id=None):
-        self.request = request = local.request
+        self.request = request = get_request()
 
         if transport_id is None:
             transport_id = request.args.get('_transport_id')
@@ -225,7 +225,7 @@ class StreamReporter(HiddenFormField, BaseReporterStream):
 
     @staticmethod
     def _get_manager():
-        app = local.application
+        app = get_application()
         return os.path.join(gettempdir(), '_zine_streams_' +
                             sha.new(app.instance_folder).hexdigest()[2:10])
 
