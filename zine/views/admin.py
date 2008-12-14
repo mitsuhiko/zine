@@ -97,8 +97,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # set up the administration menu bar
     if request.user.role == ROLE_ADMIN:
         navigation_bar += [
-            ('users', url_for('admin/show_users'), _(u'Users'), [
-                ('overview', url_for('admin/show_users'), _(u'Overview')),
+            ('users', url_for('admin/manage_users'), _(u'Users'), [
+                ('overview', url_for('admin/manage_users'), _(u'Overview')),
                 ('edit', url_for('admin/new_user'), _(u'Edit User'))
             ]),
             ('options', url_for('admin/options'), _(u'Options'), [
@@ -706,14 +706,14 @@ def delete_category(request, category_id):
 
 
 @require_role(ROLE_ADMIN)
-def show_users(request, page):
+def manage_users(request, page):
     """Show all users in a list."""
     users = User.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/show_users', page, PER_PAGE,
+    pagination = AdminPagination('admin/manage_users', page, PER_PAGE,
                                  User.query.count())
     if not posts and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_users.html', 'users.overview',
+    return render_admin_response('admin/manage_users.html', 'users.overview',
                                  users=users,
                                  pagination=pagination)
 
@@ -732,7 +732,7 @@ def edit_user(request, user_id=None):
 
     if request.method == 'POST':
         if request.form.get('cancel'):
-            return form.redirect('admin/show_users')
+            return form.redirect('admin/manage_users')
         elif request.form.get('delete') and user:
             return redirect_to('admin/delete_user', user_id=user.id)
         elif form.validate(request.form):
@@ -751,7 +751,7 @@ def edit_user(request, user_id=None):
             )
             flash(msg % html_user_detail, icon)
             if request.form.get('save'):
-                return form.redirect('admin/show_users')
+                return form.redirect('admin/manage_users')
             return redirect_to('admin/edit_user', user_id=user.id)
 
     return render_admin_response('admin/edit_user.html', 'users.edit',
@@ -766,10 +766,10 @@ def delete_user(request, user_id):
     redirect = IntelligentRedirect()
 
     if user is None:
-        return redirect('admin/show_users')
+        return redirect('admin/manage_users')
     elif user == request.user:
         flash(_(u'You cannot delete yourself.'), 'error')
-        return redirect('admin/show_users')
+        return redirect('admin/manage_users')
 
     if request.method == 'POST':
         csrf_protector.assert_safe()
@@ -800,7 +800,7 @@ def delete_user(request, user_id):
             flash(_(u'User %s deleted successfully.') %
                   escape(user.username), 'remove')
             db.commit()
-            return redirect('admin/show_users')
+            return redirect('admin/manage_users')
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
         user=user,
