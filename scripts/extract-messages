@@ -65,7 +65,7 @@ def main():
     extracted = extract_from_dir(root, METHODS, {}, KEYWORDS,
                                  COMMENT_TAGS, callback=callback,
                                  strip_comment_tags=True)
-    
+
     for filename, lineno, message, comments in extracted:
         catalog.add(message, None, [(strip_path(filename, root), lineno)],
                     auto_comments=comments)

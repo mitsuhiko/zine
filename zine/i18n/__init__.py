@@ -386,9 +386,9 @@ def list_timezones():
     return result
 
 
-def list_languages(self_translated=False):
+def list_languages(self_translated=True):
     """Return a list of all languages."""
-    if not self_translated:
+    if self_translated:
         locale = get_locale()
     else:
         locale = None

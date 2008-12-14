@@ -32,9 +32,9 @@ if CGI_DEBUG:
 import sys
 sys.path.insert(0, ZINE_LIB)
 
-from zine import make_app
+from zine import get_wsgi_app
 from wsgiref.handlers import CGIHandler
-app = make_app(INSTANCE_FOLDER)
+app = get_wsgi_app(INSTANCE_FOLDER)
 
 if __name__ == '__main__':
     CGIHandler().run(app)

@@ -32,7 +32,7 @@ from sqlalchemy.types import MutableType, TypeDecorator
 from werkzeug import url_decode
 from werkzeug.exceptions import NotFound
 
-from zine.utils import local, local_manager
+from zine.utils import local_manager
 
 
 _sqlite_re = re.compile(r'sqlite:(?:(?://(.*?))|memory)(?:\?(.*))?$')
@@ -45,7 +45,8 @@ def get_engine():
     :func:`~zine.application.get_application` and check it for `None`.
     The database engine is stored on the application object as `database_engine`.
     """
-    return local.application.database_engine
+    from zine.application import get_application
+    return get_application().database_engine
 
 
 def create_engine(uri, relative_to=None, echo=False):
@@ -124,8 +125,7 @@ class Query(orm.Query):
         return rv
 
 
-session = orm.scoped_session(lambda: orm.create_session(
-                             local.application.database_engine,
+session = orm.scoped_session(lambda: orm.create_session(get_engine(),
                              autoflush=True, autocommit=False),
                              local_manager.get_ident)
 

@@ -22,5 +22,5 @@ ZINE_LIB = '/usr/lib/zine'
 import sys
 sys.path.insert(0, ZINE_LIB)
 
-from zine import make_app
-application = make_app(INSTANCE_FOLDER)
+from zine import get_wsgi_app
+application = get_wsgi_app(INSTANCE_FOLDER)

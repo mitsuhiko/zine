@@ -42,7 +42,7 @@ def main():
     rmtree(instance)
     mkdir(instance)
 
-    from zine.application import make_zine
+    from zine.application import setup
     from zine.database import users, init_database, db
     from zine.utils.crypto import gen_pwhash, gen_secret_key
     from zine.config import Configuration
@@ -63,7 +63,7 @@ def main():
     t.commit()
 
     from zine.models import User, ROLE_ADMIN
-    app = make_zine(instance, True)
+    app = setup(instance)
     User(options.username, options.password, 'admin@localhost', role=ROLE_ADMIN)
     db.commit()
 
