@@ -50,7 +50,7 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
-     DeleteCategoryForm, EditUserForm
+     DeleteCategoryForm, EditUserForm, DeleteUserForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -762,51 +762,24 @@ def edit_user(request, user_id=None):
 def delete_user(request, user_id):
     """Like all other delete screens just that it deletes a user."""
     user = User.query.get(user_id)
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
     if user is None:
-        return redirect('admin/manage_users')
-    elif user == request.user:
+        raise NotFound()
+    form = DeleteUserForm(user)
+    if user == request.user:
         flash(_(u'You cannot delete yourself.'), 'error')
-        return redirect('admin/manage_users')
+        return form.redirect('admin/manage_users')
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
         if request.form.get('cancel'):
-            return redirect('admin/edit_user', user_id=user.id)
-        elif request.form.get('confirm'):
-            redirect.add_invalid('admin/edit_user', user_id=user.id)
-            action = request.form.get('action')
-            action_val = None
-            if action == 'reassign':
-                action_val = request.form.get('reassign_user', type=int)
-                db.execute(posts.update(posts.c.author_id == user_id), dict(
-                    author_id=action_val
-                ))
-            #! plugins can use this to react to user deletes.  They can't stop
-            #! the deleting of the user but they can delete information in
-            #! their own tables so that the database is consistent afterwards.
-            #! Additional to the user object an action and action val is
-            #! provided.  The action can be one of the following values:
-            #!  "reassign":     Reassign the objects to the user with the
-            #!                  user_id of "action_val".
-            #!  "delete":       Delete related objects.
-            #! More actions might be added in the future so plugins should
-            #! ignore unknown actions.  If an unknown action is provided
-            #! the plugin should treat is as "delete".
-            emit_event('before-user-deleted', user, action, action_val)
-            db.delete(user)
-            flash(_(u'User %s deleted successfully.') %
-                  escape(user.username), 'remove')
+            return form.redirect('admin/edit_user', user_id=user.id)
+        elif request.form.get('confirm') and form.validate(request.form):
+            form.add_invalid_redirect_target('admin/edit_user', user_id=user.id)
+            form.delete_user()
             db.commit()
-            return redirect('admin/manage_users')
+            return form.redirect('admin/manage_users')
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
-        user=user,
-        other_users=User.query.filter(User.id != user_id).all(),
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)

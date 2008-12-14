@@ -12,7 +12,7 @@ from datetime import datetime
 
 from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
-from zine.database import db
+from zine.database import db, posts
 from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
      COMMENT_BLOCKED_USER, ROLE_ADMIN, ROLE_EDITOR, ROLE_AUTHOR, \
@@ -535,9 +535,9 @@ class _UserBoundForm(forms.Form):
     """Internal baseclass for comment bound forms."""
 
     def __init__(self, user, initial=None):
+        forms.Form.__init__(self, initial)
         self.app = get_application()
         self.user = user
-        forms.Form.__init__(self, initial)
 
     def as_widget(self):
         widget = forms.Form.as_widget(self)
@@ -611,6 +611,46 @@ class EditUserForm(_UserBoundForm):
             self.user.set_password(self.data['password'])
         self.user.email = self.data['email']
         self._set_common_attributes(self.user)
+
+
+class DeleteUserForm(_UserBoundForm):
+    """Used to delete a user from the admin panel."""
+
+    action = forms.ChoiceField(lazy_gettext(u'What should Zine do with posts'
+                                            u'this user wrote?'), choices=[
+        ('delete', lazy_gettext(u'Delete them permanently')),
+        ('reassign', lazy_gettext(u'Reassign posts'))
+    ], widget=forms.RadioButtonGroup)
+    reassign_to = forms.ModelField(User, 'id',
+                                   lazy_gettext(u'Reassign posts to'),
+                                   widget=forms.SelectBox)
+
+    def __init__(self, user, initial=None):
+        self.reassign_to.choices = [('', u'')] + [
+            (u.id, u.username)
+            for u in User.query.filter(User.id != user.id)
+        ]
+        _UserBoundForm.__init__(self, user, forms.fill_dict(initial,
+            action='reassign'
+        ))
+
+    def context_validate(self, data):
+        if data['action'] == 'reassign' and not data['reassign_to']:
+            raise ValidationError(_('You have to select a user that '
+                                    'gets the posts assigned.'))
+
+    def delete_user(self):
+        """Deletes the user."""
+        if self.data['action'] == 'reassign':
+            db.execute(posts.update(posts.c.author_id == self.user.id), dict(
+                author_id=self.data['reassign_to'].id
+            ))
+        #! plugins can use this to react to user deletes.  They can't stop
+        #! the deleting of the user but they can delete information in
+        #! their own tables so that the database is consistent afterwards.
+        #! Additional to the user object the form data is submitted.
+        emit_event('before-user-deleted', self.user, self.data)
+        db.delete(self.user)
 
 
 class _ConfigForm(forms.Form):
