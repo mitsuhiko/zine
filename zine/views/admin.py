@@ -50,7 +50,7 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
-     DeleteCategoryForm
+     DeleteCategoryForm, EditUserForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -724,75 +724,24 @@ def edit_user(request, user_id=None):
     the dialog is simplified, some unimportant details are left out.
     """
     user = None
-    errors = []
-    form = dict.fromkeys(['username', 'real_name', 'display_name',
-                          'description', 'email', 'www'], u'')
-    form['role'] = ROLE_AUTHOR
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
     if user_id is not None:
         user = User.query.get(user_id)
         if user is None:
             raise NotFound()
-        form.update(
-            username=user.username,
-            real_name=user.real_name,
-            display_name=user._display_name,
-            description=user.description,
-            email=user.email,
-            www=user.www,
-            role=user.role
-        )
-    new_user = user is None
+    form = EditUserForm(user)
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
         if request.form.get('cancel'):
-            return redirect('admin/show_users')
+            return form.redirect('admin/show_users')
         elif request.form.get('delete') and user:
             return redirect_to('admin/delete_user', user_id=user.id)
-
-        username = form['username'] = request.form.get('username')
-        if not username:
-            errors.append(_(u'Username is required.'))
-        elif new_user and User.query.filter_by(username=username).first() \
-             is not None:
-            errors.append(_(u'Username “%s” is taken.') % username)
-        password = form['password'] = request.form.get('password')
-        if new_user and not password:
-            errors.append(_(u'You have to provide a password.'))
-        real_name = form['real_name'] = request.form.get('real_name', '')
-        display_name = form['display_name'] = request.form.get('display_name')
-        description = form['description'] = request.form.get('description')
-        email = form['email'] = request.form.get('email', '')
-        if not check(is_valid_email, email):
-            errors.append(_(u'The user needs a valid mail address.'))
-        www = form['www'] = request.form.get('www', '')
-        try:
-            role = form['role'] = int(request.form.get('role', ''))
-            if role not in xrange(ROLE_ADMIN + 1):
-                raise ValueError()
-        except ValueError:
-            errors.append(_(u'Invalid user role.'))
-
-        if not errors:
-            if new_user:
-                user = User(username, password, email, real_name,
-                            description, www, role)
-                user.display_name = display_name or '$username'
+        elif form.validate(request.form):
+            if user is None:
+                user = form.make_user()
                 msg = _(u'User %s created successfully.')
                 icon = 'add'
             else:
-                user.username = username
-                if password:
-                    user.set_password(password)
-                user.email = email
-                user.real_name = real_name
-                user.display_name = display_name or '$username'
-                user.description = description
-                user.www = www
-                user.role = role
+                form.save_changes()
                 msg = _(u'User %s edited successfully.')
                 icon = 'info'
             db.commit()
@@ -802,34 +751,11 @@ def edit_user(request, user_id=None):
             )
             flash(msg % html_user_detail, icon)
             if request.form.get('save'):
-                return redirect('admin/show_users')
+                return form.redirect('admin/show_users')
             return redirect_to('admin/edit_user', user_id=user.id)
 
-    if not new_user:
-        display_names = [
-            ('$username', user.username),
-        ]
-        if user.real_name:
-            display_names.append(('$real_name', user.real_name))
-    else:
-        display_names = None
-
-    for error in errors:
-        flash(error, 'error')
-
     return render_admin_response('admin/edit_user.html', 'users.edit',
-        new_user=user is None,
-        user=user,
-        form=form,
-        display_names=display_names,
-        roles=[
-            (ROLE_ADMIN, _(u'Administrator')),
-            (ROLE_EDITOR, _(u'Editor')),
-            (ROLE_AUTHOR, _(u'Author')),
-            (ROLE_SUBSCRIBER, _(u'Subscriber'))
-        ],
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)
