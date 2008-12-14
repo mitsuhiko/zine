@@ -21,7 +21,7 @@
         <li><a href="{{ url_for('admin/manage_entries')|e }}">{{ _("Manage Entries") }}</a>
         <li><a href="{{ url_for('admin/options')|e }}">{{ _("Configure Zine") }}</a>
         <li><a href="{{ url_for('admin/plugins')|e }}">{{ _("Manage Plugins") }}</a>
-        <li><a href="{{ url_for('admin/show_users')|e }}">{{ _("Manage Users") }}</a>
+        <li><a href="{{ url_for('admin/manage_users')|e }}">{{ _("Manage Users") }}</a>
         <li><a href="{{ url_for('admin/help')|e }}">{{ _("Get Help") }}</a>
       </ul>
       <p>{% trans help=url_for('admin/help'), support='http://zine.pocoo.org/support/',

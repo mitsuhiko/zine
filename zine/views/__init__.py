@@ -50,7 +50,7 @@ all_views = {
     'admin/new_category':       admin.edit_category,
     'admin/edit_category':      admin.edit_category,
     'admin/delete_category':    admin.delete_category,
-    'admin/show_users':         admin.show_users,
+    'admin/manage_users':       admin.manage_users,
     'admin/new_user':           admin.edit_user,
     'admin/edit_user':          admin.edit_user,
     'admin/delete_user':        admin.delete_user,

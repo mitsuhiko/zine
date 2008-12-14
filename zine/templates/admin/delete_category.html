@@ -2,14 +2,13 @@
 {% block title %}{{ _("Delete Category") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Delete Category") }}</h1>
-  <form action="" method="post">
+  {% call form() %}
     <div>
-      {{ hidden_form_data }}
-      <p>{% trans category_name=category.name|e %}
+      <p>{% trans category_name=form.category.name|e %}
         Do you really want to delete category "{{ category_name }}"?.
       {% endtrans %}</p>
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="confirm" value="{{ _('Yes') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

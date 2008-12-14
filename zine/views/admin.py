@@ -48,7 +48,9 @@ from zine.pluginsystem import install_package, InstallationError, \
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
-     PostDeleteForm, EditCommentForm, DeleteCommentForm
+     PostDeleteForm, EditCommentForm, DeleteCommentForm, \
+     ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
+     DeleteCategoryForm, EditUserForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -95,8 +97,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # set up the administration menu bar
     if request.user.role == ROLE_ADMIN:
         navigation_bar += [
-            ('users', url_for('admin/show_users'), _(u'Users'), [
-                ('overview', url_for('admin/show_users'), _(u'Overview')),
+            ('users', url_for('admin/manage_users'), _(u'Users'), [
+                ('overview', url_for('admin/manage_users'), _(u'Overview')),
                 ('edit', url_for('admin/new_user'), _(u'Edit User'))
             ]),
             ('options', url_for('admin/options'), _(u'Options'), [
@@ -369,10 +371,10 @@ def delete_entry(request, post):
     """
     form = PostDeleteForm(post)
 
-    if request.method == 'POST' and form.validate(request.form):
+    if request.method == 'POST':
         if request.form.get('cancel'):
             return form.redirect('admin/edit_post', post_id=post.id)
-        elif request.form.get('confirm'):
+        elif request.form.get('confirm') and form.validate(request.form):
             form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
             flash(_(u'The entry %s was deleted successfully.') %
@@ -439,10 +441,10 @@ def delete_page(request, post):
     """
     form = PostDeleteForm(post)
 
-    if request.method == 'POST' and form.validate(request.form):
+    if request.method == 'POST':
         if request.form.get('cancel'):
             return form.redirect('admin/edit_post', post_id=post.id)
-        elif request.form.get('confirm'):
+        elif request.form.get('confirm') and form.validate(request.form):
             form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
             flash(_(u'The page %s was deleted successfully.') %
@@ -595,61 +597,40 @@ def delete_comment(request, comment_id):
 def approve_comment(request, comment_id):
     """Approve a comment"""
     comment = Comment.query.get(comment_id)
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
     if comment is None:
         raise NotFound()
+    form = ApproveCommentForm(comment)
 
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('confirm'):
-            csrf_protector.assert_safe()
-            comment.status = COMMENT_MODERATED
-            comment.blocked_msg = ''
+            form.approve_comment()
             db.commit()
             flash(_(u'Comment by %s approved successfully.') %
                   escape(comment.author), 'configure')
-        return redirect('admin/show_comments')
+        return form.redirect('admin/show_comments')
 
     return render_admin_response('admin/approve_comment.html',
-                                 'comments.overview',
-        comment=comment,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 'comments.overview', form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)
 def block_comment(request, comment_id):
     """Block a comment."""
     comment = Comment.query.get(comment_id)
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
     if comment is None:
         raise NotFound()
+    form = BlockCommentForm(comment)
 
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('confirm'):
-            msg = request.form.get('message')
-            if not msg:
-                msg = _(u'blocked by %s') % request.user.display_name
-            csrf_protector.assert_safe()
-            comment.status = COMMENT_BLOCKED_USER
-            comment.blocked_msg = msg
+            form.block_comment()
             db.commit()
             flash(_(u'Comment by %s blocked successfully.') %
                   escape(comment.author), 'configure')
-        return redirect('admin/show_comments')
+        return form.redirect('admin/show_comments')
 
     return render_admin_response('admin/block_comment.html',
-                                 'comments.overview',
-        comment=comment,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 'comments.overview', form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)
@@ -668,73 +649,38 @@ def manage_categories(request, page):
 @require_role(ROLE_AUTHOR)
 def edit_category(request, category_id=None):
     """Edit a category."""
-    errors = []
-    form = dict.fromkeys(['slug', 'name', 'description'], u'')
-    new_category = True
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
+    category = None
     if category_id is not None:
         category = Category.query.get(category_id)
         if category is None:
             raise NotFound()
-        form.update(
-            slug=category.slug,
-            name=category.name,
-            description=category.description
-        )
-        new_category = False
 
-    old_slug = form['slug']
+    form = EditCategoryForm(category)
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
-
-        # cancel
         if request.form.get('cancel'):
-            return redirect('admin/show_categories')
-
-        # delete
+            return form.redirect('admin/manage_categories')
         if request.form.get('delete'):
             return redirect_to('admin/delete_category', category_id=category.id)
-
-        form['slug'] = slug = request.form.get('slug')
-        form['name'] = name = request.form.get('name')
-        form['description'] = description = request.form.get('description')
-
-        if not name:
-            errors.append(_(u'You have to give the category a name.'))
-        elif old_slug != slug and Category.query.filter_by(slug=slug).first() is not None:
-            errors.append(_(u'The slug "%s" is not unique.') % slug)
-
-        if not errors:
-            if new_category:
-                category = Category(name, description, slug or None)
+        elif form.validate(request.form):
+            if category is None:
+                category = form.make_category()
                 msg = _(u'Category %s created successfully.')
                 msg_type = 'add'
             else:
-                if category.slug is not None:
-                    category.slug = slug
-                category.name = name
-                category.description = description
+                form.save_changes()
                 msg = _(u'Category %s updated successfully.')
                 msg_type = 'info'
-
             db.commit()
             html_category_detail = u'<a href="%s">%s</a>' % (
                 escape(url_for(category)),
                 escape(category.name)
             )
             flash(msg % html_category_detail, msg_type)
-            return redirect('admin/show_categories')
-
-    for error in errors:
-        flash(error, 'error')
+            return redirect_to('admin/manage_categories')
 
     return render_admin_response('admin/edit_category.html', 'manage.categories',
-        form=form,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)
@@ -743,40 +689,31 @@ def delete_category(request, category_id):
     category = Category.query.get(category_id)
     if category is None:
         return redirect_to('admin/show_categories')
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
+    form = DeleteCategoryForm(category)
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
-
         if request.form.get('cancel'):
             return redirect('admin/edit_category', category_id=category.id)
-        elif request.form.get('confirm'):
+        elif request.form.get('confirm') and form.validate(request.form):
             redirect.add_invalid('admin/edit_category', category_id=category.id)
-            #! plugins can use this to react to category deletes.  They can't stop
-            #! the deleting of the category but they can delete information in
-            #! their own tables so that the database is consistent afterwards.
-            emit_event('before-category-deleted', category)
-            db.delete(category)
+            form.delete_category()
             flash(_(u'Category %s deleted successfully.') % escape(category.name))
             db.commit()
-            return redirect('admin/show_categories')
+            return form.redirect('admin/show_categories')
 
     return render_admin_response('admin/delete_category.html', 'manage.categories',
-        category=category,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)
-def show_users(request, page):
+def manage_users(request, page):
     """Show all users in a list."""
     users = User.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/show_users', page, PER_PAGE,
+    pagination = AdminPagination('admin/manage_users', page, PER_PAGE,
                                  User.query.count())
     if not posts and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_users.html', 'users.overview',
+    return render_admin_response('admin/manage_users.html', 'users.overview',
                                  users=users,
                                  pagination=pagination)
 
@@ -787,75 +724,24 @@ def edit_user(request, user_id=None):
     the dialog is simplified, some unimportant details are left out.
     """
     user = None
-    errors = []
-    form = dict.fromkeys(['username', 'real_name', 'display_name',
-                          'description', 'email', 'www'], u'')
-    form['role'] = ROLE_AUTHOR
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
     if user_id is not None:
         user = User.query.get(user_id)
         if user is None:
             raise NotFound()
-        form.update(
-            username=user.username,
-            real_name=user.real_name,
-            display_name=user._display_name,
-            description=user.description,
-            email=user.email,
-            www=user.www,
-            role=user.role
-        )
-    new_user = user is None
+    form = EditUserForm(user)
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
         if request.form.get('cancel'):
-            return redirect('admin/show_users')
+            return form.redirect('admin/manage_users')
         elif request.form.get('delete') and user:
             return redirect_to('admin/delete_user', user_id=user.id)
-
-        username = form['username'] = request.form.get('username')
-        if not username:
-            errors.append(_(u'Username is required.'))
-        elif new_user and User.query.filter_by(username=username).first() \
-             is not None:
-            errors.append(_(u'Username “%s” is taken.') % username)
-        password = form['password'] = request.form.get('password')
-        if new_user and not password:
-            errors.append(_(u'You have to provide a password.'))
-        real_name = form['real_name'] = request.form.get('real_name', '')
-        display_name = form['display_name'] = request.form.get('display_name')
-        description = form['description'] = request.form.get('description')
-        email = form['email'] = request.form.get('email', '')
-        if not check(is_valid_email, email):
-            errors.append(_(u'The user needs a valid mail address.'))
-        www = form['www'] = request.form.get('www', '')
-        try:
-            role = form['role'] = int(request.form.get('role', ''))
-            if role not in xrange(ROLE_ADMIN + 1):
-                raise ValueError()
-        except ValueError:
-            errors.append(_(u'Invalid user role.'))
-
-        if not errors:
-            if new_user:
-                user = User(username, password, email, real_name,
-                            description, www, role)
-                user.display_name = display_name or '$username'
+        elif form.validate(request.form):
+            if user is None:
+                user = form.make_user()
                 msg = _(u'User %s created successfully.')
                 icon = 'add'
             else:
-                user.username = username
-                if password:
-                    user.set_password(password)
-                user.email = email
-                user.real_name = real_name
-                user.display_name = display_name or '$username'
-                user.description = description
-                user.www = www
-                user.role = role
+                form.save_changes()
                 msg = _(u'User %s edited successfully.')
                 icon = 'info'
             db.commit()
@@ -865,34 +751,11 @@ def edit_user(request, user_id=None):
             )
             flash(msg % html_user_detail, icon)
             if request.form.get('save'):
-                return redirect('admin/show_users')
+                return form.redirect('admin/manage_users')
             return redirect_to('admin/edit_user', user_id=user.id)
 
-    if not new_user:
-        display_names = [
-            ('$username', user.username),
-        ]
-        if user.real_name:
-            display_names.append(('$real_name', user.real_name))
-    else:
-        display_names = None
-
-    for error in errors:
-        flash(error, 'error')
-
     return render_admin_response('admin/edit_user.html', 'users.edit',
-        new_user=user is None,
-        user=user,
-        form=form,
-        display_names=display_names,
-        roles=[
-            (ROLE_ADMIN, _(u'Administrator')),
-            (ROLE_EDITOR, _(u'Editor')),
-            (ROLE_AUTHOR, _(u'Author')),
-            (ROLE_SUBSCRIBER, _(u'Subscriber'))
-        ],
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)
@@ -903,10 +766,10 @@ def delete_user(request, user_id):
     redirect = IntelligentRedirect()
 
     if user is None:
-        return redirect('admin/show_users')
+        return redirect('admin/manage_users')
     elif user == request.user:
         flash(_(u'You cannot delete yourself.'), 'error')
-        return redirect('admin/show_users')
+        return redirect('admin/manage_users')
 
     if request.method == 'POST':
         csrf_protector.assert_safe()
@@ -937,7 +800,7 @@ def delete_user(request, user_id):
             flash(_(u'User %s deleted successfully.') %
                   escape(user.username), 'remove')
             db.commit()
-            return redirect('admin/show_users')
+            return redirect('admin/manage_users')
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
         user=user,

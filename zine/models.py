@@ -676,6 +676,11 @@ class Category(object):
 
     def set_auto_slug(self):
         """Generate a slug for this category."""
+        # TODO: this is called form the admin panel if the user does not
+        # enter a slug.  If gen_slug returns a slug that is already given
+        # for another category an error occurs.  There should be a `gen_slug`
+        # method that returns a 100% unique slug by adding numbers or
+        # something similar.
         self.slug = gen_slug(self.name)
 
     def get_url_values(self):

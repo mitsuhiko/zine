@@ -1,6 +1,6 @@
 {% macro render_formbox(field, label, class, toggleable=true, collapsed=true) %}
   <div class="formbox{{ " " + class if class }}{{ " toggleable" if toggleable
-    }}{{ " collapsed" if collapsed }}">
+    }}{{ " collapsed" if collapsed and toggleable }}">
     <h3>{{ label if label else field.label() }}</h3>
     {{ caller() if caller else field() }}
   </div>
