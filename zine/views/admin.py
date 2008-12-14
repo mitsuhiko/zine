@@ -48,7 +48,7 @@ from zine.pluginsystem import install_package, InstallationError, \
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
-     PostDeleteForm, EditCommentForm
+     PostDeleteForm, EditCommentForm, DeleteCommentForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -574,32 +574,21 @@ def delete_comment(request, comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
         return redirect_to('admin/show_comments')
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
 
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
+    form = DeleteCommentForm(comment)
 
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return redirect('admin/edit_comment', comment_id=comment.id)
+            return form.redirect('admin/edit_comment', comment_id=comment.id)
         elif request.form.get('confirm'):
-            redirect.add_invalid('admin/edit_comment', comment_id=comment.id)
-            #! plugins can use this to react to comment deletes.  They can't
-            #! stop the deleting of the comment but they can delete information
-            #! in their own tables so that the database is consistent
-            #! afterwards.
-            emit_event('before-comment-deleted', comment)
-            db.delete(comment)
-            flash(_(u'Comment by %s deleted successfully.' %
-                    escape(comment.author)), 'remove')
+            form.add_invalid_redirect_target('admin/edit_comment',
+                                             comment_id=comment.id)
+            form.delete_comment()
             db.commit()
-            return redirect('admin/show_comments')
+            return form.redirect('admin/show_comments')
 
     return render_admin_response('admin/delete_comment.html',
-                                 'comments.overview',
-        comment=comment,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 'comments.overview', form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)

@@ -357,7 +357,21 @@ class PostDeleteForm(forms.Form):
         db.delete(self.post)
 
 
-class EditCommentForm(forms.Form):
+class _CommentBoundForm(forms.Form):
+    """Internal baseclass for comment bounds forms."""
+
+    def __init__(self, comment, initial=None):
+        self.app = get_application()
+        self.comment = comment
+        forms.Form.__init__(self, initial)
+
+    def as_widget(self):
+        widget = forms.Form.as_widget(self)
+        widget.comment = self.comment
+        return widget
+
+
+class EditCommentForm(_CommentBoundForm):
     """Form for comment editing in admin."""
     author = forms.TextField(lazy_gettext(u'Author'), required=True)
     email = forms.TextField(lazy_gettext(u'Email'),
@@ -371,9 +385,7 @@ class EditCommentForm(forms.Form):
     blocked_msg = forms.TextField(lazy_gettext(u'Reason'))
 
     def __init__(self, comment, initial=None):
-        self.app = get_application()
-        self.comment = comment
-        initial = forms.fill_dict(initial,
+        _CommentBoundForm.__init__(self, comment, forms.fill_dict(initial,
             author=comment.author,
             email=comment.email,
             www=comment.www,
@@ -382,18 +394,12 @@ class EditCommentForm(forms.Form):
             parser=comment.parser,
             blocked=comment.blocked,
             blocked_msg=comment.blocked_msg
-        )
+        ))
         self.parser.choices = self.app.list_parsers()
         self.parser_missing = comment.parser_missing
         if self.parser_missing:
             self.parser.choices.append((post.parser, _('%s (missing)') %
                                         post.parser.title()))
-        forms.Form.__init__(self, initial)
-
-    def as_widget(self):
-        widget = forms.Form.as_widget(self)
-        widget.comment = self.comment
-        return widget
 
     def save_changes(self):
         """Save the changes back to the database."""
@@ -403,6 +409,19 @@ class EditCommentForm(forms.Form):
         # only apply these if the comment is not anonymous
         if self.comment.anonymous:
             forms.set_fields(self.comment, self.data, 'author', 'email', 'www')
+
+
+class DeleteCommentForm(_CommentBoundForm):
+    """Baseclass for deletion forms of comments."""
+
+    def delete_comment(self):
+        """Deletes the comment from the db."""
+        #! plugins can use this to react to comment deletes.  They can't
+        #! stop the deleting of the comment but they can delete information
+        #! in their own tables so that the database is consistent
+        #! afterwards.
+        emit_event('before-comment-deleted', self.comment)
+        db.delete(self.comment)
 
 
 class ConfigForm(forms.Form):
