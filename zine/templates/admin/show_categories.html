@@ -11,8 +11,8 @@
     </tr>
   {%- for category in categories %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
-      <td>{{ category.category_id }}</td>
-      <td><a href="{{ url_for('admin/edit_category', category_id=category.category_id)|e }}">{{
+      <td>{{ category.id }}</td>
+      <td><a href="{{ url_for('admin/edit_category', category_id=category.id)|e }}">{{
           category.slug|e }}</a></td>
       <td>{{ category.name|e }}</td>
       <td>{{ category.posts.count() }}</td>

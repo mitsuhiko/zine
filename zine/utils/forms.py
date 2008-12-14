@@ -1764,7 +1764,7 @@ class Form(object):
         path = self.request.path
         user_id = -1
         if self.request.user.is_somebody:
-            user_id = self.request.user.user_id
+            user_id = self.request.user.id
         login_time = self.request.session.get('lt', -1)
         key = self.request.app.cfg['secret_key']
         return sha1(('%s|%s|%s|%s' % (path, login_time, user_id, key))

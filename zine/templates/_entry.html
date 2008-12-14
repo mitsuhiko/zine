@@ -19,7 +19,7 @@
        %}{{ comments }} comment{% pluralize %}{{ comments}} comments{% endtrans -%}</a>
   {% endif %}
   {%- if request.user.is_manager %} {{ pipe() }}
-    <a href="{{ url_for('admin/edit_post', post_id=entry.post_id) }}">{{ _('Edit') }}</a>
+    <a href="{{ url_for('admin/edit_post', post_id=entry.id) }}">{{ _('Edit') }}</a>
   {%- endif %}
 {% endmacro %}
 

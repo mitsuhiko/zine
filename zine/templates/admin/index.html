@@ -38,7 +38,7 @@
       <ul class="drafts">
       {%- for draft in drafts %}
         <li><a href="{{ url_for('admin/edit_post',
-          post_id=draft.post_id) }}">{{ draft.title|e }}</a>
+          post_id=draft.id) }}">{{ draft.title|e }}</a>
       {%- endfor %}
       </ul>
       {% endif %}
@@ -52,12 +52,12 @@
           {{ comment.pub_date|datetimeformat('short') }}
           on <a href="{{ url_for(comment.post) }}">{{ comment.post.title|e }}</a>
           <p class="actions">
-            <a href="{{ url_for('admin/edit_comment', comment_id=comment.comment_id)|e
+            <a href="{{ url_for('admin/edit_comment', comment_id=comment.id)|e
              }}">{{ _("Edit") }}</a> |
-            <a href="{{ url_for('admin/delete_comment', comment_id=comment.comment_id)|e
+            <a href="{{ url_for('admin/delete_comment', comment_id=comment.id)|e
              }}">{{ _("Delete") }}</a> |
              <a href="{{ url_for('admin/approve_comment',
-               comment_id=comment.comment_id)|e }}">{{ _("Approve") }}</a>
+               comment_id=comment.id)|e }}">{{ _("Approve") }}</a>
       {%- endfor %}
       </ul>
       {% endif %}
@@ -65,7 +65,7 @@
       <h2>{{ _("Last Posts") }}</h2>
       <ul class="last_posts">
       {%- for post in last_posts %}
-        <li><a href="{{ url_for('admin/edit_post', post_id=post.post_id)
+        <li><a href="{{ url_for('admin/edit_post', post_id=post.id)
           }}">{{ post.title|e }}</a>, {{ post.pub_date|datetimeformat('short') }}
       {%- endfor %}
       </ul>

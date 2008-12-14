@@ -18,7 +18,7 @@
         <li>{{ h.input_field('action', 'reassign', 'radio') }} <label for="reassign">{% trans
         %}reassign to user{% endtrans %}
         <select name="reassign_user">{%- for user in other_users %}
-          <option value="{{ user.user_id }}">{{ user.username|e }}</option>
+          <option value="{{ user.id }}">{{ user.username|e }}</option>
         {%- endfor %}</select>
         {% endif %}
         <li>{{ h.input_field('action', 'delete', 'radio', checked=true) }}

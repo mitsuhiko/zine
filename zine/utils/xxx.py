@@ -162,7 +162,7 @@ class CSRFProtector(HiddenFormField):
         self.token = sha.new('%s|%s|%s|%s' % (
             request.path,
             local.application.cfg['secret_key'],
-            request.user.user_id,
+            request.user.id,
             request.user.is_somebody
         )).hexdigest()
 

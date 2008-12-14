@@ -8,16 +8,16 @@
       <th class="date">{{ _("Date") }}
   {%- for post in posts %}
     <tr class="{{ loop.cycle('odd', 'even') }}{% if post.is_draft %} draft{% endif %}">
-      <td class="title"><a href="{{ url_for('admin/edit_post', post_id=post.post_id)
+      <td class="title"><a href="{{ url_for('admin/edit_post', post_id=post.id)
         }}">{{ post.title|e }}</a>
       <td class="author"><a href="{{ url_for('admin/edit_user',
-        user_id=post.author.user_id) }}">{{ post.author.display_name|e }}</a>
+        user_id=post.author.id) }}">{{ post.author.display_name|e }}</a>
       <td class="categories">{% for category in post.categories
-        %}<a href="{{ url_for('admin/edit_category', category_id=category.category_id) }}">{{ category.name|e }}</a>
+        %}<a href="{{ url_for('admin/edit_category', category_id=category.id) }}">{{ category.name|e }}</a>
         {%- if not loop.last %}, {% endif %}
         {%- else %}{{ _("no categories") }}{% endfor %}
       <td class="comments"><a href="{{
-        url_for('admin/show_post_comments', post_id=post.post_id)
+        url_for('admin/show_post_comments', post_id=post.id)
         }}">{{ post.comments|count }}</a>
       <td class="date">{{ post.pub_date|datetimeformat('short') if post.pub_date }}
   {%- else %}
@@ -32,7 +32,7 @@
     <strong>{% trans count=drafts|length %}Your draft:{% pluralize
       %}Your drafts:{% endtrans %}</strong>
     {%- for draft in drafts %}
-      <a href="{{ url_for('admin/edit_post', post_id=draft.post_id) }}">{{ draft.title|e }}</a>
+      <a href="{{ url_for('admin/edit_post', post_id=draft.id) }}">{{ draft.title|e }}</a>
       {%- if not loop.last %},{% endif %}
     {%- endfor %}
   </div>

@@ -8,7 +8,7 @@
     {%- for comment in comments %}
       <li class="comment {{ loop.cycle('odd', 'even') }}{{ ' blocked'
         if comment.blocked else '' }}">
-        <input type="checkbox" name="comment" value="{{ comment.comment_id
+        <input type="checkbox" name="comment" value="{{ comment.id
           }}" class="mark">
         {{ render_comment(comment) }}
       </li>

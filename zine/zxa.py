@@ -220,7 +220,7 @@ class Writer(object):
         self.z('description', text=user.description, parent=rv)
         for participant in self.participants:
             participant.process_user(rv, user)
-        self.users[user.user_id] = rv
+        self.users[user.id] = rv
 
     def _dump_post(self, post):
         url = url_for(post, _external=True)
@@ -234,13 +234,13 @@ class Writer(object):
         self.atom('link', href=url, parent=entry)
 
         author = self.atom('author', parent=entry)
-        author.attrib[self.z.dependency] = self.users[post.author.user_id] \
+        author.attrib[self.z.dependency] = self.users[post.author.id] \
                                                 .attrib[self.z.dependency]
         self.atom('name', text=post.author.display_name, parent=author)
         self.atom('email', text=post.author.email, parent=author)
 
         self.z('slug', text=post.slug, parent=entry)
-        self.z('id', text=str(post.post_id), parent=entry)
+        self.z('id', text=str(post.id), parent=entry)
         self.z('comments_enabled', text=post.comments_enabled
                and 'yes' or 'no', parent=entry)
         self.z('pings_enabled', text=post.pings_enabled
@@ -260,7 +260,7 @@ class Writer(object):
 
         for c in post.comments:
             comment = self.z('comment', parent=entry)
-            self.z('id', text=str(c.comment_id), parent=comment)
+            self.z('id', text=str(c.id), parent=comment)
             author = self.z('author', parent=comment)
             self.z('name', text=c.author, parent=author)
             self.z('email', text=c.email, parent=author)

@@ -23,14 +23,14 @@ def do_get_comment(req):
     if comment.blocked and req.user.role < ROLE_AUTHOR:
         abort(403)
     if comment.parent is not None:
-        parent_id = comment.parent.comment_id
+        parent_id = comment.parent.id
     else:
         parent_id = None
     email = None
     if req.user.role >= ROLE_AUTHOR:
         email = comment.email
     return {
-        'id':           comment.comment_id,
+        'id':           comment.id,
         'parent':       parent_id,
         'body':         unicode(comment.body),
         'author':       comment.author,

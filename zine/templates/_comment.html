@@ -1,16 +1,16 @@
 {% macro render_comment(comment, add_reply_link=false) %}
   {%- if comment.visible %}
     <div class="comment{% if comment.is_pingback %} pingback{% endif %}{%
-      if comment.blocked %} blocked{% endif %}" id="comment-{{ comment.comment_id }}">
+      if comment.blocked %} blocked{% endif %}" id="comment-{{ comment.id }}">
       <div class="text">{{ comment.body }}</div>
       <p class="meta">{% if comment.is_pingback %}{{ _("Pingback by") }}
         {%- else %}{{ _("Comment by") }}{% endif %} {% if comment.www
         %}<a href="{{ comment.www|e }}">{{ comment.author|e }}</a>{%
         else %}{{ comment.author|e }}{% endif %} &mdash; {{
         comment.pub_date|datetimeformat }} |
-        <a href="#comment-{{ comment.comment_id }}">#</a>
+        <a href="#comment-{{ comment.id }}">#</a>
       {%- if add_reply_link %}
-        - <a href="javascript:Zine.replyToComment({{ comment.comment_id
+        - <a href="javascript:Zine.replyToComment({{ comment.id
           }})" title="{{ _('reply to this comment') }}">re</a>
       {% endif -%}
       </p>

@@ -144,13 +144,13 @@ def index_post(post):
     doc.add_term(u'U%s' % post.author.username.lower())
     tg.index_text(post.author.display_name, 1, 'U')
     doc.add_value(0, 'post')
-    doc.add_value(1, str(post.post_id))
+    doc.add_value(1, str(post.id))
     doc.add_value(2, str(mktime(post.pub_date.timetuple())))
     doc.add_value(3, str(post.status))
     doc.add_value(4, str(post.author_id))
-    doc.add_term('P%d' % post.post_id)
+    doc.add_term('P%d' % post.id)
     doc.add_term('Qpost')
-    db.replace_document('P%d' % post.post_id, doc)
+    db.replace_document('P%d' % post.id, doc)
 
 
 def delete_post(post):
@@ -158,7 +158,7 @@ def delete_post(post):
     db = _get_writable_db()
     if not db:
         return
-    db.delete_document('P%d' % post.post_id)
+    db.delete_document('P%d' % post.id)
 
 
 def search(request):

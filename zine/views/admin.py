@@ -267,7 +267,7 @@ def index(request):
         drafts=Post.query.drafts().all(),
         unmoderated_comments=Comment.query.unmoderated().all(),
         your_posts=Post.query.filter(
-            Post.author_id == request.user.user_id
+            Post.author_id == request.user.id
         ).count(),
         last_posts=Post.query.published(ignore_role=True)
             .order_by(Post.pub_date.desc()).limit(5).all()
@@ -337,7 +337,7 @@ def edit_entry(request, post=None):
         if 'cancel' in request.form:
             return form.redirect('admin/manage_entries')
         elif 'delete' in request.form:
-            return redirect_to('admin/delete_post', post_id=post.post_id)
+            return redirect_to('admin/delete_post', post_id=post.id)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
@@ -354,7 +354,7 @@ def edit_entry(request, post=None):
             if form['ping_links']:
                 ping_post_links(request, post)
             if 'save_and_continue' in request.form:
-                return redirect_to('admin/edit_post', post_id=post.post_id)
+                return redirect_to('admin/edit_post', post_id=post.id)
             return form.redirect('admin/new_entry')
     return render_admin_response('admin/edit_entry.html', active_tab,
                                  form=form.as_widget())
@@ -371,9 +371,9 @@ def delete_entry(request, post):
 
     if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return form.redirect('admin/edit_post', post_id=post.post_id)
+            return form.redirect('admin/edit_post', post_id=post.id)
         elif request.form.get('confirm'):
-            form.add_invalid_redirect_target('admin/edit_post', post_id=post.post_id)
+            form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
             flash(_(u'The entry %s was deleted successfully.') %
                   escape(post.title), 'remove')
@@ -407,7 +407,7 @@ def edit_page(request, post=None):
         if 'cancel' in request.form:
             return form.redirect('admin/manage_pages')
         elif 'delete' in request.form:
-            return redirect_to('admin/delete_post', post_id=post.post_id)
+            return redirect_to('admin/delete_post', post_id=post.id)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
@@ -424,7 +424,7 @@ def edit_page(request, post=None):
             if form['ping_links']:
                 ping_post_links(request, post)
             if 'save_and_continue' in request.form:
-                return redirect_to('admin/edit_post', post_id=post.post_id)
+                return redirect_to('admin/edit_post', post_id=post.id)
             return form.redirect('admin/new_page')
     return render_admin_response('admin/edit_page.html', active_tab,
                                  form=form.as_widget())
@@ -441,9 +441,9 @@ def delete_page(request, post):
 
     if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return form.redirect('admin/edit_post', post_id=post.post_id)
+            return form.redirect('admin/edit_post', post_id=post.id)
         elif request.form.get('confirm'):
-            form.add_invalid_redirect_target('admin/edit_post', post_id=post.post_id)
+            form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
             flash(_(u'The page %s was deleted successfully.') %
                   escape(post.title), 'remove')
@@ -530,11 +530,11 @@ def show_post_comments(request, page, post_id):
     if post is None:
         raise NotFound()
     link = '<a href="%s">%s</a>' % (
-        url_for('admin/edit_post', post_id=post_id),
+        url_for('admin/edit_post', post_id=post.id),
         escape(post.title)
     )
     return _handle_comments(None, _(u'Comments for “%s”') % link,
-                            Comment.query.comments_for_post(post_id), page)
+                            Comment.query.comments_for_post(post), page)
 
 
 @require_role(ROLE_AUTHOR)
@@ -676,10 +676,9 @@ def delete_comment(request, comment_id):
         csrf_protector.assert_safe()
 
         if request.form.get('cancel'):
-            return redirect('admin/edit_comment', comment_id=comment.comment_id)
+            return redirect('admin/edit_comment', comment_id=comment.id)
         elif request.form.get('confirm'):
-            redirect.add_invalid('admin/edit_comment',
-                                 comment_id=comment.comment_id)
+            redirect.add_invalid('admin/edit_comment', comment_id=comment.id)
             #! plugins can use this to react to comment deletes.  They can't
             #! stop the deleting of the comment but they can delete information
             #! in their own tables so that the database is consistent
@@ -803,7 +802,7 @@ def edit_category(request, category_id=None):
 
         # delete
         if request.form.get('delete'):
-            return redirect_to('admin/delete_category', category_id=category.category_id)
+            return redirect_to('admin/delete_category', category_id=category.id)
 
         form['slug'] = slug = request.form.get('slug')
         form['name'] = name = request.form.get('name')
@@ -857,9 +856,9 @@ def delete_category(request, category_id):
         csrf_protector.assert_safe()
 
         if request.form.get('cancel'):
-            return redirect('admin/edit_category', category_id=category.category_id)
+            return redirect('admin/edit_category', category_id=category.id)
         elif request.form.get('confirm'):
-            redirect.add_invalid('admin/edit_category', category_id=category.category_id)
+            redirect.add_invalid('admin/edit_category', category_id=category.id)
             #! plugins can use this to react to category deletes.  They can't stop
             #! the deleting of the category but they can delete information in
             #! their own tables so that the database is consistent afterwards.
@@ -921,7 +920,7 @@ def edit_user(request, user_id=None):
         if request.form.get('cancel'):
             return redirect('admin/show_users')
         elif request.form.get('delete') and user:
-            return redirect_to('admin/delete_user', user_id=user.user_id)
+            return redirect_to('admin/delete_user', user_id=user.id)
 
         username = form['username'] = request.form.get('username')
         if not username:
@@ -973,7 +972,7 @@ def edit_user(request, user_id=None):
             flash(msg % html_user_detail, icon)
             if request.form.get('save'):
                 return redirect('admin/show_users')
-            return redirect_to('admin/edit_user', user_id=user.user_id)
+            return redirect_to('admin/edit_user', user_id=user.id)
 
     if not new_user:
         display_names = [
@@ -1018,9 +1017,9 @@ def delete_user(request, user_id):
     if request.method == 'POST':
         csrf_protector.assert_safe()
         if request.form.get('cancel'):
-            return redirect('admin/edit_user', user_id=user.user_id)
+            return redirect('admin/edit_user', user_id=user.id)
         elif request.form.get('confirm'):
-            redirect.add_invalid('admin/edit_user', user_id=user.user_id)
+            redirect.add_invalid('admin/edit_user', user_id=user.id)
             action = request.form.get('action')
             action_val = None
             if action == 'reassign':
@@ -1048,7 +1047,7 @@ def delete_user(request, user_id):
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
         user=user,
-        other_users=User.query.filter(User.user_id != user_id).all(),
+        other_users=User.query.filter(User.id != user_id).all(),
         hidden_form_data=make_hidden_fields(csrf_protector, redirect)
     )
 

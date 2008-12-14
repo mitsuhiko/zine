@@ -37,8 +37,8 @@
       <li><select name="author_{{ author.id }}">
         <option value="">{{ _('Create New User') }}</option>
       {%- for user in users %}
-        <option value="{{ user.user_id }}"{% if form['author_' ~ author.id] ==
-          user.user_id %} selected{% endif %}>{{ user.username|e }}</option>
+        <option value="{{ user.id }}"{% if form['author_' ~ author.id] ==
+          user.id %} selected{% endif %}>{{ user.username|e }}</option>
       {%- endfor %}
       </select> &nbsp; {{ author.name|e }}</li>
     {%- else %}

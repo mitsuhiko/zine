@@ -230,7 +230,7 @@ class PostForm(forms.Form):
                 slug=post.slug,
                 author=post.author,
                 tags=[x.name for x in post.tags],
-                categories=[x.category_id for x in post.categories],
+                categories=[x.id for x in post.categories],
                 parser=post.parser,
                 comments_enabled=post.comments_enabled,
                 pings_enabled=post.pings_enabled,
@@ -253,7 +253,7 @@ class PostForm(forms.Form):
             self.parser.choices.append((post.parser, _('%s (missing)') %
                                         post.parser.title()))
 
-        self.categories.choices = [(c.category_id, c.name) for c in
+        self.categories.choices = [(c.id, c.name) for c in
                                    Category.query.all()]
 
         forms.Form.__init__(self, initial)
@@ -262,7 +262,7 @@ class PostForm(forms.Form):
         """Make sure the slug is unique."""
         query = Post.query.filter_by(slug=value)
         if self.post is not None:
-            query = query.filter(Post.post_id != self.post.post_id)
+            query = query.filter(Post.id != self.post.id)
         existing = query.first()
         if existing is not None:
             raise ValidationError(_('This slug is already in use'))

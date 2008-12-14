@@ -331,7 +331,7 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
             if not comment.visible:
                 continue
             uid = build_tag_uri(req.app, comment.pub_date, 'comment',
-                                comment.comment_id)
+                                comment.id)
             title = _(u'Comment %(num)d on %(post)s') % {
                 'num':  comment_num,
                 'post': post.title

@@ -292,7 +292,7 @@ class Request(RequestBase):
         self.user = user
         #! called after a user was logged in successfully
         emit_event('after-user-login', user)
-        self.session['uid'] = user.user_id
+        self.session['uid'] = user.id
         self.session['lt'] = time()
         if permanent:
             self.session['pmt'] = True

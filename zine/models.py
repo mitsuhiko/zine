@@ -285,7 +285,7 @@ class PostQuery(db.Query):
                 user = req.user
         query = self.filter(Post.status == STATUS_DRAFT)
         if user is not None:
-            query = query.filter(Post.author_id == user.user_id)
+            query = query.filter(Post.author_id == user.id)
         return query
 
     def get_list(self, endpoint=None, page=1, per_page=None,
@@ -636,7 +636,7 @@ class CategoryQuery(db.Query):
             # it's safe to access req here because we only have
             # a non ROLE_NOBODY role if there was a request.
             q &= ((p2.status == STATUS_PUBLISHED) |
-                  (p2.author_id == req.user.user_id))
+                  (p2.author_id == req.user.id))
 
         s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
                       p.category_id == t.category_id,
@@ -730,9 +730,9 @@ class CommentQuery(db.Query):
             query = query.limit(limit)
         return query
 
-    def comments_for_post(self, post_id):
+    def comments_for_post(self, post):
         """Return all comments for the blog post."""
-        return self.filter(Comment.post_id == post_id)
+        return self.filter(Comment.post_id == post.id)
 
 
 class Comment(_ZEMLContainer):
@@ -818,7 +818,7 @@ class Comment(_ZEMLContainer):
         if request is None:
             request = get_request()
         comments = request.session.setdefault('visible_comments', set())
-        comments.add(self.comment_id)
+        comments.add(self.id)
 
     def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""
@@ -837,7 +837,7 @@ class Comment(_ZEMLContainer):
         """
         request = get_request()
         comments = request.session.get('visible_comments', ())
-        if self.comment_id in comments:
+        if self.id in comments:
             return True
         return self.visible_for_user(request.user)
 
@@ -857,7 +857,7 @@ class Comment(_ZEMLContainer):
         return self.status == COMMENT_UNMODERATED
 
     def get_url_values(self):
-        return url_for(self.post) + '#comment-%d' % self.comment_id
+        return url_for(self.post) + '#comment-%d' % self.id
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -899,6 +899,7 @@ class Tag(object):
 
 # connect the tables.
 db.mapper(User, users, properties={
+    'id':               users.c.user_id,
     'display_name':     db.synonym('_display_name', map_column=True),
     'posts':            db.dynamic_loader(Post, backref='author',
                                           cascade='all, delete, delete-orphan'),
@@ -906,9 +907,11 @@ db.mapper(User, users, properties={
                                           cascade='all, delete, delete-orphan')
 })
 db.mapper(Category, categories, properties={
+    'id':               categories.c.category_id,
     'posts':            db.dynamic_loader(Post, secondary=post_categories)
 })
 db.mapper(Comment, comments, properties={
+    'id':           comments.c.comment_id,
     'text':         db.synonym('_text', map_column=True),
     'author':       db.synonym('_author', map_column=True),
     'email':        db.synonym('_email', map_column=True),
@@ -921,9 +924,14 @@ db.mapper(Comment, comments, properties={
         lazy=True
     )
 }, order_by=comments.c.pub_date.desc())
-db.mapper(PostLink, post_links)
-db.mapper(Tag, tags)
+db.mapper(PostLink, post_links, properties={
+    'id':           post_links.c.link_id,
+})
+db.mapper(Tag, tags, properties={
+    'id':           tags.c.tag_id,
+})
 db.mapper(Post, posts, properties={
+    'id':               posts.c.post_id,
     'text':             db.synonym('_text', map_column=True),
     'comments':         db.relation(Comment, backref='post',
                                     primaryjoin=posts.c.post_id ==
