@@ -817,8 +817,9 @@ class Comment(_ZEMLContainer):
         """Make the comment visible for the current request."""
         if request is None:
             request = get_request()
-        comments = request.session.setdefault('visible_comments', set())
+        comments = set(request.session.get('visible_comments', ()))
         comments.add(self.id)
+        request.session['visible_comments'] = tuple(comments)
 
     def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""
@@ -836,8 +837,8 @@ class Comment(_ZEMLContainer):
         to a user that submited a comment which is not yet moderated.
         """
         request = get_request()
-        comments = request.session.get('visible_comments', ())
-        if self.id in comments:
+        print request.session
+        if self.id in request.session.get('visible_comments', ()):
             return True
         return self.visible_for_user(request.user)
 

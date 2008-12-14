@@ -65,6 +65,7 @@ div.header div.metanav a:hover {
 
 div.footer {
     background: transparent url(img/footerbg.png) repeat-x bottom left;
+    border-top: 1px solid #092E3A;
     padding: 10px 20px;
     color: white;
     margin: 0;
@@ -77,7 +78,7 @@ div.footer a {
 div.footer p {
     margin: 0;
     padding: 0;
-    font-size: 13px;
+    font-size: 12px;
     text-align: center;
 }
 

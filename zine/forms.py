@@ -14,7 +14,7 @@ from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.database import db
 from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
-     STATUS_PUBLISHED
+     STATUS_PUBLISHED, COMMENT_UNMODERATED
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
@@ -154,6 +154,9 @@ class NewCommentForm(forms.Form):
         #! this is sent directly after the comment was saved.  Useful if
         #! you want to send mail notifications or whatever.
         emit_event('after-comment-saved', req, comment)
+
+        # Commit so that make_visible_for_request can access the comment id.
+        db.commit()
 
         # Still allow the user to see his comment if it's blocked
         if comment.blocked:
@@ -295,10 +298,7 @@ class PostForm(forms.Form):
         if the slug changes.
         """
         old_slug = self.post.slug
-        for key in 'title', 'author', 'text':
-            value = self.data[key]
-            if getattr(self.post, key) != value:
-                setattr(self.post, key, value)
+        forms.set_fields(self.port, self.data, 'title', 'author', 'text')
         if self.data['slug']:
             self.post.slug = self.data['slug']
         else:
@@ -309,10 +309,8 @@ class PostForm(forms.Form):
             register_redirect(old_slug, self.post.slug)
 
     def _set_common_attributes(self, post):
-        for key in 'comments_enabled', 'pings_enabled', 'status', 'parser':
-            value = self.data[key]
-            if getattr(post, key) != value:
-                setattr(post, key, value)
+        forms.set_fields(post, self.data, 'comments_enabled', 'pings_enabled',
+                         'status', 'parser')
         post.bind_categories(self.data['categories'])
         post.bind_tags(self.data['tags'])
 
@@ -357,6 +355,54 @@ class PostDeleteForm(forms.Form):
         """Deletes the post from the db."""
         emit_event('before-post-deleted', self.post)
         db.delete(self.post)
+
+
+class EditCommentForm(forms.Form):
+    """Form for comment editing in admin."""
+    author = forms.TextField(lazy_gettext(u'Author'), required=True)
+    email = forms.TextField(lazy_gettext(u'Email'),
+                            validators=[is_valid_email()])
+    www = forms.TextField(lazy_gettext(u'Website'),
+                          validators=[is_valid_url()])
+    text = forms.TextField(lazy_gettext(u'Text'), widget=forms.Textarea)
+    pub_date = forms.DateTimeField(lazy_gettext(u'Date'), required=True)
+    parser = forms.ChoiceField(lazy_gettext(u'Parser'), required=True)
+    blocked = forms.BooleanField(lazy_gettext(u'Block Comment'))
+    blocked_msg = forms.TextField(lazy_gettext(u'Reason'))
+
+    def __init__(self, comment, initial=None):
+        self.app = get_application()
+        self.comment = comment
+        initial = forms.fill_dict(initial,
+            author=comment.author,
+            email=comment.email,
+            www=comment.www,
+            text=comment.text,
+            pub_date=comment.pub_date,
+            parser=comment.parser,
+            blocked=comment.blocked,
+            blocked_msg=comment.blocked_msg
+        )
+        self.parser.choices = self.app.list_parsers()
+        self.parser_missing = comment.parser_missing
+        if self.parser_missing:
+            self.parser.choices.append((post.parser, _('%s (missing)') %
+                                        post.parser.title()))
+        forms.Form.__init__(self, initial)
+
+    def as_widget(self):
+        widget = forms.Form.as_widget(self)
+        widget.comment = self.comment
+        return widget
+
+    def save_changes(self):
+        """Save the changes back to the database."""
+        forms.set_fields(self.comment, self.data, 'text', 'pub_date', 'parser',
+                         'blocked', 'blocked_msg')
+
+        # only apply these if the comment is not anonymous
+        if self.comment.anonymous:
+            forms.set_fields(self.comment, self.data, 'author', 'email', 'www')
 
 
 class ConfigForm(forms.Form):

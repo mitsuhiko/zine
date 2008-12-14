@@ -73,6 +73,14 @@ def fill_dict(_dict, **kwargs):
     return _dict
 
 
+def set_fields(obj, data, *fields):
+    """Set all the fields on obj with data if changed."""
+    for field in fields:
+        value = data[field]
+        if getattr(obj, field) != value:
+            setattr(obj, field, value)
+
+
 def _next_position_hint():
     """Return the next position hint."""
     global _last_position_hint

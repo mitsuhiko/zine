@@ -48,7 +48,7 @@ from zine.pluginsystem import install_package, InstallationError, \
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
-     PostDeleteForm
+     PostDeleteForm, EditCommentForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -545,116 +545,21 @@ def edit_comment(request, comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    form = EditCommentForm(comment)
 
-    errors = []
-    form = {
-        'author':       comment.author,
-        'email':        comment.email,
-        'www':          comment.www,
-        'text':         comment.text,
-        'parser':       comment.parser,
-        'pub_date':     format_system_datetime(comment.pub_date),
-        'blocked':      comment.blocked,
-        'blocked_msg':  comment.blocked_msg
-    }
-    old_text = comment.text
-    missing_parser = None
-    keep_comment_text = False
-    if comment.parser_missing:
-        missing_parser = comment.parser
-
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-        www = None
-
-        # cancel
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return redirect('admin/show_comments')
-
-        # delete
-        if request.form.get('delete'):
+            return form.redirect('admin/show_comments')
+        elif request.form.get('delete'):
             return redirect_to('admin/delete_comment', comment_id=comment_id)
-
-        if comment.anonymous:
-            form['author'] = author = request.form.get('author')
-            if not author:
-                errors.append(_(u'You have to give the comment an author.'))
-            form['email'] = email = request.form.get('email', '')
-            if email and not check(is_valid_email, email):
-                errors.append(_(u'You have to provide a valid mail address for '
-                                u'the author.'))
-            form['www'] = www = request.form.get('www')
-        form['text'] = text = request.form.get('text', u'')
-        form['parser'] = parser = request.form.get('parser')
-        if missing_parser and parser == comment.parser:
-            if old_text != text:
-                errors.append(_(u'You cannot change the text of a comment '
-                                u'if the parser is missing.'))
-            else:
-                keep_comment_text = True
-        elif parser not in request.app.parsers:
-            errors.append(_(u'Unknown parser “%s”.') % parser)
-        if not text:
-            errors.append(_(u'Need a text for this comment.'))
-        if www and not check(is_valid_url, www):
-            errors.append(_(u'You have to ommitt the url or provide a '
-                            u'valid one.'))
-        form['pub_date'] = pub_date = request.form.get('pub_date')
-        try:
-            pub_date = parse_datetime(pub_date)
-        except ValueError:
-            errors.append(_(u'Invalid date for comment.'))
-        form['blocked'] = blocked = bool(request.form.get('blocked'))
-        form['blocked_msg'] = blocked_msg = \
-            request.form.get('blocked_msg', '')
-
-        if not errors:
-            if comment.anonymous:
-                comment.author = author
-                comment.email = email
-                comment.www = www
-            comment.pub_date = pub_date
-            if not keep_comment_text:
-                # always set parser before text because of callbacks.
-                comment.parser = parser
-                comment.text = text
-            if not blocked:
-                comment.status = COMMENT_MODERATED
-                comment.blocked_msg = ''
-            else:
-                comment.status = COMMENT_BLOCKED_USER
-                if not blocked_msg:
-                    blocked_msg = _(u'blocked by %s') % \
-                        request.user.display_name
-                comment.blocked_msg = blocked_msg
-            db.commit()
-            flash(_(u'Comment by %s moderated successfully.') %
-                  escape(comment.author))
-            return redirect('admin/show_comments')
-
-    for error in errors:
-        flash(error, 'error')
-
-    parsers = request.app.list_parsers()
-    if missing_parser:
-        parsers.insert(0, (missing_parser, _(u'Missing Parser “%s”') %
-                           missing_parser))
-        flash(_(u'This comment was submitted when the parser “%(parser)s” was '
-                u'the comment parser. Because it is not available any longer '
-                u'Zine doesn\'t allow modifcations on the text until you '
-                u'reinstall/activate the plugin that provided that parser.') %
-              {'parser': escape(missing_parser)}, 'error')
+        form.save_changes()
+        db.commit()
+        flash(_(u'Comment by %s moderated successfully.') %
+              escape(comment.author))
+        return form.redirect('admin/show_comments')
 
     return render_admin_response('admin/edit_comment.html',
-                                 'comments.overview',
-        comment=comment,
-        form=form,
-        parsers=parsers,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 'comments.overview', form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)

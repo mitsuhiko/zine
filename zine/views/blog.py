@@ -202,7 +202,6 @@ def show_entry(req, post, comment_form):
     """
     response = comment_form.create_if_valid(req)
     if response is not None:
-        db.commit()
         return response
 
     return render_response('show_entry.html',
@@ -215,7 +214,6 @@ def show_page(req, post, comment_form):
     """Shows a post that is a page."""
     response = comment_form.create_if_valid(req)
     if response is not None:
-        db.commit()
         return response
 
     cfg = req.app.cfg

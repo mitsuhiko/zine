@@ -2,63 +2,56 @@
 {% block title %}{{ _("Edit Comment") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Edit Comment") }}</h1>
-  {% if comment.is_pingback %}
+  {% if form.comment.is_pingback %}
   <p>
     This comment was submitted as pingback.  If you will change the URL
     of the comment the blog software that submitted this pingback will
     probably submit a new pingback after some time.
   <p>
   {% endif %}
-  <form action="" method="post">
-    {%- if comment.anonymous %}
+  {% call form() %}
+    {% if form.comment.anonymous %}
     <div class="formbox">
-      <h3>{{ _("Author") }}</h3>
-      {{ h.input_field('author', form.author) }}
+      <h3>{{ form.author.label() }}</h3>
+      {{ form.author() }}
     </div>
     <div class="formbox">
-      <h3>{{ _("E-Mail") }}</h3>
-      {{ h.input_field('email', form.email) }}
+      <h3>{{ form.email.label() }}</h3>
+      {{ form.email() }}
     </div>
     <div class="formbox">
-      <h3>{{ _("Website") }}</h3>
-      {{ h.input_field('www', form.www) }}
+      <h3>{{ form.www.label() }}</h3>
+      {{ form.www() }}
     </div>
-    {%- else %}
+    {% else %}
     <div class="formbox">
-      <h3>{{ _('Author') }}</h3>
-      <p>{{ comment.user.username }}</p>
+      <h3>{{ form.author.label() }}</h3>
+      {{ form.author(disabled=true) }}
     </div>
-    {%- endif %}
+    {% endif %}
     <div class="formbox">
-      <h3>{{ _("Text") }}</h3>
-      {{ h.textarea('text', form.text, rows=7) }}
+      <h3>{{ form.text.label() }}</h3>
+      {{ form.text(rows=7) }}
     </div>
     <div class="formbox toggleable collapsed">
-      <h3>{{ _("Parser") }}</h3>
-      <select name="parser">
-      {%- for parser_id, name in parsers %}
-        <option value="{{ parser_id|e }}"{% if parser_id == form.parser
-          %} selected{% endif %}>{{ name|e }}</option>
-      {%- endfor %}
-      </select>
+      <h3>{{ form.parser.label() }}</h3>
+      {{ form.parser() }}
     </div>
     <div class="formbox toggleable collapsed">
-      <h3>{{ _("Date") }}</h3>
-      {{ h.input_field('pub_date', form.pub_date) }}
+      <h3>{{ form.pub_date.label() }}</h3>
+      {{ form.pub_date() }}
     </div>
     <div class="formbox toggleable collapsed">
-      <h3>{{ _("Block Comment") }}</h3>
-      {{ h.checkbox('blocked', form.blocked) }}
-      <label for="blocked">{{ _("block comment") }}</label>
+      <h3>{{ form.blocked.label() }}</h3>
+      {{ form.blocked() }} {{ form.blocked.label() }}
       <p>
-        {{ _('Block message') }}:
-        {{ h.input_field('blocked_msg', form.blocked_msg, size=40) }}
+        {{ form.blocked_msg.label() }}:
+        {{ form.blocked_msg() }}
     </div>
     <div class="actions">
-      {{ hidden_form_data }}
       <input type="submit" value="{{ _('Save') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
       <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

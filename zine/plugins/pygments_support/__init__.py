@@ -139,11 +139,9 @@ def show_config(req):
     if req.method == 'POST' and form.validate(req.form):
         active_style = form['style']
         if 'apply' in req.form:
-            if req.app.cfg.change_single('pygments_support/style',
-                                         active_style):
-                flash(_('Pygments theme changed successfully.'), 'configure')
-            else:
-                flash(_('Pygments theme could not be changed.'), 'error')
+            req.app.cfg.change_single('pygments_support/style',
+                                      active_style)
+            flash(_('Pygments theme changed successfully.'), 'configure')
             return redirect_to('pygments_support/config')
 
     preview_formatter = get_formatter(active_style, preview=True)
