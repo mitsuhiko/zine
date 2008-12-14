@@ -18,11 +18,11 @@
       <h3>{{ form.title.label() }}</h3>
       {{ form.title(size=36) }}
     </div>
-    {{ render_formbox(form.slug, collapsed=false) }}
     <div class="formbox">
       <h3>{{ form.text.label() }}</h3>
       {{ form.text(rows=12) }}
     </div>
+    {{ render_formbox(form.slug, collapsed=false) }}
     {{ render_formbox(form.status, collapsed=false) }}
     {{ render_formbox(form.tags) }}
     {{ render_formbox(form.categories) }}

@@ -1,4 +1,5 @@
 {% extends "admin/layout.html" %}
+{% from "admin/_form_helpers.html" import render_formbox %}
 {% block title %}{{ _("Edit Comment") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Edit Comment") }}</h1>
@@ -11,36 +12,21 @@
   {% endif %}
   {% call form() %}
     {% if form.comment.anonymous %}
-    <div class="formbox">
-      <h3>{{ form.author.label() }}</h3>
-      {{ form.author() }}
-    </div>
-    <div class="formbox">
-      <h3>{{ form.email.label() }}</h3>
-      {{ form.email() }}
-    </div>
-    <div class="formbox">
-      <h3>{{ form.www.label() }}</h3>
-      {{ form.www() }}
-    </div>
+      {{ render_formbox(form.author, toggleable=false) }}
+      {{ render_formbox(form.email, toggleable=false) }}
+      {{ render_formbox(form.www, toggleable=false) }}
     {% else %}
-    <div class="formbox">
-      <h3>{{ form.author.label() }}</h3>
-      {{ form.author(disabled=true) }}
-    </div>
+      <div class="formbox">
+        <h3>{{ form.author.label() }}</h3>
+        {{ form.author(disabled=true) }}
+      </div>
     {% endif %}
     <div class="formbox">
       <h3>{{ form.text.label() }}</h3>
       {{ form.text(rows=7) }}
     </div>
-    <div class="formbox toggleable collapsed">
-      <h3>{{ form.parser.label() }}</h3>
-      {{ form.parser() }}
-    </div>
-    <div class="formbox toggleable collapsed">
-      <h3>{{ form.pub_date.label() }}</h3>
-      {{ form.pub_date() }}
-    </div>
+    {{ render_formbox(form.parser) }}
+    {{ render_formbox(form.pub_date) }}
     <div class="formbox toggleable collapsed">
       <h3>{{ form.blocked.label() }}</h3>
       {{ form.blocked() }} {{ form.blocked.label() }}

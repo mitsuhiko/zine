@@ -298,7 +298,7 @@ class PostForm(forms.Form):
         if the slug changes.
         """
         old_slug = self.post.slug
-        forms.set_fields(self.port, self.data, 'title', 'author', 'text')
+        forms.set_fields(self.post, self.data, 'title', 'author', 'text')
         if self.data['slug']:
             self.post.slug = self.data['slug']
         else:
