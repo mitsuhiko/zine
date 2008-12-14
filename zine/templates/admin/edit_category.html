@@ -1,25 +1,19 @@
 {% extends "admin/layout.html" %}
+{% from "admin/_form_helpers.html" import render_formbox %}
 {% block title %}{{ _("Edit Category") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Edit Category") }}</h1>
-  <form action="" method="post">
+  {% call form() %}
+    {{ render_formbox(form['name'], toggleable=false) }}
     <div class="formbox">
-      <h3>{{ _("Slug") }}</h3>
-      {{ h.input_field('slug', form.slug) }}
+      <h3>{{ form.description.label() }}</h3>
+      {{ form.description(rows=5) }}
     </div>
-    <div class="formbox">
-      <h3>{{ _("Name") }}</h3>
-      {{ h.input_field('name', form.name) }}
-    </div>
-    <div class="formbox">
-      <h3>{{ _("Description") }}</h3>
-      {{ h.textarea('description', form.description, rows=5) }}
-    </div>
+    {{ render_formbox(form.slug) }}
     <div class="actions">
-       {{ hidden_form_data }}
       <input type="submit" value="{{ _('Save') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
       <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

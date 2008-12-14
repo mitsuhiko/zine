@@ -48,7 +48,9 @@ from zine.pluginsystem import install_package, InstallationError, \
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
-     PostDeleteForm, EditCommentForm, DeleteCommentForm
+     PostDeleteForm, EditCommentForm, DeleteCommentForm, \
+     ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
+     DeleteCategoryForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -369,10 +371,10 @@ def delete_entry(request, post):
     """
     form = PostDeleteForm(post)
 
-    if request.method == 'POST' and form.validate(request.form):
+    if request.method == 'POST':
         if request.form.get('cancel'):
             return form.redirect('admin/edit_post', post_id=post.id)
-        elif request.form.get('confirm'):
+        elif request.form.get('confirm') and form.validate(request.form):
             form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
             flash(_(u'The entry %s was deleted successfully.') %
@@ -439,10 +441,10 @@ def delete_page(request, post):
     """
     form = PostDeleteForm(post)
 
-    if request.method == 'POST' and form.validate(request.form):
+    if request.method == 'POST':
         if request.form.get('cancel'):
             return form.redirect('admin/edit_post', post_id=post.id)
-        elif request.form.get('confirm'):
+        elif request.form.get('confirm') and form.validate(request.form):
             form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
             flash(_(u'The page %s was deleted successfully.') %
@@ -595,61 +597,40 @@ def delete_comment(request, comment_id):
 def approve_comment(request, comment_id):
     """Approve a comment"""
     comment = Comment.query.get(comment_id)
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
     if comment is None:
         raise NotFound()
+    form = ApproveCommentForm(comment)
 
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('confirm'):
-            csrf_protector.assert_safe()
-            comment.status = COMMENT_MODERATED
-            comment.blocked_msg = ''
+            form.approve_comment()
             db.commit()
             flash(_(u'Comment by %s approved successfully.') %
                   escape(comment.author), 'configure')
-        return redirect('admin/show_comments')
+        return form.redirect('admin/show_comments')
 
     return render_admin_response('admin/approve_comment.html',
-                                 'comments.overview',
-        comment=comment,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 'comments.overview', form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)
 def block_comment(request, comment_id):
     """Block a comment."""
     comment = Comment.query.get(comment_id)
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
     if comment is None:
         raise NotFound()
+    form = BlockCommentForm(comment)
 
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('confirm'):
-            msg = request.form.get('message')
-            if not msg:
-                msg = _(u'blocked by %s') % request.user.display_name
-            csrf_protector.assert_safe()
-            comment.status = COMMENT_BLOCKED_USER
-            comment.blocked_msg = msg
+            form.block_comment()
             db.commit()
             flash(_(u'Comment by %s blocked successfully.') %
                   escape(comment.author), 'configure')
-        return redirect('admin/show_comments')
+        return form.redirect('admin/show_comments')
 
     return render_admin_response('admin/block_comment.html',
-                                 'comments.overview',
-        comment=comment,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 'comments.overview', form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)
@@ -668,73 +649,38 @@ def manage_categories(request, page):
 @require_role(ROLE_AUTHOR)
 def edit_category(request, category_id=None):
     """Edit a category."""
-    errors = []
-    form = dict.fromkeys(['slug', 'name', 'description'], u'')
-    new_category = True
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
+    category = None
     if category_id is not None:
         category = Category.query.get(category_id)
         if category is None:
             raise NotFound()
-        form.update(
-            slug=category.slug,
-            name=category.name,
-            description=category.description
-        )
-        new_category = False
 
-    old_slug = form['slug']
+    form = EditCategoryForm(category)
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
-
-        # cancel
         if request.form.get('cancel'):
-            return redirect('admin/show_categories')
-
-        # delete
+            return form.redirect('admin/manage_categories')
         if request.form.get('delete'):
             return redirect_to('admin/delete_category', category_id=category.id)
-
-        form['slug'] = slug = request.form.get('slug')
-        form['name'] = name = request.form.get('name')
-        form['description'] = description = request.form.get('description')
-
-        if not name:
-            errors.append(_(u'You have to give the category a name.'))
-        elif old_slug != slug and Category.query.filter_by(slug=slug).first() is not None:
-            errors.append(_(u'The slug "%s" is not unique.') % slug)
-
-        if not errors:
-            if new_category:
-                category = Category(name, description, slug or None)
+        elif form.validate(request.form):
+            if category is None:
+                category = form.make_category()
                 msg = _(u'Category %s created successfully.')
                 msg_type = 'add'
             else:
-                if category.slug is not None:
-                    category.slug = slug
-                category.name = name
-                category.description = description
+                form.save_changes()
                 msg = _(u'Category %s updated successfully.')
                 msg_type = 'info'
-
             db.commit()
             html_category_detail = u'<a href="%s">%s</a>' % (
                 escape(url_for(category)),
                 escape(category.name)
             )
             flash(msg % html_category_detail, msg_type)
-            return redirect('admin/show_categories')
-
-    for error in errors:
-        flash(error, 'error')
+            return redirect_to('admin/manage_categories')
 
     return render_admin_response('admin/edit_category.html', 'manage.categories',
-        form=form,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_AUTHOR)
@@ -743,29 +689,20 @@ def delete_category(request, category_id):
     category = Category.query.get(category_id)
     if category is None:
         return redirect_to('admin/show_categories')
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
+    form = DeleteCategoryForm(category)
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
-
         if request.form.get('cancel'):
             return redirect('admin/edit_category', category_id=category.id)
-        elif request.form.get('confirm'):
+        elif request.form.get('confirm') and form.validate(request.form):
             redirect.add_invalid('admin/edit_category', category_id=category.id)
-            #! plugins can use this to react to category deletes.  They can't stop
-            #! the deleting of the category but they can delete information in
-            #! their own tables so that the database is consistent afterwards.
-            emit_event('before-category-deleted', category)
-            db.delete(category)
+            form.delete_category()
             flash(_(u'Category %s deleted successfully.') % escape(category.name))
             db.commit()
-            return redirect('admin/show_categories')
+            return form.redirect('admin/show_categories')
 
     return render_admin_response('admin/delete_category.html', 'manage.categories',
-        category=category,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)

@@ -2,15 +2,14 @@
 {% block title %}{{ _("Approve Comment") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Approve Comment") }}</h1>
-  <form action="" method="post">
+  {% call form() %}
     <div>
-      {{ hidden_form_data }}
-      <p>{% trans comment_author=comment.author|e,
-                  reason=comment.blocked_msg|e %}
+      <p>{% trans comment_author=form.comment.author|e,
+                  reason=form.comment.blocked_msg|e %}
         Do you really want to approve the comment by {{ comment_author }}?
       {% endtrans %}</p>
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="confirm" value="{{ _('Yes') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

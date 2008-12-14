@@ -2,17 +2,14 @@
 {% block title %}{{ _("Block Comment") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Block Comment") }}</h1>
-  <form action="" method="post">
+  {% call form() %}
     <div>
-      {{ hidden_form_data }}
-      <p>{% trans comment_author=comment.author|e,
-                  reason=comment.blocked_msg|e %}
+      <p>{% trans comment_author=form.comment.author|e %}
         Do you really want to block the comment by {{ comment_author }}?
       {% endtrans %}</p>
-      <p>Block message:
-         <input type="text" name="message" size="40"></p>
+      <p>{{ form.message.label() }}: {{ form.message(size=40) }}</p>
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="confirm" value="{{ _('Yes') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

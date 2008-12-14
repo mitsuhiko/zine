@@ -14,7 +14,8 @@ from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.database import db
 from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
-     STATUS_PUBLISHED, COMMENT_UNMODERATED
+     STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
+     COMMENT_BLOCKED_USER
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
@@ -301,7 +302,7 @@ class PostForm(forms.Form):
         forms.set_fields(self.post, self.data, 'title', 'author', 'text')
         if self.data['slug']:
             self.post.slug = self.data['slug']
-        else:
+        elif not self.post.slug:
             self.post.set_auto_slug()
         add_redirect = self.post.is_published and old_slug != self.post.slug
         self._set_common_attributes(self.post)
@@ -358,7 +359,7 @@ class PostDeleteForm(forms.Form):
 
 
 class _CommentBoundForm(forms.Form):
-    """Internal baseclass for comment bounds forms."""
+    """Internal baseclass for comment bound forms."""
 
     def __init__(self, comment, initial=None):
         self.app = get_application()
@@ -404,7 +405,14 @@ class EditCommentForm(_CommentBoundForm):
     def save_changes(self):
         """Save the changes back to the database."""
         forms.set_fields(self.comment, self.data, 'text', 'pub_date', 'parser',
-                         'blocked', 'blocked_msg')
+                         'blocked_msg')
+
+        # update status
+        if self.data['blocked']:
+            if not self.comment.blocked:
+                self.comment.status = COMMENT_BLOCKED_USER
+        else:
+            self.comment.status = COMMENT_MODERATED
 
         # only apply these if the comment is not anonymous
         if self.comment.anonymous:
@@ -412,7 +420,7 @@ class EditCommentForm(_CommentBoundForm):
 
 
 class DeleteCommentForm(_CommentBoundForm):
-    """Baseclass for deletion forms of comments."""
+    """Helper form that is used to delete comments."""
 
     def delete_comment(self):
         """Deletes the comment from the db."""
@@ -424,7 +432,106 @@ class DeleteCommentForm(_CommentBoundForm):
         db.delete(self.comment)
 
 
-class ConfigForm(forms.Form):
+class ApproveCommentForm(_CommentBoundForm):
+    """Helper form for comment approvement."""
+
+    def approve_comment(self):
+        """Approve the comment."""
+        self.comment.status = COMMENT_MODERATED
+        self.comment.blocked_msg = ''
+
+
+class BlockCommentForm(_CommentBoundForm):
+    """Form used to block comments."""
+
+    message = forms.TextField(lazy_gettext(u'Reason'))
+
+    def __init__(self, comment, initial=None):
+        self.req = get_request()
+        _CommentBoundForm.__init__(self, comment, initial)
+
+    def block_comment(self):
+        msg = self.data['message']
+        if not msg and self.req:
+            msg = _(u'blocked by %s') % self.req.user.display_name
+        self.comment.status = COMMENT_BLOCKED_USER
+        self.comment.bocked_msg = msg
+
+
+class _CategoryBoundForm(forms.Form):
+    """Internal baseclass for category bound forms."""
+
+    def __init__(self, category, initial=None):
+        self.app = get_application()
+        self.category = category
+        forms.Form.__init__(self, initial)
+
+    def as_widget(self):
+        widget = forms.Form.as_widget(self)
+        widget.category = category
+        widget.new = self.category is None
+        return widget
+
+
+class EditCategoryForm(_CategoryBoundForm):
+    """Form that is used to edit or create a category."""
+
+    slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()])
+    name = forms.TextField(lazy_gettext(u'Name'), max_length=50, required=True)
+    description = forms.TextField(lazy_gettext(u'Description'),
+                                  max_length=5000, widget=forms.Textarea)
+
+    def __init__(self, category=None, initial=None):
+        if category is not None:
+            initial = forms.fill_dict(initial,
+                slug=category.slug,
+                name=category.name,
+                description=category.description
+            )
+        _CategoryBoundForm.__init__(self, category, initial)
+
+    def validate_slug(self, value):
+        """Make sure the slug is unique."""
+        query = Category.query.filter_by(slug=value)
+        if self.category is not None:
+            query = query.filter(Category.id != self.category.id)
+        existing = query.first()
+        if existing is not None:
+            raise ValidationError(_('This slug is already in use'))
+
+    def make_category(self):
+        """A helper function taht creates a category object from the data."""
+        return Category(self.data['name'], self.data['description'],
+                        self.data['slug'] or None)
+
+    def save_changes(self):
+        """Save the changes back to the database.  This also adds a redirect
+        if the slug changes.
+        """
+        old_slug = self.category.slug
+        forms.set_fields(self.category, self.data, 'name', 'description')
+        if self.data['slug']:
+            self.category.slug = self.data['slug']
+        elif not self.category.slug:
+            self.category.set_auto_slug()
+        if old_slug != self.category.slug:
+            register_redirect(old_slug, self.category.slug)
+
+
+class DeleteCategoryForm(_CategoryBoundForm):
+    """Used for deleting categories."""
+
+    def delete_category(self):
+        """Delete the category from the database."""
+        #! plugins can use this to react to category deletes.  They can't stop
+        #! the deleting of the category but they can delete information in
+        #! their own tables so that the database is consistent afterwards.
+        emit_event('before-category-deleted', self.category)
+        db.delete(self.category)
+
+
+class _ConfigForm(forms.Form):
+    """Internal baseclass for forms that operate on config values."""
 
     def __init__(self, initial=None):
         self.app = get_application()
@@ -442,7 +549,7 @@ class ConfigForm(forms.Form):
         t.commit()
 
 
-class LogForm(ConfigForm):
+class LogForm(_ConfigForm):
     """A form for the logfiles."""
     log_file = forms.TextField(lazy_gettext(u'Filename'))
     log_level = forms.ChoiceField(lazy_gettext(u'Log Level'),
@@ -451,7 +558,7 @@ class LogForm(ConfigForm):
                                                      key=lambda x: x[1])])
 
 
-class BasicOptionsForm(ConfigForm):
+class BasicOptionsForm(_ConfigForm):
     """The form where the basic options are changed."""
     blog_title = forms.TextField(lazy_gettext(u'Blog title'))
     blog_tagline = forms.TextField(lazy_gettext(u'Blog tagline'))
@@ -475,13 +582,13 @@ class BasicOptionsForm(ConfigForm):
     posts_per_page = forms.IntegerField(lazy_gettext(u'Posts per page'))
 
     def __init__(self, initial=None):
-        ConfigForm.__init__(self, initial)
+        _ConfigForm.__init__(self, initial)
         self.language.choices = list_languages()
         self.default_parser.choices = self.comment_parser.choices = \
             self.app.list_parsers()
 
 
-class URLOptionsForm(ConfigForm):
+class URLOptionsForm(_ConfigForm):
     """The form for url changes."""
     blog_url_prefix = forms.TextField(lazy_gettext(u'Blog URL prefix'),
                                       validators=[is_valid_url_prefix()])
