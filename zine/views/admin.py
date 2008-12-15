@@ -85,8 +85,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('pages', url_for('admin/manage_pages'), _(u'Pages')),
             ('categories', url_for('admin/manage_categories'), _(u'Categories'))
         ]),
-        ('comments', url_for('admin/show_comments'), _(u'Comments'), [
-            ('overview', url_for('admin/show_comments'), _(u'Overview')),
+        ('comments', url_for('admin/manage_comments'), _(u'Comments'), [
+            ('overview', url_for('admin/manage_comments'), _(u'Overview')),
             ('unmoderated', url_for('admin/show_unmoderated_comments'),
              _(u'Awaiting Moderation (%d)') %
              Comment.query.unmoderated().count()),
@@ -460,7 +460,7 @@ def delete_page(request, post):
 def _handle_comments(identifier, title, query, page):
     request = get_request()
     comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/show_comments', page, PER_PAGE,
+    pagination = AdminPagination('admin/manage_comments', page, PER_PAGE,
                                  query.count())
     if not comments and page != 1:
         raise NotFound()
@@ -473,7 +473,7 @@ def _handle_comments(identifier, title, query, page):
                 if 'confirm' in request.form:
                     form.delete_selection()
                     db.commit()
-                    return redirect_to('admin/show_comments')
+                    return redirect_to('admin/manage_comments')
                 return render_admin_response('admin/delete_comments.html',
                                              form=form.as_widget())
 
@@ -482,18 +482,18 @@ def _handle_comments(identifier, title, query, page):
                 form.approve_selection()
                 db.commit()
                 flash(_(u'Approved all the selected comments.'))
-                return redirect_to('admin/show_comments')
+                return redirect_to('admin/manage_comments')
 
     tab = 'comments'
     if identifier is not None:
         tab += '.' + identifier
-    return render_admin_response('admin/show_comments.html', tab,
+    return render_admin_response('admin/manage_comments.html', tab,
                                  comments_title=title, form=form.as_widget(),
                                  pagination=pagination)
 
 
 @require_role(ROLE_AUTHOR)
-def show_comments(request, page):
+def manage_comments(request, page):
     """Show all the comments."""
     return _handle_comments('overview', _(u'All Comments'),
                             Comment.query, page)
@@ -538,14 +538,14 @@ def edit_comment(request, comment_id):
 
     if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return form.redirect('admin/show_comments')
+            return form.redirect('admin/manage_comments')
         elif request.form.get('delete'):
             return redirect_to('admin/delete_comment', comment_id=comment_id)
         form.save_changes()
         db.commit()
         flash(_(u'Comment by %s moderated successfully.') %
               escape(comment.author))
-        return form.redirect('admin/show_comments')
+        return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/edit_comment.html',
                                  'comments.overview', form=form.as_widget())
@@ -562,7 +562,7 @@ def delete_comment(request, comment_id):
     """
     comment = Comment.query.get(comment_id)
     if comment is None:
-        return redirect_to('admin/show_comments')
+        return redirect_to('admin/manage_comments')
 
     form = DeleteCommentForm(comment)
 
@@ -574,7 +574,7 @@ def delete_comment(request, comment_id):
                                              comment_id=comment.id)
             form.delete_comment()
             db.commit()
-            return form.redirect('admin/show_comments')
+            return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/delete_comment.html',
                                  'comments.overview', form=form.as_widget())
@@ -594,7 +594,7 @@ def approve_comment(request, comment_id):
             db.commit()
             flash(_(u'Comment by %s approved successfully.') %
                   escape(comment.author), 'configure')
-        return form.redirect('admin/show_comments')
+        return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/approve_comment.html',
                                  'comments.overview', form=form.as_widget())
@@ -614,7 +614,7 @@ def block_comment(request, comment_id):
             db.commit()
             flash(_(u'Comment by %s blocked successfully.') %
                   escape(comment.author), 'configure')
-        return form.redirect('admin/show_comments')
+        return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/block_comment.html',
                                  'comments.overview', form=form.as_widget())
