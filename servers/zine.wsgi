@@ -20,7 +20,8 @@ ZINE_LIB = '/usr/lib/zine'
 # here you can further configure the wsgi app settings but usually you don't
 # have to touch them
 import sys
-sys.path.insert(0, ZINE_LIB)
+if ZINE_LIB not in sys.path:
+    sys.path.insert(0, ZINE_LIB)
 
 from zine import make_app
 application = make_app(INSTANCE_FOLDER)

@@ -45,13 +45,18 @@ div.header div.title {
 
 div.header div.metanav {
     position: absolute;
-    top: 17px;
-    right: 20px;
+    top: 0;
+    right: 0;
     background-color: #222e4b;
     border: 1px solid #4f849d;
-    padding: 5px;
+    border-top: none;
+    border-right: none;
+    padding: 5px 10px;
     font-size: 12px;
     color: #eee;
+    -moz-border-radius: 0 0 0 10px;
+    -webkit-border-radius: 0 0 0 10px;
+    border-radius: 0 0 0 10px;
 }
 
 div.header div.metanav a {
@@ -110,6 +115,7 @@ div.body ul.navbar li a {
     height: 24px!important;
     -moz-border-radius: 2px 2px 0 0;
     -webkit-border-radius: 2px 2px 0 0;
+    border-radius: 2px 2px 0 0;
 }
 
 div.body ul.navbar li a:hover {
@@ -153,6 +159,7 @@ div.body ul.ctxnavbar li a {
     height: 21px!important;
     -moz-border-radius: 2px 2px 0 0;
     -webkit-border-radius: 2px 2px 0 0;
+    border-radius: 2px 2px 0 0;
 }
 
 div.body ul.ctxnavbar li a:hover {
@@ -271,6 +278,7 @@ div.contents input[type="reset"] {
     border: 1px solid #ccc;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
+    border-radius: 3px;
     cursor: pointer;
 }
 
@@ -332,21 +340,33 @@ div.contents div.actions {
 
 div.contents table {
     margin: 0.4em 0 0.2em 0;
-    border: 1px solid #B4D2E7;
     border-collapse: collapse;
     width: 100%;
+    border-bottom: 5px solid #B4D2E7;
+}
+
+div.contents table th:first-child {
+    -moz-border-radius: 5px 0 0 0;
+    -webkit-border-radius: 5px 0 0 0;
+    border-radius: 5px 0 0 0;
+}
+
+div.contents table th:last-child {
+    -moz-border-radius: 0 5px 0 0;
+    -webkit-border-radius: 0 5px 0 0;
+    border-radius: 0 5px 0 0;
 }
 
 div.contents table th {
     background-color: #B4D2E7;
-    padding: 4px;
+    padding: 4px 8px;
     text-align: left;
     color: #18374B;
 }
 
 div.contents table td {
     border-bottom: 1px dotted #ccc;
-    padding: 5px;
+    padding: 5px 8px;
 }
 
 div.contents table tr.even {
@@ -391,21 +411,29 @@ ul.choicegroup, ol.choicegroup {
 }
 
 div.formbox {
-    border: 1px solid #eee;
-    padding: 2px;
     margin: 10px 0 0 0;
+    border: 1px solid #DBE8F1;
+    padding: 2px;
+    -moz-border-radius: 10px 10px 0 0;
+    -webkit-border-radius: 10px 10px 0 0;
+    border-radius: 1px0 10px 0 0;
 }
 
 div.formbox h3 {
     background-color: #B4D2E7;
     margin: 0 0 3px 0;
-    padding: 5px;
+    padding: 5px 8px;
     color: #222E4B;
     font-size: 1em;
+    -moz-border-radius: 7px 7px 0 0;
+    -webkit-border-radius: 7px 7px 0 0;
+    border-radius: 7px 7px 0 0;
+    font-weight: normal;
 }
 
 div.formbox h3 label {
     display: block;
+    cursor: pointer;
 }
 
 div.toggleable h3:hover {
@@ -504,6 +532,9 @@ div.dashboard div.reddit div.table div.item {
     overflow: auto;
     border: 1px solid #AAC6E2;
     background-color: #EFF7FF;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
 }
 
 div.dashboard div.reddit div.table div.item p.meta {
@@ -632,6 +663,9 @@ ul.comments li.comment {
     margin: 10px 0 10px 0;
     padding: 10px 10px 2px 10px;
     border-bottom: 1px solid #B4D2E7;
+    -moz-border-radius: 0 10px 0 0;
+    -webkit-border-radius: 0 10px 0 0;
+    border-radius: 0 10px 0 0;
 }
 
 ul.comments li.comment p {
@@ -693,6 +727,7 @@ div.themes div.current {
     background-color: #F7FAFD;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
+    border-radius: 5px;
     padding: 9px;
 }
 
@@ -1097,6 +1132,7 @@ div.login-box div.notice {
     color: #ffa800;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
+    border-radius: 3px;
 }
 
 div.login-box form {
@@ -1130,6 +1166,7 @@ div.login-box input {
     padding: 3px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
+    border-radius: 3px;
 }
 
 div.login-box input:focus {
@@ -1154,6 +1191,7 @@ div.login-box input[type="submit"] {
     border: 1px solid #ccc;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
