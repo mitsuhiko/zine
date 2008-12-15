@@ -19,7 +19,7 @@ might be available in Debian already.
 For a quickstart with the development server do this:
 
     $ mkdir instance
-    $ ./scripts/server
+    $ ./scripts/server -I instance
 
 After the first start you will find yourself in an installation wizard that
 helps you to create the database tables and an administrator account.
@@ -30,4 +30,4 @@ To get access to a python console with the zine instance context do this:
 
 Note that if your instance folder is not named "instance" or is not stored in
 this directory or if you are not below the instance folder you have to provide
-the path to it as argument to the scripts.
+the path to it as argument to the scripts using the "-I" parameter.
