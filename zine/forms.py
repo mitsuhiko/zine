@@ -471,7 +471,7 @@ class _CategoryBoundForm(forms.Form):
 
     def as_widget(self):
         widget = forms.Form.as_widget(self)
-        widget.category = category
+        widget.category = self.category
         widget.new = self.category is None
         return widget
 

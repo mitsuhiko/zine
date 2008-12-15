@@ -624,11 +624,11 @@ def block_comment(request, comment_id):
 def manage_categories(request, page):
     """Show a list of used post categories."""
     categories = Category.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/show_categories', page, PER_PAGE,
+    pagination = AdminPagination('admin/manage_categories', page, PER_PAGE,
                                  Category.query.count())
     if not categories and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_categories.html', 'manage.categories',
+    return render_admin_response('admin/manage_categories.html', 'manage.categories',
                                  categories=categories,
                                  pagination=pagination)
 
@@ -675,7 +675,7 @@ def delete_category(request, category_id):
     """Works like the other delete pages, just that it deletes categories."""
     category = Category.query.get(category_id)
     if category is None:
-        return redirect_to('admin/show_categories')
+        return redirect_to('admin/manage_categories')
     form = DeleteCategoryForm(category)
 
     if request.method == 'POST':
@@ -686,7 +686,7 @@ def delete_category(request, category_id):
             form.delete_category()
             flash(_(u'Category %s deleted successfully.') % escape(category.name))
             db.commit()
-            return form.redirect('admin/show_categories')
+            return form.redirect('admin/manage_categories')
 
     return render_admin_response('admin/delete_category.html', 'manage.categories',
                                  form=form.as_widget())
