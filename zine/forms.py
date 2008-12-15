@@ -20,7 +20,7 @@ from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
-     is_valid_url, is_valid_slug, is_valid_url_prefix
+     is_valid_url, is_valid_slug, is_valid_url_prefix, is_netaddr
 from zine.utils.redirects import register_redirect
 
 
@@ -698,15 +698,18 @@ class _ConfigForm(forms.Form):
                 initial[name] = self.app.cfg[name]
         forms.Form.__init__(self, initial)
 
+    def _apply(self, t, skip):
+        for key, value in self.data.iteritems():
+            if key not in skip:
+                t[key] = value
+
     def apply(self):
         t = self.app.cfg.edit()
-        for key, value in self.data.iteritems():
-            if t[key] != value:
-                t[key] = value
+        self._apply(t, set())
         t.commit()
 
 
-class LogForm(_ConfigForm):
+class LogOptionsForm(_ConfigForm):
     """A form for the logfiles."""
     log_file = forms.TextField(lazy_gettext(u'Filename'))
     log_level = forms.ChoiceField(lazy_gettext(u'Log Level'),
@@ -757,3 +760,38 @@ class URLOptionsForm(_ConfigForm):
                                       validators=[is_valid_url_prefix()])
     profiles_url_prefix = forms.TextField(lazy_gettext(u'Author Profiles URL prefix'),
                                           validators=[is_valid_url_prefix()])
+
+
+class CacheOptionsForm(_ConfigForm):
+    cache_system = forms.ChoiceField(lazy_gettext(u'Cache system'), choices=[
+        (u'null', lazy_gettext(u'No Cache')),
+        (u'simple', lazy_gettext(u'Simple Cache')),
+        (u'memcached', lazy_gettext(u'memcached')),
+        (u'filesystem', lazy_gettext(u'Filesystem'))
+    ])
+    cache_timeout = forms.IntegerField(lazy_gettext(u'Default cache timeout'),
+                                       min_value=10)
+    enable_eager_caching = forms.BooleanField(
+        lazy_gettext(u'Enable eager caching'), lazy_gettext(u'Enable'))
+    memcached_servers = forms.CommaSeparated(
+        forms.TextField(validators=[is_netaddr()])
+    )
+    filesystem_cache_path = forms.TextField()
+
+    def context_validate(self, data):
+        if data['cache_system'] == 'memcached':
+            if not data['memcached_servers']:
+                raise ValidationError(_(u'If memcached is enabled you have '
+                                        u'to provide at least one server.'))
+        elif data['cache_system'] == 'filesystem':
+            if not data['filesystem_cache_path']:
+                raise ValidationError(_(u'If the filesystem cache is in use '
+                                        u'a cache folder hast to be provided.'))
+
+    def _apply(self, t, skip):
+        # XXX: this is an ugly hack because the configuration is currently
+        # using the same format (comma separated) as well.  The correct
+        # solution would be switching the configuration system to the same
+        # form validation and reusing schemas.
+        _ConfigForm._apply(self, t, set(['memcached_servers']))
+        t['memcached_servers'] = ', '.join(self.data['memcached_servers'])

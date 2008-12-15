@@ -419,6 +419,12 @@ class ConfigTransaction(object):
     def __setitem__(self, key, value):
         """Set the value for a key by a python value."""
         self._assert_uncommitted()
+
+        # do not change if we already have the same value.  Otherwise this
+        # would override defaulted values.
+        if value == self[key]:
+            return
+
         if key.startswith('zine/'):
             key = key[5:]
         if key not in self.cfg.config_vars:

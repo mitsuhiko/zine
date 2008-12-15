@@ -47,11 +47,11 @@ from zine.pluginsystem import install_package, InstallationError, \
      SetupError, get_object_name
 from zine.pingback import pingback, PingbackError
 from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
-     LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
+     LogOptionsForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
-     CommentMassModerateForm
+     CommentMassModerateForm, CacheOptionsForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -909,72 +909,22 @@ def remove_plugin(request, plugin):
 @require_role(ROLE_ADMIN)
 def cache(request):
     """Configure the cache."""
-    csrf_protector = CSRFProtector()
-    cfg = request.app.cfg
-    form = {
-        'cache_system':             cfg['cache_system'],
-        'cache_timeout':            cfg['cache_timeout'],
-        'enable_eager_caching':     cfg['enable_eager_caching'],
-        'memcached_servers':        cfg['memcached_servers'],
-        'filesystem_cache_path':    cfg['filesystem_cache_path']
-    }
-    errors = []
+    form = CacheOptionsForm()
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
-
         if 'clear_cache' in request.form:
             request.app.cache.clear()
             flash(_(u'The cache was cleared successfully.'), 'configure')
             return redirect_to('admin/cache')
+        elif form.validate(request.form):
+            form.apply()
+            flash(_(u'Cache settings were changed successfully.'), 'configure')
+            return redirect_to('admin/cache')
 
-        form['cache_system'] = cache_system = \
-            request.form.get('cache_system')
-        if cache_system not in cache.systems:
-            errors.append(_(u'Invalid cache system selected.'))
-        form['cache_timeout'] = cache_timeout = \
-            request.form.get('cache_timeout', '')
-        if not cache_timeout.isdigit():
-            errors.append(_(u'Cache timeout must be positive integer.'))
-        else:
-            cache_timeout = int(cache_timeout)
-            if cache_timeout < 10:
-                errors.append(_(u'Cache timeout must be greater than 10 '
-                                'seconds.'))
-        form['enable_eager_caching'] = enable_eager_caching = \
-            'enable_eager_caching' in request.form
-        form['memcached_servers'] = memcached_servers = \
-            request.form.get('memcached_servers', '')
-        form['filesystem_cache_path'] = filesystem_cache_path = \
-            request.form.get('filesystem_cache_path', '')
-
-        if not errors:
-            t = cfg.edit()
-            if cache_system != cfg['cache_system']:
-                t['cache_system'] = cache_system
-            if cache_timeout != cfg['cache_timeout']:
-                t['cache_timeout'] = cache_timeout
-            if enable_eager_caching != cfg['enable_eager_caching']:
-                t['enable_eager_caching'] = enable_eager_caching
-            if memcached_servers != cfg['memcached_servers']:
-                t['memcached_servers'] = memcached_servers
-            if filesystem_cache_path != cfg['filesystem_cache_path']:
-                t['filesystem_cache_path'] = filesystem_cache_path
-            t.commit()
-            flash(_(u'Updated cache settings.'), 'configure')
-        else:
-            flash(errors[0], 'error')
+    print form.errors
 
     return render_admin_response('admin/cache.html', 'options.cache',
-        hidden_form_data=make_hidden_fields(csrf_protector),
-        form=form,
-        cache_systems=[
-            ('simple', _(u'Simple Cache')),
-            ('memcached', _(u'memcached')),
-            ('filesystem', _(u'Filesystem')),
-            ('null', _(u'No Cache'))
-        ]
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)
@@ -1231,7 +1181,7 @@ def information(request):
 @require_role(ROLE_ADMIN)
 def log(request, page):
     page = request.app.log.view().get_page(page)
-    form = LogForm()
+    form = LogOptionsForm()
     if request.method == 'POST' and form.validate(request.form):
         form.apply()
         flash(_('Log changes saved.'), 'configure')
