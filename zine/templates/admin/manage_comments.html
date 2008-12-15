@@ -3,13 +3,12 @@
 {% block title %}{{ comments_title|striptags }}{% endblock %}
 {% block contents %}
   <h1>{{ comments_title }}</h1>
-  <form action="" method="post">
+  {% call form() %}
     <ul class="comments">
-    {%- for comment in comments %}
+    {%- for comment in form.comments %}
       <li class="comment {{ loop.cycle('odd', 'even') }}{{ ' blocked'
         if comment.blocked else '' }}">
-        <input type="checkbox" name="comment" value="{{ comment.id
-          }}" class="mark">
+        {{ form.selected_comments[comment.id](class='mark') }}
         {{ render_comment(comment) }}
       </li>
     {%- else %}
@@ -17,16 +16,15 @@
     {%- endfor %}
     </ul>
     <div class="actions">
-      {{ hidden_form_data }}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
     </div>
     <script type="text/javascript">
       $(function() {
-        $('<input type="button" value="{{ _('Select All') }}">')
+        $('<input type="button" value="{{ _('Toggle selection') }}">')
           .click(function() {
             $('input.mark').each(function() {
-              this.checked = true;
+              this.checked = !this.checked;
             });
           })
           .appendTo('div.actions');
@@ -37,5 +35,5 @@
       {{ pagination.generate() }}
     </div>
     {%- endif %}
-  </form>
+  {% endcall %}
 {% endblock %}

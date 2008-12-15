@@ -2,14 +2,13 @@
 {% block title %}{{ _("Delete Comments") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Delete Comments") }}</h1>
-  <form action="" method="post">
+  {% call form() %}
     <div>
-      {{ hidden_form_data }}
       <p>{{ _('Do you really want to delete the selected comments?') }}</p>
-      <input type="hidden" name="comment_list" value="{{ comment_list|join(' ') }}">
+      {{ form.selected_comments.hidden() }}
       <input type="hidden" name="confirm" value="yes">
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="delete" value="{{ _('Yes') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

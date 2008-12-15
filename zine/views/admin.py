@@ -50,7 +50,8 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
-     DeleteCategoryForm, EditUserForm
+     DeleteCategoryForm, EditUserForm, DeleteUserForm, \
+     CommentMassModerateForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -84,8 +85,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('pages', url_for('admin/manage_pages'), _(u'Pages')),
             ('categories', url_for('admin/manage_categories'), _(u'Categories'))
         ]),
-        ('comments', url_for('admin/show_comments'), _(u'Comments'), [
-            ('overview', url_for('admin/show_comments'), _(u'Overview')),
+        ('comments', url_for('admin/manage_comments'), _(u'Comments'), [
+            ('overview', url_for('admin/manage_comments'), _(u'Overview')),
             ('unmoderated', url_for('admin/show_unmoderated_comments'),
              _(u'Awaiting Moderation (%d)') %
              Comment.query.unmoderated().count()),
@@ -458,55 +459,41 @@ def delete_page(request, post):
 
 def _handle_comments(identifier, title, query, page):
     request = get_request()
-    csrf_protector = CSRFProtector()
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-
-        if 'comment_list' in request.form:
-            comments = map(int, request.form['comment_list'].split())
-        else:
-            comments = request.form.getlist('comment', type=int)
-
-        if comments and not 'cancel' in request.form:
-            query = comment_table.c.comment_id.in_(comments)
-
-            # delete the comments in the list
-            if 'delete' in request.form:
-                if 'confirm' in request.form:
-                    db.execute(comment_table.delete(query))
-                    db.commit()
-                    return redirect_to('admin/show_comments')
-                return render_admin_response('admin/delete_comments.html',
-                                             hidden_form_data=csrf_protector,
-                                             comment_list=comments)
-
-            # or approve them all
-            elif 'approve' in request.form:
-                db.execute(comment_table.update(query), dict(
-                    status=COMMENT_MODERATED,
-                    blocked_msg=''
-                ))
-                db.commit()
-                flash(_(u'Approved all the selected comments.'))
-                return redirect_to('admin/show_comments')
-
     comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/show_comments', page, PER_PAGE,
+    pagination = AdminPagination('admin/manage_comments', page, PER_PAGE,
                                  query.count())
     if not comments and page != 1:
         raise NotFound()
+
+    form = CommentMassModerateForm(comments)
+
+    if request.method == 'POST':
+        if 'cancel' not in request.form and form.validate(request.form):
+            if 'delete' in request.form:
+                if 'confirm' in request.form:
+                    form.delete_selection()
+                    db.commit()
+                    return redirect_to('admin/manage_comments')
+                return render_admin_response('admin/delete_comments.html',
+                                             form=form.as_widget())
+
+            # or approve them all
+            elif 'approve' in request.form:
+                form.approve_selection()
+                db.commit()
+                flash(_(u'Approved all the selected comments.'))
+                return redirect_to('admin/manage_comments')
+
     tab = 'comments'
     if identifier is not None:
         tab += '.' + identifier
-    return render_admin_response('admin/show_comments.html', tab,
-                                 comments_title=title,
-                                 comments=comments,
-                                 pagination=pagination,
-                                 hidden_form_data=csrf_protector)
+    return render_admin_response('admin/manage_comments.html', tab,
+                                 comments_title=title, form=form.as_widget(),
+                                 pagination=pagination)
 
 
 @require_role(ROLE_AUTHOR)
-def show_comments(request, page):
+def manage_comments(request, page):
     """Show all the comments."""
     return _handle_comments('overview', _(u'All Comments'),
                             Comment.query, page)
@@ -551,14 +538,14 @@ def edit_comment(request, comment_id):
 
     if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return form.redirect('admin/show_comments')
+            return form.redirect('admin/manage_comments')
         elif request.form.get('delete'):
             return redirect_to('admin/delete_comment', comment_id=comment_id)
         form.save_changes()
         db.commit()
         flash(_(u'Comment by %s moderated successfully.') %
               escape(comment.author))
-        return form.redirect('admin/show_comments')
+        return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/edit_comment.html',
                                  'comments.overview', form=form.as_widget())
@@ -575,7 +562,7 @@ def delete_comment(request, comment_id):
     """
     comment = Comment.query.get(comment_id)
     if comment is None:
-        return redirect_to('admin/show_comments')
+        return redirect_to('admin/manage_comments')
 
     form = DeleteCommentForm(comment)
 
@@ -587,7 +574,7 @@ def delete_comment(request, comment_id):
                                              comment_id=comment.id)
             form.delete_comment()
             db.commit()
-            return form.redirect('admin/show_comments')
+            return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/delete_comment.html',
                                  'comments.overview', form=form.as_widget())
@@ -607,7 +594,7 @@ def approve_comment(request, comment_id):
             db.commit()
             flash(_(u'Comment by %s approved successfully.') %
                   escape(comment.author), 'configure')
-        return form.redirect('admin/show_comments')
+        return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/approve_comment.html',
                                  'comments.overview', form=form.as_widget())
@@ -627,7 +614,7 @@ def block_comment(request, comment_id):
             db.commit()
             flash(_(u'Comment by %s blocked successfully.') %
                   escape(comment.author), 'configure')
-        return form.redirect('admin/show_comments')
+        return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/block_comment.html',
                                  'comments.overview', form=form.as_widget())
@@ -637,11 +624,11 @@ def block_comment(request, comment_id):
 def manage_categories(request, page):
     """Show a list of used post categories."""
     categories = Category.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/show_categories', page, PER_PAGE,
+    pagination = AdminPagination('admin/manage_categories', page, PER_PAGE,
                                  Category.query.count())
     if not categories and page != 1:
         raise NotFound()
-    return render_admin_response('admin/show_categories.html', 'manage.categories',
+    return render_admin_response('admin/manage_categories.html', 'manage.categories',
                                  categories=categories,
                                  pagination=pagination)
 
@@ -688,7 +675,7 @@ def delete_category(request, category_id):
     """Works like the other delete pages, just that it deletes categories."""
     category = Category.query.get(category_id)
     if category is None:
-        return redirect_to('admin/show_categories')
+        return redirect_to('admin/manage_categories')
     form = DeleteCategoryForm(category)
 
     if request.method == 'POST':
@@ -699,7 +686,7 @@ def delete_category(request, category_id):
             form.delete_category()
             flash(_(u'Category %s deleted successfully.') % escape(category.name))
             db.commit()
-            return form.redirect('admin/show_categories')
+            return form.redirect('admin/manage_categories')
 
     return render_admin_response('admin/delete_category.html', 'manage.categories',
                                  form=form.as_widget())
@@ -762,51 +749,24 @@ def edit_user(request, user_id=None):
 def delete_user(request, user_id):
     """Like all other delete screens just that it deletes a user."""
     user = User.query.get(user_id)
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
-
     if user is None:
-        return redirect('admin/manage_users')
-    elif user == request.user:
+        raise NotFound()
+    form = DeleteUserForm(user)
+    if user == request.user:
         flash(_(u'You cannot delete yourself.'), 'error')
-        return redirect('admin/manage_users')
+        return form.redirect('admin/manage_users')
 
     if request.method == 'POST':
-        csrf_protector.assert_safe()
         if request.form.get('cancel'):
-            return redirect('admin/edit_user', user_id=user.id)
-        elif request.form.get('confirm'):
-            redirect.add_invalid('admin/edit_user', user_id=user.id)
-            action = request.form.get('action')
-            action_val = None
-            if action == 'reassign':
-                action_val = request.form.get('reassign_user', type=int)
-                db.execute(posts.update(posts.c.author_id == user_id), dict(
-                    author_id=action_val
-                ))
-            #! plugins can use this to react to user deletes.  They can't stop
-            #! the deleting of the user but they can delete information in
-            #! their own tables so that the database is consistent afterwards.
-            #! Additional to the user object an action and action val is
-            #! provided.  The action can be one of the following values:
-            #!  "reassign":     Reassign the objects to the user with the
-            #!                  user_id of "action_val".
-            #!  "delete":       Delete related objects.
-            #! More actions might be added in the future so plugins should
-            #! ignore unknown actions.  If an unknown action is provided
-            #! the plugin should treat is as "delete".
-            emit_event('before-user-deleted', user, action, action_val)
-            db.delete(user)
-            flash(_(u'User %s deleted successfully.') %
-                  escape(user.username), 'remove')
+            return form.redirect('admin/edit_user', user_id=user.id)
+        elif request.form.get('confirm') and form.validate(request.form):
+            form.add_invalid_redirect_target('admin/edit_user', user_id=user.id)
+            form.delete_user()
             db.commit()
-            return redirect('admin/manage_users')
+            return form.redirect('admin/manage_users')
 
     return render_admin_response('admin/delete_user.html', 'users.edit',
-        user=user,
-        other_users=User.query.filter(User.id != user_id).all(),
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
-    )
+                                 form=form.as_widget())
 
 
 @require_role(ROLE_ADMIN)

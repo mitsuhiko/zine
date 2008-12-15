@@ -8,8 +8,8 @@
                   reason=form.comment.blocked_msg|e %}
         Do you really want to approve the comment by {{ comment_author }}?
       {% endtrans %}</p>
-      <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="confirm" value="{{ _('Yes') }}">
+      <input type="submit" name="cancel" value="{{ _('No') }}">
     </div>
   {% endcall %}
 {% endblock %}

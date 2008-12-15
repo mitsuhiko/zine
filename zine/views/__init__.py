@@ -38,7 +38,7 @@ all_views = {
     'admin/manage_pages':       admin.manage_pages,
     'admin/edit_post':          admin.dispatch_post_edit,
     'admin/delete_post':        admin.dispatch_post_delete,
-    'admin/show_comments':      admin.show_comments,
+    'admin/manage_comments':    admin.manage_comments,
     'admin/show_unmoderated_comments': admin.show_unmoderated_comments,
     'admin/show_spam_comments': admin.show_spam_comments,
     'admin/show_post_comments': admin.show_post_comments,

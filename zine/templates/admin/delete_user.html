@@ -2,30 +2,20 @@
 {% block title %}{{ _("Delete User") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Delete User") }}</h1>
-  <form action="" method="post">
-    {{ hidden_form_data }}
-    <p>{% trans username=user.username|e %}
-      Do you really want to delete the user “{{ username }}”?.
+  {% call form() %}
+    <p>{% trans username=form.user.username|e %}
+      Do you really want to delete the user “{{ username }}”?
     {% endtrans %}</p>
-    {% if user.posts %}
-      <p>{% trans post_count=user.posts.count() %}
-        What should happen to the {{ post_count }} post this user wrote?
-      {% pluralize %}
-        What should happen to the {{ post_count }} posts this user wrote?
-      {% endtrans %}</p>
-      <ul>
-        {% if other_users %}
-        <li>{{ h.input_field('action', 'reassign', 'radio') }} <label for="reassign">{% trans
-        %}reassign to user{% endtrans %}
-        <select name="reassign_user">{%- for user in other_users %}
-          <option value="{{ user.id }}">{{ user.username|e }}</option>
-        {%- endfor %}</select>
-        {% endif %}
-        <li>{{ h.input_field('action', 'delete', 'radio', checked=true) }}
-            <label for="delete">{% trans %}delete posts{% endtrans %}</li>
-      </ul>
-    {% endif %}
-    <input type="submit" name="cancel" value="{{ _('No') }}">
-    <input type="submit" name="confirm" value="{{ _('Yes') }}">
-  </form>
+    <p>{% trans post_count=form.user.posts.count() %}
+      What should happen to the {{ post_count }} post this user wrote?
+    {% pluralize %}
+      What should happen to the {{ post_count }} posts this user wrote?
+    {% endtrans %}</p>
+    {{ form.action() }}
+    <p>{{ form.reassign_to.label() }}: {{ form.reassign_to() }}
+    <div class="actions">
+      <input type="submit" name="cancel" value="{{ _('No') }}">
+      <input type="submit" name="confirm" value="{{ _('Yes') }}">
+    </div>
+  {% endcall %}
 {% endblock %}
