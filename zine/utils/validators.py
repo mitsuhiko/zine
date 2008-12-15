@@ -110,8 +110,6 @@ def is_valid_slug(allow_slash=True):
     False
     >>> check(is_valid_slug, 'foo/bar')
     True
-    >>> check(is_valid_slug, '<foo>')
-    False
     """
     def validator(form, value):
         if len(value) > 200:
@@ -125,7 +123,7 @@ def is_netaddr():
     """Checks if the string given is a net address.  Either an IP or a
     hostname.  This currently does not support ipv6 (XXX!!)
 
-    >>> check(is_netattr, 'localhost')
+    >>> check(is_netaddr, 'localhost')
     True
     >>> check(is_netaddr, 'localhost:443')
     True
@@ -137,9 +135,9 @@ def is_netaddr():
         if len(items) > 1:
             raise ValidationError(_(u'You have to enter a valid net address.'))
         items = items[0].split(':')
-        if len(items) != 2:
+        if len(items) not in (1, 2):
             raise ValidationError(_(u'You have to enter a valid net address.'))
-        elif not items[1].isdigit():
+        elif len(items) == 2 and not items[1].isdigit():
             raise ValidationError(_(u'The port has to be nummeric'))
     return validator
 

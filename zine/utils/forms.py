@@ -327,7 +327,7 @@ class Widget(_Renderable):
 
         gives the list of errors:
 
-        >>> username.errors()
+        >>> username.errors
         [u'This field is required.']
 
         This error list is printable:
@@ -852,7 +852,7 @@ class ErrorList(_Renderable, list):
     def _as_list(self, factory, attrs):
         if attrs.pop('hide_empty', False) and not self:
             return u''
-        return factory(*(item for item in self), **attrs)
+        return factory(*(html.li(item) for item in self), **attrs)
 
     def __call__(self, **attrs):
         attrs.setdefault('class', attrs.pop('class_', 'errors'))
@@ -1163,7 +1163,7 @@ class CommaSeparated(Multiple):
 
 
 class LineSeparated(CommaSeparated):
-    """Works like `CommaSeparated` but uses multiple lines:
+    r"""Works like `CommaSeparated` but uses multiple lines:
 
     >>> field = LineSeparated(IntegerField())
     >>> field(u'1\n2\n3')
