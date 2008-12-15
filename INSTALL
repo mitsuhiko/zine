@@ -4,12 +4,12 @@ Zine 0.1 Alpha Installation Instructions
 For a working Zine instance you need to have the following libraries
 installed:
 
-  - Werkzeug from Mercurial: hg clone http://dev.pocoo.org/hg/werkzeug-main
-  - Jinja2 from Mercurial: hg clone http://dev.pocoo.org/hg/jinja2-main
-  - SQLAlchemy 0.5 or higher*
-  - simplejson*
   - Python 2.4 or higher
+  - Werkzeug*
+  - Jinja2*
   - A database (MySQL, SQLite or PostgreSQL and others are supported)
+  - SQLAlchemy 0.5 or higher*
+  - simplejson* [included in Python 2.6 and higher]
   - pytz*
   - Babel
 
