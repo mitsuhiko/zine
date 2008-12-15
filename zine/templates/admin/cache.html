@@ -2,29 +2,29 @@
 {% block title %}{{ _("Cache Options") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Cache Options") }}</h1>
-  <p>{% trans %}
-    Zine comes with a cache system that allows you to survive a sudden
-    storm of visitors.  The caching system has different backends you can
-    chose from and also different settings that you should set depending on
-    the type of server you have and the number of visitors.
-  {% endtrans %}</p>
-  <p>{% trans %}
-    Keep in mind that if caching is enabled templates will be cached too and
-    as a result of that, not reloaded.  If you are trying to develop plugins
-    it's a good idea to disable all caching.
-  {% endtrans %}</p>
-  <script type="text/javascript">
-    $(function() {
-      $('select').change(function() {
-        var activeItem = $(this).val();
-        $('div.optionbox').each(function() {
-          $(this).is('#' + activeItem + '-options')
-            ? $(this).show() : $(this).hide();
-        });
-      }).change();
-    });
-  </script>
-  <form action="" method="post">
+  {% call form() %}
+    <p>{% trans %}
+      Zine comes with a cache system that allows you to survive a sudden
+      storm of visitors.  The caching system has different backends you can
+      chose from and also different settings that you should set depending on
+      the type of server you have and the number of visitors.
+    {% endtrans %}</p>
+    <p>{% trans %}
+      Keep in mind that if caching is enabled templates will be cached too and
+      as a result of that, not reloaded.  If you are trying to develop plugins
+      it's a good idea to disable all caching.
+    {% endtrans %}</p>
+    <script type="text/javascript">
+      $(function() {
+        $('select').change(function() {
+          var activeItem = $(this).val();
+          $('div.optionbox').each(function() {
+            $(this).is('#' + activeItem + '-options')
+              ? $(this).show() : $(this).hide();
+          });
+        }).change();
+      });
+    </script>
     <h2>{{ _("Cache System") }}</h2>
     <p>{{ _("Current Zine supports three caching systems:") }}</p>
     <ul>
@@ -44,9 +44,7 @@
           should be fast enough however.{% endtrans %}</li>
     </ul>
     <p>{% trans %}Per default no cache system is active.{% endtrans %}</p>
-    <p><select name="cache_system">{%- for key, value in cache_systems %}
-      <option value="{{ key }}"{% if key == form.cache_system
-        %} selected{% endif %}>{{ value }}</option>{% endfor %}</select></p>
+    <p>{{ form.cache_system() }}</p>
     <div class="optionbox" id="memcached-options">
       <h2>{{ _("Memcached Options") }}</h2>
       <p>{% trans %}
@@ -63,8 +61,7 @@
         port 11211 you would have to enter <code>127.0.0.1:11211</code> into
         the following text field.
       {% endtrans %}</p>
-      <p>{{ h.input_field('memcached_servers', form.memcached_servers,
-                          size=60) }}</p>
+      <p>{{ form.memcached_servers(size=60) }}</p>
     </div>
     <div class="optionbox" id="filesystem-options">
       <h2>{{ _("Filesystem Options") }}</h2>
@@ -83,8 +80,7 @@
         the case if you try to cache into <code>/tmp</code> or a similar
         folder where all kinds of applications put temporary files in.
       {% endtrans %}</p>
-      <p>{{ h.input_field('filesystem_cache_path', form.filesystem_cache_path,
-                          size=40) }}</p>
+      <p>{{ form.filesystem_cache_path(size=40) }}</p>
     </div>
     <h2>{{ _("General Cache Settings") }}</h2>
     <p>{% trans %}
@@ -97,16 +93,12 @@
       default timeout.
     {% endtrans %}</p>
     <dl>
-      <dt>{{ _("Default cache timeout") }}</dt>
-      <dd>{{ h.input_field('cache_timeout', form.cache_timeout) }}</dd>
-      <dt>{{ _("Enable eager caching") }}
-      <dd>{{ h.checkbox('enable_eager_caching', form.enable_eager_caching) }}
-          <label for="enable_eager_caching">{{ _("enable") }}</label></dd>
+      {{ form.cache_timeout.as_dd() }}
+      {{ form.enable_eager_caching.as_dd() }}
     </dl>
     <div class="actions">
       <input type="submit" value="{{ _('Save') }}">
       <input type="submit" name="clear_cache" value="{{ _('Clear Cache') }}">
-      {{ hidden_form_data }}
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

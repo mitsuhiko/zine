@@ -87,6 +87,8 @@ div.body ul.navbar {
     padding: 0 0 0 15px;
     height: 27px;
     background-color: #222e4b;
+    border-top: 1px solid #2E6083;
+    border-bottom: 1px solid #3D7094;
     list-style: none;
 }
 
@@ -117,6 +119,10 @@ div.body ul.navbar li a:hover {
 div.body ul.navbar li.active a {
     background-position: bottom;
     color: white;
+}
+
+div.body ul.navbar li.active a {
+    height: 25px!important;
 }
 
 div.body ul.navbar li.active a:hover {

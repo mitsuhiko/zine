@@ -121,6 +121,29 @@ def is_valid_slug(allow_slash=True):
     return validator
 
 
+def is_netaddr():
+    """Checks if the string given is a net address.  Either an IP or a
+    hostname.  This currently does not support ipv6 (XXX!!)
+
+    >>> check(is_netattr, 'localhost')
+    True
+    >>> check(is_netaddr, 'localhost:443')
+    True
+    >>> check(is_netaddr, 'just something else')
+    False
+    """
+    def validator(form, value):
+        items = value.split()
+        if len(items) > 1:
+            raise ValidationError(_(u'You have to enter a valid net address.'))
+        items = items[0].split(':')
+        if len(items) != 2:
+            raise ValidationError(_(u'You have to enter a valid net address.'))
+        elif not items[1].isdigit():
+            raise ValidationError(_(u'The port has to be nummeric'))
+    return validator
+
+
 def is_valid_url_prefix():
     """Validates URL parts."""
     def validator(form, value):
