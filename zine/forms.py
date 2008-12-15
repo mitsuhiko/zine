@@ -12,7 +12,7 @@ from datetime import datetime
 
 from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
-from zine.database import db, posts
+from zine.database import db, posts, comments
 from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
      COMMENT_BLOCKED_USER, ROLE_ADMIN, ROLE_EDITOR, ROLE_AUTHOR, \
@@ -211,7 +211,7 @@ class PostForm(forms.Form):
     author = forms.ModelField(User, 'username', lazy_gettext('Author'),
                               widget=forms.SelectBox)
     tags = forms.CommaSeparated(forms.TextField(), lazy_gettext(u'Tags'))
-    categories = forms.Multiple(forms.ModelField(Category, 'category_id'),
+    categories = forms.Multiple(forms.ModelField(Category, 'id'),
                                 lazy_gettext(u'Categories'),
                                 widget=forms.CheckboxGroup)
     parser = forms.ChoiceField(lazy_gettext(u'Parser'))
@@ -438,8 +438,10 @@ class ApproveCommentForm(_CommentBoundForm):
 
     def approve_comment(self):
         """Approve the comment."""
+        #! plugins can use this to react to comment approvals.
+        emit_event('before-comment-approved', self.comment)
         self.comment.status = COMMENT_MODERATED
-        self.comment.blocked_msg = ''
+        self.comment.blocked_msg = u''
 
 
 class BlockCommentForm(_CommentBoundForm):
@@ -529,6 +531,38 @@ class DeleteCategoryForm(_CategoryBoundForm):
         #! their own tables so that the database is consistent afterwards.
         emit_event('before-category-deleted', self.category)
         db.delete(self.category)
+
+
+class CommentMassModerateForm(forms.Form):
+    """This form is used for comment mass moderation."""
+    selected_comments = forms.MultiChoiceField(widget=forms.CheckboxGroup)
+
+    def __init__(self, comments, initial=None):
+        self.comments = comments
+        self.selected_comments.choices = [c.id for c in self.comments]
+        forms.Form.__init__(self, initial)
+
+    def as_widget(self):
+        widget = forms.Form.as_widget(self)
+        widget.comments = self.comments
+        return widget
+
+    def iter_selection(self):
+        selection = set(self.data['selected_comments'])
+        for comment in self.comments:
+            if comment.id in selection:
+                yield comment
+
+    def delete_selection(self):
+        for comment in self.iter_selection():
+            emit_event('before-comment-deleted', comment)
+            db.delete(comment)
+
+    def approve_selection(self):
+        for comment in self.iter_selection():
+            emit_event('before-comment-approved', comment)
+            comment.status = COMMENT_MODERATED
+            comment.blocked_msg = u''
 
 
 class _UserBoundForm(forms.Form):

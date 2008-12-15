@@ -398,6 +398,29 @@ class Widget(_Renderable):
         self._all_errors = all_errors
         self.name = name
 
+    def hidden(self):
+        """Return one or multiple hidden fields for the current value.  This
+        also handles subwidgets.  This is useful for transparent form data
+        passing.
+        """
+        fields = []
+
+        def _add_field(name, value):
+            fields.append(html.input(type='hidden', name=name, value=value))
+
+        def _to_hidden(value, name):
+            if isinstance(value, list):
+                for idx, value in enumerate(value):
+                    _to_hidden(value, _make_name(name, idx))
+            elif isinstance(value, dict):
+                for key, value in value.iteritems():
+                    _to_hidden(value, _make_name(name, key))
+            else:
+                _add_field(name, value)
+
+        _to_hidden(self.value, self.name)
+        return u'\n'.join(fields)
+
     @property
     def id(self):
         """The proposed id for this widget."""
@@ -1526,8 +1549,8 @@ class BooleanField(Field):
 
     def to_primitive(self, value):
         if value:
-            return '1'
-        return ''
+            return u'1'
+        return u''
 
 
 class FormMeta(type):

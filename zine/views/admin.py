@@ -50,7 +50,8 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
-     DeleteCategoryForm, EditUserForm, DeleteUserForm
+     DeleteCategoryForm, EditUserForm, DeleteUserForm, \
+     CommentMassModerateForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -458,51 +459,37 @@ def delete_page(request, post):
 
 def _handle_comments(identifier, title, query, page):
     request = get_request()
-    csrf_protector = CSRFProtector()
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
-
-        if 'comment_list' in request.form:
-            comments = map(int, request.form['comment_list'].split())
-        else:
-            comments = request.form.getlist('comment', type=int)
-
-        if comments and not 'cancel' in request.form:
-            query = comment_table.c.comment_id.in_(comments)
-
-            # delete the comments in the list
-            if 'delete' in request.form:
-                if 'confirm' in request.form:
-                    db.execute(comment_table.delete(query))
-                    db.commit()
-                    return redirect_to('admin/show_comments')
-                return render_admin_response('admin/delete_comments.html',
-                                             hidden_form_data=csrf_protector,
-                                             comment_list=comments)
-
-            # or approve them all
-            elif 'approve' in request.form:
-                db.execute(comment_table.update(query), dict(
-                    status=COMMENT_MODERATED,
-                    blocked_msg=''
-                ))
-                db.commit()
-                flash(_(u'Approved all the selected comments.'))
-                return redirect_to('admin/show_comments')
-
     comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/show_comments', page, PER_PAGE,
                                  query.count())
     if not comments and page != 1:
         raise NotFound()
+
+    form = CommentMassModerateForm(comments)
+
+    if request.method == 'POST':
+        if 'cancel' not in request.form and form.validate(request.form):
+            if 'delete' in request.form:
+                if 'confirm' in request.form:
+                    form.delete_selection()
+                    db.commit()
+                    return redirect_to('admin/show_comments')
+                return render_admin_response('admin/delete_comments.html',
+                                             form=form.as_widget())
+
+            # or approve them all
+            elif 'approve' in request.form:
+                form.approve_selection()
+                db.commit()
+                flash(_(u'Approved all the selected comments.'))
+                return redirect_to('admin/show_comments')
+
     tab = 'comments'
     if identifier is not None:
         tab += '.' + identifier
     return render_admin_response('admin/show_comments.html', tab,
-                                 comments_title=title,
-                                 comments=comments,
-                                 pagination=pagination,
-                                 hidden_form_data=csrf_protector)
+                                 comments_title=title, form=form.as_widget(),
+                                 pagination=pagination)
 
 
 @require_role(ROLE_AUTHOR)
