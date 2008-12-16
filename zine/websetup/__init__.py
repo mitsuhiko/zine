@@ -19,7 +19,7 @@ from os import path
 from zine.config import Configuration
 from zine.api import db
 from zine.config import ConfigurationTransactionError
-from zine.models import User, ROLE_ADMIN
+from zine.models import User
 from zine.utils.crypto import gen_pwhash, gen_secret_key, new_iid
 from zine.utils.validators import is_valid_email, check
 from zine.i18n import load_translations, has_language, list_languages
@@ -149,19 +149,27 @@ class WebSetup(object):
         except Exception, error:
             error = str(error).decode('utf-8', 'ignore')
         else:
-            from zine.models import ROLE_ADMIN
-            from zine.database import users
+            from zine.database import users, user_privileges, privileges
+            from zine.privileges import BLOG_ADMIN
 
             # create admin account
-            e.execute(users.insert(),
+            user_id = e.execute(users.insert(),
                 username=value('admin_username'),
                 pw_hash=gen_pwhash(value('admin_password')),
                 email=value('admin_email'),
                 real_name=u'',
                 description=u'',
                 extra={},
-                display_name='$username',
-                role=ROLE_ADMIN
+                display_name='$username'
+            ).last_inserted_ids()[0]
+
+            # insert a privilege for the user
+            privilege_id = e.execute(privileges.insert(),
+                name=BLOG_ADMIN.name
+            ).last_inserted_ids()[0]
+            e.execute(user_privileges.insert(),
+                user_id=user_id,
+                privilege_id=privilege_id
             )
 
             # set up the initial config

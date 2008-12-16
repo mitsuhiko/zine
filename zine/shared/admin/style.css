@@ -874,6 +874,17 @@ table.plugins tr.plugin-active td {
 }
 
 /* :::: CONFIG EDITOR :::: */
+table.config-table {
+    border: 1px solid #B4D2E7;
+}
+
+div.contents table.config-table th:first-child,
+div.contents table.config-table th:last-child {
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+}
+
 table.config-table tr.user-defined {
     background: #DEEEF8;
 }

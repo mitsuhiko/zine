@@ -83,7 +83,7 @@ def add_eric_link(req, navigation_bar):
                                  _('Eric The Fish')))
 
 
-@require_role(ROLE_ADMIN)
+@require_privilege(ROLE_ADMIN)
 def show_eric_options(req):
     """This renders the eric admin panel. Allow switching the skin and show
     the available skins.

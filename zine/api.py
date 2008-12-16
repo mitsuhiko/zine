@@ -18,9 +18,6 @@ from zine.application import (
     Response, get_request, url_for, shared_url, add_link, add_meta,
     add_script, add_header_snippet,
 
-    # View helpers
-    require_role,
-
     # Template helpers
     render_template, render_response,
 
@@ -30,6 +27,9 @@ from zine.application import (
 
 # Database
 from zine.database import db
+
+# Privilege support
+from zine.privileges import require_privilege
 
 # Cache
 from zine import cache

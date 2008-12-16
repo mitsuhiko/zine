@@ -58,7 +58,7 @@ class PostAuthDecider(xapian.MatchDecider):
            'status': int(doc.get_value(3)),
            'author_id': int(doc.get_value(4)),
         })
-        return Post.can_access.im_func(duck, user=self.user)
+        return Post.can_read.im_func(duck, user=self.user)
 
 
 def configure(request):

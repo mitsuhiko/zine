@@ -87,6 +87,7 @@ content_type_handlers = {
     'page':                     blog.show_page
 }
 
+#: the privileges for these content types are defined in zine.privileges
 admin_content_type_handlers = {
     'entry': {
         'edit':                 admin.edit_entry,

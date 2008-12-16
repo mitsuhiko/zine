@@ -17,6 +17,7 @@ from datetime import datetime
 
 from werkzeug import url_quote
 
+from zine.privileges import ENTER_ADMIN_PANEL, require_privilege
 from zine.utils import local, load_json
 from zine.i18n import _
 
@@ -48,6 +49,15 @@ def flash(msg, type='info'):
         msg = (u'<strong>%s:</strong> ' % _('Error')) + msg
     local.request.session.setdefault('admin/flashed_messages', []).\
             append((type, msg))
+
+
+def require_admin_privilege(expr=None):
+    """Works like `require_privilege` but checks if the rule for
+    `ENTER_ADMIN_PANEL` exists as well.
+    """
+    if expr:
+        expr = ENTER_ADMIN_PANEL & expr
+    return require_privilege(expr)
 
 
 def gen_slug(text, delim='-'):

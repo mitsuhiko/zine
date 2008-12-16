@@ -126,7 +126,7 @@ def get_style(req, style):
     return resp
 
 
-@require_role(ROLE_ADMIN)
+@require_privilege(ROLE_ADMIN)
 def show_config(req):
     """Request handler that provides an admin page with the configuration
     for the pygments plugin. So far this only allows changing the style.

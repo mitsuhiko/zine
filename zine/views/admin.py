@@ -17,10 +17,14 @@ from os.path import exists
 from urlparse import urlparse
 
 from werkzeug import escape
-from werkzeug.exceptions import NotFound, BadRequest
+from werkzeug.exceptions import NotFound, BadRequest, Forbidden
 
+from zine.privileges import assert_privilege, require_privilege, \
+     CREATE_ENTRIES, EDIT_OWN_ENTRIES, EDIT_OTHER_ENTRIES, \
+     CREATE_PAGES, EDIT_OWN_PAGES, EDIT_OTHER_PAGES, MODERATE_COMMENTS, \
+     MANAGE_CATEGORIES, BLOG_ADMIN
 from zine.i18n import _
-from zine.application import require_role, get_request, url_for, emit_event, \
+from zine.application import get_request, url_for, emit_event, \
      render_response, get_application
 from zine.models import User, Post, Category, Comment, ROLE_ADMIN, \
      ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, \
@@ -30,7 +34,8 @@ from zine.database import db, comments as comment_table, posts, \
      post_categories, post_links, secure_database_uri
 from zine.utils import dump_json, load_json
 from zine.utils.validators import is_valid_email, is_valid_url, check
-from zine.utils.admin import flash, gen_slug, load_zine_reddit
+from zine.utils.admin import flash, gen_slug, load_zine_reddit, \
+     require_admin_privilege
 from zine.utils.pagination import AdminPagination
 from zine.utils.xxx import make_hidden_fields, CSRFProtector, \
      IntelligentRedirect, StreamReporter
@@ -96,8 +101,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     ]
 
     # set up the administration menu bar
-    if request.user.role == ROLE_ADMIN:
-        navigation_bar += [
+    if request.user.has_privilege(BLOG_ADMIN):
+        navigation_bar.extend([
             ('users', url_for('admin/manage_users'), _(u'Users'), [
                 ('overview', url_for('admin/manage_users'), _(u'Overview')),
                 ('edit', url_for('admin/new_user'), _(u'Edit User'))
@@ -110,27 +115,28 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('plugins', url_for('admin/plugins'), _(u'Plugins')),
                 ('cache', url_for('admin/cache'), _(u'Cache'))
             ])
-        ]
+        ])
 
     # add the about items to the navigation bar
     system_items = [
-        ('information', url_for('admin/information'), _(u'Information')),
         ('help', url_for('admin/help'), _(u'Help')),
         ('about', url_for('admin/about_zine'), _(u'About'))
     ]
-    if request.user.role == ROLE_ADMIN:
-        system_items[1:1] = [
-             ('maintenance', url_for('admin/maintenance'),
+    if request.user.has_privilege(BLOG_ADMIN):
+        system_items[0:0] = [
+            ('information', url_for('admin/information'),
+             _(u'Information')),
+            ('maintenance', url_for('admin/maintenance'),
              _(u'Maintenance')),
-             ('import', url_for('admin/import'), _(u'Import')),
-             ('export', url_for('admin/export'), _(u'Export')),
-             ('log', url_for('admin/log'), _('Log')),
-             ('configuration', url_for('admin/configuration'),
-              _(u'Configuration Editor'))
+            ('import', url_for('admin/import'), _(u'Import')),
+            ('export', url_for('admin/export'), _(u'Export')),
+            ('log', url_for('admin/log'), _('Log')),
+            ('configuration', url_for('admin/configuration'),
+             _(u'Configuration Editor'))
         ]
 
-    navigation_bar.append(('system', url_for('admin/information'), _(u'System'),
-                          system_items))
+    navigation_bar.append(('system', system_items[0][1], _(u'System'),
+                           system_items))
 
     #! allow plugins to extend the navigation bar
     emit_event('modify-admin-navigation-bar', request, navigation_bar)
@@ -252,7 +258,7 @@ def ping_post_links(request, post):
                         html_url)
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege()
 def index(request):
     """Show the admin interface index page which is a wordpress inspired
     dashboard (doesn't exist right now).
@@ -272,7 +278,7 @@ def index(request):
         your_posts=Post.query.filter(
             Post.author_id == request.user.id
         ).count(),
-        last_posts=Post.query.published(ignore_role=True)
+        last_posts=Post.query.published(ignore_privileges=True)
             .order_by(Post.pub_date.desc()).limit(5).all()
     )
 
@@ -296,7 +302,7 @@ def bookmarklet(request):
     )
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(CREATE_ENTRIES | EDIT_OWN_ENTRIES | EDIT_OTHER_ENTRIES)
 def manage_entries(request, page):
     """Show a list of entries."""
     entry_query = Post.query.type('entry')
@@ -311,6 +317,11 @@ def manage_entries(request, page):
 
 
 def _make_post_dispatcher(action):
+    """Creates a new dispatcher for the given content type action.  This
+    already checks if the user can enter the admin panel but not if the
+    user has the required privileges.
+    """
+    @require_admin_privilege()
     def func(request, post_id):
         """Dispatch to the request handler for a post."""
         post = Post.query.get(post_id)
@@ -330,11 +341,16 @@ dispatch_post_edit = _make_post_dispatcher('edit')
 dispatch_post_delete = _make_post_dispatcher('delete')
 
 
-@require_role(ROLE_AUTHOR)
 def edit_entry(request, post=None):
     """Edit an existing entry or create a new one."""
     active_tab = post and 'manage.entries' or 'write.entry'
     form = EntryForm(post)
+
+    if post is None:
+        assert_privilege(CREATE_ENTRIES)
+    else:
+        if not post.can_edit(request.user):
+            raise Forbidden()
 
     if request.method == 'POST':
         if 'cancel' in request.form:
@@ -363,7 +379,7 @@ def edit_entry(request, post=None):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege()
 def delete_entry(request, post):
     """This dialog deletes an entry.  Usually users are redirected here from the
     edit post view or the post index page.  If the entry was not deleted the
@@ -371,6 +387,8 @@ def delete_entry(request, post):
     page if the information is invalid.
     """
     form = PostDeleteForm(post)
+    if not post.can_edit():
+        raise Forbidden()
 
     if request.method == 'POST':
         if request.form.get('cancel'):
@@ -387,7 +405,7 @@ def delete_entry(request, post):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(CREATE_PAGES | EDIT_OWN_PAGES | EDIT_OTHER_PAGES)
 def manage_pages(request, page):
     """Show a list of pages."""
     page_query = Post.query.type('page')
@@ -400,11 +418,17 @@ def manage_pages(request, page):
                                  pages=pages, pagination=pagination)
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege()
 def edit_page(request, post=None):
     """Edit an existing entry or create a new one."""
     active_tab = post and 'manage.pages' or 'write.page'
     form = PageForm(post)
+
+    if post is None:
+        assert_privilege(CREATE_PAGES)
+    else:
+        if not post.can_edit(request.user):
+            raise Forbidden()
 
     if request.method == 'POST':
         if 'cancel' in request.form:
@@ -433,7 +457,7 @@ def edit_page(request, post=None):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege()
 def delete_page(request, post):
     """This dialog deletes a page.  Usually users are redirected here from the
     edit post view or the page indexpage.  If the page was not deleted the
@@ -441,6 +465,8 @@ def delete_page(request, post):
     page if the information is invalid.
     """
     form = PostDeleteForm(post)
+    if not post.can_edit():
+        raise Forbidden()
 
     if request.method == 'POST':
         if request.form.get('cancel'):
@@ -492,27 +518,27 @@ def _handle_comments(identifier, title, query, page):
                                  pagination=pagination)
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MODERATE_COMMENTS)
 def manage_comments(request, page):
     """Show all the comments."""
     return _handle_comments('overview', _(u'All Comments'),
                             Comment.query, page)
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MODERATE_COMMENTS)
 def show_unmoderated_comments(request, page):
     """Show all unmoderated and user-blocked comments."""
     return _handle_comments('unmoderated', _(u'Comments Awaiting Moderation'),
                             Comment.query.unmoderated(), page)
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MODERATE_COMMENTS)
 def show_spam_comments(request, page):
     """Show all spam comments."""
     return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page)
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MODERATE_COMMENTS)
 def show_post_comments(request, page, post_id):
     """Show all comments for a single post."""
     post = Post.query.get(post_id)
@@ -526,7 +552,7 @@ def show_post_comments(request, page, post_id):
                             Comment.query.comments_for_post(post), page)
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MODERATE_COMMENTS)
 def edit_comment(request, comment_id):
     """Edit a comment.  Unlike the post edit screen it's not possible to
     create new comments from here, that has to happen from the post page.
@@ -551,7 +577,7 @@ def edit_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MODERATE_COMMENTS)
 def delete_comment(request, comment_id):
     """This dialog delets a comment.  Usually users are redirected here from the
     comment moderation page or the comment edit page.  If the comment was not
@@ -580,7 +606,7 @@ def delete_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MODERATE_COMMENTS)
 def approve_comment(request, comment_id):
     """Approve a comment"""
     comment = Comment.query.get(comment_id)
@@ -600,7 +626,7 @@ def approve_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MODERATE_COMMENTS)
 def block_comment(request, comment_id):
     """Block a comment."""
     comment = Comment.query.get(comment_id)
@@ -620,7 +646,7 @@ def block_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MANAGE_CATEGORIES)
 def manage_categories(request, page):
     """Show a list of used post categories."""
     categories = Category.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
@@ -633,7 +659,7 @@ def manage_categories(request, page):
                                  pagination=pagination)
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MANAGE_CATEGORIES)
 def edit_category(request, category_id=None):
     """Edit a category."""
     category = None
@@ -670,7 +696,7 @@ def edit_category(request, category_id=None):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(MANAGE_CATEGORIES)
 def delete_category(request, category_id):
     """Works like the other delete pages, just that it deletes categories."""
     category = Category.query.get(category_id)
@@ -692,7 +718,7 @@ def delete_category(request, category_id):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def manage_users(request, page):
     """Show all users in a list."""
     users = User.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
@@ -705,7 +731,7 @@ def manage_users(request, page):
                                  pagination=pagination)
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def edit_user(request, user_id=None):
     """Edit a user.  This can also create a user.  If a new user is created
     the dialog is simplified, some unimportant details are left out.
@@ -745,7 +771,7 @@ def edit_user(request, user_id=None):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def delete_user(request, user_id):
     """Like all other delete screens just that it deletes a user."""
     user = User.query.get(user_id)
@@ -769,7 +795,7 @@ def delete_user(request, user_id):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def options(request):
     """So far just a redirect page, later it would be a good idea to have
     a page that shows all the links to configuration things in form of
@@ -778,7 +804,7 @@ def options(request):
     return redirect_to('admin/basic_options')
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def basic_options(request):
     """The dialog for basic options such as the blog title etc."""
     # flash an altered message if the url is ?altered=true.  For more information
@@ -803,7 +829,7 @@ def basic_options(request):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def urls(request):
     """A config page for URL depending settings."""
     form = URLOptionsForm()
@@ -819,7 +845,7 @@ def urls(request):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def theme(request):
     """Allow the user to select one of the themes that are available."""
     csrf_protector = CSRFProtector()
@@ -840,7 +866,7 @@ def theme(request):
     )
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def configure_theme(request):
     if not request.app.theme.configurable:
         flash(_(u'This theme is not configurable'), 'error')
@@ -848,7 +874,7 @@ def configure_theme(request):
     return request.app.theme.configuration_page(request)
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def plugins(request):
     """Load and unload plugins and reload Zine if required."""
     form = PluginForm()
@@ -876,7 +902,7 @@ def plugins(request):
     )
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def remove_plugin(request, plugin):
     """Remove an inactive, instance installed plugin completely."""
     plugin = request.app.plugins.get(plugin)
@@ -906,7 +932,7 @@ def remove_plugin(request, plugin):
     )
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def cache(request):
     """Configure the cache."""
     form = CacheOptionsForm()
@@ -927,7 +953,7 @@ def cache(request):
                                  form=form.as_widget())
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def configuration(request):
     """Advanced configuration editor.  This is useful for development or if a
     plugin doesn't ship an editor for the configuration values.  Because all
@@ -971,7 +997,7 @@ def configuration(request):
     )
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def maintenance(request):
     """Enable / Disable maintenance mode."""
     cfg = request.app.cfg
@@ -991,7 +1017,7 @@ def maintenance(request):
     )
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def import_dump(request):
     """Show the current import queue or add new items."""
     return render_admin_response('admin/import.html', 'system.import',
@@ -1001,7 +1027,7 @@ def import_dump(request):
     )
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def inspect_import(request, id):
     """Inspect a database dump."""
     blog = load_import_dump(request.app, id)
@@ -1043,7 +1069,7 @@ def inspect_import(request, id):
     )
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def delete_import(request, id):
     """Delete an imported file."""
     dump = load_import_dump(request.app, id)
@@ -1070,7 +1096,7 @@ def delete_import(request, id):
     )
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def export(request):
     """Not yet implemented."""
     csrf_protector = CSRFProtector()
@@ -1086,7 +1112,7 @@ def export(request):
     )
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege(BLOG_ADMIN)
 def information(request):
     """Shows some details about this Zine installation.  It's useful for
     debugging and checking configurations.  If severe errors in a Zine
@@ -1178,7 +1204,7 @@ def information(request):
     return response
 
 
-@require_role(ROLE_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def log(request, page):
     page = request.app.log.view().get_page(page)
     form = LogOptionsForm()
@@ -1190,14 +1216,14 @@ def log(request, page):
                                  page=page, form=form.as_widget())
 
 
-@require_role(ROLE_AUTHOR)
+@require_privilege(ROLE_AUTHOR)
 def about_zine(request):
     """Just show the zine license and some other legal stuff."""
     return render_admin_response('admin/about_zine.html',
                                  'system.about')
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege()
 def change_password(request):
     """Allow the current user to change his password."""
     form = ChangePasswordForm(request.user)
@@ -1216,7 +1242,8 @@ def change_password(request):
     )
 
 
-@require_role(ROLE_AUTHOR)
+# XXX:
+@require_admin_privilege()
 def upload(req):
     csrf_protector = CSRFProtector()
     reporter = StreamReporter()
@@ -1261,7 +1288,8 @@ def upload(req):
     )
 
 
-@require_role(ROLE_AUTHOR)
+# XXX:
+@require_admin_privilege()
 def thumbnailer(req):
     csrf_protector = CSRFProtector()
     redirect = IntelligentRedirect()
@@ -1358,7 +1386,8 @@ def thumbnailer(req):
     )
 
 
-@require_role(ROLE_AUTHOR)
+# XXX:
+@require_admin_privilege()
 def browse_uploads(req):
     return render_admin_response('admin/file_uploads/browse.html',
                                  'file_uploads.browse',
@@ -1366,7 +1395,8 @@ def browse_uploads(req):
     )
 
 
-@require_role(ROLE_ADMIN)
+# XXX:
+@require_admin_privilege(BLOG_ADMIN)
 def upload_config(req):
     csrf_protector = CSRFProtector()
     form = {
@@ -1409,7 +1439,8 @@ def upload_config(req):
     )
 
 
-@require_role(ROLE_AUTHOR)
+# XXX:
+@require_admin_privilege()
 def delete_upload(req, filename):
     fs_filename = get_filename(filename)
     if not exists(fs_filename):
@@ -1438,7 +1469,7 @@ def delete_upload(req, filename):
     )
 
 
-@require_role(ROLE_AUTHOR)
+@require_admin_privilege()
 def help(req, page=''):
     """Show help page."""
     from zine.docs import load_page, get_resource
