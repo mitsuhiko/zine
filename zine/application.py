@@ -219,20 +219,6 @@ def render_response(template_name, **context):
     return Response(render_template(template_name, **context))
 
 
-def require_role(role):
-    """Wrap a view so that it requires a given role to access."""
-    def wrapped(f):
-        def decorated(request, *args, **kwargs):
-            if request.user.role >= role:
-                return f(request, *args, **kwargs)
-            raise Forbidden()
-        decorated.__name__ = f.__name__
-        decorated.__module__ = f.__module__
-        decorated.__doc__ = f.__doc__
-        return decorated
-    return wrapped
-
-
 class InternalError(Exception):
     """Subclasses of this exception are used to signal internal errors that
     should not happen, but may do if the configuration is garbage.  If an
@@ -707,6 +693,11 @@ class Zine(object):
         for importer in all_importers:
             self.add_importer(importer)
 
+        # register the default privileges
+        from zine.privileges import DEFAULT_PRIVILEGES, CONTENT_TYPE_PRIVILEGES
+        self.privileges = DEFAULT_PRIVILEGES.copy()
+        self.content_type_privileges = CONTENT_TYPE_PRIVILEGES.copy()
+
         # insert list of widgets
         from zine.widgets import all_widgets
         self.widgets = dict((x.name, x) for x in all_widgets)
@@ -1015,11 +1006,18 @@ class Zine(object):
         self.views[endpoint] = callback
 
     @setuponly
-    def add_content_type(self, content_type, callback, admin_callbacks=None):
+    def add_content_type(self, content_type, callback, admin_callbacks=None,
+                         create_privilege=None, edit_own_privilege=None,
+                         edit_other_privilege=None):
         """Register a view handler for a content type."""
         self.content_type_handlers[content_type] = callback
         if admin_callbacks is not None:
             self.admin_content_type_handlers[content_type] = admin_callbacks
+        self.content_type_privileges[content_type] = (
+            create_privilege,
+            edit_own_privilege,
+            edit_other_privilege
+        )
 
     @setuponly
     def add_parser(self, name, class_):
@@ -1046,6 +1044,11 @@ class Zine(object):
         service interfaces.
         """
         self._services[identifier] = callback
+
+    @setuponly
+    def add_privilege(self, privilege):
+        """Registers a new privilege."""
+        self.privileges[privilege.name] = privilege
 
     @setuponly
     def connect_event(self, event, callback, position='after'):
@@ -1090,7 +1093,6 @@ class Zine(object):
         """Return the metadata as HTML part for templates.  This is normally
         called by the layout template to get the metadata for the head section.
         """
-        from zine.models import ROLE_ADMIN
         from zine.utils import dump_json
         generators = {'script': htmlhelpers.script, 'meta': htmlhelpers.meta,
                       'link': htmlhelpers.link, 'snippet': lambda html: html}
@@ -1111,7 +1113,7 @@ class Zine(object):
             'Zine.ROOT_URL = %s' % dump_json(base_url),
             'Zine.BLOG_URL = %s' % dump_json(base_url + self.cfg['blog_url_prefix'])
         ]
-        if request is None or request.user.role >= ROLE_ADMIN:
+        if request is None or request.user.is_manager:
             javascript.append('Zine.ADMIN_URL = %s' %
                               dump_json(base_url + self.cfg['admin_url_prefix']))
         result.append(u'<script type="text/javascript">%s;</script>' %
@@ -1158,8 +1160,7 @@ class Zine(object):
 
     def handle_internal_error(self, request, error):
         """Called if internal errors are cought."""
-        from zine.models import ROLE_ADMIN
-        if request.user.role >= ROLE_ADMIN:
+        if request.user.is_admin:
             response = render_response('internal_error.html', error=error)
             response.status_code = 500
             return response
@@ -1217,8 +1218,7 @@ class Zine(object):
         if self.cfg['maintenance_mode'] and \
            request.path != admin_prefix and not \
            request.path.startswith(admin_prefix + '/'):
-            from zine.models import ROLE_ADMIN
-            if request.user.role < ROLE_ADMIN:
+            if request.user.is_admin:
                 response = render_response('maintenance.html')
                 response.status_code = 503
                 return response(environ, start_response)

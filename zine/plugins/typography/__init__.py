@@ -16,7 +16,7 @@ import re
 from os.path import dirname, join
 from zine.api import *
 from zine.models import ROLE_ADMIN
-from zine.views.admin import require_role, render_admin_response, \
+from zine.views.admin import require_privilege, render_admin_response, \
      flash
 from zine.utils.http import redirect_to
 from zine.utils import forms

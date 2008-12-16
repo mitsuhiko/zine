@@ -146,7 +146,7 @@ def add_akismet_link(req, navigation_bar):
                                      _('Akismet')))
 
 
-@require_role(ROLE_ADMIN)
+@require_privilege(ROLE_ADMIN)
 def show_akismet_config(req):
     """Show the akismet control panel."""
     form = ConfigurationForm(initial=dict(

@@ -15,7 +15,7 @@ import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
-from zine.api import _, require_role
+from zine.api import _, require_privilege
 from zine.database import db, posts
 from zine.utils.xml import escape, get_etree
 from zine.models import ROLE_ADMIN, ROLE_AUTHOR, COMMENT_MODERATED
@@ -228,7 +228,7 @@ class Importer(object):
         self.app = app
 
     def __call__(self, request):
-        return require_role(ROLE_ADMIN)(self.configure)(request)
+        return require_privilege(ROLE_ADMIN)(self.configure)(request)
 
     def configure(self, request):
         """Subclasses should override this and implement the admin panel

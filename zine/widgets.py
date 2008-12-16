@@ -64,7 +64,7 @@ class LatestPosts(Widget):
             query = Post.query.for_index()
         else:
             query = Post.query.filter(Post.content_type.in_(content_types))
-        self.posts = query.latest(limit).all()
+        self.posts = query.latest().limit(limit).all()
         self.show_title = show_title
 
 
@@ -76,7 +76,7 @@ class LatestComments(Widget):
 
     def __init__(self, limit=5, show_title=False, ignore_blocked=False):
         self.comments = Comment.query. \
-            latest(limit, ignore_blocked=ignore_blocked).all()
+            latest(ignore_blocked=ignore_blocked).limit(limit).all()
         self.show_title = show_title
 
 

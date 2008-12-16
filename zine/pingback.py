@@ -220,7 +220,7 @@ def pingback_post(url_info, target_uri, year, month, day, slug):
     post = Post.query.get_by_timestamp_and_slug(year, month, day, slug)
     if post is None or not post.pings_enabled:
         return 33, 'no such post'
-    elif not post.can_access():
+    elif not post.can_read():
         return 49, 'access denied'
     title, excerpt = get_excerpt(url_info, target_uri)
     if not title:

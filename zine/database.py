@@ -28,6 +28,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.util import to_list
 from sqlalchemy.engine.url import make_url, URL
 from sqlalchemy.types import MutableType, TypeDecorator
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from werkzeug import url_decode
 from werkzeug.exceptions import NotFound
@@ -161,6 +162,7 @@ db.create_engine = create_engine
 db.session = session
 db.ZEMLParserData = ZEMLParserData
 db.mapper = session.mapper
+db.association_proxy = association_proxy
 
 #: called at the end of a request
 cleanup_session = session.remove
@@ -178,8 +180,34 @@ users = db.Table('users', metadata,
     db.Column('extra', db.PickleType),
     db.Column('pw_hash', db.String(70)),
     db.Column('email', db.String(250)),
-    db.Column('www', db.String(200)),
-    db.Column('role', db.Integer)
+    db.Column('www', db.String(200))
+)
+
+groups = db.Table('groups', metadata,
+    db.Column('group_id', db.Integer, primary_key=True),
+    db.Column('name', db.String(30))
+)
+
+group_users = db.Table('group_users', metadata,
+    db.Column('group_id', db.Integer, db.ForeignKey('groups.group_id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id'))
+)
+
+privileges = db.Table('privileges', metadata,
+    db.Column('privilege_id', db.Integer, primary_key=True),
+    db.Column('name', db.String(50), unique=True)
+)
+
+user_privileges = db.Table('user_privileges', metadata,
+    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id')),
+    db.Column('privilege_id', db.Integer,
+              db.ForeignKey('privileges.privilege_id'))
+)
+
+group_privileges = db.Table('group_privileges', metadata,
+    db.Column('group_id', db.Integer, db.ForeignKey('groups.group_id')),
+    db.Column('privilege_id', db.Integer,
+              db.ForeignKey('privileges.privilege_id'))
 )
 
 categories = db.Table('categories', metadata,

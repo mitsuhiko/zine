@@ -133,8 +133,10 @@ def show_author(req, username, page=1):
     :Template name: ``show_author.html``
     :URL endpoint: ``blog/show_author``
     """
-    user = User.query.filter((User.username == username) &
-                             (User.role >= ROLE_AUTHOR)).first(True)
+    user = User.query.filter_by(username=username).first()
+    if user is None or not user.is_manager:
+        raise NotFound()
+
     data = Post.query.published().filter_by(author=user) \
                .get_list(page=page, per_page=30)
 
@@ -399,7 +401,7 @@ def dispatch_content_type(req):
             raise NotFound()
 
     # make sure the current user can access that page.
-    if not post.can_access():
+    if not post.can_read():
         raise Forbidden()
 
     # feed requested?  jump to the feed page

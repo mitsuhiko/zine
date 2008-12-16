@@ -16,12 +16,15 @@ from urlparse import urljoin
 from werkzeug.exceptions import NotFound
 
 from zine.database import users, categories, posts, post_links, \
-     post_categories, post_tags, tags, comments, db
+     post_categories, post_tags, tags, comments, groups, group_users, \
+     privileges, user_privileges, group_privileges, db
 from zine.utils import build_tag_uri, zeml
 from zine.utils.admin import gen_slug
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
+from zine.privileges import Privilege, _Privilege, privilege_attribute, \
+     add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN
 from zine.application import get_application, get_request, url_for
 
 
@@ -138,7 +141,11 @@ class UserQuery(db.Query):
         return AnonymousUser()
 
     def authors(self):
-        return self.filter(User.role >= ROLE_AUTHOR)
+        # XXX: this is a noop currently.  i'm not even sure what counts
+        # as an author now.  A person that has EDIT_OWN_ENTRIES or
+        # EDIT_OTHER_ENTRIES or BLOG_ADMIN?  A person that can enter
+        # the admin panel.  A separate privilege?
+        return self
 
 
 class User(object):
@@ -154,7 +161,7 @@ class User(object):
     is_somebody = True
 
     def __init__(self, username, password, email, real_name=u'',
-                 description=u'', www=u'', role=ROLE_SUBSCRIBER):
+                 description=u'', www=u''):
         self.username = username
         if password is not None:
             self.set_password(password)
@@ -166,25 +173,14 @@ class User(object):
         self.description = description
         self.extra = {}
         self.display_name = u'$nick'
-        self.role = role
 
     @property
     def is_manager(self):
-        return self.role >= ROLE_AUTHOR
+        return self.has_privilege(ENTER_ADMIN_PANEL)
 
     @property
-    def role_as_string(self):
-        """Human readable version of the role id."""
-        from zine.api import _
-        if self.role == ROLE_ADMIN:
-            return _('Administrator')
-        elif self.role == ROLE_EDITOR:
-            return _('Editor')
-        elif self.role == ROLE_AUTHOR:
-            return _('Author')
-        elif self.role == ROLE_SUBSCRIBER:
-            return _('Subscriber')
-        return _('Nobody')
+    def is_admin(self):
+        return self.has_privilege(BLOG_ADMIN)
 
     def _set_display_name(self, value):
         self._display_name = value
@@ -197,6 +193,22 @@ class User(object):
         )
 
     display_name = property(_get_display_name, _set_display_name)
+    own_privileges = privilege_attribute('_own_privileges')
+
+    @property
+    def privileges(self):
+        """A read-only set with all privileges."""
+        result = set(self.own_privileges)
+        for group in self.groups:
+            result.update(group.privileges)
+        return frozenset(result)
+
+    def has_privilege(self, privilege):
+        """Check if the user has a given privilege.  If the user has the
+        BLOG_ADMIN privilege he automatically has all the other privileges
+        as well.
+        """
+        return add_admin_privilege(privilege)(self.privileges)
 
     def set_password(self, password):
         self.pw_hash = gen_pwhash(password)
@@ -209,8 +221,13 @@ class User(object):
     def disable(self):
         self.pw_hash = '!'
 
+    @property
+    def disabled(self):
+        return self.pw_hash == '!'
+
     def get_url_values(self):
-        if self.role >= ROLE_AUTHOR:
+        # XXX: really, manager?
+        if self.is_manager:
             return 'blog/show_author', {
                 'username': self.username
             }
@@ -223,12 +240,32 @@ class User(object):
         )
 
 
+class Group(object):
+    """Wraps the group table."""
+
+    def __init__(self, name):
+        self.name = name
+
+    privileges = privilege_attribute('_privileges')
+
+    def has_privilege(self, privilege):
+        return add_admin_privilege(privilege)(self.privileges)
+
+    def __repr__(self):
+        return '<%s %r>' % (
+            self.__class__.__name__,
+            self.name
+        )
+
+
 class AnonymousUser(User):
     """Fake model for anonymous users."""
+    id = -1
     is_somebody = False
     display_name = 'Nobody'
     real_name = description = username = ''
-    role = ROLE_NOBODY
+    own_privileges = privileges = \
+        property(lambda x: frozenset())
 
     def __init__(self):
         pass
@@ -254,26 +291,12 @@ class PostQuery(db.Query):
             return self.filter_by(content_type=types[0].strip())
         return self.filter(Post.content_type.in_([x.strip() for x in types]))
 
-    def published(self, ignore_role=None):
+    def published(self, ignore_privileges=None):
         """Return a queryset for only published posts."""
-        role = ROLE_NOBODY
-        if not ignore_role:
-            req = get_request()
-            if req is not None:
-                role = req.user.role
-        p = posts.c
-
-        query = self.filter(p.status == STATUS_PUBLISHED)
-        if role <= ROLE_SUBSCRIBER:
-            return query.filter(p.pub_date <= datetime.utcnow())
-        elif role == ROLE_AUTHOR:
-            # it's safe to access req here because we only have
-            # a non ROLE_NOBODY role if there was a request.
-            return query.filter(
-                (p.pub_date <= datetime.utcnow()) |
-                (p.author == req.user)
-            )
-        return query
+        return self.filter(
+            (Post.status == STATUS_PUBLISHED) &
+            (Post.pub_date <= datetime.utcnow())
+        )
 
     def drafts(self, ignore_user=False, user=None):
         """Return a query that returns all drafts for the current user.
@@ -315,14 +338,15 @@ class PostQuery(db.Query):
         }
 
     def get_archive_summary(self, detail='months', limit=None,
-                            ignore_role=False):
+                            ignore_privileges=False):
         """Query function to get the archive of the blog. Usually used
         directly from the templates to add some links to the sidebar.
         """
         # XXX: currently we also return months without articles in it.
         # other blog systems do not, but because we use sqlalchemy we have
         # to go with the functionality provided.  Currently there is no way
-        # to do date truncating in a database agnostic way.
+        # to do date truncating in a database agnostic way.  When this is done
+        # ignore_privileges should no longer be a noop
         last = self.filter(Post.pub_date != None) \
                    .order_by(Post.pub_date.asc()).first()
         now = datetime.utcnow()
@@ -375,12 +399,9 @@ class PostQuery(db.Query):
             'empty':    not result
         }
 
-    def latest(self, limit=None, ignore_role=False):
+    def latest(self, ignore_privileges=False):
         """Filter for the latest n posts."""
-        query = self.published(ignore_role=ignore_role)
-        if limit is not None:
-            query = query.limit(limit)
-        return query
+        return self.published(ignore_privileges=ignore_privileges)
 
     def date_filter(self, year, month=None, day=None):
         """Filter all the items that match the given date."""
@@ -461,6 +482,20 @@ class Post(_ZEMLDualContainer):
         self.content_type = content_type
 
     @property
+    def _privileges(self):
+        return get_application().content_type_privileges[self.content_type]
+
+    @property
+    def EDIT_OWN_PRIVILEGE(self):
+        """The edit-own privilege for this content type."""
+        return self._privileges[1]
+
+    @property
+    def EDIT_OTHER_PRIVILEGE(self):
+        """The edit-other privilege for this content type."""
+        return self._privileges[2]
+
+    @property
     def root_comments(self):
         """Return only the comments for this post that don't have a parent."""
         return [x for x in self.comments if x.parent is None]
@@ -469,7 +504,7 @@ class Post(_ZEMLDualContainer):
     def comment_count(self):
         """The number of visible comments."""
         req = get_request()
-        if req.user.role >= ROLE_AUTHOR:
+        if req.user.is_manager:
             return len(self.comments)
         return len([x for x in self.comments if not x.blocked])
 
@@ -524,8 +559,19 @@ class Post(_ZEMLDualContainer):
         for category in new_categories.difference(currently_attached):
             self.categories.append(category)
 
-    def can_access(self, user=None):
-        """Check if the current user or the user provided can access
+    def can_edit(self, user=None):
+        """Checks if the given user (or current user) can edit this post."""
+        if user is None:
+            user = get_request().user
+
+        return (
+            user.has_privilege(self.EDIT_OTHER_PRIVILEGE) or
+            (self.author == user and
+             user.has_privilege(self.EDIT_OWN_PRIVILEGE))
+        )
+
+    def can_read(self, user=None):
+        """Check if the current user or the user provided can read-access
         this post. If there is no user there must be a request object
         for this thread defined.
         """
@@ -537,21 +583,23 @@ class Post(_ZEMLDualContainer):
         if user is None:
             user = get_request().user
 
-        # simple rule: admins and editors may always
-        if user.role in (ROLE_ADMIN, ROLE_EDITOR):
+        # if we have the privilege to edit other entries or if we are
+        # a blog administrator we can always look at posts.
+        if user.has_privilege(self.EDIT_OTHER_PRIVILEGE):
             return True
-        # subscribers and anonymous users may never
-        elif user.role in (ROLE_SUBSCRIBER, ROLE_NOBODY):
-            return False
-        # authors here, they can only view it if they are the
-        # author of this post.
-        else:
-            return self.author_id == user.id
+
+        # otherwise if the user has the EDIT_OWN_PRIVILEGE and the
+        # author of the post, he may look at it as well
+        if user.id == self.author_id and \
+           user.has_privilege(self.EDIT_OWN_PRIVILEGE):
+            return True
+
+        return False
 
     @property
     def is_published(self):
         """`True` if the post is visible for everyone."""
-        return self.can_access(AnonymousUser())
+        return self.can_read(AnonymousUser())
 
     @property
     def is_sheduled(self):
@@ -612,54 +660,6 @@ class CategoryQuery(db.Query):
             category = Category(name, slug=slug)
         return category
 
-    def get_cloud(self, max=None, ignore_role=False):
-        """Get a categorycloud."""
-        role = ROLE_NOBODY
-        if ignore_role:
-            req = get_request()
-            if req is not None:
-                role = req.user.role
-
-        # get a query
-        p = post_categories.c
-        p2 = posts.c
-        t = categories.c
-
-        q = (p.category_id == t.category_id) & (p.post_id == p2.post_id)
-
-        # do the role checking
-        if role <= ROLE_SUBSCRIBER:
-            q &= ((p2.status == STATUS_PUBLISHED) |
-                  (p2.pub_date >= datetime.utcnow()))
-
-        elif role == ROLE_AUTHOR:
-            # it's safe to access req here because we only have
-            # a non ROLE_NOBODY role if there was a request.
-            q &= ((p2.status == STATUS_PUBLISHED) |
-                  (p2.author_id == req.user.id))
-
-        s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
-                      p.category_id == t.category_id,
-                      group_by=[t.slug, t.name]).alias('post_count_query').c
-
-        options = {'order_by': [db.asc(s.s_count)]}
-        if max is not None:
-            options['limit'] = max
-
-        # the label statement circumvents a bug for sqlite3 on windows
-        # see #65
-        q = db.select([s.slug, s.name, s.s_count.label('s_count')], **options)
-
-        items = [{
-            'slug':     row.slug,
-            'name':     row.name,
-            'count':    row.s_count,
-            'size':     100 + log(row.s_count or 1) * 20
-        } for row in db.execute(q)]
-
-        items.sort(key=lambda x: x['name'].lower())
-        return items
-
 
 class Category(object):
     """Represents a category."""
@@ -698,6 +698,10 @@ class Category(object):
 class CommentQuery(db.Query):
     """The manager for comments"""
 
+    def approved(self):
+        """Return only the approved comments."""
+        return self.filter(Comment.status == COMMENT_MODERATED)
+
     def blocked(self):
         """Filter all blocked comments.  Blocked comments are all comments but
         unmoderated and moderated comments.
@@ -717,22 +721,26 @@ class CommentQuery(db.Query):
         """Filter all the spam comments."""
         return self.filter(Comment.status == COMMENT_BLOCKED_SPAM)
 
-    def latest(self, limit=None, ignore_role=False, ignore_blocked=True):
+    def latest(self, limit=None, ignore_privileges=False, ignore_blocked=True):
         """Filter the list of non blocked comments for anonymous users or
         all comments for admin users.
         """
-        role = ROLE_NOBODY
-        if not ignore_role:
-            req = get_request()
-            if req is not None:
-                role = req.user.role
-
         query = self
-        if role <= ROLE_SUBSCRIBER or ignore_blocked:
-            query = self.blocked(query)
 
-        if limit is not None:
-            query = query.limit(limit)
+        # only the approved if blocked are ignored
+        if ignore_blocked:
+            query = query.approved()
+
+        # otherwise if we don't ignore the privileges we only want
+        # the approved if the user does not have the MODERATE_COMMENTS
+        # privileges.
+        elif not ignore_privileges:
+            req = get_request()
+            if req:
+                user = req.user
+                if not user.has_privilege(MODERATE_COMMENTS):
+                    query = query.approved()
+
         return query
 
     def comments_for_post(self, post):
@@ -832,7 +840,7 @@ class Comment(_ZEMLContainer):
             return True
         if user is None:
             user = get_request().user
-        return user.role >= ROLE_AUTHOR
+        return user.has_privilege(MODERATE_COMMENTS)
 
     @property
     def visible(self):
@@ -872,9 +880,50 @@ class Comment(_ZEMLContainer):
         )
 
 
+class TagQuery(db.Query):
+
+    def get_cloud(self, max=None, ignore_privileges=False):
+        """Get a categorycloud."""
+        # XXX: ignore_privileges is currently ignored and no privilege
+        # checking is performed.  As a matter of fact only published posts
+        # appear in the cloud.
+
+        # get a query
+        pt = post_tags.c
+        p = posts.c
+        t = tags.c
+
+        q = ((pt.tag_id == t.tag_id) &
+             (p.post_id == pt.post_id) & (
+                (p2.status == STATUS_PUBLISHED) |
+                (p2.pub_date >= datetime.utcnow())))
+
+        s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
+                      pt.tag_id == t.tag_id,
+                      group_by=[t.slug, t.name]).alias('post_count_query').c
+
+        options = {'order_by': [db.asc(s.s_count)]}
+        if max is not None:
+            options['limit'] = max
+
+        # the label statement circumvents a bug for sqlite3 on windows
+        # see #65
+        q = db.select([s.slug, s.name, s.s_count.label('s_count')], **options)
+
+        items = [{
+            'slug':     row.slug,
+            'name':     row.name,
+            'count':    row.s_count,
+            'size':     100 + log(row.s_count or 1) * 20
+        } for row in db.execute(q)]
+
+        items.sort(key=lambda x: x['name'].lower())
+        return items
+
+
 class Tag(object):
     """A single tag."""
-    query = db.query_property(db.Query)
+    query = db.query_property(TagQuery)
 
     def __init__(self, name, slug=None):
         self.name = name
@@ -910,7 +959,21 @@ db.mapper(User, users, properties={
     'posts':            db.dynamic_loader(Post, backref='author',
                                           cascade='all, delete, delete-orphan'),
     'comments':         db.dynamic_loader(Comment, backref='user',
-                                          cascade='all, delete, delete-orphan')
+                                          cascade='all, delete, delete-orphan'),
+    '_own_privileges':  db.relation(_Privilege, lazy=True,
+                                    secondary=user_privileges,
+                                    collection_class=set)
+})
+db.mapper(Group, groups, properties={
+    'id':               groups.c.group_id,
+    'users':            db.dynamic_loader(User, backref='groups',
+                                          secondary=group_users),
+    '_privileges':      db.relation(_Privilege, lazy=True,
+                                    secondary=group_privileges,
+                                    collection_class=set)
+})
+db.mapper(_Privilege, privileges, properties={
+    'id':               privileges.c.privilege_id,
 })
 db.mapper(Category, categories, properties={
     'id':               categories.c.category_id,
