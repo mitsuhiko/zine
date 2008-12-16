@@ -1,0 +1,9 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ title|striptags }}{% endblock %}
+{% block contents %}
+	<h2>{{ _("Documentation Not Found") }}</h2>
+	<p>{{ _("The online documentation could not be found.") }}</p>
+	<p>{% trans %}Possibly you have to generate the docs first by running the
+	  <tt>build-documentation</tt> script from zine's scripts
+	  folder.{% endtrans %}</p>
+{% endblock %}

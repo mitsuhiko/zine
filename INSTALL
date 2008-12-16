@@ -19,7 +19,7 @@ might be available in Debian already.
 For a quickstart with the development server do this:
 
     $ mkdir instance
-    $ ./scripts/server
+    $ ./scripts/server -I instance
 
 After the first start you will find yourself in an installation wizard that
 helps you to create the database tables and an administrator account.

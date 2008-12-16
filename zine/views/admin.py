@@ -1447,7 +1447,7 @@ def help(req, page=''):
     if rv is None:
         resource = get_resource(req.app, page)
         if resource is None:
-            raise NotFound()
+            return render_admin_response('admin/help_404.html', 'system.help')
         return resource
 
     parts, is_index = rv

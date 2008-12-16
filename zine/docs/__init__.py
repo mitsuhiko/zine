@@ -4,8 +4,8 @@
     ~~~~~~~~~~~~~~
 
     This module implements a simple multilingual documentation system on
-    top of docutils.  The `build-docs` script builds pickled files for all
-    the documentation in Zine or a plugin.
+    top of docutils.  The `build-documentation` script builds pickled files
+    for all the documentation in Zine or a plugin.
 
     This is separate from the sphinx powered developer documentation.
 
