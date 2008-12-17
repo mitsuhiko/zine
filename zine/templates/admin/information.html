@@ -97,6 +97,15 @@
       {% endfor %}</ul></li>
   {%- endfor %}
   </ul>
+  <h2>{{ _("Privileges") }}</h2>
+  <p>{% trans %}
+    The following privileges are known to the system:
+  {% endtrans %}</p>
+  <ul>
+  {%- for id, explanation in privileges %}
+    <li><code>{{ id }}</code> &mdash; {{ explanation|e }}</li>
+  {%- endfor %}
+  </ul>
   <h2>{{ _("Services") }}</h2>
   <p>{% trans %}
     The following servicepoints are registered on this instance to be callable

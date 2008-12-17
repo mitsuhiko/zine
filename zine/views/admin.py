@@ -78,6 +78,12 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     """
     request = get_request()
 
+    manage_items = [
+        ('entries', url_for('admin/manage_entries'), _(u'Entries')),
+        ('pages', url_for('admin/manage_pages'), _(u'Pages')),
+        ('categories', url_for('admin/manage_categories'), _(u'Categories'))
+    ]
+
     # set up the core navigation bar
     navigation_bar = [
         ('dashboard', url_for('admin/index'), _(u'Dashboard'), []),
@@ -85,11 +91,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('entry', url_for('admin/new_entry'), _(u'Entry')),
             ('page', url_for('admin/new_page'), _(u'Page'))
         ]),
-        ('manage', url_for('admin/manage_entries'), _(u'Manage'), [
-            ('entries', url_for('admin/manage_entries'), _(u'Entries')),
-            ('pages', url_for('admin/manage_pages'), _(u'Pages')),
-            ('categories', url_for('admin/manage_categories'), _(u'Categories'))
-        ]),
+        ('manage', url_for('admin/manage_entries'), _(u'Manage'), manage_items),
         ('comments', url_for('admin/manage_comments'), _(u'Comments'), [
             ('overview', url_for('admin/manage_comments'), _(u'Overview')),
             ('unmoderated', url_for('admin/show_unmoderated_comments'),
@@ -103,10 +105,6 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # set up the administration menu bar
     if request.user.has_privilege(BLOG_ADMIN):
         navigation_bar.extend([
-            ('users', url_for('admin/manage_users'), _(u'Users'), [
-                ('overview', url_for('admin/manage_users'), _(u'Overview')),
-                ('edit', url_for('admin/new_user'), _(u'Edit User'))
-            ]),
             ('options', url_for('admin/options'), _(u'Options'), [
                 ('basic', url_for('admin/basic_options'), _(u'Basic')),
                 ('urls', url_for('admin/urls'), _(u'URLs')),
@@ -116,6 +114,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('cache', url_for('admin/cache'), _(u'Cache'))
             ])
         ])
+        manage_items.append(('users', url_for('admin/manage_users'), _(u'Users')))
 
     # add the about items to the navigation bar
     system_items = [
@@ -726,9 +725,8 @@ def manage_users(request, page):
                                  User.query.count())
     if not posts and page != 1:
         raise NotFound()
-    return render_admin_response('admin/manage_users.html', 'users.overview',
-                                 users=users,
-                                 pagination=pagination)
+    return render_admin_response('admin/manage_users.html', 'manage.users',
+                                 users=users, pagination=pagination)
 
 
 @require_admin_privilege(BLOG_ADMIN)
@@ -767,7 +765,7 @@ def edit_user(request, user_id=None):
                 return form.redirect('admin/manage_users')
             return redirect_to('admin/edit_user', user_id=user.id)
 
-    return render_admin_response('admin/edit_user.html', 'users.edit',
+    return render_admin_response('admin/edit_user.html', 'manage.users',
                                  form=form.as_widget())
 
 
@@ -791,7 +789,7 @@ def delete_user(request, user_id):
             db.commit()
             return form.redirect('admin/manage_users')
 
-    return render_admin_response('admin/delete_user.html', 'users.edit',
+    return render_admin_response('admin/delete_user.html', 'manage.users',
                                  form=form.as_widget())
 
 
@@ -1168,6 +1166,7 @@ def information(request):
         absolute_url_handlers=[get_object_name(handler) for handler
                                in request.app._absolute_url_handlers],
         content_types=content_types,
+        privileges=request.app.list_privileges(),
         servicepoints=sorted([{
             'name':         name,
             'handler':      get_object_name(service)

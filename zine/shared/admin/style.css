@@ -70,7 +70,7 @@ div.header div.metanav a:hover {
 
 div.footer {
     background: transparent url(img/footerbg.png) repeat-x bottom left;
-    border-top: 1px solid #092E3A;
+    border-top: 1px solid #0d334e;
     padding: 10px 20px;
     color: white;
     margin: 0;
@@ -131,8 +131,9 @@ div.body ul.navbar li.active a {
     height: 25px!important;
 }
 
+div.body ul.navbar li.active a,
 div.body ul.navbar li.active a:hover {
-    background: transparent url(img/dialogbg.png) repeat-x bottom left;
+    background: #316081 url(img/bluetab.png) repeat-x;
 }
 
 div.body ul.ctxnavbar {
@@ -176,7 +177,7 @@ div.body ul.navbar li a:focus {
 div.body ul.ctxnavbar li.active a,
 div.body ul.standalonebar li.active a,
 div.body ul.standalonebar li.active a:hover {
-    background: white;
+    background: white url(img/whitetab.png) repeat-x;
     color: #316182;
 }
 
@@ -195,8 +196,11 @@ div.contents div.drafts-box {
 
 div.contents div.message {
     border: 1px solid #B4D2E7;
-    margin: 0 0 10px 0;
+    margin: 0 -10px 10px -10px;
     padding: 8px 8px 8px 32px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
     background: #F7FAFD url(img/info.png) no-repeat 9px 9px;
 }
 
@@ -913,7 +917,6 @@ ul.plugin-table li {
     padding: 0;
     margin: 10px 0;
     clear: both;
-    border: 1px solid #B4D2E7;
 }
 
 ul.plugin-table li h3 {
@@ -922,11 +925,15 @@ ul.plugin-table li h3 {
     font-size: 0.9em;
     color: #222e4b;
     background: #B4D2E7;
+    -moz-border-radius: 5px 5px 0 0;
+    -webkit-border-radius: 5px 5px 0 0;
+    border-radius: 5px 5px 0 0;
 }
 
 ul.plugin-table dl {
     margin: 0;
-    padding: 0;
+    padding: 5px;
+    border: 1px solid #B4D2E7;
 }
 
 ul.plugin-table dl dt {
@@ -1216,6 +1223,9 @@ div.login-box input[type="submit"]:focus {
 
 /* :::: LOGFILE VIEWER :::: */
 table.logfile {
+    border-top: 5px solid #B4D2E7;
+    border-right: 1px solid #B4D2E7;
+    border-left: 1px solid #B4D2E7;
     margin-bottom: 1em!important;
 }
 

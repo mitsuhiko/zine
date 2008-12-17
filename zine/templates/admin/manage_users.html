@@ -8,7 +8,6 @@
       <th>{{ _("Username") }}</th>
       <th>{{ _("Realname") }}</th>
       <th>{{ _("Mail") }}</th>
-      <th>{{ _("Role") }}</th>
     </tr>
   {%- for user in users %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
@@ -17,7 +16,6 @@
           user.username|e }}</a></td>
       <td>{{ user.real_name|e }}</td>
       <td>{{ (user.email or '')|e }}</td>
-      <td>{{ user.role_as_string|e }}</td>
     </tr>
   {%- endfor %}
   </table>

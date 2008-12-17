@@ -1089,6 +1089,14 @@ class Zine(object):
         return sorted([(key, unicode(parser.name)) for key, parser in
                        self.parsers.iteritems()], key=lambda x: x[1].lower())
 
+    def list_privileges(self):
+        """Return a sorted list of privileges."""
+        # TODO: somehow add grouping...
+        result = [(x.name, unicode(x.explanation)) for x in
+                  self.privileges.values()]
+        result.sort(key=lambda x: x[0] == 'BLOG_ADMIN' or x[1].lower())
+        return result
+
     def get_page_metadata(self):
         """Return the metadata as HTML part for templates.  This is normally
         called by the layout template to get the metadata for the head section.

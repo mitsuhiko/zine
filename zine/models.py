@@ -962,7 +962,8 @@ db.mapper(User, users, properties={
                                           cascade='all, delete, delete-orphan'),
     '_own_privileges':  db.relation(_Privilege, lazy=True,
                                     secondary=user_privileges,
-                                    collection_class=set)
+                                    collection_class=set,
+                                    cascade='all, delete, delete-orphan')
 })
 db.mapper(Group, groups, properties={
     'id':               groups.c.group_id,
@@ -970,7 +971,8 @@ db.mapper(Group, groups, properties={
                                           secondary=group_users),
     '_privileges':      db.relation(_Privilege, lazy=True,
                                     secondary=group_privileges,
-                                    collection_class=set)
+                                    collection_class=set,
+                                    cascade='all, delete, delete-orphan')
 })
 db.mapper(_Privilege, privileges, properties={
     'id':               privileges.c.privilege_id,

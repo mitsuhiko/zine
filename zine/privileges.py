@@ -98,6 +98,25 @@ def add_admin_privilege(privilege):
     return privilege
 
 
+def bind_privileges(container, privileges):
+    """Binds the privileges to the container.  The privileges can be a list
+    of privilege names, the container must be a set.  This is called for
+    the http roundtrip in the form validation.
+    """
+    app = get_application()
+    current_map = dict((x.name, x) for x in container)
+    currently_attached = set(x.name for x in container)
+    new_privileges = set(privileges)
+
+    # remove outdated privileges
+    for name in currently_attached.difference(new_privileges):
+        container.remove(current_map[name])
+
+    # add new privileges
+    for name in new_privileges.difference(currently_attached):
+        container.add(app.privileges[name])
+
+
 def require_privilege(expr):
     """Requires BLOG_ADMIN privilege or one of the given."""
     def wrapped(f):
@@ -126,7 +145,7 @@ def privilege_attribute(lowlevel_attribute):
                             type(privilege).__name__)
         priv = _Privilege.query.filter_by(name=privilege.name).first()
         if priv is None:
-            priv = _Privilege(name)
+            priv = _Privilege(privilege.name)
         return priv
     return db.association_proxy(lowlevel_attribute, 'privilege',
                                 creator=creator_func)
@@ -140,7 +159,7 @@ def _register(name, description):
     __all__.append(name)
 
 
-_register('ENTER_ADMIN_PANEL', lazy_gettext(u'enter admin panel'))
+_register('ENTER_ADMIN_PANEL', lazy_gettext(u'can enter admin panel'))
 _register('BLOG_ADMIN', lazy_gettext(u'can administrate the blog'))
 _register('CREATE_ENTRIES', lazy_gettext(u'can create new entries'))
 _register('EDIT_OWN_ENTRIES', lazy_gettext(u'can edit his own entries'))

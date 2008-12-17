@@ -17,6 +17,7 @@ from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
      COMMENT_BLOCKED_USER, ROLE_ADMIN, ROLE_EDITOR, ROLE_AUTHOR, \
      ROLE_SUBSCRIBER
+from zine.privileges import bind_privileges
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
@@ -595,12 +596,8 @@ class EditUserForm(_UserBoundForm):
                           validators=[is_valid_url()])
     password = forms.TextField(lazy_gettext(u'Password'),
                                widget=forms.PasswordInput)
-    role = forms.ChoiceField(lazy_gettext(u'Role'), choices=[
-        (ROLE_ADMIN, lazy_gettext(u'Administrator')),
-        (ROLE_EDITOR, lazy_gettext(u'Editor')),
-        (ROLE_AUTHOR, lazy_gettext(u'Author')),
-        (ROLE_SUBSCRIBER, lazy_gettext(u'Subscriber'))
-    ])
+    privileges = forms.MultiChoiceField(lazy_gettext(u'Privileges'),
+                                        widget=forms.CheckboxGroup)
 
     def __init__(self, user=None, initial=None):
         if user is not None:
@@ -611,14 +608,15 @@ class EditUserForm(_UserBoundForm):
                 description=user.description,
                 email=user.email,
                 www=user.www,
-                role=user.role
+                privileges=[x.name for x in user.own_privileges]
             )
+        _UserBoundForm.__init__(self, user, initial)
         self.display_name.choices = [
             (u'$username', user and user.username or _('Username')),
             (u'$real_name', user and user.real_name or _('Realname'))
         ]
+        self.privileges.choices = self.app.list_privileges()
         self.password.required = user is None
-        _UserBoundForm.__init__(self, user, initial)
 
     def validate_username(self, value):
         query = User.query.filter_by(username=value)
@@ -629,7 +627,8 @@ class EditUserForm(_UserBoundForm):
 
     def _set_common_attributes(self, user):
         forms.set_fields(user, self.data, 'www', 'real_name', 'description',
-                         'display_name', 'role')
+                         'display_name')
+        bind_privileges(user.own_privileges, self.data['privileges'])
 
     def make_user(self):
         """A helper function that creates a new user object."""
