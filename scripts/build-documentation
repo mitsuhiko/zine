@@ -7,7 +7,7 @@
     This command builds the documentation for Zine or a plugin.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 import sys
 from os.path import isdir, join, dirname, pardir, abspath

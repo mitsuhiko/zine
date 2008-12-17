@@ -42,7 +42,7 @@
             %/Zine/templates           core templates
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import realpath, dirname, join, pardir, isdir
 

@@ -6,7 +6,7 @@
     The current default theme for Zine.
 
     :copyright: 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import join, dirname
 

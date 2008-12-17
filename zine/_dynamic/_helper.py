@@ -6,7 +6,7 @@
     Helper file. Does the auto updating of dynamic files.
 
     :copyright: 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 import os
 import sys

@@ -9,7 +9,7 @@
     TODO: get rid of that module and use werkzeug.html directly where needed.
 
     :copyright: 2007-2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from werkzeug import html
 

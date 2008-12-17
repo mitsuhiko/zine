@@ -10,7 +10,7 @@
     This is separate from the sphinx powered developer documentation.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 import re
 import os

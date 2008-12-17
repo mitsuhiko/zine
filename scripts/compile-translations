@@ -9,7 +9,7 @@
     information in those files.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 import pickle
 from os import listdir, path

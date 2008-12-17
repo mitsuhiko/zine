@@ -7,7 +7,7 @@
     features of the Zine theme system.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import join, dirname
 from zine.api import url_for, _

@@ -5,7 +5,7 @@
     This package implements various functions used all over the code.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
-    :license: GNU GPL.
+    :license: BSD
 """
 import os
 from urlparse import urlparse

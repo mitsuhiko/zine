@@ -6,7 +6,7 @@
     Adds support for pygments to pre code blocks.
 
     :copyright: 2007-2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import join, dirname
 from time import time, asctime, gmtime

@@ -8,7 +8,7 @@
     the wsgiref module installed.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 
 # path to the instance. the folder for the instance must exist,

@@ -6,7 +6,7 @@
     Helper to locate zine and the instance folder.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import abspath, join, dirname, pardir, isfile
 import sys

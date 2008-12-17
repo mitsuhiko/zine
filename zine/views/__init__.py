@@ -8,7 +8,7 @@
 
 
     :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
-    :license: GNU GPL.
+    :license: BSD
 """
 from zine.views import blog, admin
 from zine import i18n

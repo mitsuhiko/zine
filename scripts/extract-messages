@@ -7,7 +7,7 @@
     Extract messages into a PO-Template.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os import path, makedirs
 from optparse import OptionParser

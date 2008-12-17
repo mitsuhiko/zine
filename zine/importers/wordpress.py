@@ -6,7 +6,7 @@
     Implements an importer for WordPress extended RSS feeds.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 import re
 import urllib

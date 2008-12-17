@@ -7,7 +7,7 @@
     This script resets the development instance.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 import sys
 from os import mkdir, path

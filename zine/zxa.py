@@ -11,7 +11,7 @@
     each item and wrap it in hand written XML.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from cPickle import dumps
 from datetime import datetime

@@ -6,7 +6,7 @@
     The form classes the zine core uses.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from datetime import datetime
 

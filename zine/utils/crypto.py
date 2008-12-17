@@ -5,7 +5,7 @@
     This module implements various cryptographic functions.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
-    :license: GNU GPL.
+    :license: BSD
 """
 import string
 from random import choice, randrange

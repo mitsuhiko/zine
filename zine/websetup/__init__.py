@@ -12,7 +12,7 @@
     would already be returned by the normal Zine installation.
 
     :copyright: 2007-2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 import sys
 from os import path

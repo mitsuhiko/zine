@@ -8,7 +8,7 @@
 
     :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Christopher Grebs,
                              Ali Afshar.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import exists
 from time import asctime, gmtime, time

@@ -7,7 +7,7 @@
     This creates an apache config for static exports.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 import sys
 from os.path import abspath, dirname

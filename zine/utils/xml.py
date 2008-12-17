@@ -5,7 +5,7 @@
     This module implements XML-related functions and classes.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
-    :license: GNU GPL.
+    :license: BSD
 """
 import re
 import sys

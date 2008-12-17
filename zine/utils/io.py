@@ -6,7 +6,7 @@
     Various helper utilities for input/output.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 
 

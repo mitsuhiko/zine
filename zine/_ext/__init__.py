@@ -16,5 +16,5 @@
         created a fork of it that is more modular.
 
     :copyright: Copyright 2007-2008 by Armin Ronacher
-    :license: GNU GPL.
+    :license: BSD
 """

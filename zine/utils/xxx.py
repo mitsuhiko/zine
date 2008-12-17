@@ -7,7 +7,7 @@
     HTML form fields to implement e.g. redirects.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
-    :license: GNU GPL.
+    :license: BSD
 """
 import md5
 import sha

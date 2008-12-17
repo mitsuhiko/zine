@@ -6,7 +6,7 @@
     The builtin (JSON) services.
 
     :copyright: 2007-2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from zine.api import *
 from zine.models import Comment

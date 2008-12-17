@@ -6,7 +6,7 @@
     Various utilitites for file uploading (thumbnailer etc)
 
     :copyright: Copyright 2007 by Armin Ronacher
-    :license: GNU GPL.
+    :license: BSD
 """
 import re
 from os import path, listdir, makedirs

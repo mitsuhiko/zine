@@ -6,7 +6,7 @@
  * Zine admin panel.
  *
  * :copyright: 2007 by Armin Ronacher.
- * :license: GNU GPL.
+ * :license: BSD
  */
 (function() {
   var widget_map = {};

@@ -6,7 +6,7 @@
     Very simple zine theme.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import join, dirname
 

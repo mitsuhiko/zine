@@ -14,7 +14,7 @@
     For usage informations see :class:`Form`
 
     :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Lenz.
-    :license: GNU GPL.
+    :license: BSD
 """
 import re
 from datetime import datetime

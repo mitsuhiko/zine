@@ -6,7 +6,7 @@
     This module implements various functions used by the admin interface.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
-    :license: GNU GPL.
+    :license: BSD
 """
 import os
 import re

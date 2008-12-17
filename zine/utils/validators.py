@@ -10,7 +10,7 @@
           forms currently which should be replaced by real forms soon.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
-    :license: GNU GPL.
+    :license: BSD
 """
 import re
 from urlparse import urlparse

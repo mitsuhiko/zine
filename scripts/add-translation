@@ -7,7 +7,7 @@
     This script adds a new translation to Zine or a Zine plugin.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os import makedirs
 from os.path import join, realpath, pardir, isdir

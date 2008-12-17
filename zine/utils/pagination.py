@@ -6,7 +6,7 @@
     Pagination helpers.
 
     :copyright: Copyright 2008 by Armin Ronacher
-    :license: GNU GPL.
+    :license: BSD
 """
 import math
 

@@ -8,7 +8,7 @@
     registration system.
 
     :copyright: Copyright 2007 by Armin Ronacher
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import dirname, join
 from random import choice

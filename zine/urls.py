@@ -7,7 +7,7 @@
     the core components.
 
     :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
-    :license: GNU GPL.
+    :license: BSD
 """
 from werkzeug.routing import Rule, Submount
 

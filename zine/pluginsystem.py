@@ -76,7 +76,7 @@
 
 
     :copyright: 2006-2008 by Armin Ronacher, Christopher Grebs, Georg Brandl.
-    :license: GNU GPL.
+    :license: BSD
 """
 import __builtin__
 import re

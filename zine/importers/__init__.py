@@ -8,7 +8,7 @@
     and not as plugin.
 
     :copyright: Copyright 2008 by Armin Ronacher
-    :license: GNU GPL, see LICENSE for more details.
+    :license: BSD see LICENSE for more details.
 """
 import os
 import md5

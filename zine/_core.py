@@ -6,7 +6,7 @@
     Internal core module that survives reloads.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GPL.
+    :license: BSD
 """
 
 from thread import allocate_lock

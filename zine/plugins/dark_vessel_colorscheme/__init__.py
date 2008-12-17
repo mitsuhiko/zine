@@ -6,7 +6,7 @@
     A dark colorscheme for vessel.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from os.path import join, dirname
 from zine.api import _

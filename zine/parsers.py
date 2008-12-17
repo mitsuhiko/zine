@@ -7,7 +7,7 @@
     default parsers.
 
     :copyright: Copyright 2007-2008 by Armin Ronacher
-    :license: GNU GPL, see LICENSE for more details.
+    :license: BSD see LICENSE for more details.
 """
 from werkzeug import escape
 

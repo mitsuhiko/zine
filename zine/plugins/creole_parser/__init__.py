@@ -6,7 +6,7 @@
     Use Markdown for your blg posts.
 
     :copyright: 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :license: BSD
 """
 from urlparse import urljoin
 

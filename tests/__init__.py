@@ -14,7 +14,7 @@
     http://tinyurl.com/doctest-patch
 
     :copyright: 2008 by Lukas Meuser.
-    :license: GNU GPL.
+    :license: BSD
 """
 
 import sys

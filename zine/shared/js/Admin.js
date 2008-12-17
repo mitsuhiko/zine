@@ -6,7 +6,7 @@
  * functions for the administration interface.
  *
  * :copyright: 2007-2008 by Armin Ronacher.
- * :license: GNU GPL.
+ * :license: BSD
  */
 
 $(function() {
