@@ -6,10 +6,6 @@ body {
     background-color: #456981;
 }
 
-body.login {
-    background-color: white;
-}
-
 ::-moz-selection {
     background-color: #D0DFF0;
     color: #456981;
@@ -1102,31 +1098,48 @@ div.help div.toc ul {
 }
 
 /* :::: LOGIN BOX :::: */
+body.login {
+    background-color: #F8FBFD;
+}
+
+
+body.login div.site-box {
+    position: absolute;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #316182 url(img/dialogbg.png) repeat-x;
+    border-bottom: 1px solid #071F30;
+}
+
+body.login div.site-box a {
+    color: white;
+    text-decoration: none;
+}
+
+body.login div.site-box a:hover {
+    text-decoration: underline;
+}
+
+body.login div.site-box p {
+    padding: 15px;
+    margin: 0;
+}
+
 div.login-box {
+    position: absolute;
+    z-index: 80;
     background: #316182 url(img/dialogbg.png) repeat-x;
     padding: 32px;
     width: 400px;
-    margin: 70px auto 0 auto;
-}
-
-div.login-box:before {
-    background: transparent url(img/border-tr.png) no-repeat top right;
-    height: 32px;
-    line-height: 0;
-    margin: -32px -32px 0 -32px;
-    padding: 0;
-    display: block;
-    content: url(img/border-tl.png);
-}
-
-div.login-box:after {
-    background: transparent url(img/border-br.png) no-repeat bottom right;
-    height: 32px;
-    line-height: 0;
-    display: block;
-    margin: 0 -32px -32px -32px;
-    padding: 0;
-    content: url(img/border-bl.png);
+    height: 350px;
+    top: 50%;
+    left: 50%;
+    margin: -185px 0 0 -232px;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    border-radius: 20px;
 }
 
 div.login-box h2 {

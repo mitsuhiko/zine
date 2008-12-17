@@ -24,7 +24,10 @@
     </div>
     {{ render_formbox(form.status, collapsed=false) }}
     {{ render_formbox(form.tags) }}
-    {{ render_formbox(form.categories) }}
+    <div class="formbox toggleable collapsed">
+      <h3>{{ form.categories.label() }}</h3>
+      {{ form.categories(empty_msg=_('No categories.')) }}
+    </div>
     {{ render_formbox(form.parser) }}
     <div class="formbox toggleable collapsed">
       <h3>{{ _("Discussion") }}</h3>

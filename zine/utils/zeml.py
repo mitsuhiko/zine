@@ -318,7 +318,9 @@ def dump_parser_data(parser_data):
 def load_parser_data(value):
     if value is None:
         return
-    in_ = StringIO(value)
+    # the extra str() call is for databases like postgres that
+    # insist on using buffers for binary data.
+    in_ = StringIO(str(value))
     result = {}
     for x in xrange(load(in_)):
         key = load(in_)

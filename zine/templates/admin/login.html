@@ -7,6 +7,10 @@
   {{ get_page_metadata() }}
 </head>
 <body class="login">
+  <div class="site-box">
+    <p><a href="{{ url_for('blog/index') }}">{% trans
+     %}&laquo; back to the blog index{% endtrans %}</a></p>
+  </div>
   <div class="login-box">
     <h2><span>{{ _("Login") }}</span></h2>
     {%- if form.all_errors %}

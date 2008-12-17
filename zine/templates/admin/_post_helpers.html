@@ -21,7 +21,7 @@
         }}">{{ post.comments|count }}</a>
       <td class="date">{{ post.pub_date|datetimeformat('short') if post.pub_date }}
   {%- else %}
-    <tr>{{ _("No entries.") }}</tr>
+    <tr><td colspan="5">{{ _("No pages.") }}</td></tr>
   {%- endfor %}
   </table>
 {% endmacro %}

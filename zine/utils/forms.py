@@ -654,14 +654,20 @@ class _InputGroup(Widget):
         if attrs.pop('hide_empty', False) and not self.choices:
             return u''
         self._attr_setdefault(attrs)
+        empty_msg = attrs.pop('empty_msg', None)
         class_ = attrs.pop('class_', attrs.pop('class', None))
         if class_ is None:
             class_ = 'choicegroup'
         attrs['class'] = class_
-        return list_type(*[u'<li>%s %s</li>' % (
+        choices = [u'<li>%s %s</li>' % (
             choice(),
             choice.label()
-        ) for choice in self.choices], **attrs)
+        ) for choice in self.choices]
+        if not choices:
+            if empty_msg is None:
+                empty_msg = _('No choices.')
+            choices.append(u'<li>%s</li>' % _(empty_msg))
+        return list_type(*choices, **attrs)
 
     def as_ul(self, **attrs):
         """Render the radio buttons widget as <ul>"""
@@ -805,8 +811,12 @@ class ListWidget(Widget):
     def _as_list(self, factory, attrs):
         if attrs.pop('hide_empty', False) and not self:
             return u''
+        items = []
         for index in xrange(len(self) + attrs.pop('extra_rows', 1)):
-            items.append(self[index]() for item in self)
+            items.append(html.li(self[index]()) for item in self)
+        # add an invisible item for the validator
+        if not items:
+            items.append(html.li(style='display: none'))
         return factory(*items, **attrs)
 
     def __getitem__(self, index):
