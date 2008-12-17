@@ -114,7 +114,10 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('cache', url_for('admin/cache'), _(u'Cache'))
             ])
         ])
-        manage_items.append(('users', url_for('admin/manage_users'), _(u'Users')))
+        manage_items.extend([
+            ('users', url_for('admin/manage_users'), _(u'Users')),
+            ('groups', url_for('admin/manage_groups'), _(u'Groups'))
+        ])
 
     # add the about items to the navigation bar
     system_items = [
@@ -791,6 +794,21 @@ def delete_user(request, user_id):
 
     return render_admin_response('admin/delete_user.html', 'manage.users',
                                  form=form.as_widget())
+
+
+@require_admin_privilege(BLOG_ADMIN)
+def manage_groups(request):
+    pass
+
+
+@require_admin_privilege(BLOG_ADMIN)
+def edit_group(request, group_id=None):
+    pass
+
+
+@require_admin_privilege(BLOG_ADMIN)
+def delete_group(request, group_id):
+    pass
 
 
 @require_admin_privilege(BLOG_ADMIN)
