@@ -1099,18 +1099,12 @@ div.help div.toc ul {
 
 /* :::: LOGIN BOX :::: */
 body.login {
-    background-color: #F8FBFD;
+    background: #316182 url(img/dialogbg.png) repeat-x;
 }
 
 
 body.login div.site-box {
-    position: absolute;
-    z-index: 100;
-    top: 0;
-    left: 0;
     width: 100%;
-    background: #316182 url(img/dialogbg.png) repeat-x;
-    border-bottom: 1px solid #071F30;
 }
 
 body.login div.site-box a {
@@ -1123,20 +1117,18 @@ body.login div.site-box a:hover {
 }
 
 body.login div.site-box p {
-    padding: 15px;
+    padding: 10px;
     margin: 0;
 }
 
 div.login-box {
     position: absolute;
     z-index: 80;
-    background: #316182 url(img/dialogbg.png) repeat-x;
     padding: 32px;
     width: 400px;
-    height: 350px;
     top: 50%;
     left: 50%;
-    margin: -185px 0 0 -232px;
+    margin: -210px 0 0 -232px;
     -moz-border-radius: 20px;
     -webkit-border-radius: 20px;
     border-radius: 20px;
@@ -1145,7 +1137,7 @@ div.login-box {
 div.login-box h2 {
     background: transparent url(img/banner.png) no-repeat center top;
     margin: 0;
-    padding: 92px 0 0 0;
+    padding: 90px 0 0 0;
 }
 
 div.login-box h2 span {
