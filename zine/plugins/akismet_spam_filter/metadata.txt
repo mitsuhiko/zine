@@ -2,7 +2,7 @@ Name: Akismet Spam Filter
 Plugin URL: http://textpress.pocoo.org/plugins/akismet_spam_filter
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
-License: GPL
+License: BSD
 Version: 0.1
 Description: <a href="http://akismet.com/">Akismet</a> checks your comments\
  against the Akismet web service to see if they look like spam or not. You\

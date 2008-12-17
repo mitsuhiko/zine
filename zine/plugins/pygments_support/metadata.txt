@@ -3,7 +3,7 @@ Name[de]: Pygments Unterstützung
 Plugin URL: http://textpress.pocoo.org/plugins/pygments_support
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
-License: GPL
+License: BSD
 Version: 0.1
 Description: Adds support for <a href="http://pygments.org/">pygments</a>\
  to pre code blocks. Blocks marked with <code>&lt;pre syntax="language"&gt;</code>\

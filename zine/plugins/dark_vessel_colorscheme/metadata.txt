@@ -3,7 +3,7 @@ Name[de]: Dark Vessel Farbschema für Vessel Thema
 Plugin URL: http://zine.pocoo.org/pluginsdark_vessel_colorscheme
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
-License: GPL
+License: BSD
 Version: 0.1
 Description: A dark colorscheme for the vessel theme
 Description[de]: Ein dunkles Farbschema für das Vessel Thema
