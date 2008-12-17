@@ -12,7 +12,6 @@
 """
 from os import path, remove, makedirs, walk
 from time import time
-from thread import allocate_lock
 from itertools import izip
 from datetime import datetime, timedelta
 from urlparse import urlparse, urljoin
@@ -30,6 +29,7 @@ from werkzeug.exceptions import HTTPException, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
 
+from zine import plugins, _core
 from zine.environment import SHARED_DATA, BUILTIN_TEMPLATE_PATH, \
      BUILTIN_PLUGIN_FOLDER
 from zine.database import db, cleanup_session
@@ -39,9 +39,6 @@ from zine.utils import ClosingIterator, local, local_manager, dump_json, \
 from zine.utils.mail import split_email
 from zine.utils.datastructures import ReadOnlyMultiMapping
 
-
-#: the lock for the application setup.
-_setup_lock = allocate_lock()
 
 #: the default theme settings
 DEFAULT_THEME_SETTINGS = {
@@ -81,10 +78,10 @@ def get_request():
 
 
 def get_application():
-    """Get the current application.  If there is not application available
-    because no application is bound to the thread, `None` is returned.
+    """Get the application instance.  If the application was not yet set up
+    the return value is `None`
     """
-    return getattr(local, 'application', None)
+    return _core._application
 
 
 def url_for(endpoint, **args):
@@ -108,7 +105,7 @@ def url_for(endpoint, **args):
             args.update(updated_args)
     anchor = args.pop('_anchor', None)
     external = args.pop('_external', False)
-    rv = local.application.url_adapter.build(endpoint, args,
+    rv = get_application().url_adapter.build(endpoint, args,
                                              force_external=external)
     if anchor is not None:
         rv += '#' + url_quote(anchor)
@@ -132,12 +129,12 @@ def emit_event(event, *args, **kwargs):
             result.append(listener(*args, **kwargs))
     """
     return [x(*args, **kwargs) for x in
-            local.application._event_manager.iter(event)]
+            get_application()._event_manager.iter(event)]
 
 
 def iter_listeners(event):
     """Return an iterator for all the listeners for the event provided."""
-    return local.application._event_manager.iter(event)
+    return get_application()._event_manager.iter(event)
 
 
 def add_link(rel, href, type, title=None, charset=None, media=None):
@@ -178,7 +175,7 @@ def add_header_snippet(html):
 
 def select_template(templates):
     """Selects the first template from a list of templates that exists."""
-    env = local.application.template_env
+    env = get_application().template_env
     for template in templates:
         if template is not None:
             try:
@@ -198,7 +195,7 @@ def render_template(template_name, _stream=False, **context):
         tmpl = select_template(template_name)
         template_name = tmpl.name
     else:
-        tmpl = local.application.template_env.get_template(template_name)
+        tmpl = get_application().template_env.get_template(template_name)
 
     #! called right before a template is rendered, the return value is
     #! ignored but the context can be modified in place.
@@ -584,12 +581,6 @@ class ThemeLoader(BaseLoader):
         return rv
 
 
-class InstanceNotInitialized(RuntimeError):
-    """Raised if an application was created for a not yet initialized
-    instance folder.
-    """
-
-
 class Zine(object):
     """The central application object.
 
@@ -626,7 +617,7 @@ class Zine(object):
         # even if the database is not connected.
         self.cfg = Configuration(path.join(instance_folder, 'zine.ini'))
         if not self.cfg.exists:
-            raise InstanceNotInitialized()
+            raise _core.InstanceNotInitialized()
 
         # and hook in the logger
         self.log = log.Logger(path.join(instance_folder, self.cfg['log_file']),
@@ -703,8 +694,7 @@ class Zine(object):
         self.widgets = dict((x.name, x) for x in all_widgets)
 
         # load plugins
-        from zine.pluginsystem import find_plugins, \
-             register_application
+        from zine.pluginsystem import find_plugins
         self.plugin_folder = path.join(instance_folder, 'plugins')
         self.plugin_searchpath = [self.plugin_folder]
         for folder in self.cfg['plugin_searchpath'].split(','):
@@ -713,8 +703,8 @@ class Zine(object):
                 self.plugin_searchpath.append(folder)
         self.plugin_searchpath.append(BUILTIN_PLUGIN_FOLDER)
 
-        # register the application in the plugin system.
-        register_application(self)
+        # now make sure that the module path is our searchpath
+        plugins.__path__ = self.plugin_searchpath
 
         # load the plugins
         self.plugins = {}
@@ -796,19 +786,14 @@ class Zine(object):
         #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
 
-    def close(self):
-        """Called by the dispatcher before reloading.  This method should be
-        called by hand if the application object is no longer in use for shell
-        scripts and similar situations.  This cleans up data stored outside of
-        the application object such as loaded plugins.  After this was called,
-        the application object can't be used any more and has undefined
-        behavior.
-
-        Multiple calls to :meth:`close` are safe and won't cause errors.
+    @property
+    def wants_reload(self):
+        """True if the application requires a reload.  This is `True` if
+        the config was changed on the file system.  A dispatcher checks this
+        value every request and automatically unloads and reloads the
+        application if necessary.
         """
-        from zine.pluginsystem import unregister_application
-        unregister_application(self)
-        local.application = None
+        return self.cfg.changed_external
 
     @setuponly
     def add_template_filter(self, name, callback):
@@ -1067,21 +1052,6 @@ class Zine(object):
         """
         self._event_manager.connect(event, callback, position)
 
-    @property
-    def wants_reload(self):
-        """True if the application requires a reload.  This is `True` if
-        the config was changed on the file system.  A dispatcher checks this
-        value every request and automatically unloads and reloads the
-        application if necessary.
-        """
-        return self.cfg.changed_external
-
-    def bind_to_thread(self):
-        """Bind the application to the current thread.  For more information
-        about the context concept have a look at :ref:`contexts`.
-        """
-        local.application = self
-
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""
         # we call unicode to resolve the translations once.  parser.name
@@ -1212,7 +1182,6 @@ class Zine(object):
         # it afterwards.  We do this so that the request object can query
         # the database in the initialization method.
         request = object.__new__(Request)
-        local.application = self
         local.request = request
         local.page_metadata = []
         local.request_locals = {}
@@ -1278,137 +1247,6 @@ class Zine(object):
 
     # remove our decorator
     del setuponly
-
-
-class StaticDispatcher(object):
-    """Dispatches to zine or the websetup and handles reloads.  Instances
-    of this class are created by :func:`make_app` when passed the path to an
-    instance folder.
-    """
-
-    def __init__(self, instance_folder):
-        self.instance_folder = instance_folder
-        self.application = None
-        self.reload_lock = allocate_lock()
-
-    def get_handler(self):
-        # we have an application and that application has no changed config
-        if self.application and not self.application.wants_reload:
-            return self.application
-
-        # otherwise we have no up to date application, reload
-        self.reload_lock.acquire()
-        try:
-            if self.application:
-                # it could be that we waited for the lock to come free and
-                # a different request reloaded the application for us.  check
-                # here for that a second time.
-                if not self.application.wants_reload:
-                    return self.application
-
-                # otherwise close the application
-                self.application.close()
-
-            # now try to setup the application.  it the setup does not
-            # work because the instance is not initialized we hook the
-            # websetup in.
-            try:
-                self.application = make_zine(self.instance_folder)
-            except InstanceNotInitialized:
-                from zine.websetup import WebSetup
-                return WebSetup(self.instance_folder)
-        finally:
-            self.reload_lock.release()
-
-        # if we reach that point we have a valid application from the
-        # reloading process which we can return
-        return self.application
-
-    def __call__(self, environ, start_response):
-        return self.get_handler()(environ, start_response)
-
-
-class DynamicDispatcher(object):
-    """A dispatcher that creates applications on the fly from values of the
-    WSGI environment.  This means that the first request to a not yet
-    existing application will create it.  Internally it's creating a
-    :class:`StaticDispatcher` for every instance folder.
-    """
-
-    def __init__(self):
-        self.dispatchers = {}
-        self.init_lock = allocate_lock()
-
-    def __call__(self, environ, start_response):
-        instance_folder = path.realpath(environ['zine.instance_folder'])
-        self.init_lock.acquire()
-        try:
-            if instance_folder not in self.dispatchers:
-                dispatcher = StaticDispatcher(instance_folder)
-                self.dispatchers[instance_folder] = dispatcher
-            else:
-                dispatcher = self.dispatchers[instance_folder]
-        finally:
-            self.init_lock.release()
-        return dispatcher(environ, start_response)
-
-
-def make_app(instance_folder=None):
-    """This function creates a WSGI application for Zine.   Even though
-    the central :class:`Zine` object implements the WSGI protocol it's
-    not forwarded to the webserver directly because the it's reloaded under
-    some circumstances by the :ref:`dispatchers <dispatchers>` that wrap it.
-    These dispatchers also redirect requests to the websetup if the instance
-    does not exist by now.
-
-    The return value of this function is guaranteed to be a WSGI application.
-    It's either a :class:`StaticDispatcher` that points to the instance
-    provided or a :class:`DynamicDispatcher`.
-
-    If the `instance_folder` is provided a simple dispatcher is returned that
-    manages the Zine application for this instance.  If you don't provide
-    one the return value will be a dynamic dispatcher that can handle multiple
-    Zine instances.  The zine instance for one request is specified
-    in the WSGI environ in the ``'zine.instance'`` key.
-
-    If you need a :class:`Zine` object for scripts or other situations
-    you should use the :func:`make_zine` function that returns a
-    :class:`Zine` object instead.
-    """
-    if instance_folder is None:
-        return DynamicDispatcher()
-    return StaticDispatcher(path.realpath(instance_folder))
-
-
-def make_zine(instance_folder, bind_to_thread=False):
-    """Creates a new instance of the application.  Always use this function
-    to create an application because the process of setting the application
-    up requires locking which *only* happens in :func:`make_zine`.
-
-    If `bind_to_thread` is `True` the application will be set for this thread.
-    Don't use the application object returned as WSGI application beside for
-    scripting / testing or if you know what you're doing.
-
-    The :class:`Zine` object alone does not handle any reloading or
-    instance setup.
-    """
-    _setup_lock.acquire()
-    try:
-        # make sure this thread has access to the variable so just set
-        # up a partial class and call __init__ later.
-        local.application = app = object.__new__(Zine)
-
-        # now initialize the application
-        app.__init__(instance_folder)
-    finally:
-        # if there was no error when setting up the Zine instance
-        # we should now have an attribute here to delete
-        app = get_application()
-        if app is not None and not bind_to_thread:
-            local_manager.cleanup()
-        _setup_lock.release()
-
-    return app
 
 
 # import here because of circular dependencies
