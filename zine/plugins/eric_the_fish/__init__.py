@@ -27,9 +27,15 @@ from zine.views.admin import render_admin_response
 # the following method is used to show notifications in the admin panel.
 from zine.utils.admin import flash
 
+# this furction is used for redirecting the user to another page
+from zine.utils.http import redirect
+
 # Because our fish uses JSON and JavaScript we use the dump_json function
 # from the utils module.
 from zine.utils import dump_json
+
+# the following exception is raised when the config could not be changed
+from zine.config import ConfigurationTransactionError
 
 # we only want the admin to be able to configure eric. so we need the
 # BLOG_ADMIN privilege
@@ -75,7 +81,7 @@ def add_eric_link(req, navigation_bar):
     The outermost is the configuration editor, the next one the plugins
     link and then we add our fish link.
     """
-    if req.user.has_privilege(BLOG_ADMIN):
+    if not req.user.has_privilege(BLOG_ADMIN):
         return
     for link_id, url, title, children in navigation_bar:
         if link_id == 'options':
@@ -90,7 +96,9 @@ def show_eric_options(req):
     """
     new_skin = req.args.get('select')
     if new_skin in SKINS:
-        if not req.app.cfg.change_single('eric_the_fish/skin', new_skin):
+        try:
+            req.app.cfg.change_single('eric_the_fish/skin', new_skin)
+        except ConfigurationTransactionError, e:
             flash(_('The skin could not be changed.'), 'error')
         return redirect(url_for('eric_the_fish/config'))
 
