@@ -75,7 +75,7 @@ def add_eric_link(req, navigation_bar):
     The outermost is the configuration editor, the next one the plugins
     link and then we add our fish link.
     """
-    if req.user.has_privilege(BLOG_ADMIN)
+    if req.user.has_privilege(BLOG_ADMIN):
         return
     for link_id, url, title, children in navigation_bar:
         if link_id == 'options':
