@@ -20,11 +20,11 @@ from _init_zine import find_instance
 
 
 def init_func(instance):
-    from zine import make_zine
-    app = make_zine(instance, True)
+    from zine import setup
+    app = setup(instance)
+    del setup
     from zine import models
     from zine.database import db
-    del make_zine
     return locals()
 
 

@@ -26,7 +26,7 @@ This will greatly improve the performance of your Zine installation.\
 
 sys.path.append(dirname(__file__))
 from _init_zine import find_instance
-from zine import make_zine
+from zine import setup
 
 
 def main():
@@ -40,7 +40,7 @@ def main():
     if instance is None:
         parser.error('instance not found.  Specify path to instance')
 
-    app = make_zine(instance)
+    app = setup(instance)
 
     for alias, dst in app._shared_exports.iteritems():
         dst = abspath(dst)

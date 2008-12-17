@@ -29,7 +29,7 @@ else:
 
 
 def build_eventmap(instance_folder):
-    app = zine.make_zine(instance_folder)
+    app = zine.setup(instance_folder)
     zine_root = os.path.realpath(os.path.dirname(zine.__file__))
     searchpath = [(zine_root, '__builtin__')]
 
