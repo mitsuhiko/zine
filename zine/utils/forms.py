@@ -583,7 +583,7 @@ class Checkbox(Widget):
     def render(self, **attrs):
         self._attr_setdefault(attrs)
         return html.input(name=self.name, type='checkbox',
-                          checked=self.value, **attrs)
+                          checked=self.value != 'False', **attrs)
 
 
 class SelectBox(Widget):
@@ -1268,7 +1268,7 @@ class DateTimeField(Field):
     >>> field = DateTimeField()
     >>> field('1970-01-12 00:00')
     datetime.datetime(1970, 1, 12, 0, 0)
-    
+
     >>> field('foo')
     Traceback (most recent call last):
       ...
@@ -1595,12 +1595,12 @@ class BooleanField(Field):
     validate_on_omission = True
 
     def convert(self, value):
-        return bool(value)
+        return value != 'False' and bool(value)
 
     def to_primitive(self, value):
         if value:
-            return u'1'
-        return u''
+            return u'True'
+        return u'False'
 
 
 class FormMeta(type):
