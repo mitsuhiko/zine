@@ -134,7 +134,7 @@ def show_author(req, username, page=1):
     :URL endpoint: ``blog/show_author``
     """
     user = User.query.filter_by(username=username).first()
-    if user is None or not user.is_manager:
+    if user is None or not user.is_author:
         raise NotFound()
 
     data = Post.query.published().filter_by(author=user) \
