@@ -27,7 +27,7 @@ from zine.views.admin import render_admin_response
 # the following method is used to show notifications in the admin panel.
 from zine.utils.admin import flash
 
-# this furction is used for redirecting the user to another page
+# this function is used for redirecting the user to another page
 from zine.utils.http import redirect
 
 # Because our fish uses JSON and JavaScript we use the dump_json function
