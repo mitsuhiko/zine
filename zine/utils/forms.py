@@ -44,10 +44,10 @@ _position_hint_lock = Lock()
 
 class _Missing(object):
     def __reduce__(self):
-        return '_no_default'
+        return '_missing'
     def __repr__(self):
         return 'No default'
-_no_default = _Missing()
+_missing = _Missing()
 del _Missing
 
 
@@ -936,7 +936,7 @@ class Field(object):
     validate_on_omission = False
 
     def __init__(self, label=None, help_text=None, validators=None,
-                 widget=None, messages=None, default=_no_default):
+                 widget=None, messages=None, default=_missing):
         self._position_hint = _next_position_hint()
         self.label = label
         self.help_text = help_text
@@ -954,6 +954,7 @@ class Field(object):
             'can\'t use internal widgets as widgets for fields'
 
     def __call__(self, value):
+        value = self.inject_default(value)
         value = self.convert(value)
         self.apply_validators(value)
         return value
@@ -974,6 +975,19 @@ class Field(object):
         error when checking if the field is required.
         """
         return value is not None
+
+    def inject_default(self, value):
+        """This function is used to replace the value with the default
+        value before conversion starts.
+        """
+        if value is None:
+            if callable(self.default):
+                value = self.default()
+            else:
+                value = self.default
+            if value is _missing:
+                value = None
+        return value
 
     def convert(self, value):
         """This can be overridden by subclasses and performs the value
@@ -1108,7 +1122,7 @@ class Multiple(Field):
 
     def __init__(self, field, label=None, help_text=None, min_size=None,
                  max_size=None, validators=None, widget=None, messages=None,
-                 default=_no_default):
+                 default=_missing):
         Field.__init__(self, label, help_text, validators, widget, messages,
                        default)
         self.field = field
@@ -1170,7 +1184,7 @@ class CommaSeparated(Multiple):
 
     def __init__(self, field, label=None, help_text=None, min_size=None,
                  max_size=None, sep=u',', validators=None, widget=None,
-                 messages=None, default=_no_default):
+                 messages=None, default=_missing):
         Multiple.__init__(self, field, label, help_text, min_size,
                           max_size, validators, widget, messages,
                           default)
@@ -1230,7 +1244,7 @@ class TextField(Field):
 
     def __init__(self, label=None, help_text=None, required=False,
                  min_length=None, max_length=None, validators=None,
-                 widget=None, messages=None, default=_no_default):
+                 widget=None, messages=None, default=_missing):
         Field.__init__(self, label, help_text, validators, widget, messages,
                        default)
         self.required = required
@@ -1279,7 +1293,7 @@ class DateTimeField(Field):
 
     def __init__(self, label=None, help_text=None, required=False,
                  rebase=True, validators=None, widget=None, messages=None,
-                 default=_no_default):
+                 default=_missing):
         Field.__init__(self, label, help_text, validators, widget, messages,
                        default)
         self.required = required
@@ -1314,7 +1328,7 @@ class ModelField(Field):
 
     def __init__(self, model, key, label=None, help_text=None, required=False,
                  message=None, validators=None, widget=None, messages=None,
-                 default=_no_default, on_not_found=None):
+                 default=_missing, on_not_found=None):
         Field.__init__(self, label, help_text, validators, widget, messages,
                        default)
         self.model = model
@@ -1367,7 +1381,7 @@ class HiddenModelField(ModelField):
 
     def __init__(self, model, key=None, required=False, message=None,
                  validators=None, widget=None, messages=None,
-                 default=_no_default):
+                 default=_missing):
         if key is None:
             keys = db.class_mapper(model).primary_key
             assert len(keys) == 1, 'Model has multiple primary keys'
@@ -1441,7 +1455,7 @@ class ChoiceField(Field):
 
     def __init__(self, label=None, help_text=None, required=True,
                  choices=None, validators=None, widget=None, messages=None,
-                 default=_no_default):
+                 default=_missing):
         Field.__init__(self, label, help_text, validators, widget, messages,
                        default)
         self.required = required
@@ -1473,7 +1487,7 @@ class MultiChoiceField(ChoiceField):
 
     def __init__(self, label=None, help_text=None, choices=None,
                  min_size=None, max_size=None, validators=None,
-                 widget=None, messages=None, default=_no_default):
+                 widget=None, messages=None, default=_missing):
         ChoiceField.__init__(self, label, help_text, min_size > 0, choices,
                              validators, widget, messages, default)
         self.min_size = min_size
@@ -1545,7 +1559,7 @@ class IntegerField(Field):
 
     def __init__(self, label=None, help_text=None, required=False,
                  min_value=None, max_value=None, validators=None,
-                 widget=None, messages=None, default=_no_default):
+                 widget=None, messages=None, default=_missing):
         Field.__init__(self, label, help_text, validators, widget, messages,
                        default)
         self.required = required
@@ -1762,7 +1776,7 @@ class Form(object):
     added fields wouldn't be bound.  The fields that are stored directly on
     the form can also be accessed with their name like a regular attribute.
 
-    Example usage::
+    Example usage:
 
     >>> class StatusForm(Form):
     ...     status = ChoiceField()
@@ -1777,6 +1791,28 @@ class Form(object):
     True
     >>> form['status']
     u'happy'
+
+    Fields support default values.  These however are not as useful as you
+    might think.  These are only used if the value passed to the field's
+    validation and conversion function are actually the special python
+    `None` builtin.  This is a design choice and not a limitation.  If
+    form validation over HTTP happens you should use the initial dict
+    which is passed to the forms instead.
+
+    Example:
+
+    >>> field = StringField(default=u'foo')
+    >>> field(None)
+    u'foo'
+    >>> field(u'')
+    u''
+
+    Default values can be considered annotated defaults to be handled by
+    the caller that just happen to be returned on the conversion because it
+    just makes sense.  They are not a fundamental part of the form system.
+
+    The defaults can also be callables in which situation they are called
+    to create the default.
     """
     __metaclass__ = FormMeta
 
