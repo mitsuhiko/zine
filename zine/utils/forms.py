@@ -544,17 +544,21 @@ class Textarea(Widget):
 class Checkbox(Widget):
     """A simple checkbox."""
 
+    def with_help_text(self, **attrs):
+        """Render the checkbox with help text."""
+        data = self(**attrs)
+        if self.help_text:
+            data += u' ' + html.label(self.help_text, class_='explanation',
+                                      for_=self.id)
+        return data
+
     def as_dd(self, **attrs):
         """Return a dt/dd item."""
         rv = []
         label = self.label
         if label:
             rv.append(html.dt(label()))
-        data = self(**attrs)
-        if self.help_text:
-            data += u' ' + html.label(self.help_text, class_='explanation',
-                                      for_=self.id)
-        rv.append(html.dd(data))
+        rv.append(html.dd(self.with_help_text()))
         return u''.join(rv)
 
     def as_li(self, **attrs):

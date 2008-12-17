@@ -14,6 +14,10 @@
     {{ render_formbox(form.www) }}
     {{ render_formbox(form.display_name) }}
     {{ render_formbox(form.privileges) }}
+    <div class="formbox toggleable collapsed">
+      <h3>{{ form.is_author.label.text|e }}</h3>
+      {{ form.is_author.with_help_text() }}
+    </div>
     <div class="formbox">
       <h3>{{ form.description.label() }}</h3>
       {{ form.description(rows=5) }}

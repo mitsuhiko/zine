@@ -598,6 +598,8 @@ class EditUserForm(_UserBoundForm):
                                widget=forms.PasswordInput)
     privileges = forms.MultiChoiceField(lazy_gettext(u'Privileges'),
                                         widget=forms.CheckboxGroup)
+    is_author = forms.BooleanField(lazy_gettext(u'List as author'),
+        help_text=lazy_gettext(u'This user is listed as author'))
 
     def __init__(self, user=None, initial=None):
         if user is not None:
@@ -608,7 +610,8 @@ class EditUserForm(_UserBoundForm):
                 description=user.description,
                 email=user.email,
                 www=user.www,
-                privileges=[x.name for x in user.own_privileges]
+                privileges=[x.name for x in user.own_privileges],
+                is_author=user.is_author
             )
         _UserBoundForm.__init__(self, user, initial)
         self.display_name.choices = [
@@ -627,7 +630,7 @@ class EditUserForm(_UserBoundForm):
 
     def _set_common_attributes(self, user):
         forms.set_fields(user, self.data, 'www', 'real_name', 'description',
-                         'display_name')
+                         'display_name', 'is_author')
         bind_privileges(user.own_privileges, self.data['privileges'])
 
     def make_user(self):

@@ -141,11 +141,7 @@ class UserQuery(db.Query):
         return AnonymousUser()
 
     def authors(self):
-        # XXX: this is a noop currently.  i'm not even sure what counts
-        # as an author now.  A person that has EDIT_OWN_ENTRIES or
-        # EDIT_OTHER_ENTRIES or BLOG_ADMIN?  A person that can enter
-        # the admin panel.  A separate privilege?
-        return self
+        return self.filter_by(is_author=True)
 
 
 class User(object):
@@ -161,7 +157,7 @@ class User(object):
     is_somebody = True
 
     def __init__(self, username, password, email, real_name=u'',
-                 description=u'', www=u''):
+                 description=u'', www=u'', is_author=False):
         self.username = username
         if password is not None:
             self.set_password(password)
@@ -173,6 +169,7 @@ class User(object):
         self.description = description
         self.extra = {}
         self.display_name = u'$nick'
+        self.is_author = is_author
 
     @property
     def is_manager(self):
@@ -226,8 +223,7 @@ class User(object):
         return self.pw_hash == '!'
 
     def get_url_values(self):
-        # XXX: really, manager?
-        if self.is_manager:
+        if self.is_author:
             return 'blog/show_author', {
                 'username': self.username
             }
@@ -261,7 +257,7 @@ class Group(object):
 class AnonymousUser(User):
     """Fake model for anonymous users."""
     id = -1
-    is_somebody = False
+    is_somebody = is_author = False
     display_name = 'Nobody'
     real_name = description = username = ''
     own_privileges = privileges = \

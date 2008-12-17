@@ -160,7 +160,8 @@ class WebSetup(object):
                 real_name=u'',
                 description=u'',
                 extra={},
-                display_name='$username'
+                display_name='$username',
+                is_author=True
             ).last_inserted_ids()[0]
 
             # insert a privilege for the user

@@ -180,7 +180,8 @@ users = db.Table('users', metadata,
     db.Column('extra', db.PickleType),
     db.Column('pw_hash', db.String(70)),
     db.Column('email', db.String(250)),
-    db.Column('www', db.String(200))
+    db.Column('www', db.String(200)),
+    db.Column('is_author', db.Boolean)
 )
 
 groups = db.Table('groups', metadata,
