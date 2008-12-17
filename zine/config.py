@@ -109,16 +109,6 @@ DEFAULT_VARS = {
 HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',
                    'smtp_password'))
 
-#: header for the config file
-CONFIG_HEADER = '''\
-# Zine configuration file
-# This file is also updated by the Zine admin interface which will strip
-# all comments due to a limitation in the current implementation.  If you
-# want to maintain the file with your text editor be warned that comments
-# may disappear.  The charset of this file must be utf-8!
-
-'''
-
 
 def unquote_value(value):
     """Unquote a configuration value."""
@@ -204,6 +194,7 @@ class Configuration(object):
         self.config_vars = DEFAULT_VARS.copy()
         self._values = {}
         self._converted_values = {}
+        self._comments = {}
         self._lock = Lock()
 
         # if the path does not exist yet set the existing flag to none and
@@ -219,23 +210,37 @@ class Configuration(object):
         self._load_time = path.getmtime(self.filename)
         self.exists = True
         section = 'zine'
+        current_comment = ''
         f = file(self.filename)
         try:
             for line in f:
                 line = line.strip()
                 if not line or line[0] in '#;':
+                    current_comment += line + '\n'
                     continue
                 elif line[0] == '[' and line[-1] == ']':
                     section = line[1:-1].strip()
+                    if current_comment.strip():
+                        self._comments['[%s]' % section] = current_comment
+                    current_comment = ''
                 elif '=' not in line:
                     key = line.strip()
                     value = ''
+                    if current_comment.strip():
+                        self._comments[key] = current_comment
+                    current_comment = ''
                 else:
                     key, value = line.split('=', 1)
                     key = key.strip()
                     if section != 'zine':
                         key = section + '/' + key
                     self._values[key] = unquote_value(value.strip())
+                    if current_comment.strip():
+                        self._comments[key] = current_comment
+                    current_comment = ''
+            # comments at the end of the file
+            if current_comment.strip():
+                self._comments[' end '] = current_comment
         finally:
             f.close()
 
@@ -490,14 +495,23 @@ class ConfigTransaction(object):
 
             try:
                 f = file(self.cfg.filename, 'w')
-                f.write(CONFIG_HEADER)
                 try:
                     for idx, (section, items) in enumerate(sections):
-                        if idx:
+                        if '[%s]' % section in self.cfg._comments:
+                            f.write(self.cfg._comments['[%s]' % section])
+                        elif idx:
                             f.write('\n')
                         f.write('[%s]\n' % section.encode('utf-8'))
                         for key, value in items:
+                            if section != 'zine':
+                                ckey = '%s/%s' % (section, key)
+                            else:
+                                ckey = key
+                            if ckey in self.cfg._comments:
+                                f.write(self.cfg._comments[ckey])
                             f.write('%s = %s\n' % (key, quote_value(value)))
+                    if ' end ' in self.cfg._comments:
+                        f.write(self.cfg._comments[' end '])
                 finally:
                     f.close()
             except IOError, e:

@@ -33,6 +33,15 @@ jinja_env = Environment(loader=FileSystemLoader(template_path),
 jinja_env.install_null_translations()
 
 
+#: header for the config file
+CONFIG_HEADER = '''\
+# Zine configuration file
+# This file is also updated by the Zine admin interface.
+# The charset of this file must be utf-8!
+
+'''
+
+
 def render_response(request, template_name, context):
     context.update(
         gettext=request.translations.gettext,
@@ -188,6 +197,7 @@ class WebSetup(object):
                 plugins='vessel_theme',
                 theme='vessel'
             )
+            cfg._comments['[zine]'] = CONFIG_HEADER
             try:
                 t.commit()
             except ConfigurationTransactionError:
