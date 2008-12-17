@@ -62,9 +62,12 @@ def main():
     )
     t.commit()
 
-    from zine.models import User, ROLE_ADMIN
+    from zine.models import User
+    from zine.privileges import BLOG_ADMIN
     app = make_zine(instance, True)
-    User(options.username, options.password, 'admin@localhost', role=ROLE_ADMIN)
+    user = User(options.username, options.password, 'admin@localhost',
+                is_author=True)
+    user.privileges.add(BLOG_ADMIN)
     db.commit()
 
     print 'All done.'

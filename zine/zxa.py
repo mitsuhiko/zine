@@ -213,7 +213,6 @@ class Writer(object):
     def _register_user(self, user):
         rv = self.new_dependency(self.z.user)
         self.z('username', text=user.username, parent=rv)
-        self.z('role', text=str(user.role), parent=rv)
         self.z('pw_hash', text=user.pw_hash.encode('base64'), parent=rv)
         self.z('display_name', text=user._display_name, parent=rv)
         self.z('real_name', text=user.real_name, parent=rv)

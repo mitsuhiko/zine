@@ -19,8 +19,7 @@ from zine.i18n import _
 from zine.database import db
 from zine.application import add_link, url_for, render_response, emit_event, \
      iter_listeners, Response, get_application
-from zine.models import Post, Category, User, Comment, ROLE_AUTHOR, \
-     COMMENT_UNMODERATED
+from zine.models import Post, Category, User, Comment
 from zine.utils import dump_json, build_tag_uri, ClosingIterator, log
 from zine.utils.uploads import get_filename, guess_mimetype
 from zine.utils.validators import is_valid_email, is_valid_url, check

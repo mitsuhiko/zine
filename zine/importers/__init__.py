@@ -18,7 +18,8 @@ from datetime import datetime
 from zine.api import _, require_privilege
 from zine.database import db, posts
 from zine.utils.xml import escape, get_etree
-from zine.models import ROLE_ADMIN, ROLE_AUTHOR, COMMENT_MODERATED
+from zine.models import COMMENT_MODERATED
+from zine.privileges import BLOG_ADMIN
 
 
 def list_import_queue(app):
@@ -81,7 +82,7 @@ def _perform_import(app, blog, d):
             if author_rewrite:
                 user = User.objects.get(int(author_rewrite))
             else:
-                user = User(author.name, None, author.email, role=ROLE_AUTHOR)
+                user = User(author.name, None, author.email, is_author=True)
             author_mapping[author.id] = user
         return author_mapping[author.id]
 
@@ -228,7 +229,7 @@ class Importer(object):
         self.app = app
 
     def __call__(self, request):
-        return require_privilege(ROLE_ADMIN)(self.configure)(request)
+        return require_privilege(BLOG_ADMIN)(self.configure)(request)
 
     def configure(self, request):
         """Subclasses should override this and implement the admin panel

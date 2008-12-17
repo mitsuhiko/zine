@@ -25,7 +25,7 @@ except ImportError:
 
 from zine.api import *
 from zine.views.admin import render_admin_response, flash
-from zine.models import ROLE_ADMIN
+from zine.privileges import BLOG_ADMIN
 from zine.utils import forms
 from zine.utils.zeml import HTMLElement, ElementHandler
 from zine.utils.http import redirect_to
@@ -126,7 +126,7 @@ def get_style(req, style):
     return resp
 
 
-@require_privilege(ROLE_ADMIN)
+@require_privilege(BLOG_ADMIN)
 def show_config(req):
     """Request handler that provides an admin page with the configuration
     for the pygments plugin. So far this only allows changing the style.
@@ -164,7 +164,7 @@ def inject_style(req):
 
 def add_pygments_link(req, navigation_bar):
     """Add a link for the pygments configuration page to the admin panel."""
-    if req.user.role >= ROLE_ADMIN:
+    if req.user.has_privilege(BLOG_ADMIN):
         for link_id, url, title, children in navigation_bar:
             if link_id == 'options':
                 children.insert(-3, ('pygments_support',

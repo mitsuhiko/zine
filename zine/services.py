@@ -9,7 +9,8 @@
     :license: GNU GPL.
 """
 from zine.api import *
-from zine.models import Comment, ROLE_AUTHOR
+from zine.models import Comment
+from zine.privileges import MODERATE_COMMENTS
 from zine.utils.xxx import StreamReporter
 
 
@@ -20,14 +21,14 @@ def do_get_comment(req):
     comment = Comment.objects.get(comment_id)
     if comment is None:
         abort(404)
-    if comment.blocked and req.user.role < ROLE_AUTHOR:
+    if comment.blocked and not req.user.has_privilege(MODERATE_COMMENTS):
         abort(403)
     if comment.parent is not None:
         parent_id = comment.parent.id
     else:
         parent_id = None
     email = None
-    if req.user.role >= ROLE_AUTHOR:
+    if req.user.is_manager:
         email = comment.email
     return {
         'id':           comment.id,

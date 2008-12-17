@@ -26,8 +26,7 @@ from zine.privileges import assert_privilege, require_privilege, \
 from zine.i18n import _
 from zine.application import get_request, url_for, emit_event, \
      render_response, get_application
-from zine.models import User, Post, Category, Comment, ROLE_ADMIN, \
-     ROLE_EDITOR, ROLE_AUTHOR, ROLE_SUBSCRIBER, \
+from zine.models import User, Post, Category, Comment, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from zine.database import db, comments as comment_table, posts, \
@@ -1233,7 +1232,7 @@ def log(request, page):
                                  page=page, form=form.as_widget())
 
 
-@require_privilege(ROLE_AUTHOR)
+@require_admin_privilege()
 def about_zine(request):
     """Just show the zine license and some other legal stuff."""
     return render_admin_response('admin/about_zine.html',

@@ -42,6 +42,15 @@ _last_position_hint = -1
 _position_hint_lock = Lock()
 
 
+class _Missing(object):
+    def __reduce__(self):
+        return '_no_default'
+    def __repr__(self):
+        return 'No default'
+_no_default = _Missing()
+del _Missing
+
+
 def fill_dict(_dict, **kwargs):
     """A helper to fill the dict passed with the items passed as keyword
     arguments if they are not yet in the dict.  If the dict passed was
@@ -927,7 +936,7 @@ class Field(object):
     validate_on_omission = False
 
     def __init__(self, label=None, help_text=None, validators=None,
-                 widget=None, messages=None):
+                 widget=None, messages=None, default=_no_default):
         self._position_hint = _next_position_hint()
         self.label = label
         self.help_text = help_text
@@ -940,6 +949,7 @@ class Field(object):
         if messages:
             self.messages = self.messages.copy()
             self.messages.update(messages)
+        self.default = default
         assert not issubclass(self.widget, InternalWidget), \
             'can\'t use internal widgets as widgets for fields'
 
@@ -1097,8 +1107,10 @@ class Multiple(Field):
     validate_on_omission = True
 
     def __init__(self, field, label=None, help_text=None, min_size=None,
-                 max_size=None, validators=None, widget=None, messages=None):
-        Field.__init__(self, label, help_text, validators, widget, messages)
+                 max_size=None, validators=None, widget=None, messages=None,
+                 default=_no_default):
+        Field.__init__(self, label, help_text, validators, widget, messages,
+                       default)
         self.field = field
         self.min_size = min_size
         self.max_size = max_size
@@ -1158,9 +1170,10 @@ class CommaSeparated(Multiple):
 
     def __init__(self, field, label=None, help_text=None, min_size=None,
                  max_size=None, sep=u',', validators=None, widget=None,
-                 messages=None):
+                 messages=None, default=_no_default):
         Multiple.__init__(self, field, label, help_text, min_size,
-                          max_size, validators, widget, messages)
+                          max_size, validators, widget, messages,
+                          default)
         self.sep = sep
 
     def convert(self, value):
@@ -1217,8 +1230,9 @@ class TextField(Field):
 
     def __init__(self, label=None, help_text=None, required=False,
                  min_length=None, max_length=None, validators=None,
-                 widget=None, messages=None):
-        Field.__init__(self, label, help_text, validators, widget, messages)
+                 widget=None, messages=None, default=_no_default):
+        Field.__init__(self, label, help_text, validators, widget, messages,
+                       default)
         self.required = required
         self.min_length = min_length
         self.max_length = max_length
@@ -1264,8 +1278,10 @@ class DateTimeField(Field):
     messages = dict(invalid_date=lazy_gettext('Please enter a valid date.'))
 
     def __init__(self, label=None, help_text=None, required=False,
-                 rebase=True, validators=None, widget=None, messages=None):
-        Field.__init__(self, label, help_text, validators, widget, messages)
+                 rebase=True, validators=None, widget=None, messages=None,
+                 default=_no_default):
+        Field.__init__(self, label, help_text, validators, widget, messages,
+                       default)
         self.required = required
         self.rebase = rebase
 
@@ -1298,8 +1314,9 @@ class ModelField(Field):
 
     def __init__(self, model, key, label=None, help_text=None, required=False,
                  message=None, validators=None, widget=None, messages=None,
-                 on_not_found=None):
-        Field.__init__(self, label, help_text, validators, widget, messages)
+                 default=_no_default, on_not_found=None):
+        Field.__init__(self, label, help_text, validators, widget, messages,
+                       default)
         self.model = model
         self.key = key
         self.required = required
@@ -1349,13 +1366,15 @@ class HiddenModelField(ModelField):
     )
 
     def __init__(self, model, key=None, required=False, message=None,
-                 validators=None, widget=None, messages=None):
+                 validators=None, widget=None, messages=None,
+                 default=_no_default):
         if key is None:
             keys = db.class_mapper(model).primary_key
             assert len(keys) == 1, 'Model has multiple primary keys'
             key = keys[0].name
-        ModelField.__init__(self, model, key, required=False, message=None,
-                            validators=None, widget=None, messages=None)
+        ModelField.__init__(self, model, key, None, None, required,
+                            message, validators, widget, messages,
+                            default)
 
     def _coerce_value(self, value):
         try:
@@ -1421,8 +1440,10 @@ class ChoiceField(Field):
     )
 
     def __init__(self, label=None, help_text=None, required=True,
-                 choices=None, validators=None, widget=None, messages=None):
-        Field.__init__(self, label, help_text, validators, widget, messages)
+                 choices=None, validators=None, widget=None, messages=None,
+                 default=_no_default):
+        Field.__init__(self, label, help_text, validators, widget, messages,
+                       default)
         self.required = required
         self.choices = choices
 
@@ -1452,9 +1473,9 @@ class MultiChoiceField(ChoiceField):
 
     def __init__(self, label=None, help_text=None, choices=None,
                  min_size=None, max_size=None, validators=None,
-                 widget=None, messages=None):
+                 widget=None, messages=None, default=_no_default):
         ChoiceField.__init__(self, label, help_text, min_size > 0, choices,
-                             validators, widget, messages)
+                             validators, widget, messages, default)
         self.min_size = min_size
         self.max_size = max_size
 
@@ -1524,8 +1545,9 @@ class IntegerField(Field):
 
     def __init__(self, label=None, help_text=None, required=False,
                  min_value=None, max_value=None, validators=None,
-                 widget=None, messages=None):
-        Field.__init__(self, label, help_text, validators, widget, messages)
+                 widget=None, messages=None, default=_no_default):
+        Field.__init__(self, label, help_text, validators, widget, messages,
+                       default)
         self.required = required
         self.min_value = min_value
         self.max_value = max_value

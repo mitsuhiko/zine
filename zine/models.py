@@ -28,13 +28,6 @@ from zine.privileges import Privilege, _Privilege, privilege_attribute, \
 from zine.application import get_application, get_request, url_for
 
 
-#: user rules
-ROLE_ADMIN = 4
-ROLE_EDITOR = 3
-ROLE_AUTHOR = 2
-ROLE_SUBSCRIBER = 1
-ROLE_NOBODY = 0
-
 #: all kind of states for a post
 STATUS_DRAFT = 1
 STATUS_PUBLISHED = 2

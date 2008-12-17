@@ -32,8 +32,8 @@ from zine.utils.admin import flash
 from zine.utils import dump_json
 
 # we only want the admin to be able to configure eric. so we need the
-# admin role
-from zine.models import ROLE_ADMIN
+# BLOG_ADMIN privilege
+from zine.privileges import BLOG_ADMIN
 
 # the last thing is importing the FORTUNES list from the fortunes.py file
 # from the same folder. It's just a long list with quotes.
@@ -75,7 +75,7 @@ def add_eric_link(req, navigation_bar):
     The outermost is the configuration editor, the next one the plugins
     link and then we add our fish link.
     """
-    if req.user.role < ROLE_ADMIN:
+    if req.user.has_privilege(BLOG_ADMIN)
         return
     for link_id, url, title, children in navigation_bar:
         if link_id == 'options':
@@ -83,7 +83,7 @@ def add_eric_link(req, navigation_bar):
                                  _('Eric The Fish')))
 
 
-@require_privilege(ROLE_ADMIN)
+@require_privilege(BLOG_ADMIN)
 def show_eric_options(req):
     """This renders the eric admin panel. Allow switching the skin and show
     the available skins.

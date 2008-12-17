@@ -17,7 +17,8 @@ import zine
 from zine.api import *
 from zine.widgets import Widget
 from zine.views.admin import flash, render_admin_response
-from zine.models import ROLE_ADMIN, COMMENT_BLOCKED_SPAM, Comment
+from zine.models import COMMENT_BLOCKED_SPAM, Comment
+from zine.privileges import BLOG_ADMIN, require_privilege
 from zine.utils.validators import ValidationError, check
 from zine.utils.http import redirect_to
 from zine.utils import forms
@@ -138,7 +139,7 @@ def do_spamcheck(req, comment):
 
 def add_akismet_link(req, navigation_bar):
     """Add a button for akismet to the comments page."""
-    if req.user.role >= ROLE_ADMIN:
+    if req.user.has_privilege(BLOG_ADMIN):
         for link_id, url, title, children in navigation_bar:
             if link_id == 'options':
                 children.insert(-3, ('akismet_spam_filter',
@@ -146,7 +147,7 @@ def add_akismet_link(req, navigation_bar):
                                      _('Akismet')))
 
 
-@require_privilege(ROLE_ADMIN)
+@require_privilege(BLOG_ADMIN)
 def show_akismet_config(req):
     """Show the akismet control panel."""
     form = ConfigurationForm(initial=dict(

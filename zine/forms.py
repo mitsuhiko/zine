@@ -15,8 +15,7 @@ from zine.application import get_application, get_request, emit_event
 from zine.database import db, posts, comments
 from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
-     COMMENT_BLOCKED_USER, ROLE_ADMIN, ROLE_EDITOR, ROLE_AUTHOR, \
-     ROLE_SUBSCRIBER
+     COMMENT_BLOCKED_USER
 from zine.privileges import bind_privileges
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
