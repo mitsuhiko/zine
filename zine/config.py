@@ -489,7 +489,8 @@ class ConfigTransaction(object):
                 else:
                     section = 'zine'
                 sections.setdefault(section, []).append((key, value))
-            sections = sorted(sections.items())
+            zine_section = sections.pop('zine')
+            sections = [('zine', zine_section)] + sorted(sections.items())
             for section in sections:
                 section[1].sort()
 
