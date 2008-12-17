@@ -23,5 +23,5 @@ import sys
 if ZINE_LIB not in sys.path:
     sys.path.insert(0, ZINE_LIB)
 
-from zine import make_app
-application = make_app(INSTANCE_FOLDER)
+from zine import get_wsgi_app
+application = get_wsgi_app(INSTANCE_FOLDER)
