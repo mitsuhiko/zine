@@ -33,8 +33,8 @@ def main():
     if instance is None:
         parser.error('instance not found.  Specify path to instance')
 
-    from zine import make_zine
-    plugin = make_zine(instance, True).plugins[args[0]]
+    import zine
+    plugin = zine.setup(instance, True).plugins[args[0]]
     if plugin is None:
         parser.error('Plugin not found')
 

@@ -75,23 +75,6 @@
         Title[de]: Beispielplugin
 
 
-    Warnings for the Professionals
-    ------------------------------
-
-    Zine separates multiple instances in the interpreter as good as it
-    can.  That you can still interact with different instances is the nature
-    of Python.  But just because you can you shouldn't do that.  Actually you
-    are not allowed to do that because Zine supports reloading of plugins
-    at runtime which requires that a plugin can shut down without leaving
-    traces behind.  Additionally plugin must never do monkey patching because
-    that cannot be undone savely again.
-
-    There is no callback that is called on plugin unloading, what Zine
-    does, is dropping all references it has to the plugins and waits for
-    Python to deallocate the memory.  As plugin developer you have no chance
-    to execute code before unloading.
-
-
     :copyright: 2006-2008 by Armin Ronacher, Christopher Grebs, Georg Brandl.
     :license: GNU GPL.
 """
@@ -126,62 +109,19 @@ _managed_applications = {}
 PACKAGE_VERSION = 1
 
 
-def zine_import(name, *args):
-    """Redirect imports for zine.plugins to the module space."""
-    if name == 'zine.plugins' or name.startswith('zine.plugins.'):
-        app = get_application()
-        if app is not None:
-            name = 'zine._space.%s%s' % (app.iid, name[12:])
-    return _py_import(name, *args)
-
-
-def get_plugin_space(app):
-    """Return the plugin space for the given application."""
-    return _py_import('zine._space.' + app.iid, None, None, ['__name__'])
-
-
-def uncloak_path(path):
-    """Uncloak an import path."""
-    parts = path.split('.')
-    if parts[:2] == ['zine', '_space'] and len(parts) > 3:
-        return 'zine.plugins.' + '.'.join(parts[3:])
-    return path
-
-
 def get_object_name(obj):
     """Return a human readable name for the object."""
     if inspect.isclass(obj) or inspect.isfunction(obj):
         cls = obj
     else:
         cls = obj.__class__
-    if cls.__module__.startswith('zine._space.'):
-        prefix = cls.__module__.split('.', 3)[-1]
+    if cls.__module__.startswith('zine.plugins.'):
+        prefix = cls.__module__.split('.', 2)[-1]
     elif cls.__module__.startswith('zine.'):
         prefix = cls.__module__
     else:
         prefix = 'external.' + cls.__module__
     return prefix + '.' + cls.__name__
-
-
-def register_application(app):
-    """Register the application on the global plugin space."""
-    module = PluginSpace(app)
-    sys.modules[module.__name__] = module
-    setattr(_global_plugin_space, app.iid, module)
-    _managed_applications[app.iid] = app
-
-
-def unregister_application(app):
-    """Unregister the application on the plugin space."""
-    _managed_applications.pop(app.iid, None)
-    prefix = 'zine._space.%s' % app.iid
-    for module in sys.modules.keys():
-        if module.startswith(prefix):
-            sys.modules.pop(module, None)
-    try:
-        delattr(_global_plugin_space, app.iid)
-    except AttributeError:
-        pass
 
 
 def find_plugins(app):
@@ -323,44 +263,6 @@ def parse_metadata(string_or_fp):
         else:
             result[key] = value
     return MetaData(result, translations)
-
-
-class PluginSpace(ModuleType):
-    """A special module that holds all managed plugins.  It has an
-    attribute called app that is a reference to the application that owns
-    the plugin space.  If the application is already unregistered that
-    attribute is `None`.  There is also an attribute called `iid`
-    which is the internal identifier for the plugin space.
-
-    The plugin space is used internally only.  The public interface to
-    the plugin space is :attr:`zine.application.Zine.plugins` which is
-    a dict of :class:`Plugin` objects.
-    """
-
-    def __init__(self, app):
-        ModuleType.__init__(self, 'zine._space.%s' % app.iid)
-        self.__path__ = app.plugin_searchpath
-
-    @property
-    def app(self):
-        """Returns the application for this plugin space."""
-        return _managed_applications.get(self.iid)
-
-    @property
-    def iid(self):
-        """The internal ID of the application / plugin space."""
-        return self.__name__.split('.')[2]
-
-    def __iter__(self):
-        """Yields all modules this plugin space knows about.  This could also
-        yield modules that are importable but no plugins (eg: `metadata.txt`
-        is missing etc.)
-        """
-        for module_name in find_modules(self.__name__, include_packages=True):
-            yield module_name.rsplit('.', 1)[-1]
-
-    def __repr__(self):
-        return '<PluginSpace %r>' % self.iid
 
 
 class MetaData(object):
@@ -527,17 +429,10 @@ class Plugin(object):
 
     @cached_property
     def module(self):
-        """The module of the plugin. The first access imports it.
-        When the `unregister_application` function deletes the references to
-        the modules from the sys.modules dict, the cached property will keep
-        one reference until the reloader finishes it's work.  This should
-        make sure that requests that happen during plugin reloading can finish
-        without a problem.
-        """
+        """The module of the plugin. The first access imports it."""
         try:
             # we directly import from the zine module space
-            return __import__('zine._space.%s.%s' %
-                              (self.app.iid, self.name), None, None,
+            return __import__('zine.plugins.%s' % self.name, None, None,
                               ['setup'])
         except:
             if not self.app.cfg['plugin_guard']:
@@ -670,8 +565,3 @@ class Plugin(object):
             self.__class__.__name__,
             self.name
         )
-
-
-__builtin__.__import__ = zine_import
-_global_plugin_space = ModuleType('zine._space')
-sys.modules['zine._space'] = _global_plugin_space
