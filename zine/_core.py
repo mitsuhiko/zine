@@ -24,7 +24,7 @@ class InstanceNotInitialized(RuntimeError):
     """
 
 
-def _create_zine(instance_folder, timeout=5):
+def _create_zine(instance_folder, timeout=5, in_reloader=True):
     """Creates a new Zine object and initialized it.  This is also aware of
     ongoing reloads.  If funky things occour and these do not resolve
     after `timeout` seconds a `RuntimeError` is raised.
@@ -35,26 +35,29 @@ def _create_zine(instance_folder, timeout=5):
         if _application is not None:
             return _application
 
-        started = time()
-        while 1:
-            try:
-                from zine.application import Zine as cls
-            except ImportError:
-                cls = None
-            if cls is None:
+        if not in_reloader:
+            from zine.application import Zine as cls
+        else:
+            started = time()
+            while 1:
+                try:
+                    from zine.application import Zine as cls
+                except ImportError:
+                    cls = None
+                if cls is not None:
+                    break
                 if time() > started + timeout:
                     raise RuntimeError('timed out while waiting for '
                                        'reload to finish.')
                 sleep(0.05)
-                continue
 
-            _application = app = object.__new__(cls)
-            try:
-                app.__init__(instance_folder)
-            except InstanceNotInitialized:
-                _application = None
-                raise
-            return app
+        _application = app = object.__new__(cls)
+        try:
+            app.__init__(instance_folder)
+        except InstanceNotInitialized:
+            _application = None
+            raise
+        return app
     finally:
         _setup_lock.release()
 
@@ -102,7 +105,7 @@ def setup(instance_folder):
     """
     if _application is not None:
         raise RuntimeError('application already set up')
-    return _create_zine(instance_folder)
+    return _create_zine(instance_folder, in_reloader=False)
 
 
 def get_wsgi_app(instance_folder):
@@ -115,6 +118,10 @@ def get_wsgi_app(instance_folder):
     process depends that only zine controls stuff outside of the internal
     core module.  You have been warned.
     """
+    # the reloader eats import errors, so make sure that the application
+    # properly before we create our proxy application.
+    import zine.application
+
     _dispatch_lock = allocate_lock()
     def application(environ, start_response):
         _dispatch_lock.acquire()
