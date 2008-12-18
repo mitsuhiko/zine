@@ -105,9 +105,9 @@ def show_category(req, slug, page=1):
     :URL endpoint: ``blog/show_category``
     """
     category = Category.query.filter_by(slug=slug).first(True)
-    data = category.posts.published().get_list(page=page,
-                                               endpoint='blog/show_category',
-                                               url_args=dict(slug=slug))
+    data = Post.query.filter(Post.categories.contains(category)).published() \
+        .get_list(page=page, endpoint='blog/show_category',
+                  url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', category=slug),
              'application/atom+xml', _(u'All posts in category %s') % category.name)
@@ -132,9 +132,9 @@ def show_tag(req, slug, page=1):
     :URL endpoint: ``blog/show_tag``
     """
     tag = Tag.query.filter_by(slug=slug).first(True)
-    data = tag.posts.published().get_list(page=page,
-                                          endpoint='blog/show_tag',
-                                          url_args=dict(slug=slug))
+    data = Post.query.filter(Post.tags.contains(tag)).published() \
+        .get_list(page=page, endpoint='blog/show_tag',
+                  url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', tag=slug),
              'application/atom+xml', _(u'All posts tagged %s') % tag.name)
