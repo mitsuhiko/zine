@@ -29,7 +29,7 @@ from werkzeug.exceptions import HTTPException, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
 
-from zine import plugins, _core
+from zine import _core
 from zine.environment import SHARED_DATA, BUILTIN_TEMPLATE_PATH, \
      BUILTIN_PLUGIN_FOLDER
 from zine.database import db, cleanup_session
@@ -694,7 +694,7 @@ class Zine(object):
         self.widgets = dict((x.name, x) for x in all_widgets)
 
         # load plugins
-        from zine.pluginsystem import find_plugins
+        from zine.pluginsystem import find_plugins, set_plugin_searchpath
         self.plugin_folder = path.join(instance_folder, 'plugins')
         self.plugin_searchpath = [self.plugin_folder]
         for folder in self.cfg['plugin_searchpath'].split(','):
@@ -702,9 +702,7 @@ class Zine(object):
             if folder:
                 self.plugin_searchpath.append(folder)
         self.plugin_searchpath.append(BUILTIN_PLUGIN_FOLDER)
-
-        # now make sure that the module path is our searchpath
-        plugins.__path__ = self.plugin_searchpath
+        set_plugin_searchpath(self.plugin_searchpath)
 
         # load the plugins
         self.plugins = {}

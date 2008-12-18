@@ -565,3 +565,12 @@ class Plugin(object):
             self.__class__.__name__,
             self.name
         )
+
+
+def set_plugin_searchpath(searchpath):
+    """Set the plugin searchpath for the plugin pseudo package."""
+    _plugins.__path__ = searchpath
+
+
+# the application imports this on setup and modifies it
+sys.modules['zine.plugins'] = _plugins = ModuleType('zine.plugins')
