@@ -161,7 +161,7 @@ class User(object):
         self.real_name = real_name
         self.description = description
         self.extra = {}
-        self.display_name = u'$nick'
+        self.display_name = u'$username'
         self.is_author = is_author
 
     @property
