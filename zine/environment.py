@@ -72,15 +72,15 @@ if isdir(SHARED_DATA):
 # a Zine installation on a posix system
 elif PLATFORM == 'posix':
     MODE = 'posix'
-    share = join(PACKAGE_LOCATION, pardir, pardir, 'share')
+    share = join(PACKAGE_LOCATION, pardir, pardir, 'share', 'zine')
     BUILTIN_PLUGIN_FOLDER = realpath(join(PACKAGE_LOCATION, 'plugins'))
-    BUILTIN_TEMPLATE_PATH = realpath(join(share, 'zine', 'templates'))
-    SHARED_DATA = realpath(join(share, 'zine', 'htdocs'))
+    BUILTIN_TEMPLATE_PATH = realpath(join(share, 'templates'))
+    SHARED_DATA = realpath(join(share, 'htdocs'))
     del share
 
 # a Zine installation on windows
 elif PLATFORM == 'nt':
-    raise NotImplementedError('installation in windows not possible')
+    raise NotImplementedError('installation on windows not possible')
 
 else:
     raise EnvironmentError('Could not determine Zine environment')
