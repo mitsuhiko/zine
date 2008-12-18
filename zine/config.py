@@ -17,87 +17,89 @@ from threading import Lock
 
 from zine.i18n import lazy_gettext, _
 from zine.utils import log
+from zine.utils.forms import TextField, IntegerField, BooleanField
+from zine.utils.validators import ValidationError
 from zine.application import InternalError
 
 
 #: variables the zine core uses
 DEFAULT_VARS = {
     # general settings
-    'database_uri':             (unicode, u''),
-    'blog_title':               (unicode, lazy_gettext(u'My Zine Blog')),
-    'blog_tagline':             (unicode, lazy_gettext(u'just another Zine blog')),
-    'blog_url':                 (unicode, u''),
-    'blog_email':               (unicode, u''),
-    'timezone':                 (unicode, u'UTC'),
-    'maintenance_mode':         (bool, False),
-    'session_cookie_name':      (unicode, u'zine_session'),
-    'theme':                    (unicode, u'default'),
-    'secret_key':               (unicode, u''),
-    'language':                 (unicode, u'en'),
-    'plugin_searchpath':        (unicode, u''),
+    'database_uri':             (TextField(), u''),
+    'blog_title':               (TextField(), lazy_gettext(u'My Zine Blog')),
+    'blog_tagline':             (TextField(), lazy_gettext(u'just another Zine blog')),
+    'blog_url':                 (TextField(), u''),
+    'blog_email':               (TextField(), u''),
+    'timezone':                 (TextField(), u'UTC'),
+    'maintenance_mode':         (BooleanField(), False),
+    'session_cookie_name':      (TextField(), u'zine_session'),
+    'theme':                    (TextField(), u'default'),
+    'secret_key':               (TextField(), u''),
+    'language':                 (TextField(), u'en'),
+    'plugin_searchpath':        (TextField(), u''),
 
     # the iid is an internal unique id for the instance.  The setup creates a
     # uuid5 in hex format if possible (eg: uuid module is present), otherwise
     # it takes the current timestamp and hexifies it.  Changing this value later
     # will most likely break plugins with persistent data (pickles)
-    'iid':                      (unicode, u''),
+    'iid':                      (TextField(), u''),
 
     # logger settings
-    'log_file':                 (unicode, u'zine.log'),
-    'log_level':                (unicode, u'warning'),
+    'log_file':                 (TextField(), u'zine.log'),
+    'log_level':                (TextField(), u'warning'),
 
     # if set to true, internal errors are not catched.  This is useful for
     # debugging tools such as werkzeug.debug
-    'passthrough_errors':       (bool, False),
+    'passthrough_errors':       (BooleanField(), False),
 
     # url settings
-    'blog_url_prefix':          (unicode, u''),
-    'admin_url_prefix':         (unicode, u'/admin'),
-    'category_url_prefix':      (unicode, u'/categories'),
-    'tags_url_prefix':          (unicode, u'/tags'),
-    'profiles_url_prefix':      (unicode, u'/authors'),
+    'blog_url_prefix':          (TextField(), u''),
+    'admin_url_prefix':         (TextField(), u'/admin'),
+    'category_url_prefix':      (TextField(), u'/categories'),
+    'tags_url_prefix':          (TextField(), u'/tags'),
+    'profiles_url_prefix':      (TextField(), u'/authors'),
 
     # cache settings
-    'enable_eager_caching':     (bool, False),
-    'cache_timeout':            (int, 300),
-    'cache_system':             (unicode, u'null'),
-    'memcached_servers':        (unicode, u''),
-    'filesystem_cache_path':    (unicode, u'cache'),
+    'enable_eager_caching':     (BooleanField(), False),
+    'cache_timeout':            (IntegerField(), 300),
+    'cache_system':             (TextField(), u'null'),
+    'memcached_servers':        (TextField(), u''),
+    'filesystem_cache_path':    (TextField(), u'cache'),
 
     # the default markup parser. Don't ever change this value! The
     # htmlprocessor module bypasses this test when falling back to
     # the default parser. If there plans to change the default parser
     # for future Zine versions that code must be altered first.
-    'default_parser':           (unicode, u'zeml'),
-    'comment_parser':           (unicode, u'text'),
+    'default_parser':           (TextField(), u'zeml'),
+    'comment_parser':           (TextField(), u'text'),
 
     # comments and pingback
-    'comments_enabled':         (bool, True),
-    'moderate_comments':        (int, 1),       # aka MODERATE_ALL
-    'pings_enabled':            (bool, True),
+    'comments_enabled':         (BooleanField(), True),
+    'moderate_comments':        (IntegerField(), 1),       # aka MODERATE_ALL
+    'pings_enabled':            (BooleanField(), True),
 
     # post view
-    'posts_per_page':           (int, 10),
-    'use_flat_comments':        (bool, False),
-    'index_content_types':      (unicode, 'entry'),
+    'posts_per_page':           (IntegerField(), 10),
+    'use_flat_comments':        (BooleanField(), False),
+    'index_content_types':      (TextField(), 'entry'),
 
     # pages
-    'show_page_title':          (bool, True),
-    'show_page_children':       (bool, True),
+    'show_page_title':          (BooleanField(), True),
+    'show_page_children':       (BooleanField(), True),
 
     # email settings
-    'smtp_host':                (unicode, u'localhost'),
-    'smtp_port':                (int, 25),
-    'smtp_user':                (unicode, u''),
-    'smtp_password':            (unicode, u''),
-    'smtp_use_tls':             (bool, False),
+    'smtp_host':                (TextField(), u'localhost'),
+    'smtp_port':                (IntegerField(), 25),
+    'smtp_user':                (TextField(), u''),
+    'smtp_password':            (TextField(), u''),
+    'smtp_use_tls':             (BooleanField(), False),
 
     # plugin settings
-    'plugin_guard':             (bool, True),
-    'plugins':                  (unicode, u''),
+    'plugin_guard':             (BooleanField(), True),
+    'plugins':                  (TextField(), u''),
 
     # importer settings
-    'blogger_auth_token':       (unicode, u'')
+    'blogger_auth_token':       (TextField(), u'')
 }
 
 HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',
@@ -127,13 +129,11 @@ def quote_value(value):
                          .replace('"', '\\"').encode('utf-8')
 
 
-def from_string(value, conv, default):
+def from_string(value, field, default):
     """Try to convert a value from string or fall back to the default."""
-    if conv is bool:
-        conv = lambda x: x == 'True'
     try:
-        return conv(value)
-    except (ValueError, TypeError), e:
+        return field(value)
+    except ValidationError, e:
         return default
 
 
@@ -245,9 +245,9 @@ class Configuration(object):
         try:
             return self._converted_values[key]
         except KeyError:
-            conv, default = self.config_vars[key]
+            field, default = self.config_vars[key]
         try:
-            value = from_string(self._values[key], conv, default)
+            value = from_string(self._values[key], field, default)
         except KeyError:
             value = default
         self._converted_values[key] = value
@@ -314,13 +314,13 @@ class Configuration(object):
         """
         categories = {}
 
-        for key, (conv, default) in self.config_vars.iteritems():
+        for key, (field, default) in self.config_vars.iteritems():
             if key in self._values:
                 use_default = False
-                value = unicode(from_string(self._values[key], conv, default))
+                value = field.to_primitive(from_string(self._values[key], field, default))
             else:
                 use_default = True
-                value = unicode(default)
+                value = field.to_primitive(default)
             if '/' in key:
                 category, name = key.split('/', 1)
             else:
@@ -329,7 +329,7 @@ class Configuration(object):
             categories.setdefault(category, []).append({
                 'name':         name,
                 'key':          key,
-                'type':         get_converter_name(conv),
+                'type':         get_converter_name(field),
                 'value':        value,
                 'use_default':  use_default,
                 'default':      default
@@ -430,7 +430,8 @@ class ConfigTransaction(object):
             raise KeyError(key)
         if isinstance(value, str):
             value = value.decode('utf-8')
-        self._values[key] = unicode(value)
+        field, _ = self.cfg.config_vars[key]
+        self._values[key] = field.to_primitive(value)
         self._converted_values[key] = value
 
     def _assert_uncommitted(self):
@@ -442,10 +443,10 @@ class ConfigTransaction(object):
         self._assert_uncommitted()
         if key.startswith('zine/'):
             key = key[5:]
-        conv, default = self.cfg.config_vars[key]
-        new = from_string(value, conv, default)
+        field, default = self.cfg.config_vars[key]
+        new = from_string(value, field, default)
         old = self._converted_values.get(key, None) or self.cfg[key]
-        if override or unicode(old) != unicode(new):
+        if override or field.to_primitive(old) != field.to_primitive(new):
             self[key] = new
 
     def revert_to_default(self, key):
