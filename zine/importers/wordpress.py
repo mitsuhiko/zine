@@ -62,6 +62,8 @@ def parse_broken_wxr(fd):
 
     # fix two: find comment sections and escape them.  Especially trackbacks
     # tent to break the XML structure.  same applies to wp:meta_value stuff.
+    # this is especially necessary for older wordpress dumps, 2.7 fixes some
+    # of these problems.
     def escape_if_good_idea(match):
         before, content, after = match.groups()
         if not content.lstrip().startswith('<![CDATA['):

@@ -1184,7 +1184,7 @@ class Zine(object):
         if self.cfg['maintenance_mode'] and \
            request.path != admin_prefix and not \
            request.path.startswith(admin_prefix + '/'):
-            if request.user.is_admin:
+            if not request.user.is_admin:
                 response = render_response('maintenance.html')
                 response.status_code = 503
                 return response(environ, start_response)

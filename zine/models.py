@@ -24,7 +24,8 @@ from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
 from zine.privileges import Privilege, _Privilege, privilege_attribute, \
-     add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN
+     add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN, \
+     VIEW_DRAFTS
 from zine.application import get_application, get_request, url_for
 
 
@@ -575,6 +576,10 @@ class Post(_ZEMLDualContainer):
 
         if user is None:
             user = get_request().user
+
+        # users that are allowed to look at drafts may pass
+        if user.has_privilege(VIEW_DRAFTS):
+            return True
 
         # if we have the privilege to edit other entries or if we are
         # a blog administrator we can always look at posts.
