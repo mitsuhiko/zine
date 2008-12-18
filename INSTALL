@@ -11,10 +11,14 @@ installed:
   - SQLAlchemy 0.5 or higher*
   - simplejson* [included in Python 2.6 and higher]
   - pytz*
-  - Babel
+  - Babel*
 
 Libraries marked with * are installable from the cheeseshop via easy_install or
 might be available in Debian already.
+
+If you might use easy_install:
+
+    $ easy_install Werkzeug Jinja2 MySQL-python SQLAlchemy simplejson pytz Babel
 
 For a quickstart with the development server do this:
 

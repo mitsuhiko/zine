@@ -26,7 +26,7 @@ from zine.privileges import assert_privilege, require_privilege, \
 from zine.i18n import _
 from zine.application import get_request, url_for, emit_event, \
      render_response, get_application
-from zine.models import User, Post, Category, Comment, \
+from zine.models import User, Group, Post, Category, Comment, \
      STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from zine.database import db, comments as comment_table, posts, \
@@ -51,7 +51,8 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
-     CommentMassModerateForm, CacheOptionsForm
+     CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
+     DeleteGroupForm
 
 
 #: how many posts / comments should be displayed per page?
@@ -306,7 +307,7 @@ def manage_entries(request, page):
                          .limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/manage_entries', page, PER_PAGE,
                                  entry_query.count())
-    if not posts and page != 1:
+    if not entries and page != 1:
         raise NotFound()
     return render_admin_response('admin/manage_entries.html', 'manage.entries',
                                  entries=entries, pagination=pagination)
@@ -408,7 +409,7 @@ def manage_pages(request, page):
     pages = page_query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/manage_pages', page, PER_PAGE,
                                  page_query.count())
-    if not posts and page != 1:
+    if not pages and page != 1:
         raise NotFound()
     return render_admin_response('admin/manage_pages.html', 'manage.pages',
                                  pages=pages, pagination=pagination)
@@ -720,7 +721,7 @@ def manage_users(request, page):
     users = User.query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/manage_users', page, PER_PAGE,
                                  User.query.count())
-    if not posts and page != 1:
+    if not users and page != 1:
         raise NotFound()
     return render_admin_response('admin/manage_users.html', 'manage.users',
                                  users=users, pagination=pagination)
@@ -792,17 +793,66 @@ def delete_user(request, user_id):
 
 @require_admin_privilege(BLOG_ADMIN)
 def manage_groups(request):
-    pass
-
+    groups = Group.query.all()
+    return render_admin_response('admin/manage_groups.html', 'manage.groups',
+                                 groups=groups)
 
 @require_admin_privilege(BLOG_ADMIN)
 def edit_group(request, group_id=None):
-    pass
+    """Edit a Group.  This is used to create a group as well."""
+    group = None
+    if group_id is not None:
+        group = Group.query.get(group_id)
+        if group is None:
+            raise NotFound()
+    form = EditGroupForm(group)
 
+    if request.method == 'POST':
+        if request.form.get('cancel'):
+            return form.redirect('admin/manage_groups')
+        elif request.form.get('delete') and group:
+            return redirect_to('admin/delete_group', group_id=group.id)
+        elif form.validate(request.form):
+            if group is None:
+                group = form.make_group()
+                msg = _(u'Group %s created successfully.')
+                icon = 'add'
+            else:
+                form.save_changes()
+                msg = _(u'Group %s edited successfully.')
+                icon = 'info'
+            db.commit()
+            html_group_detail = u'<a href="%s">%s</a>' % (
+                escape(url_for(group)),
+                escape(group.name))
+            flash(msg % html_group_detail, icon)
+
+            if request.form.get('save'):
+                return form.redirect('admin/manage_groups')
+            return redirect_to('admin/edit_group', group_id=group.id)
+
+    return render_admin_response('admin/edit_group.html', 'manage.groups',
+                                 form=form.as_widget())
 
 @require_admin_privilege(BLOG_ADMIN)
 def delete_group(request, group_id):
-    pass
+    """Like all other delete screens just that it deletes a group."""
+    group = Group.query.get(group_id)
+    if group is None:
+        raise NotFound()
+    form = DeleteGroupForm(group)
+
+    if request.method == 'POST':
+        if request.form.get('cancel'):
+            return form.redirect('admin/edit_group', group_id=group.id)
+        elif request.form.get('confirm') and form.validate(request.form):
+            form.add_invalid_redirect_target('admin/edit_group', group_id=group.id)
+            form.delete_group()
+            db.commit()
+            return form.redirect('admin/manage_groups')
+
+    return render_admin_response('admin/delete_group.html', 'manage.groups',
+                                 form=form.as_widget())
 
 
 @require_admin_privilege(BLOG_ADMIN)

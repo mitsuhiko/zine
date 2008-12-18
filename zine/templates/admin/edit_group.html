@@ -1,0 +1,21 @@
+{% extends "admin/layout.html" %}
+{% from "admin/_form_helpers.html" import render_formbox %}
+{% block title %}{{ _('New Group') if form.new else _('Edit Group') }}{% endblock %}
+{% block contents %}
+  <h1>{{ self.title()|e }}</h1>
+  {% call form() %}
+    <div class="formbox">
+      <h3>{{ form.groupname.label() }}</h3>
+      {{ form.groupname(size=30) }}
+    </div>
+    {{ render_formbox(form.privileges) }}
+    <div class="actions">
+      <input type="submit" name="save" value="{{ _('Save') }}">
+      <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">
+      {%- if not form.new %}
+        <input type="submit" name="delete" value="{{ _('Delete') }}">
+      {%- endif %}
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
+    </div>
+  {% endcall %}
+{% endblock %}
