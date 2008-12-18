@@ -34,6 +34,9 @@ from zine.utils.http import redirect
 # from the utils module.
 from zine.utils import dump_json
 
+# TextField is used as a type of a configuration variable
+from zine.utils.forms import TextField
+
 # the following exception is raised when the config could not be changed
 from zine.config import ConfigurationTransactionError
 
@@ -131,7 +134,7 @@ def setup(app, plugin):
 
     # our fish has a configurable skin. So we register one for it which
     # defaults to blue.
-    app.add_config_var('eric_the_fish/skin', unicode, 'blue')
+    app.add_config_var('eric_the_fish/skin', TextField(), 'blue')
 
     # then we add some shared exports for the fish which points to the
     # shared files location from above. There we have all the CSS files

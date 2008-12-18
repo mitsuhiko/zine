@@ -23,6 +23,7 @@ from datetime import datetime
 from zine.api import *
 from zine.views.admin import render_admin_response
 from zine.utils.admin import flash
+from zine.utils.forms import TextField
 from zine.utils.xxx import CSRFProtector
 from zine.widgets import Widget
 from zine.models import Post, ROLE_ADMIN
@@ -214,9 +215,9 @@ def setup(app, plugin):
     """Register the plugin in zine."""
     app.add_template_searchpath(TEMPLATE_FILES)
     app.add_widget(QuickSearchWidget)
-    app.add_config_var('xapian_search/database_path', unicode,
+    app.add_config_var('xapian_search/database_path', TextField(),
                        'search.xapdb')
-    app.add_config_var('xapian_search/stem_lang', unicode, 'en')
+    app.add_config_var('xapian_search/stem_lang', TextField(), 'en')
     app.connect_event('modify-admin-navigation-bar', add_configure_link)
     app.connect_event('after-post-saved', index_post)
     app.connect_event('before-post-deleted', delete_post)

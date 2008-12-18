@@ -187,7 +187,7 @@ class AkismetBlockedCommentsCounterWidget(Widget):
 
 
 def setup(app, plugin):
-    app.add_config_var('akismet_spam_filter/apikey', unicode, u'')
+    app.add_config_var('akismet_spam_filter/apikey', forms.TextField(), u'')
     app.add_url_rule('/options/akismet', prefix='admin',
                      endpoint='akismet_spam_filter/config',
                      view=show_akismet_config)

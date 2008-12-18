@@ -178,7 +178,7 @@ def setup(app, plugin):
                          'to be installed.')
     app.connect_event('modify-admin-navigation-bar', add_pygments_link)
     app.connect_event('after-request-setup', inject_style)
-    app.add_config_var('pygments_support/style', unicode, u'default')
+    app.add_config_var('pygments_support/style', forms.TextField(), u'default')
     app.add_zeml_element_handler(SourcecodeHandler)
     app.add_url_rule('/options/pygments', prefix='admin',
                      view=show_config, endpoint='pygments_support/config')

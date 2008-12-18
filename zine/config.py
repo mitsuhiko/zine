@@ -137,6 +137,8 @@ def from_string(value, field, default):
         return default
 
 
+# XXX: this function should probably go away, currently it only exists because
+# the config editor is not yet updated to use form fields for config vars
 def get_converter_name(conv):
     """Get the name of a converter"""
     return {
@@ -329,7 +331,8 @@ class Configuration(object):
             categories.setdefault(category, []).append({
                 'name':         name,
                 'key':          key,
-                'type':         get_converter_name(field),
+                'type':         get_converter_name(field), # broken, see function
+                'field':        field,
                 'value':        value,
                 'use_default':  use_default,
                 'default':      default

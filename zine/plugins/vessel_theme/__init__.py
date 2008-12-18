@@ -71,4 +71,4 @@ def setup(app, plugin):
     app.add_theme('vessel', TEMPLATE_FILES, plugin.metadata,
                   configuration_page=configure)
     app.add_shared_exports('vessel_theme', SHARED_FILES)
-    app.add_config_var('vessel_theme/variation', unicode, blue_variation)
+    app.add_config_var('vessel_theme/variation', forms.TextField(), blue_variation)
