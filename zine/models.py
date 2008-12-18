@@ -989,6 +989,7 @@ db.mapper(PostLink, post_links, properties={
 })
 db.mapper(Tag, tags, properties={
     'id':           tags.c.tag_id,
+    'posts':        db.dynamic_loader(Post, secondary=post_tags)
 })
 db.mapper(Post, posts, properties={
     'id':               posts.c.post_id,

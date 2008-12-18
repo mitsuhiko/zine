@@ -20,6 +20,7 @@ all_views = {
     'blog/index':               blog.index,
     'blog/archive':             blog.archive,
     'blog/show_category':       blog.show_category,
+    'blog/show_tag':            blog.show_tag,
     'blog/show_author':         blog.show_author,
     'blog/authors':             blog.authors,
     'blog/service_rsd':         blog.service_rsd,

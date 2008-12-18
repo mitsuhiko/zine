@@ -19,7 +19,7 @@ from zine.i18n import _
 from zine.database import db
 from zine.application import add_link, url_for, render_response, emit_event, \
      iter_listeners, Response, get_application
-from zine.models import Post, Category, User, Comment
+from zine.models import Post, Category, User, Comment, Tag
 from zine.utils import dump_json, build_tag_uri, ClosingIterator, log
 from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
@@ -104,14 +104,41 @@ def show_category(req, slug, page=1):
     :Template name: ``show_category.html``
     :URL endpoint: ``blog/show_category``
     """
-    category = Category.query.published().filter_by(slug=slug).first(True)
-    data = Post.query.published().get_list(category=category, page=page,
-                                           endpoint='blog/show_category',
-                                           url_args=dict(slug=slug))
+    category = Category.query.filter_by(slug=slug).first(True)
+    data = category.posts.published().get_list(page=page,
+                                               endpoint='blog/show_category',
+                                               url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', category=slug),
-             'application/atom+xml', _(u'All posts categoryged %s') % category.name)
+             'application/atom+xml', _(u'All posts in category %s') % category.name)
     return render_response('show_category.html', category=category, **data)
+
+
+def show_tag(req, slug, page=1):
+    """Show all posts categoryged with a given tag slug.
+
+    Available template variables:
+
+        `posts`:
+            a list of post objects we want to display
+
+        `pagination`:
+            a pagination object to render a pagination
+
+        `tag`
+            the tag object for this page.
+
+    :Template name: ``show_tag.html``
+    :URL endpoint: ``blog/show_tag``
+    """
+    tag = Tag.query.filter_by(slug=slug).first(True)
+    data = tag.posts.published().get_list(page=page,
+                                          endpoint='blog/show_tag',
+                                          url_args=dict(slug=slug))
+
+    add_link('alternate', url_for('blog/atom_feed', tag=slug),
+             'application/atom+xml', _(u'All posts tagged %s') % tag.name)
+    return render_response('show_tag.html', tag=tag, **data)
 
 
 def show_author(req, username, page=1):
