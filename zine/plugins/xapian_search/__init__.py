@@ -215,9 +215,9 @@ def setup(app, plugin):
     """Register the plugin in zine."""
     app.add_template_searchpath(TEMPLATE_FILES)
     app.add_widget(QuickSearchWidget)
-    app.add_config_var('xapian_search/database_path', TextField(),
-                       'search.xapdb')
-    app.add_config_var('xapian_search/stem_lang', TextField(), 'en')
+    app.add_config_var('xapian_search/database_path',
+                       TextField(default='search.xapdb'))
+    app.add_config_var('xapian_search/stem_lang', TextField(default='en'))
     app.connect_event('modify-admin-navigation-bar', add_configure_link)
     app.connect_event('after-post-saved', index_post)
     app.connect_event('before-post-deleted', delete_post)

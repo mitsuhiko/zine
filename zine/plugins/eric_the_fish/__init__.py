@@ -134,7 +134,7 @@ def setup(app, plugin):
 
     # our fish has a configurable skin. So we register one for it which
     # defaults to blue.
-    app.add_config_var('eric_the_fish/skin', TextField(), 'blue')
+    app.add_config_var('eric_the_fish/skin', TextField(default='blue'))
 
     # then we add some shared exports for the fish which points to the
     # shared files location from above. There we have all the CSS files

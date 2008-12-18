@@ -25,81 +25,81 @@ from zine.application import InternalError
 #: variables the zine core uses
 DEFAULT_VARS = {
     # general settings
-    'database_uri':             (TextField(), u''),
-    'blog_title':               (TextField(), lazy_gettext(u'My Zine Blog')),
-    'blog_tagline':             (TextField(), lazy_gettext(u'just another Zine blog')),
-    'blog_url':                 (TextField(), u''),
-    'blog_email':               (TextField(), u''),
-    'timezone':                 (TextField(), u'UTC'),
-    'maintenance_mode':         (BooleanField(), False),
-    'session_cookie_name':      (TextField(), u'zine_session'),
-    'theme':                    (TextField(), u'default'),
-    'secret_key':               (TextField(), u''),
-    'language':                 (TextField(), u'en'),
-    'plugin_searchpath':        (TextField(), u''),
+    'database_uri':             TextField(default=u''),
+    'blog_title':               TextField(default=lazy_gettext(u'My Zine Blog')),
+    'blog_tagline':             TextField(default=lazy_gettext(u'just another Zine blog')),
+    'blog_url':                 TextField(default=u''),
+    'blog_email':               TextField(default=u''),
+    'timezone':                 TextField(default=u'UTC'),
+    'maintenance_mode':         BooleanField(default=False),
+    'session_cookie_name':      TextField(default=u'zine_session'),
+    'theme':                    TextField(default=u'default'),
+    'secret_key':               TextField(default=u''),
+    'language':                 TextField(default=u'en'),
+    'plugin_searchpath':        TextField(default=u''),
 
     # the iid is an internal unique id for the instance.  The setup creates a
     # uuid5 in hex format if possible (eg: uuid module is present), otherwise
     # it takes the current timestamp and hexifies it.  Changing this value later
     # will most likely break plugins with persistent data (pickles)
-    'iid':                      (TextField(), u''),
+    'iid':                      TextField(default=u''),
 
     # logger settings
-    'log_file':                 (TextField(), u'zine.log'),
-    'log_level':                (TextField(), u'warning'),
+    'log_file':                 TextField(default=u'zine.log'),
+    'log_level':                TextField(default=u'warning'),
 
     # if set to true, internal errors are not catched.  This is useful for
     # debugging tools such as werkzeug.debug
-    'passthrough_errors':       (BooleanField(), False),
+    'passthrough_errors':       BooleanField(default=False),
 
     # url settings
-    'blog_url_prefix':          (TextField(), u''),
-    'admin_url_prefix':         (TextField(), u'/admin'),
-    'category_url_prefix':      (TextField(), u'/categories'),
-    'tags_url_prefix':          (TextField(), u'/tags'),
-    'profiles_url_prefix':      (TextField(), u'/authors'),
+    'blog_url_prefix':          TextField(default=u''),
+    'admin_url_prefix':         TextField(default=u'/admin'),
+    'category_url_prefix':      TextField(default=u'/categories'),
+    'tags_url_prefix':          TextField(default=u'/tags'),
+    'profiles_url_prefix':      TextField(default=u'/authors'),
 
     # cache settings
-    'enable_eager_caching':     (BooleanField(), False),
-    'cache_timeout':            (IntegerField(), 300),
-    'cache_system':             (TextField(), u'null'),
-    'memcached_servers':        (TextField(), u''),
-    'filesystem_cache_path':    (TextField(), u'cache'),
+    'enable_eager_caching':     BooleanField(default=False),
+    'cache_timeout':            IntegerField(default=300, required=True),
+    'cache_system':             TextField(default=u'null'),
+    'memcached_servers':        TextField(default=u''),
+    'filesystem_cache_path':    TextField(default=u'cache'),
 
     # the default markup parser. Don't ever change this value! The
     # htmlprocessor module bypasses this test when falling back to
     # the default parser. If there plans to change the default parser
     # for future Zine versions that code must be altered first.
-    'default_parser':           (TextField(), u'zeml'),
-    'comment_parser':           (TextField(), u'text'),
+    'default_parser':           TextField(default=u'zeml'),
+    'comment_parser':           TextField(default=u'text'),
 
     # comments and pingback
-    'comments_enabled':         (BooleanField(), True),
-    'moderate_comments':        (IntegerField(), 1),       # aka MODERATE_ALL
-    'pings_enabled':            (BooleanField(), True),
+    'comments_enabled':         BooleanField(default=True),
+    'moderate_comments':        IntegerField(default=1, required=True),       # aka MODERATE_ALL
+    'pings_enabled':            BooleanField(default=True),
 
     # post view
-    'posts_per_page':           (IntegerField(), 10),
-    'use_flat_comments':        (BooleanField(), False),
-    'index_content_types':      (TextField(), 'entry'),
+    'posts_per_page':           IntegerField(default=10, required=True),
+    'use_flat_comments':        BooleanField(default=False),
+    'index_content_types':      TextField(default='entry'),
 
     # pages
-    'show_page_title':          (BooleanField(), True),
-    'show_page_children':       (BooleanField(), True),
+    'show_page_title':          BooleanField(default=True),
+    'show_page_children':       BooleanField(default=True),
 
     # email settings
-    'smtp_host':                (TextField(), u'localhost'),
-    'smtp_port':                (IntegerField(), 25),
-    'smtp_user':                (TextField(), u''),
-    'smtp_password':            (TextField(), u''),
-    'smtp_use_tls':             (BooleanField(), False),
+    'smtp_host':                TextField(default=u'localhost'),
+    'smtp_port':                IntegerField(default=25, required=True),
+    'smtp_user':                TextField(default=u''),
+    'smtp_password':            TextField(default=u''),
+    'smtp_use_tls':             BooleanField(default=False),
 
     # plugin settings
-    'plugin_guard':             (BooleanField(), True),
-    'plugins':                  (TextField(), u''),
+    'plugin_guard':             BooleanField(default=True),
+    'plugins':                  TextField(default=u''),
 
     # importer settings
-    'blogger_auth_token':       (TextField(), u'')
+    'blogger_auth_token':       TextField(default=u'')
 }
 
 HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',
@@ -129,12 +129,12 @@ def quote_value(value):
                          .replace('"', '\\"').encode('utf-8')
 
 
-def from_string(value, field, default):
+def from_string(value, field):
     """Try to convert a value from string or fall back to the default."""
     try:
         return field(value)
     except ValidationError, e:
-        return default
+        return field(None)
 
 
 # XXX: this function should probably go away, currently it only exists because
@@ -247,11 +247,11 @@ class Configuration(object):
         try:
             return self._converted_values[key]
         except KeyError:
-            field, default = self.config_vars[key]
+            field = self.config_vars[key]
         try:
-            value = from_string(self._values[key], field, default)
+            value = from_string(self._values[key], field)
         except KeyError:
-            value = default
+            value = field(None)
         self._converted_values[key] = value
         return value
 
@@ -316,13 +316,13 @@ class Configuration(object):
         """
         categories = {}
 
-        for key, (field, default) in self.config_vars.iteritems():
+        for key, field in self.config_vars.iteritems():
             if key in self._values:
                 use_default = False
-                value = field.to_primitive(from_string(self._values[key], field, default))
+                value = field.to_primitive(from_string(self._values[key], field))
             else:
                 use_default = True
-                value = field.to_primitive(default)
+                value = field.to_primitive(field(None))
             if '/' in key:
                 category, name = key.split('/', 1)
             else:
@@ -335,7 +335,7 @@ class Configuration(object):
                 'field':        field,
                 'value':        value,
                 'use_default':  use_default,
-                'default':      default
+                'default':      field(None)
             })
 
         def sort_func(item):
@@ -359,7 +359,7 @@ class Configuration(object):
         from zine.application import emit_event
         from zine.database import secure_database_uri
         result = []
-        for key, (_, default) in self.config_vars.iteritems():
+        for key, field in self.config_vars.iteritems():
             value = self[key]
             if hide_insecure:
                 if key in HIDDEN_KEYS:
@@ -383,7 +383,7 @@ class Configuration(object):
                 value = repr(value)
             result.append({
                 'key':          key,
-                'default':      repr(default),
+                'default':      repr(field(None)),
                 'value':        value
             })
         result.sort(key=lambda x: x['key'].lower())
@@ -433,7 +433,7 @@ class ConfigTransaction(object):
             raise KeyError(key)
         if isinstance(value, str):
             value = value.decode('utf-8')
-        field, _ = self.cfg.config_vars[key]
+        field = self.cfg.config_vars[key]
         self._values[key] = field.to_primitive(value)
         self._converted_values[key] = value
 
@@ -446,8 +446,8 @@ class ConfigTransaction(object):
         self._assert_uncommitted()
         if key.startswith('zine/'):
             key = key[5:]
-        field, default = self.cfg.config_vars[key]
-        new = from_string(value, field, default)
+        field = self.cfg.config_vars[key]
+        new = from_string(value, field)
         old = self._converted_values.get(key, None) or self.cfg[key]
         if override or field.to_primitive(old) != field.to_primitive(new):
             self[key] = new
