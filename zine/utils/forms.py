@@ -1626,7 +1626,7 @@ class BooleanField(Field):
         return value != u'False' and bool(value)
 
     def to_primitive(self, value):
-        if value:
+        if self.convert(value):
             return u'True'
         return u'False'
 
