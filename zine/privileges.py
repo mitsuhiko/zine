@@ -68,15 +68,6 @@ class Privilege(_Expr):
         self.name = name
         self.explanation = explanation
 
-    def __eq__(self, other):
-        return type(self) is type(other) and self.name == other.name
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __hash__(self):
-        return hash(self.name)
-
     def __call__(self, privileges):
         return self in privileges
 
