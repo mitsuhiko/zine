@@ -906,3 +906,43 @@ class CacheOptionsForm(_ConfigForm):
         # form validation and reusing schemas.
         _ConfigForm._apply(self, t, set(['memcached_servers']))
         t['memcached_servers'] = ', '.join(self.data['memcached_servers'])
+
+
+def make_config_form():
+    """Returns the form for the configuration editor."""
+    app = get_application()
+    fields = {}
+    values = {}
+    use_default_label = lazy_gettext(u'Use default value')
+
+    for category in app.cfg.get_detail_list():
+        items = {}
+        values[category['name']] = category_values = {}
+        for item in category['items']:
+            items[item['name']] = forms.Mapping(
+                value=item['field'],
+                use_default=forms.BooleanField(use_default_label)
+            )
+            category_values[item['name']] = {
+                'value':        item['value'],
+                'use_default':  item['use_default']
+            }
+        fields[category['name']] = forms.Mapping(**items)
+
+    class _ConfigForm(forms.Form):
+        values = forms.Mapping(**fields)
+        cfg = app.cfg
+
+        def apply(self):
+            t = self.cfg.edit()
+            for category, items in self.data['values'].iteritems():
+                for key, d in items.iteritems():
+                    if category != 'zine':
+                        key = '%s/%s' % (category, key)
+                    if d['use_default']:
+                        t.revert_to_default(key)
+                    else:
+                        t[key] = d['value']
+            t.commit()
+
+    return _ConfigForm({'values': values})

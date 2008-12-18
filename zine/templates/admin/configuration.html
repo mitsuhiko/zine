@@ -10,47 +10,34 @@
     useful if you want to configure plugins that don't provide a configuration
     page (yet).
   {% endtrans %}</p>
-  <form action="" method="post">
-  {% if editor_enabled %}
+  {% call form() %}
+    {% if editor_enabled %}
       <table class="config-table">
-      {%- for category in categories %}
-        <tr><th colspan="4">{{ category.name|e }}</th></tr>
-        {%- for item in category['items'] %}
-        <tr{% if not item.use_default %} class="user-defined"{% endif %}>
-          <td>{{ item.name|e }}</td>
-          <td>
-          {% if item.type == 'boolean' -%}
-            <select name="{{ item.key|e }}">
-              <option{% if item.value == 'True' %} selected{% endif %} value="True">{{ _("True") }}</option>
-              <option{% if item.value != 'True' %} selected{% endif %} value="False">{{ _("False") }}</option>
-            </select>
-          {%- else -%}
-            {{ h.input_field(item.key, item.value, size="30") }}
-          {%- endif %}</td>
-          <td>{{ item.type }}</td>
-          <td class="default">
-            {%- if not item.use_default -%}
-              {{ h.checkbox(item.key + '__DEFAULT') }}
-            {%- endif -%}
-          </td>
+      {% for category in form.values %}
+        <tr>
+          <th colspan="3">{{ category.localname }}</th>
         </tr>
-        {%- endfor %}
-      {%- endfor %}
+        {% for field in category %}
+        <tr{% if not field.use_default.checked %} class="user-defined"{% endif %}>
+          <td>{{ field.localname|e }}</td>
+          <td>{{ field['value']() }}</td>
+          <td class="default">{{ field.use_default() }}</td>
+        </tr>
+        {% endfor %}
+      {% endfor %}
       </table>
       <div class="actions">
-        {{ csrf_protector }}
         <input type="submit" value="{{ _('Save') }}">
         <input type="submit" name="disable_editor" value="{{ _('Disable Editor') }}">
       </div>
-  {% else %}
-    <p>{% trans %}
-      The configuration editor is disabled because of this. If you really want
-      to use it, click the button to proceed.
-    {% endtrans %}</p>
-    <div class="actions">
-      {{ csrf_protector }}
-      <input type="submit" name="enable_editor" value="{{ _('Enable Editor') }}">
-    </div>
-  {% endif %}
-  </form>
+    {% else %}
+      <p>{% trans %}
+        The configuration editor is disabled because of this. If you really want
+        to use it, click the button to proceed.
+      {% endtrans %}</p>
+      <div class="actions">
+        <input type="submit" name="enable_editor" value="{{ _('Enable Editor') }}">
+      </div>
+    {% endif %}
+  {% endcall %}
 {% endblock %}

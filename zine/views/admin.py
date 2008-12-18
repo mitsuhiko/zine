@@ -52,7 +52,7 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
-     DeleteGroupForm
+     DeleteGroupForm, make_config_form
 
 
 #: how many posts / comments should be displayed per page?
@@ -1021,40 +1021,21 @@ def configuration(request):
     left in an unusable state if a variable is set to something bad.  Because
     of this the editor shows a warning and must be enabled by hand.
     """
-    csrf_protector = CSRFProtector()
+    form = make_config_form()
+
     if request.method == 'POST':
-        csrf_protector.assert_safe()
         if request.form.get('enable_editor'):
             request.session['ace_on'] = True
         elif request.form.get('disable_editor'):
             request.session['ace_on'] = False
-        else:
-            already_default = set()
-            t = request.app.cfg.edit()
-            for key, value in request.form.iteritems():
-                key = key.replace('.', '/')
-                if key.endswith('__DEFAULT'):
-                    key = key[:-9]
-                    t.revert_to_default(key)
-                    already_default.add(key)
-                elif key in request.app.cfg and key not in already_default:
-                    t.set_from_string(key, value)
-            t.commit()
+        elif form.validate(request.form):
+            form.apply()
         return redirect_to('admin/configuration')
-
-    # html does not allow slashes.  Convert them to dots
-    categories = []
-    for category in request.app.cfg.get_detail_list():
-        for item in category['items']:
-            item['key'] = item['key'].replace('/', '.')
-        categories.append(category)
 
     return render_admin_response('admin/configuration.html',
                                  'system.configuration',
-        categories=categories,
-        editor_enabled=request.session.get('ace_on', False),
-        csrf_protector=csrf_protector
-    )
+                                 form=form.as_widget(), editor_enabled=
+                                 request.session.get('ace_on', False))
 
 
 @require_admin_privilege(BLOG_ADMIN)

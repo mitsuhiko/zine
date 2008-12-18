@@ -330,12 +330,9 @@ class Configuration(object):
                 name = key
             categories.setdefault(category, []).append({
                 'name':         name,
-                'key':          key,
-                'type':         get_converter_name(field), # broken, see function
                 'field':        field,
                 'value':        value,
-                'use_default':  use_default,
-                'default':      field(None)
+                'use_default':  use_default
             })
 
         def sort_func(item):
