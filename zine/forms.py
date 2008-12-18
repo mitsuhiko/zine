@@ -925,7 +925,7 @@ def make_config_form():
             )
             category_values[item['name']] = {
                 'value':        item['value'],
-                'use_default':  item['use_default']
+                'use_default':  False
             }
         fields[category['name']] = forms.Mapping(**items)
 
