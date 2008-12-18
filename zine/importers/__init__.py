@@ -80,7 +80,7 @@ def _perform_import(app, blog, d):
         if author.id not in author_mapping:
             author_rewrite = d.get('author_%s' % author.id)
             if author_rewrite:
-                user = User.objects.get(int(author_rewrite))
+                user = User.query.get(int(author_rewrite))
             else:
                 user = User(author.name, None, author.email, is_author=True)
             author_mapping[author.id] = user
@@ -91,15 +91,15 @@ def _perform_import(app, blog, d):
         tag = label_mapping.get(label.slug)
         if tag is not None:
             return tag
-        tag = Tag.objects.filter_by(slug=label.slug).first()
+        tag = Tag.query.filter_by(slug=label.slug).first()
         if tag is not None:
             label_mapping[label.slug] = tag
             return tag
-        tag = Tag.objects.filter_by(name=label.name).first()
+        tag = Tag.query.filter_by(name=label.name).first()
         if tag is not None:
             label_mapping[label.slug] = tag
             return tag
-        tag = label_mapping[label.id] = Tag(label.name, '', label.slug)
+        tag = label_mapping[label.id] = Tag(label.name, label.slug)
         return tag
 
     # start debug output
@@ -124,10 +124,10 @@ def _perform_import(app, blog, d):
             continue
 
         post = Post(old_post.title, prepare_author(old_post.author),
-                    old_post.body, old_post.intro, old_post.slug,
-                    old_post.pub_date, old_post.updated,
-                    old_post.comments_enabled, old_post.pings_enabled,
-                    parser=old_post.parser, uid=old_post.uid)
+                    old_post.text, old_post.slug, old_post.pub_date,
+                    old_post.updated, old_post.comments_enabled,
+                    old_post.pings_enabled, parser=old_post.parser,
+                    uid=old_post.uid)
         yield '<li><strong>%s</strong>' % escape(post.title)
         for label in old_post.labels:
             post.tags.append(prepare_label(label))
@@ -339,7 +339,14 @@ class Post(object):
         self.pings_enabled = pings_enabled
         self.updated = updated or self.pub_date
         self.uid = uid or self.link
-        self.parser = parser or 'plain'
+        self.parser = parser or 'html'
+
+    @property
+    def text(self):
+        result = self.body
+        if self.intro:
+            result = u'<intro>%s</intro>%s' % (self.intro, result)
+        return result
 
     @property
     def id(self):
@@ -366,7 +373,7 @@ class Comment(object):
         self.remote_addr = remote_addr
         self.pub_date = pub_date
         self.body = body
-        self.parser = parser or 'plain'
+        self.parser = parser or 'html'
         self.is_pingback = is_pingback
         self.status = status
 

@@ -21,7 +21,6 @@ from zine.application import add_link, url_for, render_response, emit_event, \
      iter_listeners, Response, get_application
 from zine.models import Post, Category, User, Comment
 from zine.utils import dump_json, build_tag_uri, ClosingIterator, log
-from zine.utils.uploads import get_filename, guess_mimetype
 from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
 from zine.utils.http import redirect_to, redirect
@@ -45,7 +44,8 @@ def index(req, page=1):
     :Template name: ``index.html``
     :URL endpoint: ``blog/index``
     """
-    data = Post.query.published().for_index().get_list(page=page)
+    data = Post.query.published().for_index().get_list(endpoint='blog/index',
+                                                       page=page)
 
     add_link('alternate', url_for('blog/atom_feed'), 'application/atom+xml',
              _(u'Recent Posts Feed'))
@@ -137,7 +137,7 @@ def show_author(req, username, page=1):
         raise NotFound()
 
     data = Post.query.published().filter_by(author=user) \
-               .get_list(page=page, per_page=30)
+               .get_list(page=page, per_page=30, endpoint='blog/show_author')
 
     add_link('alternate', url_for('blog/atom_feed', author=username),
              'application/atom+xml', _(u'All posts written by %s') %
@@ -344,29 +344,6 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
             comment_num += 1
 
     return feed.get_response()
-
-
-def get_upload(req, filename):
-    """Stream an uploaded file to the user.  XXX: put something into werkzeug
-    that can do that similar to the shared data middleware and make it more
-    flexible.
-    """
-    filename = get_filename(filename)
-    if not exists(filename):
-        raise NotFound()
-    guessed_type = guess_mimetype(filename)
-    fp = file(filename, 'rb')
-    def stream():
-        while True:
-            chunk = fp.read(1024 * 512)
-            if not chunk:
-                break
-            yield chunk
-    resp = Response(ClosingIterator(stream(), fp.close),
-                    mimetype=guessed_type or 'text/plain')
-    resp.headers['Cache-Control'] = 'public'
-    resp.headers['Expires'] = asctime(gmtime(time() + 3600))
-    return resp
 
 
 @cache.response(vary=('user',))

@@ -26,7 +26,6 @@ all_views = {
     'blog/json_service':        blog.json_service,
     'blog/xml_service':         blog.xml_service,
     'blog/atom_feed':           blog.atom_feed,
-    'blog/get_uploaded_file':   blog.get_upload,
     'blog/serve_translations':  i18n.serve_javascript,
 
     # admin views
@@ -58,11 +57,6 @@ all_views = {
     'admin/new_group':          admin.edit_group,
     'admin/edit_group':         admin.edit_group,
     'admin/delete_group':       admin.delete_group,
-    'admin/browse_uploads':     admin.browse_uploads,
-    'admin/new_upload':         admin.upload,
-    'admin/delete_upload':      admin.delete_upload,
-    'admin/upload_thumbnailer': admin.thumbnailer,
-    'admin/upload_config':      admin.upload_config,
     'admin/options':            admin.options,
     'admin/basic_options':      admin.basic_options,
     'admin/urls':               admin.urls,

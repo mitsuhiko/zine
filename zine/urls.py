@@ -79,15 +79,11 @@ def make_urls(app):
         Rule('/groups/new', endpoint='admin/new_group'),
         Rule('/groups/<int:group_id>', endpoint='admin/edit_group'),
         Rule('/groups/<int:group_id>/delete', endpoint='admin/delete_group'),
-        Rule('/uploads/', endpoint='admin/browse_uploads'),
-        Rule('/uploads/new', endpoint='admin/new_upload'),
-        Rule('/uploads/thumbnailer', endpoint='admin/upload_thumbnailer'),
         Rule('/options/', endpoint='admin/options'),
         Rule('/options/basic', endpoint='admin/basic_options'),
         Rule('/options/urls', endpoint='admin/urls'),
         Rule('/options/theme/', endpoint='admin/theme'),
         Rule('/options/theme/configure', endpoint='admin/configure_theme'),
-        Rule('/options/uploads', endpoint='admin/upload_config'),
         Rule('/options/plugins/', endpoint='admin/plugins'),
         Rule('/options/plugins/<plugin>/remove', endpoint='admin/remove_plugin'),
         Rule('/options/cache', endpoint='admin/cache'),
@@ -109,9 +105,7 @@ def make_urls(app):
         Rule('/_services/', endpoint='blog/service_rsd'),
         Rule('/_services/json/<path:identifier>', endpoint='blog/json_service'),
         Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service'),
-        Rule('/_translations.js', endpoint='blog/serve_translations'),
-        Rule('/_uploads/<filename>', endpoint='blog/get_uploaded_file'),
-        Rule('/_uploads/<filename>/delete', endpoint='admin/delete_upload')
+        Rule('/_translations.js', endpoint='blog/serve_translations')
     ]
 
     # add the more complex url rule for archive and show post

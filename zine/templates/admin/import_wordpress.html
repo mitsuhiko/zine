@@ -12,22 +12,14 @@
   <form action="?{{ reporter.url_value|e }}" method="post" enctype="multipart/form-data">
     <dl>
       <dt>{{ _("Dump Download URL") }}</dt>
-      <dd>{{ h.input_field('download_url', form.download_url, size=40) }}</dd>
+      <dd>{{ h.input_field('download_url', form.download_url, size=40) }}</dd>
       <dt>{{ _("Upload Dump") }}</dt>
       <dd>{{ h.input_field('dump', form.dump, size=20, type='file') }}</dd>
     </dl>
     <div class="uploadstatus"></div>
     <div class="actions">
-      {{ hidden_form_data }}
+      {{ hidden_form_data }}
       <input type="submit" value="{{ _('Import') }}">
     </div>
   </form>
-  <script type="text/javascript">
-    $(function() {
-      var reporter = new UploadProgressBar('div.uploadstatus', {{
-        reporter.transport_id|json }}, {{
-        _('Finishing upload, performing import...')|json }});
-      reporter.connectTo('form');
-    });
-  </script>
 {% endblock %}

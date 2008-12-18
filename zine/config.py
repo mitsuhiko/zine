@@ -85,12 +85,6 @@ DEFAULT_VARS = {
     'show_page_title':          (bool, True),
     'show_page_children':       (bool, True),
 
-    # file uploads
-    'upload_folder':            (unicode, u'uploads'),
-    'upload_mimetypes':         (unicode, u'*.plugin:application/'
-                                          u'x-zine-plugin'),
-    'im_path':                  (unicode, u''),
-
     # email settings
     'smtp_host':                (unicode, u'localhost'),
     'smtp_port':                (int, 25),

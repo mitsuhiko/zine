@@ -762,7 +762,8 @@ def parse_html(string):
                     result.children[-1].tail += child.value
                 else:
                     result.text += child.value
-            else:
+            # node type 6 are comments, skip them
+            elif child.type != 6:
                 new_child = _convert(child)
                 new_child.parent = result
                 result.children.append(new_child)

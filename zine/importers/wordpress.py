@@ -123,7 +123,7 @@ def parse_feed(fd):
                 x.findtext(WORDPRESS.comment_author_url),
                 x.findtext(WORDPRESS.comment_author_ip),
                 parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
-                x.findtext(WORDPRESS.comment_content), 'plain',
+                x.findtext(WORDPRESS.comment_content), 'html',
                 x.findtext(WORDPRESS.comment_type) in ('pingback',
                                                        'traceback'),
                 (COMMENT_UNMODERATED, COMMENT_MODERATED)
@@ -132,7 +132,7 @@ def parse_feed(fd):
               if x.findtext(WORDPRESS.comment_approved) != 'spam'],
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
-            parser='autop'
+            parser='html'
         ) for item in tree.findall('item')
           if item.findtext(WORDPRESS.status) == 'publish'],
         authors.values()
