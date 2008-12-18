@@ -240,6 +240,10 @@ class Group(object):
     def has_privilege(self, privilege):
         return add_admin_privilege(privilege)(self.privileges)
 
+    def get_url_values(self):
+        # TODO: a public view is missing!
+        return 'admin/edit_group', {'group_id': self.id}
+
     def __repr__(self):
         return '<%s %r>' % (
             self.__class__.__name__,

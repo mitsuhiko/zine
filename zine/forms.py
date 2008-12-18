@@ -13,7 +13,7 @@ from datetime import datetime
 from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.database import db, posts, comments
-from zine.models import User, Comment, Post, Category, STATUS_DRAFT, \
+from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
      COMMENT_BLOCKED_USER
 from zine.privileges import bind_privileges
@@ -565,8 +565,105 @@ class CommentMassModerateForm(forms.Form):
             comment.blocked_msg = u''
 
 
+class _GroupBoundForm(forms.Form):
+    """Internal baseclass for group bound forms."""
+
+    def __init__(self, group, initial=None):
+        forms.Form.__init__(self, initial)
+        self.app = get_application()
+        self.group = group
+
+    def as_widget(self):
+        widget = forms.Form.as_widget(self)
+        widget.group = self.group
+        widget.new = self.group is None
+        return widget
+
+
+class EditGroupForm(_GroupBoundForm):
+    """Edit or create a group."""
+
+    groupname = forms.TextField(lazy_gettext(u'Groupname'), max_length=30,
+                           required=True)
+    privileges = forms.MultiChoiceField(lazy_gettext(u'Privileges'),
+                                        widget=forms.CheckboxGroup)
+
+    def __init__(self, group=None, initial=None):
+        if group is not None:
+            initial = forms.fill_dict(initial,
+                groupname=group.name,
+                privileges=[x.name for x in group.privileges]
+            )
+        _GroupBoundForm.__init__(self, group, initial)
+        self.privileges.choices = self.app.list_privileges()
+
+    def validate_groupname(self, value):
+        query = Group.query.filter_by(name=value)
+        if self.group is not None:
+            query = query.filter(Group.id != self.group.id)
+        if query.first() is not None:
+            raise ValidationError(_('This groupname is already in use'))
+
+    def _set_common_attributes(self, group):
+        forms.set_fields(group, self.data)
+        bind_privileges(group.privileges, self.data['privileges'])
+
+    def make_group(self):
+        """A helper function that creates a new group object."""
+        group = Group(self.data['groupname'])
+        self._set_common_attributes(group)
+        return group
+
+    def save_changes(self):
+        """Apply the changes."""
+        self.group.name = self.data['groupname']
+        self._set_common_attributes(self.group)
+
+
+class DeleteGroupForm(_GroupBoundForm):
+    """Used to delete a group from the admin panel."""
+
+    action = forms.ChoiceField(lazy_gettext(u'What should Zine do with users '
+                                            u'assigned to this group?'),
+                              choices=[
+        ('delete_membership', lazy_gettext(u'Do nothing, just detach the membership')),
+        ('relocate', lazy_gettext(u'Move the users to another group'))
+    ], widget=forms.RadioButtonGroup)
+    relocate_to = forms.ModelField(Group, 'id', lazy_gettext(u'Relocate users to'),
+                                   widget=forms.SelectBox)
+
+    def __init__(self, group, initial=None):
+        self.relocate_to.choices = [('', u'')] + [
+            (g.id, g.name) for g in Group.query.filter(Group.id != group.id)
+        ]
+
+        _GroupBoundForm.__init__(self, group, forms.fill_dict(initial,
+            action='delete_membership'))
+
+    def context_validate(self, data):
+        if data['action'] == 'relocate' and not data['relocate_to']:
+            raise ValidationError(_('You have to select a group that '
+                                    'gets the users assigned.'))
+
+    def delete_group(self):
+        """Deletes a group."""
+        if self.data['action'] == 'relocate':
+            new_group = Group.query.filter_by(data['reassign_to'].id).first()
+            for user in self.group.users:
+                if not new_group in user.groups:
+                    user.groups.append(new_group)
+        db.commit()
+
+        #! plugins can use this to react to user deletes.  They can't stop
+        #! the deleting of the group but they can delete information in
+        #! their own tables so that the database is consistent afterwards.
+        #! Additional to the group object the form data is submitted.
+        emit_event('before-group-deleted', self.group, self.data)
+        db.delete(self.group)
+
+
 class _UserBoundForm(forms.Form):
-    """Internal baseclass for comment bound forms."""
+    """Internal baseclass for user bound forms."""
 
     def __init__(self, user, initial=None):
         forms.Form.__init__(self, initial)
@@ -597,6 +694,8 @@ class EditUserForm(_UserBoundForm):
                                widget=forms.PasswordInput)
     privileges = forms.MultiChoiceField(lazy_gettext(u'Privileges'),
                                         widget=forms.CheckboxGroup)
+    groups = forms.MultiChoiceField(lazy_gettext(u'Groups'),
+                                    widget=forms.CheckboxGroup)
     is_author = forms.BooleanField(lazy_gettext(u'List as author'),
         help_text=lazy_gettext(u'This user is listed as author'))
 
@@ -610,6 +709,7 @@ class EditUserForm(_UserBoundForm):
                 email=user.email,
                 www=user.www,
                 privileges=[x.name for x in user.own_privileges],
+                groups=[g.name for g in user.groups],
                 is_author=user.is_author
             )
         _UserBoundForm.__init__(self, user, initial)
@@ -618,6 +718,7 @@ class EditUserForm(_UserBoundForm):
             (u'$real_name', user and user.real_name or _('Realname'))
         ]
         self.privileges.choices = self.app.list_privileges()
+        self.groups.choices = [g.name for g in Group.query.all()]
         self.password.required = user is None
 
     def validate_username(self, value):
@@ -631,6 +732,15 @@ class EditUserForm(_UserBoundForm):
         forms.set_fields(user, self.data, 'www', 'real_name', 'description',
                          'display_name', 'is_author')
         bind_privileges(user.own_privileges, self.data['privileges'])
+        bound_groups = set(g.name for g in user.groups)
+        choosen_groups = set(self.data['groups'])
+        group_mapping = dict((g.name, g) for g in Group.query.all())
+        # delete groups
+        for group in (bound_groups - choosen_groups):
+            user.groups.remove(group_mapping[group])
+        # and add new groups
+        for group in (choosen_groups - bound_groups):
+            user.groups.append(group_mapping[group])
 
     def make_user(self):
         """A helper function that creates a new user object."""
@@ -651,7 +761,7 @@ class EditUserForm(_UserBoundForm):
 class DeleteUserForm(_UserBoundForm):
     """Used to delete a user from the admin panel."""
 
-    action = forms.ChoiceField(lazy_gettext(u'What should Zine do with posts'
+    action = forms.ChoiceField(lazy_gettext(u'What should Zine do with posts '
                                             u'this user wrote?'), choices=[
         ('delete', lazy_gettext(u'Delete them permanently')),
         ('reassign', lazy_gettext(u'Reassign posts'))

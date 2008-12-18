@@ -1,0 +1,20 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Delete Group") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Delete Group") }}</h1>
+  {% call form() %}
+    <p>{% trans name=form.group.name|e %}
+      Do you really want to delete the group “{{ name }}”?
+    {% endtrans %}</p>
+    <p>{% trans %}
+      What should happen to the users assigned with this group?
+    {% endtrans %}</p>
+    {{ form.action() }}
+
+    <p>{{ form.relocate_to.label() }}: {{ form.relocate_to() }}
+    <div class="actions">
+      <input type="submit" name="cancel" value="{{ _('No') }}">
+      <input type="submit" name="confirm" value="{{ _('Yes') }}">
+    </div>
+  {% endcall %}
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Manage Groups") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Manage Groups") }}</h1>
+  <table>
+    <tr>
+      <th>{{ _("ID") }}</th>
+      <th>{{ _("Groupname") }}</th>
+    </tr>
+  {%- for group in groups %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+      <td>{{ group.id }}</td>
+      <td><a href="{{ url_for('admin/edit_group', group_id=group.id)|e }}">
+            {{ group.name|e }}</td>
+    </tr>
+  {%- endfor %}
+  </table>
+  <form action="{{ url_for('admin/new_group')|e }}" method="get">
+    <div class="actions">
+      <input type="submit" value="{{ _('New Group') }}">
+    </div>
+  </form>
+{% endblock %}
