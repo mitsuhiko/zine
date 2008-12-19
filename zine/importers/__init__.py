@@ -15,11 +15,11 @@ import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
-from zine.api import _, require_privilege
+from zine.i18n import _
 from zine.database import db, posts
 from zine.utils.xml import escape, get_etree
 from zine.models import COMMENT_MODERATED
-from zine.privileges import BLOG_ADMIN
+from zine.privileges import BLOG_ADMIN, require_privilege
 
 
 def list_import_queue(app):
@@ -79,8 +79,8 @@ def _perform_import(app, blog, d):
     def prepare_author(author):
         """Adds an author to the author mapping and returns it."""
         if author.id not in author_mapping:
-            author_rewrite = d.get('author_%s' % author.id)
-            if author_rewrite:
+            author_rewrite = d['authors'][author.id]
+            if author_rewrite is not None:
                 user = User.query.get(int(author_rewrite))
             else:
                 user = User(author.name, None, author.email, is_author=True)
@@ -125,10 +125,10 @@ def _perform_import(app, blog, d):
     yield u'<ul>'
 
     # update blog configuration if user wants that
-    if 'import_blog_title' in d:
+    if d['title']:
         app.cfg.change_single('blog_title', blog.title)
         yield u'<li>%s</li>\n' % _('set blog title from dump')
-    if 'import_blog_description' in d:
+    if d['description']:
         app.cfg.change_single('blog_tagline', blog.description)
         yield u'<li>%s</li>\n' % _('set blog tagline from dump')
 
@@ -138,8 +138,7 @@ def _perform_import(app, blog, d):
         # checkboxes for already imported posts on the form, but
         # who knows what users manage to do and also skip posts
         # we don't want converted
-        if old_post.already_imported or not \
-           'import_post_%s' % old_post.id in d:
+        if old_post.already_imported or not d['posts'][old_post.id]:
             continue
 
         post = Post(old_post.title, prepare_author(old_post.author),
@@ -158,7 +157,7 @@ def _perform_import(app, blog, d):
             yield u'.'
 
         # now the comments if use wants them.
-        if 'import_comments_%s' % old_post.id in d:
+        if d['comments'][old_post.id]:
             for comment in old_post.comments:
                 Comment(post, comment.author, comment.body,
                         comment.author_email, comment.author_url, None,
@@ -397,9 +396,7 @@ class Post(object):
 
 
 class Comment(object):
-    """
-    Represents a comment on a post.
-    """
+    """Represents a comment on a post."""
 
     def __init__(self, author, author_email, author_url, remote_addr,
                  pub_date, body, parser=None, is_pingback=False,

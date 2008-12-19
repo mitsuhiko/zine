@@ -1050,9 +1050,17 @@ class Mapping(Field):
 
     widget = MappingWidget
 
-    def __init__(self, **fields):
+    def __init__(self, *args, **fields):
         Field.__init__(self)
-        self.fields = OrderedDict(fields)
+        if len(args) == 1:
+            if fields:
+                raise TypeError('keyword arguments and dict given')
+            self.fields = OrderedDict(args[0])
+        else:
+            if args:
+                raise TypeError('no positional arguments allowed if keyword '
+                                'arguments provided.')
+            self.fields = OrderedDict(fields)
         self.fields.sort(key=lambda i: i[1]._position_hint)
 
     def convert(self, value):

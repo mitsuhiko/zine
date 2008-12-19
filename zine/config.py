@@ -15,12 +15,15 @@ import os
 from os import path
 from threading import Lock
 
+from zine import environment
 from zine.i18n import lazy_gettext, _
 from zine.utils import log
 from zine.utils.forms import TextField, IntegerField, BooleanField
 from zine.utils.validators import ValidationError
 from zine.application import InternalError
 
+
+_dev_mode = environment.MODE == 'development'
 
 #: variables the zine core uses
 DEFAULT_VARS = {
@@ -50,7 +53,7 @@ DEFAULT_VARS = {
 
     # if set to true, internal errors are not catched.  This is useful for
     # debugging tools such as werkzeug.debug
-    'passthrough_errors':       BooleanField(default=False),
+    'passthrough_errors':       BooleanField(default=_dev_mode),
 
     # url settings
     'blog_url_prefix':          TextField(default=u''),

@@ -908,6 +908,12 @@ class CacheOptionsForm(_ConfigForm):
         t['memcached_servers'] = ', '.join(self.data['memcached_servers'])
 
 
+class WordPressImportForm(forms.Form):
+    """This form is used in the WordPress importer."""
+    download_url = forms.TextField(lazy_gettext(u'Dump Download URL'),
+                                   validators=[is_valid_url()])
+
+
 def make_config_form():
     """Returns the form for the configuration editor."""
     app = get_application()
@@ -946,3 +952,36 @@ def make_config_form():
             t.commit()
 
     return _ConfigForm({'values': values})
+
+
+def make_import_form(blog):
+    user_choices = [(None, _(u'Create new user'))] + [
+        (user.id, user.username)
+        for user in User.query.order_by('username').all()
+    ]
+
+    _authors = dict((author.id, forms.ChoiceField(author.name,
+                                                  choices=user_choices))
+                    for author in blog.authors)
+    _posts = dict((post.id, forms.BooleanField(help_text=post.title)) for post
+                  in blog.posts)
+    _comments = dict((post.id, forms.BooleanField()) for post
+                     in blog.posts)
+
+    class _ImportForm(forms.Form):
+        title = forms.BooleanField(lazy_gettext(u'Blog title'),
+                                   help_text=blog.title)
+        description = forms.BooleanField(lazy_gettext(u'Blog description'),
+                                         help_text=blog.description)
+        authors = forms.Mapping(_authors)
+        posts = forms.Mapping(_posts)
+        comments = forms.Mapping(_comments)
+
+        def perform_import(self):
+            from zine.importers import perform_import
+            return perform_import(get_application(), blog, self.data,
+                                  stream=True)
+
+    _all_true = dict((x.id, True) for x in blog.posts)
+    return _ImportForm({'posts': _all_true.copy(),
+                        'comments': _all_true.copy()})

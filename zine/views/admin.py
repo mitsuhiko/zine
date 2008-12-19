@@ -42,7 +42,7 @@ from zine.utils.http import redirect_back, redirect_to, redirect
 from zine.i18n import parse_datetime, format_system_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from zine.importers import list_import_queue, load_import_dump, \
-     delete_import_dump, perform_import
+     delete_import_dump
 from zine.pluginsystem import install_package, InstallationError, \
      SetupError, get_object_name
 from zine.pingback import pingback, PingbackError
@@ -52,7 +52,7 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
-     DeleteGroupForm, make_config_form
+     DeleteGroupForm, make_config_form, make_import_form
 
 
 #: how many posts / comments should be displayed per page?
@@ -1072,40 +1072,24 @@ def inspect_import(request, id):
     blog = load_import_dump(request.app, id)
     if blog is None:
         raise NotFound()
-    csrf_protector = CSRFProtector()
-
-    # assemble initial dict
-    form = {}
-    for author in blog.authors:
-        form['import_author_%s' % author.id] = True
-    for post in blog.posts:
-        form.update({
-            'import_post_%s' % post.id:     True,
-            'import_comments_%s' % post.id: True
-        })
+    form = make_import_form(blog)
 
     # perform the actual import here
     if request.method == 'POST':
-        csrf_protector.assert_safe()
         if 'cancel' in request.form:
             return redirect_to('admin/maintenance')
         elif 'delete' in request.form:
             return redirect_to('admin/delete_import', id=id)
-        return render_admin_response('admin/perform_import.html',
-                                     'system.import',
-            live_log=perform_import(request.app, blog, request.form,
-                                    stream=True),
-            _stream=True
-        )
+        elif form.validate(request.form):
+            return render_admin_response('admin/perform_import.html',
+                                         'system.import',
+                live_log=form.perform_import(),
+                _stream=True
+            )
 
     return render_admin_response('admin/inspect_import.html',
-                                 'system.import',
-        form=form,
-        blog=blog,
-        users=User.query.order_by('username').all(),
-        hidden_form_data=make_hidden_fields(csrf_protector),
-        dump_id=id
-    )
+                                 'system.import', blog=blog,
+                                 form=form.as_widget(), dump_id=id)
 
 
 @require_admin_privilege(BLOG_ADMIN)

@@ -16,6 +16,7 @@
 """
 import sys
 from os import path
+from zine import environment
 from zine.config import Configuration
 from zine.api import db
 from zine.config import ConfigurationTransactionError
@@ -187,7 +188,7 @@ class WebSetup(object):
             cfg = Configuration(config_filename)
             t = cfg.edit()
             t.update(
-                maintenance_mode=True,
+                maintenance_mode=environment.MODE != 'development',
                 blog_url=request.url_root,
                 secret_key=gen_secret_key(),
                 database_uri=database_uri,

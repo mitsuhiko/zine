@@ -12,9 +12,9 @@ import re
 import urllib
 from time import strptime
 from datetime import datetime
+from zine.forms import WordPressImportForm
 from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.i18n import lazy_gettext, _
-from zine.utils import forms
 from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
 from zine.utils.xml import _html_entities, get_etree, escape
@@ -151,17 +151,12 @@ def parse_feed(fd):
     )
 
 
-class ImportForm(forms.Form):
-    download_url = forms.TextField(lazy_gettext(u'Dump Download URL'),
-                                   validators=[is_valid_url()])
-
-
 class WordPressImporter(Importer):
     name = 'wordpress'
     title = 'WordPress'
 
     def configure(self, request):
-        form = ImportForm()
+        form = WordPressImportForm()
 
         if request.method == 'POST' and form.validate(request.form):
             dump = request.files.get('dump')
