@@ -106,9 +106,9 @@ class NewCommentForm(forms.Form):
         return widget
 
     def validate_parent(self, value):
-        # this message is only displayed if the user tempered with
-        # the form data
         if value.post != self.post:
+            #_ this message is only displayed if the user tempered with
+            #_ the form data
             raise ValidationError(_('Invalid object referenced.'))
 
     def context_validate(self, data):
