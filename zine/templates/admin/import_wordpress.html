@@ -9,17 +9,14 @@
     the location of such a file on an external URL and it will import the posts,
     comments, custom fields, and categories into this blog.
   {% endtrans %}</p>
-  <form action="?{{ reporter.url_value|e }}" method="post" enctype="multipart/form-data">
+  {% call form(enctype='multipart/form-data') %}
     <dl>
-      <dt>{{ _("Dump Download URL") }}</dt>
-      <dd>{{ h.input_field('download_url', form.download_url, size=40) }}</dd>
+      {{ form.download_url.as_dd() }}
       <dt>{{ _("Upload Dump") }}</dt>
-      <dd>{{ h.input_field('dump', form.dump, size=20, type='file') }}</dd>
+      <dd><input type="file" name="dump" size="20"></dd>
     </dl>
-    <div class="uploadstatus"></div>
     <div class="actions">
-      {{ hidden_form_data }}
       <input type="submit" value="{{ _('Import') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

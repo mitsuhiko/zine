@@ -13,11 +13,12 @@ import urllib
 from time import strptime
 from datetime import datetime
 from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
+from zine.i18n import lazy_gettext, _
+from zine.utils import forms
+from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
 from zine.utils.xml import _html_entities, get_etree, escape
 from zine.utils.http import redirect_to
-from zine.utils.xxx import CSRFProtector, StreamReporter, \
-     make_hidden_fields
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED
 
 
@@ -150,44 +151,36 @@ def parse_feed(fd):
     )
 
 
+class ImportForm(forms.Form):
+    download_url = forms.TextField(lazy_gettext(u'Dump Download URL'),
+                                   validators=[is_valid_url()])
+
+
 class WordPressImporter(Importer):
     name = 'wordpress'
     title = 'WordPress'
 
     def configure(self, request):
-        form = dict.fromkeys(('download_url', 'dump'))
-        error = None
-        csrf_protector = CSRFProtector()
-        reporter = StreamReporter()
+        form = ImportForm()
 
-        if request.method == 'POST':
-            csrf_protector.assert_safe()
-            form['download_url'] = url = request.form.get('download_url')
+        if request.method == 'POST' and form.validate(request.form):
             dump = request.files.get('dump')
-            if url and dump:
-                error = _('Both dump uploaded and download URL given.')
-            elif url:
+            if not form.data['download_url']:
                 try:
-                    dump = urllib.urlopen(url)
+                    dump = urllib.urlopen(form.data['url'])
                 except Exception, e:
-                    error = _('Error downloading from URL: %s') % e
+                    error = _(u'Error downloading from URL: %s') % e
             elif not dump:
                 return redirect_to('import/wordpress')
 
-            if error is not None:
-                flash(error, 'error')
+            try:
+                blog = parse_feed(dump)
+            except Exception, e:
+                flash(_(u'Error parsing uploaded file: %s') % e, 'error')
             else:
-                try:
-                    blog = parse_feed(dump)
-                except Exception, e:
-                    flash(_('Error parsing uploaded file: %s') % e, 'error')
-                else:
-                    self.enqueue_dump(blog)
-                    flash('Added imported items to queue.')
-                    return redirect_to('admin/import')
+                self.enqueue_dump(blog)
+                flash(_(u'Added imported items to queue.'))
+                return redirect_to('admin/import')
 
         return self.render_admin_page('admin/import_wordpress.html',
-            form=form,
-            hidden_form_data=make_hidden_fields(csrf_protector),
-            reporter=reporter
-        )
+                                      form=form.as_widget())
