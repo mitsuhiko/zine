@@ -10,7 +10,7 @@
 """
 from datetime import datetime
 
-from zine.i18n import _, lazy_gettext, list_languages
+from zine.i18n import _, lazy_gettext, list_languages, list_timezones
 from zine.application import get_application, get_request, emit_event
 from zine.database import db, posts, comments
 from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
@@ -835,6 +835,8 @@ class BasicOptionsForm(_ConfigForm):
     blog_tagline = forms.TextField(lazy_gettext(u'Blog tagline'))
     blog_email = forms.TextField(lazy_gettext(u'Blog email'))
     language = forms.ChoiceField(lazy_gettext(u'Language'))
+    timezone = forms.ChoiceField(lazy_gettext(u'Timezone'),
+                                 choices=sorted(list_timezones()))
     session_cookie_name = forms.TextField(lazy_gettext(u'Cookie Name'))
     comments_enabled = forms.BooleanField(lazy_gettext(u'Comments enabled'),
         help_text=lazy_gettext(u'enable comments per default'))
