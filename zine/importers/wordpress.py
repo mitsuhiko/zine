@@ -12,7 +12,7 @@ import re
 import urllib
 from time import strptime
 from datetime import datetime
-from zine.importers import Importer, Blog, Label, Author, Post, Comment
+from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.utils.admin import flash
 from zine.utils.xml import _html_entities, get_etree, escape
 from zine.utils.http import redirect_to
@@ -97,18 +97,25 @@ def parse_feed(fd):
                 author = authors[name] = Author(len(authors) + 1, name, None)
             return author
 
-    labels = {}
+    tags = {}
+    for item in tree.findall(WORDPRESS.tag):
+        tag = Tag(item.findtext(WORDPRESS.tag_slug),
+                  item.findtext(WORDPRESS.tag_name))
+        tags[tag.name] = tag
+
+    categories = {}
     for item in tree.findall(WORDPRESS.category):
-        label = Label(item.findtext(WORDPRESS.category_nicename),
-                      item.findtext(WORDPRESS.cat_name))
-        labels[label.name] = label
+        category = Category(item.findtext(WORDPRESS.category_nicename),
+                            item.findtext(WORDPRESS.cat_name))
+        categories[category.name] = category
 
     return Blog(
         tree.findtext('title'),
         tree.findtext('link'),
         tree.findtext('description') or '',
         tree.findtext('language') or 'en',
-        labels.values(),
+        tags.values(),
+        categories.values(),
         [Post(
             item.findtext(WORDPRESS.post_name),
             item.findtext('title'),
@@ -117,8 +124,10 @@ def parse_feed(fd):
             get_author(item.findtext(DC_METADATA.creator)),
             item.findtext('description'),
             item.findtext(CONTENT.encoded),
-            [labels[x.text] for x in item.findall('category')
-             if x.text in labels],
+            [tags[x.text] for x in item.findall('tag')
+             if x.text in tags],
+            [categories[x.text] for x in item.findall('category')
+             if x.text in categories],
             [Comment(
                 x.findtext(WORDPRESS.comment_author),
                 x.findtext(WORDPRESS.comment_author_email),
