@@ -1007,8 +1007,6 @@ def cache(request):
             flash(_(u'Cache settings were changed successfully.'), 'configure')
             return redirect_to('admin/cache')
 
-    print form.errors
-
     return render_admin_response('admin/cache.html', 'options.cache',
                                  form=form.as_widget())
 
@@ -1030,7 +1028,7 @@ def configuration(request):
             request.session['ace_on'] = False
         elif form.validate(request.form):
             form.apply()
-        return redirect_to('admin/configuration')
+            return redirect_to('admin/configuration')
 
     return render_admin_response('admin/configuration.html',
                                  'system.configuration',

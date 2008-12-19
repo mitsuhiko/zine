@@ -848,7 +848,6 @@ class Comment(_ZEMLContainer):
         to a user that submited a comment which is not yet moderated.
         """
         request = get_request()
-        print request.session
         if self.id in request.session.get('visible_comments', ()):
             return True
         return self.visible_for_user(request.user)
