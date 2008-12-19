@@ -15,11 +15,11 @@ import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
-from zine.api import _, require_privilege
+from zine.i18n import _
 from zine.database import db, posts
 from zine.utils.xml import escape, get_etree
 from zine.models import COMMENT_MODERATED
-from zine.privileges import BLOG_ADMIN
+from zine.privileges import BLOG_ADMIN, require_privilege
 
 
 def list_import_queue(app):
@@ -71,47 +71,66 @@ def delete_import_dump(app, id):
 def _perform_import(app, blog, d):
     # import models here because they have the same names as our
     # importer objects this module exports
-    from zine.models import User, Tag, Post, Comment
+    from zine.models import User, Tag, Category, Post, Comment
     author_mapping = {}
-    label_mapping = {}
+    tag_mapping = {}
+    category_mapping = {}
 
     def prepare_author(author):
         """Adds an author to the author mapping and returns it."""
         if author.id not in author_mapping:
-            author_rewrite = d.get('author_%s' % author.id)
-            if author_rewrite:
+            author_rewrite = d['authors'][author.id]
+            if author_rewrite is not None:
                 user = User.query.get(int(author_rewrite))
             else:
                 user = User(author.name, None, author.email, is_author=True)
             author_mapping[author.id] = user
         return author_mapping[author.id]
 
-    def prepare_label(label):
-        """Get a tag for a label."""
-        tag = label_mapping.get(label.slug)
-        if tag is not None:
-            return tag
-        tag = Tag.query.filter_by(slug=label.slug).first()
-        if tag is not None:
-            label_mapping[label.slug] = tag
-            return tag
-        tag = Tag.query.filter_by(name=label.name).first()
-        if tag is not None:
-            label_mapping[label.slug] = tag
-            return tag
-        tag = label_mapping[label.id] = Tag(label.name, label.slug)
-        return tag
+    def prepare_tag(tag):
+        """Get a tag for a tag."""
+        t = tag_mapping.get(tag.slug)
+        if t is not None:
+            return t
+        t = Tag.query.filter_by(slug=tag.slug).first()
+        if t is not None:
+            tag_mapping[tag.slug] = t
+            return t
+        t = Tag.query.filter_by(name=tag.name).first()
+        if t is not None:
+            tag_mapping[tag.slug] = t
+            return t
+        t = tag_mapping[tag.id] = Tag(tag.name, tag.slug)
+        return t
+
+    def prepare_category(category):
+        """Get a category for a category."""
+        c = category_mapping.get(category.slug)
+        if c is not None:
+            return c
+        c = Category.query.filter_by(slug=category.slug).first()
+        if c is not None:
+            category_mapping[category.slug] = c
+            return c
+        c = Category.query.filter_by(name=category.name).first()
+        if c is not None:
+            category_mapping[category.slug] = c
+            return c
+        c = category_mapping[category.id] = Category(category.name,
+                                                     category.description,
+                                                     category.slug)
+        return c
 
     # start debug output
-    yield '<ul>'
+    yield u'<ul>'
 
     # update blog configuration if user wants that
-    if 'import_blog_title' in d:
+    if d['title']:
         app.cfg.change_single('blog_title', blog.title)
-        yield '<li>%s</li>\n' % _('set blog title from dump')
-    if 'import_blog_description' in d:
+        yield u'<li>%s</li>\n' % _('set blog title from dump')
+    if d['description']:
         app.cfg.change_single('blog_tagline', blog.description)
-        yield '<li>%s</li>\n' % _('set blog tagline from dump')
+        yield u'<li>%s</li>\n' % _('set blog tagline from dump')
 
     # convert the posts now
     for old_post in blog.posts:
@@ -119,8 +138,7 @@ def _perform_import(app, blog, d):
         # checkboxes for already imported posts on the form, but
         # who knows what users manage to do and also skip posts
         # we don't want converted
-        if old_post.already_imported or not \
-           'import_post_%s' % old_post.id in d:
+        if old_post.already_imported or not d['posts'][old_post.id]:
             continue
 
         post = Post(old_post.title, prepare_author(old_post.author),
@@ -128,24 +146,29 @@ def _perform_import(app, blog, d):
                     old_post.updated, old_post.comments_enabled,
                     old_post.pings_enabled, parser=old_post.parser,
                     uid=old_post.uid)
-        yield '<li><strong>%s</strong>' % escape(post.title)
-        for label in old_post.labels:
-            post.tags.append(prepare_label(label))
-            yield '.'
+        yield u'<li><strong>%s</strong>' % escape(post.title)
+
+        for tag in old_post.tags:
+            post.tags.append(prepare_tag(tag))
+            yield u'.'
+
+        for category in old_post.categories:
+            post.categories.append(prepare_category(category))
+            yield u'.'
 
         # now the comments if use wants them.
-        if 'import_comments_%s' % old_post.id in d:
+        if d['comments'][old_post.id]:
             for comment in old_post.comments:
                 Comment(post, comment.author, comment.body,
                         comment.author_email, comment.author_url, None,
                         comment.pub_date, comment.remote_addr,
                         comment.parser, comment.is_pingback,
                         comment.status)
-                yield '.'
+                yield u'.'
         yield u' <em>%s</em></li>\n' % _('done')
 
     # send to the database
-    yield '<li>%s' % _('Committing transaction...')
+    yield u'<li>%s' % _('Committing transaction...')
     db.commit()
     yield u' <em>%s</em></li></ul>' % _('done')
 
@@ -240,16 +263,19 @@ class Importer(object):
 class Blog(object):
     """Represents a blog."""
 
-    def __init__(self, title, link, description, language='en', labels=None,
-                 posts=None, authors=None):
+    def __init__(self, title, link, description, language='en', tags=None,
+                 categories=None, posts=None, authors=None):
         self.dump_date = datetime.utcnow()
         self.title = title
         self.link = link
         self.description = description
         self.language = language
-        if labels:
-            labels.sort(key=lambda x: x.name.lower())
-        self.labels = labels or []
+        if tags:
+            tags.sort(key=lambda x: x.name.lower())
+        self.tags = tags or []
+        if categories:
+            categories.sort(key=lambda x: x.name.lower())
+        self.categories = categories or []
         if posts:
             posts.sort(key=lambda x: x.pub_date, reverse=True)
         self.posts = posts or []
@@ -302,8 +328,8 @@ class Author(object):
         )
 
 
-class Label(object):
-    """Represents a category or tag."""
+class Tag(object):
+    """Represents a tag."""
 
     def __init__(self, slug, name):
         self.slug = slug
@@ -320,12 +346,21 @@ class Label(object):
         )
 
 
+class Category(Tag):
+    """Represents a category."""
+
+    def __init__(self, slug, name, description=u''):
+        Tag.__init__(self, slug, name)
+        self.description = description
+
+
 class Post(object):
     """Represents a blog post."""
 
     def __init__(self, slug, title, link, pub_date, author, intro, body,
-                 labels=None, comments=None, comments_enabled=True,
-                 pings_enabled=True, updated=None, uid=None, parser=None):
+                 tags=None, categories=None, comments=None,
+                 comments_enabled=True, pings_enabled=True, updated=None,
+                 uid=None, parser=None):
         self.slug = slug
         self.title = title
         self.link = link
@@ -333,7 +368,8 @@ class Post(object):
         self.author = author
         self.intro = intro
         self.body = body
-        self.labels = labels or []
+        self.tags = tags or []
+        self.categories = categories or []
         self.comments = comments or []
         self.comments_enabled = comments_enabled
         self.pings_enabled = pings_enabled
@@ -360,9 +396,7 @@ class Post(object):
 
 
 class Comment(object):
-    """
-    Represents a comment on a post.
-    """
+    """Represents a comment on a post."""
 
     def __init__(self, author, author_email, author_url, remote_addr,
                  pub_date, body, parser=None, is_pingback=False,

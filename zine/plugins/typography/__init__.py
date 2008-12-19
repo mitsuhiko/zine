@@ -125,4 +125,5 @@ def setup(app, plugin):
     app.add_view('typography/config', show_config)
     app.add_template_searchpath(TEMPLATES)
     for ignore, name, default in _rules:
-        app.add_config_var('typography/' + name, unicode, default)
+        app.add_config_var('typography/' + name,
+                           forms.TextField(default=default))

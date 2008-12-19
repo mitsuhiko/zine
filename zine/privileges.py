@@ -68,15 +68,6 @@ class Privilege(_Expr):
         self.name = name
         self.explanation = explanation
 
-    def __eq__(self, other):
-        return type(self) is type(other) and self.name == other.name
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __hash__(self):
-        return hash(self.name)
-
     def __call__(self, privileges):
         return self in privileges
 
@@ -167,6 +158,7 @@ _register('EDIT_OTHER_ENTRIES', lazy_gettext(u'can edit another person\'s entrie
 _register('CREATE_PAGES', lazy_gettext(u'can create new pages'))
 _register('EDIT_OWN_PAGES', lazy_gettext(u'can edit his own pages'))
 _register('EDIT_OTHER_PAGES', lazy_gettext(u'can edit another person\'s pages'))
+_register('VIEW_DRAFTS', lazy_gettext(u'can view drafts'))
 _register('MANAGE_CATEGORIES', lazy_gettext(u'can manage categories'))
 _register('MODERATE_COMMENTS', lazy_gettext(u'can moderate comments'))
 

@@ -906,3 +906,82 @@ class CacheOptionsForm(_ConfigForm):
         # form validation and reusing schemas.
         _ConfigForm._apply(self, t, set(['memcached_servers']))
         t['memcached_servers'] = ', '.join(self.data['memcached_servers'])
+
+
+class WordPressImportForm(forms.Form):
+    """This form is used in the WordPress importer."""
+    download_url = forms.TextField(lazy_gettext(u'Dump Download URL'),
+                                   validators=[is_valid_url()])
+
+
+def make_config_form():
+    """Returns the form for the configuration editor."""
+    app = get_application()
+    fields = {}
+    values = {}
+    use_default_label = lazy_gettext(u'Use default value')
+
+    for category in app.cfg.get_detail_list():
+        items = {}
+        values[category['name']] = category_values = {}
+        for item in category['items']:
+            items[item['name']] = forms.Mapping(
+                value=item['field'],
+                use_default=forms.BooleanField(use_default_label)
+            )
+            category_values[item['name']] = {
+                'value':        item['value'],
+                'use_default':  False
+            }
+        fields[category['name']] = forms.Mapping(**items)
+
+    class _ConfigForm(forms.Form):
+        values = forms.Mapping(**fields)
+        cfg = app.cfg
+
+        def apply(self):
+            t = self.cfg.edit()
+            for category, items in self.data['values'].iteritems():
+                for key, d in items.iteritems():
+                    if category != 'zine':
+                        key = '%s/%s' % (category, key)
+                    if d['use_default']:
+                        t.revert_to_default(key)
+                    else:
+                        t[key] = d['value']
+            t.commit()
+
+    return _ConfigForm({'values': values})
+
+
+def make_import_form(blog):
+    user_choices = [(None, _(u'Create new user'))] + [
+        (user.id, user.username)
+        for user in User.query.order_by('username').all()
+    ]
+
+    _authors = dict((author.id, forms.ChoiceField(author.name,
+                                                  choices=user_choices))
+                    for author in blog.authors)
+    _posts = dict((post.id, forms.BooleanField(help_text=post.title)) for post
+                  in blog.posts)
+    _comments = dict((post.id, forms.BooleanField()) for post
+                     in blog.posts)
+
+    class _ImportForm(forms.Form):
+        title = forms.BooleanField(lazy_gettext(u'Blog title'),
+                                   help_text=blog.title)
+        description = forms.BooleanField(lazy_gettext(u'Blog description'),
+                                         help_text=blog.description)
+        authors = forms.Mapping(_authors)
+        posts = forms.Mapping(_posts)
+        comments = forms.Mapping(_comments)
+
+        def perform_import(self):
+            from zine.importers import perform_import
+            return perform_import(get_application(), blog, self.data,
+                                  stream=True)
+
+    _all_true = dict((x.id, True) for x in blog.posts)
+    return _ImportForm({'posts': _all_true.copy(),
+                        'comments': _all_true.copy()})

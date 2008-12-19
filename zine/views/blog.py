@@ -132,8 +132,7 @@ def show_tag(req, slug, page=1):
     :URL endpoint: ``blog/show_tag``
     """
     tag = Tag.query.filter_by(slug=slug).first(True)
-    data = tag.posts.published().get_list(page=page,
-                                          endpoint='blog/show_tag',
+    data = tag.posts.published().get_list(page=page, endpoint='blog/show_tag',
                                           url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', tag=slug),

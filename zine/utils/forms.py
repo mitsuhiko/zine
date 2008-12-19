@@ -420,10 +420,15 @@ class Widget(_Renderable):
         return u'\n'.join(fields)
 
     @property
+    def localname(self):
+        """The local name of the field."""
+        return self.name.rsplit('.', 1)[-1]
+
+    @property
     def id(self):
         """The proposed id for this widget."""
         if self.name is not None:
-            return 'f_' + self.name.replace('.', '_')
+            return 'f_' + self.name.replace('.', '__')
 
     @property
     def value(self):
@@ -553,6 +558,10 @@ class Textarea(Widget):
 class Checkbox(Widget):
     """A simple checkbox."""
 
+    @property
+    def checked(self):
+        return self.value != u'False'
+
     def with_help_text(self, **attrs):
         """Render the checkbox with help text."""
         data = self(**attrs)
@@ -583,7 +592,7 @@ class Checkbox(Widget):
     def render(self, **attrs):
         self._attr_setdefault(attrs)
         return html.input(name=self.name, type='checkbox',
-                          checked=self.value != 'False', **attrs)
+                          checked=self.checked, **attrs)
 
 
 class SelectBox(Widget):
@@ -731,13 +740,14 @@ class MappingWidget(Widget):
         return subwidget
 
     def as_dl(self, **attrs):
-        return html.dl(*[self[k].as_dd() for k in self], **attrs)
+        return html.dl(*[x.as_dd() for x in self], **attrs)
 
     def __call__(self, *args, **kwargs):
         return self.as_dl(*args, **kwargs)
 
     def __iter__(self):
-        return iter(self._field.fields)
+        for key in self._field.fields:
+            yield self[key]
 
 
 class FormWidget(MappingWidget):
@@ -1040,9 +1050,17 @@ class Mapping(Field):
 
     widget = MappingWidget
 
-    def __init__(self, **fields):
+    def __init__(self, *args, **fields):
         Field.__init__(self)
-        self.fields = OrderedDict(fields)
+        if len(args) == 1:
+            if fields:
+                raise TypeError('keyword arguments and dict given')
+            self.fields = OrderedDict(args[0])
+        else:
+            if args:
+                raise TypeError('no positional arguments allowed if keyword '
+                                'arguments provided.')
+            self.fields = OrderedDict(fields)
         self.fields.sort(key=lambda i: i[1]._position_hint)
 
     def convert(self, value):
@@ -1607,12 +1625,16 @@ class BooleanField(Field):
 
     widget = Checkbox
     validate_on_omission = True
+    choices = [
+        (u'True', lazy_gettext(u'True')),
+        (u'False', lazy_gettext(u'False'))
+    ]
 
     def convert(self, value):
-        return value != 'False' and bool(value)
+        return value != u'False' and bool(value)
 
     def to_primitive(self, value):
-        if value:
+        if self.convert(value):
             return u'True'
         return u'False'
 

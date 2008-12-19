@@ -24,7 +24,8 @@ from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
 from zine.privileges import Privilege, _Privilege, privilege_attribute, \
-     add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN
+     add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN, \
+     VIEW_DRAFTS
 from zine.application import get_application, get_request, url_for
 
 
@@ -161,7 +162,7 @@ class User(object):
         self.real_name = real_name
         self.description = description
         self.extra = {}
-        self.display_name = u'$nick'
+        self.display_name = u'$username'
         self.is_author = is_author
 
     @property
@@ -576,6 +577,10 @@ class Post(_ZEMLDualContainer):
         if user is None:
             user = get_request().user
 
+        # users that are allowed to look at drafts may pass
+        if user.has_privilege(VIEW_DRAFTS):
+            return True
+
         # if we have the privilege to edit other entries or if we are
         # a blog administrator we can always look at posts.
         if user.has_privilege(self.EDIT_OTHER_PRIVILEGE):
@@ -843,7 +848,6 @@ class Comment(_ZEMLContainer):
         to a user that submited a comment which is not yet moderated.
         """
         request = get_request()
-        print request.session
         if self.id in request.session.get('visible_comments', ()):
             return True
         return self.visible_for_user(request.user)
@@ -950,6 +954,7 @@ db.mapper(User, users, properties={
     'id':               users.c.user_id,
     'display_name':     db.synonym('_display_name', map_column=True),
     'posts':            db.dynamic_loader(Post, backref='author',
+                                          query_class=PostQuery,
                                           cascade='all, delete, delete-orphan'),
     'comments':         db.dynamic_loader(Comment, backref='user',
                                           cascade='all, delete, delete-orphan'),
@@ -961,6 +966,7 @@ db.mapper(User, users, properties={
 db.mapper(Group, groups, properties={
     'id':               groups.c.group_id,
     'users':            db.dynamic_loader(User, backref='groups',
+                                          query_class=UserQuery,
                                           secondary=group_users),
     '_privileges':      db.relation(_Privilege, lazy=True,
                                     secondary=group_privileges,
@@ -972,7 +978,8 @@ db.mapper(_Privilege, privileges, properties={
 })
 db.mapper(Category, categories, properties={
     'id':               categories.c.category_id,
-    'posts':            db.dynamic_loader(Post, secondary=post_categories)
+    'posts':            db.dynamic_loader(Post, secondary=post_categories,
+                                          query_class=PostQuery)
 })
 db.mapper(Comment, comments, properties={
     'id':           comments.c.comment_id,
@@ -993,7 +1000,8 @@ db.mapper(PostLink, post_links, properties={
 })
 db.mapper(Tag, tags, properties={
     'id':           tags.c.tag_id,
-    'posts':        db.dynamic_loader(Post, secondary=post_tags)
+    'posts':        db.dynamic_loader(Post, secondary=post_tags,
+                                      query_class=PostQuery)
 })
 db.mapper(Post, posts, properties={
     'id':               posts.c.post_id,

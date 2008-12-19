@@ -885,10 +885,6 @@ div.contents table.config-table th:last-child {
     border-radius: 0;
 }
 
-table.config-table tr.user-defined {
-    background: #DEEEF8;
-}
-
 table.config-table td.default {
     text-align: right;
 }

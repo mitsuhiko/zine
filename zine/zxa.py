@@ -23,6 +23,7 @@ from zine.models import Post, User
 from zine.utils import build_tag_uri
 from zine.utils.dates import format_iso8601
 from zine.utils.xml import get_etree, escape
+from zine.utils.zeml import dump_parser_data
 
 
 ATOM_NS = 'http://www.w3.org/2005/Atom'
@@ -213,12 +214,18 @@ class Writer(object):
     def _register_user(self, user):
         rv = self.new_dependency(self.z.user)
         self.z('username', text=user.username, parent=rv)
+        self.z('email', text=user.email, parent=rv)
         self.z('pw_hash', text=user.pw_hash.encode('base64'), parent=rv)
         self.z('display_name', text=user._display_name, parent=rv)
         self.z('real_name', text=user.real_name, parent=rv)
         self.z('description', text=user.description, parent=rv)
+        self.z('is_author', text=user.is_author and 'yes' or 'no', parent=rv)
+        self.z('extra', text=dumps(user.extra))
         for participant in self.participants:
             participant.process_user(rv, user)
+        privileges = self.z('privileges', parent=rv)
+        for privilege in user.own_privileges:
+            self.z('privilege', text=privilege.name, parent=privileges)
         self.users[user.id] = rv
 
     def _dump_post(self, post):
@@ -246,16 +253,13 @@ class Writer(object):
                and 'yes' or 'no', parent=entry)
         self.z('status', text=str(post.status), parent=entry)
 
-        self.atom('content', type='html', text=post.body.render(), parent=entry)
+        self.atom('content', type='text', text=post.text, parent=entry)
+        self.atom('content', type='html', text=post.body.to_html(), parent=entry)
         if post.intro:
-            self.atom('summary', type='html', text=post.intro.render(),
+            self.atom('summary', type='html', text=post.intro.to_html(),
                       parent=entry)
-        self.z('data', text=dumps({
-            'extra':        post.extra,
-            'raw_body':     post.raw_body,
-            'raw_intro':    post.raw_intro,
-            'parser_data':  post.parser_data
-        }, 2).encode('base64'), parent=entry)
+        self.z('data', text=dump_parser_data(post.parser_data).encode('base64'),
+               parent=entry)
 
         for c in post.comments:
             comment = self.z('comment', parent=entry)
@@ -274,10 +278,11 @@ class Writer(object):
                    parent=comment)
             self.z('parent', text=c.parent_id is not None and str(c.parent_id)
                    or '', parent=comment)
-            self.z('data', text=dumps({
-                'raw_body':     c.raw_body,
-                'parser_data':  c.parser_data
-            }, 2).encode('base64'), parent=entry)
+            self.z('content', type='html', text=c.body.to_html(),
+                   parent=entry)
+            self.z('content', type='text', text=c.text, parent=entry)
+            self.z('data', text=dump_parser_data(c.parser_data).encode('base64'),
+                   parent=entry)
 
         for participant in self.participants:
             participant.process_post(entry, post)

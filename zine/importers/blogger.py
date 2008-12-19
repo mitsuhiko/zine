@@ -99,7 +99,7 @@ except ImportError:
     service = None
 
 from zine.application import url_for
-from zine.importers import Importer, Blog, Label, Author, Post, Comment
+from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.api import _
 from zine.utils.admin import flash
 from zine.utils.dates import parse_iso8601

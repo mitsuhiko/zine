@@ -911,31 +911,22 @@ class Zine(object):
                                                    *args, **kwargs)
 
     @setuponly
-    def add_config_var(self, key, type, default):
+    def add_config_var(self, key, field):
         """Add a configuration variable to the application.  The config
         variable should be named ``<plugin_name>/<variable_name>``.  The
         `variable_name` itself must not contain another slash.  Variables
         that are not prefixed are reserved for Zine' internal usage.
-        The `type` can be one of the following builtins:
-
-        +-------------+--------------------------+
-        | `int`       | An integer value         |
-        +-------------+--------------------------+
-        | `unicode`   | An unicode value         |
-        +-------------+--------------------------+
-        | `bool`      | A boolean value          |
-        +-------------+--------------------------+
-
-        Lists and other data structures are not supported at the moment,
-        you can however use strings and split them by comma.
+        The `field` is an instance of a field class from zine.utils.forms
+        that is used to validate the variable. It has to contain the default
+        value for that variable.
 
         Example usage::
 
-            app.add_config_var('my_plugin/with_useless_stuff', bool, True)
+            app.add_config_var('my_plugin/my_var', BooleanField(default=True))
         """
         if key.count('/') > 1:
             raise ValueError('key might not have more than one slash')
-        self.cfg.config_vars[key] = (type, default)
+        self.cfg.config_vars[key] = field
 
     @setuponly
     def add_url_rule(self, rule, **kwargs):
@@ -1193,7 +1184,7 @@ class Zine(object):
         if self.cfg['maintenance_mode'] and \
            request.path != admin_prefix and not \
            request.path.startswith(admin_prefix + '/'):
-            if request.user.is_admin:
+            if not request.user.is_admin:
                 response = render_response('maintenance.html')
                 response.status_code = 503
                 return response(environ, start_response)

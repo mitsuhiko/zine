@@ -8,7 +8,7 @@
       <h3>{{ form.groupname.label() }}</h3>
       {{ form.groupname(size=30) }}
     </div>
-    {{ render_formbox(form.privileges) }}
+    {{ render_formbox(form.privileges, collapsed=false) }}
     <div class="actions">
       <input type="submit" name="save" value="{{ _('Save') }}">
       <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">

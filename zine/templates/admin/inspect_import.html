@@ -6,19 +6,11 @@
     Here you can now inspect the imported data and select the data you want
     to import into the database.
   {% endtrans %}</p>
-  {%- macro tick(name, title) -%}
-    {{ h.checkbox('import_' ~ name, form['import_' ~ name]) }}
-    <label for="import_{{ name }}">{{ title }}</label>
-  {%- endmacro %}
-  <form action="" method="post">
+  {% call form() %}
     <h2>{{ _("Blog Details") }}</h2>
     <dl>
-      <dt>{{ tick('blog_title', _('Blog Title')) }}</dt>
-      <dd><a href="{{ blog.link|e }}">{{ blog.title|e }}</a></dd>
-      <dt>{{ tick('blog_description', _('Description')) }}</dt>
-      <dd>{{ blog.description }}</dd>
-      <dt>{{ _('Language') }}</dt>
-      <dd>{{ blog.language }}</dd>
+      {{ form.title.as_dd() }}
+      {{ form.description.as_dd() }}
       <dt>{{ _('Dump ID') }}</dt>
       <dd><code>{{ dump_id }}</code><br>
           <small>{{ _('If you have a special installation and want to '
@@ -34,13 +26,7 @@
     {% endtrans %}</p>
     <ul>
     {%- for author in blog.authors %}
-      <li><select name="author_{{ author.id }}">
-        <option value="">{{ _('Create New User') }}</option>
-      {%- for user in users %}
-        <option value="{{ user.id }}"{% if form['author_' ~ author.id] ==
-          user.id %} selected{% endif %}>{{ user.username|e }}</option>
-      {%- endfor %}
-      </select> &nbsp; {{ author.name|e }}</li>
+      <li>{{ form.authors[author.id]() }} &mdash; {{ author.name|e }}</li>
     {%- else %}
       <li><em>{{ _("no author information") }}</em></li>
     {%- endfor %}
@@ -71,18 +57,17 @@
       {%- else %}
       <tr>
         <td>{{ post.pub_date|datetimeformat|e }}</td>
-        <td>{{ tick('post_' ~ post.id, post.title|e) }}</td>
+        <td>{{ form.posts[post.id].with_help_text() }}</td>
         <td>{{ post.author.name|e }}</td>
-        <td>{{ tick('comments_' ~ post.id, post.comments|count) }}</td>
+        <td>{{ form.comments[post.id]() }}</td>
       {% endif %}
       </tr>
       {%- endfor %}
     </table>
     <div class="actions">
-      {{ hidden_form_data }}
       <input type="submit" value="{{ _('Import into Blog') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
       <input type="submit" name="cancel" value="{{ _('Cancel') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}
