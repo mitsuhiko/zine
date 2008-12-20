@@ -1,0 +1,20 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Import from Feed") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Import from Feed") }}</h1>
+  <p>{% trans %}
+    This importer can be used to import standard compliant feeds with optional
+    proprietary extensions.  Because of different incompatible RSS standards
+    this importer can currently only handle Atom feeds.
+  {% endtrans %}</p>
+  {% call form(enctype='multipart/form-data') %}
+    <dl>
+      {{ form.download_url.as_dd() }}
+      <dt>{{ _("Upload Feed") }}</dt>
+      <dd><input type="file" name="feed" size="20"></dd>
+    </dl>
+    <div class="actions">
+      <input type="submit" value="{{ _('Import') }}">
+    </div>
+  {% endcall %}
+{% endblock %}

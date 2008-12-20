@@ -232,7 +232,7 @@ class Importer(object):
     def render_admin_page(self, template_name, **context):
         """Shortcut for rendering an page for the admin."""
         from zine.views.admin import render_admin_response
-        return render_admin_response(template_name, 'maintenance.import',
+        return render_admin_response(template_name, 'system.import',
                                      **context)
 
     def enqueue_dump(self, blog):
@@ -420,4 +420,5 @@ class Comment(object):
 
 from zine.importers.wordpress import WordPressImporter
 from zine.importers.blogger import BloggerImporter
-all_importers = [WordPressImporter, BloggerImporter]
+from zine.importers.feed import FeedImporter
+all_importers = [WordPressImporter, BloggerImporter, FeedImporter]

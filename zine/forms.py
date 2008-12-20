@@ -914,6 +914,12 @@ class WordPressImportForm(forms.Form):
                                    validators=[is_valid_url()])
 
 
+class FeedImportForm(forms.Form):
+    """This form is used in the feed importer."""
+    download_url = forms.TextField(lazy_gettext(u'Feed Download URL'),
+                                   validators=[is_valid_url()])
+
+
 def make_config_form():
     """Returns the form for the configuration editor."""
     app = get_application()
