@@ -2,17 +2,18 @@
 {% block title %}{{ _('Zine Internal Error') }}{% endblock %}
 {% block body %}
   <h1>{{ _('Internal Error') }}</h1>
-  <p>{% trans %}
-    Zine encountered an internal error during processing:
-  {% endtrans %}
+  <p>
+    {% trans %}Zine encountered an internal error during processing:{% endtras %}
+  </p>
   <p class="error">{{ error.message }}
   {% if error.help_text %}
     {{ error.help_text }}
   {% endif %}
+  </p>
   <p>{% trans %}
     If you have troubles fixing the problem have a look at the Zine
     documentation.
-  {% endtrans %}
+  {% endtrans %}</p>
   <p><small>{% trans %}
     This error is only visible to blog administrators.  If a regular user
     triggered the error an entry to the log is added and a generic error

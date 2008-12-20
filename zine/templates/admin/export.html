@@ -10,9 +10,9 @@
     Zine migrations as this file will not include attachments, the blog
     configuration and probably data stored by plugins.
   {% endtrans %}</p>
-  <form action="" method="get">
+  <form action="" method="post">
     <div class="actions">
-      {{ hidden_form_data }}
+      {{ form.hidden_fields }}
       <input type="hidden" name="format" value="zxa">
       <input type="submit" value="{{ _('Export') }}">
     </div>

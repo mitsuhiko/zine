@@ -10,7 +10,7 @@
 """
 from datetime import datetime
 
-from zine.i18n import _, lazy_gettext, list_languages
+from zine.i18n import _, lazy_gettext, list_languages, list_timezones
 from zine.application import get_application, get_request, emit_event
 from zine.database import db, posts, comments
 from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
@@ -22,6 +22,15 @@ from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
      is_valid_url, is_valid_slug, is_valid_url_prefix, is_netaddr
 from zine.utils.redirects import register_redirect
+
+
+class DummyForm(forms.Form):
+    """
+    This form is used quite a lot.  We use it
+    for views that don't need to define their own form
+    but need a working csrf protection or the `form.redirect`
+    feature.
+    """
 
 
 class LoginForm(forms.Form):
@@ -106,9 +115,9 @@ class NewCommentForm(forms.Form):
         return widget
 
     def validate_parent(self, value):
-        # this message is only displayed if the user tempered with
-        # the form data
         if value.post != self.post:
+            #_ this message is only displayed if the user tempered with
+            #_ the form data
             raise ValidationError(_('Invalid object referenced.'))
 
     def context_validate(self, data):
@@ -835,6 +844,8 @@ class BasicOptionsForm(_ConfigForm):
     blog_tagline = forms.TextField(lazy_gettext(u'Blog tagline'))
     blog_email = forms.TextField(lazy_gettext(u'Blog email'))
     language = forms.ChoiceField(lazy_gettext(u'Language'))
+    timezone = forms.ChoiceField(lazy_gettext(u'Timezone'),
+                                 choices=sorted(list_timezones()))
     session_cookie_name = forms.TextField(lazy_gettext(u'Cookie Name'))
     comments_enabled = forms.BooleanField(lazy_gettext(u'Comments enabled'),
         help_text=lazy_gettext(u'enable comments per default'))
@@ -871,6 +882,13 @@ class URLOptionsForm(_ConfigForm):
                                       validators=[is_valid_url_prefix()])
     profiles_url_prefix = forms.TextField(lazy_gettext(u'Author Profiles URL prefix'),
                                           validators=[is_valid_url_prefix()])
+
+
+class ThemeOptionsForm(_ConfigForm):
+    """
+    The form for theme changes.  This is mainly just a dummy,
+    to get csrf protection working.
+    """
 
 
 class CacheOptionsForm(_ConfigForm):

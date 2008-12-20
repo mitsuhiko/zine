@@ -36,8 +36,6 @@ from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.admin import flash, gen_slug, load_zine_reddit, \
      require_admin_privilege
 from zine.utils.pagination import AdminPagination
-from zine.utils.xxx import make_hidden_fields, CSRFProtector, \
-     IntelligentRedirect, StreamReporter
 from zine.utils.http import redirect_back, redirect_to, redirect
 from zine.i18n import parse_datetime, format_system_datetime, \
      list_timezones, has_timezone, list_languages, has_language
@@ -46,13 +44,13 @@ from zine.importers import list_import_queue, load_import_dump, \
 from zine.pluginsystem import install_package, InstallationError, \
      SetupError, get_object_name
 from zine.pingback import pingback, PingbackError
-from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
+from zine.forms import DummyForm, LoginForm, ChangePasswordForm, PluginForm, \
      LogOptionsForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
-     DeleteGroupForm, make_config_form, make_import_form
+     DeleteGroupForm, ThemeOptionsForm, make_config_form, make_import_form
 
 
 #: how many posts / comments should be displayed per page?
@@ -908,21 +906,23 @@ def urls(request):
 @require_admin_privilege(BLOG_ADMIN)
 def theme(request):
     """Allow the user to select one of the themes that are available."""
-    csrf_protector = CSRFProtector()
-    if 'configure' in request.args:
-        return redirect_to('admin/configure_theme')
-    new_theme = request.args.get('select')
-    if new_theme in request.app.themes:
-        csrf_protector.assert_safe()
-        request.app.cfg.change_single('theme', new_theme)
-        flash(_(u'Theme changed successfully.'), 'configure')
-        return redirect_to('admin/theme')
+    form = ThemeOptionsForm()
+
+    if request.method == 'GET' and form.validate(request.args):
+        if 'configure' in request.args:
+            return redirect_to('admin/configure_theme')
+
+        new_theme = request.args.get('select')
+        if new_theme in request.app.themes:
+            request.app.cfg.change_single('theme', new_theme)
+            flash(_(u'Theme changed successfully.'), 'configure')
+            return redirect_to('admin/theme')
 
     return render_admin_response('admin/theme.html', 'options.theme',
         themes=sorted(request.app.themes.values(),
                       key=lambda x: x.name == 'default' or x.display_name.lower()),
         current_theme=request.app.theme,
-        csrf_protector=csrf_protector
+        form=form.as_widget()
     )
 
 
@@ -970,11 +970,9 @@ def remove_plugin(request, plugin):
        not plugin.instance_plugin or \
        plugin.active:
         raise NotFound()
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
+    form = RemovePluginForm()
 
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('confirm'):
             try:
                 plugin.remove()
@@ -984,11 +982,11 @@ def remove_plugin(request, plugin):
                       plugin.html_display_name)
             flash(_(u'The plugin “%s” was removed from the instance '
                     u'successfully.') % escape(plugin.display_name), 'remove')
-        return redirect('admin/plugins')
+        return form.redirect('admin/plugins')
 
     return render_admin_response('admin/remove_plugin.html', 'options.plugins',
         plugin=plugin,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+        form=form.as_widget()
     )
 
 
@@ -1040,9 +1038,8 @@ def configuration(request):
 def maintenance(request):
     """Enable / Disable maintenance mode."""
     cfg = request.app.cfg
-    csrf_protector = CSRFProtector()
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
+    form = DummyForm()
+    if request.method == 'POST' and form.validate(request.form):
         cfg.change_single('maintenance_mode', not cfg['maintenance_mode'])
         if not cfg['maintenance_mode']:
             flash(_(u'Maintenance mode disabled.  The blog is now '
@@ -1051,8 +1048,8 @@ def maintenance(request):
 
     return render_admin_response('admin/maintenance.html',
                                  'system.maintenance',
-        hidden_form_data=make_hidden_fields(csrf_protector),
-        maintenance_mode=cfg['maintenance_mode']
+        maintenance_mode=cfg['maintenance_mode'],
+        form=form.as_widget()
     )
 
 
@@ -1098,40 +1095,40 @@ def delete_import(request, id):
     dump = load_import_dump(request.app, id)
     if dump is None:
         raise NotFound()
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
+    form = DummyForm()
 
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return redirect('admin/inspect_import', id=id)
+            return form.redirect('admin/inspect_import', id=id)
         elif request.form.get('confirm'):
             redirect.add_invalid('admin/inspect_import', id=id)
             delete_import_dump(request.app, id)
             flash(_(u'The imported dump “%s” was deleted successfully.') %
                   escape(dump.title), 'remove')
-            return redirect('admin/import')
+            return form.redirect('admin/import')
 
     return render_admin_response('admin/delete_import.html',
                                  'system.import',
         dump=dump,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+        form=form.as_widget()
     )
 
 
 @require_admin_privilege(BLOG_ADMIN)
 def export(request):
-    """Not yet implemented."""
-    csrf_protector = CSRFProtector()
-    if request.args.get('format') == 'zxa':
-        csrf_protector.assert_safe()
-        from zine.zxa import export
-        response = export(request.app)
-        response.headers['Content-Disposition'] = 'attachment; ' \
-            'filename="%s.zxa"' % '_'.join(request.app.cfg['blog_title'].split())
-        return response
+    """Export the blog to the ZXA format."""
+    form = DummyForm()
+
+    if request.method == 'POST' and form.validate(request.form):
+        print form.errors
+        if request.form.get('format') == 'zxa':
+            from zine.zxa import export
+            response = export(request.app)
+            response.headers['Content-Disposition'] = 'attachment; ' \
+                'filename="%s.zxa"' % '_'.join(request.app.cfg['blog_title'].split())
+            return response
     return render_admin_response('admin/export.html', 'system.export',
-        hidden_form_data=make_hidden_fields(csrf_protector)
+        form=form.as_widget()
     )
 
 
