@@ -51,18 +51,27 @@ def parse_broken_wxr(fd):
     # fix one: add inline doctype that defines the HTML entities so that
     # the parser doesn't bark on them, wordpress adds such entities to some
     # sections from time to time
-    inline_doctype = '<!DOCTYPE wordpress [ %s ]>' % '\n'.join(
+    inline_doctype = '<!DOCTYPE wordpress [ %s ]>' % ' '.join(
         '<!ENTITY %s "&#%d;">' % (name, codepoint)
         for name, codepoint in _html_entities.iteritems()
     )
+
+    # fix two: wordpress 2.6 uses "excerpt:encoded" where excerpt is an
+    # undeclared namespace.  What they did makes no sense whatsoever but
+    # who cares.  We're not treating that element anyways but the XML
+    # parser freaks out.  To fix that problem we're wrapping the whole
+    # thing in another root element
+    extra = '<wxrfix xmlns:excerpt="ignore:me">'
+
     code = fd.read()
     xml_decl = _xml_decl_re.search(code)
     if xml_decl is not None:
-        code = code[:xml_decl.end()] + inline_doctype + code[xml_decl.end():]
+        code = code[:xml_decl.end()] + inline_doctype + extra + \
+               code[xml_decl.end():]
     else:
-        code = inline_doctype + code
+        code = inline_doctype + extra + code
 
-    # fix two: find comment sections and escape them.  Especially trackbacks
+    # fix three: find comment sections and escape them.  Especially trackbacks
     # tent to break the XML structure.  same applies to wp:meta_value stuff.
     # this is especially necessary for older wordpress dumps, 2.7 fixes some
     # of these problems.
@@ -73,8 +82,9 @@ def parse_broken_wxr(fd):
         return before + content + after
     code = _meta_value_re.sub(escape_if_good_idea, code)
     code = _comment_re.sub(escape_if_good_idea, code)
+    code += '</wxrfix>'
 
-    return etree.fromstring(code).find('channel')
+    return etree.fromstring(code).find('rss').find('channel')
 
 
 def parse_wordpress_date(value):
