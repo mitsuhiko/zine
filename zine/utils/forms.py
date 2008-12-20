@@ -969,6 +969,9 @@ class Field(object):
         self.apply_validators(value)
         return value
 
+    def __copy__(self):
+        return _bind(self, None, None)
+
     def apply_validators(self, value):
         """Applies all validators on the value."""
         if self.should_validate(value):
@@ -1014,14 +1017,16 @@ class Field(object):
         return _to_string(value)
 
     def _bind(self, form, memo):
-        """Method that binds a field to a form."""
-        if self.bound:
+        """Method that binds a field to a form. If `form` is None, a copy of
+        the field is returned."""
+        if form is not None and self.bound:
             raise TypeError('%r already bound' % type(obj).__name__)
         rv = object.__new__(self.__class__)
         rv.__dict__.update(self.__dict__)
         rv.validators = self.validators[:]
         rv.messages = self.messages.copy()
-        rv.form = form
+        if form is not None:
+            rv.form = form
         return rv
 
     @property

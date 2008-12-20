@@ -18,7 +18,7 @@ from threading import Lock
 from zine import environment
 from zine.i18n import lazy_gettext, _
 from zine.utils import log
-from zine.utils.forms import TextField, IntegerField, BooleanField
+from zine.utils.forms import TextField, IntegerField, BooleanField, ChoiceField
 from zine.utils.validators import ValidationError
 from zine.application import InternalError
 
@@ -78,7 +78,11 @@ DEFAULT_VARS = {
 
     # comments and pingback
     'comments_enabled':         BooleanField(default=True),
-    'moderate_comments':        IntegerField(default=1, required=True),       # aka MODERATE_ALL
+    'moderate_comments':        ChoiceField(choices=[
+        (0, lazy_gettext(u'Automatically approve all comments')),
+        (1, lazy_gettext(u'An administrator must always aprove the comment')),
+        (2, lazy_gettext(u'Automatically approve comments by known comment authors'))
+                                            ], default=1),
     'pings_enabled':            BooleanField(default=True),
 
     # post view

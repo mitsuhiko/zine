@@ -8,10 +8,12 @@
     :copyright: 2008 by Armin Ronacher.
     :license: BSD
 """
+from copy import copy
 from datetime import datetime
 
 from zine.i18n import _, lazy_gettext, list_languages, list_timezones
 from zine.application import get_application, get_request, emit_event
+from zine.config import DEFAULT_VARS
 from zine.database import db, posts, comments
 from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
@@ -22,6 +24,15 @@ from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
      is_valid_url, is_valid_slug, is_valid_url_prefix, is_netaddr
 from zine.utils.redirects import register_redirect
+
+
+def config_field(cfgvar, **kwargs):
+    """Helper function for fetching fields from the config."""
+    field = copy(DEFAULT_VARS[cfgvar])
+    field._position_hint = forms._next_position_hint()
+    for name, value in kwargs.iteritems():
+        setattr(field, name, value)
+    return field
 
 
 class LoginForm(forms.Form):
@@ -840,12 +851,9 @@ class BasicOptionsForm(_ConfigForm):
     session_cookie_name = forms.TextField(lazy_gettext(u'Cookie Name'))
     comments_enabled = forms.BooleanField(lazy_gettext(u'Comments enabled'),
         help_text=lazy_gettext(u'enable comments per default'))
-    moderate_comments = forms.ChoiceField(lazy_gettext(u'Comment Moderation'),
-                                          choices=[
-        (0, lazy_gettext(u'Automatically approve all comments')),
-        (1, lazy_gettext(u'An administrator must always aprove the comment')),
-        (2, lazy_gettext(u'Automatically approve comments by known comment authors'))
-    ], widget=forms.RadioButtonGroup)
+    moderate_comments = config_field('moderate_comments',
+                                     label=lazy_gettext(u'Comment Moderation'),
+                                     widget=forms.RadioButtonGroup)
     pings_enabled = forms.BooleanField(lazy_gettext(u'Pingbacks enabled'),
         help_text=lazy_gettext(u'enable pingbacks per default'))
     use_flat_comments = forms.BooleanField(lazy_gettext(u'Use flat comments'),
