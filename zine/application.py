@@ -673,6 +673,7 @@ class Zine(object):
 
         self.apis = {}
         self.importers = {}
+        self.feed_importer_extensions = []
 
         # register the pingback API.
         from zine import pingback
@@ -680,9 +681,14 @@ class Zine(object):
         self.pingback_endpoints = pingback.endpoints.copy()
 
         # register our builtin importers
-        from zine.importers import all_importers
-        for importer in all_importers:
+        from zine.importers import importers
+        for importer in importers:
             self.add_importer(importer)
+
+        # and the feed importer extensions
+        from zine.importers.feed import extensions
+        for extension in extensions:
+            self.add_feed_importer_extension(extension)
 
         # register the default privileges
         from zine.privileges import DEFAULT_PRIVILEGES, CONTENT_TYPE_PRIVILEGES
@@ -842,6 +848,16 @@ class Zine(object):
         self.add_url_rule('/maintenance/import/' + importer.name,
                           prefix='admin', endpoint=endpoint)
         self.add_view(endpoint, importer)
+
+    @setuponly
+    def add_feed_importer_extension(self, extension):
+        """Registers a feed importer extension.  This is for example used
+        for to implement the ZXA importing in the feed importer.
+
+        All blogs that provide feeds that extend Atom (and in the future
+        RSS) should be imported by registering an importer here.
+        """
+        self.feed_importer_extensions.append(extension)
 
     @setuponly
     def add_pingback_endpoint(self, endpoint, callback):

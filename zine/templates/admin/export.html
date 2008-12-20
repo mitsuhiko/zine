@@ -10,11 +10,15 @@
     Zine migrations as this file will not include attachments, the blog
     configuration and probably data stored by plugins.
   {% endtrans %}</p>
-  <form action="" method="post">
+  <p>{% trans %}
+    Please keep in mind that the exported file will contain confidential
+    information such as password hashes and database passwords from the
+    configuration.
+  {% endtrans %}</p>
+  {% call form() %}
     <div class="actions">
-      {{ form.hidden_fields }}
       <input type="hidden" name="format" value="zxa">
       <input type="submit" value="{{ _('Export') }}">
     </div>
-  </form>
+  {% endcall %}
 {% endblock %}

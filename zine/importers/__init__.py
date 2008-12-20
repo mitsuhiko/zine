@@ -11,7 +11,10 @@
     :license: BSD see LICENSE for more details.
 """
 import os
-import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
@@ -20,6 +23,15 @@ from zine.database import db, posts
 from zine.utils.xml import escape
 from zine.models import COMMENT_MODERATED
 from zine.privileges import BLOG_ADMIN, require_privilege
+
+
+def _make_id(*args):
+    hash = md5()
+    for arg in args:
+        if isinstance(arg, unicode):
+            arg = arg.encode('utf-8')
+        hash.update('|' + str(arg))
+    return hash.hexdigest()
 
 
 def list_import_queue(app):
@@ -156,15 +168,31 @@ def _perform_import(app, blog, d):
             post.categories.append(prepare_category(category))
             yield u'.'
 
-        # now the comments if use wants them.
+        # now the comments if user wants them.
         if d['comments'][old_post.id]:
-            for comment in old_post.comments:
-                Comment(post, comment.author, comment.body,
-                        comment.author_email, comment.author_url, None,
-                        comment.pub_date, comment.remote_addr,
-                        comment.parser, comment.is_pingback,
-                        comment.status)
+            to_create = set(old_post.comments)
+            created = {}
+
+            def _create_comment(comment):
+                parent = None
+                if comment.parent is not None:
+                    if comment.parent in created:
+                        parent = created[comment.parent]
+                    else:
+                        parent = _create_comment(comment.parent)
+                    to_create.discard(comment.parent)
+                rv = Comment(post, comment.author, comment.body,
+                             comment.author_email, comment.author_url, parent,
+                             comment.pub_date, comment.remote_addr,
+                             comment.parser, comment.is_pingback,
+                             comment.status)
+                created[comment] = rv
+                return rv
+
+            while to_create:
+                _create_comment(to_create.pop())
                 yield u'.'
+
         yield u' <em>%s</em></li>\n' % _('done')
 
     # send to the database
@@ -262,9 +290,11 @@ class Importer(object):
 
 class Blog(object):
     """Represents a blog."""
+    element = None
 
     def __init__(self, title, link, description, language='en', tags=None,
-                 categories=None, posts=None, authors=None):
+                 categories=None, posts=None, authors=None,
+                 configuration=None):
         self.dump_date = datetime.utcnow()
         self.title = title
         self.link = link
@@ -282,6 +312,9 @@ class Blog(object):
         if authors:
             authors.sort(key=lambda x: x.name.lower())
         self.authors = authors or []
+        if configuration is None:
+            configuration = {}
+        self.configuration = configuration
 
     def __getstate__(self):
         for post in self.posts:
@@ -315,8 +348,11 @@ class Blog(object):
 
 class Author(object):
     """Represents an author."""
+    element = None
 
-    def __init__(self, id, name, email):
+    def __init__(self, name, email, id=None):
+        if id is None:
+            id = _make_id(name, email)
         self.id = id
         self.name = name
         self.email = email
@@ -330,14 +366,17 @@ class Author(object):
 
 class Tag(object):
     """Represents a tag."""
+    element = None
 
-    def __init__(self, slug, name):
+    def __init__(self, slug, name=None):
         self.slug = slug
+        if name is None:
+            name = slug
         self.name = name
 
     @property
     def id(self):
-        return md5.new(self.slug).hexdigest()
+        return _make_id(self.slug)
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -348,14 +387,16 @@ class Tag(object):
 
 class Category(Tag):
     """Represents a category."""
+    element = None
 
-    def __init__(self, slug, name, description=u''):
+    def __init__(self, slug, name=None, description=u''):
         Tag.__init__(self, slug, name)
         self.description = description
 
 
 class Post(object):
     """Represents a blog post."""
+    element = None
 
     def __init__(self, slug, title, link, pub_date, author, intro, body,
                  tags=None, categories=None, comments=None,
@@ -386,7 +427,7 @@ class Post(object):
 
     @property
     def id(self):
-        return md5.new(self.uid).hexdigest()
+        return _make_id(self.uid)
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -397,9 +438,10 @@ class Post(object):
 
 class Comment(object):
     """Represents a comment on a post."""
+    element = None
 
-    def __init__(self, author, author_email, author_url, remote_addr,
-                 pub_date, body, parser=None, is_pingback=False,
+    def __init__(self, author, body, author_email, author_url, parent,
+                 pub_date, remote_addr, parser=None, is_pingback=False,
                  status=COMMENT_MODERATED):
         self.author = author
         self.author_email = author_email
@@ -410,6 +452,7 @@ class Comment(object):
         self.parser = parser or 'html'
         self.is_pingback = is_pingback
         self.status = status
+        self.parent = parent
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -421,4 +464,4 @@ class Comment(object):
 from zine.importers.wordpress import WordPressImporter
 from zine.importers.blogger import BloggerImporter
 from zine.importers.feed import FeedImporter
-all_importers = [WordPressImporter, BloggerImporter, FeedImporter]
+importers = [WordPressImporter, BloggerImporter, FeedImporter]

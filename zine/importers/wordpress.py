@@ -16,22 +16,16 @@ from lxml import etree
 from zine.forms import WordPressImportForm
 from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.i18n import lazy_gettext, _
+from zine.utils import log
 from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
-from zine.utils.xml import _html_entities, escape
+from zine.utils.xml import Namespace, html_entities, escape
 from zine.utils.http import redirect_to
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED
 
-
-class _Namespace(object):
-    def __init__(self, uri):
-        self._uri = uri
-    def __getattr__(self, name):
-        return '{%s}%s' % (self._uri, name)
-
-CONTENT = _Namespace('http://purl.org/rss/1.0/modules/content/')
-DC_METADATA = _Namespace('http://purl.org/dc/elements/1.1/')
-WORDPRESS = _Namespace('http://wordpress.org/export/1.0/')
+CONTENT = Namespace('http://purl.org/rss/1.0/modules/content/')
+DC_METADATA = Namespace('http://purl.org/dc/elements/1.1/')
+WORDPRESS = Namespace('http://wordpress.org/export/1.0/')
 
 
 _xml_decl_re = re.compile(r'<\?xml.*?\?>(?s)')
@@ -53,7 +47,7 @@ def parse_broken_wxr(fd):
     # sections from time to time
     inline_doctype = '<!DOCTYPE wordpress [ %s ]>' % ' '.join(
         '<!ENTITY %s "&#%d;">' % (name, codepoint)
-        for name, codepoint in _html_entities.iteritems()
+        for name, codepoint in html_entities.iteritems()
     )
 
     # fix two: wordpress 2.6 uses "excerpt:encoded" where excerpt is an
@@ -106,7 +100,7 @@ def parse_feed(fd):
         if name:
             author = authors.get(name)
             if author is None:
-                author = authors[name] = Author(len(authors) + 1, name, None)
+                author = authors[name] = Author(name, None, len(authors) + 1)
             return author
 
     tags = {}
@@ -142,11 +136,13 @@ def parse_feed(fd):
              if x.text in categories],
             [Comment(
                 x.findtext(WORDPRESS.comment_author),
+                x.findtext(WORDPRESS.comment_content),
                 x.findtext(WORDPRESS.comment_author_email),
                 x.findtext(WORDPRESS.comment_author_url),
+                None,
                 x.findtext(WORDPRESS.comment_author_ip),
                 parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
-                x.findtext(WORDPRESS.comment_content), 'html',
+                'html',
                 x.findtext(WORDPRESS.comment_type) in ('pingback',
                                                        'traceback'),
                 (COMMENT_UNMODERATED, COMMENT_MODERATED)
@@ -173,7 +169,7 @@ class WordPressImporter(Importer):
             dump = request.files.get('dump')
             if not form.data['download_url']:
                 try:
-                    dump = urllib.urlopen(form.data['url'])
+                    dump = urllib.urlopen(form.data['download_url'])
                 except Exception, e:
                     error = _(u'Error downloading from URL: %s') % e
             elif not dump:
@@ -182,6 +178,7 @@ class WordPressImporter(Importer):
             try:
                 blog = parse_feed(dump)
             except Exception, e:
+                log.exception(_(u'Error parsing uploaded file'))
                 flash(_(u'Error parsing uploaded file: %s') % e, 'error')
             else:
                 self.enqueue_dump(blog)

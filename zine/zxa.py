@@ -23,11 +23,10 @@ from zine.api import *
 from zine.models import Post, User
 from zine.utils import build_tag_uri
 from zine.utils.dates import format_iso8601
-from zine.utils.xml import escape
+from zine.utils.xml import escape, XML_NS
 from zine.utils.zeml import dump_parser_data
 
 
-XML_NS = 'http://www.w3.org/XML/1998/namespace'
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 ZINE_NS = 'http://zine.pocoo.org/'
 ZINE_TAG_URI = ZINE_NS + '#tag-scheme'
@@ -66,7 +65,7 @@ XML_PREAMBLE = u'''\
     something else.
 
 -->
-<feed xmlns="%(atom_ns)s" xmlns:zine="%(zine_ns)s">\
+<feed xmlns="%(atom_ns)s" xmlns:zine="%(zine_ns)s" xml:lang="%(language)s">\
 <title>%(title)s</title>\
 <subtitle>%(subtitle)s</subtitle>\
 <id>%(id)s</id>\
@@ -159,7 +158,8 @@ class Writer(object):
             'zine_ns':      ZINE_NS,
             'id':           escape(feed_id),
             'blog_url':     escape(self.app.cfg['blog_url']),
-            'updated':      format_iso8601(last_update)
+            'updated':      format_iso8601(last_update),
+            'language':     self.app.cfg['language']
         }).encode('utf-8')
 
         def dump_node(node):
@@ -243,6 +243,7 @@ class Writer(object):
         self.z('pings_enabled', text=post.pings_enabled
                and 'yes' or 'no', parent=entry)
         self.z('status', text=str(post.status), parent=entry)
+        self.z('content_type', text=str(post.content_type))
 
         self.atom('content', type='text', text=post.text, parent=entry)
         self.atom('content', type='html', text=post.body.to_html(), parent=entry)

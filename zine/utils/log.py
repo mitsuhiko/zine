@@ -197,9 +197,7 @@ class LogfileView(object):
                                        self.per_page * (number - 1))
             finally:
                 f.close()
-        if not lines:
-            if number == 1:
-                return []
+        if not lines and number != 1:
             raise NoSuchPage()
         return LogfilePage(lines, has_more, number)
 
