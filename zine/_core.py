@@ -26,7 +26,7 @@ class InstanceNotInitialized(RuntimeError):
 
 def _create_zine(instance_folder, timeout=5, in_reloader=True):
     """Creates a new Zine object and initialized it.  This is also aware of
-    ongoing reloads.  If funky things occour and these do not resolve
+    ongoing reloads.  If funky things occur and these do not resolve
     after `timeout` seconds a `RuntimeError` is raised.
     """
     global _application

@@ -980,7 +980,7 @@ def remove_plugin(request, plugin):
                 plugin.remove()
             except IOError:
                 flash(_(u'Could not remove the plugin “%s” because an '
-                        u'IO error occoured. Wrong permissions?') %
+                        u'IO error occurred. Wrong permissions?') %
                       plugin.html_display_name)
             flash(_(u'The plugin “%s” was removed from the instance '
                     u'successfully.') % escape(plugin.display_name), 'remove')
@@ -1138,7 +1138,7 @@ def export(request):
 def information(request):
     """Shows some details about this Zine installation.  It's useful for
     debugging and checking configurations.  If severe errors in a Zine
-    installation occour it's a good idea to dump this page and attach it to
+    installation occur it's a good idea to dump this page and attach it to
     a bug report mail.
     """
     from platform import platform

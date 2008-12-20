@@ -276,7 +276,7 @@ class PostForm(forms.Form):
     def validate_parser(self, value):
         """Make sure the missing parser is not selected."""
         if self.parser_missing and value == self.post.parser:
-            raise ValidationError(_('The selected parser is no longer '
+            raise ValidationError(_('Selected parser is no longer '
                                     'available on the system.'))
 
     def as_widget(self):
@@ -763,7 +763,7 @@ class DeleteUserForm(_UserBoundForm):
     """Used to delete a user from the admin panel."""
 
     action = forms.ChoiceField(lazy_gettext(u'What should Zine do with posts '
-                                            u'this user wrote?'), choices=[
+                                            u'written by this user?'), choices=[
         ('delete', lazy_gettext(u'Delete them permanently')),
         ('reassign', lazy_gettext(u'Reassign posts'))
     ], widget=forms.RadioButtonGroup)
@@ -782,7 +782,8 @@ class DeleteUserForm(_UserBoundForm):
 
     def context_validate(self, data):
         if data['action'] == 'reassign' and not data['reassign_to']:
-            raise ValidationError(_('You have to select a user that '
+            # XXX: Bad wording
+            raise ValidationError(_('You have to select the user that '
                                     'gets the posts assigned.'))
 
     def delete_user(self):
@@ -844,8 +845,8 @@ class BasicOptionsForm(_ConfigForm):
     moderate_comments = forms.ChoiceField(lazy_gettext(u'Comment Moderation'),
                                           choices=[
         (0, lazy_gettext(u'Automatically approve all comments')),
-        (1, lazy_gettext(u'An administrator must always aprove the comment')),
-        (2, lazy_gettext(u'Automatically approve comments by known comment authors'))
+        (1, lazy_gettext(u'An administrator must always approve the comment')),
+        (2, lazy_gettext(u'Automatically approve comments by already known commenters'))
     ], widget=forms.RadioButtonGroup)
     pings_enabled = forms.BooleanField(lazy_gettext(u'Pingbacks enabled'),
         help_text=lazy_gettext(u'enable pingbacks per default'))
@@ -902,12 +903,12 @@ class CacheOptionsForm(_ConfigForm):
     def context_validate(self, data):
         if data['cache_system'] == 'memcached':
             if not data['memcached_servers']:
-                raise ValidationError(_(u'If memcached is enabled you have '
-                                        u'to provide at least one server.'))
+                raise ValidationError(_(u'You have to provide at least one '
+                                        u'server to use memcached.'))
         elif data['cache_system'] == 'filesystem':
             if not data['filesystem_cache_path']:
-                raise ValidationError(_(u'If the filesystem cache is in use '
-                                        u'a cache folder hast to be provided.'))
+                raise ValidationError(_(u'You have to provide cache folder to '
+                                        u'use filesystem cache.'))
 
     def _apply(self, t, skip):
         # XXX: this is an ugly hack because the configuration is currently

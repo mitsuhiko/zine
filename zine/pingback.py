@@ -68,7 +68,7 @@ class PingbackError(Exception):
             33: _('The specified target URL cannot be used as a target'),
             48: _('The pingback has already been registered'),
             49: _('Access Denied')
-        }.get(self.fault_code, _('An unknown server error (%s) occoured') %
+        }.get(self.fault_code, _('An unknown server error (%s) occurred') %
               self.fault_code)
 
 
