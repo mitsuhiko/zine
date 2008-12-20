@@ -704,7 +704,8 @@ def delete_category(request, category_id):
         if request.form.get('cancel'):
             return redirect('admin/edit_category', category_id=category.id)
         elif request.form.get('confirm') and form.validate(request.form):
-            redirect.add_invalid('admin/edit_category', category_id=category.id)
+            form.add_invalid_redirect_target('admin/edit_category',
+                                             category_id=category.id)
             form.delete_category()
             flash(_(u'Category %s deleted successfully.') % escape(category.name))
             db.commit()
@@ -1102,7 +1103,7 @@ def delete_import(request, id):
         if request.form.get('cancel'):
             return form.redirect('admin/inspect_import', id=id)
         elif request.form.get('confirm'):
-            redirect.add_invalid('admin/inspect_import', id=id)
+            form.add_invalid_redirect_target('admin/inspect_import', id=id)
             delete_import_dump(request.app, id)
             flash(_(u'The imported dump “%s” was deleted successfully.') %
                   escape(dump.title), 'remove')
