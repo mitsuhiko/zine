@@ -11,7 +11,6 @@
 from zine.api import *
 from zine.models import Comment
 from zine.privileges import MODERATE_COMMENTS
-from zine.utils.xxx import StreamReporter
 
 
 def do_get_comment(req):

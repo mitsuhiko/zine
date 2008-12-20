@@ -7,7 +7,7 @@
       <p>{% trans dump_title=dump.title|e %}
         Do you really want to delete the imported dump “{{ dump_title }}”?.
       {% endtrans %}</p>
-      {{ hidden_form_data }}
+      {{ form.hidden_fields }}
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="confirm" value="{{ _('Yes') }}">
     </div>

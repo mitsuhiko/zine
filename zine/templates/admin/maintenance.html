@@ -12,7 +12,7 @@
   {% endtrans %}</p>
   <form action="" method="post">
     <div class="actions">
-      {{ hidden_form_data }}
+      {{ form.hidden_fields }}
       <input type="submit" value="{{ _('Disable maintenance mode') if
         maintenance_mode else _('Enable maintenance mode') }}" />
     </div>

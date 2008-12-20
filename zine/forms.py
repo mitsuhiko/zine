@@ -24,6 +24,15 @@ from zine.utils.validators import ValidationError, is_valid_email, \
 from zine.utils.redirects import register_redirect
 
 
+class DummyForm(forms.Form):
+    """
+    This form is used quite a lot.  We use it
+    for views that don't need to define their own form
+    but need a working csrf protection or the `form.redirect`
+    feature.
+    """
+
+
 class LoginForm(forms.Form):
     """The form for the login page."""
     user = forms.ModelField(User, 'username', required=True, messages=dict(
@@ -873,6 +882,13 @@ class URLOptionsForm(_ConfigForm):
                                       validators=[is_valid_url_prefix()])
     profiles_url_prefix = forms.TextField(lazy_gettext(u'Author Profiles URL prefix'),
                                           validators=[is_valid_url_prefix()])
+
+
+class ThemeOptionsForm(_ConfigForm):
+    """
+    The form for theme changes.  This is mainly just a dummy,
+    to get csrf protection working.
+    """
 
 
 class CacheOptionsForm(_ConfigForm):

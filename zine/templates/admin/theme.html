@@ -6,8 +6,7 @@
   {%- for theme in themes %}
     <div class="themewrapper">
       <div class="theme{% if theme.is_current %} current{% endif %}">
-        <h2><a href="?select={{ theme.name|e }}&amp;{{ csrf_protector.url_value|e
-          }}">{{ theme.display_name|e }}</a></h2>
+        <h2><a href="?select={{ theme.name|e }}&amp;_csrf_token={{ form.csrf_token|e }}">{{ theme.display_name|e }}</a></h2>
         {%- if theme.has_preview %}
           <img src="{{ theme.preview_url|e }}" alt="preview image" class="preview">
         {%- endif %}
