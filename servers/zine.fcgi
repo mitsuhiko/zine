@@ -27,7 +27,7 @@ sys.path.insert(0, ZINE_LIB)
 
 from zine import get_wsgi_app
 from flup.server.fcgi import WSGIServer
-app = get_wsgp_app(INSTANCE_FOLDER)
+app = get_wsgi_app(INSTANCE_FOLDER)
 srv = WSGIServer(app)
 
 if __name__ == '__main__':
