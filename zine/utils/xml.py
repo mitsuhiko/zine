@@ -60,26 +60,6 @@ def strip_tags(s, normalize_whitespace=True):
     return s
 
 
-_etree = None
-def get_etree():
-    """Get an etree implementation that is not lxml.  We love lxml but because
-    lxml is an c (cython) extension we can't have it as another dependency.
-    Because we need `ElementTree._write` for our zxa module which is not
-    supported by lxml this is needed.
-    """
-    global _etree
-    if _etree is not None:
-        return _etree
-    for name in 'elementtree.cElementTree', \
-                'cElementTree', 'xml.etree.cElementTree', \
-                'ElementEtree', 'xml.etree.ElementTree':
-        etree = import_string(name, silent=True)
-        if etree is not None:
-            _etree = etree
-            return etree
-    raise RuntimeError('no elementtree implementation found')
-
-
 def generate_rsd(app):
     """Generate the RSD definition for this application apis."""
     from zine.application import url_for

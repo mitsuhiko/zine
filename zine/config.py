@@ -313,6 +313,13 @@ class Configuration(object):
         """Return a list of all key, value tuples."""
         return list(self.iteritems())
 
+    def export(self):
+        """Like iteritems but with the raw values."""
+        for key, value in self.iteritems():
+            value = self.config_vars[key].to_primitive(value)
+            if isinstance(value, basestring):
+                yield key, value
+
     def get_detail_list(self):
         """Return a list of categories with keys and some more
         details for the advanced configuration editor.

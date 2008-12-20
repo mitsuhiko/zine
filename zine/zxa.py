@@ -18,16 +18,20 @@ from datetime import datetime
 from itertools import chain
 
 import zine
+from lxml import etree
 from zine.api import *
 from zine.models import Post, User
 from zine.utils import build_tag_uri
 from zine.utils.dates import format_iso8601
-from zine.utils.xml import get_etree, escape
+from zine.utils.xml import escape
 from zine.utils.zeml import dump_parser_data
 
 
+XML_NS = 'http://www.w3.org/XML/1998/namespace'
 ATOM_NS = 'http://www.w3.org/2005/Atom'
 ZINE_NS = 'http://zine.pocoo.org/'
+ZINE_TAG_URI = ZINE_NS + '#tag-scheme'
+ZINE_CATEGORY_URI = ZINE_NS + '#category-scheme'
 
 XML_PREAMBLE = u'''\
 <?xml version="1.0" encoding="utf-8"?>
@@ -62,15 +66,18 @@ XML_PREAMBLE = u'''\
     something else.
 
 -->
-<a:feed xmlns:a="%(atom_ns)s" xmlns:z="%(zine_ns)s">\
-<a:title>%(title)s</a:title>\
-<a:subtitle>%(subtitle)s</a:subtitle>\
-<a:id>%(id)s</a:id>\
-<a:generator uri="http://zine.pocoo.org/"\
- version="%(version)s">ZineXA Export</a:generator>\
-<a:link href="%(blog_url)s"/>\
-<a:updated>%(updated)s</a:updated>'''
-XML_EPILOG = '</a:feed>'
+<feed xmlns="%(atom_ns)s" xmlns:zine="%(zine_ns)s">\
+<title>%(title)s</title>\
+<subtitle>%(subtitle)s</subtitle>\
+<id>%(id)s</id>\
+<generator uri="http://zine.pocoo.org/"\
+ version="%(version)s">ZineXA Export</generator>\
+<link href="%(blog_url)s"/>\
+<updated>%(updated)s</updated>'''
+XML_EPILOG = '</feed>'
+
+
+NAMESPACES = {None: ATOM_NS, 'zine': ZINE_NS}
 
 
 def export(app):
@@ -78,34 +85,24 @@ def export(app):
     return Response(Writer(app)._generate(), mimetype='application/atom+xml')
 
 
-class _MinimalO(object):
-
-    def __init__(self):
-        self._buffer = []
-        self.write = self._buffer.append
-
-    def _get_and_clean(self):
-        rv = ''.join(self._buffer)
-        del self._buffer[:]
-        return rv
-
-
 class _ElementHelper(object):
 
-    def __init__(self, etree, ns):
-        self._etree = etree
+    def __init__(self, ns):
         self._ns = ns
 
     def __getattr__(self, tag):
         return '{%s}%s' % (self._ns, tag)
 
-    def __call__(self, tag, attrib={}, parent=None, **extra):
+    def __call__(self, tag, attrib=None, parent=None, **extra):
         tag = getattr(self, tag)
         text = extra.pop('text', None)
+        if attrib is None:
+            attrib = {}
+        attrib.update(extra)
         if parent is not None:
-           rv = self._etree.SubElement(parent, tag, attrib, **extra)
+            rv = etree.SubElement(parent, tag, attrib, nsmap=NAMESPACES)
         else:
-            rv = self._etree.Element(tag, attrib, **extra)
+            rv = etree.Element(tag, attrib, nsmap=NAMESPACES)
         if text is not None:
             rv.text = text
         return rv
@@ -115,7 +112,7 @@ class Participant(object):
 
     def __init__(self, writer):
         self.app = writer.app
-        self.etree = writer.etree
+        etree = writer.etree
         self.writer = writer
 
     def before_dump(self):
@@ -135,9 +132,8 @@ class Writer(object):
 
     def __init__(self, app):
         self.app = app
-        self.etree = etree = get_etree()
-        self.atom = _ElementHelper(etree, ATOM_NS)
-        self.z = _ElementHelper(etree, ZINE_NS)
+        self.atom = _ElementHelper(ATOM_NS)
+        self.z = _ElementHelper(ZINE_NS)
         self._dependencies = {}
         self.users = {}
         self.participants = [x(self) for x in
@@ -166,20 +162,16 @@ class Writer(object):
             'updated':      format_iso8601(last_update)
         }).encode('utf-8')
 
-        ns_map = {ATOM_NS: 'a', ZINE_NS: 'z'}
-        out = _MinimalO()
         def dump_node(node):
-            self.etree.ElementTree(node)._write(out, node, 'utf-8',
-                                                dict(ns_map))
-            return out._get_and_clean()
+            return etree.tostring(node, encoding='utf-8')
 
         for participant in self.participants:
             participant.setup()
 
         # dump configuration
         cfg = self.z('configuration')
-        for key, value in self.app.cfg.iteritems():
-            self.z('item', key=key, text=unicode(value), parent=cfg)
+        for key, value in self.app.cfg.export():
+            self.z('item', key=key, text=value, parent=cfg)
         yield dump_node(cfg)
 
         # allow plugins to dump trees
@@ -198,16 +190,16 @@ class Writer(object):
 
         # if we have dependencies (very likely) dump them now
         if self._dependencies:
-            yield '<z:dependencies>'
+            yield '<zine:dependencies>'
             for node in self._dependencies.itervalues():
                 yield dump_node(node)
-            yield '</z:dependencies>'
+            yield '</zine:dependencies>'
 
         yield XML_EPILOG.encode('utf-8')
 
     def new_dependency(self, tag):
         id = '%x' % (len(self._dependencies) + 1)
-        node = self.etree.Element(tag, {self.z.dependency: id})
+        node = etree.Element(tag, {self.z.dependency: id}, nsmap=NAMESPACES)
         self._dependencies[id] = node
         return node
 
@@ -230,7 +222,7 @@ class Writer(object):
 
     def _dump_post(self, post):
         url = url_for(post, _external=True)
-        entry = self.atom('entry', {'xml:base': url})
+        entry = self.atom('entry', {'{%s}base' % XML_NS: url})
         self.atom('title', text=post.title, type='text', parent=entry)
         self.atom('id', text=post.uid, parent=entry)
         self.atom('updated', text=format_iso8601(post.last_update),
@@ -246,7 +238,6 @@ class Writer(object):
         self.atom('email', text=post.author.email, parent=author)
 
         self.z('slug', text=post.slug, parent=entry)
-        self.z('id', text=str(post.id), parent=entry)
         self.z('comments_enabled', text=post.comments_enabled
                and 'yes' or 'no', parent=entry)
         self.z('pings_enabled', text=post.pings_enabled
@@ -258,12 +249,24 @@ class Writer(object):
         if post.intro:
             self.atom('summary', type='html', text=post.intro.to_html(),
                       parent=entry)
+
+        for category in post.categories:
+            attrib = dict(term=category.slug, scheme=ZINE_CATEGORY_URI)
+            if category.slug != category.name:
+                attrib['label'] = category.name
+            self.atom('category', attrib=attrib, parent=entry)
+
+        for tag in post.tags:
+            attrib = dict(term=tag.slug, scheme=ZINE_TAG_URI)
+            if tag.slug != tag.name:
+                attrib['label'] = tag.name
+            self.atom('tag', attrib=attrib, parent=entry)
+
         self.z('data', text=dump_parser_data(post.parser_data).encode('base64'),
                parent=entry)
 
         for c in post.comments:
             comment = self.z('comment', parent=entry)
-            self.z('id', text=str(c.id), parent=comment)
             author = self.z('author', parent=comment)
             self.z('name', text=c.author, parent=author)
             self.z('email', text=c.email, parent=author)

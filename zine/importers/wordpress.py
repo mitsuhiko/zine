@@ -12,12 +12,13 @@ import re
 import urllib
 from time import strptime
 from datetime import datetime
+from lxml import etree
 from zine.forms import WordPressImportForm
 from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.i18n import lazy_gettext, _
 from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
-from zine.utils.xml import _html_entities, get_etree, escape
+from zine.utils.xml import _html_entities, escape
 from zine.utils.http import redirect_to
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED
 
@@ -73,7 +74,7 @@ def parse_broken_wxr(fd):
     code = _meta_value_re.sub(escape_if_good_idea, code)
     code = _comment_re.sub(escape_if_good_idea, code)
 
-    return get_etree().fromstring(code).find('channel')
+    return etree.fromstring(code).find('channel')
 
 
 def parse_wordpress_date(value):

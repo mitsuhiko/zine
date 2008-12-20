@@ -17,7 +17,7 @@ from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
 from zine.i18n import _
 from zine.database import db, posts
-from zine.utils.xml import escape, get_etree
+from zine.utils.xml import escape
 from zine.models import COMMENT_MODERATED
 from zine.privileges import BLOG_ADMIN, require_privilege
 
