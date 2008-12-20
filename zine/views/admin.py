@@ -44,13 +44,14 @@ from zine.importers import list_import_queue, load_import_dump, \
 from zine.pluginsystem import install_package, InstallationError, \
      SetupError, get_object_name
 from zine.pingback import pingback, PingbackError
-from zine.forms import DummyForm, LoginForm, ChangePasswordForm, PluginForm, \
+from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      LogOptionsForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
-     DeleteGroupForm, ThemeOptionsForm, make_config_form, make_import_form
+     DeleteGroupForm, ThemeOptionsForm, DeleteImportForm, ExportForm, \
+     MaintenanceModeForm, make_config_form, make_import_form
 
 
 #: how many posts / comments should be displayed per page?
@@ -1038,7 +1039,7 @@ def configuration(request):
 def maintenance(request):
     """Enable / Disable maintenance mode."""
     cfg = request.app.cfg
-    form = DummyForm()
+    form = MaintenanceModeForm()
     if request.method == 'POST' and form.validate(request.form):
         cfg.change_single('maintenance_mode', not cfg['maintenance_mode'])
         if not cfg['maintenance_mode']:
@@ -1095,7 +1096,7 @@ def delete_import(request, id):
     dump = load_import_dump(request.app, id)
     if dump is None:
         raise NotFound()
-    form = DummyForm()
+    form = DeleteImportForm()
 
     if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
@@ -1117,7 +1118,7 @@ def delete_import(request, id):
 @require_admin_privilege(BLOG_ADMIN)
 def export(request):
     """Export the blog to the ZXA format."""
-    form = DummyForm()
+    form = ExportForm()
 
     if request.method == 'POST' and form.validate(request.form):
         print form.errors

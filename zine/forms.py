@@ -24,14 +24,6 @@ from zine.utils.validators import ValidationError, is_valid_email, \
 from zine.utils.redirects import register_redirect
 
 
-class DummyForm(forms.Form):
-    """
-    This form is used quite a lot.  We use it
-    for views that don't need to define their own form
-    but need a working csrf protection or the `form.redirect`
-    feature.
-    """
-
 
 class LoginForm(forms.Form):
     """The form for the login page."""
@@ -926,6 +918,10 @@ class CacheOptionsForm(_ConfigForm):
         t['memcached_servers'] = ', '.join(self.data['memcached_servers'])
 
 
+class MaintenanceModeForm(forms.Form):
+    """yet a dummy form, but could be extended later."""
+
+
 class WordPressImportForm(forms.Form):
     """This form is used in the WordPress importer."""
     download_url = forms.TextField(lazy_gettext(u'Dump Download URL'),
@@ -936,6 +932,14 @@ class FeedImportForm(forms.Form):
     """This form is used in the feed importer."""
     download_url = forms.TextField(lazy_gettext(u'Feed Download URL'),
                                    validators=[is_valid_url()])
+
+
+class DeleteImportForm(forms.Form):
+    """This form is used to delete a imported file."""
+
+
+class ExportForm(forms.Form):
+    """This form is used to implement the export dialog."""
 
 
 def make_config_form():
