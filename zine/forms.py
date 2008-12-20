@@ -28,7 +28,10 @@ from zine.utils.redirects import register_redirect
 
 def config_field(cfgvar, **kwargs):
     """Helper function for fetching fields from the config."""
-    field = copy(DEFAULT_VARS[cfgvar])
+    if isinstance(field, forms.Field):
+        field = copy(field)
+    else:
+        field = copy(DEFAULT_VARS[cfgvar])
     field._position_hint = forms._next_position_hint()
     for name, value in kwargs.iteritems():
         setattr(field, name, value)
