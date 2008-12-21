@@ -325,7 +325,11 @@ dispatch_post_delete = _make_post_dispatcher('delete')
 def edit_entry(request, post=None):
     """Edit an existing entry or create a new one."""
     active_tab = post and 'manage.entries' or 'write.entry'
-    form = EntryForm(post)
+    initial = None
+    body = request.args.get('body')
+    if body:
+        initial = {'text': body}
+    form = EntryForm(post, initial)
 
     if post is None:
         assert_privilege(CREATE_ENTRIES)

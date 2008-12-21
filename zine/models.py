@@ -980,7 +980,7 @@ db.mapper(Category, categories, properties={
     'id':               categories.c.category_id,
     'posts':            db.dynamic_loader(Post, secondary=post_categories,
                                           query_class=PostQuery)
-})
+}, order_by=categories.c.name)
 db.mapper(Comment, comments, properties={
     'id':           comments.c.comment_id,
     'text':         db.synonym('_text', map_column=True),
@@ -1002,7 +1002,7 @@ db.mapper(Tag, tags, properties={
     'id':           tags.c.tag_id,
     'posts':        db.dynamic_loader(Post, secondary=post_tags,
                                       query_class=PostQuery)
-})
+}, order_by=tags.c.name)
 db.mapper(Post, posts, properties={
     'id':               posts.c.post_id,
     'text':             db.synonym('_text', map_column=True),
