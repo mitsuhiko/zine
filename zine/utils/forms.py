@@ -1950,7 +1950,12 @@ class Form(object):
         # have to hook the data in here.
         for name, field in self._root_field.fields.iteritems():
             if field.validate_on_omission and name not in self.raw_data:
-                self.raw_data.setdefault(name)
+                # checkboxes are not in the data if they are not checked
+                if isinstance(field, BooleanField):
+                    value = False
+                else:
+                    value = None
+                self.raw_data.setdefault(name, value)
 
         d = self.data.copy()
         d.update(self.raw_data)

@@ -16,10 +16,12 @@ from os import path
 from threading import Lock
 
 from zine import environment
-from zine.i18n import lazy_gettext, _
+from zine.i18n import lazy_gettext, _, list_timezones
 from zine.utils import log
-from zine.utils.forms import TextField, IntegerField, BooleanField, ChoiceField
-from zine.utils.validators import ValidationError
+from zine.utils.forms import TextField, IntegerField, BooleanField, \
+    ChoiceField, CommaSeparated
+from zine.utils.validators import ValidationError, is_valid_url_prefix, \
+    is_netaddr
 from zine.application import InternalError
 
 
@@ -33,12 +35,13 @@ DEFAULT_VARS = {
     'blog_tagline':             TextField(default=lazy_gettext(u'just another Zine blog')),
     'blog_url':                 TextField(default=u''),
     'blog_email':               TextField(default=u''),
-    'timezone':                 TextField(default=u'UTC'),
+    'timezone':                 ChoiceField(choices=sorted(list_timezones()),
+                                            default=u'UTC'),
     'maintenance_mode':         BooleanField(default=False),
     'session_cookie_name':      TextField(default=u'zine_session'),
     'theme':                    TextField(default=u'default'),
     'secret_key':               TextField(default=u''),
-    'language':                 TextField(default=u'en'),
+    'language':                 ChoiceField(choices=[u'en'], default=u'en'),
     'plugin_searchpath':        TextField(default=u''),
 
     # the iid is an internal unique id for the instance.  The setup creates a
@@ -49,32 +52,47 @@ DEFAULT_VARS = {
 
     # logger settings
     'log_file':                 TextField(default=u'zine.log'),
-    'log_level':                TextField(default=u'warning'),
+    'log_level':                ChoiceField(choices=[(k, lazy_gettext(k)) for k, v
+                                                in sorted(log.LEVELS.items(),
+                                                          key=lambda x: x[1])],
+                                            default=u'warning'),
 
     # if set to true, internal errors are not catched.  This is useful for
     # debugging tools such as werkzeug.debug
     'passthrough_errors':       BooleanField(default=_dev_mode),
 
     # url settings
-    'blog_url_prefix':          TextField(default=u''),
-    'admin_url_prefix':         TextField(default=u'/admin'),
-    'category_url_prefix':      TextField(default=u'/categories'),
-    'tags_url_prefix':          TextField(default=u'/tags'),
-    'profiles_url_prefix':      TextField(default=u'/authors'),
+    'blog_url_prefix':          TextField(default=u'',
+                                          validators=[is_valid_url_prefix()]),
+    'admin_url_prefix':         TextField(default=u'/admin',
+                                          validators=[is_valid_url_prefix()]),
+    'category_url_prefix':      TextField(default=u'/categories',
+                                          validators=[is_valid_url_prefix()]),
+    'tags_url_prefix':          TextField(default=u'/tags',
+                                          validators=[is_valid_url_prefix()]),
+    'profiles_url_prefix':      TextField(default=u'/authors',
+                                          validators=[is_valid_url_prefix()]),
 
     # cache settings
     'enable_eager_caching':     BooleanField(default=False),
-    'cache_timeout':            IntegerField(default=300, required=True),
-    'cache_system':             TextField(default=u'null'),
-    'memcached_servers':        TextField(default=u''),
+    'cache_timeout':            IntegerField(default=300, min_value=10),
+    'cache_system':             ChoiceField(choices=[
+        (u'null', lazy_gettext(u'No Cache')),
+        (u'simple', lazy_gettext(u'Simple Cache')),
+        (u'memcached', lazy_gettext(u'memcached')),
+        (u'filesystem', lazy_gettext(u'Filesystem'))
+                                            ], default=u'null'),
+    'memcached_servers':        CommaSeparated(TextField(
+                                                    validators=[is_netaddr()]),
+                                               default=u''),
     'filesystem_cache_path':    TextField(default=u'cache'),
 
     # the default markup parser. Don't ever change this value! The
     # htmlprocessor module bypasses this test when falling back to
     # the default parser. If there plans to change the default parser
     # for future Zine versions that code must be altered first.
-    'default_parser':           TextField(default=u'zeml'),
-    'comment_parser':           TextField(default=u'text'),
+    'default_parser':           ChoiceField(default=u'zeml'),
+    'comment_parser':           ChoiceField(default=u'text'),
 
     # comments and pingback
     'comments_enabled':         BooleanField(default=True),
@@ -86,7 +104,7 @@ DEFAULT_VARS = {
     'pings_enabled':            BooleanField(default=True),
 
     # post view
-    'posts_per_page':           IntegerField(default=10, required=True),
+    'posts_per_page':           IntegerField(default=10),
     'use_flat_comments':        BooleanField(default=False),
     'index_content_types':      TextField(default='entry'),
 
@@ -96,7 +114,7 @@ DEFAULT_VARS = {
 
     # email settings
     'smtp_host':                TextField(default=u'localhost'),
-    'smtp_port':                IntegerField(default=25, required=True),
+    'smtp_port':                IntegerField(default=25),
     'smtp_user':                TextField(default=u''),
     'smtp_password':            TextField(default=u''),
     'smtp_use_tls':             BooleanField(default=False),
