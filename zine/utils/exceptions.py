@@ -27,7 +27,7 @@ class ZineException(Exception):
         return str(self).decode('utf-8', 'ignore')
 
 
-class UnicodeException(ZineException):
+class UserException(ZineException):
     """Baseclass for exception with unicode messages."""
 
     def __str__(self):

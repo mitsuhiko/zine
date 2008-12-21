@@ -96,7 +96,7 @@ from werkzeug import cached_property, escape, find_modules, import_string
 from zine.application import get_application
 from zine.utils import log
 from zine.utils.mail import split_email, is_valid_email, check
-from zine.utils.exceptions import UnicodeException, summarize_exception
+from zine.utils.exceptions import UserException, summarize_exception
 from zine.i18n import Translations, lazy_gettext, _
 
 
@@ -325,7 +325,7 @@ class MetaData(object):
         return result
 
 
-class InstallationError(UnicodeException):
+class InstallationError(UserException):
     """Raised during plugin installation."""
 
     MESSAGES = {
@@ -342,11 +342,11 @@ class InstallationError(UnicodeException):
     }
 
     def __init__(self, code):
-        UnicodeException.__init__(self, self.MESSAGES[code])
+        UserException.__init__(self, self.MESSAGES[code])
         self.code = code
 
 
-class SetupError(UnicodeException):
+class SetupError(UserException):
     """Raised by plugins if they want to stop their setup.  If a plugin raises
     a `SetupError` during the init, it will be disabled automatically.
     """

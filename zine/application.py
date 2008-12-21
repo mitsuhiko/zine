@@ -38,7 +38,7 @@ from zine.utils import ClosingIterator, local, local_manager, dump_json, \
      htmlhelpers
 from zine.utils.mail import split_email
 from zine.utils.datastructures import ReadOnlyMultiMapping
-from zine.utils.exceptions import UnicodeException
+from zine.utils.exceptions import UserException
 
 
 #: the default theme settings
@@ -217,7 +217,7 @@ def render_response(template_name, **context):
     return Response(render_template(template_name, **context))
 
 
-class InternalError(UnicodeException):
+class InternalError(UserException):
     """Subclasses of this exception are used to signal internal errors that
     should not happen, but may do if the configuration is garbage.  If an
     internal error is raised during request handling they are converted into

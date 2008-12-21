@@ -37,7 +37,7 @@ from werkzeug import escape, unescape
 
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment
-from zine.utils.exceptions import UnicodeException
+from zine.utils.exceptions import UserException
 from zine.utils.xml import XMLRPC, strip_tags
 
 
@@ -46,14 +46,14 @@ _pingback_re = re.compile(r'<link rel="pingback" href="([^"]+)" ?/?>(?i)')
 _chunk_re = re.compile(r'\n\n|<(?:p|div|h\d)[^>]*>')
 
 
-class PingbackError(UnicodeException):
+class PingbackError(UserException):
     """Raised if the remote server caused an exception while pingbacking.
     This is not raised if the pingback function is unable to locate a
     remote server.
     """
 
     def __init__(self, fault_code):
-        UnicodeException.__init__(self)
+        UserException.__init__(self)
         self.fault_code = fault_code
 
     @property
