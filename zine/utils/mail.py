@@ -12,7 +12,6 @@ from email.MIMEText import MIMEText
 from smtplib import SMTP, SMTPException
 from urlparse import urlparse
 
-from zine.i18n import _
 from zine.utils import local
 from zine.utils.validators import is_valid_email, check
 
@@ -88,8 +87,10 @@ class EMail(object):
             #smtp.set_debuglevel(1)
             smtp.ehlo()
             if not smtp.esmtp_features.has_key('starttls'):
-                raise RuntimeError(_("TLS enabled but server does not support "
-                                     "TLS"))
+                # XXX: untranlated because python exceptions do not support
+                # unicode messages.
+                raise RuntimeError('TLS enabled but server does not '
+                                   'support TLS')
             smtp.starttls()
             smtp.ehlo()
 

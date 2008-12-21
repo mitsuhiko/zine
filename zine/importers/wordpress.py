@@ -100,7 +100,7 @@ def parse_feed(fd):
         if name:
             author = authors.get(name)
             if author is None:
-                author = authors[name] = Author(name, None, len(authors) + 1)
+                author = authors[name] = Author(name, None, id=len(authors) + 1)
             return author
 
     tags = {}

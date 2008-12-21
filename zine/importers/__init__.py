@@ -22,7 +22,7 @@ from zine.i18n import _
 from zine.database import db, posts
 from zine.utils.xml import escape
 from zine.models import COMMENT_MODERATED
-from zine.privileges import BLOG_ADMIN, require_privilege
+from zine.privileges import BLOG_ADMIN, ENTER_ADMIN_PANEL, require_privilege
 
 
 def _make_id(*args):
@@ -95,7 +95,12 @@ def _perform_import(app, blog, d):
             if author_rewrite is not None:
                 user = User.query.get(int(author_rewrite))
             else:
-                user = User(author.name, None, author.email, is_author=True)
+                user = User(author.username, None, author.email,
+                            author.real_name, author.description,
+                            author.www, author.is_author)
+                if author.pw_hash:
+                    user.pw_hash = author.pw_hash
+                user.privileges.update(author.privileges)
             author_mapping[author.id] = user
         return author_mapping[author.id]
 
@@ -198,6 +203,16 @@ def _perform_import(app, blog, d):
     # send to the database
     yield u'<li>%s' % _('Committing transaction...')
     db.commit()
+
+    # write config if we have
+    if d['load_config']:
+        yield u'<li>%s' % _('Updating configuration...')
+        t = app.cfg.edit()
+        for key, value in blog.config.iteritems():
+            if key in t:
+                t.set_from_string(key, value)
+        t.commit()
+
     yield u' <em>%s</em></li></ul>' % _('done')
 
 
@@ -288,9 +303,17 @@ class Importer(object):
         """
 
 
-class Blog(object):
-    """Represents a blog."""
+class _Element(object):
     element = None
+
+    def __getstate__(self):
+        d = dict(self.__dict__)
+        d.pop('element', None)
+        return d
+
+
+class Blog(_Element):
+    """Represents a blog."""
 
     def __init__(self, title, link, description, language='en', tags=None,
                  categories=None, posts=None, authors=None,
@@ -310,7 +333,7 @@ class Blog(object):
             posts.sort(key=lambda x: x.pub_date, reverse=True)
         self.posts = posts or []
         if authors:
-            authors.sort(key=lambda x: x.name.lower())
+            authors.sort(key=lambda x: x.username.lower())
         self.authors = authors or []
         if configuration is None:
             configuration = {}
@@ -319,7 +342,7 @@ class Blog(object):
     def __getstate__(self):
         for post in self.posts:
             post.__dict__.pop('already_imported', None)
-        return self.__dict__
+        return _Element.__getstate__(self)
 
     def __setstate__(self, d):
         self.__dict__ = d
@@ -346,27 +369,31 @@ class Blog(object):
         )
 
 
-class Author(object):
+class Author(_Element):
     """Represents an author."""
-    element = None
 
-    def __init__(self, name, email, id=None):
+    def __init__(self, username, email, real_name=u'', description=u'',
+                 pw_hash=None, is_author=True, id=None):
         if id is None:
-            id = _make_id(name, email)
+            id = _make_id(username, email)
         self.id = id
-        self.name = name
+        self.username = username
+        self.real_name = real_name
         self.email = email
+        self.description = description
+        self.privileges = set([ENTER_ADMIN_PANEL])
+        self.is_author = is_author
+        self.pw_hash = pw_hash
 
     def __repr__(self):
         return '<%s %r>' % (
             self.__class__.__name__,
-            self.name
+            self.username
         )
 
 
-class Tag(object):
+class Tag(_Element):
     """Represents a tag."""
-    element = None
 
     def __init__(self, slug, name=None):
         self.slug = slug
@@ -394,9 +421,8 @@ class Category(Tag):
         self.description = description
 
 
-class Post(object):
+class Post(_Element):
     """Represents a blog post."""
-    element = None
 
     def __init__(self, slug, title, link, pub_date, author, intro, body,
                  tags=None, categories=None, comments=None,
@@ -436,9 +462,8 @@ class Post(object):
         )
 
 
-class Comment(object):
+class Comment(_Element):
     """Represents a comment on a post."""
-    element = None
 
     def __init__(self, author, body, author_email, author_url, parent,
                  pub_date, remote_addr, parser=None, is_pingback=False,

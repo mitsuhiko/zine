@@ -64,7 +64,7 @@ from babel.support import Translations as TranslationsBase
 from pytz import timezone, UTC
 from werkzeug.exceptions import NotFound
 
-import zine.application
+import zine
 from zine.environment import LOCALE_PATH
 from zine.utils import dump_json
 
@@ -199,7 +199,7 @@ class _TranslationProxy(object):
         self._func = func
         self._args = args
 
-    value = property(lambda x: x._func(*x._args))
+    value = property(lambda x: object.__getattribute__(x, '_func')(*x._args))
 
     def __contains__(self, key):
         return key in self.value
@@ -263,6 +263,12 @@ class _TranslationProxy(object):
             return self.__dir__()
         return getattr(self.value, name)
 
+    def __getstate__(self):
+        return self._func, self._args
+
+    def __setstate__(self, tup):
+        self._func, self._args = tup
+
     def __getitem__(self, key):
         return self.value[key]
 
@@ -275,6 +281,8 @@ class _TranslationProxy(object):
 
 def lazy_gettext(string):
     """A lazy version of `gettext`."""
+    if isinstance(string, _TranslationProxy):
+        return string
     return _TranslationProxy(gettext, string)
 
 

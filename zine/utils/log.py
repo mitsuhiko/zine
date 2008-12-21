@@ -24,7 +24,7 @@ from traceback import print_exception, format_exception
 from werkzeug.exceptions import NotFound
 
 from zine.i18n import gettext
-from zine.utils import local
+from zine.application import get_application
 from zine.utils.io import tail
 from zine.utils.dates import format_iso8601, parse_iso8601
 
@@ -210,7 +210,7 @@ def _logging_func(name):
     level = LEVELS[name]
     def log(message, module=None):
         try:
-            logger = local.application.log
+            logger = get_application().log
         except AttributeError:
             warn(UnboundLogging('Tried to log %r but no application '
                                 'was bound to the calling thread'
@@ -227,7 +227,7 @@ def exception(message=None, module=None, exc_info=None):
     if exc_info is None:
         exc_info = sys.exc_info()
     try:
-        logger = local.application.log
+        logger = get_application().log
     except AttributeError:
         # no application, write the exception to stderr
         return print_exception(*exc_info)

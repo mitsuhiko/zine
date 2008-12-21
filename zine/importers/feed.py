@@ -9,13 +9,16 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
+from lxml import etree
 from zine.application import get_application
 from zine.i18n import _, lazy_gettext
 from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.forms import FeedImportForm
 from zine.utils import log
+from zine.utils.admin import flash
 from zine.utils.dates import parse_iso8601
 from zine.utils.xml import Namespace, to_text
+from zine.utils.http import redirect_to
 from zine.zxa import ZINE_NS, ATOM_NS, XML_NS
 
 
@@ -54,11 +57,11 @@ def _get_html_content(elements):
 
 
 def parse_feed(fd):
-    tree = etree.parse(fd)
-    if tree.find('rss'):
+    tree = etree.parse(fd).getroot()
+    if tree.tag == 'rss':
         parser_clas = RSSParser
-    elif tree.find('feed'):
-        parser_class = ATOMParser
+    elif tree.tag == atom.feed:
+        parser_class = AtomParser
     else:
         raise FeedImportError(_('Unknown feed uploaded.'))
     parser = parser_class(tree)
@@ -77,7 +80,27 @@ class Parser(object):
         self.posts = []
         self.blog = None
         self.extensions = [extension(self.app, self, tree)
-                           for extension in app.feed_importer_extensions]
+                           for extension in self.app.feed_importer_extensions]
+
+    def find_tag(self, **critereon):
+        return self._find_criteron(self.tags, critereon)
+
+    def find_category(self, **critereon):
+        return self._find_criteron(self.categories, critereon)
+
+    def find_author(self, **critereon):
+        return self._find_criteron(self.authors, critereon)
+
+    def find_post(self, **critereon):
+        return self._find_criteron(self.posts, critereon)
+
+    def _find_criteron(self, sequence, d):
+        if len(d) != 1:
+            raise TypeError('one critereon expected')
+        key, value = d.iteritems().next()
+        for item in sequence:
+            if getattr(item, key, None) == value:
+                return item
 
 
 class RSSParser(Parser):
@@ -97,7 +120,7 @@ class AtomParser(Parser):
         self._categories_by_term = {}
 
         # and the same for authors
-        self._authors_by_name = {}
+        self._authors_by_username = {}
         self._authors_by_email = {}
 
     def parse(self):
@@ -105,23 +128,23 @@ class AtomParser(Parser):
             self.posts.append(self.parse_post(entry))
 
         self.blog = Blog(
-            tree.findtext('title'),
-            tree.findtext('link'),
-            tree.findtext('subtitle'),
-            tree.findtext(xml.lang),
-            tags.values(),
-            categories.values(),
-            posts,
-            authors.values()
+            self.tree.findtext(atom.title),
+            self.tree.findtext(atom.link),
+            self.tree.findtext(atom.subtitle),
+            self.tree.attrib.get(xml.lang, u'en'),
+            self.tags,
+            self.categories,
+            self.posts,
+            self.authors
         )
-        self.blog.element = tree
-        for extension in extensions:
+        self.blog.element = self.tree
+        for extension in self.extensions:
             extension.handle_root(self.blog)
 
     def parse_post(self, entry):
         # parse the dates first.
-        updated = parse_iso8601(item.findtext(atom.updated))
-        published = item.findtext(atom.published)
+        updated = parse_iso8601(entry.findtext(atom.updated))
+        published = entry.findtext(atom.published)
         if published is not None:
             published = parse_iso8601(published)
         else:
@@ -133,10 +156,14 @@ class AtomParser(Parser):
         # as category.
         tags, categories = self.parse_categories(entry)
 
+        link = entry.find(atom.link)
+        if link is not None:
+            link = link.attrib.get('href')
+
         post = Post(
             None,
             _get_text_content(entry.findall(atom.title)),
-            entry.findtext('link'),
+            link,
             published,
             self.parse_author(entry),
             # XXX: the Post is prefixing the intro before the actual
@@ -149,15 +176,18 @@ class AtomParser(Parser):
             tags,
             categories,
             parser='html',
-            updated=updated
+            updated=updated,
+            uid=entry.findtext(atom.id)
         )
         post.element = entry
 
         # now parse the comments for the post
         self.parse_comments(post)
 
-        for extension in extensions:
+        for extension in self.extensions:
             extension.postprocess_post(post)
+
+        return post
 
     def parse_author(self, entry):
         """Lookup the author for the given entry."""
@@ -165,33 +195,37 @@ class AtomParser(Parser):
             if author.email is not None and \
                author.email not in self._authors_by_email:
                 self._authors_by_email[author.email] = author
-            if author.name is not None and \
-               author.name not in self._authors_by_name:
-                self._authors_by_name[author.name] = author
+            if author.username is not None and \
+               author.username not in self._authors_by_username:
+                self._authors_by_username[author.username] = author
 
         author = entry.find(atom.author)
+        email = author.findtext(atom.email)
+        username = author.findtext(atom.name)
+
         for extension in self.extensions:
-            rv = extension.lookup_author(author, entry)
+            rv = extension.lookup_author(author, entry, username, email)
             if rv is not None:
                 _remember_author(rv)
                 return rv
 
-        email = author.attrib.get('email')
         if email is not None and email in self._authors_by_email:
             return self._authors_by_email[email]
-        name = author.attrib['name']
-        if name in self._authors_by_name:
-            return self._authors_by_name[name]
-        author = Author(name, email)
+        if username in self._authors_by_username:
+            return self._authors_by_username[username]
+
+        print (author.getchildren(), email, username)
+        author = Author(username, email)
         _remember_author(author)
+        self.authors.append(author)
         return author
 
     def parse_categories(self, entry):
         """Is passed an <entry> element and parses all <category>
         child elements.  Returns a tuple with ``(tags, categories)``.
         """
-        def _remember_category(category):
-            term = category.attrib['term']
+        def _remember_category(category, element):
+            term = element.attrib['term']
             if term not in self._categories_by_term:
                 self._categories_by_term[term] = category
 
@@ -206,14 +240,15 @@ class AtomParser(Parser):
                         tags.append(rv)
                     else:
                         categories.append(rv)
-                        _remember_category(rv)
+                        _remember_category(rv, category)
                     break
             else:
                 rv = self._categories_by_term.get(category.attrib['term'])
                 if rv is None:
                     rv = Category(category.attrib['term'],
                                   category.attrib.get('label'))
-                    _remember_category(rv)
+                    _remember_category(rv, category)
+                    self.categories.append(rv)
                 categories.append(rv)
 
         return tags, categories
@@ -224,6 +259,7 @@ class AtomParser(Parser):
             rv = extension.parse_comments(post)
             if rv is not None:
                 post.comments.extend(rv)
+                self.comments.extend(rv)
 
 
 class FeedImportError(Exception):
@@ -289,7 +325,7 @@ class Extension(object):
         extension also has to look there first for matching categories.
         """
 
-    def lookup_author(self, author, entry):
+    def lookup_author(self, author, entry, username, email):
         """Lookup the author for an element.  `author` is an element
         that points to the author relevant element for the feed.
         `entry` points to the whole entry element.
@@ -310,7 +346,7 @@ class Extension(object):
 class ZEAExtension(Extension):
 
     def handle_root(self, blog):
-        self.blog.configuration.update(self._parse_config(
+        blog.configuration.update(self._parse_config(
             blog.element.find(zine.configuration)))
 
     def _parse_config(self, element):

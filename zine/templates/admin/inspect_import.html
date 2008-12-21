@@ -11,6 +11,9 @@
     <dl>
       {{ form.title.as_dd() }}
       {{ form.description.as_dd() }}
+      {% if blog.config %}
+        {{ form.load_config.as_dd() }}
+      {% endif %}
       <dt>{{ _('Dump ID') }}</dt>
       <dd><code>{{ dump_id }}</code><br>
           <small>{{ _('If you have a special installation and want to '
@@ -26,7 +29,7 @@
     {% endtrans %}</p>
     <ul>
     {%- for author in blog.authors %}
-      <li>{{ form.authors[author.id]() }} &mdash; {{ author.name|e }}</li>
+      <li>{{ form.authors[author.id]() }} &mdash; {{ author.username|e }}</li>
     {%- else %}
       <li><em>{{ _("no author information") }}</em></li>
     {%- endfor %}
@@ -52,13 +55,13 @@
       <tr class="already-imported">
         <td>{{ post.pub_date|datetimeformat|e }}</td>
         <td>{{ post.title|e }}</td>
-        <td>{{ post.author.name|e }}</td>
+        <td>{{ post.author.username|e }}</td>
         <td>{{ post.comments|count }}</td>
       {%- else %}
       <tr>
         <td>{{ post.pub_date|datetimeformat|e }}</td>
         <td>{{ form.posts[post.id].with_help_text() }}</td>
-        <td>{{ post.author.name|e }}</td>
+        <td>{{ post.author.username|e }}</td>
         <td>{{ form.comments[post.id]() }}</td>
       {% endif %}
       </tr>

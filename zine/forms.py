@@ -984,7 +984,7 @@ def make_import_form(blog):
         for user in User.query.order_by('username').all()
     ]
 
-    _authors = dict((author.id, forms.ChoiceField(author.name,
+    _authors = dict((author.id, forms.ChoiceField(author.username,
                                                   choices=user_choices))
                     for author in blog.authors)
     _posts = dict((post.id, forms.BooleanField(help_text=post.title)) for post
@@ -1000,6 +1000,10 @@ def make_import_form(blog):
         authors = forms.Mapping(_authors)
         posts = forms.Mapping(_posts)
         comments = forms.Mapping(_comments)
+        load_config = forms.BooleanField(lazy_gettext(u'Load config values'),
+                                         help_text=lazy_gettext(
+                                         u'Load the configuration values '
+                                         u'from the import.'))
 
         def perform_import(self):
             from zine.importers import perform_import
