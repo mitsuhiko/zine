@@ -37,6 +37,7 @@ from werkzeug import escape, unescape
 
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment
+from zine.utils.datastructures import UnicodeException
 from zine.utils.xml import XMLRPC, strip_tags
 
 
@@ -45,30 +46,30 @@ _pingback_re = re.compile(r'<link rel="pingback" href="([^"]+)" ?/?>(?i)')
 _chunk_re = re.compile(r'\n\n|<(?:p|div|h\d)[^>]*>')
 
 
-class PingbackError(Exception):
+class PingbackError(UnicodeException):
     """Raised if the remote server caused an exception while pingbacking.
     This is not raised if the pingback function is unable to locate a
     remote server.
     """
 
     def __init__(self, fault_code):
+        UnicodeException.__init__(self)
         self.fault_code = fault_code
-        Exception.__init__(self, fault_code)
 
     @property
     def ignore_silently(self):
         return self.fault_code in (17, 33, 48, 49)
 
     @property
-    def description(self):
+    def message(self):
         return {
-            16: _('source URL does not exist'),
-            17: _('The source URL does not contain a link to the target URL'),
-            32: _('The specified target URL does not exist'),
-            33: _('The specified target URL cannot be used as a target'),
-            48: _('The pingback has already been registered'),
-            49: _('Access Denied')
-        }.get(self.fault_code, _('An unknown server error (%s) occurred') %
+            16: _(u'source URL does not exist'),
+            17: _(u'The source URL does not contain a link to the target URL'),
+            32: _(u'The specified target URL does not exist'),
+            33: _(u'The specified target URL cannot be used as a target'),
+            48: _(u'The pingback has already been registered'),
+            49: _(u'Access Denied')
+        }.get(self.fault_code, _(u'An unknown server error (%s) occurred') %
               self.fault_code)
 
 

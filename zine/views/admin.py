@@ -247,7 +247,7 @@ def ping_post_links(request, post):
                 if not e.ignore_silently:
                     flash(_(u'Could not ping %(url)s: %(error)s') % {
                         'url': html_url,
-                        'error': e.description
+                        'error': e.message
                     }, 'error')
             else:
                 flash(_(u'%s was pinged successfully.') %

@@ -21,6 +21,7 @@ from zine.utils.dates import parse_iso8601
 from zine.utils.xml import Namespace, to_text
 from zine.utils.http import redirect_to
 from zine.utils.zeml import load_parser_data
+from zine.utils.datastructures import UnicodeException
 from zine.zxa import ZINE_NS, ATOM_NS, XML_NS, ZINE_TAG_URI, ZINE_CATEGORY_URI
 
 
@@ -283,12 +284,8 @@ class AtomParser(Parser):
             post.comments.extend(extension.parse_comments(post) or ())
 
 
-class FeedImportError(Exception):
+class FeedImportError(UnicodeException):
     """Raised if the system was unable to import the feed."""
-
-    def __init__(self, message):
-        Exception.__init__(self, message.encode('utf-8'))
-        self.message = message
 
 
 class FeedImporter(Importer):
@@ -315,7 +312,7 @@ class FeedImporter(Importer):
                 flash(_(u'Error parsing feed: %s') % e, 'error')
             else:
                 self.enqueue_dump(blog)
-                flash(_('Added imported items to queue.'))
+                flash(_(u'Added imported items to queue.'))
                 return redirect_to('admin/import')
 
         return self.render_admin_page('admin/import_feed.html',

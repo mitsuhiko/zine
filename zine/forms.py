@@ -24,7 +24,6 @@ from zine.utils.validators import ValidationError, is_valid_email, \
 from zine.utils.redirects import register_redirect
 
 
-
 class LoginForm(forms.Form):
     """The form for the login page."""
     user = forms.ModelField(User, 'username', required=True, messages=dict(

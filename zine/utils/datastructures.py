@@ -11,7 +11,42 @@
 from itertools import izip, imap
 from copy import deepcopy
 
-missing = object()
+
+class _Missing(object):
+    def __reduce__(self):
+        return 'missing'
+    def __repr__(self):
+        return 'No default'
+missing = _Missing()
+del _Missing
+
+
+class ZineException(Exception):
+    """Baseclass for all Zine exceptions."""
+    message = None
+
+    def __init__(self, message=None):
+        Exception.__init__(self)
+        if message is not None:
+            self.message = message
+
+    def __str__(self):
+        return self.message or ''
+
+    def __unicode__(self):
+        return str(self).decode('utf-8', 'ignore')
+
+
+class UnicodeException(ZineException):
+    """Baseclass for exception with unicode messages."""
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
+    def __unicode__(self):
+        if self.message is None:
+            return u''
+        return unicode(self.message)
 
 
 class ReadOnlyMultiMapping(object):
