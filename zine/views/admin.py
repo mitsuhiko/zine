@@ -895,15 +895,15 @@ def theme(request):
     """Allow the user to select one of the themes that are available."""
     form = ThemeOptionsForm()
 
-    if request.method == 'GET' and form.validate(request.args):
+    if request.method == 'GET':
         if 'configure' in request.args:
             return redirect_to('admin/configure_theme')
-
-        new_theme = request.args.get('select')
-        if new_theme in request.app.themes:
-            request.app.cfg.change_single('theme', new_theme)
-            flash(_(u'Theme changed successfully.'), 'configure')
-            return redirect_to('admin/theme')
+        elif form.validate(request.args):
+            new_theme = request.args.get('select')
+            if new_theme in request.app.themes:
+                request.app.cfg.change_single('theme', new_theme)
+                flash(_(u'Theme changed successfully.'), 'configure')
+                return redirect_to('admin/theme')
 
     return render_admin_response('admin/theme.html', 'options.theme',
         themes=sorted(request.app.themes.values(),
