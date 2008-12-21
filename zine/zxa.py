@@ -257,7 +257,9 @@ class Writer(object):
             attrib = dict(term=category.slug, scheme=ZINE_CATEGORY_URI)
             if category.slug != category.name:
                 attrib['label'] = category.name
-            self.atom('category', attrib=attrib, parent=entry)
+            element = self.atom('category', attrib=attrib, parent=entry)
+            if category.description:
+                self.zine.description(category.description, parent=element)
 
         for tag in post.tags:
             attrib = dict(term=tag.slug, scheme=ZINE_TAG_URI)
