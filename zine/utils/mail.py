@@ -134,5 +134,3 @@ class EMail(object):
             return self.send()
         except Exception:
             return
-
-

@@ -82,7 +82,7 @@ class OrderedDict(dict):
     >>> d.update({'foo': 'bar'})
     >>> d
     OrderedDict([('a', 'b'), ('c', 'd'), ('foo', 'bar')])
-    
+
     Keep in mind that when updating from dict-literals the order is not
     preserved as these dicts are unsorted!
 
@@ -131,7 +131,7 @@ class OrderedDict(dict):
     >>> d.reverse()
     >>> d
     OrderedDict([('spam', []), ('foo', 'bar'), ('c', 'd'), ('a', 'b')])
-    
+
     And sort it like a list:
 
     >>> d.sort(key=lambda x: x[0].lower())
