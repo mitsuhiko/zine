@@ -395,7 +395,7 @@ msgstr "Sprache"
 
 #: zine/forms.py:839
 msgid "Timezone"
-msgstr ""
+msgstr "Zeitzone"
 
 #: zine/forms.py:841
 msgid "Cookie Name"
@@ -519,7 +519,7 @@ msgstr "Dump Download URL"
 
 #: zine/forms.py:933
 msgid "Feed Download URL"
-msgstr ""
+msgstr "Feed Download URI"
 
 #: zine/forms.py:950
 msgid "Use default value"
@@ -535,11 +535,11 @@ msgstr "Blogbeschreibung"
 
 #: zine/forms.py:1007
 msgid "Load config values"
-msgstr ""
+msgstr "Konfiguration laden"
 
 #: zine/forms.py:1008
 msgid "Load the configuration values from the import."
-msgstr ""
+msgstr "Die Konfiguration aus dem Import laden."
 
 #: zine/parsers.py:73
 msgid "Zine-Markup"
@@ -607,12 +607,12 @@ msgstr ""
 
 #: zine/pluginsystem.py:361
 msgid "Plugin setup error"
-msgstr ""
+msgstr "Plugin Setup Fehler"
 
 #: zine/pluginsystem.py:372
 #, python-format
 msgid "Exception happend on setup: %(error)s (%(file)s, line %(line)d)"
-msgstr ""
+msgstr "Ein Fehler ist im Setup aufgetreten: %(error)s (%(file)s, Zeile %(line)d)"
 
 #: zine/privileges.py:153
 msgid "can enter admin panel"
@@ -1591,6 +1591,11 @@ msgid ""
 "      the type of server you have and the number of visitors.\n"
 "    "
 msgstr ""
+"\n"
+"      Zine kommt mit einem Cache System, dass es erlaubt einen plötzlichen\n"
+"      Benutzeransturm zu bewältigen.  Das Cache System hat verschiedene\n"
+"      Backends von denen du wählen kannst.\n"
+"    "
 
 #: zine/templates/admin/cache.html:12
 msgid ""
@@ -1602,6 +1607,11 @@ msgid ""
 "      plugins it might be a good idea to disable all caching.\n"
 "    "
 msgstr ""
+"\n"
+"      Beachte, dass bei aktivierem Caching auch Templates gecacht werden\n"
+"      und unter Umständen bei Veränderungen nicht neugeladen werden.  Wenn\n"
+"      du Plugins entwickelst ist es eine gute Idee, den Cache zu deaktivieren.\n"
+"    "
 
 #: zine/templates/admin/cache.html:28
 msgid "Cache System"
@@ -2157,6 +2167,10 @@ msgid ""
 "    configuration.\n"
 "  "
 msgstr ""
+"\n"
+"    Bitte bachte, dass die exportiere Datei Passwort Hashes und Datenbank\n"
+"    Passwörter beinhaltet.\n"
+"   "
 
 #: zine/templates/admin/help.html:8
 msgid "Table Of Contents"
@@ -2308,10 +2322,16 @@ msgid ""
 "    this importer can currently only handle Atom feeds.\n"
 "  "
 msgstr ""
+"\n"
+"    Dieser Importer kann genutzt werden um Standard konforme Feeds mit\n"
+"    optionalen, propritären Erweiterungen zu importern.  Weil es viele\n"
+"    verschiedene, zu einander inkompatible RSS Standards gibt kann dieser\n"
+"    Importer momentan nur Atom Feeds importeren.\n"
+"  "
 
 #: zine/templates/admin/import_feed.html:13
 msgid "Upload Feed"
-msgstr ""
+msgstr "Feed hochladen"
 
 #: zine/templates/admin/import_wordpress.html:2
 #: zine/templates/admin/import_wordpress.html:4
