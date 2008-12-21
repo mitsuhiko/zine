@@ -68,6 +68,22 @@ class ReadOnlyMultiMapping(object):
         return result
 
 
+class _PickleProtocol2Sucks(object):
+    """This class implements a dummy container that just eats up all
+    the stuff appended to it.  It exists because pickle protocol 2 feeds
+    stuff to the ordered dict with opcodes *before* `__setstate__` is
+    called.  As a matter of fact no `_keys` is present on the dict that point
+    and the unpickling crashes with an `AttributeError`.
+
+    This behavior is confusing and yet undocumented, see `#4612`_.
+
+    .. _#4612: http://bugs.python.org/issue4712
+    """
+
+    def append(self, value):
+        pass
+
+
 class OrderedDict(dict):
     """Simple ordered dict implementation.
 
@@ -141,6 +157,7 @@ class OrderedDict(dict):
     .. _proposal: http://thread.gmane.org/gmane.comp.python.devel/95316
     .. _ordereddict: http://www.xs4all.nl/~anthon/Python/ordereddict/
     """
+    _keys = _PickleProtocol2Sucks()
 
     def __init__(self, *args, **kwargs):
         dict.__init__(self)
@@ -172,7 +189,7 @@ class OrderedDict(dict):
 
     def __setstate__(self, d):
         self._keys = d['keys']
-        dict.update(d['items'])
+        dict.update(self, d['items'])
 
     def __reversed__(self):
         return reversed(self._keys)
@@ -227,7 +244,7 @@ class OrderedDict(dict):
 
     def popitem(self, key):
         self._keys.remove(key)
-        return dict.popitem(key)
+        return dict.popitem(self, key)
 
     def setdefault(self, key, default=None):
         if key not in self:

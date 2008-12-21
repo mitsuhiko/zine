@@ -115,18 +115,20 @@ def parse_feed(fd):
                             item.findtext(WORDPRESS.cat_name))
         categories[category.name] = category
 
-    return Blog(
-        tree.findtext('title'),
-        tree.findtext('link'),
-        tree.findtext('description') or '',
-        tree.findtext('language') or 'en',
-        tags.values(),
-        categories.values(),
-        [Post(
-            item.findtext(WORDPRESS.post_name),
+    posts = []
+
+    for item in tree.findall('item'):
+        status = {
+            'draft':            STATUS_DRAFT
+        }.get(item.findtext(WORDPRESS.status), STATUS_PUBLISHED)
+        post_name = item.findtext(WORDPRESS.post_name)
+        pub_date = parse_wordpress_date(item.findtext(WORDPRESS.post_date_gmt))
+        slug = pub_date.strftime('%Y/%m/%d/') + post_name
+        post = Post(
+            slug,
             item.findtext('title'),
             item.findtext('link'),
-            parse_wordpress_date(item.findtext(WORDPRESS.post_date_gmt)),
+            pub_date,
             get_author(item.findtext(DC_METADATA.creator)),
             item.findtext('description'),
             item.findtext(CONTENT.encoded),
@@ -152,8 +154,17 @@ def parse_feed(fd):
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
             parser='html'
-        ) for item in tree.findall('item')
-          if item.findtext(WORDPRESS.status) == 'publish'],
+        )
+        posts.append(post)
+
+    return Blog(
+        tree.findtext('title'),
+        tree.findtext('link'),
+        tree.findtext('description') or '',
+        tree.findtext('language') or 'en',
+        tags.values(),
+        categories.values(),
+        posts,
         authors.values()
     )
 

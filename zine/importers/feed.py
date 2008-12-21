@@ -20,6 +20,7 @@ from zine.utils.admin import flash
 from zine.utils.dates import parse_iso8601
 from zine.utils.xml import Namespace, to_text
 from zine.utils.http import redirect_to
+from zine.utils.zeml import load_parser_data
 from zine.zxa import ZINE_NS, ATOM_NS, XML_NS, ZINE_TAG_URI, ZINE_CATEGORY_URI
 
 
@@ -71,10 +72,15 @@ def _pickle(value):
         return loads(value.decode('base64'))
 
 
+def _parser_data(value):
+    if value:
+        return load_parser_data(value.decode('base64'))
+
+
 def parse_feed(fd):
     tree = etree.parse(fd).getroot()
     if tree.tag == 'rss':
-        parser_clas = RSSParser
+        parser_class = RSSParser
     elif tree.tag == atom.feed:
         parser_class = AtomParser
     else:
@@ -274,9 +280,7 @@ class AtomParser(Parser):
     def parse_comments(self, post):
         """Parse the comments for the post."""
         for extension in self.extensions:
-            rv = extension.parse_comments(post)
-            if rv is not None:
-                post.comments.extend(rv)
+            post.comments.extend(extension.parse_comments(post) or ())
 
 
 class FeedImportError(Exception):
@@ -411,22 +415,6 @@ class ZEAExtension(Extension):
             self.parser.authors.append(author)
         return author
 
-    def handle_root(self, blog):
-        blog.configuration.update(self._parse_config(
-            blog.element.find(zine.configuration)))
-
-    def lookup_author(self, author, entry, username, email):
-        dependency = author.attrib.get(zine.dependency)
-        if dependency is not None:
-            return self._get_author(dependency)
-
-    def tag_or_category(self, element):
-        scheme = element.attrib.get('scheme')
-        if scheme == ZINE_TAG_URI:
-            return self._parse_tag(element)
-        elif scheme == ZINE_CATEGORY_URI:
-            return self._parse_category(element)
-
     def _parse_tag(self, element):
         term = element.attrib['term']
         if term not in self._tags:
@@ -439,6 +427,27 @@ class ZEAExtension(Extension):
             self._categories[term] = Category(term, element.attrib.get('label'),
                                               element.findtext(zine.description))
         return self._categories[term]
+
+    def handle_root(self, blog):
+        blog.configuration.update(self._parse_config(
+            blog.element.find(zine.configuration)))
+
+    def postprocess_post(self, post):
+        content_type = post.element.findtext(zine.content_type)
+        if content_type is not None:
+            post.content_type = content_type
+
+    def lookup_author(self, author, entry, username, email):
+        dependency = author.attrib.get(zine.dependency)
+        if dependency is not None:
+            return self._get_author(dependency)
+
+    def tag_or_category(self, element):
+        scheme = element.attrib.get('scheme')
+        if scheme == ZINE_TAG_URI:
+            return self._parse_tag(element)
+        elif scheme == ZINE_CATEGORY_URI:
+            return self._parse_category(element)
 
     def parse_comments(self, post):
         comments = {}
@@ -461,7 +470,8 @@ class ZEAExtension(Extension):
                               element.findtext(zine.submitter_ip), 'html',
                               _to_bool(element.findtext(zine.is_pingback)),
                               int(element.findtext(zine.status)),
-                              element.findtext(zine.blocked_msg))
+                              element.findtext(zine.blocked_msg),
+                              _parser_data(element.findtext(zine.parser_data)))
             comments[int(element.attrib['id'])] = comment
             parent = element.findtext(zine.parent)
             if parent is not None:
@@ -470,7 +480,7 @@ class ZEAExtension(Extension):
         for comment, parent_id in unresolved_parents.iteritems():
             comment.parent = comments[parent_id]
 
-        return comments.values() or None
+        return comments.values()
 
 
 extensions = [ZEAExtension]

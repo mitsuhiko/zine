@@ -25,6 +25,9 @@ from zine.models import COMMENT_MODERATED
 from zine.privileges import BLOG_ADMIN, ENTER_ADMIN_PANEL, require_privilege
 
 
+ignored_config_keys = frozenset(['database_uri'])
+
+
 def _make_id(*args):
     hash = md5()
     for arg in args:
@@ -163,6 +166,8 @@ def _perform_import(app, blog, d):
                     old_post.updated, old_post.comments_enabled,
                     old_post.pings_enabled, parser=old_post.parser,
                     uid=old_post.uid)
+        if old_post.parser_data is not None:
+            post.parser_data = old_post.parser_data
         yield u'<li><strong>%s</strong>' % escape(post.title)
 
         for tag in old_post.tags:
@@ -211,7 +216,7 @@ def _perform_import(app, blog, d):
         yield u'<li>%s' % _('Updating configuration...')
         t = app.cfg.edit()
         for key, value in blog.config.iteritems():
-            if key in t:
+            if key in t and key not in ignored_config_keys:
                 t.set_from_string(key, value)
         t.commit()
 
@@ -309,9 +314,8 @@ class _Element(object):
     element = None
 
     def __getstate__(self):
-        d = dict(self.__dict__)
-        d.pop('element', None)
-        return d
+        self.__dict__.pop('element', None)
+        return self.__dict__
 
 
 class Blog(_Element):
@@ -430,7 +434,7 @@ class Post(_Element):
     def __init__(self, slug, title, link, pub_date, author, intro, body,
                  tags=None, categories=None, comments=None,
                  comments_enabled=True, pings_enabled=True, updated=None,
-                 uid=None, parser=None):
+                 uid=None, parser=None, parser_data=None):
         self.slug = slug
         self.title = title
         self.link = link
@@ -446,6 +450,7 @@ class Post(_Element):
         self.updated = updated or self.pub_date
         self.uid = uid or self.link
         self.parser = parser or 'html'
+        self.parser_data = parser_data
 
     @property
     def text(self):
@@ -470,7 +475,8 @@ class Comment(_Element):
 
     def __init__(self, author, body, author_email, author_url, parent,
                  pub_date, remote_addr, parser=None, is_pingback=False,
-                 status=COMMENT_MODERATED, blocked_msg=u''):
+                 status=COMMENT_MODERATED, blocked_msg=u'',
+                 parser_data=None):
         self.author = author
         self.author_email = author_email
         self.author_url = author_url
@@ -482,6 +488,7 @@ class Comment(_Element):
         self.is_pingback = is_pingback
         self.status = status
         self.blocked_msg = blocked_msg
+        self.parser_data = parser_data
 
     def __repr__(self):
         return '<%s %r>' % (

@@ -267,7 +267,7 @@ class Writer(object):
                 attrib['label'] = tag.name
             self.atom('tag', attrib=attrib, parent=entry)
 
-        self.z('data', text=dump_parser_data(post.parser_data).encode('base64'),
+        self.z('parser_data', text=dump_parser_data(post.parser_data).encode('base64'),
                parent=entry)
 
         for c in post.comments:
@@ -295,7 +295,7 @@ class Writer(object):
             self.z('content', type='html', text=c.body.to_html(),
                    parent=comment)
             self.z('content', type='text', text=c.text, parent=comment)
-            self.z('data', text=dump_parser_data(c.parser_data).encode('base64'),
+            self.z('parser_data', text=dump_parser_data(c.parser_data).encode('base64'),
                    parent=comment)
 
         for participant in self.participants:
