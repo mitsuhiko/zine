@@ -37,7 +37,7 @@ from werkzeug import escape, unescape
 
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment
-from zine.utils.datastructures import UnicodeException
+from zine.utils.exceptions import UnicodeException
 from zine.utils.xml import XMLRPC, strip_tags
 
 

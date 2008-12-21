@@ -21,7 +21,7 @@ from zine.utils.dates import parse_iso8601
 from zine.utils.xml import Namespace, to_text
 from zine.utils.http import redirect_to
 from zine.utils.zeml import load_parser_data
-from zine.utils.datastructures import UnicodeException
+from zine.utils.exceptions import UnicodeException
 from zine.zxa import ZINE_NS, ATOM_NS, XML_NS, ZINE_TAG_URI, ZINE_CATEGORY_URI
 
 

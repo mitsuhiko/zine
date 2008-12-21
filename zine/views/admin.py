@@ -163,26 +163,11 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         plugins_to_deactivate = []
         for plugin in request.app.plugins.itervalues():
             if plugin.active and plugin.setup_error is not None:
+                flash(_(u'Could not activate plugin “%(name)s”: %(error)s') % {
+                    'name':     plugin.html_display_name,
+                    'error':    plugin.setup_error
+                })
                 plugins_to_deactivate.append(plugin.name)
-                exc_type, exc_value, tb = plugin.setup_error
-                if exc_type is SetupError:
-                    msg = _(u'Could not activate plugin “%(name)s”: %(error)s') % {
-                        'name': plugin.html_display_name,
-                        'error': exc_value.message
-                    }
-                else:
-                    msg =_(u'The plugin guard detected that the plugin '
-                           u'“%(name)s” causes problems (%(error)s in '
-                           u'%(file)s, line %(line)s) and deactivated it.  If '
-                           u'you want to debug it, disable the plugin guard.') % {
-                        'name': plugin.html_display_name,
-                        'error': escape(str(plugin.setup_error[1]).
-                                        decode('utf-8', 'ignore')),
-                        'file': plugin.setup_error[2].tb_frame.
-                                    f_globals.get('__file__', _(u'unknown file')),
-                        'line': plugin.setup_error[2].tb_lineno
-                    }
-                flash(msg, 'error')
 
         if plugins_to_deactivate:
             #TODO: it's quite tricky – it needs at least two reloads to

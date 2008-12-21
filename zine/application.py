@@ -37,7 +37,8 @@ from zine.cache import get_cache
 from zine.utils import ClosingIterator, local, local_manager, dump_json, \
      htmlhelpers
 from zine.utils.mail import split_email
-from zine.utils.datastructures import ReadOnlyMultiMapping, UnicodeException
+from zine.utils.datastructures import ReadOnlyMultiMapping
+from zine.utils.exceptions import UnicodeException
 
 
 #: the default theme settings
