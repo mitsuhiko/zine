@@ -18,7 +18,7 @@
     :license: BSD
 """
 from zine.application import render_template
-from zine.models import Post, Category, Comment
+from zine.models import Post, Category, Tag, Comment
 
 
 class Widget(object):
@@ -80,5 +80,16 @@ class LatestComments(Widget):
         self.show_title = show_title
 
 
+class TagCloud(Widget):
+    """Show a tagcloud."""
+
+    name = 'tag_cloud'
+    template = 'widgets/tagcloud.html'
+
+    def __init__(self, max=None, show_title=False):
+        self.tags = Tag.query.get_cloud(max)
+        self.show_title = show_title
+
+
 #: list of all core widgets
-all_widgets = [PostArchiveSummary, LatestPosts, LatestComments]
+all_widgets = [PostArchiveSummary, LatestPosts, LatestComments, TagCloud]

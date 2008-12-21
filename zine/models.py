@@ -892,8 +892,8 @@ class TagQuery(db.Query):
 
         q = ((pt.tag_id == t.tag_id) &
              (p.post_id == pt.post_id) & (
-                (p2.status == STATUS_PUBLISHED) |
-                (p2.pub_date >= datetime.utcnow())))
+                (p.status == STATUS_PUBLISHED) |
+                (p.pub_date >= datetime.utcnow())))
 
         s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
                       pt.tag_id == t.tag_id,
