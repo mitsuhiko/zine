@@ -328,12 +328,12 @@ class InstallationError(ValueError):
 
     MESSAGES = {
         'invalid':  lazy_gettext('Could not install the plugin because the '
-                                 'file uploaded is not a valid plugin file.'),
+                                 'uploaded file is not a valid plugin file.'),
         'version':  lazy_gettext('The plugin uploaded has a newer package '
                                  'version than this Zine installation '
                                  'can handle.'),
         'exists':   lazy_gettext('A plugin with the same UID is already '
-                                 'installed.  Aborted.'),
+                                 'installed. Aborted.'),
         'ioerror':  lazy_gettext('Could not install the package because the '
                                  'installer wasn\'t able to write the package '
                                  'information. Wrong permissions?')

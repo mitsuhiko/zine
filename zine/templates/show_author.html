@@ -9,7 +9,7 @@
     <div class="description">{{ user.description }}</div>
   {%- endif %}
   {%- if posts %}
-    <h3>{{ _("Posts this user wrote") }}</h3>
+    <h3>{{ _("Posts written by user") }}</h3>
     <ul>
     {%- for post in posts %}
       <li>{% trans post='<a href="%s">%s</a>' % (url_for(post)|e, post.title|e), date=post.pub_date|datetimeformat|e %}{{ post }}, on {{ date }}{% endtrans %}</li>

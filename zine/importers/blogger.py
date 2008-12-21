@@ -308,8 +308,8 @@ class BloggerImporter(Importer):
     def configure(self, request):
         if service is None:
             # gdata is not installed, show an error and refuse to do anything
-            flash(_('GData python client library is not installed, '
-                  'and is required for functioning of the Blogger importer.'
+            flash(_('Blogger importer requires GData Python client library, '
+                    'but it is not installed.'
                   '<p>Please visit: %(download_link)s</p>') %
                     {'download_link': GDATA_DOWNLOAD_LINK},
                   type='error')

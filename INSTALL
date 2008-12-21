@@ -19,7 +19,9 @@ might be available in Debian already.
 
 If you might use easy_install:
 
-    $ easy_install Werkzeug Jinja2 MySQL-python SQLAlchemy simplejson pytz Babel lxmll
+    $ easy_install Werkzeug Jinja2 MySQL-python SQLAlchemy simplejson pytz Babel lxml
+
+To install lxml you may need the development packages of libxml2 and libxslt
 
 For a quickstart with the development server do this:
 
