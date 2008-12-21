@@ -191,6 +191,8 @@ def _perform_import(app, blog, d):
                              comment.pub_date, comment.remote_addr,
                              comment.parser, comment.is_pingback,
                              comment.status)
+                if comment.blocked_msg:
+                    rv.blocked_msg = comment.blocked_msg
                 created[comment] = rv
                 return rv
 
@@ -373,7 +375,7 @@ class Author(_Element):
     """Represents an author."""
 
     def __init__(self, username, email, real_name=u'', description=u'',
-                 pw_hash=None, is_author=True, id=None):
+                 pw_hash=None, is_author=True, extra=None, id=None):
         if id is None:
             id = _make_id(username, email)
         self.id = id
@@ -384,6 +386,7 @@ class Author(_Element):
         self.privileges = set([ENTER_ADMIN_PANEL])
         self.is_author = is_author
         self.pw_hash = pw_hash
+        self.extra = extra or {}
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -467,17 +470,18 @@ class Comment(_Element):
 
     def __init__(self, author, body, author_email, author_url, parent,
                  pub_date, remote_addr, parser=None, is_pingback=False,
-                 status=COMMENT_MODERATED):
+                 status=COMMENT_MODERATED, blocked_msg=u''):
         self.author = author
         self.author_email = author_email
         self.author_url = author_url
+        self.parent = parent
         self.remote_addr = remote_addr
         self.pub_date = pub_date
         self.body = body
         self.parser = parser or 'html'
         self.is_pingback = is_pingback
         self.status = status
-        self.parent = parent
+        self.blocked_msg = blocked_msg
 
     def __repr__(self):
         return '<%s %r>' % (

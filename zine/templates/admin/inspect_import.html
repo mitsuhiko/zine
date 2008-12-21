@@ -11,7 +11,7 @@
     <dl>
       {{ form.title.as_dd() }}
       {{ form.description.as_dd() }}
-      {% if blog.config %}
+      {% if blog.configuration %}
         {{ form.load_config.as_dd() }}
       {% endif %}
       <dt>{{ _('Dump ID') }}</dt>

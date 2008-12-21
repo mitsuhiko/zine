@@ -56,6 +56,15 @@ def _get_html_content(elements):
     return elements[0].text
 
 
+def _to_bool(value):
+    value = value.strip()
+    if value == 'yes':
+        return True
+    elif value == 'no':
+        return False
+    raise ValueError('invalid boolean literal, expected yes/no')
+
+
 def parse_feed(fd):
     tree = etree.parse(fd).getroot()
     if tree.tag == 'rss':
@@ -70,6 +79,7 @@ def parse_feed(fd):
 
 
 class Parser(object):
+    feed_type = None
 
     def __init__(self, tree):
         self.app = get_application()
@@ -80,7 +90,8 @@ class Parser(object):
         self.posts = []
         self.blog = None
         self.extensions = [extension(self.app, self, tree)
-                           for extension in self.app.feed_importer_extensions]
+                           for extension in self.app.feed_importer_extensions
+                           if self.feed_type in extension.feed_types]
 
     def find_tag(self, **critereon):
         return self._find_criteron(self.tags, critereon)
@@ -104,6 +115,7 @@ class Parser(object):
 
 
 class RSSParser(Parser):
+    feed_type = 'rss'
 
     def __init__(self, tree):
         raise FeedImportError(_('Importing of RSS feeds is currently '
@@ -111,6 +123,7 @@ class RSSParser(Parser):
 
 
 class AtomParser(Parser):
+    feed_type = 'atom'
 
     def __init__(self, tree):
         Parser.__init__(self, tree)
@@ -214,7 +227,6 @@ class AtomParser(Parser):
         if username in self._authors_by_username:
             return self._authors_by_username[username]
 
-        print (author.getchildren(), email, username)
         author = Author(username, email)
         _remember_author(author)
         self.authors.append(author)
@@ -259,7 +271,6 @@ class AtomParser(Parser):
             rv = extension.parse_comments(post)
             if rv is not None:
                 post.comments.extend(rv)
-                self.comments.extend(rv)
 
 
 class FeedImportError(Exception):
@@ -303,6 +314,7 @@ class FeedImporter(Importer):
 
 class Extension(object):
     """Extensions are instanciated for each parsing process."""
+    feed_types = frozenset()
 
     def __init__(self, app, parser, root):
         self.app = app
@@ -344,6 +356,9 @@ class Extension(object):
 
 
 class ZEAExtension(Extension):
+    """Handles ZEA Atom extensions."""
+
+    feed_types = frozenset(['atom'])
 
     def handle_root(self, blog):
         blog.configuration.update(self._parse_config(
@@ -355,6 +370,38 @@ class ZEAExtension(Extension):
             for element in element.findall(zine.item):
                 result[element.attrib['key']] = element.text
         return result
+
+    def parse_comments(self, post):
+        comments = {}
+        unresolved_parents = {}
+
+        for element in post.element.findall(zine.comment):
+            author = element.find(zine.author)
+            dependency = author.attrib.get('dependency')
+            if dependency is not None:
+                author = self._get_author(author)
+                email = www = None
+            else:
+                email = author.findtext(zine.email)
+                www = author.findtext(zine.uri)
+                author = author.findtext(zine.name)
+
+            body = _get_html_content(element.findall(zine.content))
+            comment = Comment(author, body, email, www, None,
+                              parse_iso8601(element.findtext(zine.published)),
+                              element.findtext(zine.submitter_ip), 'html',
+                              _to_bool(element.findtext(zine.is_pingback)),
+                              int(element.findtext(zine.status)),
+                              element.findtext(zine.blocked_msg))
+            comments[int(element.attrib['id'])] = comment
+            parent = element.findtext(zine.parent)
+            if parent is not None:
+                unresolved_parents[comment] = int(parent)
+
+        for comment, parent_id in unresolved_parents.iteritems():
+            comment.parent = comments[parent_id]
+
+        return comments.values()
 
 
 extensions = [ZEAExtension]

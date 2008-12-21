@@ -268,25 +268,31 @@ class Writer(object):
 
         for c in post.comments:
             comment = self.z('comment', parent=entry)
+            comment.attrib['id'] = str(c.id)
             author = self.z('author', parent=comment)
             self.z('name', text=c.author, parent=author)
             self.z('email', text=c.email, parent=author)
             self.z('uri', text=c.www, parent=author)
+            if c.user is not None:
+                author.attrib['dependency'] = self.users[c.user.id] \
+                                                  .attrib[self.z.dependency]
             self.z('published', text=format_iso8601(c.pub_date),
                    parent=comment)
             self.z('blocked', text=c.blocked and 'yes' or 'no',
                    parent=comment)
             self.z('is_pingback', text=c.is_pingback and 'yes' or 'no',
                    parent=comment)
+            self.z('status', text=str(c.status), parent=comment),
             self.z('blocked_msg', text=str(c.blocked_msg or ''),
                    parent=comment)
             self.z('parent', text=c.parent_id is not None and str(c.parent_id)
                    or '', parent=comment)
+            self.z('submitter_ip', text=c.submitter_ip, parent=comment)
             self.z('content', type='html', text=c.body.to_html(),
-                   parent=entry)
-            self.z('content', type='text', text=c.text, parent=entry)
+                   parent=comment)
+            self.z('content', type='text', text=c.text, parent=comment)
             self.z('data', text=dump_parser_data(c.parser_data).encode('base64'),
-                   parent=entry)
+                   parent=comment)
 
         for participant in self.participants:
             participant.process_post(entry, post)
