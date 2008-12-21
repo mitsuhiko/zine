@@ -1,0 +1,10 @@
+{% extends 'widgets/base.html' %}
+{% block title %}{{ _('Category List') }}{% endblock %}
+{% block body %}
+  <ul class="category-list">
+  {%- for category in widget.categories %}
+    <li><a href="{{ url_for('blog/show_category', slug=category.slug)|e
+      }}">{{ category.name|e }}</a></li>
+  {%- endfor %}
+  </ul>
+{% endblock %}

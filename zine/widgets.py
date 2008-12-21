@@ -91,5 +91,17 @@ class TagCloud(Widget):
         self.show_title = show_title
 
 
+class CategoryList(Widget):
+    """Show a list of all categories."""
+
+    name = 'category_list'
+    template = 'widgets/category_list.html'
+
+    def __init__(self, show_title=False):
+        self.categories = Category.query.all()
+        self.show_title = show_title
+
+
 #: list of all core widgets
-all_widgets = [PostArchiveSummary, LatestPosts, LatestComments, TagCloud]
+all_widgets = [PostArchiveSummary, LatestPosts, LatestComments, TagCloud,
+               CategoryList]
