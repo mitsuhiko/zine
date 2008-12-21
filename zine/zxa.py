@@ -52,12 +52,12 @@ XML_PREAMBLE = u'''\
     -   parse the file with a proper XML parser.  And proper means shout
         on syntax and encoding errors.
     -   handle namespaces!  The prefixes might and will change, so use the
-        goddamn full qualified names with the namespaces when parsing.
+        goddamn fully qualified names with the namespaces when parsing.
 
     User Notice
     ~~~~~~~~~~~
 
-    This file contains a dump of your blog but probably exluding some details
+    This file contains a dump of your blog but probably excluding some details
     if plugins did not provide ways to export the information.  It's not
     intended as blog backup nor as preferred solution to migrate from one
     machine to another.  The main purpose of this file is being a portable
