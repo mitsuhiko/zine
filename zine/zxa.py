@@ -180,9 +180,11 @@ class Writer(object):
             if rv is not None:
                 yield dump_node(rv)
 
-        # look up all the users and add them as dependencies
+        # look up all the users and add them as dependencies if they
+        # have written a comment or created a post.
         for user in User.query.all():
-            self._register_user(user)
+            if user.posts.count() > 0 or user.comments.count() > 0:
+                self._register_user(user)
 
         # dump all the posts
         for post in posts:
@@ -199,7 +201,7 @@ class Writer(object):
 
     def new_dependency(self, tag):
         id = '%x' % (len(self._dependencies) + 1)
-        node = etree.Element(tag, {self.z.dependency: id}, nsmap=NAMESPACES)
+        node = etree.Element(tag, {'dependency': id}, nsmap=NAMESPACES)
         self._dependencies[id] = node
         return node
 
@@ -212,7 +214,7 @@ class Writer(object):
         self.z('real_name', text=user.real_name, parent=rv)
         self.z('description', text=user.description, parent=rv)
         self.z('is_author', text=user.is_author and 'yes' or 'no', parent=rv)
-        self.z('extra', text=dumps(user.extra))
+        self.z('extra', text=dumps(user.extra).encode('base64'))
         for participant in self.participants:
             participant.process_user(rv, user)
         privileges = self.z('privileges', parent=rv)
@@ -233,7 +235,7 @@ class Writer(object):
 
         author = self.atom('author', parent=entry)
         author.attrib[self.z.dependency] = self.users[post.author.id] \
-                                                .attrib[self.z.dependency]
+                                                .attrib['dependency']
         self.atom('name', text=post.author.display_name, parent=author)
         self.atom('email', text=post.author.email, parent=author)
 

@@ -9,6 +9,7 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
+from pickle import loads
 from lxml import etree
 from zine.application import get_application
 from zine.i18n import _, lazy_gettext
@@ -63,6 +64,11 @@ def _to_bool(value):
     elif value == 'no':
         return False
     raise ValueError('invalid boolean literal, expected yes/no')
+
+
+def _pickle(value):
+    if value:
+        return loads(value.decode('base64'))
 
 
 def parse_feed(fd):
@@ -360,9 +366,13 @@ class ZEAExtension(Extension):
 
     feed_types = frozenset(['atom'])
 
-    def handle_root(self, blog):
-        blog.configuration.update(self._parse_config(
-            blog.element.find(zine.configuration)))
+    def __init__(self, app, parser, root):
+        Extension.__init__(self, app, parser, root)
+        self._authors = {}
+        self._dependencies = root.find(zine.dependencies)
+
+        self._lookup_user = etree.XPath('./zine:user[@dependency=$id]',
+                                        namespaces={'zine': ZINE_NS})
 
     def _parse_config(self, element):
         result = {}
@@ -370,6 +380,38 @@ class ZEAExtension(Extension):
             for element in element.findall(zine.item):
                 result[element.attrib['key']] = element.text
         return result
+
+    def _get_author(self, dependency):
+        author = self._authors.get(dependency)
+        if author is None:
+            element = self._lookup_user(self._dependencies,
+                                        id=dependency)[0]
+            author = Author(
+                element.findtext(zine.username),
+                element.findtext(zine.email),
+                element.findtext(zine.real_name),
+                element.findtext(zine.description),
+                element.findtext(zine.pw_hash),
+                _to_bool(element.findtext(zine.is_author)),
+                _pickle(element.findtext(zine.extra)),
+                dependency
+            )
+            for privilege in element.findall(zine.privilege):
+                p = self.app.privileges.get(privilege.text)
+                if p is not None:
+                    author.privileges.add(p)
+            self._authors[dependency] = author
+            self.parser.authors.append(author)
+        return author
+
+    def handle_root(self, blog):
+        blog.configuration.update(self._parse_config(
+            blog.element.find(zine.configuration)))
+
+    def lookup_author(self, author, entry, username, email):
+        dependency = author.attrib.get(zine.dependency)
+        if dependency is not None:
+            return self._get_author(dependency)
 
     def parse_comments(self, post):
         comments = {}
@@ -401,7 +443,7 @@ class ZEAExtension(Extension):
         for comment, parent_id in unresolved_parents.iteritems():
             comment.parent = comments[parent_id]
 
-        return comments.values()
+        return comments.values() or None
 
 
 extensions = [ZEAExtension]

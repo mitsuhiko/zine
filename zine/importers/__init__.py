@@ -380,9 +380,9 @@ class Author(_Element):
             id = _make_id(username, email)
         self.id = id
         self.username = username
-        self.real_name = real_name
-        self.email = email
-        self.description = description
+        self.real_name = real_name or u''
+        self.email = email or u''
+        self.description = description or u''
         self.privileges = set([ENTER_ADMIN_PANEL])
         self.is_author = is_author
         self.pw_hash = pw_hash
