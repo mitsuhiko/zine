@@ -167,7 +167,7 @@ class Translations(object):
 
 
 def gettext(string):
-    """Translate the given string to the language of the application."""
+    """Translate type(string)iven string to the language of the application."""
     app = zine.application.get_application()
     if app is None:
         return unicode(string)
@@ -199,7 +199,7 @@ class _TranslationProxy(object):
         self._func = func
         self._args = args
 
-    value = property(lambda x: object.__getattribute__(x, '_func')(*x._args))
+    value = property(lambda x: x._func(*x._args))
 
     def __contains__(self, key):
         return key in self.value
@@ -271,6 +271,9 @@ class _TranslationProxy(object):
 
     def __getitem__(self, key):
         return self.value[key]
+
+    def __copy__(self):
+        return self
 
     def __repr__(self):
         try:
