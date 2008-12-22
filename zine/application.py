@@ -695,7 +695,7 @@ class Zine(object):
         from zine.pluginsystem import find_plugins, set_plugin_searchpath
         self.plugin_folder = path.join(instance_folder, 'plugins')
         self.plugin_searchpath = [self.plugin_folder]
-        for folder in self.cfg['plugin_searchpath'].split(','):
+        for folder in self.cfg['plugin_searchpath']:
             folder = folder.strip()
             if folder:
                 self.plugin_searchpath.append(folder)
@@ -777,6 +777,12 @@ class Zine(object):
             raise RuntimeError('Cannot register new callbacks after '
                                'application setup phase.')
         self.__dict__.update(dict.fromkeys(self._setup_only, _error))
+
+        self.cfg.config_vars['language'].choices = i18n.list_languages()
+        self.cfg.config_vars['default_parser'].choices = \
+            self.cfg.config_vars['comment_parser'].choices = \
+            self.list_parsers()
+
         self.initialized = True
 
         #! called after the application and all plugins are initialized
