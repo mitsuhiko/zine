@@ -1792,26 +1792,14 @@ class Form(object):
     u'happy'
 
     Fields support default values.  These however are not as useful as you
-    might think.  These are only used if the value passed to the field's
-    validation and conversion function are actually the special python
-    `None` builtin.  This is a design choice and not a limitation.  If
-    form validation over HTTP happens you should use the initial dict
-    which is passed to the forms instead.
+    might think.  These defaults are just annotations for external handling.
+    The form validation system does not respect those values.
+
+    They are for example used in the configuration system.
 
     Example:
 
     >>> field = StringField(default=u'foo')
-    >>> field(None)
-    u'foo'
-    >>> field(u'')
-    u''
-
-    Default values can be considered annotated defaults to be handled by
-    the caller that just happen to be returned on the conversion because it
-    just makes sense.  They are not a fundamental part of the form system.
-
-    The defaults can also be callables in which situation they are called
-    to create the default.
     """
     __metaclass__ = FormMeta
 
