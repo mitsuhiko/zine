@@ -21,7 +21,7 @@ import zine
 from lxml import etree
 from zine.api import *
 from zine.models import Post, User
-from zine.utils import build_tag_uri
+from zine.utils.text import build_tag_uri
 from zine.utils.dates import format_iso8601
 from zine.utils.xml import escape, XML_NS
 from zine.utils.zeml import dump_parser_data

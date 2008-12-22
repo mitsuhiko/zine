@@ -33,8 +33,8 @@ from zine.database import db, comments as comment_table, posts, \
      post_categories, post_links, secure_database_uri
 from zine.utils import dump_json, load_json
 from zine.utils.validators import is_valid_email, is_valid_url, check
-from zine.utils.admin import flash, gen_slug, load_zine_reddit, \
-     require_admin_privilege
+from zine.utils.admin import flash, load_zine_reddit, require_admin_privilege
+from zine.utils.text import gen_slug
 from zine.utils.pagination import AdminPagination
 from zine.utils.http import redirect_back, redirect_to, redirect
 from zine.i18n import parse_datetime, format_system_datetime, \

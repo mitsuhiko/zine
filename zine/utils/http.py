@@ -14,6 +14,7 @@ from werkzeug import redirect as _redirect
 from werkzeug.exceptions import BadRequest
 
 from zine.application import get_application, get_request, url_for
+from zine.utils import local
 
 
 def check_external_url(app, url):
@@ -102,3 +103,33 @@ def redirect_back(*args, **kwargs):
     if target is None:
         target = url_for(*args, **kwargs)
     return redirect(target)
+
+
+class RequestLocal(object):
+    """All attributes on this object are request local and deleted after the
+    request finished. The request local object itself must be stored somewhere
+    in a global context and never deleted.
+    """
+
+    def __init__(self, **vars):
+        self.__dict__.update(_vars=vars)
+        for key, value in vars.iteritems():
+            if value is None:
+                value = lambda: None
+            vars[key] = value
+
+    @property
+    def _storage(self):
+        return local.request_locals.setdefault(id(self), {})
+
+    def __getattr__(self, name):
+        if name not in self._vars:
+            raise AttributeError(name)
+        if name not in self._storage:
+            self._storage[name] = self._vars[name]()
+        return self._storage[name]
+
+    def __setattr__(self, name, value):
+        if name not in self._vars:
+            raise AttributeError(name)
+        self._storage[name] = value

@@ -20,7 +20,8 @@ from zine.database import db
 from zine.application import add_link, url_for, render_response, emit_event, \
      iter_listeners, Response, get_application
 from zine.models import Post, Category, User, Comment, Tag
-from zine.utils import dump_json, build_tag_uri, ClosingIterator, log
+from zine.utils import dump_json, ClosingIterator, log
+from zine.utils.text import build_tag_uri
 from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
 from zine.utils.http import redirect_to, redirect

@@ -46,7 +46,7 @@ Plugin documentation goes here...
 sys.path.append(os.path.dirname(__file__))
 import _init_zine
 
-from zine.utils.admin import gen_slug
+from zine.utils.text import gen_slug
 from zine.utils.mail import split_email
 
 

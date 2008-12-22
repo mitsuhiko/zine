@@ -18,8 +18,8 @@ from werkzeug.exceptions import NotFound
 from zine.database import users, categories, posts, post_links, \
      post_categories, post_tags, tags, comments, groups, group_users, \
      privileges, user_privileges, group_privileges, db
-from zine.utils import build_tag_uri, zeml
-from zine.utils.admin import gen_slug
+from zine.utils import zeml
+from zine.utils.text import gen_slug, build_tag_uri
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url

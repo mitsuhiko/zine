@@ -9,8 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 import os
-import re
-import unicodedata
 from time import time
 from itertools import islice
 from datetime import datetime
@@ -20,19 +18,6 @@ from werkzeug import url_quote
 from zine.privileges import ENTER_ADMIN_PANEL, require_privilege
 from zine.utils import local, load_json
 from zine.i18n import _
-
-
-_punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|}]+')
-
-_tagify_replacement_table = {
-    u'\xdf': 'ss',
-    u'\xe4': 'ae',
-    u'\xe6': 'ae',
-    u'\xf0': 'dh',
-    u'\xf6': 'oe',
-    u'\xfc': 'ue',
-    u'\xfe': 'th'
-}
 
 
 def flash(msg, type='info'):
@@ -58,18 +43,6 @@ def require_admin_privilege(expr=None):
     if expr:
         expr = ENTER_ADMIN_PANEL & expr
     return require_privilege(expr)
-
-
-def gen_slug(text, delim='-'):
-    """remove accents and make text lowercase."""
-    result = []
-    for word in _punctuation_re.split(text.lower()):
-        if word:
-            for search, replace in _tagify_replacement_table.iteritems():
-                word = word.replace(search, replace)
-            word = unicodedata.normalize('NFKD', word)
-            result.append(word.encode('ascii', 'ignore'))
-    return unicode(delim.join(result))
 
 
 def load_zine_reddit():
