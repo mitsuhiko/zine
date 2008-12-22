@@ -163,9 +163,10 @@ def show_author(req, username, page=1):
         raise NotFound()
 
     data = Post.query.published().filter_by(author=user) \
-               .get_list(page=page, per_page=30, endpoint='blog/show_author')
+               .get_list(page=page, per_page=30, endpoint='blog/show_author',
+                         url_args=dict(username=user.username))
 
-    add_link('alternate', url_for('blog/atom_feed', author=username),
+    add_link('alternate', url_for('blog/atom_feed', author=user.username),
              'application/atom+xml', _(u'All posts written by %s') %
              user.display_name)
 
