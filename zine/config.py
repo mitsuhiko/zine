@@ -42,7 +42,7 @@ DEFAULT_VARS = {
     'theme':                    TextField(default=u'default'),
     'secret_key':               TextField(default=u''),
     'language':                 ChoiceField(choices=[u'en'], default=u'en'),
-    'plugin_searchpath':        TextField(default=u''),
+    'plugin_searchpath':        CommaSeparated(TextField(), default=u''),
 
     # the iid is an internal unique id for the instance.  The setup creates a
     # uuid5 in hex format if possible (eg: uuid module is present), otherwise
@@ -106,7 +106,7 @@ DEFAULT_VARS = {
     # post view
     'posts_per_page':           IntegerField(default=10),
     'use_flat_comments':        BooleanField(default=False),
-    'index_content_types':      TextField(default='entry'),
+    'index_content_types':      CommaSeparated(TextField(), default='entry'),
 
     # pages
     'show_page_title':          BooleanField(default=True),
@@ -121,7 +121,7 @@ DEFAULT_VARS = {
 
     # plugin settings
     'plugin_guard':             BooleanField(default=True),
-    'plugins':                  TextField(default=u''),
+    'plugins':                  CommaSeparated(TextField(), default=u''),
 
     # importer settings
     'blogger_auth_token':       TextField(default=u'')

@@ -695,7 +695,7 @@ class Zine(object):
         from zine.pluginsystem import find_plugins, set_plugin_searchpath
         self.plugin_folder = path.join(instance_folder, 'plugins')
         self.plugin_searchpath = [self.plugin_folder]
-        for folder in self.cfg['plugin_searchpath'].split(','):
+        for folder in self.cfg['plugin_searchpath']:
             folder = folder.strip()
             if folder:
                 self.plugin_searchpath.append(folder)

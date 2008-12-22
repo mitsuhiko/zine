@@ -130,7 +130,7 @@ def find_plugins(app):
     """Return an iterator over all plugins available."""
     enabled_plugins = set()
     found_plugins = set()
-    for plugin in app.cfg['plugins'].split(','):
+    for plugin in app.cfg['plugins']:
         plugin = plugin.strip()
         if plugin:
             enabled_plugins.add(plugin)
