@@ -1139,7 +1139,7 @@ class Zine(object):
         return response
 
     def handle_internal_error(self, request, error):
-        """Called if internal errors are cought."""
+        """Called if internal errors are caught."""
         if request.user.is_admin:
             response = render_response('internal_error.html', error=error)
             response.status_code = 500

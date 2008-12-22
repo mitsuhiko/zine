@@ -58,7 +58,7 @@ DEFAULT_VARS = {
                                                           key=lambda x: x[1])],
                                             default=u'warning'),
 
-    # if set to true, internal errors are not cought.  This is useful for
+    # if set to true, internal errors are not caught.  This is useful for
     # debugging tools such as werkzeug.debug
     'passthrough_errors':       BooleanField(default=_dev_mode),
 
