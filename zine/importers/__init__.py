@@ -7,8 +7,8 @@
     API as well as some core importers we implement as part of the software
     and not as plugin.
 
-    :copyright: Copyright 2008 by Armin Ronacher
-    :license: BSD see LICENSE for more details.
+    :copyright: Copyright 2008 by Armin Ronacher.
+    :license: BSD, see LICENSE for more details.
 """
 import os
 try:
