@@ -59,10 +59,12 @@
         <td>{{ post.comments|count }}</td>
       {%- else %}
       <tr>
-        <td>{{ post.pub_date|datetimeformat|e }}</td>
+        <td>{{ post.pub_date|datetimeformat|e if post.pub_date
+               else _('unpublished') }}</td>
         <td>{{ form.posts[post.id].with_help_text() }}</td>
         <td>{{ post.author.username|e }}</td>
-        <td>{{ form.comments[post.id]() }}</td>
+        <td>{{ form.comments[post.id]() }} <label for="{{
+          form.comments[post.id].id }}">{{ post.comments|count }}</label></td>
       {% endif %}
       </tr>
       {%- endfor %}

@@ -17,7 +17,7 @@ except ImportError:
     from md5 import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
-from datetime import datetime
+from datetime import datetime, MAXYEAR
 from zine.i18n import _
 from zine.database import db, posts
 from zine.utils.xml import escape
@@ -26,6 +26,8 @@ from zine.privileges import BLOG_ADMIN, ENTER_ADMIN_PANEL, require_privilege
 
 
 ignored_config_keys = frozenset(['database_uri'])
+
+_distant_future = datetime(MAXYEAR, 12, 31)
 
 
 def _make_id(*args):
@@ -336,7 +338,7 @@ class Blog(_Element):
             categories.sort(key=lambda x: x.name.lower())
         self.categories = categories or []
         if posts:
-            posts.sort(key=lambda x: x.pub_date, reverse=True)
+            posts.sort(key=lambda x: x.pub_date or _distant_future, reverse=True)
         self.posts = posts or []
         if authors:
             authors.sort(key=lambda x: x.username.lower())

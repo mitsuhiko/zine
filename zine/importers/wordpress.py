@@ -21,7 +21,8 @@ from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
 from zine.utils.xml import Namespace, html_entities, escape
 from zine.utils.http import redirect_to
-from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED
+from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED, \
+     STATUS_DRAFT, STATUS_PUBLISHED
 
 CONTENT = Namespace('http://purl.org/rss/1.0/modules/content/')
 DC_METADATA = Namespace('http://purl.org/dc/elements/1.1/')
@@ -123,7 +124,13 @@ def parse_feed(fd):
         }.get(item.findtext(WORDPRESS.status), STATUS_PUBLISHED)
         post_name = item.findtext(WORDPRESS.post_name)
         pub_date = parse_wordpress_date(item.findtext(WORDPRESS.post_date_gmt))
-        slug = pub_date.strftime('%Y/%m/%d/') + post_name
+        slug = None
+
+        if pub_date is None or post_name is None:
+            status = STATUS_DRAFT
+        if status == STATUS_PUBLISHED:
+            slug = pub_date.strftime('%Y/%m/%d/') + post_name
+
         post = Post(
             slug,
             item.findtext('title'),
