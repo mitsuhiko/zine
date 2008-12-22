@@ -950,7 +950,7 @@ class Field(object):
         if messages:
             self.messages = self.messages.copy()
             self.messages.update(messages)
-        self.default = default
+        self._default = default
         assert not issubclass(self.widget, InternalWidget), \
             'can\'t use internal widgets as widgets for fields'
 
@@ -992,6 +992,11 @@ class Field(object):
         This method must never fail!
         """
         return _to_string(value)
+
+    def get_default(self):
+        if callable(self._default):
+            return self._default()
+        return self._default
 
     def _bind(self, form, memo):
         """Method that binds a field to a form. If `form` is None, a copy of

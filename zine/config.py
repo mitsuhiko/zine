@@ -42,7 +42,7 @@ DEFAULT_VARS = {
     'theme':                    TextField(default=u'default'),
     'secret_key':               TextField(default=u''),
     'language':                 ChoiceField(choices=[u'en'], default=u'en'),
-    'plugin_searchpath':        CommaSeparated(TextField(), default=[u'']),
+    'plugin_searchpath':        CommaSeparated(TextField(), default=list),
 
     # the iid is an internal unique id for the instance.  The setup creates a
     # uuid5 in hex format if possible (eg: uuid module is present), otherwise
@@ -84,7 +84,7 @@ DEFAULT_VARS = {
                                             ], default=u'null'),
     'memcached_servers':        CommaSeparated(TextField(
                                                     validators=[is_netaddr()]),
-                                               default=[u'']),
+                                               default=list),
     'filesystem_cache_path':    TextField(default=u'cache'),
 
     # the default markup parser. Don't ever change this value! The
@@ -106,7 +106,8 @@ DEFAULT_VARS = {
     # post view
     'posts_per_page':           IntegerField(default=10),
     'use_flat_comments':        BooleanField(default=False),
-    'index_content_types':      CommaSeparated(TextField(), default=['entry']),
+    'index_content_types':      CommaSeparated(TextField(),
+                                               default=lambda: ['entry']),
 
     # pages
     'show_page_title':          BooleanField(default=True),
@@ -121,7 +122,7 @@ DEFAULT_VARS = {
 
     # plugin settings
     'plugin_guard':             BooleanField(default=True),
-    'plugins':                  CommaSeparated(TextField(), default=[u'']),
+    'plugins':                  CommaSeparated(TextField(), default=list),
 
     # importer settings
     'blogger_auth_token':       TextField(default=u'')
@@ -159,7 +160,7 @@ def from_string(value, field):
     try:
         return field(value)
     except ValidationError, e:
-        return field.default
+        return field.get_default()
 
 
 # XXX: this function should probably go away, currently it only exists because
@@ -276,7 +277,7 @@ class Configuration(object):
         try:
             value = from_string(self._values[key], field)
         except KeyError:
-            value = field.default
+            value = field.get_default()
         self._converted_values[key] = value
         return value
 
@@ -354,7 +355,7 @@ class Configuration(object):
                 value = field.to_primitive(from_string(self._values[key], field))
             else:
                 use_default = True
-                value = field.to_primitive(field.default)
+                value = field.to_primitive(field.get_default())
             if '/' in key:
                 category, name = key.split('/', 1)
             else:
@@ -412,7 +413,7 @@ class Configuration(object):
                 value = repr(value)
             result.append({
                 'key':          key,
-                'default':      repr(field.default),
+                'default':      repr(field.get_default()),
                 'value':        value
             })
         result.sort(key=lambda x: x['key'].lower())
