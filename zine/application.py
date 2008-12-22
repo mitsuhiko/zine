@@ -778,7 +778,6 @@ class Zine(object):
                                'application setup phase.')
         self.__dict__.update(dict.fromkeys(self._setup_only, _error))
 
-        self.cfg.config_vars['language'].choices = i18n.list_languages()
         self.cfg.config_vars['default_parser'].choices = \
             self.cfg.config_vars['comment_parser'].choices = \
             self.list_parsers()
