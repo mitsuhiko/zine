@@ -892,8 +892,8 @@ class TagQuery(db.Query):
 
         q = ((pt.tag_id == t.tag_id) &
              (p.post_id == pt.post_id) & (
-                (p2.status == STATUS_PUBLISHED) |
-                (p2.pub_date >= datetime.utcnow())))
+                (p.status == STATUS_PUBLISHED) |
+                (p.pub_date >= datetime.utcnow())))
 
         s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
                       pt.tag_id == t.tag_id,
@@ -980,7 +980,7 @@ db.mapper(Category, categories, properties={
     'id':               categories.c.category_id,
     'posts':            db.dynamic_loader(Post, secondary=post_categories,
                                           query_class=PostQuery)
-})
+}, order_by=categories.c.name)
 db.mapper(Comment, comments, properties={
     'id':           comments.c.comment_id,
     'text':         db.synonym('_text', map_column=True),
@@ -1002,7 +1002,7 @@ db.mapper(Tag, tags, properties={
     'id':           tags.c.tag_id,
     'posts':        db.dynamic_loader(Post, secondary=post_tags,
                                       query_class=PostQuery)
-})
+}, order_by=tags.c.name)
 db.mapper(Post, posts, properties={
     'id':               posts.c.post_id,
     'text':             db.synonym('_text', map_column=True),

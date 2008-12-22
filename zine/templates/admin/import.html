@@ -5,7 +5,7 @@
   <p>{% trans %}
     If you have posts or comments in another system, Zine can import those
     into this blog.  The data imported doesn't directly end up in the blog but a
-    queue so that you can pickl which data you want to import.  To get started,
+    queue so that you can pick which data you want to import.  To get started,
     choose a system to import from below:
   {% endtrans %}</p>
   <ul>
@@ -26,7 +26,7 @@
         <th>{{ _('Importer Used') }}</th>
       </tr>
       {%- for item in queue %}
-      <tr>
+      <tr class="{{ loop.cycle('odd', 'even') }}">
         <td>{{ item.dump_date|datetimeformat|e }}</td>
         <td><a href="{{ url_for('admin/inspect_import', id=item.id) }}">{{
           item.title|e }}</a></td>

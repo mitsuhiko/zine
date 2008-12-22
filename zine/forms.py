@@ -291,7 +291,7 @@ class PostForm(forms.Form):
     def validate_parser(self, value):
         """Make sure the missing parser is not selected."""
         if self.parser_missing and value == self.post.parser:
-            raise ValidationError(_('The selected parser is no longer '
+            raise ValidationError(_('Selected parser is no longer '
                                     'available on the system.'))
 
     def as_widget(self):
@@ -778,7 +778,7 @@ class DeleteUserForm(_UserBoundForm):
     """Used to delete a user from the admin panel."""
 
     action = forms.ChoiceField(lazy_gettext(u'What should Zine do with posts '
-                                            u'this user wrote?'), choices=[
+                                            u'written by this user?'), choices=[
         ('delete', lazy_gettext(u'Delete them permanently')),
         ('reassign', lazy_gettext(u'Reassign posts'))
     ], widget=forms.RadioButtonGroup)
@@ -797,7 +797,8 @@ class DeleteUserForm(_UserBoundForm):
 
     def context_validate(self, data):
         if data['action'] == 'reassign' and not data['reassign_to']:
-            raise ValidationError(_('You have to select a user that '
+            # XXX: Bad wording
+            raise ValidationError(_('You have to select the user that '
                                     'gets the posts assigned.'))
 
     def delete_user(self):
@@ -879,6 +880,7 @@ class BasicOptionsForm(_ConfigForm):
 
 class URLOptionsForm(_ConfigForm):
     """The form for url changes."""
+<<<<<<< local
     blog_url_prefix = config_field('blog_url_prefix',
                                    lazy_gettext(u'Blog URL prefix'))
     admin_url_prefix = config_field('admin_url_prefix',
@@ -889,6 +891,25 @@ class URLOptionsForm(_ConfigForm):
                                    lazy_gettext(u'Tag URL prefix'))
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
+=======
+    blog_url_prefix = forms.TextField(lazy_gettext(u'Blog URL prefix'),
+                                      validators=[is_valid_url_prefix()])
+    admin_url_prefix = forms.TextField(lazy_gettext(u'Admin URL prefix'),
+                                       validators=[is_valid_url_prefix()])
+    category_url_prefix = forms.TextField(lazy_gettext(u'Category URL prefix'),
+                                          validators=[is_valid_url_prefix()])
+    tags_url_prefix = forms.TextField(lazy_gettext(u'Tag URL prefix'),
+                                      validators=[is_valid_url_prefix()])
+    profiles_url_prefix = forms.TextField(lazy_gettext(u'Author Profiles URL prefix'),
+                                          validators=[is_valid_url_prefix()])
+
+
+class ThemeOptionsForm(_ConfigForm):
+    """
+    The form for theme changes.  This is mainly just a dummy,
+    to get csrf protection working.
+    """
+>>>>>>> other
 
 
 class CacheOptionsForm(_ConfigForm):
@@ -904,12 +925,12 @@ class CacheOptionsForm(_ConfigForm):
     def context_validate(self, data):
         if data['cache_system'] == 'memcached':
             if not data['memcached_servers']:
-                raise ValidationError(_(u'If memcached is enabled you have '
-                                        u'to provide at least one server.'))
+                raise ValidationError(_(u'You have to provide at least one '
+                                        u'server to use memcached.'))
         elif data['cache_system'] == 'filesystem':
             if not data['filesystem_cache_path']:
-                raise ValidationError(_(u'If the filesystem cache is in use '
-                                        u'a cache folder hast to be provided.'))
+                raise ValidationError(_(u'You have to provide cache folder to '
+                                        u'use filesystem cache.'))
 
     def _apply(self, t, skip):
         # XXX: this is an ugly hack because the configuration is currently
@@ -920,10 +941,28 @@ class CacheOptionsForm(_ConfigForm):
         t['memcached_servers'] = ', '.join(self.data['memcached_servers'])
 
 
+class MaintenanceModeForm(forms.Form):
+    """yet a dummy form, but could be extended later."""
+
+
 class WordPressImportForm(forms.Form):
     """This form is used in the WordPress importer."""
     download_url = forms.TextField(lazy_gettext(u'Dump Download URL'),
                                    validators=[is_valid_url()])
+
+
+class FeedImportForm(forms.Form):
+    """This form is used in the feed importer."""
+    download_url = forms.TextField(lazy_gettext(u'Feed Download URL'),
+                                   validators=[is_valid_url()])
+
+
+class DeleteImportForm(forms.Form):
+    """This form is used to delete a imported file."""
+
+
+class ExportForm(forms.Form):
+    """This form is used to implement the export dialog."""
 
 
 def make_config_form():
@@ -972,7 +1011,7 @@ def make_import_form(blog):
         for user in User.query.order_by('username').all()
     ]
 
-    _authors = dict((author.id, forms.ChoiceField(author.name,
+    _authors = dict((author.id, forms.ChoiceField(author.username,
                                                   choices=user_choices))
                     for author in blog.authors)
     _posts = dict((post.id, forms.BooleanField(help_text=post.title)) for post
@@ -988,6 +1027,10 @@ def make_import_form(blog):
         authors = forms.Mapping(_authors)
         posts = forms.Mapping(_posts)
         comments = forms.Mapping(_comments)
+        load_config = forms.BooleanField(lazy_gettext(u'Load config values'),
+                                         help_text=lazy_gettext(
+                                         u'Load the configuration values '
+                                         u'from the import.'))
 
         def perform_import(self):
             from zine.importers import perform_import

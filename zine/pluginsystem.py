@@ -94,8 +94,10 @@ from urllib import quote
 from werkzeug import cached_property, escape, find_modules, import_string
 
 from zine.application import get_application
+from zine.utils import log
 from zine.utils.mail import split_email, is_valid_email, check
-from zine.i18n import Translations, lazy_gettext
+from zine.utils.exceptions import UserException, summarize_exception
+from zine.i18n import Translations, lazy_gettext, _
 
 
 _py_import = __builtin__.__import__
@@ -323,32 +325,56 @@ class MetaData(object):
         return result
 
 
-class InstallationError(ValueError):
+class InstallationError(UserException):
     """Raised during plugin installation."""
 
     MESSAGES = {
         'invalid':  lazy_gettext('Could not install the plugin because the '
-                                 'file uploaded is not a valid plugin file.'),
+                                 'uploaded file is not a valid plugin file.'),
         'version':  lazy_gettext('The plugin uploaded has a newer package '
                                  'version than this Zine installation '
                                  'can handle.'),
         'exists':   lazy_gettext('A plugin with the same UID is already '
-                                 'installed.  Aborted.'),
+                                 'installed. Aborted.'),
         'ioerror':  lazy_gettext('Could not install the package because the '
                                  'installer wasn\'t able to write the package '
                                  'information. Wrong permissions?')
     }
 
     def __init__(self, code):
-        self.message = self.MESSAGES[code]
+        UserException.__init__(self, self.MESSAGES[code])
         self.code = code
-        ValueError.__init__(self, code)
 
 
-class SetupError(RuntimeError):
+class SetupError(UserException):
     """Raised by plugins if they want to stop their setup.  If a plugin raises
     a `SetupError` during the init, it will be disabled automatically.
     """
+
+
+def make_setup_error(exc_info=None):
+    """Create a new SetupError for the last exception and log it."""
+    if exc_info is None:
+        exc_info = sys.exc_info()
+
+    # log the exception
+    log.exception(_(u'Plugin setup error'), 'pluginsystem', exc_info)
+    exc_type, exc_value, tb = exc_info
+
+    # if the exception is already a SetupError we only
+    # have to return it unchanged.
+    if isinstance(exc_value, SetupError):
+        return exc_value
+
+    # otherwise create an error message for it and return a new
+    # exception.
+    error, (filename, line) = summarize_exception(exc_info)
+    return SetupError(_(u'Exception happend on setup: '
+                        u'%(error)s (%(file)s, line %(line)d)') % {
+        'error':    escape(error),
+        'file':     filename,
+        'line':     line
+    })
 
 
 class Plugin(object):
@@ -437,8 +463,7 @@ class Plugin(object):
         except:
             if not self.app.cfg['plugin_guard']:
                 raise
-            exc_type, exc_value, tb = sys.exc_info()
-            self.setup_error = exc_type, exc_value, tb.tb_next
+            self.setup_error = make_setup_error()
 
     @property
     def display_name(self):
@@ -556,7 +581,7 @@ class Plugin(object):
             self.module.setup(self.app, self)
         except:
             if self.setup_error is None:
-                self.setup_error = sys.exc_info()
+                self.setup_error = make_setup_error()
             if not self.app.cfg['plugin_guard']:
                 raise
 

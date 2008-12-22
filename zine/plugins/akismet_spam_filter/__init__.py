@@ -161,8 +161,7 @@ def show_akismet_config(req):
                 flash(_('Akismet configuration could not be written.'),
                       'error')
             elif form['api_key']:
-                flash(_('Akismet enabled successfully. The API key '
-                        'provided is valid'), 'ok')
+                flash(_('Akismet has been successfully enabled.'), 'ok')
             else:
                 flash(_('Akismet disabled.'), 'ok')
         return redirect_to('akismet_spam_filter/config')
@@ -183,7 +182,7 @@ class AkismetBlockedCommentsCounterWidget(Widget):
 
     @staticmethod
     def get_display_name():
-        return _('Akismet Blocked Comments')
+        return _('Comments Blocked by Akismet')
 
 
 def setup(app, plugin):

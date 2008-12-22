@@ -20,10 +20,14 @@ _entity_re = re.compile(r'&([^;]+);')
 _striptags_re = re.compile(r'(<!--.*?-->|<[^>]*>)')
 
 
+#: the xml namespace
+XML_NS = 'http://www.w3.org/XML/1998/namespace'
+
+
 #: a dict of html entities to codepoints. This includes the problematic
 #: &apos; character.
-_html_entities = name2codepoint.copy()
-_html_entities['apos'] = 39
+html_entities = name2codepoint.copy()
+html_entities['apos'] = 39
 del name2codepoint
 
 
@@ -35,8 +39,8 @@ def replace_entities(string):
     """
     def handle_match(m):
         name = m.group(1)
-        if name in _html_entities:
-            return unichr(_html_entities[name])
+        if name in html_entities:
+            return unichr(html_entities[name])
         if name[:2] in ('#x', '#X'):
             try:
                 return unichr(int(name[2:], 16))
@@ -51,6 +55,20 @@ def replace_entities(string):
     return _entity_re.sub(handle_match, string)
 
 
+def to_text(element):
+    """Convert an element into text only information."""
+    result = []
+
+    def _to_text(element):
+        result.append(element.text or u'')
+        for child in element.iterchildren():
+            _to_text(child)
+        result.append(element.tail or u'')
+
+    _to_text(element)
+    return u''.join(result)
+
+
 def strip_tags(s, normalize_whitespace=True):
     """Remove HTML tags in a text.  This also resolves entities."""
     s = _striptags_re.sub('', s)
@@ -58,26 +76,6 @@ def strip_tags(s, normalize_whitespace=True):
     if normalize_whitespace:
         s = ' '.join(s.split())
     return s
-
-
-_etree = None
-def get_etree():
-    """Get an etree implementation that is not lxml.  We love lxml but because
-    lxml is an c (cython) extension we can't have it as another dependency.
-    Because we need `ElementTree._write` for our zxa module which is not
-    supported by lxml this is needed.
-    """
-    global _etree
-    if _etree is not None:
-        return _etree
-    for name in 'elementtree.cElementTree', \
-                'cElementTree', 'xml.etree.cElementTree', \
-                'ElementEtree', 'xml.etree.ElementTree':
-        etree = import_string(name, silent=True)
-        if etree is not None:
-            _etree = etree
-            return etree
-    raise RuntimeError('no elementtree implementation found')
 
 
 def generate_rsd(app):
@@ -174,3 +172,21 @@ class XMLRPC(object, SimpleXMLRPCDispatcher):
 
     def __call__(self, request):
         return self.handle_request(request)
+
+
+class Namespace(object):
+
+    def __init__(self, uri):
+        self._uri = unicode(uri)
+
+    def __getattr__(self, name):
+        return u'{%s}%s' % (self._uri, name)
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
+    def __unicode__(self):
+        return self._uri

@@ -76,8 +76,9 @@ def load_zine_reddit():
     """Load the zine reddit."""
     import urllib
     reddit_url = 'http://www.reddit.com/r/zine'
+
+    f = urllib.urlopen(reddit_url + '.json')
     try:
-        f = urllib.urlopen(reddit_url + '.json')
         data = load_json(f.read())
     finally:
         f.close()

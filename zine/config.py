@@ -98,7 +98,7 @@ DEFAULT_VARS = {
     'comments_enabled':         BooleanField(default=True),
     'moderate_comments':        ChoiceField(choices=[
         (0, lazy_gettext(u'Automatically approve all comments')),
-        (1, lazy_gettext(u'An administrator must always aprove the comment')),
+        (1, lazy_gettext(u'An administrator must always approve the comment')),
         (2, lazy_gettext(u'Automatically approve comments by known comment authors'))
                                             ], default=1),
     'pings_enabled':            BooleanField(default=True),
@@ -159,7 +159,7 @@ def from_string(value, field):
     try:
         return field(value)
     except ValidationError, e:
-        return field(None)
+        return field.default
 
 
 # XXX: this function should probably go away, currently it only exists because
@@ -276,7 +276,7 @@ class Configuration(object):
         try:
             value = from_string(self._values[key], field)
         except KeyError:
-            value = field(None)
+            value = field.default
         self._converted_values[key] = value
         return value
 
@@ -335,6 +335,13 @@ class Configuration(object):
         """Return a list of all key, value tuples."""
         return list(self.iteritems())
 
+    def export(self):
+        """Like iteritems but with the raw values."""
+        for key, value in self.iteritems():
+            value = self.config_vars[key].to_primitive(value)
+            if isinstance(value, basestring):
+                yield key, value
+
     def get_detail_list(self):
         """Return a list of categories with keys and some more
         details for the advanced configuration editor.
@@ -347,7 +354,7 @@ class Configuration(object):
                 value = field.to_primitive(from_string(self._values[key], field))
             else:
                 use_default = True
-                value = field.to_primitive(field(None))
+                value = field.to_primitive(field.default)
             if '/' in key:
                 category, name = key.split('/', 1)
             else:
@@ -405,7 +412,7 @@ class Configuration(object):
                 value = repr(value)
             result.append({
                 'key':          key,
-                'default':      repr(field(None)),
+                'default':      repr(field.default),
                 'value':        value
             })
         result.sort(key=lambda x: x['key'].lower())

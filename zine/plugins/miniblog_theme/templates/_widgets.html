@@ -1,6 +1,6 @@
 {{ widgets.latest_posts(show_title=true) }}
 {{ widgets.post_archive_summary('months', 6, show_title=true) }}
-{{ widgets.tagcloud(show_title=true) }}
+{{ widgets.tag_cloud(show_title=true) }}
 {% if request.user.is_manager %}
 <h3>{{ _('Administration') }}</h3>
 <p>

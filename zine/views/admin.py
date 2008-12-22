@@ -36,8 +36,6 @@ from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.admin import flash, gen_slug, load_zine_reddit, \
      require_admin_privilege
 from zine.utils.pagination import AdminPagination
-from zine.utils.xxx import make_hidden_fields, CSRFProtector, \
-     IntelligentRedirect, StreamReporter
 from zine.utils.http import redirect_back, redirect_to, redirect
 from zine.i18n import parse_datetime, format_system_datetime, \
      list_timezones, has_timezone, list_languages, has_language
@@ -52,7 +50,8 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
-     DeleteGroupForm, make_config_form, make_import_form
+     DeleteGroupForm, ThemeOptionsForm, DeleteImportForm, ExportForm, \
+     MaintenanceModeForm, make_config_form, make_import_form
 
 
 #: how many posts / comments should be displayed per page?
@@ -164,26 +163,11 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         plugins_to_deactivate = []
         for plugin in request.app.plugins.itervalues():
             if plugin.active and plugin.setup_error is not None:
+                flash(_(u'Could not activate plugin “%(name)s”: %(error)s') % {
+                    'name':     plugin.html_display_name,
+                    'error':    plugin.setup_error
+                })
                 plugins_to_deactivate.append(plugin.name)
-                exc_type, exc_value, tb = plugin.setup_error
-                if exc_type is SetupError:
-                    msg = _(u'Could not activate plugin “%(name)s”: %(error)s') % {
-                        'name': plugin.html_display_name,
-                        'error': exc_value.message
-                    }
-                else:
-                    msg =_(u'The plugin guard detected that the plugin '
-                           u'“%(name)s” causes problems (%(error)s in '
-                           u'%(file)s, line %(line)s) and deactivated it.  If '
-                           u'you want to debug it, disable the plugin guard.') % {
-                        'name': plugin.html_display_name,
-                        'error': escape(str(plugin.setup_error[1]).
-                                        decode('utf-8', 'ignore')),
-                        'file': plugin.setup_error[2].tb_frame.
-                                    f_globals.get('__file__', _(u'unknown file')),
-                        'line': plugin.setup_error[2].tb_lineno
-                    }
-                flash(msg, 'error')
 
         if plugins_to_deactivate:
             #TODO: it's quite tricky – it needs at least two reloads to
@@ -248,7 +232,7 @@ def ping_post_links(request, post):
                 if not e.ignore_silently:
                     flash(_(u'Could not ping %(url)s: %(error)s') % {
                         'url': html_url,
-                        'error': e.description
+                        'error': e.message
                     }, 'error')
             else:
                 flash(_(u'%s was pinged successfully.') %
@@ -341,7 +325,11 @@ dispatch_post_delete = _make_post_dispatcher('delete')
 def edit_entry(request, post=None):
     """Edit an existing entry or create a new one."""
     active_tab = post and 'manage.entries' or 'write.entry'
-    form = EntryForm(post)
+    initial = None
+    body = request.args.get('body')
+    if body:
+        initial = {'text': body}
+    form = EntryForm(post, initial)
 
     if post is None:
         assert_privilege(CREATE_ENTRIES)
@@ -705,7 +693,8 @@ def delete_category(request, category_id):
         if request.form.get('cancel'):
             return redirect('admin/edit_category', category_id=category.id)
         elif request.form.get('confirm') and form.validate(request.form):
-            redirect.add_invalid('admin/edit_category', category_id=category.id)
+            form.add_invalid_redirect_target('admin/edit_category',
+                                             category_id=category.id)
             form.delete_category()
             flash(_(u'Category %s deleted successfully.') % escape(category.name))
             db.commit()
@@ -908,21 +897,23 @@ def urls(request):
 @require_admin_privilege(BLOG_ADMIN)
 def theme(request):
     """Allow the user to select one of the themes that are available."""
-    csrf_protector = CSRFProtector()
-    if 'configure' in request.args:
-        return redirect_to('admin/configure_theme')
-    new_theme = request.args.get('select')
-    if new_theme in request.app.themes:
-        csrf_protector.assert_safe()
-        request.app.cfg.change_single('theme', new_theme)
-        flash(_(u'Theme changed successfully.'), 'configure')
-        return redirect_to('admin/theme')
+    form = ThemeOptionsForm()
+
+    if request.method == 'GET':
+        if 'configure' in request.args:
+            return redirect_to('admin/configure_theme')
+        elif form.validate(request.args):
+            new_theme = request.args.get('select')
+            if new_theme in request.app.themes:
+                request.app.cfg.change_single('theme', new_theme)
+                flash(_(u'Theme changed successfully.'), 'configure')
+                return redirect_to('admin/theme')
 
     return render_admin_response('admin/theme.html', 'options.theme',
         themes=sorted(request.app.themes.values(),
                       key=lambda x: x.name == 'default' or x.display_name.lower()),
         current_theme=request.app.theme,
-        csrf_protector=csrf_protector
+        form=form.as_widget()
     )
 
 
@@ -970,25 +961,23 @@ def remove_plugin(request, plugin):
        not plugin.instance_plugin or \
        plugin.active:
         raise NotFound()
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
+    form = RemovePluginForm()
 
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('confirm'):
             try:
                 plugin.remove()
             except IOError:
                 flash(_(u'Could not remove the plugin “%s” because an '
-                        u'IO error occoured. Wrong permissions?') %
+                        u'IO error occurred. Wrong permissions?') %
                       plugin.html_display_name)
             flash(_(u'The plugin “%s” was removed from the instance '
                     u'successfully.') % escape(plugin.display_name), 'remove')
-        return redirect('admin/plugins')
+        return form.redirect('admin/plugins')
 
     return render_admin_response('admin/remove_plugin.html', 'options.plugins',
         plugin=plugin,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+        form=form.as_widget()
     )
 
 
@@ -1040,9 +1029,8 @@ def configuration(request):
 def maintenance(request):
     """Enable / Disable maintenance mode."""
     cfg = request.app.cfg
-    csrf_protector = CSRFProtector()
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
+    form = MaintenanceModeForm()
+    if request.method == 'POST' and form.validate(request.form):
         cfg.change_single('maintenance_mode', not cfg['maintenance_mode'])
         if not cfg['maintenance_mode']:
             flash(_(u'Maintenance mode disabled.  The blog is now '
@@ -1051,8 +1039,8 @@ def maintenance(request):
 
     return render_admin_response('admin/maintenance.html',
                                  'system.maintenance',
-        hidden_form_data=make_hidden_fields(csrf_protector),
-        maintenance_mode=cfg['maintenance_mode']
+        maintenance_mode=cfg['maintenance_mode'],
+        form=form.as_widget()
     )
 
 
@@ -1098,40 +1086,39 @@ def delete_import(request, id):
     dump = load_import_dump(request.app, id)
     if dump is None:
         raise NotFound()
-    csrf_protector = CSRFProtector()
-    redirect = IntelligentRedirect()
+    form = DeleteImportForm()
 
-    if request.method == 'POST':
-        csrf_protector.assert_safe()
+    if request.method == 'POST' and form.validate(request.form):
         if request.form.get('cancel'):
-            return redirect('admin/inspect_import', id=id)
+            return form.redirect('admin/inspect_import', id=id)
         elif request.form.get('confirm'):
-            redirect.add_invalid('admin/inspect_import', id=id)
+            form.add_invalid_redirect_target('admin/inspect_import', id=id)
             delete_import_dump(request.app, id)
             flash(_(u'The imported dump “%s” was deleted successfully.') %
                   escape(dump.title), 'remove')
-            return redirect('admin/import')
+            return form.redirect('admin/import')
 
     return render_admin_response('admin/delete_import.html',
                                  'system.import',
         dump=dump,
-        hidden_form_data=make_hidden_fields(csrf_protector, redirect)
+        form=form.as_widget()
     )
 
 
 @require_admin_privilege(BLOG_ADMIN)
 def export(request):
-    """Not yet implemented."""
-    csrf_protector = CSRFProtector()
-    if request.args.get('format') == 'zxa':
-        csrf_protector.assert_safe()
-        from zine.zxa import export
-        response = export(request.app)
-        response.headers['Content-Disposition'] = 'attachment; ' \
-            'filename="%s.zxa"' % '_'.join(request.app.cfg['blog_title'].split())
-        return response
+    """Export the blog to the ZXA format."""
+    form = ExportForm()
+
+    if request.method == 'POST' and form.validate(request.form):
+        if request.form.get('format') == 'zxa':
+            from zine.zxa import export
+            response = export(request.app)
+            response.headers['Content-Disposition'] = 'attachment; ' \
+                'filename="%s.zxa"' % '_'.join(request.app.cfg['blog_title'].split())
+            return response
     return render_admin_response('admin/export.html', 'system.export',
-        hidden_form_data=make_hidden_fields(csrf_protector)
+        form=form.as_widget()
     )
 
 
@@ -1139,7 +1126,7 @@ def export(request):
 def information(request):
     """Shows some details about this Zine installation.  It's useful for
     debugging and checking configurations.  If severe errors in a Zine
-    installation occour it's a good idea to dump this page and attach it to
+    installation occur it's a good idea to dump this page and attach it to
     a bug report mail.
     """
     from platform import platform
@@ -1223,7 +1210,7 @@ def information(request):
 
     if export:
         response.headers['Content-Disposition'] = 'attachment; ' \
-            'filename="textpress-environment.html"'
+            'filename="zine-environment.html"'
 
     return response
 

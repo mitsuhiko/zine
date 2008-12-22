@@ -12,25 +12,20 @@ import re
 import urllib
 from time import strptime
 from datetime import datetime
+from lxml import etree
 from zine.forms import WordPressImportForm
 from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.i18n import lazy_gettext, _
+from zine.utils import log
 from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
-from zine.utils.xml import _html_entities, get_etree, escape
+from zine.utils.xml import Namespace, html_entities, escape
 from zine.utils.http import redirect_to
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED
 
-
-class _Namespace(object):
-    def __init__(self, uri):
-        self._uri = uri
-    def __getattr__(self, name):
-        return '{%s}%s' % (self._uri, name)
-
-CONTENT = _Namespace('http://purl.org/rss/1.0/modules/content/')
-DC_METADATA = _Namespace('http://purl.org/dc/elements/1.1/')
-WORDPRESS = _Namespace('http://wordpress.org/export/1.0/')
+CONTENT = Namespace('http://purl.org/rss/1.0/modules/content/')
+DC_METADATA = Namespace('http://purl.org/dc/elements/1.1/')
+WORDPRESS = Namespace('http://wordpress.org/export/1.0/')
 
 
 _xml_decl_re = re.compile(r'<\?xml.*?\?>(?s)')
@@ -50,18 +45,27 @@ def parse_broken_wxr(fd):
     # fix one: add inline doctype that defines the HTML entities so that
     # the parser doesn't bark on them, wordpress adds such entities to some
     # sections from time to time
-    inline_doctype = '<!DOCTYPE wordpress [ %s ]>' % '\n'.join(
+    inline_doctype = '<!DOCTYPE wordpress [ %s ]>' % ' '.join(
         '<!ENTITY %s "&#%d;">' % (name, codepoint)
-        for name, codepoint in _html_entities.iteritems()
+        for name, codepoint in html_entities.iteritems()
     )
+
+    # fix two: wordpress 2.6 uses "excerpt:encoded" where excerpt is an
+    # undeclared namespace.  What they did makes no sense whatsoever but
+    # who cares.  We're not treating that element anyways but the XML
+    # parser freaks out.  To fix that problem we're wrapping the whole
+    # thing in another root element
+    extra = '<wxrfix xmlns:excerpt="ignore:me">'
+
     code = fd.read()
     xml_decl = _xml_decl_re.search(code)
     if xml_decl is not None:
-        code = code[:xml_decl.end()] + inline_doctype + code[xml_decl.end():]
+        code = code[:xml_decl.end()] + inline_doctype + extra + \
+               code[xml_decl.end():]
     else:
-        code = inline_doctype + code
+        code = inline_doctype + extra + code
 
-    # fix two: find comment sections and escape them.  Especially trackbacks
+    # fix three: find comment sections and escape them.  Especially trackbacks
     # tent to break the XML structure.  same applies to wp:meta_value stuff.
     # this is especially necessary for older wordpress dumps, 2.7 fixes some
     # of these problems.
@@ -72,8 +76,9 @@ def parse_broken_wxr(fd):
         return before + content + after
     code = _meta_value_re.sub(escape_if_good_idea, code)
     code = _comment_re.sub(escape_if_good_idea, code)
+    code += '</wxrfix>'
 
-    return get_etree().fromstring(code).find('channel')
+    return etree.fromstring(code).find('rss').find('channel')
 
 
 def parse_wordpress_date(value):
@@ -95,7 +100,7 @@ def parse_feed(fd):
         if name:
             author = authors.get(name)
             if author is None:
-                author = authors[name] = Author(len(authors) + 1, name, None)
+                author = authors[name] = Author(name, None, id=len(authors) + 1)
             return author
 
     tags = {}
@@ -110,18 +115,20 @@ def parse_feed(fd):
                             item.findtext(WORDPRESS.cat_name))
         categories[category.name] = category
 
-    return Blog(
-        tree.findtext('title'),
-        tree.findtext('link'),
-        tree.findtext('description') or '',
-        tree.findtext('language') or 'en',
-        tags.values(),
-        categories.values(),
-        [Post(
-            item.findtext(WORDPRESS.post_name),
+    posts = []
+
+    for item in tree.findall('item'):
+        status = {
+            'draft':            STATUS_DRAFT
+        }.get(item.findtext(WORDPRESS.status), STATUS_PUBLISHED)
+        post_name = item.findtext(WORDPRESS.post_name)
+        pub_date = parse_wordpress_date(item.findtext(WORDPRESS.post_date_gmt))
+        slug = pub_date.strftime('%Y/%m/%d/') + post_name
+        post = Post(
+            slug,
             item.findtext('title'),
             item.findtext('link'),
-            parse_wordpress_date(item.findtext(WORDPRESS.post_date_gmt)),
+            pub_date,
             get_author(item.findtext(DC_METADATA.creator)),
             item.findtext('description'),
             item.findtext(CONTENT.encoded),
@@ -131,11 +138,13 @@ def parse_feed(fd):
              if x.text in categories],
             [Comment(
                 x.findtext(WORDPRESS.comment_author),
+                x.findtext(WORDPRESS.comment_content),
                 x.findtext(WORDPRESS.comment_author_email),
                 x.findtext(WORDPRESS.comment_author_url),
+                None,
                 x.findtext(WORDPRESS.comment_author_ip),
                 parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
-                x.findtext(WORDPRESS.comment_content), 'html',
+                'html',
                 x.findtext(WORDPRESS.comment_type) in ('pingback',
                                                        'traceback'),
                 (COMMENT_UNMODERATED, COMMENT_MODERATED)
@@ -145,8 +154,17 @@ def parse_feed(fd):
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
             parser='html'
-        ) for item in tree.findall('item')
-          if item.findtext(WORDPRESS.status) == 'publish'],
+        )
+        posts.append(post)
+
+    return Blog(
+        tree.findtext('title'),
+        tree.findtext('link'),
+        tree.findtext('description') or '',
+        tree.findtext('language') or 'en',
+        tags.values(),
+        categories.values(),
+        posts,
         authors.values()
     )
 
@@ -162,7 +180,7 @@ class WordPressImporter(Importer):
             dump = request.files.get('dump')
             if not form.data['download_url']:
                 try:
-                    dump = urllib.urlopen(form.data['url'])
+                    dump = urllib.urlopen(form.data['download_url'])
                 except Exception, e:
                     error = _(u'Error downloading from URL: %s') % e
             elif not dump:
@@ -171,6 +189,7 @@ class WordPressImporter(Importer):
             try:
                 blog = parse_feed(dump)
             except Exception, e:
+                log.exception(_(u'Error parsing uploaded file'))
                 flash(_(u'Error parsing uploaded file: %s') % e, 'error')
             else:
                 self.enqueue_dump(blog)

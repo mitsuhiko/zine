@@ -1294,18 +1294,18 @@ class Sanitizer(object):
 
         clean = []
         for prop, value in self._css_pair_re.findall(css):
-          if not value:
-              continue
-          if prop.lower() in self.acceptable_css_properties:
-              clean.append('%s: %s' % (prop, value))
-          elif prop.split('-', 1)[0].lower() in \
-               ('background', 'border', 'margin', 'padding'):
-              for keyword in value.split():
-                  if not keyword in self.acceptable_css_keywords and \
-                     not self._css_unit_re.match(keyword):
-                      break
-              else:
-                  clean.append('%s: %s' % (prop, value))
+            if not value:
+                continue
+            if prop.lower() in self.acceptable_css_properties:
+                clean.append('%s: %s' % (prop, value))
+            elif prop.split('-', 1)[0].lower() in \
+                 ('background', 'border', 'margin', 'padding'):
+                for keyword in value.split():
+                    if not keyword in self.acceptable_css_keywords and \
+                       not self._css_unit_re.match(keyword):
+                        break
+                else:
+                    clean.append('%s: %s' % (prop, value))
 
         return u'; '.join(clean)
 

@@ -11,15 +11,30 @@
     :license: BSD see LICENSE for more details.
 """
 import os
-import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime
 from zine.i18n import _
 from zine.database import db, posts
-from zine.utils.xml import escape, get_etree
+from zine.utils.xml import escape
 from zine.models import COMMENT_MODERATED
-from zine.privileges import BLOG_ADMIN, require_privilege
+from zine.privileges import BLOG_ADMIN, ENTER_ADMIN_PANEL, require_privilege
+
+
+ignored_config_keys = frozenset(['database_uri'])
+
+
+def _make_id(*args):
+    hash = md5()
+    for arg in args:
+        if isinstance(arg, unicode):
+            arg = arg.encode('utf-8')
+        hash.update('|' + str(arg))
+    return hash.hexdigest()
 
 
 def list_import_queue(app):
@@ -83,7 +98,12 @@ def _perform_import(app, blog, d):
             if author_rewrite is not None:
                 user = User.query.get(int(author_rewrite))
             else:
-                user = User(author.name, None, author.email, is_author=True)
+                user = User(author.username, None, author.email,
+                            author.real_name, author.description,
+                            author.www, author.is_author)
+                if author.pw_hash:
+                    user.pw_hash = author.pw_hash
+                user.privileges.update(author.privileges)
             author_mapping[author.id] = user
         return author_mapping[author.id]
 
@@ -146,6 +166,8 @@ def _perform_import(app, blog, d):
                     old_post.updated, old_post.comments_enabled,
                     old_post.pings_enabled, parser=old_post.parser,
                     uid=old_post.uid)
+        if old_post.parser_data is not None:
+            post.parser_data = old_post.parser_data
         yield u'<li><strong>%s</strong>' % escape(post.title)
 
         for tag in old_post.tags:
@@ -156,20 +178,48 @@ def _perform_import(app, blog, d):
             post.categories.append(prepare_category(category))
             yield u'.'
 
-        # now the comments if use wants them.
+        # now the comments if user wants them.
         if d['comments'][old_post.id]:
-            for comment in old_post.comments:
-                Comment(post, comment.author, comment.body,
-                        comment.author_email, comment.author_url, None,
-                        comment.pub_date, comment.remote_addr,
-                        comment.parser, comment.is_pingback,
-                        comment.status)
+            to_create = set(old_post.comments)
+            created = {}
+
+            def _create_comment(comment):
+                parent = None
+                if comment.parent is not None:
+                    if comment.parent in created:
+                        parent = created[comment.parent]
+                    else:
+                        parent = _create_comment(comment.parent)
+                    to_create.discard(comment.parent)
+                rv = Comment(post, comment.author, comment.body,
+                             comment.author_email, comment.author_url, parent,
+                             comment.pub_date, comment.remote_addr,
+                             comment.parser, comment.is_pingback,
+                             comment.status)
+                if comment.blocked_msg:
+                    rv.blocked_msg = comment.blocked_msg
+                created[comment] = rv
+                return rv
+
+            while to_create:
+                _create_comment(to_create.pop())
                 yield u'.'
+
         yield u' <em>%s</em></li>\n' % _('done')
 
     # send to the database
     yield u'<li>%s' % _('Committing transaction...')
     db.commit()
+
+    # write config if we have
+    if d['load_config']:
+        yield u'<li>%s' % _('Updating configuration...')
+        t = app.cfg.edit()
+        for key, value in blog.config.iteritems():
+            if key in t and key not in ignored_config_keys:
+                t.set_from_string(key, value)
+        t.commit()
+
     yield u' <em>%s</em></li></ul>' % _('done')
 
 
@@ -232,7 +282,7 @@ class Importer(object):
     def render_admin_page(self, template_name, **context):
         """Shortcut for rendering an page for the admin."""
         from zine.views.admin import render_admin_response
-        return render_admin_response(template_name, 'maintenance.import',
+        return render_admin_response(template_name, 'system.import',
                                      **context)
 
     def enqueue_dump(self, blog):
@@ -260,11 +310,20 @@ class Importer(object):
         """
 
 
-class Blog(object):
+class _Element(object):
+    element = None
+
+    def __getstate__(self):
+        self.__dict__.pop('element', None)
+        return self.__dict__
+
+
+class Blog(_Element):
     """Represents a blog."""
 
     def __init__(self, title, link, description, language='en', tags=None,
-                 categories=None, posts=None, authors=None):
+                 categories=None, posts=None, authors=None,
+                 configuration=None):
         self.dump_date = datetime.utcnow()
         self.title = title
         self.link = link
@@ -280,13 +339,16 @@ class Blog(object):
             posts.sort(key=lambda x: x.pub_date, reverse=True)
         self.posts = posts or []
         if authors:
-            authors.sort(key=lambda x: x.name.lower())
+            authors.sort(key=lambda x: x.username.lower())
         self.authors = authors or []
+        if configuration is None:
+            configuration = {}
+        self.configuration = configuration
 
     def __getstate__(self):
         for post in self.posts:
             post.__dict__.pop('already_imported', None)
-        return self.__dict__
+        return _Element.__getstate__(self)
 
     def __setstate__(self, d):
         self.__dict__ = d
@@ -313,31 +375,42 @@ class Blog(object):
         )
 
 
-class Author(object):
+class Author(_Element):
     """Represents an author."""
 
-    def __init__(self, id, name, email):
+    def __init__(self, username, email, real_name=u'', description=u'',
+                 pw_hash=None, is_author=True, extra=None, id=None):
+        if id is None:
+            id = _make_id(username, email)
         self.id = id
-        self.name = name
-        self.email = email
+        self.username = username
+        self.real_name = real_name or u''
+        self.email = email or u''
+        self.description = description or u''
+        self.privileges = set([ENTER_ADMIN_PANEL])
+        self.is_author = is_author
+        self.pw_hash = pw_hash
+        self.extra = extra or {}
 
     def __repr__(self):
         return '<%s %r>' % (
             self.__class__.__name__,
-            self.name
+            self.username
         )
 
 
-class Tag(object):
+class Tag(_Element):
     """Represents a tag."""
 
-    def __init__(self, slug, name):
+    def __init__(self, slug, name=None):
         self.slug = slug
+        if name is None:
+            name = slug
         self.name = name
 
     @property
     def id(self):
-        return md5.new(self.slug).hexdigest()
+        return _make_id(self.slug)
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -348,19 +421,20 @@ class Tag(object):
 
 class Category(Tag):
     """Represents a category."""
+    element = None
 
-    def __init__(self, slug, name, description=u''):
+    def __init__(self, slug, name=None, description=u''):
         Tag.__init__(self, slug, name)
         self.description = description
 
 
-class Post(object):
+class Post(_Element):
     """Represents a blog post."""
 
     def __init__(self, slug, title, link, pub_date, author, intro, body,
                  tags=None, categories=None, comments=None,
                  comments_enabled=True, pings_enabled=True, updated=None,
-                 uid=None, parser=None):
+                 uid=None, parser=None, parser_data=None):
         self.slug = slug
         self.title = title
         self.link = link
@@ -376,6 +450,7 @@ class Post(object):
         self.updated = updated or self.pub_date
         self.uid = uid or self.link
         self.parser = parser or 'html'
+        self.parser_data = parser_data
 
     @property
     def text(self):
@@ -386,7 +461,7 @@ class Post(object):
 
     @property
     def id(self):
-        return md5.new(self.uid).hexdigest()
+        return _make_id(self.uid)
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -395,21 +470,25 @@ class Post(object):
         )
 
 
-class Comment(object):
+class Comment(_Element):
     """Represents a comment on a post."""
 
-    def __init__(self, author, author_email, author_url, remote_addr,
-                 pub_date, body, parser=None, is_pingback=False,
-                 status=COMMENT_MODERATED):
+    def __init__(self, author, body, author_email, author_url, parent,
+                 pub_date, remote_addr, parser=None, is_pingback=False,
+                 status=COMMENT_MODERATED, blocked_msg=u'',
+                 parser_data=None):
         self.author = author
         self.author_email = author_email
         self.author_url = author_url
+        self.parent = parent
         self.remote_addr = remote_addr
         self.pub_date = pub_date
         self.body = body
         self.parser = parser or 'html'
         self.is_pingback = is_pingback
         self.status = status
+        self.blocked_msg = blocked_msg
+        self.parser_data = parser_data
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -420,4 +499,5 @@ class Comment(object):
 
 from zine.importers.wordpress import WordPressImporter
 from zine.importers.blogger import BloggerImporter
-all_importers = [WordPressImporter, BloggerImporter]
+from zine.importers.feed import FeedImporter
+importers = [WordPressImporter, BloggerImporter, FeedImporter]
