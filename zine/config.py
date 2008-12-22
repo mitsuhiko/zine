@@ -16,7 +16,7 @@ from os import path
 from threading import Lock
 
 from zine import environment
-from zine.i18n import lazy_gettext, _, list_timezones
+from zine.i18n import lazy_gettext, _, list_timezones, list_languages
 from zine.utils import log
 from zine.utils.forms import TextField, IntegerField, BooleanField, \
     ChoiceField, CommaSeparated
@@ -41,7 +41,8 @@ DEFAULT_VARS = {
     'session_cookie_name':      TextField(default=u'zine_session'),
     'theme':                    TextField(default=u'default'),
     'secret_key':               TextField(default=u''),
-    'language':                 ChoiceField(choices=[u'en'], default=u'en'),
+    'language':                 ChoiceField(choices=list_languages(False),
+                                            default=u'en'),
     'plugin_searchpath':        CommaSeparated(TextField(), default=list),
 
     # the iid is an internal unique id for the instance.  The setup creates a
