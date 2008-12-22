@@ -156,11 +156,9 @@ def show_akismet_config(req):
 
     if req.method == 'POST' and form.validate(req.form):
         if form.has_changed:
-            if not req.app.cfg.change_single('akismet_spam_filter/apikey',
-                                             form['api_key']):
-                flash(_('Akismet configuration could not be written.'),
-                      'error')
-            elif form['api_key']:
+            req.app.cfg.change_single('akismet_spam_filter/apikey',
+                                      form['api_key'])
+            if form['api_key']:
                 flash(_('Akismet has been successfully enabled.'), 'ok')
             else:
                 flash(_('Akismet disabled.'), 'ok')
