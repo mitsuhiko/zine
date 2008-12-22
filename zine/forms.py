@@ -919,14 +919,6 @@ class CacheOptionsForm(_ConfigForm):
                 raise ValidationError(_(u'You have to provide cache folder to '
                                         u'use filesystem cache.'))
 
-    def _apply(self, t, skip):
-        # XXX: this is an ugly hack because the configuration is currently
-        # using the same format (comma separated) as well.  The correct
-        # solution would be switching the configuration system to the same
-        # form validation and reusing schemas.
-        _ConfigForm._apply(self, t, set(['memcached_servers']))
-        t['memcached_servers'] = ', '.join(self.data['memcached_servers'])
-
 
 class MaintenanceModeForm(forms.Form):
     """yet a dummy form, but could be extended later."""

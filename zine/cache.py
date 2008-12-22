@@ -147,7 +147,7 @@ systems = {
     'null':         lambda app: NullCache(),
     'simple':       lambda app: SimpleCache(app.cfg['cache_timeout']),
     'memcached':    lambda app: MemcachedCache([x.strip() for x in
-                        app.cfg['memcached_servers'].split(',')],
+                        app.cfg['memcached_servers']],
                         app.cfg['cache_timeout']),
     'filesystem':   lambda app: FileSystemCache(
                         os.path.join(app.instance_folder,
