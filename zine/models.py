@@ -280,7 +280,7 @@ class PostQuery(db.Query):
 
     def for_index(self):
         """Return all the types for the index."""
-        types = get_application().cfg['index_content_types'].split(',')
+        types = get_application().cfg['index_content_types']
         if len(types) == 1:
             return self.filter_by(content_type=types[0].strip())
         return self.filter(Post.content_type.in_([x.strip() for x in types]))

@@ -8,10 +8,12 @@
     :copyright: 2008 by Armin Ronacher.
     :license: BSD
 """
+from copy import copy
 from datetime import datetime
 
-from zine.i18n import _, lazy_gettext, list_languages, list_timezones
+from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
+from zine.config import DEFAULT_VARS
 from zine.database import db, posts, comments
 from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
@@ -20,8 +22,22 @@ from zine.privileges import bind_privileges
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
-     is_valid_url, is_valid_slug, is_valid_url_prefix, is_netaddr
+     is_valid_url, is_valid_slug, is_netaddr
 from zine.utils.redirects import register_redirect
+
+
+def config_field(cfgvar, label=None, **kwargs):
+    """Helper function for fetching fields from the config."""
+    if isinstance(cfgvar, forms.Field):
+        field = copy(cfgvar)
+    else:
+        field = copy(DEFAULT_VARS[cfgvar])
+    field._position_hint = forms._next_position_hint()
+    if label is not None:
+        field.label = label
+    for name, value in kwargs.iteritems():
+        setattr(field, name, value)
+    return field
 
 
 class LoginForm(forms.Form):
@@ -823,37 +839,37 @@ class _ConfigForm(forms.Form):
 
 class LogOptionsForm(_ConfigForm):
     """A form for the logfiles."""
-    log_file = forms.TextField(lazy_gettext(u'Filename'))
-    log_level = forms.ChoiceField(lazy_gettext(u'Log Level'),
-                                  choices=[(k, lazy_gettext(k)) for k, v
-                                           in sorted(log.LEVELS.items(),
-                                                     key=lambda x: x[1])])
+    log_file = config_field('log_file', lazy_gettext(u'Filename'))
+    log_level = config_field('log_level', lazy_gettext(u'Log Level'))
 
 
 class BasicOptionsForm(_ConfigForm):
     """The form where the basic options are changed."""
-    blog_title = forms.TextField(lazy_gettext(u'Blog title'))
-    blog_tagline = forms.TextField(lazy_gettext(u'Blog tagline'))
-    blog_email = forms.TextField(lazy_gettext(u'Blog email'))
-    language = forms.ChoiceField(lazy_gettext(u'Language'))
-    timezone = forms.ChoiceField(lazy_gettext(u'Timezone'),
-                                 choices=sorted(list_timezones()))
-    session_cookie_name = forms.TextField(lazy_gettext(u'Cookie Name'))
-    comments_enabled = forms.BooleanField(lazy_gettext(u'Comments enabled'),
+    blog_title = config_field('blog_title', lazy_gettext(u'Blog title'))
+    blog_tagline = config_field('blog_tagline', lazy_gettext(u'Blog tagline'))
+    blog_email = config_field('blog_email', lazy_gettext(u'Blog email'))
+    language = config_field('language', lazy_gettext(u'Language'))
+    timezone = config_field('timezone', lazy_gettext(u'Timezone'))
+    session_cookie_name = config_field('session_cookie_name',
+                                       lazy_gettext(u'Cookie Name'))
+    comments_enabled = config_field('comments_enabled',
+        label=lazy_gettext(u'Comments enabled'),
         help_text=lazy_gettext(u'enable comments per default'))
-    moderate_comments = forms.ChoiceField(lazy_gettext(u'Comment Moderation'),
-                                          choices=[
-        (0, lazy_gettext(u'Automatically approve all comments')),
-        (1, lazy_gettext(u'An administrator must always approve the comment')),
-        (2, lazy_gettext(u'Automatically approve comments by already known commenters'))
-    ], widget=forms.RadioButtonGroup)
-    pings_enabled = forms.BooleanField(lazy_gettext(u'Pingbacks enabled'),
+    moderate_comments = config_field('moderate_comments',
+                                     lazy_gettext(u'Comment Moderation'),
+                                     widget=forms.RadioButtonGroup)
+    pings_enabled = config_field('pings_enabled',
+        lazy_gettext(u'Pingbacks enabled'),
         help_text=lazy_gettext(u'enable pingbacks per default'))
-    use_flat_comments = forms.BooleanField(lazy_gettext(u'Use flat comments'),
+    use_flat_comments = config_field('use_flat_comments',
+        lazy_gettext(u'Use flat comments'),
         help_text=lazy_gettext(u'All comments are posted top-level'))
-    default_parser = forms.ChoiceField(lazy_gettext(u'Default parser'))
-    comment_parser = forms.ChoiceField(lazy_gettext(u'Comment parser'))
-    posts_per_page = forms.IntegerField(lazy_gettext(u'Posts per page'))
+    default_parser = config_field('default_parser',
+                                  lazy_gettext(u'Default parser'))
+    comment_parser = config_field('comment_parser',
+                                  lazy_gettext(u'Comment parser'))
+    posts_per_page = config_field('posts_per_page',
+                                  lazy_gettext(u'Posts per page'))
 
     def __init__(self, initial=None):
         _ConfigForm.__init__(self, initial)
@@ -864,16 +880,16 @@ class BasicOptionsForm(_ConfigForm):
 
 class URLOptionsForm(_ConfigForm):
     """The form for url changes."""
-    blog_url_prefix = forms.TextField(lazy_gettext(u'Blog URL prefix'),
-                                      validators=[is_valid_url_prefix()])
-    admin_url_prefix = forms.TextField(lazy_gettext(u'Admin URL prefix'),
-                                       validators=[is_valid_url_prefix()])
-    category_url_prefix = forms.TextField(lazy_gettext(u'Category URL prefix'),
-                                          validators=[is_valid_url_prefix()])
-    tags_url_prefix = forms.TextField(lazy_gettext(u'Tag URL prefix'),
-                                      validators=[is_valid_url_prefix()])
-    profiles_url_prefix = forms.TextField(lazy_gettext(u'Author Profiles URL prefix'),
-                                          validators=[is_valid_url_prefix()])
+    blog_url_prefix = config_field('blog_url_prefix',
+                                   lazy_gettext(u'Blog URL prefix'))
+    admin_url_prefix = config_field('admin_url_prefix',
+                                    lazy_gettext(u'Admin URL prefix'))
+    category_url_prefix = config_field('category_url_prefix',
+                                       lazy_gettext(u'Category URL prefix'))
+    tags_url_prefix = config_field('tags_url_prefix',
+                                   lazy_gettext(u'Tag URL prefix'))
+    profiles_url_prefix = config_field('profiles_url_prefix',
+        lazy_gettext(u'Author Profiles URL prefix'))
 
 
 class ThemeOptionsForm(_ConfigForm):
@@ -884,20 +900,14 @@ class ThemeOptionsForm(_ConfigForm):
 
 
 class CacheOptionsForm(_ConfigForm):
-    cache_system = forms.ChoiceField(lazy_gettext(u'Cache system'), choices=[
-        (u'null', lazy_gettext(u'No Cache')),
-        (u'simple', lazy_gettext(u'Simple Cache')),
-        (u'memcached', lazy_gettext(u'memcached')),
-        (u'filesystem', lazy_gettext(u'Filesystem'))
-    ])
-    cache_timeout = forms.IntegerField(lazy_gettext(u'Default cache timeout'),
-                                       min_value=10)
-    enable_eager_caching = forms.BooleanField(
-        lazy_gettext(u'Enable eager caching'), lazy_gettext(u'Enable'))
-    memcached_servers = forms.CommaSeparated(
-        forms.TextField(validators=[is_netaddr()])
-    )
-    filesystem_cache_path = forms.TextField()
+    cache_system = config_field('cache_system', lazy_gettext(u'Cache system'))
+    cache_timeout = config_field('cache_timeout',
+                                 lazy_gettext(u'Default cache timeout'))
+    enable_eager_caching = config_field('enable_eager_caching',
+                                        lazy_gettext(u'Enable eager caching'),
+                                        help_text=lazy_gettext(u'Enable'))
+    memcached_servers = config_field('memcached_servers')
+    filesystem_cache_path = config_field('filesystem_cache_path')
 
     def context_validate(self, data):
         if data['cache_system'] == 'memcached':
@@ -908,14 +918,6 @@ class CacheOptionsForm(_ConfigForm):
             if not data['filesystem_cache_path']:
                 raise ValidationError(_(u'You have to provide cache folder to '
                                         u'use filesystem cache.'))
-
-    def _apply(self, t, skip):
-        # XXX: this is an ugly hack because the configuration is currently
-        # using the same format (comma separated) as well.  The correct
-        # solution would be switching the configuration system to the same
-        # form validation and reusing schemas.
-        _ConfigForm._apply(self, t, set(['memcached_servers']))
-        t['memcached_servers'] = ', '.join(self.data['memcached_servers'])
 
 
 class MaintenanceModeForm(forms.Form):
