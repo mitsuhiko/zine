@@ -9,7 +9,7 @@
           very bad implementation as it requires multiple parsing steps.
 
     :copyright: 2007-2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from zine.api import *
 from zine.parsers import BaseParser

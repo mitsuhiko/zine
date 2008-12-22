@@ -50,7 +50,7 @@
     New languages are added with `add-translation`.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import os
 import cPickle as pickle

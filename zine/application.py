@@ -8,7 +8,7 @@
 
 
     :copyright: 2007-2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from os import path, remove, makedirs, walk
 from time import time

@@ -88,7 +88,7 @@
 
 
     :copyright: Copyright 2008 by Ali Afshar, Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
 

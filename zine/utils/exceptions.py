@@ -6,7 +6,7 @@
     Exception utility module.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: BSD.
+    :license: BSD, see LICENSE for more details.
 """
 from zine.i18n import _
 

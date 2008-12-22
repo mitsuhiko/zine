@@ -11,7 +11,7 @@
     in a central spot and it's pretty slow.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import re
 import sys

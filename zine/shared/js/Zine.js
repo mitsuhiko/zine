@@ -6,7 +6,7 @@
  * functions for the base templates.
  *
  * :copyright: 2007 by Armin Ronacher.
- * :license: BSD
+ * :license: BSD, see LICENSE for more details.
  */
 
 var Zine = {

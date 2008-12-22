@@ -7,7 +7,7 @@
     This script asks a few questions to create a plugin skeleton
 
     :copyright: 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import re
 import sys
@@ -27,7 +27,7 @@ init_template = Template('''\
     Plugin implementation description goes here.
 
     :copyright: {{ year }} by {{ author }}.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 
 def setup(app, plugin):

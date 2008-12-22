@@ -6,7 +6,7 @@
     Various HTTP related helpers.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from urlparse import urlparse, urljoin
 

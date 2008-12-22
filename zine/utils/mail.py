@@ -5,7 +5,7 @@
     This module implements some email-related functions and classes.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import re
 from email.MIMEText import MIMEText

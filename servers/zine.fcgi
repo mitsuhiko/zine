@@ -8,7 +8,7 @@
     For working FastCGI support you have to have flup installed.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 
 # path to the instance. the folder for the instance must exist,

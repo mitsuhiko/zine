@@ -7,7 +7,7 @@
  * classes and registeres a click action for the fish that sends a request.
  *
  * :copyright: 2007-2008 by Armin Ronacher.
- * :license: BSD
+ * :license: BSD, see LICENSE for more details.
  */
 
 /* execute all the following code during the document setup in a closure.

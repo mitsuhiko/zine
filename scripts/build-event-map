@@ -7,7 +7,7 @@
     Lists all the events send in a given Zine installation.
 
     :copyright: 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import sys
 import os

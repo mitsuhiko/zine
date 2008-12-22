@@ -9,7 +9,7 @@
 
     :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs, Pedro Algarvio,
                              Ali Afshar.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
 from os import remove, sep as pathsep

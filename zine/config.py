@@ -9,7 +9,7 @@
 
 
     :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Lukas Meuser.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import os
 from os import path

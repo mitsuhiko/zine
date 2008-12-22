@@ -6,7 +6,7 @@
     This module implements the access to the redirect table.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from urlparse import urlparse
 

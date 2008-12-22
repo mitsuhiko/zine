@@ -7,7 +7,7 @@
     Run it with the --help option for usage information.
 
     :copyright: 2008 by Lukas Meuser.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import os
 import sys

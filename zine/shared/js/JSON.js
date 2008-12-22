@@ -5,7 +5,7 @@
  * Add JSON support for jQuery.
  *
  * :copyright: 2007 by Armin Ronacher.
- * :license: BSD
+ * :license: BSD, see LICENSE for more details.
  */
 
 (function($) {

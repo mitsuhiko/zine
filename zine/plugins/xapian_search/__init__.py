@@ -14,7 +14,7 @@
     documentation on queries for a full documentation.
 
     :copyright: 2008 by Christoph Hack.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import xapian
 from os.path import join, dirname

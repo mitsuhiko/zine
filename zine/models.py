@@ -7,7 +7,7 @@
 
     :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Christopher Grebs,
                              Ali Afshar.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from math import ceil, log
 from datetime import date, datetime, timedelta

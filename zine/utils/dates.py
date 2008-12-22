@@ -5,7 +5,7 @@
     This module implements date formatting and parsing functions.
 
     :copyright: 2007 by Armin Ronacher, Georg Brandl.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import re
 from datetime import datetime, timedelta

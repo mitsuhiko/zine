@@ -15,7 +15,7 @@
 
     :copyright: Copyright 2007-2008 by Armin Ronacher, Pedro Algarvio,
                                        Christopher Grebs, Ali Afshar.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from zine.application import render_template
 from zine.models import Post, Category, Tag, Comment

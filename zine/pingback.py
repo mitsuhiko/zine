@@ -24,7 +24,7 @@
 
 
     :copyright: Copyright 2007-2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import re
 import urllib2

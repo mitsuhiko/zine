@@ -6,7 +6,7 @@
     Do spam checking via Akismet of comments.
 
     :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from os.path import dirname, join
 from urllib import urlopen

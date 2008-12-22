@@ -9,7 +9,7 @@
     The rules for ZEML are documented as part of the parser.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import re
 import struct

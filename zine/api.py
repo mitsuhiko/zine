@@ -7,7 +7,7 @@
     access to all the important helper functions.
 
     :copyright: 2007-2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 
 from zine.application import (

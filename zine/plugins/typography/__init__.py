@@ -10,7 +10,7 @@
     other languages a different plugin is a better idea.
 
     :copyright: 2007 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 import re
 from os.path import dirname, join

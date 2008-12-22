@@ -6,7 +6,7 @@
     This module contains a list of builtin privileges.
 
     :copyright: Copyright 2008 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
 from werkzeug.exceptions import Forbidden
 

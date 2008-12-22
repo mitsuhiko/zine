@@ -10,5 +10,5 @@
     into the "zine.utils" module.
 
     :copyright: 2007 by Armin Ronacher.
-    :license: BSD
+    :license: BSD, see LICENSE for more details.
 """
