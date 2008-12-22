@@ -188,7 +188,7 @@ class PluginForm(forms.Form):
     active_plugins = forms.MultiChoiceField(widget=forms.CheckboxGroup)
     disable_guard = forms.BooleanField(lazy_gettext(u'Disable plugin guard'),
         help_text=lazy_gettext(u'If the plugin guard is disabled errors '
-                               u'on plugin setup are not catched.'))
+                               u'on plugin setup are not cought.'))
 
     def __init__(self, initial=None):
         self.app = app = get_application()
