@@ -51,11 +51,11 @@ def suite(modnames=[], return_covermods=False):
     #    write >>> my_function(app, ...) in the tests
     # The instance directory of this object is located in the tests directory.
     #
-    # make_zine isn't imported at module level because this way coverage
+    # setup isn't imported at module level because this way coverage
     # can track the whole zine imports
-    from zine.application import make_zine
+    from zine import setup
     instance_path = join(dirname(__file__), 'instance')
-    app = make_zine(instance_path, True)
+    app = setup(instance_path)
 
     if return_covermods:
         covermods = []

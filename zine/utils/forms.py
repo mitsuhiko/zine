@@ -1799,7 +1799,7 @@ class Form(object):
 
     Example:
 
-    >>> field = StringField(default=u'foo')
+    >>> field = TextField(default=u'foo')
     """
     __metaclass__ = FormMeta
 
