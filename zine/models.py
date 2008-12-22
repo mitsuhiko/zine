@@ -600,8 +600,8 @@ class Post(_ZEMLDualContainer):
         return self.can_read(AnonymousUser())
 
     @property
-    def is_sheduled(self):
-        """True if the item is sheduled for appearing."""
+    def is_scheduled(self):
+        """True if the item is scheduled for appearing."""
         return self.status == STATUS_PUBLISHED and \
                self.pub_date > datetime.utcnow()
 

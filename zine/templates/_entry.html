@@ -33,9 +33,9 @@
         pub_date=entry.pub_date|datetimeformat|e -%}
           written by {{ author }}, on {{ pub_date }}.
       {%- endtrans %}
-      {%- if entry.is_sheduled %}<br>[ {% trans
+      {%- if entry.is_scheduled %}<br>[ {% trans
         time_span=entry.pub_date|timedeltaformat
-        %}<strong>Sheduled Post:</strong> This entry will appear in {{
+        %}<strong>Scheduled Post:</strong> This entry will appear in {{
           time_span }}.{% endtrans %}
       ]{% endif -%}
     </p>
