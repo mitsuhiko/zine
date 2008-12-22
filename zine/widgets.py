@@ -102,6 +102,21 @@ class CategoryList(Widget):
         self.show_title = show_title
 
 
+class IncludePage(Widget):
+    """Includes a page."""
+
+    name = 'include_page'
+    template = 'widgets/include_page.html'
+
+    def __init__(self, page_name, show_title=False):
+        self.page_name = page_name
+        self.page = Post.query.type('page').filter_by(slug=page_name).first()
+
+    @property
+    def exists(self):
+        return self.page is not None
+
+
 #: list of all core widgets
 all_widgets = [PostArchiveSummary, LatestPosts, LatestComments, TagCloud,
-               CategoryList]
+               CategoryList, IncludePage]
