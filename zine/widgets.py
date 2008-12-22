@@ -84,7 +84,7 @@ class TagCloud(Widget):
     """Show a tagcloud."""
 
     name = 'tag_cloud'
-    template = 'widgets/tagcloud.html'
+    template = 'widgets/tag_cloud.html'
 
     def __init__(self, max=None, show_title=False):
         self.tags = Tag.query.get_cloud(max)
