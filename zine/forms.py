@@ -43,10 +43,10 @@ def config_field(cfgvar, label=None, **kwargs):
 class LoginForm(forms.Form):
     """The form for the login page."""
     user = forms.ModelField(User, 'username', required=True, messages=dict(
-        not_found=lazy_gettext(u'User "%(value)s" does not exist.'),
+        not_found=lazy_gettext(u'User “%(value)s” does not exist.'),
         required=lazy_gettext(u'You have to enter a username.')
     ), on_not_found=lambda user:
-        log.warning(_('Failed login attempt, user "%s" does not exist')
+        log.warning(_(u'Failed login attempt, user “%s” does not exist')
                       % user, 'auth')
     )
     password = forms.TextField(widget=forms.PasswordInput)
@@ -54,7 +54,7 @@ class LoginForm(forms.Form):
 
     def context_validate(self, data):
         if not data['user'].check_password(data['password']):
-            log.warning(_('Failed login attempt from "%s", invalid password')
+            log.warning(_(u'Failed login attempt from “%s”, invalid password')
                         % data['user'].username, 'auth')
             raise ValidationError(_('Incorrect password.'))
 

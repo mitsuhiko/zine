@@ -713,7 +713,7 @@ class Zine(object):
         # set the active theme based on the config.
         theme = self.cfg['theme']
         if theme not in self.themes:
-            log.warning(_(u'Theme "%s" is no longer available, falling back '
+            log.warning(_(u'Theme “%s” is no longer available, falling back '
                           u'to default theme.') % theme, 'core')
             theme = 'default'
             self.cfg.change_single('theme', theme)

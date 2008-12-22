@@ -1329,7 +1329,7 @@ class ModelField(Field):
     The first argument is the name of the model, the second the named
     argument for `filter_by` (eg: `User` and ``'username'``).
     """
-    messages = dict(not_found=lazy_gettext('"%(value)s" does not exist'))
+    messages = dict(not_found=lazy_gettext(u'“%(value)s” does not exist'))
 
     def __init__(self, model, key, label=None, help_text=None, required=False,
                  message=None, validators=None, widget=None, messages=None,
