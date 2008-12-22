@@ -955,7 +955,6 @@ class Field(object):
             'can\'t use internal widgets as widgets for fields'
 
     def __call__(self, value):
-        value = self.inject_default(value)
         value = self.convert(value)
         self.apply_validators(value)
         return value
@@ -976,19 +975,6 @@ class Field(object):
         error when checking if the field is required.
         """
         return value is not None
-
-    def inject_default(self, value):
-        """This function is used to replace the value with the default
-        value before conversion starts.
-        """
-        if value is None:
-            if callable(self.default):
-                value = self.default()
-            else:
-                value = self.default
-            if value is missing:
-                value = None
-        return value
 
     def convert(self, value):
         """This can be overridden by subclasses and performs the value

@@ -137,7 +137,7 @@ def from_string(value, field):
     try:
         return field(value)
     except ValidationError, e:
-        return field(None)
+        return field.default
 
 
 # XXX: this function should probably go away, currently it only exists because
@@ -254,7 +254,7 @@ class Configuration(object):
         try:
             value = from_string(self._values[key], field)
         except KeyError:
-            value = field(None)
+            value = field.default
         self._converted_values[key] = value
         return value
 
@@ -332,7 +332,7 @@ class Configuration(object):
                 value = field.to_primitive(from_string(self._values[key], field))
             else:
                 use_default = True
-                value = field.to_primitive(field(None))
+                value = field.to_primitive(field.default)
             if '/' in key:
                 category, name = key.split('/', 1)
             else:
@@ -390,7 +390,7 @@ class Configuration(object):
                 value = repr(value)
             result.append({
                 'key':          key,
-                'default':      repr(field(None)),
+                'default':      repr(field.default),
                 'value':        value
             })
         result.sort(key=lambda x: x['key'].lower())
