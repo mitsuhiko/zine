@@ -880,7 +880,6 @@ class BasicOptionsForm(_ConfigForm):
 
 class URLOptionsForm(_ConfigForm):
     """The form for url changes."""
-<<<<<<< local
     blog_url_prefix = config_field('blog_url_prefix',
                                    lazy_gettext(u'Blog URL prefix'))
     admin_url_prefix = config_field('admin_url_prefix',
@@ -891,17 +890,6 @@ class URLOptionsForm(_ConfigForm):
                                    lazy_gettext(u'Tag URL prefix'))
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
-=======
-    blog_url_prefix = forms.TextField(lazy_gettext(u'Blog URL prefix'),
-                                      validators=[is_valid_url_prefix()])
-    admin_url_prefix = forms.TextField(lazy_gettext(u'Admin URL prefix'),
-                                       validators=[is_valid_url_prefix()])
-    category_url_prefix = forms.TextField(lazy_gettext(u'Category URL prefix'),
-                                          validators=[is_valid_url_prefix()])
-    tags_url_prefix = forms.TextField(lazy_gettext(u'Tag URL prefix'),
-                                      validators=[is_valid_url_prefix()])
-    profiles_url_prefix = forms.TextField(lazy_gettext(u'Author Profiles URL prefix'),
-                                          validators=[is_valid_url_prefix()])
 
 
 class ThemeOptionsForm(_ConfigForm):
@@ -909,7 +897,6 @@ class ThemeOptionsForm(_ConfigForm):
     The form for theme changes.  This is mainly just a dummy,
     to get csrf protection working.
     """
->>>>>>> other
 
 
 class CacheOptionsForm(_ConfigForm):
