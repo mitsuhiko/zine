@@ -1206,7 +1206,6 @@ table.logfile {
 }
 
 table.logfile td.detail {
-    width: 12em;
     padding-left: 10px;
 }
 
@@ -1222,12 +1221,12 @@ table.logfile td.detail div.location {
 }
 
 table.logfile td.level {
-    width: 4em;
     font-size: 12px;
 }
 
 table.logfile td.message pre {
     vertical-align: top;
+    font-size: 12px;
     padding: 0;
     margin: 0;
     border: none;
@@ -1295,7 +1294,6 @@ table.logfile tr.even td.level-warning {
 }
 
 table.logfile td.module {
-    width: 5em;
     font-size: 13px;
     text-align: right;
 }
