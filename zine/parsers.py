@@ -11,9 +11,11 @@
 """
 from werkzeug import escape
 
-from zine.application import iter_listeners, get_application
-from zine.utils.zeml import parse_html, parse_zeml, sanitize
 from zine.i18n import lazy_gettext
+from zine.application import iter_listeners, get_application
+from zine.utils.zeml import parse_html, parse_zeml, sanitize, Element, \
+     RootElement
+from zine.utils.xml import replace_entities
 
 
 def parse(input_data, parser=None, reason='unknown'):
@@ -92,11 +94,40 @@ class HTMLParser(BaseParser):
 
 
 class PlainTextParser(BaseParser):
+    """Parses simple text into a ZEML tree by utilizing pottymouth."""
 
     name = lazy_gettext('Text')
 
+    def _to_text(self, token):
+        """Convert a token to normal text."""
+        return replace_entities(unicode(token))
+
+    def _to_zeml(self, node):
+        """Convert a potty-mouth node into a ZEML tree."""
+        from zine._ext.pottymouth import Token
+        def convert(node, is_root):
+            if is_root:
+                result = RootElement()
+            else:
+                result = Element(node.name)
+            result.attributes.update(node._attributes)
+            for item in node:
+                if isinstance(item, (str, unicode, Token)):
+                    text = self._to_text(item)
+                    if result.children:
+                        result.children[-1].tail += text
+                    else:
+                        result.text += text
+                else:
+                    result.children.append(convert(item, False))
+            return result
+        return convert(node, True)
+
     def parse(self, input_data, reason):
-        return escape(input_data)
+        from zine._ext.pottymouth import PottyMouth
+        parser = PottyMouth(emdash=False, ellipsis=False, smart_quotes=False)
+        node = parser.parse(input_data)
+        return self._to_zeml(node)
 
 
 all_parsers = {
