@@ -109,7 +109,10 @@ def redirect_back(*args, **kwargs):
     target = get_redirect_target()
     if target is None:
         target = url_for(*args, **kwargs)
-    return redirect(target)
+    # call werkzeug's redirect directly and not the redirect() function
+    # from this module because it will strip leading slashes this function
+    # returns and thus generate wrong redirects.
+    return _redirect(target)
 
 
 class RequestLocal(object):
