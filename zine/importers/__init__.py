@@ -105,7 +105,7 @@ def _perform_import(app, blog, d):
                             author.www, author.is_author)
                 if author.pw_hash:
                     user.pw_hash = author.pw_hash
-                user.privileges.update(author.privileges)
+                user.own_privileges.update(author.privileges)
             author_mapping[author.id] = user
         return author_mapping[author.id]
 
@@ -381,14 +381,16 @@ class Author(_Element):
     """Represents an author."""
 
     def __init__(self, username, email, real_name=u'', description=u'',
-                 pw_hash=None, is_author=True, extra=None, id=None):
+                 www=u'', pw_hash=None, is_author=True, extra=None,
+                 id=None):
         if id is None:
             id = _make_id(username, email)
         self.id = id
-        self.username = username
+        self.username = username[:30]
         self.real_name = real_name or u''
         self.email = email or u''
         self.description = description or u''
+        self.www = www or u''
         self.privileges = set([ENTER_ADMIN_PANEL])
         self.is_author = is_author
         self.pw_hash = pw_hash
@@ -405,10 +407,10 @@ class Tag(_Element):
     """Represents a tag."""
 
     def __init__(self, slug, name=None):
-        self.slug = slug
+        self.slug = slug[:150]
         if name is None:
             name = slug
-        self.name = name
+        self.name = name[:100]
 
     @property
     def id(self):
@@ -479,6 +481,8 @@ class Comment(_Element):
                  pub_date, remote_addr, parser=None, is_pingback=False,
                  status=COMMENT_MODERATED, blocked_msg=u'',
                  parser_data=None):
+        if isinstance(author, basestring):
+            author = author[:400]
         self.author = author
         self.author_email = author_email
         self.author_url = author_url

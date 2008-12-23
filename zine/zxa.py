@@ -213,6 +213,7 @@ class Writer(object):
         self.z('display_name', text=user._display_name, parent=rv)
         self.z('real_name', text=user.real_name, parent=rv)
         self.z('description', text=user.description, parent=rv)
+        self.u('www', text=user.www, parent=rv)
         self.z('is_author', text=user.is_author and 'yes' or 'no', parent=rv)
         self.z('extra', text=dumps(user.extra).encode('base64'))
         for participant in self.participants:

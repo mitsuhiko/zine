@@ -34,6 +34,7 @@ _tag_end_re = re.compile(r'\s*>(?u)')
 _entity_re = re.compile(r'&([^;]+);')
 _entity_re = re.compile(r'&([^;]+);')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
+_autoparagraphed_elements = set(['div', 'blockquote'])
 
 _entities = {
     'Aacute':       u'\xc1',        'aacute':       u'\xe1',
@@ -808,6 +809,88 @@ def split_intro(tree):
     return intro, body
 
 
+def inject_implicit_paragraphs(tree):
+    """Inject implicit paragraphs into the tree.  This mimicks the WordPress
+    automatic paragarph insertion and can be used to import markup from blogs
+    like WordPress that use implicit paragraphs.
+
+    This however must not be used for any kind of ZEML trees because it only
+    knows some basic rules for regular HTML.
+    """
+    def joined_text_iter(node):
+        text_buf = [node.text]
+        node.text = u''
+
+        def flush_text_buf():
+            if text_buf:
+                text = u''.join(text_buf)
+                del text_buf[:]
+                if text:
+                    return text
+
+        for child in node.children:
+            text = flush_text_buf()
+            if text is not None:
+                yield text
+            yield child
+            text_buf.append(child.tail)
+            child.tail = u''
+
+        text = flush_text_buf()
+        if text is not None:
+            yield text
+
+    def make_paragraph(children):
+        element = Element('p')
+        for child in children:
+            if isinstance(child, unicode):
+                if element.children:
+                    element.children[-1].tail += child
+                else:
+                    element.text += child
+            elif child:
+                element.children.append(child)
+        return element
+
+    def transform(parent):
+        for node in parent.children[:]:
+            transform(node)
+        if not parent.is_root and \
+           parent.name not in _autoparagraphed_elements:
+            return
+        paragraphs = [[]]
+
+        for item in joined_text_iter(parent):
+            if isinstance(item, unicode):
+                blockiter = iter(_paragraph_re.split(item))
+                for block in blockiter:
+                    try:
+                        is_paragraph = blockiter.next()
+                    except StopIteration:
+                        is_paragraph = False
+                    if block:
+                        paragraphs[-1].append(block)
+                    if is_paragraph:
+                        paragraphs.append([])
+            elif item.name in Parser.block_elements:
+                paragraphs.extend((item, []))
+            else:
+                paragraphs[-1].append(item)
+
+        del parent.children[:]
+        for paragraph in paragraphs:
+            if not isinstance(paragraph, list):
+                parent.children.append(paragraph)
+            else:
+                for item in paragraph:
+                    if not isinstance(item, unicode) or item:
+                        parent.children.append(make_paragraph(paragraph))
+                        break
+
+    transform(tree)
+    return tree
+
+
 class ElementHandler(object):
     """A dynamic element handler."""
 
@@ -816,7 +899,6 @@ class ElementHandler(object):
     is_isolated = False
     is_semi_isolated = False
     is_block_level = False
-    is_autoparagraphed = False
     broken_by = None
 
     def __init__(self, app):
@@ -897,7 +979,6 @@ class Parser(object):
     """
 
     isolated_elements = set(['script', 'style', 'noscript', 'iframe'])
-    autoparagraphed_elements = set(['div', 'blockquote'])
     semi_isolated_elements = set(['textarea'])
     void_elements = set(['br', 'img', 'area', 'hr', 'param', 'input',
                          'embed', 'col'])
@@ -921,7 +1002,6 @@ class Parser(object):
         self.stack = [self.result]
 
         self.isolated_elements = self.isolated_elements.copy()
-        self.autoparagraphed_elements = self.autoparagraphed_elements.copy()
         self.semi_isolated_elements = self.semi_isolated_elements.copy()
         self.void_elements = self.void_elements.copy()
         self.block_elements = self.block_elements.copy()
@@ -937,8 +1017,6 @@ class Parser(object):
         for element in element_handlers or ():
             if element.is_isolated:
                 self.isolated_elements.add(element.tag)
-            if element.is_autoparagraphed:
-                self.autoparagraphed_elements.add(element.tag)
             if element.is_semi_isolated:
                 self.semi_isolated_elements.add(element.tag)
             if element.is_void:

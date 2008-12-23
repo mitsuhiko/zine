@@ -85,6 +85,10 @@ class ChangePasswordForm(forms.Form):
 
 class NewCommentForm(forms.Form):
     """New comment form for authors."""
+    # implementation detail: the maximum length of the column in the
+    # database is longer than that.  However we don't want users to
+    # insert too long names there.  The long column is reserved for
+    # pingbacks and such.
     author = forms.TextField(lazy_gettext(u'Name*'), required=True,
                              max_length=100, messages=dict(
         too_long=lazy_gettext(u'Your name is too long.'),

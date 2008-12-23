@@ -399,6 +399,7 @@ class ZEAExtension(Extension):
                 element.findtext(zine.email),
                 element.findtext(zine.real_name),
                 element.findtext(zine.description),
+                element.findtext(zine.www),
                 element.findtext(zine.pw_hash),
                 _to_bool(element.findtext(zine.is_author)),
                 _pickle(element.findtext(zine.extra)),

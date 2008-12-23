@@ -20,6 +20,7 @@ from zine.utils import log
 from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
 from zine.utils.xml import Namespace, html_entities, escape
+from zine.utils.zeml import parse_html, inject_implicit_paragraphs
 from zine.utils.http import redirect_to
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED, \
      STATUS_DRAFT, STATUS_PUBLISHED
@@ -34,6 +35,11 @@ _meta_value_re = re.compile(r'(<wp:postmeta>.*?<wp:meta_value>)(.*?)'
                             r'(</wp:meta_value>.*?</wp:postmeta>)(?s)')
 _comment_re = re.compile(r'(<wp:comment>.*?<wp:comment_content>)(.*?)'
                          r'(</wp:comment_content>.*?</wp:comment>)(?s)')
+
+
+def _wordpress_to_html(markup):
+    """Convert WordPress-HTML into read HTML."""
+    return inject_implicit_paragraphs(parse_html(markup)).to_html()
 
 
 def parse_broken_wxr(fd):
@@ -138,7 +144,7 @@ def parse_feed(fd):
             pub_date,
             get_author(item.findtext(DC_METADATA.creator)),
             item.findtext('description'),
-            item.findtext(CONTENT.encoded),
+            _wordpress_to_html(item.findtext(CONTENT.encoded)),
             [tags[x.text] for x in item.findall('tag')
              if x.text in tags],
             [categories[x.text] for x in item.findall('category')
