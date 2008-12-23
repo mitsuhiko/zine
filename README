@@ -1,0 +1,53 @@
+Zine - a Python powered blog engine
+===================================
+
+This is Zine 0.1, the first stable release of Zine.
+It already provides quite a few features:
+
+ - of course, basic blog functionality: posting, comments, categories, tags,
+   RSS and ATOM feeds
+ - user, group and permission management
+ - theming support
+ - importers for Wordpress and blogger.com blogs
+ - an advanced plugin system
+ - a translatable interface (although with this first release, only English and
+   German translations are available)
+
+But some things are still missing. The following things (and more) will be
+included in Zine 0.2 (tentatively set to be released on April 1, 2009):
+
+ - search functionality
+ - file upload system
+ - notifications about new posts, comments, etc
+ - more translations
+ - documentation for (plugin) developers (for now, there's a documented example
+   plugin called Eric The Fish included in Zine's source. If you want to
+   develop plugins, that's the starting point.)
+
+
+Installation
+============
+
+See the file INSTALL for a list of dependencies and installation instructions
+
+
+Authors
+=======
+
+Zine was mainly written and is maintained by Armin Ronacher. See the files
+AUTHORS and THANKS for a complete list of contributors.
+Zine is released under a BSD-style license, see the file LICENSE.
+
+
+Getting in touch with the developers
+====================================
+
+The best way to communicate with the developers is the IRC channel #pocoo on
+irc.freenode.net. Beware, several projects have their "home" there, so be sure
+to tell the people you're talking about Zine.
+The Zine development page is at http://dev.pocoo.org/projects/zine/. It includes
+a bugtracker. If you find a bug, have a patch or want to suggest a feature, you
+can use that tracker.
+Zine's Mercurial repository is located at http://dev.pocoo.org/hg/zine-main/.
+There also is an official mirror on Bitbucket, at
+http://www.bitbucket.org/mitsuhiko/zine-main/.
