@@ -22,7 +22,7 @@ def check_external_url(app, url):
     URL (eg: it externalizes a passed in path)
     """
     blog_url = app.cfg['blog_url']
-    check_url = urljoin(blog_url)
+    check_url = urljoin(blog_url, url)
     if urlparse(blog_url)[:2] != urlparse(check_url)[:2]:
         raise ValueError('The URL %s is not on the same server' % check_url)
     return check_url
