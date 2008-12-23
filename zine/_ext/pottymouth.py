@@ -124,18 +124,20 @@ class Token(unicode):
     def __add__(self, extra):
         return Token(self.name, unicode.__add__(self, extra))
 
-    def escape(string):
-        out = string.replace('&', '&amp;')
-        out =    out.replace('<', '&lt;' )
-        out =    out.replace('>', '&gt;' )
-        out =    out.encode('ascii', 'xmlcharrefreplace')
-        return out
+    def __str__(self):
+        return self.encode('ascii', 'xmlcharrefreplace')
 
-    # make escape a static method so it can be easily overriden by the
-    # importing module, in case you are using Node & Token objects to
-    # create XML with libxml directly, or using some other method that
-    # takes care of quoting for you.
-    escape = staticmethod(escape)
+
+
+# escape() made is available to calling code in case it needs to
+# escape the content of PottyMouth Nodes before converting it to
+# another tree object that does not automatically escape these
+# disallowed HTML characters.
+def escape(string):
+    out = string.replace('&', '&amp;')
+    out =    out.replace('<', '&lt;' )
+    out =    out.replace('>', '&gt;' )
+    return out
 
 
 
@@ -165,7 +167,7 @@ class Node(list):
         super(list, self).__init__(self)
         self.name = name.lower()
         self.extend(contents)
-        self._attributes = kw.get('attributes')
+        self._attributes = kw.get('attributes', {})
 
 
     def node_children(self):
@@ -175,73 +177,73 @@ class Node(list):
         return False
 
 
-    def __repr__(self):
-        if self.name in ('br',): # Also <hr>
+    def __str__(self):
+        if self.name in ('br','img'): # Also <hr>
             # <br></br> causes double-newlines, so we do this
-            return u'<%s%s/>' % (self.name, self._attribute_string())
+            return '<%s%s />' % (self.name, self._attribute_string())
         else:
-            content = u'\n'.join(map(unicode, self))
-            content = content.replace(u'\n', u'\n  ')
+            content = ''
+            for c in self:
+                if isinstance(c, Node):
+                    content += str(c)
+                else:
+                    content += escape(c).encode('ascii', 'xmlcharrefreplace')
+                content += '\n'
+            content = content.rstrip('\n')
+            content = content.replace('\n', '\n  ')
 
             interpolate = {'name'   :self.name               ,
                            'attrs'  :self._attribute_string(),
                            'content':content                 ,}
 
             if self.node_children():
-                return u'<%(name)s%(attrs)s>\n  %(content)s\n</%(name)s>' % interpolate
+                return '<%(name)s%(attrs)s>\n  %(content)s\n</%(name)s>' % interpolate
             else:
-                return u'<%(name)s%(attrs)s>%(content)s</%(name)s>' % interpolate
-
-
-            return pat % (self.name, self._attribute_string(), content, self.name)
+                return '<%(name)s%(attrs)s>%(content)s</%(name)s>' % interpolate
 
 
     def _attribute_string(self):
+        content = ''
         if self._attributes:
-            return ' ' + ' '.join(map('%s="%s"'.__mod__, self._attributes.items()))
-        return ''
+            for k, v in self._attributes.items():
+                content += ' %s="%s"' % (k, escape(v).encode('ascii', 'xmlcharrefreplace'))
+        return content
 
 
 
 class URLNode(Node):
 
-
     def __new__(cls, content, internal=False):
         self = Node.__new__(cls, 'a', content)
         return self
 
+
     def __init__(self, content, internal=False):
-        Node.__init__(self, 'a', content)
-        self._internal = internal
+        attributes = {'href':content}
+        if not internal:
+            attributes['class'] = 'external'
 
-    def _get_internal(self):
-        return self._internal
+        if content.startswith('http://'):
+            content = content[7:]
 
-    internal = property(_get_internal)
+        Node.__init__(self, 'a', content, attributes=attributes)
 
 
 
 class LinkNode(URLNode):
 
-    def __repr__(self):
-        class_attribute = ''
-        if not self._internal:
-            class_attribute = 'class="external"'
-
-        displayed_url = self[0]
-        if self[0].startswith('http://'):
-            displayed_url = self[0][7:]
-
-        return u'<%s href="%s" %s>%s</%s>' % (self.name, Token.escape(self[0]),
-                                             class_attribute,
-                                             Token.escape(displayed_url), self.name)
+    pass
 
 
 
 class EmailNode(URLNode):
-    
-    def __repr__(self):
-        return u'<%s href="mailto:%s">%s</%s>' % (self.name, Token.escape(self[0]), Token.escape(self[0]), self.name)
+
+    def __init__(self, content, internal=False):
+        attributes = {'href':'mailto:'+content}
+        if not internal:
+            attributes['class'] = 'external'
+
+        Node.__init__(self, 'a', content, attributes=attributes)
 
 
 
@@ -252,10 +254,7 @@ class ImageNode(Node):
         return self
 
     def __init__(self, content):
-        Node.__init__(self, 'img', content)
-
-    def __repr__(self):
-        return u'<%s src="%s" />' % (self.name, Token.escape(self[0]))
+        Node.__init__(self, 'img', '', attributes={'src':content})
 
 
 
@@ -587,8 +586,7 @@ class PottyMouth(object):
             else:
                 if current_span is None:
                     current_span = Node('span')
-                et = Token.escape(t)
-                current_span.append(et)
+                current_span.append(t)
         if current_span is not None:
             new_sub_line.append(current_span)
 
