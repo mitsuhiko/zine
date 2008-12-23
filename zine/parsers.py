@@ -110,7 +110,8 @@ class PlainTextParser(BaseParser):
                 result = RootElement()
             else:
                 result = Element(node.name)
-            result.attributes.update(node._attributes)
+            if node._attributes:
+                result.attributes.update(node._attributes)
             for item in node:
                 if isinstance(item, (str, unicode, Token)):
                     text = self._to_text(item)
