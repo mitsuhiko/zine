@@ -7,3 +7,8 @@ Other contributors (as mentionend in :copyright:s) are:
 - Christopher Grebs
 - Pedro Algarvio
 - Lukas Meuser
+
+Authors of libraries or code snippets included in Zine:
+
+- Matt Chisholm (PottyMouth, used by Text parser)
+- Manfred Stienstra and Yuri Takhteyev (markdown.py, used by Markdown plugin)
