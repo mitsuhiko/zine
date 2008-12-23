@@ -1919,7 +1919,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Möchtest du den Eintrag \"%(eintrag_title)s\"?.\n"
+"    Möchtest du den Eintrag „%(entry_title)s“?.\n"
 "    "
 
 #: zine/templates/admin/delete_entry.html:10
