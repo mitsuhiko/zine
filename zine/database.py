@@ -15,6 +15,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
+import os
 import sys
 import urlparse
 from os import path
@@ -82,7 +83,21 @@ def create_engine(uri, relative_to=None, echo=False):
         if info.drivername == 'mysql':
             info.query.setdefault('charset', 'utf8')
 
-    return sqlalchemy.create_engine(info, convert_unicode=True, echo=echo)
+    options = {'convert_unicode': True, 'echo': echo}
+
+    # alternative pool sizes / recycle settings and more.  These are
+    # interpreter wide and not from the config for the following reasons:
+    #
+    # - system administrators can set it independently from the webserver
+    #   configuration via SetEnv and friends.
+    # - this setting is deployment dependent should not affect a development
+    #   server for the same instance or a development shell
+    for key in 'pool_size', 'pool_recycle', 'pool_timeout':
+        value = os.environ.get('ZINE_DATABASE_' + key.upper())
+        if value is not None:
+            options[key] = int(value)
+
+    return sqlalchemy.create_engine(info, **options)
 
 
 def secure_database_uri(uri):
