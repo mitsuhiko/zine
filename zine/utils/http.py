@@ -22,7 +22,7 @@ def check_external_url(app, url):
     URL (eg: it externalizes a passed in path)
     """
     blog_url = app.cfg['blog_url']
-    check_url = urljoin(blog_url, url.lstrip('/'))
+    check_url = urljoin(blog_url)
     if urlparse(blog_url)[:2] != urlparse(check_url)[:2]:
         raise ValueError('The URL %s is not on the same server' % check_url)
     return check_url
@@ -80,6 +80,10 @@ def redirect(url, code=302, allow_external_redirect=False):
     target was requested `BadRequest` is raised unless
     `allow_external_redirect` was explicitly set to `True`.
     """
+    # leading slashes are ignored, if we redirect to "/foo" or "foo"
+    # does not matter, in both cases we want to be below our blog root.
+    url = url.lstrip('/')
+
     if not allow_external_redirect:
         #: check if the url is on the same server
         #: and make it an external one
@@ -92,7 +96,10 @@ def redirect(url, code=302, allow_external_redirect=False):
 
 def redirect_to(*args, **kwargs):
     """Temporarily redirect to an URL rule."""
-    return redirect(url_for(*args, **kwargs))
+    # call werkzeug's redirect directly and not the redirect() function
+    # from this module because it will strip leading slashes this function
+    # returns and thus generate wrong redirects.
+    return _redirect(url_for(*args, **kwargs))
 
 
 def redirect_back(*args, **kwargs):
