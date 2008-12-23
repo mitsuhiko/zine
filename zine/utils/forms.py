@@ -1327,13 +1327,14 @@ class ModelField(Field):
     """A field that queries for a model.
 
     The first argument is the name of the model, the second the named
-    argument for `filter_by` (eg: `User` and ``'username'``).
+    argument for `filter_by` (eg: `User` and ``'username'``).  If the
+    key is not given (None) the primary key is assumed.
     """
     messages = dict(not_found=lazy_gettext(u'“%(value)s” does not exist'))
 
-    def __init__(self, model, key, label=None, help_text=None, required=False,
-                 message=None, validators=None, widget=None, messages=None,
-                 default=missing, on_not_found=None):
+    def __init__(self, model, key=None, label=None, help_text=None,
+                 required=False, message=None, validators=None, widget=None,
+                 messages=None, default=missing, on_not_found=None):
         Field.__init__(self, label, help_text, validators, widget, messages,
                        default)
         self.model = model
@@ -1351,7 +1352,11 @@ class ModelField(Field):
             return None
         value = self._coerce_value(value)
 
-        rv = self.model.query.filter_by(**{self.key: value}).first()
+        if self.key is None:
+            rv = self.model.query.get(value)
+        else:
+            rv = self.model.query.filter_by(**{self.key: value}).first()
+
         if rv is None:
             if self.on_not_found is not None:
                 self.on_not_found(value)
@@ -1366,7 +1371,11 @@ class ModelField(Field):
         if value is None:
             return u''
         elif isinstance(value, self.model):
-            value = getattr(value, self.key)
+            if self.key is None:
+                value = db.class_mapper(self.model) \
+                          .primary_key_from_instance(value)[0]
+            else:
+                value = getattr(value, self.key)
         return unicode(value)
 
 
@@ -1387,10 +1396,6 @@ class HiddenModelField(ModelField):
     def __init__(self, model, key=None, required=False, message=None,
                  validators=None, widget=None, messages=None,
                  default=missing):
-        if key is None:
-            keys = db.class_mapper(model).primary_key
-            assert len(keys) == 1, 'Model has multiple primary keys'
-            key = keys[0].name
         ModelField.__init__(self, model, key, None, None, required,
                             message, validators, widget, messages,
                             default)
