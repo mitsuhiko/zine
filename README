@@ -5,7 +5,7 @@ This is Zine 0.1, the first stable release of Zine.
 It already provides quite a few features:
 
  - of course, basic blog functionality: posting, comments, categories, tags,
-   RSS and ATOM feeds
+   and feeds
  - user, group and permission management
  - theming support
  - importers for Wordpress and blogger.com blogs
