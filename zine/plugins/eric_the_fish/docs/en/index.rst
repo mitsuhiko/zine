@@ -12,7 +12,7 @@ configuration pages.
 
 About this documentation page
 -----------------------------
-As the rest of the plugin, the documentation also is mainly an example --
+As the rest of the plugin, the documentation also is mainly an example —
 this time for documenting plugins.  You can build the docs from source
 using the ``build-documentation`` script distributed with Zine::
 
