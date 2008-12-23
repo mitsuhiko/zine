@@ -1,6 +1,6 @@
 Name: Typography
 Name[de]: Typographie
-Plugin URL: http://textpress.pocoo.org/plugins/typography
+Plugin URL: http://zine.pocoo.org/plugins/typography
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: BSD

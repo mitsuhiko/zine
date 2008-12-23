@@ -1,5 +1,5 @@
 Name: Akismet Spam Filter
-Plugin URL: http://textpress.pocoo.org/plugins/akismet_spam_filter
+Plugin URL: http://zine.pocoo.org/plugins/akismet_spam_filter
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: BSD

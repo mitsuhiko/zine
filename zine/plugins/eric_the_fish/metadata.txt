@@ -1,6 +1,6 @@
 Name: Eric The Fish
 Name[de]: Erik der Fisch
-Plugin URL: http://textpress.pocoo.org/plugins/eric_the_fish
+Plugin URL: http://zine.pocoo.org/plugins/eric_the_fish
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: BSD
