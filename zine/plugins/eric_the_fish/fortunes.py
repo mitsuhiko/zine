@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     zine.plugins.eric_the_fish.fortunes
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Erics fortune cookies (ripped and stripped from the ubuntu `fortune`
     fortune data file.)

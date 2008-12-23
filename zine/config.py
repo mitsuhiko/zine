@@ -384,7 +384,7 @@ class Configuration(object):
 
     def get_public_list(self, hide_insecure=False):
         """Return a list of publicly available information about the
-        configuration.  This list is save to share because dangerous keys
+        configuration.  This list is safe to share because dangerous keys
         are either hidden or cloaked.
         """
         from zine.application import emit_event

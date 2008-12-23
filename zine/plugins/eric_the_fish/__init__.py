@@ -14,13 +14,13 @@ from os.path import dirname, join
 from random import choice
 
 # the API gives us access to a bunch of functions useful for plugins. The
-# api module just acts as an collection module which is save to star import.
-# the objects' implementations are in different modules.
+# api module just acts as a collection module which is safe to star import.
+# The objects' implementations are in different modules.
 from zine.api import *
 
 # because we want to add an admin panel page for our fish we need the
 # render_admin_response function that works like the normal render_response
-# function, but it assembles a navigation bar for the admin layout template
+# function, but assembles a navigation bar for the admin layout template
 # and emits the `modify-admin-navigation-bar` event also use here.
 from zine.views.admin import render_admin_response
 
