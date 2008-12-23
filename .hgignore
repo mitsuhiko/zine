@@ -7,5 +7,6 @@
 ^zine/i18n/messages\.pot$
 ^zine/i18n/.*?/messages.catalog$
 ^zine/docs/.*?\.page$
+^zine/plugins/.*?/docs/.*?\.page$
 .coverage
 ^docs/_build/
