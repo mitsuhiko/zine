@@ -1,6 +1,6 @@
 Name: Miniblog Theme
 Name[de]: Miniblog Thema
-Plugin URL: http://textpress.pocoo.org/plugins/miniblog_theme
+Plugin URL: http://zine.pocoo.org/plugins/miniblog_theme
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: BSD

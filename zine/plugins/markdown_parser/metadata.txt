@@ -1,5 +1,5 @@
 Name: Markdown Parser
-Plugin URL: http://textpress.pocoo.org/plugins/markdown_parser
+Plugin URL: http://zine.pocoo.org/plugins/markdown_parser
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: BSD
