@@ -28,6 +28,8 @@ def main():
                       default=True, help='Disable the reloader')
     parser.add_option('--no-debugger', dest='debugger', action='store_false',
                       default=True, help='Disable the debugger')
+    parser.add_option('--threaded', dest='threaded', action='store_true',
+                      default=False, help='Activate multithreading')
     parser.add_option('--profile', dest='profile', action='store_true',
                       help='Enable the profiler')
     parser.add_option('--instance', '-I', dest='instance',
@@ -44,7 +46,7 @@ def main():
         from werkzeug.contrib.profiler import ProfilerMiddleware
         app = ProfilerMiddleware(app, stream=sys.stderr)
 
-    run_simple(options.hostname, options.port, app,
+    run_simple(options.hostname, options.port, app, threaded=options.threaded,
                use_reloader=options.reloader, use_debugger=options.debugger)
 
 

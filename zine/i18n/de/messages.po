@@ -2098,7 +2098,7 @@ msgstr "Speichern und bearbeiten forsetzen"
 #: zine/templates/admin/edit_group.html:3
 #: zine/templates/admin/manage_groups.html:22
 msgid "New Group"
-msgstr "Gruppe anschauen"
+msgstr "Neue Gruppe"
 
 #: zine/templates/admin/edit_group.html:3
 msgid "Edit Group"
