@@ -245,7 +245,7 @@ class WebSetup(object):
                     response = self.handle_view(request, view)
 
         if response is None:
-            response = redirect('/')
+            response = redirect('')
         return response(environ, start_response)
 
 
