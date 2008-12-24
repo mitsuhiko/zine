@@ -504,6 +504,5 @@ class Comment(_Element):
 
 
 from zine.importers.wordpress import WordPressImporter
-from zine.importers.blogger import BloggerImporter
 from zine.importers.feed import FeedImporter
-importers = [WordPressImporter, BloggerImporter, FeedImporter]
+importers = [WordPressImporter, FeedImporter]
