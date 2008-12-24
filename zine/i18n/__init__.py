@@ -175,7 +175,7 @@ def get_translations():
 
 
 def gettext(string):
-    """Translate type(string)iven string to the language of the application."""
+    """Translate a given string to the language of the application."""
     translations = get_translations()
     if translations is None:
         return unicode(string)
