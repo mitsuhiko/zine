@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+"""
+    Create Package
+    ~~~~~~~~~~~~~~
+
+    This script dumps Zine with all files required files into a .tar.gz
+    and .zip archive for distribution.
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: BSD, see LICENSE for more details.
+"""
+import re
+import os
+import sys
+import shutil
+import tempfile
+import subprocess
+from optparse import OptionParser
+
+
+IGNORED = map(re.compile, r'''
+^artwork/
+^\.hgignore$
+'''.strip().splitlines())
+
+
+def is_ignored(filename):
+    for rule in IGNORED:
+        if rule.search(filename):
+            return True
+    return False
+
+
+class BuildError(Exception):
+    pass
+
+
+def find_files():
+    allowed_states = frozenset('CI?')
+    client = subprocess.Popen(['hg', 'status', '-A'], stdout=subprocess.PIPE)
+    for line in client.communicate()[0].splitlines():
+        line = line.split(None, 1)
+        if len(line) != 2:
+            continue
+        status, filename = line
+        if status not in allowed_states:
+            raise BuildError('hg unclean. Uncommited modifications?')
+        if status == 'C' and not is_ignored(filename):
+            yield filename
+
+
+def get_zine_version():
+    from zine import __version__ as rv
+    return rv
+
+
+def run_script(dir, script, args=None):
+    subprocess.call([os.path.join(dir, 'scripts', script)] + list(args or ()))
+
+
+def build(dst_dir, build_dir, formats):
+    zine_version = get_zine_version()
+    archive_base = os.path.join(dst_dir, 'Zine-%s' %
+                                '-'.join(zine_version.split()))
+    plugins = set()
+
+    # copy all tracked files into the build dir
+    print 'Bootstrapping build directory [%s]' % build_dir
+    for filename in find_files():
+        target_folder = os.path.join(build_dir, os.path.dirname(filename))
+        if not os.path.exists(target_folder):
+            os.makedirs(target_folder)
+        shutil.copy(filename, target_folder)
+        print filename
+        if filename.startswith('zine/plugins/'):
+            plugins.add(filename.split('/')[2])
+
+    plugins = sorted(plugins)
+    print 'Found %d plugins:' % len(plugins)
+    for plugin in plugins:
+        print '  *', plugin
+
+    # build translations
+    run_script(build_dir, 'compile-translations')
+
+    # and the documentation for everything
+    run_script(build_dir, 'build-documentation')
+    for plugin in plugins:
+        run_script(build_dir, 'build-documentation',
+                   os.path.join(build_dir, 'zine', 'plugins', plugin))
+
+    # now create the archives
+    if format.tar:
+        subprocess.call(['tar', 'czf', archive_base + '.tar.gz', '.'])
+
+
+def main():
+    parser = OptionParser(usage='%prog [options] destination')
+    parser.add_option('--no-zip', dest='zip', action='store_false',
+                      default=True, help='Do not generate a .zip file')
+    parser.add_option('--no-tar', dest='tar', action='store_false',
+                      default=True, help='Do not generate a tarball')
+    options, args = parser.parse_args()
+    if len(args) != 1:
+        parser.error('incorrect number of arguments')
+    dst = args[0]
+
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+
+    try:
+        build_dir = tempfile.mkdtemp(prefix='zine')
+        try:
+            build(dst, build_dir, options)
+        finally:
+            shutil.rmtree(build_dir, ignore_errors=True)
+    except BuildError, e:
+        print >> sys.stderr, e
+
+
+if __name__ == '__main__':
+    base_dir = os.path.join(os.path.dirname(__file__), '..')
+    os.chdir(base_dir)
+    sys.path.insert(0, base_dir)
+    main()
