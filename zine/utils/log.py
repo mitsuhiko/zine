@@ -14,6 +14,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
+import os
 import sys
 from os import path
 from datetime import datetime
