@@ -4,6 +4,16 @@ Zine Changelog
 This file lists the major changes between the Zine releases.
 
 
+Zine 0.1.1
+----------
+
+(Bugfix release)
+
+  * Fixed an infinite-recursion error if a language was selected in the
+    config that is not available.
+  * Fixed a bug that caused problems in the pingback system.
+
+
 Zine 0.1
 --------
 
