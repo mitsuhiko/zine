@@ -166,24 +166,32 @@ class Translations(object):
         return Translations(locale=locale)
 
 
+def get_translations():
+    """Get the active translations or `None` if there are none."""
+    try:
+        return zine.application.get_application().translations
+    except AttributeError:
+        return None
+
+
 def gettext(string):
-    """Translate type(string)iven string to the language of the application."""
-    app = zine.application.get_application()
-    if app is None:
+    """Translate a given string to the language of the application."""
+    translations = get_translations()
+    if translations is None:
         return unicode(string)
-    return app.translations.gettext(string)
+    return translations.gettext(string)
 
 
 def ngettext(singular, plural, n):
     """Translate the possible pluralized string to the language of the
     application.
     """
-    app = zine.application.get_application()
-    if app is None:
+    translations = get_translations()
+    if translations is None:
         if n == 1:
             return unicode(singular)
         return unicode(plural)
-    return app.translations.ngettext(singular, plural, n)
+    return translations.ngettext(singular, plural, n)
 
 
 class _TranslationProxy(object):
