@@ -24,7 +24,52 @@ If you might use easy_install::
 
 To install lxml you may need the development packages of libxml2 and libxslt
 
-For a quickstart with the development server do this:
+
+Installation
+------------
+
+Currently the installation of Zine is only possible on (mostly) posix
+systems like OS X, Solaris, BSD or Linux.  Development of Zine works
+on other operating systems as well and future release may provide a
+deployment plan for Windows as well.
+
+To install Zine on your system you have to configure and "make install" it::
+
+    $ ./configure --prefix=/usr && make install
+
+Zine installs itself into `/usr/lib/zine` and `/usr/share/zine`.  Please
+note that this does not install the dependencies.
+
+The following examples hows how to set up Zine for `mod_wsgi`.
+
+1.  Create a new folder `/var/zine/yourblog` where `yourblog` is a name
+    that make sense for you.
+2.  Copy the `zine.wsgi` file from `/usr/share/zine/servers` into the
+    newly created folder and open it with an editor.
+3.  Modify the `INSTANCE_FOLDER` variable to point to the `yourblog` folder.
+4.  Open your Apache vhost config or your Apache config, whatever you use
+    and add the following lines::
+
+        WSGIScriptAlias /yourblog /var/zine/yourblog/zine.wsgi
+
+    This tells Apache that it should hook your blog into the webserver at
+    `/yourblog`.  You can also move it to a different vhost and mount it
+    in the root or ask Apache to spawn as different user.  More details
+    about that are available in the `mod_wsgi documentation`_.
+5.  Make sure the user your Apache (or application if you configured a
+    different user for mod_wsgi) has read and write access to the
+    `yourblog` folder.
+6.  Reload your apache and go to the URL of your blog and follow the
+    installation instructions.
+
+
+.. _mod_wsgi documentation: http://code.google.com/p/modwsgi/wiki/InstallationInstructions
+
+
+Development Quickstart
+----------------------
+
+For a quickstart with the development server do this::
 
     $ mkdir instance
     $ ./scripts/server -I instance
