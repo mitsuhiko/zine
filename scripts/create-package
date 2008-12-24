@@ -23,6 +23,10 @@ IGNORED = map(re.compile, r'''
 ^\.hgignore$
 '''.strip().splitlines())
 
+EXTRA_RST = 'README INSTALL'.split()
+
+_documented_plugin_re = re.compile(r'^zine/plugins/([^/]+)/docs/')
+
 
 def is_ignored(filename):
     for rule in IGNORED:
@@ -60,38 +64,69 @@ def run_script(dir, script, args=None):
 
 def build(dst_dir, build_dir, formats):
     zine_version = get_zine_version()
-    archive_base = os.path.join(dst_dir, 'Zine-%s' %
-                                '-'.join(zine_version.split()))
-    plugins = set()
+    release_name = 'Zine-%s' % '-'.join(zine_version.split())
+    archive_base = os.path.join(dst_dir, release_name)
+
+    # create a subfolder for this release
+    release_dir = os.path.join(build_dir, release_name)
+    os.mkdir(release_dir)
+
+    documented_plugins = set()
 
     # copy all tracked files into the build dir
     print 'Bootstrapping build directory [%s]' % build_dir
     for filename in find_files():
-        target_folder = os.path.join(build_dir, os.path.dirname(filename))
+        target_folder = os.path.join(release_dir, os.path.dirname(filename))
         if not os.path.exists(target_folder):
             os.makedirs(target_folder)
         shutil.copy(filename, target_folder)
         print filename
-        if filename.startswith('zine/plugins/'):
-            plugins.add(filename.split('/')[2])
+        match = _documented_plugin_re.match(filename)
+        if match is not None:
+            documented_plugins.add(match.group(1))
 
-    plugins = sorted(plugins)
-    print 'Found %d plugins:' % len(plugins)
-    for plugin in plugins:
+    print 'The following plugins are documented:'
+    for plugin in sorted(documented_plugins):
         print '  *', plugin
 
     # build translations
-    run_script(build_dir, 'compile-translations')
+    run_script(release_dir, 'compile-translations')
 
     # and the documentation for everything
-    run_script(build_dir, 'build-documentation')
-    for plugin in plugins:
-        run_script(build_dir, 'build-documentation',
-                   os.path.join(build_dir, 'zine', 'plugins', plugin))
+    run_script(release_dir, 'build-documentation')
+    for plugin in documented_plugins:
+        run_script(release_dir, 'build-documentation',
+                   [os.path.join(release_dir, 'zine', 'plugins', plugin)])
+
+    # build extra rst files into .html files
+    old_dir = os.getcwd()
+    try:
+        os.chdir(release_dir)
+        for filename in EXTRA_RST:
+            subprocess.call(['rst2html.py', filename, filename + '.html'])
+    finally:
+        os.chdir(old_dir)
 
     # now create the archives
-    if format.tar:
-        subprocess.call(['tar', 'czf', archive_base + '.tar.gz', '.'])
+    messages = []
+    old_dir = os.getcwd()
+    try:
+        os.chdir(build_dir)
+        if formats.tar:
+            tarball_filename = archive_base + '.tar.gz'
+            subprocess.call(['tar', 'vczf', tarball_filename, release_name])
+            messages.append('Created tarball in %s' % tarball_filename)
+        if formats.zip:
+            zip_filename = archive_base + '.zip'
+            subprocess.call(['zip', '-r', zip_filename, release_name])
+            messages.append('Created zip file in %s' % zip_filename)
+    finally:
+        os.chdir(old_dir)
+
+    print '-' * 60
+    print 'Summary'
+    for message in messages:
+        print message
 
 
 def main():
@@ -111,7 +146,7 @@ def main():
     try:
         build_dir = tempfile.mkdtemp(prefix='zine')
         try:
-            build(dst, build_dir, options)
+            build(os.path.abspath(dst), build_dir, options)
         finally:
             shutil.rmtree(build_dir, ignore_errors=True)
     except BuildError, e:
