@@ -52,7 +52,5 @@ done
 cp $SRC/../scripts/_init_zine.py $PREFIX/share/zine/scripts
 sed -i '' -e "s|^ZINE_LIB = None$|ZINE_LIB = '$PREFIX/lib/zine'|g" \
    $PREFIX/share/zine/scripts/_init_zine.py
-sed -i '' -e "s|^#!/usr/bin/(env )?python|#!$PYTHON|g" \
-   $PREFIX/share/zine/scripts/*
 
 echo "All done."
