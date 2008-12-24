@@ -167,7 +167,7 @@ class Translations(object):
 
 
 def get_translations():
-    """Get the active translations or `None` if there are no."""
+    """Get the active translations or `None` if there are none."""
     try:
         return zine.application.get_application().translations
     except AttributeError:
