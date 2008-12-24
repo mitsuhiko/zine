@@ -6,9 +6,9 @@ Author URL: http://lucumr.pocoo.org/
 License: BSD
 Version: 0.1
 Description: Adds support for <a href="http://pygments.org/">pygments</a>\
- to pre code blocks. Blocks marked with <code>&lt;pre syntax="language"&gt;</code>\
- are highlighted using the Pygments lexer defined in the <tt>syntax</tt>\
- attribute.
+ highlighted code blocks. Blocks marked with <code>&lt;sourcecode\
+ syntax="language"&gt;</code> are highlighted using the Pygments\
+ lexer defined in the <tt>syntax</tt> attribute.
 Description[de]: Fügt Unterstützung für <a href="http://pygments.org/">pygments</a>\
- zu <code>pre</code> Blöcken hinzu.  Mit <code>&lt;pre syntax="language"&gt;</code>\
+ zu hinzu.  Mit <code>&lt;sourcecode syntax="language"&gt;</code>\
  markierte Blöcke werden von Pygments automatisch hervorgehoben.
