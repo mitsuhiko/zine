@@ -8,8 +8,8 @@ introduction to Zine.
 Creating your First Post
 ------------------------
 
-You can write new blog entries (called posts) by going to the "New Post"
-page.  Either go to "Posts -> Write Post" or click on the "New Post" link
+You can write new blog entries (called posts) by going to the "New Entry"
+page.  Either go to "Write -> Entry" or click on the "New Entry" link
 on the Dashboard.
 
 After doing that you should see a new page where you can fill out the
