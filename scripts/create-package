@@ -62,6 +62,14 @@ def run_script(dir, script, args=None):
     subprocess.call([os.path.join(dir, 'scripts', script)] + list(args or ()))
 
 
+def delete_pycs(folder):
+    for dirname, folders, files in os.walk(folder):
+        for filename in files:
+            if filename.endswith('.pyc'):
+                filename = os.path.join(folder, dirname, filename)
+                os.remove(filename)
+
+
 def build(dst_dir, build_dir, formats):
     zine_version = get_zine_version()
     release_name = 'Zine-%s' % '-'.join(zine_version.split())
@@ -106,6 +114,9 @@ def build(dst_dir, build_dir, formats):
             subprocess.call(['rst2html.py', filename, filename + '.html'])
     finally:
         os.chdir(old_dir)
+
+    # delete .pyc files the documentation builder might have created
+    delete_pycs(release_dir)
 
     # now create the archives
     messages = []

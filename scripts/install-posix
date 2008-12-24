@@ -40,7 +40,7 @@ cp -R $SRC/templates $PREFIX/share/zine/templates
 
 # copy the server files and adjust the ZINE_LIB path
 cp -R $SRC/../servers $PREFIX/share/zine
-sed -i '' -E -e "s|^ZINE_LIB =.*$|ZINE_LIB = '$PREFIX/lib/zine'|g" \
+sed -i '' -e "s|^ZINE_LIB =.*$|ZINE_LIB = '$PREFIX/lib/zine'|g" \
     -e "s|^#!/usr/bin/python|#!$PYTHON|g" $PREFIX/share/zine/servers/*
 
 # copy some of the scripts
@@ -50,9 +50,9 @@ for script in $SCRIPTS; do
   chmod +x $PREFIX/share/zine/scripts
 done
 cp $SRC/../scripts/_init_zine.py $PREFIX/share/zine/scripts
-sed -i '' -E -e "s|^ZINE_LIB = None$|ZINE_LIB = '$PREFIX/lib/zine'|g" \
+sed -i '' -e "s|^ZINE_LIB = None$|ZINE_LIB = '$PREFIX/lib/zine'|g" \
    $PREFIX/share/zine/scripts/_init_zine.py
-sed -i '' -E -e "s|^#!/usr/bin/(env )?python|#!$PYTHON|g" \
+sed -i '' -e "s|^#!/usr/bin/(env )?python|#!$PYTHON|g" \
    $PREFIX/share/zine/scripts/*
 
 echo "All done."
