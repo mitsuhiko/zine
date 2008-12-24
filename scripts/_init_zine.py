@@ -11,9 +11,15 @@
 from os.path import abspath, join, dirname, pardir, isfile
 import sys
 
+# set to None first because the installation replaces this
+# with the path to the installed zine library.
+ZINE_LIB = None
+
+if ZINE_LIB is None:
+    ZINE_LIB = abspath(join(dirname(__file__), pardir))
 
 # make sure we load the correct zine
-sys.path.insert(0, abspath(join(dirname(__file__), pardir)))
+sys.path.insert(0, ZINE_LIB)
 
 
 def find_instance():
