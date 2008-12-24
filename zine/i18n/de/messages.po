@@ -242,7 +242,7 @@ msgstr "Autor"
 
 #: zine/forms.py:229 zine/templates/widgets/tag_cloud.html:2
 msgid "Tags"
-msgstr "Markierungen"
+msgstr "Tags"
 
 #: zine/forms.py:231 zine/templates/_entry.html:4
 #: zine/templates/admin/_post_helpers.html:6
