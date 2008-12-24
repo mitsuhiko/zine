@@ -10,3 +10,4 @@
 ^zine/plugins/.*?/docs/.*?\.page$
 .coverage
 ^docs/_build/
+^Makefile$

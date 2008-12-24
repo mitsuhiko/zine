@@ -305,4 +305,8 @@ def init_database(engine):
     """This is called from the websetup which explains why it takes an engine
     and not a zine application.
     """
+    # XXX: consider using something like this for mysql:
+    #   cx = engine.connect()
+    #   cx.execute('set storage_engine=innodb')
+    #   metadata.create_all(cx)
     metadata.create_all(engine)

@@ -3,7 +3,7 @@
 # files with PYTHON.  If PREFIX is not defined /usr is assumed.
 
 SRC="`dirname $0`/../zine"
-PACKAGES="_dynamic _ext importers parsers utils views websetup i18n"
+PACKAGES="_dynamic _ext importers utils views websetup i18n docs"
 
 if [ x$PREFIX == x ]; then
   PREFIX=/usr
@@ -27,7 +27,7 @@ for package in $PACKAGES; do
 done
 
 # all the plugins
-cp -R $SRC/{experimental_,}plugins $PREFIX/lib/zine
+cp -R $SRC/plugins $PREFIX/lib/zine
 
 # compile all files
 $PYTHON -O -mcompileall -qf $PREFIX/lib/zine/{zine,plugins}
@@ -38,7 +38,8 @@ cp -R $SRC/templates $PREFIX/share/zine/templates
 
 # copy the server files and adjust the ZINE_LIB path
 cp -R $SRC/../servers $PREFIX/share/zine
-sed -i'' -r "s|^ZINE_LIB\s*=.*$|ZINE_LIB = '$PREFIX/lib/zine'|g" $PREFIX/share/zine/servers/*
+sed -i '' -E -e "s|^ZINE_LIB =.*$|ZINE_LIB = '$PREFIX/lib/zine'|g" \
+    -e "s|^#!/usr/bin/python|#!$PYTHON|g" $PREFIX/share/zine/servers/*
 
 
 echo "All done."

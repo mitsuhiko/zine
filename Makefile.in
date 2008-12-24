@@ -1,0 +1,13 @@
+.PHONY: install uninstall
+
+PREFIX=%(PREFIX)s
+PYTHON=%(PYTHON)s
+
+# All is a no-op, we don't need compilation
+all:
+
+install:
+	@(PREFIX=$(PREFIX) PYTHON=$(PYTHON) ./scripts/install-posix)
+
+uninstall:
+	@(PREFIX=$(PREFIX) ./scripts/uninstall-posix)
