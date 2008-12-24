@@ -39,7 +39,7 @@ class BuildError(Exception):
     pass
 
 
-def find_files():
+def find_files(force):
     allowed_states = frozenset('CI?')
     client = subprocess.Popen(['hg', 'status', '-A'], stdout=subprocess.PIPE)
     for line in client.communicate()[0].splitlines():
@@ -47,7 +47,7 @@ def find_files():
         if len(line) != 2:
             continue
         status, filename = line
-        if status not in allowed_states:
+        if not force and status not in allowed_states:
             raise BuildError('hg unclean. Uncommited modifications?')
         if status == 'C' and not is_ignored(filename):
             yield filename
@@ -70,7 +70,7 @@ def delete_pycs(folder):
                 os.remove(filename)
 
 
-def build(dst_dir, build_dir, formats):
+def build(dst_dir, build_dir, options):
     zine_version = get_zine_version()
     release_name = 'Zine-%s' % '-'.join(zine_version.split())
     archive_base = os.path.join(dst_dir, release_name)
@@ -83,7 +83,7 @@ def build(dst_dir, build_dir, formats):
 
     # copy all tracked files into the build dir
     print 'Bootstrapping build directory [%s]' % build_dir
-    for filename in find_files():
+    for filename in find_files(options.force):
         target_folder = os.path.join(release_dir, os.path.dirname(filename))
         if not os.path.exists(target_folder):
             os.makedirs(target_folder)
@@ -123,11 +123,11 @@ def build(dst_dir, build_dir, formats):
     old_dir = os.getcwd()
     try:
         os.chdir(build_dir)
-        if formats.tar:
+        if options.tar:
             tarball_filename = archive_base + '.tar.gz'
             subprocess.call(['tar', 'vczf', tarball_filename, release_name])
             messages.append('Created tarball in %s' % tarball_filename)
-        if formats.zip:
+        if options.zip:
             zip_filename = archive_base + '.zip'
             subprocess.call(['zip', '-r', zip_filename, release_name])
             messages.append('Created zip file in %s' % zip_filename)
@@ -146,6 +146,9 @@ def main():
                       default=True, help='Do not generate a .zip file')
     parser.add_option('--no-tar', dest='tar', action='store_false',
                       default=True, help='Do not generate a tarball')
+    parser.add_option('-f', '--force', dest='force', action='store_true',
+                      default=False, help='Force build, even if local '
+                      'modifications exist.')
     options, args = parser.parse_args()
     if len(args) != 1:
         parser.error('incorrect number of arguments')
