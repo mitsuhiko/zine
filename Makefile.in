@@ -7,7 +7,7 @@ PYTHON=%(PYTHON)s
 all:
 
 install:
-	@($(PYTHON) scripts/install-posix $(PREFIX))
+	@($(PYTHON) scripts/_install-posix.py $(PREFIX))
 
 uninstall:
 	@(PREFIX=$(PREFIX) /bin/sh ./scripts/_uninstall-posix.sh)
