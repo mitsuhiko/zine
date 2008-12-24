@@ -8,6 +8,8 @@
     :copyright: 2007-2008 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
+from werkzeug import abort
+
 from zine.api import *
 from zine.models import Comment
 from zine.privileges import MODERATE_COMMENTS
