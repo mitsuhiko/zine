@@ -19,6 +19,17 @@ from babel.messages.pofile import read_po
 domains = ['messages']
 
 
+def is_untranslated(obj):
+    if not obj:
+        return True
+    elif isinstance(obj, basestring):
+        return not obj.strip()
+    for translation in obj:
+        if translation.strip():
+            return True
+    return False
+
+
 def main():
     parser = OptionParser(usage='%prog [path]')
     options, args = parser.parse_args()
@@ -55,6 +66,8 @@ def main():
                         s = message.string
                         if isinstance(s, list):
                             s = tuple(s)
+                        if is_untranslated(s):
+                            continue
                         rv['messages'][i] = s
                         for filename, lineno in message.locations:
                             if filename.endswith('.js'):
