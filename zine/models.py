@@ -517,7 +517,11 @@ class Post(_ZEMLDualContainer):
         slug = gen_slug(self.title)
         if not slug:
             slug = self.pub_date.strftime('%H:%M')
-        self.slug = u'%s/%s/%s/%s' % (
+        prefix = get_application().cfg['blog_url_prefix'].lstrip('/')
+        if prefix:
+            prefix += '/'
+        self.slug = u'%s%s/%s/%s/%s' % (
+            prefix,
             self.pub_date.year,
             self.pub_date.month,
             self.pub_date.day,

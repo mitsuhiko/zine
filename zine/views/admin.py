@@ -885,6 +885,7 @@ def urls(request):
 
     if request.method == 'POST' and form.validate(request.form):
         form.apply()
+        db.commit()
         flash(_(u'URL configuration changed.'), 'configure')
         # because the next request could reload the application and move
         # the admin interface we construct the URL to this page by hand.

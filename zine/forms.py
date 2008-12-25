@@ -23,7 +23,7 @@ from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
      is_valid_url, is_valid_slug, is_netaddr
-from zine.utils.redirects import register_redirect
+from zine.utils.redirects import register_redirect, change_url_prefix
 
 
 def config_field(cfgvar, label=None, **kwargs):
@@ -883,7 +883,10 @@ class BasicOptionsForm(_ConfigForm):
 
 
 class URLOptionsForm(_ConfigForm):
-    """The form for url changes."""
+    """The form for url changes.  This form sends database queries, even
+    though seems to only operate on the config.  Make sure to commit.
+    """
+
     blog_url_prefix = config_field('blog_url_prefix',
                                    lazy_gettext(u'Blog URL prefix'))
     admin_url_prefix = config_field('admin_url_prefix',
@@ -894,6 +897,14 @@ class URLOptionsForm(_ConfigForm):
                                    lazy_gettext(u'Tag URL prefix'))
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
+
+    def _apply(self, t, skip):
+        for key, value in self.data.iteritems():
+            if key not in skip:
+                old = t[key]
+                if old != value:
+                    change_url_prefix(old, value)
+                    t[key] = value
 
 
 class ThemeOptionsForm(_ConfigForm):
