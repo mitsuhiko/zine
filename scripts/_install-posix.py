@@ -77,11 +77,11 @@ def copy_scripts(source, destination, lib_dir):
 
 
 def main(prefix):
-    dest_dir = os.environ.get('DESTDIR', '')
-    if dest_dir:
-        dest_dir = join(dest_dir, prefix.lstrip('/'))
+    if 'DESTDIR' in os.environ:
+        dest_dir = join(os.environ['DESTDIR'], prefix.lstrip('/'))
     else:
         dest_dir = prefix
+
     python = sys.executable
     source = os.path.abspath('.')
     zine_source = join(source, 'zine')
