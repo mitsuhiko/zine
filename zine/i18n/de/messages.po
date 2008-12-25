@@ -762,7 +762,7 @@ msgstr "Kommentar geblockt von Akismet"
 
 #: zine/plugins/akismet_spam_filter/templates/akismet_widget.html:4
 #, python-format
-msgid "Akisment has blocked <b>%(spam_comments)s</b> comments."
+msgid "Akismet has blocked <b>%(spam_comments)s</b> comments."
 msgstr "Akismet blockte <b>%(spam_comments)s</b> Kommentare."
 
 #: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:2
