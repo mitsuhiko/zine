@@ -9,7 +9,7 @@
           raise `forms.ValidationError`\s.  They are used in hand validated
           forms currently which should be replaced by real forms soon.
 
-    :copyright: 2007 by Armin Ronacher, Georg Brandl.
+    :copyright: 2007, 2008 by Armin Ronacher, Georg Brandl.
     :license: BSD, see LICENSE for more details.
 """
 import re
@@ -138,7 +138,7 @@ def is_netaddr():
         if len(items) not in (1, 2):
             raise ValidationError(_(u'You have to enter a valid net address.'))
         elif len(items) == 2 and not items[1].isdigit():
-            raise ValidationError(_(u'The port has to be nummeric'))
+            raise ValidationError(_(u'The port has to be numeric'))
     return validator
 
 
