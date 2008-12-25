@@ -5,7 +5,7 @@
   {% call form() %}
     <div>
       <p>{% trans category_name=form.category.name|e %}
-        Do you really want to delete category “{{ category_name }}”?.
+        Do you really want to delete category “{{ category_name }}”?el
       {% endtrans %}</p>
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="confirm" value="{{ _('Yes') }}">
