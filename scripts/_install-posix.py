@@ -77,11 +77,19 @@ def copy_scripts(source, destination, lib_dir):
 
 
 def main(prefix):
+    dest_dir = os.environ.get('DESTDIR', '')
+    if dest_dir:
+        if prefix.startswith('/'):
+            dest_dir = join(dest_dir, prefix[1:])
+        else:
+            dest_dir = join(dest_dir, prefix)
+    else:
+        dest_dir = prefix
     python = sys.executable
     source = os.path.abspath('.')
     zine_source = join(source, 'zine')
-    lib_dir = join(prefix, 'lib', 'zine')
-    share_dir = join(prefix, 'share', 'zine')
+    lib_dir = join(dest_dir, 'lib', 'zine')
+    share_dir = join(dest_dir, 'share', 'zine')
 
     print 'Installing to ' + prefix
     print 'Using ' + python
