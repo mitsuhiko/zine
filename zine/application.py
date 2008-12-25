@@ -607,6 +607,7 @@ class Zine(object):
 
         # and instanciate the configuration. this won't fail,
         # even if the database is not connected.
+        from zine.config import Configuration
         self.cfg = Configuration(path.join(instance_folder, 'zine.ini'))
         if not self.cfg.exists:
             raise _core.InstanceNotInitialized()
@@ -1253,6 +1254,5 @@ class Zine(object):
 
 # import here because of circular dependencies
 from zine import i18n
-from zine.config import Configuration
 from zine.utils import log
 from zine.utils.http import make_external_url
