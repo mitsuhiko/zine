@@ -128,7 +128,7 @@ class Translations(object):
 
     def gettext(self, string):
         msg = self._lookup(string)
-        if msg is None:
+        if msg is None or msg == '':
             return unicode(string)
         elif msg.__class__ is tuple:
             return msg[0]

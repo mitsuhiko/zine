@@ -309,7 +309,7 @@ class PostForm(forms.Form):
         """A helper function that creates a post object from the data."""
         data = self.data
         post = Post(data['title'], data['author'], data['text'], data['slug'],
-                    content_type=self.content_type)
+                    parser=data['parser'], content_type=self.content_type)
         post.bind_categories(data['categories'])
         post.bind_tags(data['tags'])
         self._set_common_attributes(post)
@@ -320,7 +320,11 @@ class PostForm(forms.Form):
         if the slug changes.
         """
         old_slug = self.post.slug
-        forms.set_fields(self.post, self.data, 'title', 'author', 'text')
+        old_parser = self.post.parser
+        forms.set_fields(self.post, self.data, 'title', 'author', 'parser')
+        if (self.data['text'] != self.post.text
+            or self.data['parser'] != old_parser):
+            self.post.text = self.data['text']
         if self.data['slug']:
             self.post.slug = self.data['slug']
         elif not self.post.slug:
@@ -332,7 +336,7 @@ class PostForm(forms.Form):
 
     def _set_common_attributes(self, post):
         forms.set_fields(post, self.data, 'comments_enabled', 'pings_enabled',
-                         'status', 'parser')
+                         'status')
         post.bind_categories(self.data['categories'])
         post.bind_tags(self.data['tags'])
 
