@@ -443,7 +443,7 @@ class Plugin(object):
     def translations(self):
         """The translations for this application."""
         locale_path = path.join(self.path, 'i18n')
-        return Translations.load(locale_path, [self.app.cfg['language']])
+        return Translations.load(locale_path, self.app.cfg['language'])
 
     @cached_property
     def is_documented(self):

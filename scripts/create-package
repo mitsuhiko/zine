@@ -41,6 +41,7 @@ class BuildError(Exception):
 
 def find_files(force):
     allowed_states = frozenset('CI?')
+    tracked_states = frozenset('CM')
     client = subprocess.Popen(['hg', 'status', '-A'], stdout=subprocess.PIPE)
     for line in client.communicate()[0].splitlines():
         line = line.split(None, 1)
@@ -49,7 +50,7 @@ def find_files(force):
         status, filename = line
         if not force and status not in allowed_states:
             raise BuildError('hg unclean. Uncommited modifications?')
-        if status == 'C' and not is_ignored(filename):
+        if status in tracked_states and not is_ignored(filename):
             yield filename
 
 

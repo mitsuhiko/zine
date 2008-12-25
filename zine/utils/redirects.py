@@ -35,9 +35,11 @@ def lookup_redirect(url):
 
 
 def register_redirect(original, new_url):
-    """Register a new redirect."""
+    """Register a new redirect.  Also an old one that may still exist."""
+    original = _strip_url(original)
+    db.execute(redirects.delete(original=original))
     db.execute(redirects.insert(), dict(
-        original=_strip_url(original),
+        original=original,
         new=_strip_url(new_url)
     ))
 
@@ -53,3 +55,30 @@ def get_redirect_map():
     """Return a dict of all redirects."""
     return dict((row.original, make_external_url(row.new)) for row in
                 db.execute(redirects.select()))
+
+
+def change_url_prefix(old, new):
+    """Changes a URL prefix from `old` to `new`.  This does not update the
+    configuration but renames all slugs there were below the old one and
+    puts it to the new and also registers redirects.
+    """
+    from zine.models import Post
+
+    def _rewrite(s):
+        s = s.strip('/')
+        if s:
+            s += '/'
+        return s
+
+    old = _rewrite(old)
+    new = _rewrite(new)
+    cut_off = len(old)
+
+    posts = Post.query.filter(
+        Post.slug.like(old.replace('%', '%%') + '%')
+    ).all()
+
+    for post in posts:
+        new_slug = new + post.slug[cut_off:]
+        register_redirect(post.slug, new_slug)
+        post.slug = new_slug

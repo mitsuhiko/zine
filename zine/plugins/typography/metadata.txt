@@ -6,6 +6,6 @@ Author URL: http://lucumr.pocoo.org/
 License: BSD
 Version: 0.1
 Description: This plugin replaces some characters with their typographic\
- better replacements (quotes etc.)
-Description[de]: Dieses Plugin erlaubt es dir einige Zeichen automatisch\
- mit dem typographisch besseren zu ersetzen (Anführungszeichen usw.)
+ better equivalents (quotes etc.)
+Description[de]: Dieses Plugin erlaubt es dir, einige Zeichen automatisch\
+ durch typographisch bessere zu ersetzen (Anführungszeichen usw.)

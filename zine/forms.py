@@ -23,7 +23,7 @@ from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
      is_valid_url, is_valid_slug, is_netaddr
-from zine.utils.redirects import register_redirect
+from zine.utils.redirects import register_redirect, change_url_prefix
 
 
 def config_field(cfgvar, label=None, **kwargs):
@@ -309,7 +309,7 @@ class PostForm(forms.Form):
         """A helper function that creates a post object from the data."""
         data = self.data
         post = Post(data['title'], data['author'], data['text'], data['slug'],
-                    content_type=self.content_type)
+                    parser=data['parser'], content_type=self.content_type)
         post.bind_categories(data['categories'])
         post.bind_tags(data['tags'])
         self._set_common_attributes(post)
@@ -320,7 +320,11 @@ class PostForm(forms.Form):
         if the slug changes.
         """
         old_slug = self.post.slug
-        forms.set_fields(self.post, self.data, 'title', 'author', 'text')
+        old_parser = self.post.parser
+        forms.set_fields(self.post, self.data, 'title', 'author', 'parser')
+        if (self.data['text'] != self.post.text
+            or self.data['parser'] != old_parser):
+            self.post.text = self.data['text']
         if self.data['slug']:
             self.post.slug = self.data['slug']
         elif not self.post.slug:
@@ -332,7 +336,7 @@ class PostForm(forms.Form):
 
     def _set_common_attributes(self, post):
         forms.set_fields(post, self.data, 'comments_enabled', 'pings_enabled',
-                         'status', 'parser')
+                         'status')
         post.bind_categories(self.data['categories'])
         post.bind_tags(self.data['tags'])
 
@@ -883,7 +887,10 @@ class BasicOptionsForm(_ConfigForm):
 
 
 class URLOptionsForm(_ConfigForm):
-    """The form for url changes."""
+    """The form for url changes.  This form sends database queries, even
+    though seems to only operate on the config.  Make sure to commit.
+    """
+
     blog_url_prefix = config_field('blog_url_prefix',
                                    lazy_gettext(u'Blog URL prefix'))
     admin_url_prefix = config_field('admin_url_prefix',
@@ -894,6 +901,14 @@ class URLOptionsForm(_ConfigForm):
                                    lazy_gettext(u'Tag URL prefix'))
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
+
+    def _apply(self, t, skip):
+        for key, value in self.data.iteritems():
+            if key not in skip:
+                old = t[key]
+                if old != value:
+                    change_url_prefix(old, value)
+                    t[key] = value
 
 
 class ThemeOptionsForm(_ConfigForm):

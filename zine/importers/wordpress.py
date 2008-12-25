@@ -35,6 +35,8 @@ _meta_value_re = re.compile(r'(<wp:postmeta>.*?<wp:meta_value>)(.*?)'
                             r'(</wp:meta_value>.*?</wp:postmeta>)(?s)')
 _comment_re = re.compile(r'(<wp:comment>.*?<wp:comment_content>)(.*?)'
                          r'(</wp:comment_content>.*?</wp:comment>)(?s)')
+_content_encoded_re = re.compile(r'(<content:encoded>)<!\[CDATA\['
+                                 r'(.*?)\]\]>(</content:encoded>)(?s)')
 
 
 def _wordpress_to_html(markup):
@@ -84,6 +86,15 @@ def parse_broken_wxr(fd):
     code = _meta_value_re.sub(escape_if_good_idea, code)
     code = _comment_re.sub(escape_if_good_idea, code)
     code += '</wxrfix>'
+
+    # fix four: WordPress uses CDATA sections for content.  Because it's very
+    # likely ]]> appears in the text as literal the XML parser totally freaks
+    # out there.  We've had at least one dump that does not import without
+    # this hack.
+    def reescape_escaped_content(match):
+        before, content, after = match.groups()
+        return before + escape(content) + after
+    code = _content_encoded_re.sub(reescape_escaped_content, code)
 
     return etree.fromstring(code).find('rss').find('channel')
 
