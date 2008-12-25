@@ -14,6 +14,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
+import os
 import sys
 from os import path
 from datetime import datetime
@@ -90,7 +91,7 @@ class Logger(object):
                 self._file = file(self.logfile, 'a+')
             except IOError:
                 # grml.  log file not writable.  return a dummy
-                return file(os.nulldev, 'w')
+                return file(os.devnull, 'w')
             if self._file.tell() > 0:
                 self._file.seek(-1, 2)
                 char = self._file.read()
