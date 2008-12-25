@@ -26,13 +26,13 @@ try:
 except ImportError:
     from sha import new as sha1
 
-from werkzeug import html, escape, cached_property, MultiDict, redirect
+from werkzeug import html, escape, cached_property, MultiDict
 
 from zine.application import get_request, url_for
 from zine.database import db
 from zine.i18n import _, ngettext, lazy_gettext, parse_datetime, \
      format_system_datetime
-from zine.utils.http import get_redirect_target
+from zine.utils.http import get_redirect_target, redirect, redirect_to
 from zine.utils.crypto import gen_random_identifier
 from zine.utils.validators import ValidationError
 from zine.utils.datastructures import OrderedDict, missing
@@ -1871,7 +1871,7 @@ class Form(object):
         if self.redirect_tracking:
             target = self.redirect_target
         if target is None:
-            target = url_for(*args, **kwargs)
+            return redirect_to(*args, **kwargs)
         return redirect(target)
 
     @property
