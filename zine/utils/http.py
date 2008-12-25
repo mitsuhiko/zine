@@ -30,7 +30,8 @@ def check_external_url(app, url):
 
 def get_redirect_target(invalid_targets=(), request=None):
     """Check the request and get the redirect target if possible.
-    If not this function returns just `None`.
+    If not this function returns just `None`.  The return value of this
+    function is suitable to be passed to `_redirect`
     """
     if request is None:
         request = get_request()
@@ -43,6 +44,9 @@ def get_redirect_target(invalid_targets=(), request=None):
     # to use the target url
     if not check_target:
         return
+
+    # otherwise drop the leading slash
+    check_target = check_target.lstrip('/')
 
     blog_url = request.app.cfg['blog_url']
     blog_parts = urlparse(blog_url)
@@ -79,6 +83,11 @@ def redirect(url, code=302, allow_external_redirect=False):
     one checks for external redirects too.  If a redirect to an external
     target was requested `BadRequest` is raised unless
     `allow_external_redirect` was explicitly set to `True`.
+
+    Leading slashes are ignored which makes it unsuitable to redirect
+    to URLs returned from `url_for` and others.  Use `redirect_to`
+    to redirect to arbitrary endpoints or `_redirect` to redirect to
+    unchecked resources outside the URL root.
     """
     # leading slashes are ignored, if we redirect to "/foo" or "foo"
     # does not matter, in both cases we want to be below our blog root.

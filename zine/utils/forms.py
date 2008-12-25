@@ -32,7 +32,7 @@ from zine.application import get_request, url_for
 from zine.database import db
 from zine.i18n import _, ngettext, lazy_gettext, parse_datetime, \
      format_system_datetime
-from zine.utils.http import get_redirect_target, redirect, redirect_to
+from zine.utils.http import get_redirect_target, _redirect, redirect_to
 from zine.utils.crypto import gen_random_identifier
 from zine.utils.validators import ValidationError
 from zine.utils.datastructures import OrderedDict, missing
@@ -1872,7 +1872,7 @@ class Form(object):
             target = self.redirect_target
         if target is None:
             return redirect_to(*args, **kwargs)
-        return redirect(target)
+        return _redirect(target)
 
     @property
     def csrf_token(self):
