@@ -8,7 +8,7 @@ installed:
 - Werkzeug*
 - Jinja2*
 - A database (MySQL, SQLite or PostgreSQL and others are supported)
-- SQLAlchemy 0.5
+- SQLAlchemy 0.5 [revision>=5491] or higher*
 - simplejson* [included in Python 2.6 and higher]
 - html5lib*
 - pytz*
