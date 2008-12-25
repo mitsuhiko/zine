@@ -1,14 +1,14 @@
-# Russian translations for PROJECT.
+# Russian translations for Zine.
 # Copyright (C) 2008 The Pocoo Team
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
+# This file is distributed under the same license as the Zine project.
+# Translated by Nikita Kabardin <wackum@gmail.com>, 2008.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
 "POT-Creation-Date: 2008-12-25 13:50+0300\n"
-"PO-Revision-Date: 2008-12-25 19:45+0300\n"
+"PO-Revision-Date: 2008-12-26 01:23+0300\n"
 "Last-Translator: Nikita Kabardin <wackum@gmail.com>\n"
 "Language-Team: ru <LL@li.org>\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
@@ -53,7 +53,7 @@ msgstr "Простое кэширование"
 
 #: zine/config.py:83
 msgid "memcached"
-msgstr ""
+msgstr "memcached"
 
 #: zine/config.py:84
 msgid "Filesystem"
@@ -577,7 +577,7 @@ msgstr "Zine-разметка"
 
 #: zine/parsers.py:87
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: zine/pingback.py:66
 msgid "source URL does not exist"
@@ -756,7 +756,7 @@ msgstr "Невозможно проверить ключ из-за ошибки 
 
 #: zine/plugins/akismet_spam_filter/__init__.py:147
 msgid "Akismet"
-msgstr ""
+msgstr "Akismet"
 
 #: zine/plugins/akismet_spam_filter/__init__.py:162
 msgid "Akismet has been successfully enabled."
@@ -801,7 +801,7 @@ msgstr "Ключ обновления"
 
 #: zine/plugins/creole_parser/__init__.py:52
 msgid "Creole"
-msgstr ""
+msgstr "Creole"
 
 #: zine/plugins/dark_vessel_colorscheme/__init__.py:21
 msgid "Dark"
@@ -831,7 +831,7 @@ msgstr ""
 
 #: zine/plugins/markdown_parser/__init__.py:23
 msgid "Markdown"
-msgstr ""
+msgstr "Markdown"
 
 #: zine/plugins/miniblog_theme/templates/_widgets.html:5
 #: zine/plugins/vessel_theme/templates/_widgets.html:4
@@ -880,7 +880,7 @@ msgstr "Тема pygments успешно изменена."
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:2
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:4
 msgid "Pygments"
-msgstr ""
+msgstr "Pygments"
 
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:5
 msgid ""
@@ -1074,11 +1074,11 @@ msgstr ""
 
 #: zine/templates/500.html:2
 msgid "Zine Internal Server Error"
-msgstr ""
+msgstr "Zine Internal Server Error"
 
 #: zine/templates/500.html:4
 msgid "Internal Server Error"
-msgstr ""
+msgstr "Internal Server Error"
 
 #: zine/templates/500.html:5
 msgid ""
@@ -2315,7 +2315,7 @@ msgstr "активен"
 
 #: zine/templates/admin/information.html:159
 msgid "UID"
-msgstr ""
+msgstr "UID"
 
 #: zine/templates/admin/information.html:163
 msgid "Location"
@@ -2519,7 +2519,7 @@ msgstr "Управлять категориями"
 #: zine/templates/admin/manage_groups.html:7
 #: zine/templates/admin/manage_users.html:7
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: zine/templates/admin/manage_categories.html:10
 msgid "Number of Posts"
@@ -2672,6 +2672,11 @@ msgid ""
 "      can also be completely removed.\n"
 "    "
 msgstr ""
+"\n"
+"      Если у вас есть расширение в виде файла <tt>.plugin</tt>, вы можете\n"
+"      загрузить его в Zine используя форму. Расширения, добавленные таким образом,\n"
+"      также могут быть полностью удалены.\n"
+"    "
 
 #: zine/templates/admin/reddit.html:7
 #, python-format
@@ -3373,17 +3378,18 @@ msgid ""
 msgstr ""
 "\n"
 "    Zine использует базу данных для хранения записей и другой информации.\n"
-"    Необходимо только указать URI-формат пути к базе данных.\n"
+"    Необходимо указать URI-формат пути к базе данных.\n"
 "    В зависимости от вашей БД, URI может выглядеть по-разному. Обратите\n"
-"    внимание на таблицу — она содержит примеры.    "
+"    внимание на таблицу — она содержит примеры.\n"
+"  "
 
 #: zine/websetup/templates/database.html:11
 msgid "SQLite"
-msgstr ""
+msgstr "SQLite"
 
 #: zine/websetup/templates/database.html:12
 msgid "sqlite://database.db"
-msgstr ""
+msgstr "sqlite://database.db"
 
 #: zine/websetup/templates/database.html:13
 msgid ""
@@ -3394,7 +3400,7 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"        Путь к базе данных SQLite может быть как абсолютным (если\n"
+"        Путь к базе данных SQLite может быть как абсолютным (\n"
 "        начинается с трех слешей на OS X / Linux или двух слешей и\n"
 "        буквы диска на Windows) так и относительным (к папке экземпляра\n"
 "        блога).\n"
@@ -3402,19 +3408,19 @@ msgstr ""
 
 #: zine/websetup/templates/database.html:18
 msgid "MySQL"
-msgstr ""
+msgstr "MySQL"
 
 #: zine/websetup/templates/database.html:19
 msgid "mysql://username:password@host/database_name"
-msgstr ""
+msgstr "mysql://username:password@host/database_name"
 
 #: zine/websetup/templates/database.html:20
 msgid "Postgres"
-msgstr ""
+msgstr "Postgres"
 
 #: zine/websetup/templates/database.html:21
 msgid "postgres://username:password@host/database_name"
-msgstr ""
+msgstr "postgres://username:password@host/database_name"
 
 #: zine/websetup/templates/error.html:3
 msgid "Setup Failed"
@@ -3478,7 +3484,7 @@ msgstr "Назад"
 
 #: zine/websetup/templates/start.html:3
 msgid "Welcome To The Zine Setup"
-msgstr "Добро пожаловать в мастер установки Zine"
+msgstr "Добро пожаловать в мастер установки Zine!"
 
 #: zine/websetup/templates/start.html:4
 msgid ""
@@ -3488,8 +3494,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Добро пожаловать в мастер установки, который, задаст\n"
-"    несколько простых вопросов и установит Zine для вас.\n"
+"    Вам будет задано несколько простых вопросов, ответы на которые\n"
+"    нужны, чтобы установить Zine.\n"
 "  "
 
 #: zine/websetup/templates/start.html:8
@@ -3503,12 +3509,13 @@ msgstr ""
 "\n"
 "    Мы попробовали определить язык из настроек вашего браузера.\n"
 "    Если вы хотите пройти процедуру установки, используя другой язык,\n"
-"    выберите его в выпадающем меню и нажмите «Вперед».\n"
+"    выберите его в выпадающем меню.\n"
+"    Чтобы начать, нажмите «Вперед».\n"
 "  "
 
 #: zine/websetup/templates/summary.html:3
 msgid "Setup Starting"
-msgstr "Начинается установка"
+msgstr "Запускается установка"
 
 #: zine/websetup/templates/summary.html:4
 msgid ""
