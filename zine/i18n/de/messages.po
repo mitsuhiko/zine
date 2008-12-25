@@ -521,7 +521,7 @@ msgstr "Dump Download URL"
 
 #: zine/forms.py:935
 msgid "Feed Download URL"
-msgstr "Feed Download URI"
+msgstr "Feed Download URL"
 
 #: zine/forms.py:952
 msgid "Use default value"
