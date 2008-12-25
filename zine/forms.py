@@ -320,8 +320,11 @@ class PostForm(forms.Form):
         if the slug changes.
         """
         old_slug = self.post.slug
-        forms.set_fields(self.post, self.data, 'title', 'author', 'parser',
-                         'text')
+        old_parser = self.post.parser
+        forms.set_fields(self.post, self.data, 'title', 'author', 'parser')
+        if (self.data['text'] != self.post.text
+            or self.data['parser'] != old_parser):
+            self.post.text = self.data['text']
         if self.data['slug']:
             self.post.slug = self.data['slug']
         elif not self.post.slug:
