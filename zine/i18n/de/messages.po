@@ -69,7 +69,6 @@ msgid "An administrator must always approve the comment"
 msgstr "Ein Administrator muss Kommentare immer bestätigen"
 
 #: zine/config.py:103
-#, fuzzy
 msgid "Automatically approve comments by known comment authors"
 msgstr "Automatisch Kommentare von bekannten Autoren bestätigen"
 
@@ -2770,9 +2769,8 @@ msgstr ""
 "    "
 
 #: zine/templates/admin/inspect_import.html:63
-#, fuzzy
 msgid "unpublished"
-msgstr "Veröffentlicht"
+msgstr "Unveröffentlicht"
 
 #: zine/templates/admin/inspect_import.html:73
 msgid "Import into Blog"
