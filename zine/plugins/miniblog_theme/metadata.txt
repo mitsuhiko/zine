@@ -7,6 +7,6 @@ License: BSD
 Version: 0.1
 Description: A very simple theme for tumblelogs or whatever inspired by\
  the flickr design.
-Description[de]: Ein einfaches Thema für thublelogs und ähnliches,\
+Description[de]: Ein einfaches Design für thublelogs und ähnliches,\
  inspiriert durch das flickr Design.
 Preview: miniblog_theme::preview.png

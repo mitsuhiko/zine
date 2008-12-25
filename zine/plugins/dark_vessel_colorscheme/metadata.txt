@@ -6,5 +6,5 @@ Author URL: http://lucumr.pocoo.org/
 License: BSD
 Version: 0.1
 Description: A dark colorscheme for the vessel theme
-Description[de]: Ein dunkles Farbschema für das Vessel Thema
+Description[de]: Ein dunkles Farbschema für das Vessel-Design
 Depends: vessel_theme
