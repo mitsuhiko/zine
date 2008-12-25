@@ -79,10 +79,7 @@ def copy_scripts(source, destination, lib_dir):
 def main(prefix):
     dest_dir = os.environ.get('DESTDIR', '')
     if dest_dir:
-        if prefix.startswith('/'):
-            dest_dir = join(dest_dir, prefix[1:])
-        else:
-            dest_dir = join(dest_dir, prefix)
+        dest_dir = join(dest_dir, prefix.lstrip('/'))
     else:
         dest_dir = prefix
     python = sys.executable
