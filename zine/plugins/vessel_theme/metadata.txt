@@ -6,5 +6,5 @@ Author URL: http://lucumr.pocoo.org/
 License: BSD
 Version: 0.1
 Description: A simple default theme
-Description[de]: Ein einfaches Standardthema
+Description[de]: Ein einfaches Standarddesign
 Preview: vessel_theme::preview.png

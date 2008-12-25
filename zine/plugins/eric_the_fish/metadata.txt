@@ -7,6 +7,6 @@ License: BSD
 Version: 0.1
 Description: Adds Eric The Fish, an annoying fish to the admin panel. Clicking\
  it shows a random fortune quote. This is a documented example plugin.
-Description[de]: Fügt Erik den Fisch (nervend!) zum Administrationsbereich hinzu.\
+Description[de]: Fügt Erik, einen nervigen Fisch, zum Administrationsbereich hinzu.\
  Ein Klick auf Erik sagt dir die Zukunft voraus.  Erik ist ein dokumentiertes\
  Beispielplugin.

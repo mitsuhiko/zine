@@ -6,5 +6,5 @@ Author URL: http://lucumr.pocoo.org/
 License: BSD
 Version: 0.1
 Description: A brownish theme called "myrtle".
-Description[de]: Ein braunes Thema Namens "myrtle".
+Description[de]: Ein braunes Design namens "myrtle".
 Preview: myrtle_theme::preview.png
