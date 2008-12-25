@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Zine 0.1\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-12-25 18:38+0100\n"
+"PO-Revision-Date: 2008-12-25 19:19+0100\n"
 "Last-Translator: Georg Brandl <georg@python.org>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -1549,7 +1549,7 @@ msgstr "Import-Überprüfung"
 
 #: zine/templates/admin/cache.html:2 zine/templates/admin/cache.html:4
 msgid "Cache Options"
-msgstr "Cache Einstellungen"
+msgstr "Cache-Einstellungen"
 
 #: zine/templates/admin/cache.html:6
 msgid ""
@@ -1563,10 +1563,9 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Zine kommt mit einem Cache System, dass es erlaubt einen "
-"plötzlichen\n"
-"      Benutzeransturm zu bewältigen.  Das Cache System hat verschiedene\n"
-"      Backends von denen du wählen kannst.\n"
+"      Zine bringt ein Cache-System mit, das es erlaubt, einen plötzlichen\n"
+"      Benutzeransturm zu bewältigen.  Das Cache-System hat verschiedene\n"
+"      Backends, unter denen du wählen kannst.\n"
 "    "
 
 #: zine/templates/admin/cache.html:12
@@ -1580,11 +1579,9 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Beachte, dass bei aktivierem Caching auch Templates gecacht werden\n"
-"      und unter Umständen bei Veränderungen nicht neugeladen werden.  "
-"Wenn\n"
-"      du Plugins entwickelst ist es eine gute Idee, den Cache zu "
-"deaktivieren.\n"
+"      Beachte, dass bei aktiviertem Caching auch Templates gecacht werden\n"
+"      und unter Umständen bei Veränderungen nicht neugeladen werden.  Wenn\n"
+"      du Plugins entwickelst, ist es sinnvoll, den Cache zu deaktivieren.\n"
 "    "
 
 #: zine/templates/admin/cache.html:28
@@ -1593,7 +1590,7 @@ msgstr "Cache System"
 
 #: zine/templates/admin/cache.html:29
 msgid "Currently Zine supports three caching systems:"
-msgstr "Momentan unterstützt Zine die folgenden drei Cache Systeme:"
+msgstr "Momentan unterstützt Zine die folgenden drei Cache-Systeme:"
 
 #: zine/templates/admin/cache.html:31
 msgid ""
@@ -1609,10 +1606,10 @@ msgid ""
 msgstr ""
 "<strong>Einfaches Caching</strong>: Der einfache Cache ist ein\n"
 "    sehr einfaches Caching im Arbeitsspeicher des Prozesses.  Dieser\n"
-"    Cache funktioniert nur, wenn du eine persistente Serverugebung hast.\n"
-"    Vereinfacht gesagt funktioniert es umso besser, desto mehr Theads\n"
-"    und desto weniger Prozesse du hastt.  Wenn du einen memcached Server\n"
-"    verwenden kannst solltest du den einfachen Cache nicht nutzen."
+"    Cache funktioniert nur, wenn du eine persistente Serverumgebung hast.\n"
+"    Vereinfacht gesagt funktioniert es umso besser, je mehr Theads\n"
+"    und je weniger Prozesse du hast.  Wenn du einen memcached Server\n"
+"    verwenden kannst, solltest du den einfachen Cache nicht nutzen."
 
 #: zine/templates/admin/cache.html:37
 msgid ""
@@ -1623,8 +1620,8 @@ msgid ""
 "          is useful for high traffic sites."
 msgstr ""
 "<strong>memcached</strong>: Dieser Cache nutzt einen oder mehrere\n"
-"    entfernte memcached Server um die Daten zu speichern.  Dies     "
-"erfordert zumindest einen memcache Daemon.  Diese Art des Caching\n"
+"    entfernte memcached Server um die Daten zu speichern.  Dies\n"
+"    erfordert zumindest einen memcache Daemon.  Diese Art des Caching\n"
 "    ist besonders für Seiten mit vielen Besuchern sinnvoll."
 
 #: zine/templates/admin/cache.html:41
@@ -1637,13 +1634,14 @@ msgid ""
 "          filesystem it should be fast enough."
 msgstr ""
 "<strong>Dateisystem</strong>: Dieser Cache speichert die\n"
-"    Cache-Informationen auf dem Dateisystem.  Wenn IO das Problem     auf"
-" dem Server ist, sollte dieser Cache nicht verwendet werden.     In den "
-"meisten Fällen sollte das Dateisystem jedoch schnell     genug sein."
+"    Cache-Informationen auf dem Dateisystem.  Wenn IO das Problem\n"
+"    auf dem Server ist, sollte dieser Cache nicht verwendet werden.\n"
+"    In den meisten Fällen sollte das Dateisystem jedoch schnell\n"
+"    genug sein."
 
 #: zine/templates/admin/cache.html:46
 msgid "Per default no cache system is active."
-msgstr "Standardmäßig ist kein Cache System aktiv."
+msgstr "Standardmäßig ist kein Cache-System aktiv."
 
 #: zine/templates/admin/cache.html:49
 msgid "Memcached Options"
@@ -1667,14 +1665,13 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"    Um memcached verwenden zu können muss die Adresse zum\n"
-"    memcached Server angegeben werden.  Für mehr Details     schau dir "
-"die <a href=\"http://www.danga.com/memcached/\">memcached\n"
-"    Webseite an</a>.  Mehrere Adressen können mit Beistrichen getrennt\n"
+"    Um memcached verwenden zu können, muss die Adresse zum\n"
+"    memcached Server angegeben werden.  Für mehr Details\n"
+"    schau dir die <a href=\"http://www.danga.com/memcached/\">Webseite von\n"
+"    memcached</a> an.  Mehrere Adressen können mit Kommas getrennt\n"
 "    angegeben werden.  Die Unterstützung für memcached erfordert zudem\n"
 "    entweder das <a href=\"http://gijsbert.org/cmemcache/\"\n"
-"    >cmemcache</a> oder <a href=\"ftp://ftp.tummy.com/pub/python-"
-"memcached/\"\n"
+"    >cmemcache</a> oder <a href=\"ftp://ftp.tummy.com/pub/python-memcached/\"\n"
 "    >python-memcached</a> Modul.\n"
 "    "
 
@@ -1689,9 +1686,8 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"    Wenn du zum Beispiel einen memcached Server auf localhost (127.0.0.1)"
-"\n"
-"    port 11211 laufen hast, müsstest du <code>127.0.0.1:11211</code> in\n"
+"    Wenn du zum Beispiel einen memcached Server auf localhost (127.0.0.1),\n"
+"    Port 11211 laufen hast, müsstest du <code>127.0.0.1:11211</code> in\n"
 "    das Textfeld eingeben.\n"
 "    "
 
@@ -1711,10 +1707,10 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"       Wenn der Dateisystem Cache verwendet ist kannst du einen Pfad\n"
-"       angeben in dem Zine die die Daten ablegt.  Beachte bitte, dass\n"
-"       das Ändern des Pfades die alten Cache Dateien in diesem Ordner\n"
-"       nicht automatisch löscht.      "
+"       Wenn der Dateisystem-Cache verwendet wird, kannst du einen Pfad\n"
+"       angeben, in dem Zine die Daten ablegt.  Beachte bitte, dass\n"
+"       das Ändern des Pfades die alten Cache-Dateien in diesem Ordner\n"
+"       nicht automatisch löscht."
 
 #: zine/templates/admin/cache.html:75
 msgid ""
@@ -1730,12 +1726,11 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"    Außerdem muss beachtet werden, dass der Cache Pfad ausschließlich\n"
+"    Außerdem muss beachtet werden, dass der Cache-Pfad ausschließlich\n"
 "    von Zine für Dateien verwendet wird.  Zine wird von Zeit\n"
-"    zu Zeit den Cache leeren und würde ohne Nachfrage alle Dateien in\n"
-"    diesem Ordner löschen.  Nutze also nicht einfach nur "
-"<code>/tmp</code>\n"
-"    für Caching sondern immer einen Unterordner.\n"
+"    zu Zeit den Cache leeren und ohne Nachfrage alle Dateien in\n"
+"    diesem Ordner löschen.  Nutze also nicht einfach nur <code>/tmp</code>\n"
+"    für Caching, sondern immer einen Unterordner.\n"
 "   "
 
 #: zine/templates/admin/cache.html:85
@@ -1761,14 +1756,14 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Die folgenden Werte sind Cache-System unabhängig.  Du kannst sie\n"
-"    verwenden um das Cachen im Detail zu beeinflussen.  Der Timeout\n"
-"    ist die Anzahl an Sekunden die ein einzelner Eintrag im Cache\n"
-"    gespeichert wird.  Allerdings haben bestimmte Einträge einen Timeout\n"
-"    der nicht von diesem Wert abhängt.  \"eager caching\" aktiviert ist\n"
-"    wird das Cache System wesentlich mehr Daten speichern mit sichtbaren\n"
+"    Die folgenden Werte sind vom Cache-System unabhängig.  Du kannst sie\n"
+"    verwenden, um das Caching im Detail zu beeinflussen.  Der Timeout\n"
+"    ist die Anzahl an Sekunden, die ein einzelner Eintrag im Cache\n"
+"    gespeichert wird.  Allerdings haben bestimmte Einträge einen Timeout,\n"
+"    der nicht von diesem Wert abhängt.  Wenn \"Eager caching\" aktiviert ist,\n"
+"    wird das Cache-System wesentlich mehr Daten speichern - mit sichtbaren\n"
 "    Nebeneffekten.  Zum Beispiel werden neue Blogposts auf der Übersicht\n"
-"    oder einem Newsfeed erst nach einiger Zeit erscheinen.\n"
+"    oder in einem Newsfeed erst nach einiger Zeit erscheinen.\n"
 "   "
 
 #: zine/templates/admin/cache.html:101
@@ -1803,17 +1798,12 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Hier können alle bekannten Konfigurationswerte verändert werden.  "
-"Beachte\n"
-"    das einige von ihnen (speziell die \"core\" Einträge) sehr einfach "
-"die\n"
-"    Installation zerstören können wenn sie auf ungültige Werte gestellt "
-"werden.\n"
-"    Verändere diese Werte nicht, wenn du nicht genau weißt was sie "
-"bewirken.\n"
-"    Der Editor ist speziell dann nützlich wenn du Werte von Plugins "
-"verändern\n"
-"    willst die (noch) keine Konfigurationsseite besitzen.\n"
+"    Hier können alle bekannten Konfigurationswerte verändert werden.\n"
+"    Einige von ihnen (speziell die \"core\" Einträge) können sehr leicht die\n"
+"    Installation zerstören, wenn sie auf ungültige Werte gestellt werden.\n"
+"    Verändere diese Werte nicht, wenn du nicht genau weißt, was sie bewirken.\n"
+"    Der Editor ist speziell dann nützlich, wenn du Werte von Plugins verändern\n"
+"    willst, die (noch) keine Konfigurationsseite besitzen.\n"
 "   "
 
 #: zine/templates/admin/configuration.html:31
@@ -1829,9 +1819,8 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"      Der Konfigurationseditor ist aus diesem Grund deaktiviert.  Wenn du"
-"\n"
-"      ihn wirklich aktivieren willst klicke auf den Knopf.\n"
+"      Der Konfigurationseditor ist aus diesem Grund deaktiviert.  Wenn du\n"
+"      ihn wirklich aktivieren willst, klicke auf den Knopf.\n"
 "   "
 
 #: zine/templates/admin/configuration.html:39
@@ -1851,7 +1840,7 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"    Möchtest du wirklich die Kategorie \"%(category_name)s\" löschen?.\n"
+"    Möchtest du wirklich die Kategorie \"%(category_name)s\" löschen?\n"
 "    "
 
 #: zine/templates/admin/delete_comment.html:2
@@ -1867,7 +1856,7 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"    Möchtest du das Kommentar von %(comment_author)s wirklich löschen?.\n"
+"    Möchtest du den Kommentar von %(comment_author)s wirklich löschen?\n"
 "   "
 
 #: zine/templates/admin/delete_comments.html:2
@@ -1890,9 +1879,9 @@ msgid ""
 "\n"
 "      Do you really want to delete entry “%(entry_title)s”?.\n"
 "    "
-msgstr ""
+msgstr[0] ""
 "\n"
-"    Möchtest du den Eintrag „%(entry_title)s“?.\n"
+"    Möchtest du den Eintrag „%(entry_title)s“ wirklich löschen?\n"
 "    "
 
 #: zine/templates/admin/delete_entry.html:10
@@ -1928,7 +1917,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Möchtest du wirklich die Gruppe \"%(name)s\" löschen?.\n"
+"      Möchtest du wirklich die Gruppe \"%(name)s\" löschen?\n"
 "   "
 
 #: zine/templates/admin/delete_group.html:9
@@ -1954,7 +1943,7 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"    Möchtest du den Import \"%(dump_title)s\" wirklich löschen?.\n"
+"    Möchtest du den Import \"%(dump_title)s\" wirklich löschen?\n"
 "    "
 
 #: zine/templates/admin/delete_page.html:2
@@ -1970,7 +1959,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Möchtest du wirklich die Seite \"%(page_title)s\" löschen?.\n"
+"      Möchtest du die Seite \"%(page_title)s\" wirklich löschen?\n"
 "    "
 
 #: zine/templates/admin/delete_user.html:2
@@ -1986,7 +1975,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Möchtest du wirklich den Benutzer \"%(username)s\" löschen?.\n"
+"      Möchtest du wirklich den Benutzer \"%(username)s\" löschen?\n"
 "   "
 
 #: zine/templates/admin/delete_user.html:9
@@ -2032,7 +2021,7 @@ msgstr "Bearbeite Eintrag „%s”"
 #: zine/templates/admin/edit_entry.html:11
 #: zine/templates/admin/edit_page.html:11
 msgid "Important:"
-msgstr "Wichtig."
+msgstr "Wichtig:"
 
 #: zine/templates/admin/edit_entry.html:12
 #: zine/templates/admin/edit_page.html:12
@@ -2042,10 +2031,9 @@ msgid ""
 "parser\n"
 "        unless you re-activate the plugin that provided it."
 msgstr ""
-"Dieser Beitrag wurde mit einem nicht mehr verfügbaren\n"
-" Parser erstellt.  Du kannst den Beitrag nicht mit dem selben Parser "
-"speichern,\n"
-"    bis du das Plugin wieder aktivierst."
+"Dieser Beitrag wurde mit einem nicht mehr verfügbaren Parser erstellt.\n"
+"Du kannst den Beitrag nicht mit demselben Parser speichern,\n"
+"bis du das Plugin wieder aktivierst."
 
 #: zine/templates/admin/edit_entry.html:29
 #: zine/templates/admin/manage_categories.html:21
@@ -2124,13 +2112,11 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Von hier aus kannst du deine Zine Datenbank in ein standardisiertes\n"
-"    Format (Atom) mit Zine Erweiterungen exportieren.  Diese Zine\n"
-"    eXtended Atom (ZineXA) Dateien kannst du nutzen um die Daten an "
-"andere\n"
-"    Weblog Anwendungen zu importieren.  Du solltest diese Datei nicht "
-"nutzen\n"
-"    um Backups deines Blogs zu erstellen.\n"
+"    Von hier aus kannst du deine Zine-Datenbank in ein standardisiertes\n"
+"    Format (Atom) mit Zine-spezifischen Erweiterungen exportieren.  Diese Zine\n"
+"    eXtended Atom (ZineXA) Dateien kannst du nutzen, um die Daten in andere\n"
+"    Weblog-Anwendungen zu importieren.  Du solltest diese Datei nicht als\n"
+"    Backup für das Blog nutzen.\n"
 "  "
 
 #: zine/templates/admin/export.html:13
@@ -2142,9 +2128,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Bitte bachte, dass die exportiere Datei Passwort Hashes und Datenbank"
-"\n"
-"    Passwörter beinhaltet.\n"
+"    Bitte beachte, dass die exportierte Datei Passwort-Hashes und\n"
+"    Datenbank-Passwörter beinhaltet.\n"
 "   "
 
 #: zine/templates/admin/help.html:8
@@ -2164,10 +2149,7 @@ msgid ""
 "Possibly you have to generate the docs first by running the\n"
 "\t  <tt>build-documentation</tt> script from zine's scripts\n"
 "\t  folder."
-msgstr ""
-"Möglicherweise musst du die Dokumentationen erst durch das\n"
-"\t ausführen des <tt>build-documentation</tt> Scripts im «scripts» Ordner"
-" generieren."
+msgstr "Möglicherweise musst du die Dokumentation erst mit dem Skript <tt>build-documentation</tt> im \"scripts\"-Ordner generieren."
 
 #: zine/templates/admin/import.html:2 zine/templates/admin/import.html:4
 #: zine/templates/admin/import_blogger.html:41
@@ -2189,9 +2171,9 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"   Wenn du Einträge oder Kommentare in anderen Systemen hast kann Zine\n"
+"   Wenn du Einträge oder Kommentare in anderen Systemen hast, kann Zine\n"
 "   diese in dein Blog importieren.  Die importierten Daten werden nicht\n"
-"   direkt in das Blog importiert, sondern in eine separate Datei von wo\n"
+"   direkt in das Blog importiert, sondern in eine separate Datei, von wo\n"
 "   einzelne oder alle Beiträge in das Blog kopiert werden können.\n"
 "   Um die Daten zu importieren wähle ein System unten aus:\n"
 "  "
@@ -2208,9 +2190,8 @@ msgid ""
 msgstr ""
 "\n"
 "   Die folgende Liste enthält alle bereits importierten Daten, die aber\n"
-"   möglicherweise noch nicht in der Datenbank sind.  Wähle einen der "
-"Links\n"
-"   an um die importierten Daten zu begutachten.\n"
+"   möglicherweise noch nicht in der Datenbank sind.  Wähle einen der Links\n"
+"   aus, um die importierten Daten zu begutachten.\n"
 "  "
 
 #: zine/templates/admin/import.html:26
@@ -2298,11 +2279,10 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Dieser Importer kann genutzt werden um Standard konforme Feeds mit\n"
-"    optionalen, propritären Erweiterungen zu importern.  Weil es viele\n"
-"    verschiedene, zu einander inkompatible RSS Standards gibt kann dieser"
-"\n"
-"    Importer momentan nur Atom Feeds importeren.\n"
+"    Dieser Importer kann genutzt werden, um standardkonforme Feeds mit\n"
+"    optionalen, proprietären Erweiterungen zu importieren.  Weil es viele\n"
+"    verschiedene, zueinander inkompatible RSS-Standards gibt, kann dieser\n"
+"    Importer momentan nur Atom-Feeds importeren.\n"
 "  "
 
 #: zine/templates/admin/import_feed.html:13
@@ -2328,10 +2308,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Dieser Importer erlaubt es dir Posts und Kommentare von einem "
-"WordPress\n"
-"    Blog in dieses Blog zu importieren.  Du kannst entweder eine "
-"WordPress\n"
+"    Dieser Importer erlaubt es dir, Posts und Kommentare von einem WordPress\n"
+"    Blog in dieses Blog zu importieren.  Du kannst entweder eine WordPress\n"
 "    eXtended RSS (WXR) Datei hochladen oder die URL zu einer angeben.  "
 
 #: zine/templates/admin/import_wordpress.html:15
@@ -2371,7 +2349,7 @@ msgstr "Einträge verwalten"
 
 #: zine/templates/admin/index.html:22
 msgid "Configure Zine"
-msgstr "Zine Konfigurieren"
+msgstr "Zine konfigurieren"
 
 #: zine/templates/admin/index.html:23
 msgid "Manage Plugins"
@@ -2399,11 +2377,9 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"      Wenn du Hilfe benötigst kannst du in die <a "
-"href=\"%(help)s\">Dokumentation</a> schauen.  Wenn das dein Problem nicht"
-" löst\n"
-"    findest du Antworten in der <a href=\"%(support)s\">Support "
-"Sektion</a>     der <a href=\"%(website)s\">Zine Webseite</a>.\n"
+"      Wenn du Hilfe benötigst, kannst du in die <a href=\"%(help)s\">Dokumentation</a> schauen.\n"
+"      Wenn das dein Problem nicht löst, findest du Antworten in der\n"
+"      <a href=\"%(support)s\">Support-Abteilung</a> von <a href=\"%(website)s\">Zine Webseite</a>.\n"
 "   "
 
 #: zine/templates/admin/index.html:37
@@ -2412,7 +2388,7 @@ msgstr "Entwürfe"
 
 #: zine/templates/admin/index.html:46
 msgid "Comments Awaiting Approval"
-msgstr "Nicht-bestätigte Kommentare"
+msgstr "Nicht bestätigte Kommentare"
 
 #: zine/templates/admin/index.html:65
 msgid "Last Posts"
@@ -2432,7 +2408,7 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"        Zine hat einnen Subreddit auf %(reddit)s.  Die letzten populären\n"
+"        Zine hat einnen Subreddit auf %(reddit)s.  Die neuesten beliebten\n"
 "        Einträge sind unten aufgeführt:\n"
 "       "
 
@@ -2443,11 +2419,11 @@ msgstr "Über das System"
 
 #: zine/templates/admin/information.html:21
 msgid "Zine Environment"
-msgstr "Zine Umgebung"
+msgstr "Zine-Umgebung"
 
 #: zine/templates/admin/information.html:23
 msgid "Zine Version"
-msgstr "Zine Version"
+msgstr "Zine-Version"
 
 #: zine/templates/admin/information.html:25
 msgid "Distribution Mode"
@@ -2459,7 +2435,7 @@ msgstr "Pfad zum Package"
 
 #: zine/templates/admin/information.html:29
 msgid "Shared Data"
-msgstr "Geteilte Daten"
+msgstr "Gemeinsam genutzte Daten"
 
 #: zine/templates/admin/information.html:31
 msgid "Builtin Templates"
@@ -2475,15 +2451,15 @@ msgstr "Pfad zur Instanz"
 
 #: zine/templates/admin/information.html:37
 msgid "Database URI"
-msgstr "Datenbank URI"
+msgstr "Datenbank-URI"
 
 #: zine/templates/admin/information.html:40
 msgid "Hosting Environment"
-msgstr "Hosting Umgebung"
+msgstr "Hosting-Umgebung"
 
 #: zine/templates/admin/information.html:42
 msgid "Python Version"
-msgstr "Python Version"
+msgstr "Python-Version"
 
 #: zine/templates/admin/information.html:44
 msgid "Platform"
@@ -2519,11 +2495,11 @@ msgstr "Mehrere Prozesse"
 
 #: zine/templates/admin/information.html:58
 msgid "WSGI Version"
-msgstr "WSGI Version"
+msgstr "WSGI-Version"
 
 #: zine/templates/admin/information.html:61
 msgid "URL Endpoints"
-msgstr "URL Endpunkte"
+msgstr "URL-Endpunkte"
 
 #: zine/templates/admin/information.html:62
 msgid ""
@@ -2532,7 +2508,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Die folgenden URL Endpunkte sind in dieser Instanz registriert:\n"
+"    Die folgenden URL-Endpunkte sind in dieser Instanz registriert:\n"
 "  "
 
 #: zine/templates/admin/information.html:70
@@ -2546,7 +2522,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Die folgenden URL Handler sind in dieser Instanz registriert:\n"
+"    Die folgenden URL-Handler sind in dieser Instanz registriert:\n"
 "  "
 
 #: zine/templates/admin/information.html:79
@@ -2561,7 +2537,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Die folgenden View_handler sind in dieser Instanz registriert:\n"
+"    Die folgenden View-Handler sind in dieser Instanz registriert:\n"
 "  "
 
 #: zine/templates/admin/information.html:88
@@ -2632,8 +2608,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Die folgenden ZEML Element Handler sind in dieser Instanz "
-"registriert:\n"
+"    Die folgenden ZEML Element-Handler sind in dieser Instanz registriert:\n"
 "  "
 
 #: zine/templates/admin/information.html:141
@@ -2688,11 +2663,11 @@ msgstr "Standard"
 
 #: zine/templates/admin/information.html:183
 msgid "Template Globals"
-msgstr "Template Globale"
+msgstr "Template-Globals"
 
 #: zine/templates/admin/information.html:189
 msgid "Template Filters"
-msgstr "Template Filter"
+msgstr "Template-Filter"
 
 #: zine/templates/admin/information.html:196
 msgid ""
@@ -2704,11 +2679,9 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Du kannst diese Liste exportieren und für die Fehlersuche "
-"bereitstellen\n"
-"    indem du den unten stehenden Button klickst.  Die entstehende Datei "
-"enthällt keine vertrauenswürdigen\n"
-"    Informationen wie Passwörter.\n"
+"    Du kannst diese Liste exportieren und für die Fehlersuche bereitstellen,\n"
+"    indem du den unten stehenden Button klickst.  Die entstehende Datei enthält\n"
+"    keine vertraulichen Informationen wie Passwörter.\n"
 
 #: zine/templates/admin/inspect_import.html:2
 #: zine/templates/admin/inspect_import.html:4
@@ -2724,7 +2697,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Hier kannst du nun die importerten Daten ansehen und die gewünschten\n"
+"    Hier kannst du nun die importerten Daten ansehen und alles Gewünschte\n"
 "    in die Datenbank importieren.\n"
 "  "
 
@@ -2740,9 +2713,7 @@ msgstr "Dump ID"
 msgid ""
 "If you have a special installation and want to rewrite the import "
 "programmatically you need this identifier."
-msgstr ""
-"Wenn du eine spezielle Installation hast kannst du den Import mit einem "
-"Script bearbeiten.  Dafür benötigst du diesen Bezeichner."
+msgstr "Wenn du eine spezielle Installation hast, kannst du den Import mit einem Script bearbeiten.  Dafür benötigst du diesen Bezeichner."
 
 #: zine/templates/admin/inspect_import.html:24
 msgid ""
@@ -2758,7 +2729,7 @@ msgid ""
 msgstr ""
 "\n"
 "      Wähle die Autoren, deren Posts du importieren willst.  In dem Menü\n"
-"      kannst du einen bereits existierenden Benutzer auswählen um die\n"
+"      kannst du einen bereits existierenden Benutzer auswählen, um die\n"
 "      importierten Beiträge diesem Benutzer zuzuordnen.\n"
 "      In der Standardeinstellung wird ein neuer Benutzer ohne Passwort\n"
 "      erstellt.\n"
@@ -2779,9 +2750,9 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Autoren werden nur konvertiert wenn zumindest einer ihrer       "
-"Beiträge konvertiert wird.  Wenn du also alle Beiträge eines\n"
-"      benutzers abwählst ist es egal was du hier auswählst.\n"
+"      Autoren werden nur konvertiert, wenn zumindest einer ihrer Beiträge\n"
+"      konvertiert wird.  Wenn du also alle Beiträge eines\n"
+"      Benutzers abwählst, ist es egal was du hier auswählst.\n"
 "    "
 
 #: zine/templates/admin/inspect_import.html:42
@@ -2795,8 +2766,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Posts die mit einem blauen Hintergrund markiet sind wurden bereits "
-"importiert.\n"
+"      Posts, die mit einem blauen Hintergrund markiert sind, wurden bereits importiert.\n"
 "    "
 
 #: zine/templates/admin/inspect_import.html:63
@@ -2830,7 +2800,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Der Log zeigt dir wichtige Informationen über dein System.  Sobald\n"
+"    Der Log zeigt dir wichtige Informationen über dein System.  Wenn\n"
 "    Probleme auftreten, kannst du es hier sehen.\n"
 
 #: zine/templates/admin/log.html:9
@@ -2893,10 +2863,10 @@ msgid ""
 msgstr ""
 "\n"
 "    Von hier aus kannst du dein Blog in den Wartungsmodus schalten.\n"
-"    Es wird empfohlen den Wartungsmodus zu aktivieren bevor du Plugins\n"
-"    installierst oder Daten importierst.  Zwar ist es nicht nötig\n"
-"    aber eine gute Idee die Daten zu testen bevor sie online gehen.\n"
-"    Solange der Wartungsmodus aktiviert ist sehen Benutzer nur einen\n"
+"    Es wird empfohlen, den Wartungsmodus zu aktivieren, bevor du Plugins\n"
+"    installierst oder Daten importierst.  Zwar ist es nicht nötig,\n"
+"    aber es ist sinnvoll, Änderungen zu testen bevor sie online gehen.\n"
+"    Solange der Wartungsmodus aktiviert ist, sehen Benutzer einen\n"
 "    Hinweis, dass das Blog im Wartungsmodus ist.\n"
 "  "
 
@@ -2921,7 +2891,7 @@ msgstr "ID"
 
 #: zine/templates/admin/manage_categories.html:10
 msgid "Number of Posts"
-msgstr "Anzahl Einträgen"
+msgstr "Anzahl Einträge"
 
 #: zine/templates/admin/manage_categories.html:26
 msgid "New Category"
@@ -2933,7 +2903,7 @@ msgstr "Keine Kommentare."
 
 #: zine/templates/admin/manage_comments.html:24
 msgid "Toggle selection"
-msgstr "Auswahl umschalten"
+msgstr "Auswahl umkehren"
 
 #: zine/templates/admin/manage_groups.html:2
 #: zine/templates/admin/manage_groups.html:4
@@ -2993,10 +2963,10 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Der Importer konvertiert all die gesammelten und ausgewählten\n"
+"    Der Importer konvertiert alle gesammelten und ausgewählten\n"
 "    Daten für Zine und fügt sie in die Datenbank ein.  Das kann\n"
-"    einige Zeit benötigen.\n"
-"  <strong>Drücke nicht auf Abbrechen</strong>\n"
+"    einige Zeit dauern.\n"
+"  <strong>Klicke nicht auf Abbrechen!</strong>\n"
 "  "
 
 #: zine/templates/admin/perform_import.html:11
@@ -3011,7 +2981,7 @@ msgstr ""
 
 #: zine/templates/admin/plugins.html:2 zine/templates/admin/plugins.html:4
 msgid "Plugin Management"
-msgstr "Plugin Verwaltung"
+msgstr "Plugin-Verwaltung"
 
 #: zine/templates/admin/plugins.html:7
 msgid ""
@@ -3026,9 +2996,8 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Plugins können die Funktionalität von Zine erweitern.  Plugins\n"
-"    müssen von Hand aktiviert werden.  Einige Plugins arbeiten "
-"möglicherweise\n"
+"    Plugins können die Funktionalität von Zine erweitern.  Aus Sicherheitsgründen müssen sie\n"
+"    von Hand aktiviert werden.  Einige Plugins arbeiten möglicherweise\n"
 "    nicht mit anderen Plugins zusammen.  Im Zweifelsfall schau bitte in\n"
 "    die Installationsanweisungen des Plugins.\n"
 "   "
@@ -3073,7 +3042,7 @@ msgstr "Plugin entfernen"
 
 #: zine/templates/admin/plugins.html:45
 msgid "Plugin Guard"
-msgstr "Plugin-Wache"
+msgstr "Plugin-Guard"
 
 #: zine/templates/admin/plugins.html:46
 msgid ""
@@ -3084,9 +3053,8 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Normalerweise ist der Plugin-Wache aktiv und fängt Fehler während\n"
-"    des Plugin-Setups ab.  Warum auch immer ist das in einigen "
-"Situationen nicht gewollt, zum Beispiel\n"
+"    Normalerweise ist der Plugin-Guard aktiv und fängt Fehler während\n"
+"    des Plugin-Setups ab.  Manchmal ist das nicht sinnvoll, zum Beispiel\n"
 "    wenn du ein kaputtes Plugin debuggen möchtest.\n"
 
 #: zine/templates/admin/plugins.html:52
@@ -3105,9 +3073,9 @@ msgid ""
 msgstr ""
 "\n"
 "     Wenn du ein Plugin als Zine <tt>.plugin</tt> Datei hast, kannst\n"
-"     du es in deine Zine Instanz importieren in dem du es hier\n"
-"     hochlädst.  Plugins die auf diese Weise hinzugefügt werden können\n"
-"     auch so wieder entfernt werden.\n"
+"     du es in deine Zine-Instanz importieren, indem du es hier\n"
+"     hochlädst.  Plugins, die auf diese Weise hinzugefügt werden, können\n"
+"     auch wieder vollständig entfernt werden.\n"
 "    "
 
 #: zine/templates/admin/reddit.html:7
@@ -3128,7 +3096,7 @@ msgstr[1] "%d Kommentare"
 
 #: zine/templates/admin/reddit.html:20
 msgid "No items on the frontpage"
-msgstr "Keine Einträge auf Hauptseite"
+msgstr "Keine Einträge auf der Hauptseite"
 
 #: zine/templates/admin/remove_plugin.html:2
 #: zine/templates/admin/remove_plugin.html:4
@@ -3148,13 +3116,13 @@ msgid ""
 msgstr ""
 "\n"
 "      Möchtest du das Plugin \"%(plugin_name)s\" permanent aus dem\n"
-"      Instanzordner entfernen?  Um das Plugin wieder zu aktivieren\n"
+"      Instanzordner entfernen?  Um das Plugin wieder zu aktivieren,\n"
 "      muss es zuvor wieder neu installiert werden.\n"
 "    "
 
 #: zine/templates/admin/theme.html:2 zine/templates/admin/theme.html:4
 msgid "Theme Manager"
-msgstr "Themaverwaltung"
+msgstr "Designverwaltung"
 
 #: zine/templates/admin/theme.html:16
 #, python-format
@@ -3163,7 +3131,7 @@ msgstr "von %(author)s"
 
 #: zine/templates/admin/theme.html:27
 msgid "Configure Theme"
-msgstr "Thema konfigurieren"
+msgstr "Design konfigurieren"
 
 #: zine/templates/admin/unblock_comment.html:2
 #: zine/templates/admin/unblock_comment.html:4
@@ -3179,15 +3147,15 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"      Möchtest du das Kommentar von %(comment_author)s\n"
-"      wirklich nicht mehr länger blockieren?  Es wurde aus\n"
+"      Möchtest du den Kommentar von %(comment_author)s\n"
+"      wirklich nicht mehr blockieren?  Er wurde aus\n"
 "      dem folgenden Grund blockiert: %(reason)s\n"
 "    "
 
 #: zine/templates/admin/url_options.html:2
 #: zine/templates/admin/url_options.html:4
 msgid "URL Options"
-msgstr "URL Einstellungen"
+msgstr "URL-Einstellungen"
 
 #: zine/templates/admin/url_options.html:5
 msgid ""
@@ -3200,11 +3168,9 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Hier kannst du einige grundlegende URL-Konfigurationen ändern. Das "
-"ist insbesondere\n"
-"    nützlich wenn du Plugins installiert hast, die eine neue Index-Seite "
-"einfügen oder\n"
-"    Wenn du die Administration an eine andere Stelle verlegen möchtest.\n"
+"    Hier kannst du einige grundlegende URL-Konfigurationen ändern. Das ist insbesondere\n"
+"    nützlich, wenn du Plugins installiert hast, die eine neue Index-Seite einfügen oder\n"
+"    wenn du die Administration an eine andere Stelle verlegen möchtest.\n"
 
 #: zine/templates/admin/write_page.html:13
 msgid ""
@@ -3214,9 +3180,7 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"        Der Schlüssel wird verwendet um die URL aufzubauen.  Wenn"
-"         kein Schlüssel angegeben wird, wird aus dem Titel einer         "
-"erstellt.\n"
+"        Der Schlüssel wird verwendet, um die URL aufzubauen.  Wenn kein Schlüssel angegeben wird, wird er aus dem Titel erstellt.\n"
 "       "
 
 #: zine/templates/admin/write_page.html:18
@@ -3233,7 +3197,7 @@ msgstr "Position"
 
 #: zine/templates/widgets/latest_comments.html:2
 msgid "Latest Comments"
-msgstr "Letzte Kommentare"
+msgstr "Neueste Kommentare"
 
 #: zine/templates/widgets/latest_comments.html:7
 msgid "by"
@@ -3241,7 +3205,7 @@ msgstr "von"
 
 #: zine/templates/widgets/latest_posts.html:2
 msgid "Latest Posts"
-msgstr "Letzte Einträge"
+msgstr "Neueste Einträge"
 
 #: zine/templates/widgets/pages_navigation.html:2
 msgid "Navigation"
@@ -3276,7 +3240,7 @@ msgstr "Absenden"
 
 #: zine/utils/forms.py:925
 msgid "This field is required."
-msgstr "Dieses Feld ist verpflichtend."
+msgstr "Dieses Feld ist erforderlich."
 
 #: zine/utils/forms.py:1093
 msgid "Invalid security token submitted."
@@ -3293,7 +3257,7 @@ msgstr[1] "Bitte gib zumindest %d Einträge an."
 #, python-format
 msgid "Please provide no more than %d item."
 msgid_plural "Please provide no more than %d items."
-msgstr[0] "Bitte gib nicht mehr als %d Eintrag angeben."
+msgstr[0] "Bitte nicht mehr als %d Eintrag angeben."
 msgstr[1] "Bitte nicht mehr als %d Einträge angeben."
 
 #: zine/utils/forms.py:1266
@@ -3329,12 +3293,12 @@ msgstr "Schlüssel existiert nicht."
 
 #: zine/utils/forms.py:1458
 msgid "Please enter a valid choice."
-msgstr "Bitte eine mögliche Auswahl angeben."
+msgstr "Bitte eine Wahlmöglichkeit angeben."
 
 #: zine/utils/forms.py:1517
 #, python-format
 msgid "“%s” is not a valid choice"
-msgstr "„%s” ist keine mögliche Auswahl."
+msgstr "„%s” ist keine Wahlmöglichkeit."
 
 #: zine/utils/forms.py:1562
 msgid "Please enter a whole number."
@@ -3360,7 +3324,7 @@ msgstr "Falsch"
 
 #: zine/utils/log.py:34
 msgid "critical"
-msgstr "Kritisch"
+msgstr "Schwerer Fehler"
 
 #: zine/utils/log.py:35
 msgid "error"
@@ -3396,11 +3360,11 @@ msgstr "Du musst eine gültige URL angeben."
 
 #: zine/utils/validators.py:116
 msgid "The slug is too long"
-msgstr "Der URL Bezeichner ist zu lang."
+msgstr "Der URL-Bezeichner ist zu lang."
 
 #: zine/utils/validators.py:118
 msgid "The slug must not start with a slash"
-msgstr "Ein URL Bezeichner darf nicht mit einem Slash beginnen."
+msgstr "Ein URL-Bezeichner darf nicht mit einem Slash beginnen."
 
 #: zine/utils/validators.py:136 zine/utils/validators.py:139
 msgid "You have to enter a valid net address."
@@ -3408,7 +3372,7 @@ msgstr "Du musst eine gültige Netzwerkadresse angeben."
 
 #: zine/utils/validators.py:141
 msgid "The port has to be nummeric"
-msgstr "Der Port muss eine Nummber sein."
+msgstr "Der Port muss eine Zahl sein."
 
 #: zine/utils/validators.py:149
 msgid "Invalid character, < or > are not allowed."
@@ -3416,28 +3380,26 @@ msgstr "Fehlerhaftes Zeichen, < oder > sind nicht erlaubt."
 
 #: zine/utils/validators.py:151
 msgid "URL prefix must not be a sole slash."
-msgstr "ein URL Präfix darf nicht ein einzelner Slash sein."
+msgstr "Ein URL-Präfix darf nicht ein einzelner Slash sein."
 
 #: zine/utils/validators.py:154
 msgid "URL prefix must start with a slash."
-msgstr "URL Präfixe müssen mit einem Slash beginnen."
+msgstr "Ein URL-Präfix muss mit einem Slash beginnen."
 
 #: zine/utils/validators.py:156
 msgid "URL prefix must not end with a slash."
-msgstr "ein URL Präfix darf nicht mit einem Slash enden."
+msgstr "Ein URL-Präfix darf nicht mit einem Slash enden."
 
 #: zine/utils/zeml.py:298
 msgid ""
 "Error when loading dynamic ZEML element. The system ignored the element."
 "  Maybe a disabled plugin caused the problem."
-msgstr ""
-"Fehler beim laden eines dynamischen ZEML Elements. Das System ignoriert "
-"dieses, vielleicht hat ein deaktiviertes Plugin das Problem verursacht."
+msgstr "Fehler beim Laden eines dynamischen ZEML-Elements. Das System ignoriert dieses Element, vielleicht hat ein deaktiviertes Plugin das Problem verursacht."
 
 #: zine/utils/zeml.py:645
 #, python-format
 msgid "Error loading dynamic element %s"
-msgstr "Fehler beim laden des dynamischen Elements %s"
+msgstr "Fehler beim Laden des dynamischen Elements %s"
 
 #: zine/views/admin.py:77
 msgid "Entries"
@@ -3483,7 +3445,7 @@ msgstr "Optionen"
 
 #: zine/views/admin.py:104
 msgid "Basic"
-msgstr "Einfach"
+msgstr "Grundlagen"
 
 #: zine/views/admin.py:105
 msgid "URLs"
@@ -3518,9 +3480,7 @@ msgstr "System"
 msgid ""
 "Zine is in maintenance mode. Don't forget to <a href=\"%s\">turn it off "
 "again</a> once you finish your changes."
-msgstr ""
-"Zine ist im Wartungsmodus.  Vergiss nicht ihn <a href=\"%s\">wieder zu "
-"deaktivieren</a> wenn du fertig bist."
+msgstr "Zine ist im Wartungsmodus.  Vergiss nicht, ihn <a href=\"%s\">wieder zu deaktivieren</a>, wenn du fertig bist."
 
 #: zine/views/admin.py:166
 #, python-format
@@ -3537,9 +3497,7 @@ msgstr ""
 msgid ""
 "Could not ping URLs because the parser for the post is not available any "
 "longer."
-msgstr ""
-"Konnte URLs nicht pingen weil der Parser für diesen Eintrag nicht mehr "
-"länger verfügbar ist."
+msgstr "Konnte URLs nicht pingen, weil der Parser für diesen Eintrag nicht mehr länger verfügbar ist."
 
 #: zine/views/admin.py:233
 #, python-format
@@ -3557,37 +3515,37 @@ msgstr "Text hier..."
 
 #: zine/views/admin.py:278
 msgid "Untitled Page"
-msgstr "Seite schreiben"
+msgstr "Neue Seite"
 
 #: zine/views/admin.py:348
 #, python-format
 msgid "The entry %s was created successfully."
-msgstr "Der Eintrag %s wurde erfolgreich erstellt."
+msgstr "Der Eintrag %s wurde erstellt."
 
 #: zine/views/admin.py:351
 #, python-format
 msgid "The entry %s was updated successfully."
-msgstr "Der Eintrag %s wurde erfolgreich aktualisiert."
+msgstr "Der Eintrag %s wurde aktualisiert."
 
 #: zine/views/admin.py:384
 #, python-format
 msgid "The entry %s was deleted successfully."
-msgstr "Der Eintrag %s wurde erfolgreich gelöscht."
+msgstr "Der Eintrag %s wurde gelöscht."
 
 #: zine/views/admin.py:426
 #, python-format
 msgid "The page %s was created successfully."
-msgstr "Die Seite %s wurde erfolgreich erstellt."
+msgstr "Die Seite %s wurde erstellt."
 
 #: zine/views/admin.py:429
 #, python-format
 msgid "The page %s was updated successfully."
-msgstr "Die Seite %s wurde erfolgreich aktualisiert."
+msgstr "Die Seite %s wurde aktualisiert."
 
 #: zine/views/admin.py:462
 #, python-format
 msgid "The page %s was deleted successfully."
-msgstr "Die Seite %s wurde erfolgreich gelöscht."
+msgstr "Die Seite %s wurde gelöscht."
 
 #: zine/views/admin.py:495
 msgid "Approved all the selected comments."
@@ -3613,42 +3571,42 @@ msgstr "Kommentare für \"%s\""
 #: zine/views/admin.py:557
 #, python-format
 msgid "Comment by %s moderated successfully."
-msgstr "Kommentar von %s wurde erfolgreich moderiert."
+msgstr "Der Kommentar von %s wurde moderiert."
 
 #: zine/views/admin.py:606
 #, python-format
 msgid "Comment by %s approved successfully."
-msgstr "Kommentar von %s wurde erfolgreich bestätigt.."
+msgstr "Der Kommentar von %s wurde bestätigt."
 
 #: zine/views/admin.py:626
 #, python-format
 msgid "Comment by %s blocked successfully."
-msgstr "Kommentar von %s wurde erfolgreich geblockt."
+msgstr "Der Kommentar von %s wurde geblockt."
 
 #: zine/views/admin.py:666
 #, python-format
 msgid "Category %s created successfully."
-msgstr "Die Kategorie %s wurde erfolgreich erstellt."
+msgstr "Die Kategorie %s wurde erstellt."
 
 #: zine/views/admin.py:670
 #, python-format
 msgid "Category %s updated successfully."
-msgstr "Die Kategorie %s wurde erfolgreich verändert."
+msgstr "Die Kategorie %s wurde verändert."
 
 #: zine/views/admin.py:699
 #, python-format
 msgid "Category %s deleted successfully."
-msgstr "Die Kategorie %s wurde erfolgreich gelöscht."
+msgstr "Die Kategorie %s wurde gelöscht."
 
 #: zine/views/admin.py:739
 #, python-format
 msgid "User %s created successfully."
-msgstr "Benutzer %s erfolgreich erstellt"
+msgstr "Der Benutzer %s wurde erstellt."
 
 #: zine/views/admin.py:743
 #, python-format
 msgid "User %s edited successfully."
-msgstr "Benutzer %s wurde erfolgreich bearbeitet."
+msgstr "Der Benutzer %s wurde bearbeitet."
 
 #: zine/views/admin.py:767
 msgid "You cannot delete yourself."
@@ -3657,32 +3615,32 @@ msgstr "Du kannst dich selbst nicht löschen."
 #: zine/views/admin.py:807
 #, python-format
 msgid "Group %s created successfully."
-msgstr "Die Gruppe %s wurde erfolgreich erstellt."
+msgstr "Die Gruppe %s wurde erstellt."
 
 #: zine/views/admin.py:811
 #, python-format
 msgid "Group %s edited successfully."
-msgstr "Die Gruppe %s wurde erfolgreich bearbeitet."
+msgstr "Die Gruppe %s wurde bearbeitet."
 
 #: zine/views/admin.py:862
 msgid "Configuration altered successfully."
-msgstr "Konfiguration wurde erfolgreich verändert."
+msgstr "Die Konfiguration wurde verändert."
 
 #: zine/views/admin.py:888
 msgid "URL configuration changed."
-msgstr "Die URL Konfiguration wurde geändert."
+msgstr "Die URL-Konfiguration wurde geändert."
 
 #: zine/views/admin.py:909
 msgid "Theme changed successfully."
-msgstr "Das Thema wurde erfolgreich geändert."
+msgstr "Das Design wurde gewechselt."
 
 #: zine/views/admin.py:923
 msgid "This theme is not configurable"
-msgstr "Dieses Thema kann nicht konfiguriert werden"
+msgstr "Dieses Design kann nicht konfiguriert werden"
 
 #: zine/views/admin.py:935
 msgid "Plugin configuration changed"
-msgstr "Die Plugin Konfiguration wurde geändert."
+msgstr "Die Plugin-Konfiguration wurde geändert."
 
 #: zine/views/admin.py:944
 #, python-format
@@ -3696,9 +3654,7 @@ msgstr ""
 msgid ""
 "Could not remove the plugin “%s” because an IO error occurred. Wrong "
 "permissions?"
-msgstr ""
-"Konnte das Plugin \"%s\" nicht entfernen weil ein Fehler aufgetreten ist."
-"  Falsche Zugriffsrechte?"
+msgstr "Konnte das Plugin \"%s\" nicht entfernen, weil ein Fehler aufgetreten ist.  Falsche Zugriffsrechte?"
 
 #: zine/views/admin.py:974
 #, python-format
@@ -3707,7 +3663,7 @@ msgstr "Das Plugin \"%s\" wurde erfolgreich entfernt."
 
 #: zine/views/admin.py:992
 msgid "The cache was cleared successfully."
-msgstr "Der cache wurde erfolgreich geleert."
+msgstr "Der Cache wurde erfolgreich geleert."
 
 #: zine/views/admin.py:996
 msgid "Cache settings were changed successfully."
@@ -3763,9 +3719,7 @@ msgstr "Kommentar-Feed"
 msgid ""
 "Instance folder does not exist.  You have to create the folder “%s” "
 "before proceeding."
-msgstr ""
-"Der Instanz-Ordner existiert nicht.  Du musst den Ordner \"%s\" erstellen"
-" bevor das Setup fortfahren kann."
+msgstr "Der Instanz-Ordner existiert nicht.  Du musst den Ordner \"%s\" erstellen, bevor das Setup weitermachen kann."
 
 #: zine/websetup/__init__.py:127
 msgid "You have to provide a username."
@@ -3792,9 +3746,7 @@ msgstr "Die Passwörter stimmen nicht überein."
 msgid ""
 "The configuration file (%s) could not be opened for writing. Please "
 "adjust your permissions and try again."
-msgstr ""
-"Die Konfigurationsdatei (%s) konnte nicht zum schreiben geöffnet werden. "
-"Bitte passe die Zugriffsrechte an und probiere nochmal."
+msgstr "Die Konfigurationsdatei (%s) konnte nicht zum Schreiben geöffnet werden. Bitte passe die Zugriffsrechte an und probiere nochmal."
 
 #: zine/websetup/templates/admin_account.html:3
 msgid "Administrator Account"
@@ -3810,8 +3762,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Um dich in deinem Blog anmelden zu können musst du einen Namen\n"
-"    Für den Administrator Benutzer angeben.  Du kannst diesen später\n"
+"    Um dich an deinem Blog anmelden zu können, musst du einen Namen\n"
+"    für den Administrator angeben.  Du kannst diesen später\n"
 "    umbenennen oder löschen.\n"
 "  "
 
@@ -3839,9 +3791,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Zine benutzt eine Datenbank um die Einträge und andere Informationen\n"
-"    zu speichern.  Dazu musst du die URI für die Datenbank angeben.  "
-"Abhängig\n"
+"    Zine benutzt eine Datenbank, um deine Einträge und andere Informationen\n"
+"    zu speichern.  Dazu musst du die URI für die Datenbank angeben.  Abhängig\n"
 "    vom Datenbanksystem ist diese etwas unterschiedlich.\n"
 "  "
 
@@ -3863,8 +3814,8 @@ msgid ""
 "      "
 msgstr ""
 "\n"
-"        Der Pfad zur SQLite Datenbank kann entweder absolut (drei\n"
-"        führende Schrägstriche auf OS X / Linux oder zwei Schrägstriche\n"
+"        Der Pfad zur SQLite Datenbank kann entweder absolut (beginnend mit\n"
+"        drei Schrägstrichen auf OS X / Linux oder zwei Schrägstrichen\n"
 "        gefolgt von einem Laufwerksbuchstaben auf Windows) oder relativ\n"
 "        zum Instanzordner angebenen werden.\n"
 "      "
@@ -3887,7 +3838,7 @@ msgstr "postgres://benutzername:passwort@server/datenbank_name"
 
 #: zine/websetup/templates/error.html:3
 msgid "Setup Failed"
-msgstr "Setup Fehlgeschlagen"
+msgstr "Setup ist fehlgeschlagen"
 
 #: zine/websetup/templates/error.html:4
 msgid "The websetup was not able to finish the Zine installation successfully."
@@ -3901,13 +3852,13 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Wenn du Hilfe benötigst um Zine zu installieren schau auf die\n"
-"    Support Webseite sobald die Beta erhältlich ist :-)\n"
+"    Wenn du Hilfe zur Installation von Zine brauchst, schau auf die\n"
+"    Support-Webseite (sobald die Beta erhältlich ist :-)\n"
 "  "
 
 #: zine/websetup/templates/finished.html:3
 msgid "Setup Finished"
-msgstr "Setup Fertiggstellt"
+msgstr "Setup ist fertig"
 
 #: zine/websetup/templates/finished.html:4
 msgid ""
@@ -3918,10 +3869,9 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Das Setup wurde erfolgreich fertiggestellt.  Du kannst nun\n"
-"    zum Admin Panel gehen und die Konfiguration des Blogs beginnen.\n"
-"    Vergiss nicht den Wartungsmodus zu deaktivieren sobald du die\n"
-"    Konfiguration beendet hast.\n"
+"    Das Setup wurde erfolgreich beendet.  Du kannst nun\n"
+"    zum Admin-Panel gehen und das Blogs konfigurieren.\n"
+"    Vergiss nicht, den Wartungsmodus zu deaktivieren, sobald du damit fertig bist.\n"
 "  "
 
 #: zine/websetup/templates/layout.html:5
@@ -3947,7 +3897,7 @@ msgstr "Zurück"
 
 #: zine/websetup/templates/start.html:3
 msgid "Welcome To The Zine Setup"
-msgstr "Willkommen zum Zine Setup"
+msgstr "Willkommen zum Setup von Zine"
 
 #: zine/websetup/templates/start.html:4
 msgid ""
@@ -3957,9 +3907,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Willkommen zur Zine Installation.  Dieser Assistent wird\n"
-"    dir ein paar einfache Fragen stellen und Zine für dich\n"
-"    konfigurieren.\n"
+"    Willkommen zur Installation von Zine.  Dieser Assistent wird\n"
+"    dir ein paar einfache Fragen stellen und Zine für dich konfigurieren.\n"
 "  "
 
 #: zine/websetup/templates/start.html:8
@@ -3971,16 +3920,14 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Das Setup hat die Sprache von deinen Browsereinstellungen übernommen."
-"\n"
-"    Solltest du eine andere Sprache wünschen kannst du es in der "
-"folgenden\n"
+"    Das Setup hat die Sprache aus deinen Browsereinstellungen übernommen.\n"
+"    Solltest du eine andere Sprache wünschen, kannst du sie in dieser\n"
 "    Liste auswählen.\n"
 "  "
 
 #: zine/websetup/templates/summary.html:3
 msgid "Setup Starting"
-msgstr "Installation Starten"
+msgstr "Installation starten"
 
 #: zine/websetup/templates/summary.html:4
 msgid ""
@@ -3996,8 +3943,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Zine kennt jetzt alle Informationen die es benötigt um dein Blog\n"
+"    Zine hat jetzt alle Informationen, die es benötigt, um dein Blog\n"
 "    anzulegen.  Nach der Installation wird Zine im Wartungsmodus online "
 "sein.\n"
-"    Solange dieser aktiviert ist kannst nur du das Blog betrachten.  "
+"    Solange dieser aktiviert ist, kannst nur du das Blog betrachten.  "
 
