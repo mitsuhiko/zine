@@ -3649,7 +3649,7 @@ msgstr "Die Plugin-Konfiguration wurde geändert."
 
 #: zine/views/admin.py:945
 #, python-format
-msgid "Plugin “%s” added succesfully. You can now enable it in the plugin list."
+msgid "Plugin “%s” added successfully. You can now enable it in the plugin list."
 msgstr ""
 "Plugin „%s“ wurde erfolgreich hinzugefügt.  Du kannst das Plugin nun "
 "aktivieren."
