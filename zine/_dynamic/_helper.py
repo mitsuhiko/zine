@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     zine._dynamic._helper
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~
 
     Helper file. Does the auto updating of dynamic files.
 
