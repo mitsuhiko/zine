@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    Build Translit-Tab
+    ~~~~~~~~~~~~~~~~~~
+
+    Generates a trans
+
+    :copyright: 2008 by Armin Ronacher, Jason Kirtland.
+    :license: BSD, see LICENSE for more details.
+"""
+import os
+import sys
+import csv
+from optparse import OptionParser
+
+
+import _init_zine
+import zine
+sys.path.append(os.path.dirname(__file__))
+csv.register_dialect('transtab', delimiter=';')
+
+
+def read_table(path):
+    long, short, single = {}, {}, {}
+
+    t = open(path)
+    for line in t.readlines():
+        if not line.startswith('<'):
+            continue
+        from_spec, raw_to = line.strip().split(' ', 1)
+        from_ord = int(from_spec[2:-1], 16)
+
+        raw = csv.reader([raw_to], 'transtab').next()
+        long_char = _unpack_uchrs(raw[0])
+        if len(raw) < 2:
+            short_char = long_char
+        else:
+            short_char = _unpack_uchrs(raw[1])
+
+        long[from_ord] = long_char
+        short[from_ord] = short_char
+        if len(short_char) == 1:
+            single[from_ord] = short_char
+    return long, short, single
+
+
+def _unpack_uchrs(packed):
+    chunks = packed.replace('<U', ' ').strip().split()
+    return ''.join(unichr(int(spec[:-1], 16)) for spec in chunks)
+
+
+def update_mapping(long, short, single, path):
+    src = open(path)
+    try:
+        data = src.read()
+        pos = 0
+        for x in xrange(2):
+            pos = data.find('"""', pos) + 1
+        preamble = data[:pos + 3]
+    finally:
+        src.close()
+
+    rewrite = open(path, 'wb')
+    try:
+        rewrite.writelines(preamble)
+        _dump_dict(rewrite, 'LONG_TABLE', long)
+        _dump_dict(rewrite, 'SHORT_TABLE', short)
+        _dump_dict(rewrite, 'SINGLE_TABLE', single)
+    finally:
+        rewrite.close()
+
+
+def _dump_dict(fh, name, data):
+    fh.write('\n%s = {\n' % name)
+    for pair in sorted(data.items()):
+        fh.write('    %r: %r,\n' % pair)
+    fh.write('}\n')
+
+
+def main():
+    global parser
+    parser = OptionParser(usage='%prog [path/to/transtab]')
+    options, args = parser.parse_args()
+    if len(args) != 1:
+        parser.error('incorrect number of arguments')
+
+    mapping_file = os.path.join(os.path.dirname(zine.__file__),
+                                '_dynamic', 'translit_tab.py')
+    table = read_table(os.path.join(args[0], 'transtab'))
+    update_mapping(path=mapping_file, *table)
+    print 'All done.'
+
+
+if __name__ == '__main__':
+    main()
