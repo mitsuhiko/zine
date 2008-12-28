@@ -59,9 +59,9 @@ DEFAULT_THEME_SETTINGS = {
 
     # how many posts per page?
     'author.per_page':              30,
-    'archive.per_page':             10,
-    'category.per_page':            10,
-    'tag.per_page':                 10,
+    'archive.per_page':             None,
+    'category.per_page':            None,
+    'tag.per_page':                 None,
 
     # datetime formatting settings
     'date.date_format.default':     'medium',
