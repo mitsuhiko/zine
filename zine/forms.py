@@ -424,8 +424,8 @@ class EditCommentForm(_CommentBoundForm):
         self.parser.choices = self.app.list_parsers()
         self.parser_missing = comment.parser_missing
         if self.parser_missing:
-            self.parser.choices.append((post.parser, _('%s (missing)') %
-                                        post.parser.title()))
+            self.parser.choices.append((comment.parser, _('%s (missing)') %
+                                        comment.parser.title()))
 
     def save_changes(self):
         """Save the changes back to the database."""
