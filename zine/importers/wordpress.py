@@ -202,7 +202,7 @@ class WordPressImporter(Importer):
 
         if request.method == 'POST' and form.validate(request.form):
             dump = request.files.get('dump')
-            if not form.data['download_url']:
+            if form.data['download_url']:
                 try:
                     dump = urllib.urlopen(form.data['download_url'])
                 except Exception, e:
