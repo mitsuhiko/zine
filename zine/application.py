@@ -57,6 +57,12 @@ DEFAULT_THEME_SETTINGS = {
     'pagination.gray_next_link':    True,
     'pagination.simple':            False,
 
+    # how many posts per page?
+    'author.per_page':              30,
+    'archive.per_page':             10,
+    'category.per_page':            10,
+    'tag.per_page':                 10,
+
     # datetime formatting settings
     'date.date_format.default':     'medium',
     'date.datetime_format.default': 'medium',
