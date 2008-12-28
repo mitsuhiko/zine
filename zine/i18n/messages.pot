@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
-"POT-Creation-Date: 2008-12-27 23:29+0100\n"
+"POT-Creation-Date: 2008-12-28 20:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,35 +43,35 @@ msgstr ""
 msgid "just another Zine blog"
 msgstr ""
 
-#: zine/config.py:81
+#: zine/config.py:82
 msgid "No Cache"
 msgstr ""
 
-#: zine/config.py:82
+#: zine/config.py:83
 msgid "Simple Cache"
 msgstr ""
 
-#: zine/config.py:83
+#: zine/config.py:84
 msgid "memcached"
 msgstr ""
 
-#: zine/config.py:84
+#: zine/config.py:85
 msgid "Filesystem"
 msgstr ""
 
-#: zine/config.py:101
+#: zine/config.py:102
 msgid "Automatically approve all comments"
 msgstr ""
 
-#: zine/config.py:102
+#: zine/config.py:103
 msgid "An administrator must always approve the comment"
 msgstr ""
 
-#: zine/config.py:103
+#: zine/config.py:104
 msgid "Automatically approve comments by known comment authors"
 msgstr ""
 
-#: zine/config.py:183
+#: zine/config.py:184
 msgid ""
 "\n"
 "    <p>\n"
@@ -81,7 +81,7 @@ msgid ""
 "    "
 msgstr ""
 
-#: zine/config.py:195
+#: zine/config.py:196
 #, python-format
 msgid "Could not save configuration file: %s"
 msgstr ""
@@ -786,8 +786,7 @@ msgstr ""
 
 #: zine/plugins/miniblog_theme/templates/_widgets.html:5
 #: zine/plugins/vessel_theme/templates/_widgets.html:4
-#: zine/templates/admin/layout.html:6 zine/templates/admin/layout.html:14
-#: zine/templates/admin/login.html:5
+#: zine/templates/admin/layout.html:6 zine/templates/admin/login.html:5
 msgid "Administration"
 msgstr ""
 
@@ -2348,6 +2347,11 @@ msgstr ""
 
 #: zine/templates/admin/inspect_import.html:73
 msgid "Import into Blog"
+msgstr ""
+
+#: zine/templates/admin/layout.html:14
+#, python-format
+msgid "%(blog_title)s Administration"
 msgstr ""
 
 #: zine/templates/admin/layout.html:16
