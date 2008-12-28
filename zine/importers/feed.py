@@ -297,7 +297,7 @@ class FeedImporter(Importer):
 
         if request.method == 'POST' and form.validate(request.form):
             feed = request.files.get('feed')
-            if not form.data['download_url']:
+            if form.data['download_url']:
                 try:
                     feed = urllib.urlopen(form.data['download_url'])
                 except Exception, e:
