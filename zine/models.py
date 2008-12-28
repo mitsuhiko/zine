@@ -685,6 +685,12 @@ class Category(object):
     def set_auto_slug(self):
         """Generate a slug for this category."""
         full_slug = gen_slug(self.name)
+        if not full_slug:
+            # if slug generation failed we select the highest category
+            # id as base for slug generation.
+            category = Category.query.autoflush(False) \
+                               .order_by(Category.id.desc()).first()
+            full_slug = unicode(category and category.id or u'1')
         if full_slug != self.slug:
             while Category.query.autoflush(False) \
                           .filter_by(slug=full_slug).limit(1).count():
@@ -948,6 +954,11 @@ class Tag(object):
 
     def set_auto_slug(self):
         full_slug = gen_slug(self.name)
+        if not full_slug:
+            # if slug generation failed we select the highest category
+            # id as base for slug generation.
+            tag = Tag.query.autoflush(False).order_by(Tag.id.desc()).first()
+            full_slug = unicode(tag and tag.id or u'1')
         if full_slug != self.slug:
             while Tag.query.autoflush(False) \
                           .filter_by(slug=full_slug).limit(1).count():
