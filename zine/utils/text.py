@@ -14,7 +14,7 @@ from urlparse import urlparse
 
 from werkzeug import url_quote
 
-_punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|}]+')
+_punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 _string_inc_re = re.compile(r'(\d+)$')
 
 _tagify_replacement_table = {
