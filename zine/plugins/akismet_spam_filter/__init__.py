@@ -107,13 +107,13 @@ def do_spamcheck(req, comment):
     if comment.blocked:
         return
 
-    key = get_akismet_key()
-    if key is None:
+    apikey = get_akismet_key()
+    if apikey is None:
         return
 
     data = {
         'key':                  apikey,
-        'blog':                 req.app['blog_url'],
+        'blog':                 get_application().cfg['blog_url'],
         'user_ip':              comment.submitter_ip,
         'user_agent':           USER_AGENT,
         'comment_type':         'comment',

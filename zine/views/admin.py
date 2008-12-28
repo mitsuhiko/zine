@@ -942,7 +942,7 @@ def plugins(request):
             except InstallationError, e:
                 flash(e.message, 'error')
             else:
-                flash(_(u'Plugin “%s” added succesfully. You can now '
+                flash(_(u'Plugin “%s” added successfully. You can now '
                         u'enable it in the plugin list.') %
                       plugin.html_display_name, 'add')
 

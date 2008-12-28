@@ -9,6 +9,7 @@ Zine 0.1.1
 
 (Bugfix release)
 
+  * Fixed a bug that caused the akismet plugin not to work.
   * Fixed an infinite-recursion error if a language was selected in the
     config that is not available.
   * Fixed a bug that caused problems in the pingback system.
