@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
-"POT-Creation-Date: 2008-12-28 20:21+0100\n"
+"POT-Creation-Date: 2008-12-28 23:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -393,7 +393,7 @@ msgstr ""
 msgid "Log Level"
 msgstr ""
 
-#: zine/forms.py:856 zine/forms.py:1021
+#: zine/forms.py:856 zine/forms.py:1025
 msgid "Blog title"
 msgstr ""
 
@@ -474,58 +474,66 @@ msgid "Tag URL prefix"
 msgstr ""
 
 #: zine/forms.py:903
+msgid "Limit slugs to ASCII"
+msgstr ""
+
+#: zine/forms.py:904
+msgid "Automatically generated slugs are limited to ASCII"
+msgstr ""
+
+#: zine/forms.py:907
 msgid "Author Profiles URL prefix"
 msgstr ""
 
-#: zine/forms.py:922
+#: zine/forms.py:926
 msgid "Cache system"
 msgstr ""
 
-#: zine/forms.py:924
+#: zine/forms.py:928
 msgid "Default cache timeout"
 msgstr ""
 
-#: zine/forms.py:926
+#: zine/forms.py:930
 msgid "Enable eager caching"
 msgstr ""
 
-#: zine/forms.py:927
+#: zine/forms.py:931
 msgid "Enable"
 msgstr ""
 
-#: zine/forms.py:934
+#: zine/forms.py:938
 msgid "You have to provide at least one server to use memcached."
 msgstr ""
 
-#: zine/forms.py:938
+#: zine/forms.py:942
 msgid "You have to provide cache folder to use filesystem cache."
 msgstr ""
 
-#: zine/forms.py:948
+#: zine/forms.py:952
 msgid "Dump Download URL"
 msgstr ""
 
-#: zine/forms.py:954
+#: zine/forms.py:958
 msgid "Feed Download URL"
 msgstr ""
 
-#: zine/forms.py:971
+#: zine/forms.py:975
 msgid "Use default value"
 msgstr ""
 
-#: zine/forms.py:1007
+#: zine/forms.py:1011
 msgid "Create new user"
 msgstr ""
 
-#: zine/forms.py:1023
+#: zine/forms.py:1027
 msgid "Blog description"
 msgstr ""
 
-#: zine/forms.py:1028
+#: zine/forms.py:1032
 msgid "Load config values"
 msgstr ""
 
-#: zine/forms.py:1029
+#: zine/forms.py:1033
 msgid "Load the configuration values from the import."
 msgstr ""
 

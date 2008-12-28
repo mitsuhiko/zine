@@ -4,7 +4,9 @@
     Build Translit-Tab
     ~~~~~~~~~~~~~~~~~~
 
-    Generates a trans
+    Generates a conversion of a transtab map.  Used by `zine.utils.text`.
+    You will need a version of transtab which you can get for example
+    here: http://www.bitbucket.org/jek/translitcodec/
 
     :copyright: 2008 by Armin Ronacher, Jason Kirtland.
     :license: BSD, see LICENSE for more details.

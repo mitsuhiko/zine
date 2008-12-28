@@ -5,27 +5,21 @@
 
     This module provides various text utility functions.
 
-    :copyright: 2008 by Armin Ronacher, Georg Brandl.
+    :copyright: 2008 by Armin Ronacher, Georg Brandl, Jason Kirtland.
     :license: BSD, see LICENSE for more details.
 """
 import re
+import string
 import unicodedata
 from urlparse import urlparse
 
 from werkzeug import url_quote
 
+from zine._dynamic.translit_tab import LONG_TABLE, SHORT_TABLE, SINGLE_TABLE
+
+
 _punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 _string_inc_re = re.compile(r'(\d+)$')
-
-_tagify_replacement_table = {
-    u'\xdf':    u'ss',
-    u'\xe4':    u'ae',
-    u'\xe6':    u'ae',
-    u'\xf0':    u'dh',
-    u'\xf6':    u'oe',
-    u'\xfc':    u'ue',
-    u'\xfe':    u'th'
-}
 
 
 def gen_slug(text, delim=u'-'):
@@ -43,11 +37,9 @@ def gen_ascii_slug(text, delim=u'-'):
     """Generates an ASCII-only slug."""
     result = []
     for word in _punctuation_re.split(text.lower()):
+        word = _punctuation_re.sub(u'', transliterate(word))
         if word:
-            for search, replace in _tagify_replacement_table.iteritems():
-                word = word.replace(search, replace)
-            word = unicodedata.normalize('NFKD', word)
-            result.append(word.encode('ascii', 'ignore'))
+            result.append(word)
     return unicode(delim.join(result))
 
 
@@ -68,6 +60,18 @@ def increment_string(string):
     if match is None:
         return string + u'2'
     return string[:match.start()] + unicode(int(match.group(1)) + 1)
+
+
+def transliterate(string, table='long'):
+    """Transliterate to 8 bit using one of the tables given.  The table
+    must either be ``'long'``, ``'short'`` or ``'single'``.
+    """
+    table = {
+        'long':     LONG_TABLE,
+        'short':    SHORT_TABLE,
+        'single':   SINGLE_TABLE
+    }[table]
+    return unicodedata.normalize('NFKC', unicode(string)).translate(table)
 
 
 def build_tag_uri(app, date, resource, identifier):

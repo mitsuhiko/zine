@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Zine 0.1\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2008-06-29 17:22+0200\n"
-"PO-Revision-Date: 2008-12-28 20:21+0100\n"
+"PO-Revision-Date: 2008-12-28 23:39+0100\n"
 "Last-Translator: Georg Brandl <georg@python.org>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -407,7 +407,7 @@ msgstr "Dateiname"
 msgid "Log Level"
 msgstr "Log-Level"
 
-#: zine/forms.py:856 zine/forms.py:1021
+#: zine/forms.py:856 zine/forms.py:1025
 msgid "Blog title"
 msgstr "Blog-Titel"
 
@@ -488,58 +488,66 @@ msgid "Tag URL prefix"
 msgstr "URL-Präfix für Tags"
 
 #: zine/forms.py:903
+msgid "Limit slugs to ASCII"
+msgstr "URL Bezeichner auf ASCII beschränken"
+
+#: zine/forms.py:904
+msgid "Automatically generated slugs are limited to ASCII"
+msgstr "Automatisch erzeugte URL Bezeichner werden auf ASCII limitiert"
+
+#: zine/forms.py:907
 msgid "Author Profiles URL prefix"
 msgstr "URL-Präfix für Autoren"
 
-#: zine/forms.py:922
+#: zine/forms.py:926
 msgid "Cache system"
 msgstr "Cache-System"
 
-#: zine/forms.py:924
+#: zine/forms.py:928
 msgid "Default cache timeout"
 msgstr "Standardmäßiger Timeout"
 
-#: zine/forms.py:926
+#: zine/forms.py:930
 msgid "Enable eager caching"
 msgstr "Eager caching aktivieren"
 
-#: zine/forms.py:927
+#: zine/forms.py:931
 msgid "Enable"
 msgstr "Aktivieren"
 
-#: zine/forms.py:934
+#: zine/forms.py:938
 msgid "You have to provide at least one server to use memcached."
 msgstr "Du musst mindestens einen Server auswählen, wenn memcached aktiviert ist."
 
-#: zine/forms.py:938
+#: zine/forms.py:942
 msgid "You have to provide cache folder to use filesystem cache."
 msgstr "Du musst einen Pfad für den Dateisystem-Cache angeben."
 
-#: zine/forms.py:948
+#: zine/forms.py:952
 msgid "Dump Download URL"
 msgstr "Dump Download URL"
 
-#: zine/forms.py:954
+#: zine/forms.py:958
 msgid "Feed Download URL"
 msgstr "Feed Download URL"
 
-#: zine/forms.py:971
+#: zine/forms.py:975
 msgid "Use default value"
 msgstr "Benutze Standardwert"
 
-#: zine/forms.py:1007
+#: zine/forms.py:1011
 msgid "Create new user"
 msgstr "Neuen Benutzer erstellen"
 
-#: zine/forms.py:1023
+#: zine/forms.py:1027
 msgid "Blog description"
 msgstr "Blogbeschreibung"
 
-#: zine/forms.py:1028
+#: zine/forms.py:1032
 msgid "Load config values"
 msgstr "Konfiguration laden"
 
-#: zine/forms.py:1029
+#: zine/forms.py:1033
 msgid "Load the configuration values from the import."
 msgstr "Die Konfiguration aus dem Import laden."
 
