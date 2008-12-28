@@ -73,6 +73,7 @@ DEFAULT_VARS = {
                                           validators=[is_valid_url_prefix()]),
     'profiles_url_prefix':      TextField(default=u'/authors',
                                           validators=[is_valid_url_prefix()]),
+    'ascii_slugs':              BooleanField(default=True),
 
     # cache settings
     'enable_eager_caching':     BooleanField(default=False),
