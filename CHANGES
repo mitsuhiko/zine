@@ -14,8 +14,8 @@ Zine 0.1.2
 
 (Bugfix release)
 
-  * `zine.importers.rewrite_import` properly accepts a string as first
-    argument now.
+- `zine.importers.rewrite_import` properly accepts a string as first
+  argument now.
 
 
 Zine 0.1.1
@@ -23,14 +23,14 @@ Zine 0.1.1
 
 (Bugfix release; Released December 29th 2008)
 
-  * Fixed a bug that caused the akismet plugin not to work.
-  * Fixed an infinite-recursion error if a language was selected in the
-    config that is not available.
-  * Fixed a bug that caused problems in the pingback system.
-  * Added Russian translation
-  * Improved German translation.
-  * Fixed a problem with slugs that consisted only of non-ascii letters.
-  * Fixed various problems if the blog was mounted outside of the URL root.
+- Fixed a bug that caused the akismet plugin not to work.
+- Fixed an infinite-recursion error if a language was selected in the
+  config that is not available.
+- Fixed a bug that caused problems in the pingback system.
+- Added Russian translation
+- Improved German translation.
+- Fixed a problem with slugs that consisted only of non-ascii letters.
+- Fixed various problems if the blog was mounted outside of the URL root.
 
 
 Zine 0.1
@@ -38,4 +38,4 @@ Zine 0.1
 
 (Codename Aldus; Released December 24th 2008)
 
-  * initial release
+- initial release
