@@ -249,11 +249,9 @@ def rewrite_import(app, id, callback, title='Modified Import'):
     thread or a string with the path to the instance folder.  The latter is
     useful for simple scripts that should rewrite imports.
     """
-    close = False
     if isinstance(app, basestring):
-        from zine import make_zine
-        app = make_zine(app, bind_to_thread=True)
-        close = True
+        from zine import setup
+        app = make_zine(app)
 
     blog = load_import_dump(app, id)
     callback(blog)
@@ -263,9 +261,6 @@ def rewrite_import(app, id, callback, title='Modified Import'):
         blog.dump(f, title)
     finally:
         f.close()
-
-    if close:
-        app.close()
 
 
 class Importer(object):

@@ -14,6 +14,9 @@ Zine 0.1.2
 
 (Bugfix release)
 
+  * `zine.importers.rewrite_import` properly accepts a string as first
+    argument now.
+
 
 Zine 0.1.1
 ----------
