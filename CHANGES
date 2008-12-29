@@ -18,6 +18,7 @@ Zine 0.1.2
   argument now.
 - Fixed the config page for `ascii_slugs`.  Ticking/unticking the
   checkbox resulted in an internal server error.
+- fixed a bug in the WordPress importer with comment dates.
 
 
 Zine 0.1.1
