@@ -669,9 +669,9 @@ class _HTMLSerializer(object):
     """
 
     # elements that must not have a body
-    void_elements = frozenset(['base', 'command', 'event-source', 'link', 'meta',
-                         'hr', 'br', 'img', 'embed', 'param', 'area', 'col',
-                         'input', 'source'])
+    void_elements = frozenset(['base', 'command', 'event-source', 'link',
+                               'meta', 'hr', 'br', 'img', 'embed', 'param',
+                               'area', 'col', 'input', 'source'])
 
     #: elements that work like ZEML's isolated elements
     rcdata_elements = set(['noscript', 'style', 'script', 'iframe', 'noembed',
@@ -984,7 +984,8 @@ class Parser(object):
                          'embed', 'col'])
     block_elements = set(['div', 'p', 'form', 'ul', 'ol', 'li', 'table', 'tr',
                           'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'tl',
-                          'dt', 'dd', 'blockquote'])
+                          'dt', 'dd', 'blockquote', 'h1', 'h2', 'h3', 'h4',
+                          'h5', 'h6'])
     breaking_rules = [
         (['p'], set(['#block'])),
         (['li'], set(['li'])),
