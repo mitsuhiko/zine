@@ -13,14 +13,14 @@ installed:
 - html5lib*
 - pytz*
 - Babel*
-- lxml*
+- lxml* [2.0 or higher]
 
 Libraries marked with * are installable from the cheeseshop via
 easy_install / pip or might be available in Debian already.
 
 If you might use easy_install::
 
-    $ easy_install Werkzeug Jinja2 MySQL-python SQLAlchemy simplejson pytz Babel lxml
+    $ easy_install Werkzeug Jinja2 MySQL-python SQLAlchemy simplejson pytz Babel lxml html5lib
 
 To install lxml you may need the development packages of libxml2 and libxslt
 

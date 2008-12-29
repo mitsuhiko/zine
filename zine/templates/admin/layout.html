@@ -11,7 +11,7 @@
 </head>
 <body>
   <div class="header">
-    <div class="title">{{ cfg.blog_title|e }} {{ _("Administration") }}</div>
+    <div class="title">{% trans blog_title=cfg.blog_title|e %}{{ blog_title }} Administration{% endtrans %}</div>
     <div class="metanav">
       <a href="{{ url_for('blog/index')|e }}">{{ _("View Blog") }}</a> |
       <a href="{{ url_for('admin/change_password')|e }}">{{ _("Change Password") }}</a> |

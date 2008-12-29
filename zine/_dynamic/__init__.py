@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
     zine._dynamic
-    ~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~
 
     Contains modules that are self updateable and contain important
-    precalculated information (none so far).
+    precalculated information.
 
     The module is nonpublic but all the important constants are imported
-    into the "zine.utils" module.
+    in some internal utility modules.
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """

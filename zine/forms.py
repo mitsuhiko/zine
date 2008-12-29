@@ -424,8 +424,8 @@ class EditCommentForm(_CommentBoundForm):
         self.parser.choices = self.app.list_parsers()
         self.parser_missing = comment.parser_missing
         if self.parser_missing:
-            self.parser.choices.append((post.parser, _('%s (missing)') %
-                                        post.parser.title()))
+            self.parser.choices.append((comment.parser, _('%s (missing)') %
+                                        comment.parser.title()))
 
     def save_changes(self):
         """Save the changes back to the database."""
@@ -899,6 +899,10 @@ class URLOptionsForm(_ConfigForm):
                                        lazy_gettext(u'Category URL prefix'))
     tags_url_prefix = config_field('tags_url_prefix',
                                    lazy_gettext(u'Tag URL prefix'))
+    ascii_slugs = config_field('ascii_slugs',
+                               lazy_gettext(u'Limit slugs to ASCII'),
+                               help_text=lazy_gettext(u'Automatically '
+                               u'generated slugs are limited to ASCII'))
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
 

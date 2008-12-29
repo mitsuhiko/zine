@@ -5,38 +5,73 @@
 
     This module provides various text utility functions.
 
-    :copyright: 2008 by Armin Ronacher, Georg Brandl.
+    :copyright: 2008 by Armin Ronacher, Georg Brandl, Jason Kirtland.
     :license: BSD, see LICENSE for more details.
 """
 import re
+import string
 import unicodedata
 from urlparse import urlparse
 
 from werkzeug import url_quote
 
-_punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|}]+')
-
-_tagify_replacement_table = {
-    u'\xdf': 'ss',
-    u'\xe4': 'ae',
-    u'\xe6': 'ae',
-    u'\xf0': 'dh',
-    u'\xf6': 'oe',
-    u'\xfc': 'ue',
-    u'\xfe': 'th'
-}
+from zine._dynamic.translit_tab import LONG_TABLE, SHORT_TABLE, SINGLE_TABLE
 
 
-def gen_slug(text, delim='-'):
-    """remove accents and make text lowercase."""
+_punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+_string_inc_re = re.compile(r'(\d+)$')
+
+
+def gen_slug(text, delim=u'-'):
+    """Generates a proper slug for the given text.  It calls either
+    `gen_ascii_slug` or `gen_unicode_slug` depending on the application
+    configuration.
+    """
+    from zine.application import get_application
+    if get_application().cfg['ascii_slugs']:
+        return gen_ascii_slug(text, delim)
+    return gen_unicode_slug(text, delim)
+
+
+def gen_ascii_slug(text, delim=u'-'):
+    """Generates an ASCII-only slug."""
     result = []
     for word in _punctuation_re.split(text.lower()):
+        word = _punctuation_re.sub(u'', transliterate(word))
         if word:
-            for search, replace in _tagify_replacement_table.iteritems():
-                word = word.replace(search, replace)
-            word = unicodedata.normalize('NFKD', word)
-            result.append(word.encode('ascii', 'ignore'))
+            result.append(word)
     return unicode(delim.join(result))
+
+
+def gen_unicode_slug(text, delim=u'-'):
+    """Generate an unicode slug."""
+    return unicode(delim.join(_punctuation_re.split(text.lower())))
+
+
+def increment_string(string):
+    """Increment a string by one:
+
+    >>> increment_string(u'test')
+    u'test2'
+    >>> increment_string(u'test2')
+    u'test3'
+    """
+    match = _string_inc_re.search(string)
+    if match is None:
+        return string + u'2'
+    return string[:match.start()] + unicode(int(match.group(1)) + 1)
+
+
+def transliterate(string, table='long'):
+    """Transliterate to 8 bit using one of the tables given.  The table
+    must either be ``'long'``, ``'short'`` or ``'single'``.
+    """
+    table = {
+        'long':     LONG_TABLE,
+        'short':    SHORT_TABLE,
+        'single':   SINGLE_TABLE
+    }[table]
+    return unicodedata.normalize('NFKC', unicode(string)).translate(table)
 
 
 def build_tag_uri(app, date, resource, identifier):

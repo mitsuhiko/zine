@@ -520,13 +520,19 @@ class Post(_ZEMLDualContainer):
         prefix = get_application().cfg['blog_url_prefix'].lstrip('/')
         if prefix:
             prefix += '/'
-        self.slug = u'%s%s/%s/%s/%s' % (
+        full_slug = u'%s%s/%s/%s/%s' % (
             prefix,
             self.pub_date.year,
             self.pub_date.month,
             self.pub_date.day,
             slug
         )
+
+        if full_slug != self.slug:
+            while Post.query.autoflush(False).filter_by(slug=full_slug) \
+                      .limit(1).count():
+                full_slug = increment_string(full_slug)
+            self.slug = full_slug
 
     def bind_tags(self, tags):
         """Rebinds the tags to a list of tags (strings, not tag objects)."""
@@ -678,12 +684,18 @@ class Category(object):
 
     def set_auto_slug(self):
         """Generate a slug for this category."""
-        # TODO: this is called form the admin panel if the user does not
-        # enter a slug.  If gen_slug returns a slug that is already given
-        # for another category an error occurs.  There should be a `gen_slug`
-        # method that returns a 100% unique slug by adding numbers or
-        # something similar.
-        self.slug = gen_slug(self.name)
+        full_slug = gen_slug(self.name)
+        if not full_slug:
+            # if slug generation failed we select the highest category
+            # id as base for slug generation.
+            category = Category.query.autoflush(False) \
+                               .order_by(Category.id.desc()).first()
+            full_slug = unicode(category and category.id or u'1')
+        if full_slug != self.slug:
+            while Category.query.autoflush(False) \
+                          .filter_by(slug=full_slug).limit(1).count():
+                full_slug = increment_string(full_slug)
+            self.slug = full_slug
 
     def get_url_values(self):
         return 'blog/show_category', {
@@ -941,7 +953,17 @@ class Tag(object):
         return Tag(name)
 
     def set_auto_slug(self):
-        self.slug = gen_slug(self.name)
+        full_slug = gen_slug(self.name)
+        if not full_slug:
+            # if slug generation failed we select the highest category
+            # id as base for slug generation.
+            tag = Tag.query.autoflush(False).order_by(Tag.id.desc()).first()
+            full_slug = unicode(tag and tag.id or u'1')
+        if full_slug != self.slug:
+            while Tag.query.autoflush(False) \
+                          .filter_by(slug=full_slug).limit(1).count():
+                full_slug = increment_string(full_slug)
+            self.slug = full_slug
 
     def get_url_values(self):
         return 'blog/show_tag', {'slug': self.slug}
