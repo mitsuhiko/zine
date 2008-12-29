@@ -24,7 +24,7 @@
     :copyright: 2007-2008 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
-__version__ = '0.1'
+__version__ = '0.1.1'
 __url__ = 'http://zine.pocoo.org/'
 
 
