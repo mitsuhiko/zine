@@ -980,6 +980,7 @@ db.mapper(User, users, properties={
     'id':               users.c.user_id,
     'display_name':     db.synonym('_display_name', map_column=True),
     'posts':            db.dynamic_loader(Post, backref='author',
+                                          query_class=PostQuery,
                                           cascade='all, delete, delete-orphan'),
     'comments':         db.dynamic_loader(Comment, backref='user',
                                           cascade='all, delete, delete-orphan'),
@@ -991,6 +992,7 @@ db.mapper(User, users, properties={
 db.mapper(Group, groups, properties={
     'id':               groups.c.group_id,
     'users':            db.dynamic_loader(User, backref='groups',
+                                          query_class=UserQuery,
                                           secondary=group_users),
     '_privileges':      db.relation(_Privilege, lazy=True,
                                     secondary=group_privileges,
@@ -1002,7 +1004,8 @@ db.mapper(_Privilege, privileges, properties={
 })
 db.mapper(Category, categories, properties={
     'id':               categories.c.category_id,
-    'posts':            db.dynamic_loader(Post, secondary=post_categories)
+    'posts':            db.dynamic_loader(Post, secondary=post_categories,
+                                          query_class=PostQuery)
 }, order_by=categories.c.name)
 db.mapper(Comment, comments, properties={
     'id':           comments.c.comment_id,
@@ -1023,7 +1026,8 @@ db.mapper(PostLink, post_links, properties={
 })
 db.mapper(Tag, tags, properties={
     'id':           tags.c.tag_id,
-    'posts':        db.dynamic_loader(Post, secondary=post_tags)
+    'posts':        db.dynamic_loader(Post, secondary=post_tags,
+                                      query_class=PostQuery)
 }, order_by=tags.c.name)
 db.mapper(Post, posts, properties={
     'id':               posts.c.post_id,
