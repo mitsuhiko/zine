@@ -899,19 +899,20 @@ class URLOptionsForm(_ConfigForm):
                                        lazy_gettext(u'Category URL prefix'))
     tags_url_prefix = config_field('tags_url_prefix',
                                    lazy_gettext(u'Tag URL prefix'))
+    profiles_url_prefix = config_field('profiles_url_prefix',
+        lazy_gettext(u'Author Profiles URL prefix'))
     ascii_slugs = config_field('ascii_slugs',
                                lazy_gettext(u'Limit slugs to ASCII'),
                                help_text=lazy_gettext(u'Automatically '
                                u'generated slugs are limited to ASCII'))
-    profiles_url_prefix = config_field('profiles_url_prefix',
-        lazy_gettext(u'Author Profiles URL prefix'))
 
     def _apply(self, t, skip):
         for key, value in self.data.iteritems():
             if key not in skip:
                 old = t[key]
                 if old != value:
-                    change_url_prefix(old, value)
+                    if key != 'ascii_slugs':
+                        change_url_prefix(old, value)
                     t[key] = value
 
 

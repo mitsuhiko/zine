@@ -16,6 +16,8 @@ Zine 0.1.2
 
 - `zine.importers.rewrite_import` properly accepts a string as first
   argument now.
+- Fixed the config page for `ascii_slugs`.  Ticking/unticking the
+  checkbox resulted in an internal server error.
 
 
 Zine 0.1.1
