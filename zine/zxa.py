@@ -246,7 +246,7 @@ class Writer(object):
         self.z('pings_enabled', text=post.pings_enabled
                and 'yes' or 'no', parent=entry)
         self.z('status', text=str(post.status), parent=entry)
-        self.z('content_type', text=str(post.content_type))
+        self.z('content_type', text=str(post.content_type), parent=entry)
 
         self.atom('content', type='text', text=post.text, parent=entry)
         self.atom('content', type='html', text=post.body.to_html(), parent=entry)
