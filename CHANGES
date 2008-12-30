@@ -28,6 +28,8 @@ Zine 0.1.2
 - fixed bug in tag-cloud query.  Too many items were counted for
   each tag.
 - fixed tag Atom feed.
+- Atom feeds for the index now only contain posts of the types for
+  the index page as configured.
 
 
 Zine 0.1.1
