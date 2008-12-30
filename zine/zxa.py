@@ -266,7 +266,7 @@ class Writer(object):
             attrib = dict(term=tag.slug, scheme=ZINE_TAG_URI)
             if tag.slug != tag.name:
                 attrib['label'] = tag.name
-            self.atom('tag', attrib=attrib, parent=entry)
+            self.atom('category', attrib=attrib, parent=entry)
 
         self.z('parser_data', text=dump_parser_data(post.parser_data).encode('base64'),
                parent=entry)
