@@ -349,7 +349,8 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
     # provided and pass them to the feed builder.  This will only return
     # a feed for posts with a content type listed in `index_content_types`
     if post is None:
-        for post in query.order_by(Post.pub_date.desc()).limit(15).all():
+        for post in query.for_index().order_by(Post.pub_date.desc()) \
+                         .limit(15).all():
             links = [link.as_dict() for link in post.links]
             feed.add(post.title, unicode(post.body), content_type='html',
                      author=post.author.display_name, links=links,
