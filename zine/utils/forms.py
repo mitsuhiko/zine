@@ -973,7 +973,7 @@ class Field(object):
         called before the custom validators are applied to not perform
         validation if the field is empty and not required.
 
-        For example a validator like `is_valid_ip` is never alled if the
+        For example a validator like `is_valid_ip` is never called if the
         value is an empty string and the field hasn't raised a validation
         error when checking if the field is required.
         """

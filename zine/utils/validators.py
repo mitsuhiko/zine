@@ -155,3 +155,12 @@ def is_valid_url_prefix():
             if value[-1:] == '/':
                 raise ValidationError(_(u'URL prefix must not end with a slash.'))
     return validator
+
+def is_not_whitespace_only():
+    """Make sure the value does consist of at least one
+    non-whitespace character"""
+    def validator(form, value):
+        if not value.strip():
+            raise ValidationError(_('At least one non-whitespace character '
+                                    'is required.'))
+    return validator
