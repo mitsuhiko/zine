@@ -380,7 +380,7 @@ class Author(_Element):
                  id=None):
         if id is None:
             id = _make_id(username, email)
-        self.id = id
+        self.id = unicode(id)
         self.username = username[:30]
         self.real_name = real_name or u''
         self.email = email or u''
