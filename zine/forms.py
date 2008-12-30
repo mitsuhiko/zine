@@ -22,7 +22,7 @@ from zine.privileges import bind_privileges
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
-     is_valid_url, is_valid_slug, is_netaddr
+     is_valid_url, is_valid_slug, is_netaddr, is_not_whitespace_only
 from zine.utils.redirects import register_redirect, change_url_prefix
 
 
@@ -220,7 +220,7 @@ class PostForm(forms.Form):
     two builtin subclasses for the builtin content types 'entry' and 'page'.
     """
     title = forms.TextField(lazy_gettext(u'Title'), max_length=150,
-                            required=True)
+                            validators=[is_not_whitespace_only()], required=True)
     text = forms.TextField(lazy_gettext(u'Text'), max_length=65000,
                            widget=forms.Textarea)
     status = forms.ChoiceField(lazy_gettext(u'Publication status'), choices=[
@@ -290,7 +290,7 @@ class PostForm(forms.Form):
             query = query.filter(Post.id != self.post.id)
         existing = query.first()
         if existing is not None:
-            raise ValidationError(_('This slug is already in use'))
+            raise ValidationError(_('This slug is already in use.'))
 
     def validate_parser(self, value):
         """Make sure the missing parser is not selected."""
@@ -504,7 +504,8 @@ class EditCategoryForm(_CategoryBoundForm):
     """Form that is used to edit or create a category."""
 
     slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()])
-    name = forms.TextField(lazy_gettext(u'Name'), max_length=50, required=True)
+    name = forms.TextField(lazy_gettext(u'Name'), max_length=50, required=True,
+                           validators=[is_not_whitespace_only()])
     description = forms.TextField(lazy_gettext(u'Description'),
                                   max_length=5000, widget=forms.Textarea)
 
@@ -608,7 +609,8 @@ class EditGroupForm(_GroupBoundForm):
     """Edit or create a group."""
 
     groupname = forms.TextField(lazy_gettext(u'Groupname'), max_length=30,
-                           required=True)
+                                validators=[is_not_whitespace_only()],
+                                required=True)
     privileges = forms.MultiChoiceField(lazy_gettext(u'Privileges'),
                                         widget=forms.CheckboxGroup)
 
@@ -705,6 +707,7 @@ class EditUserForm(_UserBoundForm):
     """Edit or create a user."""
 
     username = forms.TextField(lazy_gettext(u'Username'), max_length=30,
+                               validators=[is_not_whitespace_only()],
                                required=True)
     real_name = forms.TextField(lazy_gettext(u'Realname'), max_length=180)
     display_name = forms.ChoiceField(lazy_gettext(u'Display name'))
