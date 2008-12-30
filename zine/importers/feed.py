@@ -402,8 +402,7 @@ class ZEAExtension(Extension):
                 element.findtext(zine.www),
                 element.findtext(zine.pw_hash),
                 _to_bool(element.findtext(zine.is_author)),
-                _pickle(element.findtext(zine.extra)),
-                dependency
+                _pickle(element.findtext(zine.extra))
             )
             for privilege in element.findall(zine.privilege):
                 p = self.app.privileges.get(privilege.text)
