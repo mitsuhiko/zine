@@ -30,6 +30,7 @@ Zine 0.1.2
 - fixed tag Atom feed.
 - Atom feeds for the index now only contain posts of the types for
   the index page as configured.
+- added Brazilian Portuguese translation.
 
 
 Zine 0.1.1
