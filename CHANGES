@@ -20,6 +20,8 @@ Zine 0.1.2
   checkbox resulted in an internal server error.
 - fixed a bug in the WordPress importer with comment dates.
 - fixed a bug in the ZXA exporter.
+- importer no longer creates new users if a user was selected in the
+  dropdown.
 
 
 Zine 0.1.1
