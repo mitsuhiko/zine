@@ -23,6 +23,7 @@ Zine 0.1.2
   did not work properly.
 - importer no longer creates new users if a user was selected in the
   dropdown.
+- fixed importing of ZXA feeds with tags.
 
 
 Zine 0.1.1
