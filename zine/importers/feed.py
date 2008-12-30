@@ -415,7 +415,7 @@ class ZEAExtension(Extension):
     def _parse_tag(self, element):
         term = element.attrib['term']
         if term not in self._tags:
-            self._tags[term] = Tag(term, term.attrib.get('label'))
+            self._tags[term] = Tag(term, element.attrib.get('label'))
         return self._tags[term]
 
     def _parse_category(self, element):
