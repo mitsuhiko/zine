@@ -27,6 +27,7 @@ Zine 0.1.2
 - fixed wrong content type exporting in ZXA feeds.
 - fixed bug in tag-cloud query.  Too many items were counted for
   each tag.
+- fixed tag Atom feed.
 
 
 Zine 0.1.1

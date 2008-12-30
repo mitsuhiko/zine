@@ -314,7 +314,7 @@ def xml_service(req, identifier):
 
 @cache.response(vary=('user',))
 def atom_feed(req, author=None, year=None, month=None, day=None,
-              category=None, post=None):
+              category=None, tag=None, post=None):
     """Renders an atom feed requested.
 
     :URL endpoint: ``blog/atom_feed``
@@ -330,6 +330,11 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
     if category is not None:
         category = Category.query.filter_by(slug=category).first(True)
         query = query.filter(Post.categories.contains(category))
+
+    # feed for a tag
+    if tag is not None:
+        tag = Tag.query.filter_by(slug=tag).first(True)
+        query = query.filter(Post.tags.contains(tag))
 
     # feed for an author
     if author is not None:
