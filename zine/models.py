@@ -907,12 +907,13 @@ class TagQuery(db.Query):
         t = tags.c
 
         q = ((pt.tag_id == t.tag_id) &
-             (p.post_id == pt.post_id) & (
-                (p.status == STATUS_PUBLISHED) |
-                (p.pub_date >= datetime.utcnow())))
+             (pt.post_id == p.post_id) &
+             (p.status == STATUS_PUBLISHED) &
+             (p.pub_date >= datetime.utcnow()))
 
         s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
-                      pt.tag_id == t.tag_id,
+                      (pt.tag_id == t.tag_id) &
+                      (pt.post_id == p.post_id),
                       group_by=[t.slug, t.name]).alias('post_count_query').c
 
         options = {'order_by': [db.asc(s.s_count)]}
