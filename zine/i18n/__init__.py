@@ -54,7 +54,8 @@
 """
 import os
 import cPickle as pickle
-from gettext import c2py
+import struct
+from gettext import NullTranslations
 from datetime import datetime
 from time import strptime
 from weakref import WeakKeyDictionary
@@ -67,6 +68,7 @@ from werkzeug.exceptions import NotFound
 import zine
 from zine.environment import LOCALE_PATH
 from zine.utils import dump_json
+from babel.messages.mofile import read_mo
 
 
 __all__ = ['_', 'gettext', 'ngettext', 'lazy_gettext', 'lazy_ngettext']
@@ -92,78 +94,84 @@ def load_translations(locale):
 
     The application code combines them into one translations object.
     """
-    return Translations.load(LOCALE_PATH, locale)
+    return ZineTranslations.load(LOCALE_PATH, locale)
+
+class CustomAttrsTranslations(object):
+    _info = None
+    _plural_expr = None
+    client_keys = set()
+    
+    def _get_plural_expr(self):
+        if not self._plural_expr:
+            self._plural_expr = self._info.get(
+                'plural-forms', 'nplurals=2; plural=(n != 1)'
+            ).split(';')[1].strip()[len('plural='):]
+        return self._plural_expr
+        
+    def _set_plural_expr(self, plural_expr):
+        self._plural_expr = plural_expr
+
+    plural_expr = property(_get_plural_expr, _set_plural_expr)
+    del _get_plural_expr, _set_plural_expr
 
 
-class Translations(object):
-    """A gettext like API for Zine."""
-
-    def __init__(self, catalog=None, locale=None):
-        if locale is not None:
-            locale = Locale.parse(locale)
+class ZineTranslations(TranslationsBase, CustomAttrsTranslations):
+    
+    def __init__(self, fileobj=None, locale=None):
+        TranslationsBase.__init__(self, fileobj=fileobj)
         self.locale = locale
-        if catalog is None:
-            self.messages = {}
-            self.client_keys = set()
-            self.plural_func = lambda n: int(n != 1)
-            self.plural_expr = '(n != 1)'
-        else:
-            close = False
-            if isinstance(catalog, basestring):
-                catalog = file(catalog, 'rb')
-                close = True
-            try:
-                dump = pickle.load(catalog)
-                self.messages = dump['messages']
-                self.client_keys = dump['client_keys']
-                self.plural_func = c2py(dump['plural'])
-                self.plural_expr = dump['plural']
-            finally:
-                if close:
-                    catalog.close()
-        self._lookup = self.messages.get
-
-    def __nonzero__(self):
-        return bool(self.messages)
-
-    def gettext(self, string):
-        msg = self._lookup(string)
-        if msg is None:
-            return unicode(string)
-        elif msg.__class__ is tuple:
-            return msg[0]
-        return msg
-
-    def ngettext(self, singular, plural, n):
-        msgs = self._lookup(singular)
-        if msgs is None or msgs.__class__ is not tuple:
-            if n == 1:
-                return unicode(singular)
-            return unicode(plural)
-        return msgs[self.plural_func(n)]
-
-    # unicode aliases for gettext compatibility.  Jinja for example
-    # will try to use those.
-    ugettext = gettext
-    ungettext = ngettext
-
-    def merge(self, translations):
-        """Update the translations with others."""
-        self.messages.update(translations.messages)
-        self.client_keys.update(translations.client_keys)
+        
+    def _parse(self, fileobj):
+        TranslationsBase._parse(self, fileobj)
+        try:
+            # Got the end of file minus 4 bytes 
+            fileobj.seek(-4, 2)
+            # Read stored pickled data file pointer position
+            pickled_data_pointer_pos = struct.unpack('i', fileobj.read())
+            fileobj.seek(pickled_data_pointer_pos[0])
+            # Load pickled data
+            self.client_keys = pickle.load(fileobj)
+        except EOFError:
+            # Catalog does not contain any pickled data at the end of it
+            pass
 
     @classmethod
-    def load(cls, path, locale, domain='messages'):
+    def load(cls, path, locale=None, domain='messages'):
         """Looks for .catalog files in the path provided in a gettext
         inspired manner.
 
         If there are no translations an empty locale is returned.
         """
         locale = Locale.parse(locale)
-        catalog = os.path.join(path, str(locale), domain + '.catalog')
+        catalog = os.path.join(path, str(locale), domain + '.mo')
         if os.path.isfile(catalog):
-            return Translations(catalog, locale)
-        return Translations(locale=locale)
+            return ZineTranslations(fileobj=open(catalog), locale=locale)
+        return ZineNullTranslations(locale=locale)
+    
+    def gettext(self, string):
+        # Always use the unicode version of the function
+        return TranslationsBase.ugettext(self, string)
+    
+    def ngettext(self, singular, plural, num):
+        # Always use the unicode version of the function
+        return TranslationsBase.ungettext(self, singular, plural, num)
+
+    def __nonzero__(self):
+        return bool(self._catalog)
+    
+class ZineNullTranslations(NullTranslations, CustomAttrsTranslations):
+    
+    def __init__(self, fileobj=None, locale=None):
+        NullTranslations.__init__(self, fileobj)
+        self.locale = locale
+    
+    def merge(self, translations): 
+        """Update the translations with others."""
+        self.add_fallback(translations)
+        self.client_keys.update(translations.client_keys)
+
+    def __nonzero__(self):
+        return bool(self._fallback)
 
 
 def get_translations():
@@ -417,7 +425,7 @@ def list_languages(self_translated=True):
     for filename in os.listdir(LOCALE_PATH):
         if filename == 'en' or not \
            os.path.isfile(os.path.join(LOCALE_PATH, filename,
-                                       'messages.catalog')):
+                                       'messages.mo')):
             continue
         try:
             l = Locale.parse(filename)
@@ -533,7 +541,7 @@ def serve_javascript(request):
     if code is None:
         t = request.app.translations
         code = 'Zine.addTranslations(%s)' % dump_json(dict(
-            messages=dict((k, t.messages[k]) for k in t.client_keys),
+            messages=dict((k.id, k.string) for k in t.client_keys),
             plural_expr=t.plural_expr,
             locale=str(t.locale)
         ))

@@ -97,7 +97,7 @@ from zine.application import get_application
 from zine.utils import log
 from zine.utils.mail import split_email, is_valid_email, check
 from zine.utils.exceptions import UserException, summarize_exception
-from zine.i18n import Translations, lazy_gettext, _
+from zine.i18n import ZineTranslations as Translations, lazy_gettext, _
 
 
 _py_import = __builtin__.__import__

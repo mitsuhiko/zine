@@ -12,9 +12,11 @@
     :license: BSD, see LICENSE for more details.
 """
 import pickle
+import struct
 from os import listdir, path
 from optparse import OptionParser
 from babel.messages.pofile import read_po
+from babel.messages.mofile import write_mo
 
 domains = ['messages']
 
@@ -49,35 +51,33 @@ def main():
         for lang in listdir(root):
             folder = path.join(root, lang)
             translations = path.join(folder, domain + '.po')
+            
             if path.isfile(translations):
+                mo_file = open(translations.replace('.po', '.mo'), 'wb')
                 print 'Compiling %r' % lang
                 f = file(translations)
                 try:
                     catalog = read_po(f, locale=lang)
                 finally:
                     f.close()
-                rv = dict(messages={}, plural=catalog.plural_expr,
-                          client_keys=set())
+                # Write standard catalog
+                write_mo(mo_file, catalog)
+                
+                # Find current file pointer position                
+                pickled_data_pointer_pos = mo_file.tell()
+                
+                # Gather client messages
+                client_messages = set()
                 for message in catalog:
-                    if message.id:
-                        i = message.id
-                        if isinstance(i, (list, tuple)):
-                            i = i[0]
-                        s = message.string
-                        if isinstance(s, (tuple, list)):
-                            s = tuple(s)
-                        if is_untranslated(s):
-                            continue
-                        rv['messages'][i] = s
-                        for filename, lineno in message.locations:
-                            if filename.endswith('.js'):
-                                rv['client_keys'].add(i)
-                                break
-                f = file(path.join(folder, domain + '.catalog'), 'wb')
-                try:
-                    pickle.dump(rv, f, protocol=2)
-                finally:
-                    f.close()
+                    for fname, _ in message.locations:
+                        if fname.endswith('.js'):
+                            client_messages.add(message)
+                
+                # Dump pickled data into standard catalog
+                pickle.dump(client_messages, mo_file, 2)
+                # Write the pickled data pointer position
+                mo_file.write(struct.pack('i', pickled_data_pointer_pos))
+                mo_file.close()
     print 'All done.'
 
 

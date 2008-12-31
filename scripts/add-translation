@@ -10,7 +10,7 @@
     :license: BSD, see LICENSE for more details.
 """
 from os import makedirs
-from os.path import join, realpath, pardir, isdir
+from os.path import dirname, join, realpath, pardir, isdir
 from optparse import OptionParser
 from datetime import datetime
 from babel import Locale, UnknownLocaleError
@@ -20,6 +20,7 @@ from babel.util import LOCALTZ
 
 
 zine = realpath(join(pardir, 'zine'))
+zine = realpath(join(dirname(__file__), '..', 'zine'))
 
 
 def main():
@@ -58,7 +59,7 @@ def create_from_pot(locale, path):
 
 
 def write_catalog(catalog, folder):
-    target = join(folder, str(catalog.locale), 'LC_MESSAGES')
+    target = join(folder, str(catalog.locale)) #, 'LC_MESSAGES')
     if not isdir(target):
         makedirs(target)
     f = file(join(target, 'messages.po'), 'w')
