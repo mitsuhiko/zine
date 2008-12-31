@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    Regenerate Post.uids.
+    ---------------------
+
+    Regenerates the uids for all postings.
+
+    Use Case:
+      When an ATOM feed is generated, each entry is given
+      a tag URI. The URI for each post entry is taken from
+      Post.uid.
+      The format of Post.uid did not always fit the tag URI
+      spec at http://www.faqs.org/rfcs/rfc4151.html.
+      The problem was fixed in changeset 5937aca4e919.
+      Old postings still contain the old uids though, so
+      they need to be regenerated.
+
+    :copyright: 2008 by Christopher Denter
+    :license: BSD, see LICENSE for more details.
+"""
+
+from optparse import OptionParser
+
+from _init_zine import find_instance
+
+
+def regenerate_post_uids(instance):
+    from zine import setup
+    app = setup(instance)
+    del setup
+    from zine.models import Post
+    from zine.database import db
+    from zine.utils.text import build_tag_uri
+
+    for post in Post.query.all():
+        post.uid = build_tag_uri(app, post.pub_date, post.content_type,
+                                 post.slug)
+    db.commit()
+    print "Done regenerating post uids."
+
+
+def main():
+    parser = OptionParser(usage='%prog -I /path/to/instance')
+    parser.add_option('--instance', '-I', dest='instance',
+                      help='Use the given Zine instance.')
+    options, args = parser.parse_args()
+    if args:
+        parser.error('incorrect number of arguments')
+    instance = options.instance or find_instance()
+    if instance is None:
+        parser.error('instance not found. Specify path to instance')
+
+    regenerate_post_uids(instance)
+
+
+if __name__ == '__main__':
+    main()
