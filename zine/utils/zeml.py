@@ -29,7 +29,7 @@ from zine.utils.datastructures import OrderedDict
 
 _tag_name_re = re.compile(r'([\w.-]+)\b(?u)')
 _attribute_re = re.compile(r'\s*([\w.-]+)(?:\s*=\s*(".*?"|'
-                           "'.*?'|[^\s>]*))?(?u)")
+                           "'.*?'|[^\s>]*))?(?us)")
 _tag_end_re = re.compile(r'\s*>(?u)')
 _entity_re = re.compile(r'&([^;]+);')
 _entity_re = re.compile(r'&([^;]+);')
