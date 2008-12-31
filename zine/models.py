@@ -441,6 +441,7 @@ class Post(_ZEMLDualContainer):
                  pings_enabled=True, status=STATUS_PUBLISHED,
                  parser=None, uid=None, content_type='entry'):
         app = get_application()
+        self.content_type = content_type
         self.title = title
         self.author = author
         if parser is None:
@@ -450,30 +451,22 @@ class Post(_ZEMLDualContainer):
         self.text = text or u''
         self.extra = {}
 
-        if pub_date is None and status == STATUS_PUBLISHED:
-            pub_date = datetime.utcnow()
-        self.pub_date = pub_date
-        if last_update is None:
-            last_update = pub_date
-        self.last_update = last_update
         self.comments_enabled = comments_enabled
         self.pings_enabled = pings_enabled
         self.status = status
 
-        # always assign the slug at the very bottom because if it cannot
-        # calculate a slug it will fall back to the time of the post, and
-        # this requires pub_date to be assigned.
-        if not slug:
-            self.set_auto_slug()
-        else:
-            self.slug = slug
+        # set times now, they depend on status being set
+        self.touch_times(pub_date)
+        if last_update is not None:
+            self.last_update = last_update
+
+        # now bind the slug for which we need the times set.
+        self.bind_slug(slug)
 
         # generate a UID if none is given
         if uid is None:
             uid = build_tag_uri(app, self.pub_date, content_type, self.slug)
         self.uid = uid
-
-        self.content_type = content_type
 
     @property
     def _privileges(self):
@@ -533,6 +526,30 @@ class Post(_ZEMLDualContainer):
                       .limit(1).count():
                 full_slug = increment_string(full_slug)
             self.slug = full_slug
+
+    def touch_times(self, pub_date=None):
+        """Touches the times for this post.  If the pub_date is given the
+        `pub_date` is changed to the given date.  If it's not given the
+        current time is assumed if the post status is set to published,
+        otherwise it's set to `None`.
+
+        Additionally the `last_update` is always set to now.
+        """
+        now = datetime.utcnow()
+        if pub_date is None and self.status == STATUS_PUBLISHED:
+            pub_date = now
+        self.pub_date = pub_date
+        self.last_update = now
+
+    def bind_slug(self, slug=None):
+        """Binds a new slug to the post.  If the slug is `None`/empty a new
+        automatically generated slug is created.  Otherwise that slug is
+        used and assigned.
+        """
+        if not slug:
+            self.set_auto_slug()
+        else:
+            self.slug = slug
 
     def bind_tags(self, tags):
         """Rebinds the tags to a list of tags (strings, not tag objects)."""
