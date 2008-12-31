@@ -51,7 +51,7 @@ def main():
         for lang in listdir(root):
             folder = path.join(root, lang)
             translations = path.join(folder, domain + '.po')
-            
+
             if path.isfile(translations):
                 mo_file = open(translations.replace('.po', '.mo'), 'wb')
                 print 'Compiling %r' % lang
@@ -62,17 +62,18 @@ def main():
                     f.close()
                 # Write standard catalog
                 write_mo(mo_file, catalog)
-                
-                # Find current file pointer position                
+
+                # Find current file pointer position
                 pickled_data_pointer_pos = mo_file.tell()
-                
+
                 # Gather client messages
                 client_messages = set()
                 for message in catalog:
                     for fname, _ in message.locations:
                         if fname.endswith('.js'):
                             client_messages.add(message)
-                
+                            break
+
                 # Dump pickled data into standard catalog
                 pickle.dump(client_messages, mo_file, 2)
                 # Write the pickled data pointer position

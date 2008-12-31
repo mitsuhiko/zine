@@ -116,11 +116,11 @@ class CustomAttrsTranslations(object):
 
 
 class ZineTranslations(TranslationsBase, CustomAttrsTranslations):
-    
+
     def __init__(self, fileobj=None, locale=None):
         TranslationsBase.__init__(self, fileobj=fileobj)
         self.locale = locale
-        
+
     def _parse(self, fileobj):
         TranslationsBase._parse(self, fileobj)
         try:
@@ -137,34 +137,29 @@ class ZineTranslations(TranslationsBase, CustomAttrsTranslations):
 
     @classmethod
     def load(cls, path, locale=None, domain='messages'):
-        """Looks for .catalog files in the path provided in a gettext
-        inspired manner.
-
-        If there are no translations an empty locale is returned.
-        """
         locale = Locale.parse(locale)
         catalog = os.path.join(path, str(locale), domain + '.mo')
         if os.path.isfile(catalog):
             return ZineTranslations(fileobj=open(catalog), locale=locale)
         return ZineNullTranslations(locale=locale)
-    
+
     def gettext(self, string):
         # Always use the unicode version of the function
         return TranslationsBase.ugettext(self, string)
-    
+
     def ngettext(self, singular, plural, num):
         # Always use the unicode version of the function
         return TranslationsBase.ungettext(self, singular, plural, num)
 
     def __nonzero__(self):
         return bool(self._catalog)
-    
+
 class ZineNullTranslations(NullTranslations, CustomAttrsTranslations):
-    
+
     def __init__(self, fileobj=None, locale=None):
         NullTranslations.__init__(self, fileobj)
         self.locale = locale
-    
+
     def merge(self, translations): 
         """Update the translations with others."""
         self.add_fallback(translations)

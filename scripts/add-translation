@@ -18,10 +18,7 @@ from babel.messages import Catalog
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
 
-
-zine = realpath(join(pardir, 'zine'))
 zine = realpath(join(dirname(__file__), '..', 'zine'))
-
 
 def main():
     global parser
@@ -59,7 +56,7 @@ def create_from_pot(locale, path):
 
 
 def write_catalog(catalog, folder):
-    target = join(folder, str(catalog.locale)) #, 'LC_MESSAGES')
+    target = join(folder, str(catalog.locale))
     if not isdir(target):
         makedirs(target)
     f = file(join(target, 'messages.po'), 'w')
