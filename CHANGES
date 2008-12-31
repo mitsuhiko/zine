@@ -33,6 +33,7 @@ Zine 0.1.2
 - added Brazilian Portuguese translation.
 - Fixed the bug that made it impossible to set the slug to the
   publication defined on new entry creation.
+- ZEML handles newlines in elements properly now.
 
 
 Zine 0.1.1
