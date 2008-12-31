@@ -75,7 +75,10 @@ def transliterate(string, table='long'):
 
 
 def build_tag_uri(app, date, resource, identifier):
-    """Build a unique tag URI for this blog."""
+    """Build a unique tag URI.
+       The tag URI must obey the ABNF defined in
+       http://www.faqs.org/rfcs/rfc4151.html """
+
     host, path = urlparse(app.cfg['blog_url'])[1:3]
     if ':' in host:
         host = host.split(':', 1)[0]
@@ -84,5 +87,5 @@ def build_tag_uri(app, date, resource, identifier):
         path = ',' + path
     if not isinstance(identifier, basestring):
         identifier = str(identifier)
-    return 'tag:%s,%s%s/%s:%s' % (host, date.strftime('%Y-%m-%d'), path,
-                                  url_quote(resource), url_quote(identifier))
+    return = 'tag:%s,%s:%s/%s;%s' % (host, date.strftime('%Y-%m-%d'), path,
+                                     url_quote(resource), url_quote(identifier))
