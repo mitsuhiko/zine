@@ -87,5 +87,5 @@ def build_tag_uri(app, date, resource, identifier):
         path = ',' + path
     if not isinstance(identifier, basestring):
         identifier = str(identifier)
-    return = 'tag:%s,%s:%s/%s;%s' % (host, date.strftime('%Y-%m-%d'), path,
-                                     url_quote(resource), url_quote(identifier))
+    return 'tag:%s,%s:%s/%s;%s' % (host, date.strftime('%Y-%m-%d'), path,
+                                   url_quote(resource), url_quote(identifier))
