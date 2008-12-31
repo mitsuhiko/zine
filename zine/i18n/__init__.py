@@ -68,7 +68,6 @@ from werkzeug.exceptions import NotFound
 import zine
 from zine.environment import LOCALE_PATH
 from zine.utils import dump_json
-from babel.messages.mofile import read_mo
 
 
 __all__ = ['_', 'gettext', 'ngettext', 'lazy_gettext', 'lazy_ngettext']
@@ -96,18 +95,19 @@ def load_translations(locale):
     """
     return ZineTranslations.load(LOCALE_PATH, locale)
 
+
 class CustomAttrsTranslations(object):
     _info = None
     _plural_expr = None
     client_keys = set()
-    
+
     def _get_plural_expr(self):
         if not self._plural_expr:
             self._plural_expr = self._info.get(
                 'plural-forms', 'nplurals=2; plural=(n != 1)'
             ).split(';')[1].strip()[len('plural='):]
         return self._plural_expr
-        
+
     def _set_plural_expr(self, plural_expr):
         self._plural_expr = plural_expr
 
@@ -143,16 +143,13 @@ class ZineTranslations(TranslationsBase, CustomAttrsTranslations):
             return ZineTranslations(fileobj=open(catalog), locale=locale)
         return ZineNullTranslations(locale=locale)
 
-    def gettext(self, string):
-        # Always use the unicode version of the function
-        return TranslationsBase.ugettext(self, string)
-
-    def ngettext(self, singular, plural, num):
-        # Always use the unicode version of the function
-        return TranslationsBase.ungettext(self, singular, plural, num)
+    # Always use the unicode versions, we don't support byte strings
+    gettext = TranslationsBase.ugettext
+    ngettext = TranslationsBase.ungettext
 
     def __nonzero__(self):
         return bool(self._catalog)
+
 
 class ZineNullTranslations(NullTranslations, CustomAttrsTranslations):
 
@@ -160,7 +157,7 @@ class ZineNullTranslations(NullTranslations, CustomAttrsTranslations):
         NullTranslations.__init__(self, fileobj)
         self.locale = locale
 
-    def merge(self, translations): 
+    def merge(self, translations):
         """Update the translations with others."""
         self.add_fallback(translations)
         self.client_keys.update(translations.client_keys)
