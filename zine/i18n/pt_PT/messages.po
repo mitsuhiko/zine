@@ -7,33 +7,33 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Zine 0.1\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
-"POT-Creation-Date: 2008-12-26 19:39+0200\n"
-"PO-Revision-Date: 2008-12-31 20:14+0000\n"
+"POT-Creation-Date: 2009-01-01 22:20+0000\n"
+"PO-Revision-Date: 2009-01-01 23:36+0000\n"
 "Last-Translator: Pedro Algarvio <ufs@ufsoft.org>\n"
 "Language-Team: pt_PT <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 0.9.4\n"
+"Generated-By: Babel 1.0dev-r466\n"
 
-#: zine/application.py:659
+#: zine/application.py:661
 msgid "Default Theme"
-msgstr "Tema Padrão"
+msgstr "Tema por Defeito"
 
-#: zine/application.py:660
+#: zine/application.py:662
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Simples tema padrão que não contém nenhuma formatação de estilo."
 
-#: zine/application.py:717
+#: zine/application.py:719
 #, python-format
 msgid "Theme “%s” is no longer available, falling back to default theme."
-msgstr "Tema “%s” não está disponível, voltando ao tema padrão."
+msgstr "Tema “%s” não está disponível, voltando ao tema por defeito."
 
-#: zine/application.py:740
+#: zine/application.py:742
 #, python-format
 msgid "Copyright %(years)s by the Pocoo Team"
-msgstr "Direitos Autorais %(years)s por Pocoo Team"
+msgstr "Direitos de Autoria %(years)s por Pocoo Team"
 
 #: zine/config.py:34
 msgid "My Zine Blog"
@@ -43,35 +43,35 @@ msgstr "O Meu Blog Zine"
 msgid "just another Zine blog"
 msgstr "apenas outro blog Zine"
 
-#: zine/config.py:81
+#: zine/config.py:82
 msgid "No Cache"
 msgstr "Sem Cache"
 
-#: zine/config.py:82
+#: zine/config.py:83
 msgid "Simple Cache"
 msgstr "Cache simples"
 
-#: zine/config.py:83
+#: zine/config.py:84
 msgid "memcached"
 msgstr "memcached"
 
-#: zine/config.py:84
+#: zine/config.py:85
 msgid "Filesystem"
 msgstr "Sistema de arquivos"
 
-#: zine/config.py:101
+#: zine/config.py:102
 msgid "Automatically approve all comments"
 msgstr "Aprovar automaticamente todos os comentários"
 
-#: zine/config.py:102
+#: zine/config.py:103
 msgid "An administrator must always approve the comment"
 msgstr "Um administrador deve sempre aprovar o comentário"
 
-#: zine/config.py:103
+#: zine/config.py:104
 msgid "Automatically approve comments by known comment authors"
 msgstr "Aprovar automaticamente comentários de autores conhecidos"
 
-#: zine/config.py:183
+#: zine/config.py:184
 msgid ""
 "\n"
 "    <p>\n"
@@ -82,11 +82,13 @@ msgid ""
 msgstr ""
 "\n"
 "    <p>\n"
-"      Este erro pode acontecer se o arquivo de configuração não puder ser escrito.\n"
-"      Tenha a certeza de que a pasta do arquivo e o arquivo de configuração\n"
+"      Este erro pode acontecer se o arquivo de configuração não puder ser"
+" escrito.\n"
+"      Tenha a certeza de que a pasta do arquivo e o arquivo de "
+"configuração\n"
 "      podem ser escritos.\n"
 
-#: zine/config.py:195
+#: zine/config.py:196
 #, python-format
 msgid "Could not save configuration file: %s"
 msgstr "Não foi possível guardar o arquivo de configuração: %s"
@@ -98,17 +100,17 @@ msgstr "Utilizador “%(value)s” não existe."
 
 #: zine/forms.py:47
 msgid "You have to enter a username."
-msgstr "Você deve introduzir um nome de utilizador."
+msgstr "Tem que introduzir um nome de utilizador."
 
 #: zine/forms.py:49
 #, python-format
 msgid "Failed login attempt, user “%s” does not exist"
-msgstr "Tentativa de login falhada, o utilizador “%s” não existe"
+msgstr "Tentativa de autenticação falhada, o utilizador “%s” não existe"
 
 #: zine/forms.py:57
 #, python-format
 msgid "Failed login attempt from “%s”, invalid password"
-msgstr "Tentativa de login falhada de “%s”, palavra-passe inválida"
+msgstr "Tentativa de autenticação falhada de “%s”, palavra-passe inválida"
 
 #: zine/forms.py:59
 msgid "Incorrect password."
@@ -128,7 +130,7 @@ msgstr "Repetir palavra-passe"
 
 #: zine/forms.py:78
 msgid "The old password you've entered is wrong."
-msgstr "A palavra-passe antiga que você introduziu esta incorreta."
+msgstr "A palavra-passe antiga que você introduziu esta incorrecta."
 
 #: zine/forms.py:83
 msgid "The two passwords don't match."
@@ -144,31 +146,25 @@ msgstr "O nome é muito longo."
 
 #: zine/forms.py:95
 msgid "You have to enter your name."
-msgstr "Você deve introduzir o seu nome."
+msgstr "Tem que introduzir o seu nome."
 
 #: zine/forms.py:97
 msgid "Mail* (not published)"
 msgstr "Mail* (não será publicado)"
 
-#: zine/forms.py:100
-#: zine/utils/validators.py:77
+#: zine/forms.py:100 zine/utils/validators.py:77
 msgid "You have to enter a valid e-mail address."
-msgstr "Você deve introduzir um endereço de email válido"
+msgstr "Tem introduzir um endereço de email válido"
 
-#: zine/forms.py:102
-#: zine/forms.py:405
-#: zine/forms.py:715
+#: zine/forms.py:102 zine/forms.py:400 zine/forms.py:713
 msgid "Website"
 msgstr "Website"
 
 #: zine/forms.py:103
 msgid "You have to enter a valid URL or omit the field."
-msgstr "Você deve introduzir um URL válido ou omitir o campo."
+msgstr "Tem que introduzir um URL válido ou omitir o campo."
 
-#: zine/forms.py:105
-#: zine/forms.py:224
-#: zine/forms.py:407
-#: zine/parsers.py:99
+#: zine/forms.py:105 zine/forms.py:224 zine/forms.py:402 zine/parsers.py:99
 msgid "Text"
 msgstr "Texto"
 
@@ -188,7 +184,7 @@ msgstr "Você tem de escrever um comentário."
 #. the form data
 #: zine/forms.py:132
 msgid "Invalid object referenced."
-msgstr "Objeto referenciado é inválido."
+msgstr "O Objecto referenciado é inválido."
 
 #: zine/forms.py:136
 msgid "Post is closed for commenting."
@@ -204,10 +200,11 @@ msgstr "Desabilitar plugin guard"
 
 #: zine/forms.py:194
 msgid "If the plugin guard is disabled errors on plugin setup are not caught."
-msgstr "Se o plugin guard for desabilitado, os erros durante configuração dos plugins não serão capturados."
+msgstr ""
+"Se o plugin guard for desabilitado, os erros durante a configuração dos "
+"plugins não serão capturados."
 
-#: zine/forms.py:222
-#: zine/templates/admin/_post_helpers.html:4
+#: zine/forms.py:222 zine/templates/admin/_post_helpers.html:4
 #: zine/templates/admin/import.html:25
 #: zine/templates/admin/inspect_import.html:49
 #: zine/templates/admin/write_page.html:7
@@ -230,36 +227,29 @@ msgstr "Publicado"
 msgid "Publication date"
 msgstr "Data de publicação"
 
-#: zine/forms.py:230
-#: zine/forms.py:506
+#: zine/forms.py:230 zine/forms.py:501
 #: zine/templates/admin/manage_categories.html:8
 msgid "Slug"
 msgstr "Slug"
 
-#: zine/forms.py:231
-#: zine/forms.py:402
+#: zine/forms.py:231 zine/forms.py:397
 #: zine/templates/admin/_post_helpers.html:5
 #: zine/templates/admin/information.html:163
 #: zine/templates/admin/inspect_import.html:50
 msgid "Author"
 msgstr "Autor"
 
-#: zine/forms.py:233
-#: zine/templates/widgets/tag_cloud.html:2
+#: zine/forms.py:233 zine/templates/widgets/tag_cloud.html:2
 msgid "Tags"
 msgstr "Tags"
 
-#: zine/forms.py:235
-#: zine/templates/_entry.html:4
+#: zine/forms.py:235 zine/templates/_entry.html:4
 #: zine/templates/admin/_post_helpers.html:6
-#: zine/templates/widgets/category_list.html:2
-#: zine/views/admin.py:79
+#: zine/templates/widgets/category_list.html:2 zine/views/admin.py:79
 msgid "Categories"
 msgstr "Categorias"
 
-#: zine/forms.py:237
-#: zine/forms.py:409
-#: zine/templates/admin/write_page.html:22
+#: zine/forms.py:237 zine/forms.py:404 zine/templates/admin/write_page.html:22
 msgid "Parser"
 msgstr "Parser"
 
@@ -275,298 +265,294 @@ msgstr "Habilitar pingbacks"
 msgid "Ping links"
 msgstr "Ping links"
 
-#: zine/forms.py:278
-#: zine/forms.py:427
+#: zine/forms.py:278 zine/forms.py:422
 #, python-format
 msgid "%s (missing)"
 msgstr "%s (em falta)"
 
 #: zine/forms.py:293
-#: zine/forms.py:527
-msgid "This slug is already in use"
+msgid "This slug is already in use."
 msgstr "Este slug já se encontra em uso"
 
 #: zine/forms.py:298
 msgid "Selected parser is no longer available on the system."
-msgstr "O parser selecionado já não está disponível no sistema."
+msgstr "O parser seleccionado já não está disponível no sistema."
 
-#: zine/forms.py:403
-#: zine/forms.py:713
+#: zine/forms.py:398 zine/forms.py:711
 msgid "Email"
 msgstr "Email"
 
-#: zine/forms.py:408
-#: zine/templates/admin/_post_helpers.html:8
+#: zine/forms.py:403 zine/templates/admin/_post_helpers.html:8
 #: zine/templates/admin/import.html:24
 #: zine/templates/admin/inspect_import.html:48
 msgid "Date"
 msgstr "Data"
 
-#: zine/forms.py:410
-#: zine/templates/admin/block_comment.html:2
+#: zine/forms.py:405 zine/templates/admin/block_comment.html:2
 #: zine/templates/admin/block_comment.html:4
 msgid "Block Comment"
 msgstr "Bloquear Comentário"
 
-#: zine/forms.py:411
-#: zine/forms.py:474
+#: zine/forms.py:406 zine/forms.py:469
 msgid "Reason"
 msgstr "Razão"
 
-#: zine/forms.py:483
+#: zine/forms.py:478
 #, python-format
 msgid "blocked by %s"
 msgstr "bloqueado por %s"
 
-#: zine/forms.py:507
-#: zine/templates/admin/manage_categories.html:9
+#: zine/forms.py:502 zine/templates/admin/manage_categories.html:9
 msgid "Name"
 msgstr "Nome"
 
-#: zine/forms.py:508
-#: zine/forms.py:711
-#: zine/templates/admin/plugins.html:18
+#: zine/forms.py:504 zine/forms.py:709 zine/templates/admin/plugins.html:18
 msgid "Description"
 msgstr "Descrição"
 
-#: zine/forms.py:610
-#: zine/templates/admin/manage_groups.html:8
+#: zine/forms.py:523
+msgid "This slug is already in use"
+msgstr "Este slug já se encontra em uso"
+
+#: zine/forms.py:606 zine/templates/admin/manage_groups.html:8
 msgid "Groupname"
 msgstr "Nome do grupo"
 
-#: zine/forms.py:612
-#: zine/forms.py:719
+#: zine/forms.py:609 zine/forms.py:717
 #: zine/templates/admin/information.html:102
 msgid "Privileges"
 msgstr "Privilégios"
 
-#: zine/forms.py:629
+#: zine/forms.py:626
 msgid "This groupname is already in use"
-msgstr "Esse nome de grupo já se encontra em uso"
+msgstr "Este nome do grupo já se encontra em uso"
 
-#: zine/forms.py:650
+#: zine/forms.py:647
 msgid "What should Zine do with users assigned to this group?"
 msgstr "O que deve fazer o Zine com utilizadores desse grupo?"
 
-#: zine/forms.py:653
+#: zine/forms.py:650
 msgid "Do nothing, just detach the membership"
 msgstr "Não faça nada, apenas remova a inscrição do grupo"
 
-#: zine/forms.py:654
+#: zine/forms.py:651
 msgid "Move the users to another group"
 msgstr "Mover os utilizadores para outro grupo"
 
-#: zine/forms.py:656
+#: zine/forms.py:653
 msgid "Relocate users to"
 msgstr "Recolocar os utilizadores para"
 
-#: zine/forms.py:669
+#: zine/forms.py:666
 msgid "You have to select a group that gets the users assigned."
-msgstr "Você deve selecionar um grupo para receber os utilizadores."
+msgstr "Você deve seleccionar um grupo para receber os utilizadores."
 
-#: zine/forms.py:707
-#: zine/forms.py:741
-#: zine/templates/admin/login.html:23
+#: zine/forms.py:704 zine/forms.py:739 zine/templates/admin/login.html:23
 #: zine/templates/admin/manage_users.html:8
 #: zine/websetup/templates/admin_account.html:10
 msgid "Username"
 msgstr "Nome de utilizador"
 
-#: zine/forms.py:709
-#: zine/forms.py:742
-#: zine/templates/admin/manage_users.html:9
+#: zine/forms.py:707 zine/forms.py:740 zine/templates/admin/manage_users.html:9
 msgid "Realname"
 msgstr "Nome real"
 
-#: zine/forms.py:710
+#: zine/forms.py:708
 msgid "Display name"
 msgstr "Nome a exibir"
 
-#: zine/forms.py:717
-#: zine/templates/admin/login.html:25
+#: zine/forms.py:715 zine/templates/admin/login.html:25
 #: zine/websetup/templates/admin_account.html:12
 msgid "Password"
 msgstr "Palavra-passe"
 
-#: zine/forms.py:721
-#: zine/views/admin.py:113
+#: zine/forms.py:719 zine/views/admin.py:113
 msgid "Groups"
 msgstr "Grupos"
 
-#: zine/forms.py:723
+#: zine/forms.py:721
 msgid "List as author"
 msgstr "Listar como autor"
 
-#: zine/forms.py:724
+#: zine/forms.py:722
 msgid "This user is listed as author"
 msgstr "Este utilizador é listado como autor"
 
-#: zine/forms.py:753
+#: zine/forms.py:751
 msgid "This username is already in use"
 msgstr "Este nome de utilizador já se encontra em uso"
 
-#: zine/forms.py:788
+#: zine/forms.py:786
 msgid "What should Zine do with posts written by this user?"
 msgstr "O que Zine deve fazer com os artigos escritos por este utilizador?"
 
-#: zine/forms.py:790
+#: zine/forms.py:788
 msgid "Delete them permanently"
 msgstr "Apagá-los permanentemente"
 
-#: zine/forms.py:791
+#: zine/forms.py:789
 msgid "Reassign posts"
 msgstr "Reatribuir artigos"
 
-#: zine/forms.py:794
+#: zine/forms.py:792
 msgid "Reassign posts to"
 msgstr "Reatribuir artigos para"
 
-#: zine/forms.py:809
+#: zine/forms.py:807
 msgid "You have to select the user that gets the posts assigned."
-msgstr "Deve seleccionar um utilizador para receber os artigos."
+msgstr "Tem que seleccionar um utilizador para receber os artigos."
 
-#: zine/forms.py:850
+#: zine/forms.py:848
 msgid "Filename"
 msgstr "Nome de arquivo"
 
-#: zine/forms.py:851
+#: zine/forms.py:849
 msgid "Log Level"
 msgstr "Nível de registo"
 
-#: zine/forms.py:856
-#: zine/forms.py:1021
+#: zine/forms.py:854 zine/forms.py:1024
 msgid "Blog title"
 msgstr "Título do blog"
 
-#: zine/forms.py:857
+#: zine/forms.py:855
 msgid "Blog tagline"
 msgstr "Tagline do blog"
 
-#: zine/forms.py:858
+#: zine/forms.py:856
 msgid "Blog email"
 msgstr "Email do blog"
 
-#: zine/forms.py:859
+#: zine/forms.py:857
 msgid "Language"
 msgstr "Linguagem"
 
-#: zine/forms.py:860
+#: zine/forms.py:858
 msgid "Timezone"
 msgstr "Fuso horário"
 
-#: zine/forms.py:862
+#: zine/forms.py:860
 msgid "Cookie Name"
-msgstr "Nome de cookie"
+msgstr "Nome da cookie"
 
-#: zine/forms.py:864
+#: zine/forms.py:862
 msgid "Comments enabled"
 msgstr "Comentários habilitados"
 
-#: zine/forms.py:865
+#: zine/forms.py:863
 msgid "enable comments per default"
 msgstr "habilitar comentários por defeito"
 
-#: zine/forms.py:867
+#: zine/forms.py:865
 msgid "Comment Moderation"
 msgstr "Moderação de Comentários"
 
-#: zine/forms.py:870
+#: zine/forms.py:868
 msgid "Pingbacks enabled"
 msgstr "Pingbacks activos"
 
-#: zine/forms.py:871
+#: zine/forms.py:869
 msgid "enable pingbacks per default"
 msgstr "activar pingbacks por defeito"
 
-#: zine/forms.py:873
+#: zine/forms.py:871
 msgid "Use flat comments"
 msgstr "Utilizar comentários de texto"
 
-#: zine/forms.py:874
+#: zine/forms.py:872
 msgid "All comments are posted top-level"
 msgstr "Todos os comentários serão publicados no nível de topo"
 
-#: zine/forms.py:876
+#: zine/forms.py:874
 msgid "Default parser"
 msgstr "Parser por defeito"
 
-#: zine/forms.py:878
+#: zine/forms.py:876
 msgid "Comment parser"
 msgstr "Parser de comentários"
 
-#: zine/forms.py:880
+#: zine/forms.py:878
 msgid "Posts per page"
 msgstr "Artigos por página"
 
-#: zine/forms.py:895
+#: zine/forms.py:893
 msgid "Blog URL prefix"
 msgstr "Prefixo URL do blog"
 
-#: zine/forms.py:897
+#: zine/forms.py:895
 msgid "Admin URL prefix"
 msgstr "Prefixo URL de administração"
 
-#: zine/forms.py:899
+#: zine/forms.py:897
 msgid "Category URL prefix"
-msgstr "Prefixo URL das categorias"
+msgstr "Prefixo URL de categorias"
+
+#: zine/forms.py:899
+msgid "Tag URL prefix"
+msgstr "Prefixo URL de tags"
 
 #: zine/forms.py:901
-msgid "Tag URL prefix"
-msgstr "Prefixo URL das tags"
+msgid "Author Profiles URL prefix"
+msgstr "Prefixo URL de perfis de autor"
 
 #: zine/forms.py:903
-msgid "Author Profiles URL prefix"
-msgstr "Prefixo URL dos perfis de autor"
+msgid "Limit slugs to ASCII"
+msgstr "Limitar slugs ao ASCCII"
 
-#: zine/forms.py:922
+#: zine/forms.py:904
+msgid "Automatically generated slugs are limited to ASCII"
+msgstr "As slugs geradas automaticamente são limitadas ao ASCII"
+
+#: zine/forms.py:925
 msgid "Cache system"
 msgstr "Sistema de cache"
 
-#: zine/forms.py:924
+#: zine/forms.py:927
 msgid "Default cache timeout"
 msgstr "Timeout da cache por defeito"
 
-#: zine/forms.py:926
+#: zine/forms.py:929
 msgid "Enable eager caching"
-msgstr "Habilitar cache antecipado"
+msgstr "Habilitar cache egoísta"
 
-#: zine/forms.py:927
+#: zine/forms.py:930
 msgid "Enable"
 msgstr "Habilitar"
 
-#: zine/forms.py:934
+#: zine/forms.py:937
 msgid "You have to provide at least one server to use memcached."
 msgstr "Tem que fornecer pelo menos um servidor para usar memcached."
 
-#: zine/forms.py:938
+#: zine/forms.py:941
 msgid "You have to provide cache folder to use filesystem cache."
-msgstr "Tem que fornecer uma pasta de cache para usar cache no sistema de arquivos."
+msgstr ""
+"Tem que fornecer uma pasta de cache para utilizar a cache no sistema de "
+"arquivos."
 
-#: zine/forms.py:948
+#: zine/forms.py:951
 msgid "Dump Download URL"
 msgstr "Dump Download URL"
 
-#: zine/forms.py:954
+#: zine/forms.py:957
 msgid "Feed Download URL"
 msgstr "Feed Download URL"
 
-#: zine/forms.py:971
+#: zine/forms.py:974
 msgid "Use default value"
 msgstr "Utilizar o valor por defeito"
 
-#: zine/forms.py:1007
+#: zine/forms.py:1010
 msgid "Create new user"
 msgstr "Criar um novo utilizador"
 
-#: zine/forms.py:1023
+#: zine/forms.py:1026
 msgid "Blog description"
 msgstr "Descrição do blog"
 
-#: zine/forms.py:1028
+#: zine/forms.py:1031
 msgid "Load config values"
 msgstr "Carregar valores de configuração"
 
-#: zine/forms.py:1029
+#: zine/forms.py:1032
 msgid "Load the configuration values from the import."
 msgstr "Carregar os valores de configuração da importação."
 
@@ -580,27 +566,25 @@ msgstr "HTML"
 
 #: zine/pingback.py:66
 msgid "source URL does not exist"
-msgstr "O URL fonte não existe"
+msgstr "O URL da origem não existe"
 
 #: zine/pingback.py:67
 msgid "The source URL does not contain a link to the target URL"
-msgstr "O URL fonte não contém um link para URL alvo"
+msgstr "O URL da origem não contém um link para URL de destino"
 
 #: zine/pingback.py:68
 msgid "The specified target URL does not exist"
-msgstr "O URL alvo especificado não existe"
+msgstr "O URL de destino especificado não existe"
 
 #: zine/pingback.py:69
 msgid "The specified target URL cannot be used as a target"
-msgstr "O URL alvo especificado não pode ser usado como alvo"
+msgstr "O URL da origem especificado não pode ser usado como destino"
 
 #: zine/pingback.py:70
 msgid "The pingback has already been registered"
 msgstr "O pingback já foi registrado"
 
-#: zine/pingback.py:71
-#: zine/templates/403.html:2
-#: zine/templates/403.html:4
+#: zine/pingback.py:71 zine/templates/403.html:2 zine/templates/403.html:4
 msgid "Access Denied"
 msgstr "Acesso Negado"
 
@@ -610,21 +594,32 @@ msgid "An unknown server error (%s) occurred"
 msgstr "Ocorreu um erro de servidor desconhecido (%s)"
 
 #: zine/pluginsystem.py:332
-msgid "Could not install the plugin because the uploaded file is not a valid plugin file."
-msgstr "O plugin não pode ser instalado porque o arquivo enviado não é um plugin válido."
+msgid ""
+"Could not install the plugin because the uploaded file is not a valid "
+"plugin file."
+msgstr ""
+"O plugin não pôde ser instalado porque o arquivo enviado não é um plugin "
+"válido."
 
 #: zine/pluginsystem.py:334
-msgid "The plugin uploaded has a newer package version than this Zine installation can handle."
-msgstr "O plugin enviado tem uma versão mais recente do que esta instalação do Zine pode lidar."
+msgid ""
+"The plugin uploaded has a newer package version than this Zine "
+"installation can handle."
+msgstr ""
+"O plugin enviado tem uma versão mais recente do que esta instalação do "
+"Zine pode lidar."
 
 #: zine/pluginsystem.py:337
 msgid "A plugin with the same UID is already installed. Aborted."
-msgstr "Um plugin com o mesmo UID já esta instalado. Procedimento abortado."
+msgstr "Um plugin com o mesmo UID já se encontra instalado. Procedimento abortado."
 
-# Retranslate this one :\ ?
 #: zine/pluginsystem.py:339
-msgid "Could not install the package because the installer wasn't able to write the package information. Wrong permissions?"
-msgstr "Não foi possível instalar o pacote porque o instalador não pode escrever as informações do pacote. Sem as permissões necessárias?"
+msgid ""
+"Could not install the package because the installer wasn't able to write "
+"the package information. Wrong permissions?"
+msgstr ""
+"Não foi possível instalar o pacote porque o instalador não pôde escrever "
+"as informações do pacote. Sem as permissões necessárias?"
 
 #: zine/pluginsystem.py:361
 msgid "Plugin setup error"
@@ -673,7 +668,7 @@ msgstr "pode ver rascunhos"
 
 #: zine/privileges.py:162
 msgid "can manage categories"
-msgstr "pode administrar categorias"
+msgstr "pode gerir categorias"
 
 #: zine/privileges.py:163
 msgid "can moderate comments"
@@ -683,7 +678,7 @@ msgstr "pode moderar comentários"
 msgid "no documented plugins installed."
 msgstr "nenhum plugin com documentação instalado."
 
-#: zine/i18n/__init__.py:460
+#: zine/i18n/__init__.py:478
 msgid "now"
 msgstr "agora"
 
@@ -695,23 +690,21 @@ msgstr "configurar o título do blog a partir do dump"
 msgid "set blog tagline from dump"
 msgstr "configurar tagline do blog a partir do dump"
 
-#: zine/importers/__init__.py:210
-#: zine/importers/__init__.py:225
+#: zine/importers/__init__.py:210 zine/importers/__init__.py:225
 msgid "done"
 msgstr "pronto"
 
 #: zine/importers/__init__.py:213
 msgid "Committing transaction..."
-msgstr "Enviando transacção..."
+msgstr "A enviar a transacção..."
 
 #: zine/importers/__init__.py:218
 msgid "Updating configuration..."
-msgstr "Actualizando configuração..."
+msgstr "A actualizar a configuração..."
 
-# XXX: Re-Translate!?
 #: zine/importers/feed.py:88
 msgid "Unknown feed uploaded."
-msgstr "Feed desconhecido enviado."
+msgstr "Feed enviado desconhecido."
 
 #: zine/importers/feed.py:134
 msgid "Importing of RSS feeds is currently not possible."
@@ -721,26 +714,23 @@ msgstr "Actualmente não é possível importar feeds RSS."
 msgid "Feed Importer"
 msgstr "Importador de Feed"
 
-#: zine/importers/feed.py:304
-#: zine/importers/wordpress.py:209
+#: zine/importers/feed.py:304 zine/importers/wordpress.py:209
 #, python-format
 msgid "Error downloading from URL: %s"
 msgstr "Erro no download do URL: %s"
 
-#: zine/importers/feed.py:311
-#: zine/importers/wordpress.py:216
+#: zine/importers/feed.py:311 zine/importers/wordpress.py:216
 msgid "Error parsing uploaded file"
-msgstr "Erro ao ler arquivo enviado"
+msgstr "Erro ao ler o arquivo enviado"
 
 #: zine/importers/feed.py:312
 #, python-format
 msgid "Error parsing feed: %s"
-msgstr "Erro ao ler feed: %s"
+msgstr "Erro ao ler o feed: %s"
 
-#: zine/importers/feed.py:315
-#: zine/importers/wordpress.py:220
+#: zine/importers/feed.py:315 zine/importers/wordpress.py:220
 msgid "Added imported items to queue."
-msgstr "Os itens importados foram adicionados à fila."
+msgstr "Os itens importados foram adicionados à fila de trabalho."
 
 #: zine/importers/wordpress.py:217
 #, python-format
@@ -753,7 +743,9 @@ msgstr "Chave inválida."
 
 #: zine/plugins/akismet_spam_filter/__init__.py:79
 msgid "Could not verify key because of a server to server connection error."
-msgstr "Não possível verificar chave devido a erro na conexão de servidor para servidor."
+msgstr ""
+"Não possível verificar a chave devido a um erro na conexão de servidor para "
+"servidor."
 
 #: zine/plugins/akismet_spam_filter/__init__.py:147
 msgid "Akismet"
@@ -785,14 +777,18 @@ msgstr "Configuração do Akismet"
 #, python-format
 msgid ""
 "\n"
-"    Akismet will help you to reduce or even completely eliminate the comment spam\n"
-"    you get on your site. If you don't have a WordPress.com account yet, you can\n"
+"    Akismet will help you to reduce or even completely eliminate the "
+"comment spam\n"
+"    you get on your site. If you don't have a WordPress.com account yet, "
+"you can\n"
 "    get one at <a href=\"%(api_link)s\">WordPress.com</a>.\n"
 "  "
 msgstr ""
 "\n"
-"    Akismet irá ajuda-lo a reduzir ou até eliminar completamente os comentários de spam\n"
-"    que você recebe no seu site. Se você ainda não tem uma conta em WordPress.com, você\n"
+"    O Akismet irá ajudá-lo a reduzir ou até eliminar completamente os "
+"comentários de spam\n"
+"    que você recebe no seu site. Se ainda não tem uma conta em "
+"WordPress.com, \n"
 "    pode obter uma em <a href=\"%(api_link)s\">WordPress.com</a>.\n"
 
 #: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:14
@@ -825,7 +821,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Esta é página de configuração do plugin Eric. Aqui você pode configurar\n"
+"    Esta é página de configuração do plugin Eric. Aqui pode "
+"configurar\n"
 "    a aparência do Eric.\n"
 
 #: zine/plugins/markdown_parser/__init__.py:23
@@ -834,9 +831,7 @@ msgstr "Markdown"
 
 #: zine/plugins/miniblog_theme/templates/_widgets.html:5
 #: zine/plugins/vessel_theme/templates/_widgets.html:4
-#: zine/templates/admin/layout.html:6
-#: zine/templates/admin/layout.html:14
-#: zine/templates/admin/login.html:5
+#: zine/templates/admin/layout.html:6 zine/templates/admin/login.html:5
 msgid "Administration"
 msgstr "Administração"
 
@@ -861,7 +856,9 @@ msgstr "Orgulhosamente movido por %(zine)s."
 #: zine/plugins/myrtle_theme/templates/layout.html:27
 #, python-format
 msgid "Proudly powered by %(zine)s, %(theme)s designed by %(author)s."
-msgstr "Orgulhosamente movido por %(zine)s, tema %(theme)s desenvolvido por %(author)s."
+msgstr ""
+"Orgulhosamente movido por %(zine)s, tema %(theme)s desenvolvido por "
+"%(author)s."
 
 #: zine/plugins/myrtle_theme/templates/layout.html:32
 #: zine/websetup/templates/finished.html:10
@@ -875,7 +872,7 @@ msgstr "Sair"
 
 #: zine/plugins/pygments_support/__init__.py:144
 msgid "Pygments theme changed successfully."
-msgstr "Tema do Pygments alterado com sucesso."
+msgstr "O tema do Pygments foi alterado com sucesso."
 
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:2
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:4
@@ -890,8 +887,9 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    O Pygments permite que você seleccione entre vários temas para suas tags de código.\n"
-"    Você pode pré-visualizar e seleccionar um tema abaixo.\n"
+"    O Pygments permite que seleccione entre vários temas para as suas "
+"tags de código.\n"
+"    Pode pré-visualizar e seleccionar um tema em baixo.\n"
 
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:13
 #: zine/views/admin.py:106
@@ -900,7 +898,7 @@ msgstr "Tema"
 
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:15
 msgid "Preview"
-msgstr "Pré-visualização"
+msgstr "Pré-visualizar"
 
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:16
 msgid "Select"
@@ -914,11 +912,11 @@ msgstr "Tipografia"
 
 #: zine/plugins/typography/__init__.py:111
 msgid "Typography settings could not be changed."
-msgstr "As configurações de Tipografia não puderam ser alteradas."
+msgstr "As configurações de tipografia não puderam ser alteradas."
 
 #: zine/plugins/typography/__init__.py:113
 msgid "Typography settings changed."
-msgstr "Configurações de Tipografia alteradas."
+msgstr "Configurações de tipografia alteradas."
 
 #: zine/plugins/typography/templates/admin/typography.html:34
 msgid ""
@@ -929,9 +927,10 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Aqui você pode configurar as preferências de tipografia. De notar que\n"
+"    Aqui pode configurar as preferências de tipografia. De notar que"
+"\n"
 "    actualmente a semântica é forçada, por isso não existe uma maneira\n"
-"    de alterar o seu algoritmo através desse painel.\n"
+"    de alterar o seu algoritmo através deste painel.\n"
 
 #: zine/plugins/typography/templates/admin/typography.html:41
 msgid "Double Quote Pairs"
@@ -980,7 +979,7 @@ msgstr "Variação da cor"
 
 #: zine/plugins/vessel_theme/__init__.py:62
 msgid "Color variation changed successfully."
-msgstr "Variação da cor alterada com sucesso."
+msgstr "Variação de cor alterada com sucesso."
 
 #: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:2
 #: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:4
@@ -1014,25 +1013,37 @@ msgid "Bookmarklet"
 msgstr "Bookmarklet"
 
 #: zine/shared/js/Admin.js:52
-msgid "Right click on the following link and choose “Add to favorites” or “Bookmark link” to create a posting shortcut."
-msgstr "Clique com o botão direito no link a seguir e escolha \"Adicionar aos favoritos\" para criar um atalho para a criação de artigos."
+msgid ""
+"Right click on the following link and choose “Add to favorites” or "
+"“Bookmark link” to create a posting shortcut."
+msgstr ""
+"Clique com o botão direito no link seguinte e escolha “Adicionar aos "
+"favoritos” para criar um atalho para a criação de artigos."
 
 #: zine/shared/js/Admin.js:56
-msgid "Next time you visit an interesting page, just select some text and click on the bookmark."
-msgstr "Na próxima vez que você visitar alguma página interessante, apenas seleccione o texto e clique na bookmark."
+msgid ""
+"Next time you visit an interesting page, just select some text and click "
+"on the bookmark."
+msgstr ""
+"Da próxima vez que visitar alguma página interessante, apenas "
+"seleccione o texto e clique na bookmark."
 
 #: zine/shared/js/Admin.js:60
 msgid "Blog It!"
 msgstr "Blog It!"
 
 #: zine/shared/js/Admin.js:62
-msgid "Right click on this link and choose “Add to favorites” or “Bookmark link” to create a posting shortcut."
-msgstr "Clique com o botão direito neste link e escolha “Adicionar aos favoritos” para criar um atalho para criação de artigos."
+msgid ""
+"Right click on this link and choose “Add to favorites” or “Bookmark link”"
+" to create a posting shortcut."
+msgstr ""
+"Clique com o botão direito neste link e escolha “Adicionar aos favoritos”"
+" para criar um atalho para criação de artigos."
 
 #: zine/shared/js/Zine.js:31
 #, python-format
 msgid "Replying to comment by %s."
-msgstr "Respondendo ao comentário por %s."
+msgstr "A responder ao comentário por %s."
 
 #: zine/shared/js/Zine.js:33
 msgid "(Create as top level comment)"
@@ -1045,11 +1056,10 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    O acesso para o recurso solicitado foi negado.\n"
+"    O acesso para o recurso solicitado foi restringido.\n"
 "  "
 
-#: zine/templates/404.html:2
-#: zine/templates/404.html:4
+#: zine/templates/404.html:2 zine/templates/404.html:4
 msgid "Page Not Found"
 msgstr "Página Não Encontrada"
 
@@ -1062,7 +1072,7 @@ msgid ""
 "You may have followed a bad link or mis-typed a URL.\n"
 "    That’s most likely what went wrong."
 msgstr ""
-"Você deve ter seguido um link inválido ou enganou-se a copiar o URL.\n"
+"Deve ter seguido um link inválido ou enganou-se a copiar o URL.\n"
 "    É o mais provável que tenha acontecido."
 
 #: zine/templates/404.html:8
@@ -1085,7 +1095,8 @@ msgstr "Erro Interno do Servidor"
 #: zine/templates/500.html:5
 msgid ""
 "\n"
-"    An internal error happened in the application. The blog administrator\n"
+"    An internal error happened in the application. The blog administrator"
+"\n"
 "    has been informed about the problem.\n"
 "  "
 msgstr ""
@@ -1125,14 +1136,12 @@ msgid_plural "%(comments)s comments"
 msgstr[0] "%(comments)s comentário"
 msgstr[1] "%(comments)s comentários"
 
-#: zine/templates/_entry.html:22
-#: zine/templates/admin/_comment.html:12
+#: zine/templates/_entry.html:22 zine/templates/admin/_comment.html:12
 #: zine/templates/admin/index.html:56
 msgid "Edit"
 msgstr "Editar"
 
-#: zine/templates/_entry.html:31
-#: zine/templates/show_entry.html:8
+#: zine/templates/_entry.html:31 zine/templates/show_entry.html:8
 #, python-format
 msgid "written by %(author)s, on %(pub_date)s."
 msgstr "escrito por %(author)s, em %(pub_date)s."
@@ -1140,14 +1149,15 @@ msgstr "escrito por %(author)s, em %(pub_date)s."
 #: zine/templates/_entry.html:36
 #, python-format
 msgid "<strong>Scheduled Post:</strong> This entry will appear in %(time_span)s."
-msgstr "<strong>Artigo Agendado:</strong> Esta entrada será publicada em %(time_span)s."
+msgstr ""
+"<strong>Artigo Agendado:</strong> Esta entrada será publicada em "
+"%(time_span)s."
 
 #: zine/templates/_entry.html:45
 msgid "Read on"
-msgstr "Ler"
+msgstr "Continuar a ler"
 
-#: zine/templates/archive.html:2
-#: zine/templates/archive.html:6
+#: zine/templates/archive.html:2 zine/templates/archive.html:6
 #: zine/templates/widgets/post_archive_summary.html:2
 msgid "Archive"
 msgstr "Arquivo"
@@ -1171,8 +1181,7 @@ msgstr "Arquivo de %(month)s"
 msgid "Archive for %(day)s"
 msgstr "Arquivo de %(day)s"
 
-#: zine/templates/authors.html:2
-#: zine/templates/authors.html:4
+#: zine/templates/authors.html:2 zine/templates/authors.html:4
 #: zine/templates/admin/inspect_import.html:23
 msgid "Authors"
 msgstr "Autores"
@@ -1193,6 +1202,46 @@ msgstr "Bem-vindo"
 msgid "So far there are no entries in this blog."
 msgstr "De momento não existem artigos neste blog."
 
+#: zine/templates/internal_error.html:2
+#, fuzzy
+msgid "Zine Internal Error"
+msgstr "Erro Interno do Servidor Zine"
+
+#: zine/templates/internal_error.html:4
+#, fuzzy
+msgid "Internal Error"
+msgstr "Erro Interno do Servidor"
+
+#: zine/templates/internal_error.html:6
+msgid "Zine encountered an internal error during processing:"
+msgstr "O Zine encontrou um erro interno ao processar:"
+
+#: zine/templates/internal_error.html:13
+msgid ""
+"\n"
+"    If you have troubles fixing the problem have a look at the Zine\n"
+"    documentation.\n"
+"  "
+msgstr ""
+"    Se tiver problemas a solucionar o problema de uma olhada na "
+"    documentação do Zine.\n"
+
+#: zine/templates/internal_error.html:17
+msgid ""
+"\n"
+"    This error is only visible to blog administrators.  If a regular user"
+"\n"
+"    triggered the error an entry to the log is added and a generic error\n"
+"    message is displayed.\n"
+"  "
+msgstr ""
+"\n"
+"    Este erro só é visível a administradores do blog.  Se um utilizador comum"
+"\n"
+"    provocou o error é adicionada uma entrada no registo e um erro genérico\n"
+"    é exibido.\n"
+"  "
+
 #: zine/templates/maintenance.html:40
 msgid "Maintenance Mode"
 msgstr "Modo de Manutenção"
@@ -1204,19 +1253,16 @@ msgid ""
 "      Please wait until the administrator reopens the blog."
 msgstr ""
 "\n"
-"      Essa instância do Zine está actualmente em modo de manutenção.\n"
+"      Esta instância do Zine está actualmente em modo de manutenção.\n"
 "      Por favor aguarde até o administrador reabrir o blog."
 
-#: zine/templates/page.html:10
-#: zine/templates/show_entry.html:22
+#: zine/templates/page.html:10 zine/templates/show_entry.html:22
 #: zine/templates/admin/_post_helpers.html:7
-#: zine/templates/admin/inspect_import.html:51
-#: zine/views/admin.py:90
+#: zine/templates/admin/inspect_import.html:51 zine/views/admin.py:90
 msgid "Comments"
 msgstr "Comentários"
 
-#: zine/templates/page.html:14
-#: zine/templates/show_entry.html:26
+#: zine/templates/page.html:14 zine/templates/show_entry.html:26
 msgid "Leave a Reply"
 msgstr "Deixe uma Resposta"
 
@@ -1243,8 +1289,7 @@ msgstr "Exibir “%(category)s”"
 msgid "Entries in the Category “%(category)s”"
 msgstr "Entradas na Categoria “%(category)s”"
 
-#: zine/templates/show_category.html:10
-#: zine/templates/show_tag.html:10
+#: zine/templates/show_category.html:10 zine/templates/show_tag.html:10
 msgid "No public posts found"
 msgstr "Não foram encontrados artigos públicos"
 
@@ -1264,8 +1309,7 @@ msgstr "Entradas classificadas como “%(tag)s”"
 #: zine/templates/admin/edit_entry.html:53
 #: zine/templates/admin/edit_group.html:16
 #: zine/templates/admin/edit_page.html:49
-#: zine/templates/admin/edit_user.html:30
-#: zine/templates/admin/index.html:58
+#: zine/templates/admin/edit_user.html:30 zine/templates/admin/index.html:58
 #: zine/templates/admin/inspect_import.html:74
 #: zine/templates/admin/manage_comments.html:20
 #: zine/templates/admin/write_page.html:53
@@ -1276,8 +1320,7 @@ msgstr "Apagar"
 msgid "Not Spam"
 msgstr "Não é Spam"
 
-#: zine/templates/admin/_comment.html:19
-#: zine/templates/admin/index.html:60
+#: zine/templates/admin/_comment.html:19 zine/templates/admin/index.html:60
 #: zine/templates/admin/manage_comments.html:19
 msgid "Approve"
 msgstr "Aprovar"
@@ -1308,15 +1351,19 @@ msgstr "Sobre o Zine"
 #: zine/templates/admin/about_zine.html:7
 msgid ""
 "\n"
-"      Zine is an open source content publishing platform emphasizing ease\n"
-"      of use and extensibility. It provides powerful internal infrastructure,\n"
+"      Zine is an open source content publishing platform emphasizing ease"
+"\n"
+"      of use and extensibility. It provides powerful internal "
+"infrastructure,\n"
 "      a simple and intuitive user interface.\n"
 "    "
 msgstr ""
 "\n"
-"      O Zine é uma plataforma de publicação de conteúdos open source, com ênfase na\n"
-"      facilidade de utilização e na extensibilidade. Fornece uma infraestrutura interna poderosa,\n"
-"      um interface simples e intuitiva.\n"
+"      O Zine é uma plataforma de publicação de conteúdos open source, com"
+" ênfase na\n"
+"      facilidade de utilização e na extensibilidade. Fornece uma "
+"infraestrutura interna poderosa,\n"
+"      um interface simples e intuitivo.\n"
 
 #: zine/templates/admin/about_zine.html:12
 #, python-format
@@ -1331,7 +1378,8 @@ msgid ""
 "      are met:"
 msgstr ""
 "\n"
-"      Redistribuição e uso nas formas de código fonte ou binários, com ou sem\n"
+"      Redistribuição e uso nas formas de código fonte ou binários, com ou"
+" sem\n"
 "      modificação são permitidas dentro das seguintes condições:"
 
 #: zine/templates/admin/about_zine.html:20
@@ -1341,8 +1389,8 @@ msgid ""
 "        disclaimer."
 msgstr ""
 "A redistribuição do software deve conter todas as\n"
-"        informações sobre direitos autorais, esta lista de condições\n"
-"        e o aviso abaixo;"
+"        informações sobre direitos de autoria, esta lista de condições\n"
+"        e o aviso em baixo;"
 
 #: zine/templates/admin/about_zine.html:23
 msgid ""
@@ -1351,11 +1399,13 @@ msgid ""
 "        disclaimer in the documentation and/or other materials provided\n"
 "        with the distribution."
 msgstr ""
-"A redistribuição de binários ou executáveis deve conter todas as informações\n"
-"       sobre direitos autorais, listas de condições e o aviso abaixo anúncio\n"
-"       na documentação e/ou em outros materiais constantes da distribuição."
+"A redistribuição de binários ou executáveis deve conter todas as "
+"informações\n"
+"       sobre direitos de autoria, listas de condições e o aviso em baixo "
+"anunciado\n"
+"       na documentação e/ou em outros materiais constantes da "
+"distribuição."
 
-#############
 #: zine/templates/admin/about_zine.html:27
 msgid ""
 "The names of the contributors may not be used to endorse\n"
@@ -1370,24 +1420,37 @@ msgstr ""
 msgid ""
 "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n"
 "      “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n"
-"      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n"
-"      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n"
-"      OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n"
+"      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS "
+"FOR\n"
+"      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE "
+"COPYRIGHT\n"
+"      OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, "
+"INCIDENTAL,\n"
 "      SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n"
-"      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n"
-"      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
-"      THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
-"      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
+"      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF "
+"USE,\n"
+"      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON "
+"ANY\n"
+"      THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT"
+"\n"
+"      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE "
+"USE\n"
 "      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 msgstr ""
 "ESTE SOFTWARE É DISTRIBUÍDO POR SEUS MONITORES E CONTRIBUINTES\n"
-"     NA FORMA EM QUE SE ENCONTRA, E QUALQUER GARANTIA EXPRESSA OU IMPLÍCITA,\n"
-"     INCLUINDO, MAS NÃO LIMITADAS AS GARANTIAS COMERCIAIS E ATENDIMENTO DE\n"
-"     DETERMINADOS PROPÓSITOS QUE NÃO SÃO RECONHECIDAS. EM NENHUMA HIPÓTESE OS\n"
-"     MONITORES OU SEUS CONTRIBUINTES SERÃO RESPONSÁVEIS POR QUALQUER DANO\n"
-"     DIRECTO, INDIRECTO, ACIDENTAL, ESPECIAL, INCLUINDO, MAS NÃO LIMITADO À\n"
-"     SUSBTITUIÇÃO DE MERCADORIAS OU SERVIÇOS, IMPOSSIBILIDADE DE USO, PERDA\n"
-"     DE DADOS, LUCROS CESSANTES OU INTERRUPÇÃO DE ATIVIDADES COMERCIAIS,\n"
+"     NA FORMA EM QUE SE ENCONTRA, E QUALQUER GARANTIA EXPRESSA OU "
+"IMPLÍCITA,\n"
+"     INCLUINDO, MAS NÃO LIMITADAS AS GARANTIAS COMERCIAIS E ATENDIMENTO "
+"DE\n"
+"     DETERMINADOS PROPÓSITOS QUE NÃO SÃO RECONHECIDAS. EM NENHUMA "
+"HIPÓTESE OS\n"
+"     MONITORES OU SEUS CONTRIBUINTES SERÃO RESPONSÁVEIS POR QUALQUER DANO"
+"\n"
+"     DIRECTO, INDIRECTO, ACIDENTAL, ESPECIAL, INCLUINDO, MAS NÃO LIMITADO"
+" À\n"
+"     SUSBTITUIÇÃO DE MERCADORIAS OU SERVIÇOS, IMPOSSIBILIDADE DE USO, "
+"PERDA\n"
+"     DE DADOS, LUCROS CESSANTES OU INTERRUPÇÃO DE ACTIVIDADES COMERCIAIS,\n"
 "     CAUSADOS EM QUALQUER BASE PELO USO DESTE SOFTWARE."
 
 #: zine/templates/admin/approve_comment.html:2
@@ -1480,7 +1543,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    O importador irá fazer download da sua informação do Blogger.com\n"
+"    O importador irá descarregar a sua informação do Blogger.com\n"
 "    Isto pode levar algum tempo.\n"
 "    <strong>Não clique em cancelar!</strong>\n"
 "  "
@@ -1499,8 +1562,7 @@ msgstr ""
 msgid "Import review page"
 msgstr "Página de revisão da importação"
 
-#: zine/templates/admin/cache.html:2
-#: zine/templates/admin/cache.html:4
+#: zine/templates/admin/cache.html:2 zine/templates/admin/cache.html:4
 msgid "Cache Options"
 msgstr "Opções de Cache"
 
@@ -1508,30 +1570,38 @@ msgstr "Opções de Cache"
 msgid ""
 "\n"
 "      Zine comes with a cache system that allows you to survive a sudden\n"
-"      storm of visitors. The caching system has different backends you can\n"
-"      choose from and also different settings that you should set depending on\n"
+"      storm of visitors. The caching system has different backends you "
+"can\n"
+"      choose from and also different settings that you should set "
+"depending on\n"
 "      the type of server you have and the number of visitors.\n"
 "    "
 msgstr ""
 "\n"
-"      O Zine vem com um sistema de cache que lhe permite sobreviver a uma inesperada\n"
-"      enxurrada de visitas. O sistema de cache tem diferentes backends de onde\n"
+"      O Zine vem com um sistema de cache que lhe permite sobreviver a uma"
+" inesperada\n"
+"      enxurrada de visitas. O sistema de cache tem diferentes backends de"
+" onde\n"
 "      escolher e também diferentes configurações necessárias dependendo\n"
-"      do tipo de servidor que você tem e número de visitantes.\n"
+"      do tipo de servidor que você tem e o número de visitantes.\n"
 "    "
 
 #: zine/templates/admin/cache.html:12
 msgid ""
 "\n"
-"      Keep in mind that if caching is enabled templates will be cached too and\n"
-"      as a result of that, they are not reloaded. If you are trying to develop \n"
+"      Keep in mind that if caching is enabled templates will be cached "
+"too and\n"
+"      as a result of that, they are not reloaded. If you are trying to "
+"develop \n"
 "      plugins it might be a good idea to disable all caching.\n"
 "    "
 msgstr ""
 "\n"
-"      Tenha em mente que se o sistema de cache for habilitado ele fará efeito nos templates,\n"
-"      como resultado, eles não serão recarregados. Se estiver a desenvolver\n"
-"      plugins pode ser uma boa ideia desabilitar qualquer cache.\n"
+"      Tenha em mente que se o sistema de cache for habilitado ele terá "
+"efeito nos templates,\n"
+"      como resultado, eles não serão recarregados. Se estiver a "
+"desenvolver\n"
+"      plugins pode ser uma boa ideia desabilitar a cache.\n"
 "    "
 
 #: zine/templates/admin/cache.html:28
@@ -1545,41 +1615,53 @@ msgstr "Actualmente o Zine suporta três sistemas de cache:"
 #: zine/templates/admin/cache.html:31
 msgid ""
 "<strong>Simple Cache</strong>: The simple cache is a very\n"
-"          basic memory cache inside the server process. This cache works only\n"
-"          if you have a persistent environment. Roughly speaking this cache\n"
-"          works better the higher the number of threads in a process and the\n"
+"          basic memory cache inside the server process. This cache works "
+"only\n"
+"          if you have a persistent environment. Roughly speaking this "
+"cache\n"
+"          works better the higher the number of threads in a process and "
+"the\n"
 "          lower the number or processes. If you have the chance to use a\n"
 "          memcached you should not use the simple cache."
 msgstr ""
 "<strong>Cache simples</strong>: A cache simples é uma memória\n"
-"          de cache muito básica dentro do processo no servidor. Esta cache só funciona\n"
+"          de cache muito básica dentro do processo no servidor. Esta "
+"cache só funciona\n"
 "          se tiver um ambiente persistente. De grosso modo, esta cache\n"
-"          funciona melhor com um alto número de threads por processo e um\n"
-"          baixo número de processos. Se tiver hipótese de usar o memcached não\n"
+"          funciona melhor com um alto número de threads por processo e um"
+"\n"
+"          baixo número de processos. Se tiver hipótese de utilizar o "
+"memcached não\n"
 "          use a cache simples."
 
 #: zine/templates/admin/cache.html:37
 msgid ""
 "<strong>memcached</strong>: This cache system uses one\n"
 "          or multiple remote memcached servers for storing the cache\n"
-"          information. It requires at least one running memcached daemon. This\n"
+"          information. It requires at least one running memcached daemon."
+" This\n"
 "          is useful for high traffic sites."
 msgstr ""
 "<strong>memcached</strong>: Esse sistema de cache utiliza um ou\n"
-"          múltiplos servidores memcached remotos para armazenar as informações\n"
+"          múltiplos servidores memcached remotos para armazenar as "
+"informações\n"
 "          da cache. Requer pelo menos um daemon de memcached a correr.\n"
 "          É muito útil para sites com muito tráfego."
 
 #: zine/templates/admin/cache.html:41
 msgid ""
 "<strong>Filesystem</strong>: This cache system stores the\n"
-"          cache information on the filesystem. If IO is a problem for you,\n"
-"          you should not use this cache. However for most of the cases the \n"
+"          cache information on the filesystem. If IO is a problem for "
+"you,\n"
+"          you should not use this cache. However for most of the cases "
+"the \n"
 "          filesystem it should be fast enough."
 msgstr ""
 "<strong>Sistema de Arquivos</strong>: Este sistema de cache armazena\n"
-"          as informações da cache no sistema de arquivos. Se as operações de IO são um,\n"
-"          problema para si, não deve usar este sistema de cache. No entanto para maioria\n"
+"          as informações da cache no sistema de arquivos. Se as operações"
+" de IO são um,\n"
+"          problema para si, não deve usar este sistema de cache. No "
+"entanto para maioria\n"
 "          dos casos, é rápido o suficiente."
 
 #: zine/templates/admin/cache.html:46
@@ -1593,35 +1675,49 @@ msgstr "Opções de Memcached"
 #: zine/templates/admin/cache.html:50
 msgid ""
 "\n"
-"        In order to use the memcached system you have to provide the address\n"
-"        of at least one machine running memcached.  For further details have\n"
-"        a look at <a href=\"http://www.danga.com/memcached/\">the memcached\n"
-"        webpage</a>.  Separate multiple addresses with commas.  This also\n"
+"        In order to use the memcached system you have to provide the "
+"address\n"
+"        of at least one machine running memcached.  For further details "
+"have\n"
+"        a look at <a href=\"http://www.danga.com/memcached/\">the "
+"memcached\n"
+"        webpage</a>.  Separate multiple addresses with commas.  This also"
+"\n"
 "        requires either the <a href=\"http://gijsbert.org/cmemcache/\"\n"
-"        >cmemcache</a> or <a href=\"ftp://ftp.tummy.com/pub/python-memcached/\"\n"
+"        >cmemcache</a> or <a href=\"ftp://ftp.tummy.com/pub/python-"
+"memcached/\"\n"
 "        >python-memcached</a> module.\n"
 "      "
 msgstr ""
 "\n"
 "        Para utilizar o sistema memcached tem que fornecer o endereço\n"
-"        de pelo menos uma máquina a correr o memcached. Para mais detalhes\n"
-"        veja <a href=\"http://www.danga.com/memcached/\">o site do memcached</a>.\n"
-"        Separe múltiplos endereços usando vírgulas. Esta opção também requer \n"
-"        o módulo <a href=\"http://gijsbert.org/cmemcache/\">cmemcache</a> ou\n"
-"        <a href=\"ftp://ftp.tummy.com/pub/python-memcached/\">python-memcached</a>.\n"
+"        de pelo menos uma máquina a correr o memcached. Para mais "
+"detalhes\n"
+"        veja <a href=\"http://www.danga.com/memcached/\">o site do "
+"memcached</a>.\n"
+"        Separe múltiplos endereços usando vírgulas. Esta opção também "
+"requer \n"
+"        o módulo <a href=\"http://gijsbert.org/cmemcache/\">cmemcache</a>"
+" ou\n"
+"        <a href=\"ftp://ftp.tummy.com/pub/python-memcached/\">python-"
+"memcached</a>.\n"
 "      "
 
 #: zine/templates/admin/cache.html:59
 msgid ""
 "\n"
-"        If you for example have a memcached running on localhost (127.0.0.1)\n"
-"        port 11211 you would have to enter <code>127.0.0.1:11211</code> into\n"
+"        If you for example have a memcached running on localhost "
+"(127.0.0.1)\n"
+"        port 11211 you would have to enter <code>127.0.0.1:11211</code> "
+"into\n"
 "        the following text field.\n"
 "      "
 msgstr ""
 "\n"
-"        Se, por exemplo, tiver o memcached a correr em localhost (127.0.0.1)\n"
-"        na porta 11211, deve introduzir <code>127.0.0.1:11211</code> no campo\n"
+"        Se, por exemplo, tiver o memcached a correr em localhost "
+"(127.0.0.1)\n"
+"        na porta 11211, deve introduzir <code>127.0.0.1:11211</code> no "
+"campo\n"
 "        de texto seguinte.\n"
 "      "
 
@@ -1635,14 +1731,18 @@ msgid ""
 "        When using the filesystem cache you can control where Zine puts\n"
 "        all the cache data.  This path is relative to your Zine instance\n"
 "        folder and will be created automatically by Zine.  Keep in mind\n"
-"        that if you change that path and old cache data is left in the old\n"
+"        that if you change that path and old cache data is left in the "
+"old\n"
 "        folder, Zine won't clean up the data left for you.\n"
 "      "
 msgstr ""
 "\n"
-"        Ao utilizar a cache no sistema de arquivos pode controlar onde o Zine\n"
-"        coloca toda a informação da cache. Este caminho é relativo à pasta\n"
-"        da sua instância Zine e será criado automaticamente pelo Zine. Tenha\n"
+"        Ao utilizar a cache no sistema de arquivos pode controlar onde o "
+"Zine\n"
+"        coloca toda a informação da cache. Este caminho é relativo à "
+"pasta\n"
+"        da sua instância Zine e será criado automaticamente pelo Zine. "
+"Tenha\n"
 "        em mente que se alterar o caminho e os dados ficarem na pasta\n"
 "        antiga o Zine não limpará esses dados por si.\n"
 "      "
@@ -1650,21 +1750,26 @@ msgstr ""
 #: zine/templates/admin/cache.html:75
 msgid ""
 "\n"
-"        One thing you have to keep in mind is that the cache path <em>must</em>\n"
+"        One thing you have to keep in mind is that the cache path "
+"<em>must</em>\n"
 "        be a directory that only Zine uses for file management. The\n"
 "        Zine code cleans up there from time to time and it could delete\n"
 "        files that are otherwise not tracked by Zine. This is especially\n"
 "        the case if you try to cache into <code>/tmp</code> or a similar\n"
-"        folder that all kinds of applications use for storing temporary files.\n"
+"        folder that all kinds of applications use for storing temporary "
+"files.\n"
 "      "
 msgstr ""
 "\n"
-"        Algo que deve ter em mente é que o caminho para a cache <em>deve</em>\n"
+"        Algo que deve ter em mente é que o caminho para a cache "
+"<em>deve</em>\n"
 "        ser uma pasta que apenas o Zine usa para gerir arquivos. O\n"
 "        código do Zine limpa a pasta de tempos a tempos e pode apagar\n"
-"        arquivos não controlados pelo Zine. Este é o caso especialmente se\n"
+"        arquivos não controlados pelo Zine. Este é o caso especialmente "
+"se\n"
 "        tentar colocar a cache em <code>/tmp</code> ou pasta\n"
-"        similar, onde qualquer tipo de aplicação guarda arquivos temporários.\n"
+"        similar, onde qualquer tipo de aplicação guarda arquivos "
+"temporários.\n"
 "      "
 
 #: zine/templates/admin/cache.html:85
@@ -1674,22 +1779,33 @@ msgstr "Configurações Gerais da Cache"
 #: zine/templates/admin/cache.html:86
 msgid ""
 "\n"
-"      The following configuration values are cache system-independent. You\n"
-"      can use them to fine-tune the caching. The timeout is the number of\n"
-"      seconds an item is cached per default. Some items have different cache\n"
-"      timeouts though. If “eager caching” is enabled the cache system will\n"
-"      cache a lot more but it will have visible side-effects. For example\n"
-"      new blog posts won't appear on the index or in the feed for up to the\n"
+"      The following configuration values are cache system-independent. "
+"You\n"
+"      can use them to fine-tune the caching. The timeout is the number of"
+"\n"
+"      seconds an item is cached per default. Some items have different "
+"cache\n"
+"      timeouts though. If “eager caching” is enabled the cache system "
+"will\n"
+"      cache a lot more but it will have visible side-effects. For example"
+"\n"
+"      new blog posts won't appear on the index or in the feed for up to "
+"the\n"
 "      default timeout.\n"
 "    "
 msgstr ""
 "\n"
-"      Os valores de configuração seguintes são independentes do sistema de cache.\n"
+"      Os valores de configuração seguintes são independentes do sistema "
+"de cache.\n"
 "      Pode usá-los para ajustar a cache. O timeout é o número de\n"
-"      segundos que um item fica na cache por defeito. Alguns itens têm diferentes\n"
-"      valores de timeout. Se um “caching egoísta” é habilitado, o sistema de cache\n"
-"      vai armazenar mais e isso terá feitos visíveis. Por exemplo, novos artigos\n"
-"      não aparecerão no índice ou no feed até ao tempo por defeito de timeout.\n"
+"      segundos que um item fica na cache por defeito. Alguns itens têm "
+"diferentes\n"
+"      valores de timeout. Se uma “caching egoísta” é habilitada, o sistema"
+" de cache\n"
+"      vai armazenar mais e isso terá feitos visíveis. Por exemplo, novos "
+"artigos\n"
+"      não aparecerão no índice ou no feed até ao tempo por defeito de "
+"timeout.\n"
 "    "
 
 #: zine/templates/admin/cache.html:101
@@ -1704,29 +1820,34 @@ msgid "Change Password"
 msgstr "Alterar Palavra-passe"
 
 #: zine/templates/admin/configuration.html:2
-#: zine/templates/admin/configuration.html:4
-#: zine/views/admin.py:131
+#: zine/templates/admin/configuration.html:4 zine/views/admin.py:131
 msgid "Configuration Editor"
 msgstr "Editor de Configurações"
 
 #: zine/templates/admin/configuration.html:5
 msgid ""
 "\n"
-"    Here you can tune all registered configuration values. Note that some of\n"
-"    them (especially the core configuration values) can easily break your\n"
-"    installation if set to an illegal value. Don't alter any of those values\n"
+"    Here you can tune all registered configuration values. Note that some"
+" of\n"
+"    them (especially the core configuration values) can easily break your"
+"\n"
+"    installation if set to an illegal value. Don't alter any of those "
+"values\n"
 "    if you don't know what effect they have. This editor is especially\n"
-"    useful if you want to configure plugins that don't provide a configuration\n"
+"    useful if you want to configure plugins that don't provide a "
+"configuration\n"
 "    page (yet).\n"
 "  "
 msgstr ""
 "\n"
-"    Aqui pode configurar todos os valores de configuração registrados. Note que\n"
+"    Aqui pode configurar todos os valores de configuração registrados. "
+"Note que\n"
 "    alguns desses valores podem facilmente comprometer a sua instalação\n"
-"    se configurados para valores não permitidos. Não altere nenhum desses valores\n"
+"    se configurados para valores não permitidos. Não altere nenhum desses"
+" valores\n"
 "    se você não conhecer os efeitos que tem. Este editor é especialmente\n"
-"    útil se deseja configurar plugins que ainda não oferecem uma página\n"
-"    de configuração (para já).\n"
+"    útil se deseja configurar plugins que ainda(para já) não oferecem uma página\n"
+"    de configuração.\n"
 
 #: zine/templates/admin/configuration.html:31
 msgid "Disable Editor"
@@ -1735,13 +1856,15 @@ msgstr "Desactivar Editor"
 #: zine/templates/admin/configuration.html:34
 msgid ""
 "\n"
-"        The configuration editor is disabled because of this. If you really want\n"
+"        The configuration editor is disabled because of this. If you "
+"really want\n"
 "        to use it, click the button to proceed.\n"
 "      "
 msgstr ""
 "\n"
-"        O editor de configurações esta desabilitado por este motivo. Se realmente\n"
-"        deseja utiliza-lo, clique no botão para continuar.\n"
+"        O editor de configurações está desabilitado por este motivo. Se "
+"realmente\n"
+"        deseja utilizá-lo, clique no botão para continuar.\n"
 
 #: zine/templates/admin/configuration.html:39
 msgid "Enable Editor"
@@ -1756,11 +1879,12 @@ msgstr "Apagar Categoria"
 #, python-format
 msgid ""
 "\n"
-"        Do you really want to delete category “%(category_name)s”?el\n"
+"        Do you really want to delete category “%(category_name)s”?\n"
 "      "
 msgstr ""
 "\n"
 "        Deseja realmente apagar a categoria “%(category_name)s”?\n"
+"      "
 
 #: zine/templates/admin/delete_comment.html:2
 #: zine/templates/admin/delete_comment.html:4
@@ -1816,11 +1940,11 @@ msgid_plural ""
 "    "
 msgstr[0] ""
 "\n"
-"      Vai também apagar %(comment_count)s comentário.\n"
+"      Irá também apagar %(comment_count)s comentário.\n"
 "    "
 msgstr[1] ""
 "\n"
-"      Vai também apagar %(comment_count)s comentários.\n"
+"      Irá também apagar %(comment_count)s comentários.\n"
 "    "
 
 #: zine/templates/admin/delete_group.html:2
@@ -1907,11 +2031,13 @@ msgid_plural ""
 "    "
 msgstr[0] ""
 "\n"
-"      O que deve acontecer com %(post_count)s artigo que este utilizador escreveu?\n"
+"      O que deve acontecer com %(post_count)s artigo que este utilizador "
+"escreveu?\n"
 "    "
 msgstr[1] ""
 "\n"
-"      O que deve acontecer com %(post_count)s artigos que este utilizador escreveu?\n"
+"      O que deve acontecer com %(post_count)s artigos que este utilizador"
+" escreveu?\n"
 "    "
 
 #: zine/templates/admin/edit_category.html:3
@@ -1924,8 +2050,7 @@ msgstr "Editar Categoria"
 msgid "Edit Comment"
 msgstr "Editar Comentário"
 
-#: zine/templates/admin/edit_entry.html:4
-#: zine/templates/admin/index.html:19
+#: zine/templates/admin/edit_entry.html:4 zine/templates/admin/index.html:19
 #: zine/templates/admin/manage_entries.html:10
 msgid "New Entry"
 msgstr "Nova Entrada"
@@ -1944,11 +2069,13 @@ msgstr "Importante:"
 #: zine/templates/admin/edit_page.html:12
 msgid ""
 "This post was created with a parser that is no longer\n"
-"        available.  You won't be able to save the post with the same parser\n"
+"        available.  You won't be able to save the post with the same "
+"parser\n"
 "        unless you re-activate the plugin that provided it."
 msgstr ""
 "Esse artigo foi criado com um parser que já não se encontra\n"
-"        disponível. Não será possível guardar o artigo com o mesmo parser\n"
+"        disponível. Não será possível guardar o artigo com o mesmo parser"
+"\n"
 "        a menos que reactive o plugin que o fornece."
 
 #: zine/templates/admin/edit_entry.html:29
@@ -2007,31 +2134,36 @@ msgstr "Novo Utilizador"
 msgid "Edit User"
 msgstr "Editar Utilizador"
 
-#: zine/templates/admin/export.html:2
-#: zine/templates/admin/export.html:4
+#: zine/templates/admin/export.html:2 zine/templates/admin/export.html:4
 #: zine/templates/admin/export.html:21
-#: zine/templates/admin/information.html:206
-#: zine/views/admin.py:128
+#: zine/templates/admin/information.html:206 zine/views/admin.py:128
 msgid "Export"
 msgstr "Exportar"
 
 #: zine/templates/admin/export.html:5
 msgid ""
 "\n"
-"    Here you can dump your Zine database information into an standardized\n"
+"    Here you can dump your Zine database information into an standardized"
+"\n"
 "    format (Atom) with Zine extensions which we call “Zine eXtended\n"
-"    Atom” (ZineXA).  You can use this file to import your posts into another\n"
-"    weblog software that supports Atom.  You should not use this file for\n"
+"    Atom” (ZineXA).  You can use this file to import your posts into "
+"another\n"
+"    weblog software that supports Atom.  You should not use this file for"
+"\n"
 "    Zine migrations as this file will not include attachments, the blog\n"
 "    configuration and probably data stored by plugins.\n"
 "  "
 msgstr ""
 "\n"
-"    Aqui pode extrair informações da sua base de dados Zine num formato standard\n"
-"     (Atom) com extensões Zine a que chamamos “Zine eXtended\n"
-"    Atom” (ZineXA). Pode utilizar este arquivo para importar os seus artigos noutro\n"
-"    software de weblogs que suporte Atom. Não deve utilizar este arquivo para\n"
-"    migrar o Zine já que este arquivo não irá incluir anexos, a configuração\n"
+"    Aqui pode extrair informações da sua base de dados Zine num formato "
+"(Atom) standard\n"
+"     com extensões Zine a que chamamos “Zine eXtended\n"
+"    Atom” (ZineXA). Pode utilizar este arquivo para importar os seus "
+"artigos noutro\n"
+"    software de weblogs que suporte Atom. Não deve utilizar este arquivo "
+"para\n"
+"    migrar o Zine já que este arquivo não irá incluir anexos, a "
+"configuração\n"
 "    do blog e provavelmente informações armazenadas por plugins.\n"
 "  "
 
@@ -2045,7 +2177,8 @@ msgid ""
 msgstr ""
 "\n"
 "    Tenha em mente que o arquivo exportado irá conter informações\n"
-"    confidenciais como palavras-passe codificadas e a palavra-passe da base de dados da\n"
+"    confidenciais tais como palavras-passe codificadas e a palavra-passe da "
+"base de dados da\n"
 "    configuração.\n"
 "  "
 
@@ -2071,42 +2204,50 @@ msgstr ""
 "\t  script <tt>build-documentation</tt> localizado na pasta de\n"
 "\t  scripts do Zine."
 
-#: zine/templates/admin/import.html:2
-#: zine/templates/admin/import.html:4
+#: zine/templates/admin/import.html:2 zine/templates/admin/import.html:4
 #: zine/templates/admin/import_blogger.html:41
 #: zine/templates/admin/import_feed.html:17
-#: zine/templates/admin/import_wordpress.html:19
-#: zine/views/admin.py:127
+#: zine/templates/admin/import_wordpress.html:19 zine/views/admin.py:127
 msgid "Import"
 msgstr "Importar"
 
 #: zine/templates/admin/import.html:5
 msgid ""
 "\n"
-"    If you have posts or comments in another system, Zine can import those\n"
-"    into this blog.  The data imported doesn't directly end up in the blog but a\n"
-"    queue so that you can pick which data you want to import.  To get started,\n"
+"    If you have posts or comments in another system, Zine can import "
+"those\n"
+"    into this blog.  The data imported doesn't directly end up in the "
+"blog but a\n"
+"    queue so that you can pick which data you want to import.  To get "
+"started,\n"
 "    choose a system to import from below:\n"
 "  "
 msgstr ""
 "\n"
-"    Se tem artigos ou comentários noutro sistema, o Zine pode importá-los\n"
-"    para este blog. A informação importada não vai directamente para o blog mas\n"
-"    para uma fila de trabalhos, de modo que, assim pode seleccionar o que deseja importar. Para começar,\n"
-"    escolha abaixo um sistema para importar:\n"
+"    Se tem artigos ou comentários noutro sistema, o Zine pode importá-los"
+"\n"
+"    para este blog. A informação importada não vai directamente para o "
+"blog mas\n"
+"    para uma fila de trabalhos, de modo que, assim pode seleccionar o que"
+" deseja importar. Para começar,\n"
+"    escolha em baixo um sistema para importar:\n"
 "  "
 
 #: zine/templates/admin/import.html:17
 msgid ""
 "\n"
-"      The following list lists all the imports that are not yet in the database\n"
-"      or deleted.  Click on one of the links to inspect the imported data and\n"
+"      The following list lists all the imports that are not yet in the "
+"database\n"
+"      or deleted.  Click on one of the links to inspect the imported data"
+" and\n"
 "      select what you want to have in the database.\n"
 "    "
 msgstr ""
 "\n"
-"      A lista seguinte mostra todas as importações que ainda não estão na base\n"
-"      de dados ou apagadas. Clique num dos links para examinar os dados importados e\n"
+"      A lista seguinte mostra todas as importações que ainda não estão na"
+" base\n"
+"      de dados ou apagadas. Clique num dos links para examinar os dados "
+"importados e\n"
 "      seleccionar o que quer na base de dados.\n"
 "    "
 
@@ -2142,7 +2283,7 @@ msgstr ""
 
 #: zine/templates/admin/import_blogger.html:30
 msgid "Select Blog To Import"
-msgstr "Seleccione um Blog para Importar"
+msgstr "Seleccione um Blog Para Importar"
 
 #: zine/templates/admin/import_blogger.html:42
 msgid "Log out of Google"
@@ -2152,17 +2293,21 @@ msgstr "Sair do Google"
 #, python-format
 msgid ""
 "\n"
-"  You are not authenticated with %(google)s. You need to authenticate to continue\n"
+"  You are not authenticated with %(google)s. You need to authenticate to "
+"continue\n"
 "  the import. This link will take you to %(google)s, and once you are\n"
-"  authenticated you will be redirected back to this importer. This is the\n"
-"  preferred way to authenticate, and although it's a bit clumsy, it is safe.\n"
+"  authenticated you will be redirected back to this importer. This is the"
+"\n"
+"  preferred way to authenticate, and although it's a bit clumsy, it is "
+"safe.\n"
 "  "
 msgstr ""
 "\n"
-"  Não está autenticado com %(google)s. É necessário autenticar-se para continuar\n"
-"  a importação. Este link levá-lo-á ao  %(google)s, e uma vez autenticado\n"
+"  Não está autenticado com %(google)s. É necessário autenticar-se para "
+"continuar\n"
+"  a importação. Este link levá-lo-á ao %(google)s, e uma vez autenticado\n"
 "  será redireccionado de volta para este importador. Esta é a maneira\n"
-"  ideal para autenticação, embora seja desconfortável, é segura.\n"
+"  ideal de autenticação, embora seja desconfortável, é segura.\n"
 "  "
 
 #: zine/templates/admin/import_blogger.html:57
@@ -2184,14 +2329,18 @@ msgstr "Importar do Feed"
 #: zine/templates/admin/import_feed.html:5
 msgid ""
 "\n"
-"    This importer can be used to import standard compliant feeds with optional\n"
-"    proprietary extensions.  Because of different incompatible RSS standards\n"
+"    This importer can be used to import standard compliant feeds with "
+"optional\n"
+"    proprietary extensions.  Because of different incompatible RSS "
+"standards\n"
 "    this importer can currently only handle Atom feeds.\n"
 "  "
 msgstr ""
 "\n"
-"    Este importador pode ser usado para importar um feed padrão com opções\n"
-"    de extensões proprietárias. Devido à incompatibilidade nos padrões RSS\n"
+"    Este importador pode ser usado para importar um feed padrão com "
+"opções\n"
+"    de extensões proprietárias. Devido à incompatibilidade nos padrões "
+"RSS\n"
 "    este importador actualmente só pode trabalhar com feeds Atom.\n"
 "  "
 
@@ -2207,27 +2356,32 @@ msgstr "Importar do WordPress"
 #: zine/templates/admin/import_wordpress.html:5
 msgid ""
 "\n"
-"    This importer allows you to import posts and comments from your WordPress\n"
+"    This importer allows you to import posts and comments from your "
+"WordPress\n"
 "    blog into your new Zine blog.  Either upload your WordPress eXtended\n"
-"    RSS (WXR) file created in the WordPress admin panel or give the importer\n"
-"    the location of such a file on an external URL and it will import the posts,\n"
+"    RSS (WXR) file created in the WordPress admin panel or give the "
+"importer\n"
+"    the location of such a file on an external URL and it will import the"
+" posts,\n"
 "    comments, custom fields, and categories into this blog.\n"
 "  "
 msgstr ""
 "\n"
-"    Este importador permite importar artigos e comentários do seu blog Wordpress\n"
+"    Este importador permite importar artigos e comentários do seu blog "
+"Wordpress\n"
 "    para o seu blog Zine. Carregue o seu arquivo WordPress eXtended\n"
-"    RSS (WXR) criado no painel administrativo do WordPress ou forneça ao importador\n"
-"    a localização do arquivo num URL externo e o mesmo importará os seus artigos,\n"
-"    comentários, campos personalizados e categorias nesse blog.\n"
+"    RSS (WXR) criado no painel administrativo do WordPress ou forneça ao "
+"importador\n"
+"    a localização do arquivo num URL externo e o mesmo importará os seus "
+"artigos,\n"
+"    comentários, campos personalizados e categorias desse blog.\n"
 "  "
 
 #: zine/templates/admin/import_wordpress.html:15
 msgid "Upload Dump"
 msgstr "Carregar Dump"
 
-#: zine/templates/admin/index.html:2
-#: zine/templates/admin/index.html:5
+#: zine/templates/admin/index.html:2 zine/templates/admin/index.html:5
 #: zine/views/admin.py:84
 msgid "Dashboard"
 msgstr "Painel"
@@ -2235,7 +2389,7 @@ msgstr "Painel"
 #: zine/templates/admin/index.html:8
 #, python-format
 msgid "Howdy.  Welcome to the Zine administration interface %(user)s."
-msgstr "Olá, %(user)s. Seja bem-vindo à interface administrativa do Zine."
+msgstr "Olá. Bem-vindo à interface administrativa do Zine %(user)s."
 
 #: zine/templates/admin/index.html:11
 #, python-format
@@ -2266,8 +2420,7 @@ msgstr "Configurar o Zine"
 msgid "Manage Plugins"
 msgstr "Gerir Plugins"
 
-#: zine/templates/admin/index.html:24
-#: zine/templates/admin/manage_users.html:2
+#: zine/templates/admin/index.html:24 zine/templates/admin/manage_users.html:2
 #: zine/templates/admin/manage_users.html:4
 msgid "Manage Users"
 msgstr "Gerir Utilizadores"
@@ -2280,14 +2433,20 @@ msgstr "Obter Ajuda"
 #, python-format
 msgid ""
 "\n"
-"        If you need help, have a look at the <a href=\"%(help)s\">documentation</a>.  If that doesn't solve your problems you might\n"
-"        find answers in the <a href=\"%(support)s\">support section</a> of the\n"
+"        If you need help, have a look at the <a "
+"href=\"%(help)s\">documentation</a>.  If that doesn't solve your problems"
+" you might\n"
+"        find answers in the <a href=\"%(support)s\">support section</a> "
+"of the\n"
 "        <a href=\"%(website)s\">Zine website</a>.\n"
 "      "
 msgstr ""
 "\n"
-"        Se necessita de ajuda, dê uma olhada na <a href=\"%(help)s\">documentação</a>. Se isso não resolver os seus problemas poderá\n"
-"        encontrar respostas na <a href=\"%(support)s\">secção de suporte</a> no \n"
+"        Se necessita de ajuda, dê uma olhada na <a "
+"href=\"%(help)s\">documentação</a>. Se isso não resolver os seus "
+"problemas poderá\n"
+"        encontrar respostas na <a href=\"%(support)s\">secção de "
+"suporte</a> no \n"
 "        <a href=\"%(website)s\">website do Zine</a>.\n"
 "      "
 
@@ -2311,12 +2470,14 @@ msgstr "Zine no Reddit"
 #, python-format
 msgid ""
 "\n"
-"        Zine is present at %(reddit)s.  The latest popular items in the Zine\n"
+"        Zine is present at %(reddit)s.  The latest popular items in the "
+"Zine\n"
 "        subreddit are listed below:\n"
 "        "
 msgstr ""
 "\n"
-"        Zine está presente no %(reddit)s. Os itens mais recentes e populares do subreddit\n"
+"        O Zine está presente no %(reddit)s. Os itens mais recentes e "
+"populares do subreddit\n"
 "        do Zine estão listados em baixo:\n"
 "        "
 
@@ -2420,7 +2581,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Os seguintes pontos finais estão registrados nesta instância:\n"
+"    Os pontos finais seguintes estão registrados nesta instância:\n"
 "  "
 
 #: zine/templates/admin/information.html:72
@@ -2434,7 +2595,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Os seguintes manipuladores de URL's absolutos estão registrados nesta instância:\n"
+"    Os seguintes manipuladores de URL's absolutos estão registrados nesta"
+" instância:\n"
 "  "
 
 #: zine/templates/admin/information.html:81
@@ -2444,11 +2606,13 @@ msgstr "Manipuladores de Visão"
 #: zine/templates/admin/information.html:82
 msgid ""
 "\n"
-"    The following view handlers for endpoints are registered on this instance:\n"
+"    The following view handlers for endpoints are registered on this "
+"instance:\n"
 "  "
 msgstr ""
 "\n"
-"    Os seguintes manipuladores de visão estão registrados nesta instância:\n"
+"    Os seguintes manipuladores de visão estão registrados nesta "
+"instância:\n"
 "  "
 
 #: zine/templates/admin/information.html:90
@@ -2482,12 +2646,14 @@ msgstr "Serviços"
 #: zine/templates/admin/information.html:112
 msgid ""
 "\n"
-"    The following servicepoints are registered on this instance to be callable\n"
+"    The following servicepoints are registered on this instance to be "
+"callable\n"
 "    via one of the available services.\n"
 "    "
 msgstr ""
 "\n"
-"    Os seguintes servicepoints estão registrados nesta instância para serem chamados\n"
+"    Os seguintes pontos de serviço estão registrados nesta instância para "
+"serem chamados\n"
 "    através de um dos serviços disponíveis.\n"
 "    "
 
@@ -2498,12 +2664,14 @@ msgstr "APIs Instaladas"
 #: zine/templates/admin/information.html:122
 msgid ""
 "\n"
-"    The following APIs are installed on this blog instance. APIs marked with\n"
+"    The following APIs are installed on this blog instance. APIs marked "
+"with\n"
 "    a star (*) are preferred.\n"
 "  "
 msgstr ""
 "\n"
-"    As seguintes APIs estão instaladas na instância deste blog. APIs marcadas com\n"
+"    As seguintes APIs estão instaladas na instância deste blog. APIs "
+"marcadas com\n"
 "    asterisco (*) são preferidos.\n"
 "  "
 
@@ -2518,7 +2686,8 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    Os seguintes manipuladores de elementos ZEML estão registrados nesta instância:\n"
+"    Os seguintes manipuladores de elementos ZEML estão registrados nesta "
+"instância:\n"
 "  "
 
 #: zine/templates/admin/information.html:143
@@ -2539,8 +2708,7 @@ msgstr ""
 "    Os seguintes parsers estão actualmente instalados:\n"
 "  "
 
-#: zine/templates/admin/information.html:156
-#: zine/views/admin.py:107
+#: zine/templates/admin/information.html:156 zine/views/admin.py:107
 msgid "Plugins"
 msgstr "Plugins"
 
@@ -2584,15 +2752,17 @@ msgstr "Filtros de Modelo"
 #: zine/templates/admin/information.html:198
 msgid ""
 "\n"
-"    You can export this list and share it for troubleshooting by clicking\n"
+"    You can export this list and share it for troubleshooting by clicking"
+"\n"
 "    on the button below.  The resulting file is stripped of confidential\n"
 "    information such as passwords.\n"
 "  "
 msgstr ""
 "\n"
 "    Pode exportar esta lista e partilhá-la para a detecção de problemas\n"
-"    clicando no botão em baixo. O arquivo resultante não contém informações\n"
-"    confidenciais como palavras-passe.\n"
+"    clicando no botão em baixo. O arquivo resultante não contém "
+"informações\n"
+"    confidenciais tais como palavras-passe.\n"
 "  "
 
 #: zine/templates/admin/inspect_import.html:2
@@ -2603,12 +2773,13 @@ msgstr "Inspeccionar Importação"
 #: zine/templates/admin/inspect_import.html:5
 msgid ""
 "\n"
-"    Here you can now inspect the imported data and select the data you want\n"
+"    Here you can now inspect the imported data and select the data you "
+"want\n"
 "    to import into the database.\n"
 "  "
 msgstr ""
 "\n"
-"    Aqui você pode inspeccionar as informações importadas e seleccionar o que\n"
+"    Aqui pode inspeccionar as informações importadas e seleccionar o que\n"
 "    deseja importar para a base de dados.\n"
 "  "
 
@@ -2621,22 +2792,31 @@ msgid "Dump ID"
 msgstr "ID do Dump"
 
 #: zine/templates/admin/inspect_import.html:19
-msgid "If you have a special installation and want to rewrite the import programmatically you need this identifier."
-msgstr "Se tem uma instalação especial e deseja reescrever a importação programaticamente necessita deste identificador."
+msgid ""
+"If you have a special installation and want to rewrite the import "
+"programmatically you need this identifier."
+msgstr ""
+"Se tem uma instalação especial e deseja reescrever a importação "
+"programaticamente necessita deste identificador."
 
 #: zine/templates/admin/inspect_import.html:24
 msgid ""
 "\n"
-"      Chose the authors whose posts you want to import.  In the dropdown you\n"
-"      can select one of the already existing users if you want to change the\n"
-"      author during importing.  In the default settings a new and inactive user\n"
+"      Chose the authors whose posts you want to import.  In the dropdown "
+"you\n"
+"      can select one of the already existing users if you want to change "
+"the\n"
+"      author during importing.  In the default settings a new and "
+"inactive user\n"
 "      without a password is created.\n"
 "    "
 msgstr ""
 "\n"
-"      Seleccione os autores cujo artigos deseja importar. No dropdown pode\n"
-"      seleccionar um autor já existe se desejar alterar o autor durante\n"
-"      a importação.  Nas opções por defeito um utilizador novo e inactivo sem palavra-passe\n"
+"      Seleccione os autores cujos artigos deseja importar. No dropdown "
+"pode\n"
+"      seleccionar um autor já existente se desejar alterar o autor durante\n"
+"      a importação.  Nas opções por defeito um utilizador novo e inactivo"
+" sem palavra-passe\n"
 "      é criado.\n"
 "    "
 
@@ -2647,14 +2827,18 @@ msgstr "sem informação do autor"
 #: zine/templates/admin/inspect_import.html:37
 msgid ""
 "\n"
-"      Authors are only converted if at least one of their posts is coverted.\n"
-"      So if you unselect all the posts by a user in the list below it doesn't\n"
+"      Authors are only converted if at least one of their posts is "
+"coverted.\n"
+"      So if you unselect all the posts by a user in the list below it "
+"doesn't\n"
 "      matter what you select here.\n"
 "    "
 msgstr ""
 "\n"
-"      Os Autores serão convertidos somente se um de seus artigos for convertido.\n"
-"      Portanto se não seleccionar nenhum dos artigos de um utilizador na lista em baixo não\n"
+"      Os Autores serão convertidos somente se um dos seus artigos for "
+"convertido.\n"
+"      Portanto se não seleccionar nenhum dos artigos de um utilizador na "
+"lista em baixo não\n"
 "      importa o que seleccionar aqui.\n"
 "    "
 
@@ -2680,6 +2864,11 @@ msgstr "não publicado"
 msgid "Import into Blog"
 msgstr "Importar para o Blog"
 
+#: zine/templates/admin/layout.html:14
+#, python-format
+msgid "%(blog_title)s Administration"
+msgstr "Administração %(blog_title)s"
+
 #: zine/templates/admin/layout.html:16
 msgid "View Blog"
 msgstr "Visualizar o Blog"
@@ -2689,8 +2878,7 @@ msgstr "Visualizar o Blog"
 msgid "Powered by %(zine)s %(version)s."
 msgstr "Movido por %(zine)s %(version)s."
 
-#: zine/templates/admin/log.html:2
-#: zine/templates/admin/log.html:4
+#: zine/templates/admin/log.html:2 zine/templates/admin/log.html:4
 #: zine/views/admin.py:129
 msgid "Log"
 msgstr "Registro"
@@ -2727,13 +2915,11 @@ msgstr "Cima ▲"
 msgid "Log Settings"
 msgstr "Configurações de Registo"
 
-#: zine/templates/admin/log.html:40
-#: zine/templates/admin/plugins.html:60
+#: zine/templates/admin/log.html:40 zine/templates/admin/plugins.html:60
 msgid "Apply"
 msgstr "Aplicar"
 
-#: zine/templates/admin/login.html:5
-#: zine/templates/admin/login.html:15
+#: zine/templates/admin/login.html:5 zine/templates/admin/login.html:15
 #: zine/templates/admin/login.html:36
 msgid "Login"
 msgstr "Autenticar"
@@ -2747,38 +2933,47 @@ msgid "Remember me"
 msgstr "Lembrar de mim"
 
 #: zine/templates/admin/maintenance.html:2
-#: zine/templates/admin/maintenance.html:4
-#: zine/views/admin.py:126
+#: zine/templates/admin/maintenance.html:4 zine/views/admin.py:126
 msgid "Maintenance"
 msgstr "Manutenção"
 
 #: zine/templates/admin/maintenance.html:5
 msgid ""
 "\n"
-"    From here you can set your blog into maintenance mode and do administrative\n"
-"    tasks.  It's recommend to enable maintenance mode before doing software\n"
-"    upgrades, imports, exports or plugin installations.  While it's not stricly\n"
-"    necessary for the latter it's good idea to test the changes before going\n"
-"    live with them.  As long as maintenance mode is enabled users will see a\n"
+"    From here you can set your blog into maintenance mode and do "
+"administrative\n"
+"    tasks.  It's recommend to enable maintenance mode before doing "
+"software\n"
+"    upgrades, imports, exports or plugin installations.  While it's not "
+"stricly\n"
+"    necessary for the latter it's good idea to test the changes before "
+"going\n"
+"    live with them.  As long as maintenance mode is enabled users will "
+"see a\n"
 "    message that says that the blog is in maintenance mode.\n"
 "  "
 msgstr ""
 "\n"
-"    A partir daqui poderá colocar o blog em modo de manutenção e executar tarefas\n"
-"    administrativas. É recomendado activar o modo manutenção antes de executar\n"
-"    actualizações, importações, exportações ou instalação de plugins. Não é estritamente\n"
-"    necessário mas é uma boa ideia testar as mudanças antes de colocá-las\n"
-"    em produção. Enquanto o modo manutenção estiver habilitado os utilizadores irão\n"
+"    A partir daqui poderá colocar o blog em modo de manutenção e executar"
+" tarefas\n"
+"    administrativas. É recomendado activar o modo manutenção antes de "
+"executar\n"
+"    actualizações, importações, exportações ou instalação de plugins. Não"
+" é estritamente\n"
+"    necessário mas é uma boa ideia testar as mudanças antes de colocá-las"
+"\n"
+"    em produção. Enquanto o modo manutenção estiver habilitado os "
+"utilizadores irão\n"
 "    ver uma mensagem dizendo que o blog esta em manutenção.\n"
 "  "
 
 #: zine/templates/admin/maintenance.html:16
 msgid "Disable maintenance mode"
-msgstr "Desabilitar modo de manutenção"
+msgstr "Desabilitar o modo de manutenção"
 
 #: zine/templates/admin/maintenance.html:17
 msgid "Enable maintenance mode"
-msgstr "Habilitar modo de manutenção"
+msgstr "Habilitar o modo de manutenção"
 
 #: zine/templates/admin/manage_categories.html:2
 #: zine/templates/admin/manage_categories.html:4
@@ -2865,8 +3060,10 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    O importador converterá agora todas as informações agregadas e seleccionadas\n"
-"    para o Zine e as inserirá na base de dados. Isto pode levar algum tempo.\n"
+"    O importador converterá agora todas as informações agregadas e "
+"seleccionadas\n"
+"    para o Zine e as inserirá na base de dados. Isto pode levar algum "
+"tempo.\n"
 "    <strong>Não clique em cancelar!</strong>\n"
 "  "
 
@@ -2880,8 +3077,7 @@ msgstr ""
 "    Dados importados com sucesso.\n"
 "  "
 
-#: zine/templates/admin/plugins.html:2
-#: zine/templates/admin/plugins.html:4
+#: zine/templates/admin/plugins.html:2 zine/templates/admin/plugins.html:4
 msgid "Plugin Management"
 msgstr "Gestão de Plugins"
 
@@ -2889,16 +3085,20 @@ msgstr "Gestão de Plugins"
 msgid ""
 "\n"
 "      Plugins extend the functionality of the Zine system. Because of\n"
-"      security and convenience reasons you have to enable plugins by hand.\n"
+"      security and convenience reasons you have to enable plugins by "
+"hand.\n"
 "      Some plugins could conflict with each other so it's up to you to\n"
-"      decide which plugins you want to enable. In case of doubt have a look\n"
+"      decide which plugins you want to enable. In case of doubt have a "
+"look\n"
 "      at the installation instructions of the plugin you've added.\n"
 "    "
 msgstr ""
 "\n"
-"      Os plugins extendem as funcionalidades do Zine. Por motivos de segurança\n"
+"      Os plugins extendem as funcionalidades do Zine. Por motivos de "
+"segurança\n"
 "      e conveniência deve activar os plugins manualmente.\n"
-"      Alguns plugins pode entrar em conflito com outros, é sua decisão definir\n"
+"      Alguns plugins podem entrar em conflito com outros, é sua decisão "
+"definir\n"
 "      quais plugins serão activos. Em caso de dúvidas dê uma olhada\n"
 "      nas instruções de instalação do plugin que adicionou.\n"
 "    "
@@ -2955,8 +3155,10 @@ msgid ""
 msgstr ""
 "\n"
 "      Normalmente o plugin guard está activo e captura excepções durante\n"
-"      a configuração dos plugins. Contudo, em alguns casos isso não é desejável,\n"
-"      por exemplo se deseja descobrir o problema de um plugin defeituoso.\n"
+"      a configuração dos plugins. Contudo, em alguns casos isso não é "
+"desejável,\n"
+"      por exemplo se deseja descobrir o problema de um plugin defeituoso."
+"\n"
 "    "
 
 #: zine/templates/admin/plugins.html:52
@@ -2966,21 +3168,28 @@ msgstr "Adicionar Um Novo Plugin"
 #: zine/templates/admin/plugins.html:53
 msgid ""
 "\n"
-"      If you have a plugin as Zine <tt>.plugin</tt> file you can upload it\n"
-"      to your Zine instance using the following form. Plugins added this way\n"
+"      If you have a plugin as Zine <tt>.plugin</tt> file you can upload "
+"it\n"
+"      to your Zine instance using the following form. Plugins added this "
+"way\n"
 "      can also be completely removed.\n"
 "    "
 msgstr ""
 "\n"
-"      Se você tem um arquivo de <tt>.plugin</tt> Zine, você pode enviá-lo\n"
-"      para sua instância Zine usando o formulário seguinte. Plugins adicionados\n"
+"      Se tem um arquivo <tt>.plugin</tt> Zine, pode enviá-lo\n"
+"      para a sua instância Zine usando o formulário seguinte. Plugins "
+"adicionados\n"
 "      desta maneira podem ser removidos por completo.\n"
 "    "
 
 #: zine/templates/admin/reddit.html:7
 #, python-format
-msgid "from <em>%(domain)s</em>, submitted by %(author)s @ %(submitted)s, %(comments)s"
-msgstr "de <em>%(domain)s</em>, enviado por %(author)s @ %(submitted)s, %(comments)s"
+msgid ""
+"from <em>%(domain)s</em>, submitted by %(author)s @ %(submitted)s, "
+"%(comments)s"
+msgstr ""
+"de <em>%(domain)s</em>, enviado por %(author)s @ %(submitted)s, "
+"%(comments)s"
 
 #: zine/templates/admin/reddit.html:12
 #, python-format
@@ -2991,7 +3200,7 @@ msgstr[1] "%d comentários"
 
 #: zine/templates/admin/reddit.html:20
 msgid "No items on the frontpage"
-msgstr "Nenhum item na página inicial"
+msgstr "Sem itens na página inicial"
 
 #: zine/templates/admin/remove_plugin.html:2
 #: zine/templates/admin/remove_plugin.html:4
@@ -3002,19 +3211,22 @@ msgstr "Remover Plugin"
 #, python-format
 msgid ""
 "\n"
-"      Do you really want to remove the plugin “%(plugin_name)s” permanently\n"
-"      from the instance folder? If you do so you have to reinstall the plugin\n"
+"      Do you really want to remove the plugin “%(plugin_name)s” "
+"permanently\n"
+"      from the instance folder? If you do so you have to reinstall the "
+"plugin\n"
 "      if you want to use it again.\n"
 "    "
 msgstr ""
 "\n"
-"      Deseja realmente remover o plugin “%(plugin_name)s” permanentemente\n"
-"      da pasta da sua instância? Se o fizer, deverá reinstalar o plugin caso\n"
+"      Deseja realmente remover o plugin “%(plugin_name)s” permanentemente"
+"\n"
+"      da pasta da sua instância? Se o fizer, deverá reinstalar o plugin "
+"caso\n"
 "      deseje utilizá-lo novamente.\n"
 "    "
 
-#: zine/templates/admin/theme.html:2
-#: zine/templates/admin/theme.html:4
+#: zine/templates/admin/theme.html:2 zine/templates/admin/theme.html:4
 msgid "Theme Manager"
 msgstr "Gestor de Temas"
 
@@ -3053,25 +3265,31 @@ msgstr "Opções de URL"
 #: zine/templates/admin/url_options.html:5
 msgid ""
 "\n"
-"    Here you can change some basic URL configuration settings.  This is especially\n"
-"    useful if you have plugins installed that that add a new index page or if you\n"
+"    Here you can change some basic URL configuration settings.  This is "
+"especially\n"
+"    useful if you have plugins installed that that add a new index page "
+"or if you\n"
 "    want to move the administration to a different location.\n"
 "  "
 msgstr ""
 "\n"
-"    Aqui você pode alterar algumas configurações básicas de URL. Isso é especialmente\n"
-"    útil se tem instalado plugins que adicionam uma nova página índice ou se\n"
+"    Aqui pode alterar algumas configurações básicas de URL. Isso é "
+"especialmente\n"
+"    útil se tem instalado plugins que adicionam uma nova página índice ou"
+" se\n"
 "    deseja mover a administração para uma localização diferente.\n"
 "  "
 
 #: zine/templates/admin/write_page.html:13
 msgid ""
 "\n"
-"        The key is used to build the url. If no key is given it's just the title-slug.\n"
+"        The key is used to build the url. If no key is given it's just "
+"the title-slug.\n"
 "      "
 msgstr ""
 "\n"
-"        A chave é usada para criar o URL. Se nenhuma chave é fornecida, usa-se apenas a slug do título.\n"
+"        A chave é usada para criar o URL. Se nenhuma chave é fornecida, "
+"usa-se apenas a slug do título.\n"
 "      "
 
 #: zine/templates/admin/write_page.html:18
@@ -3137,16 +3355,14 @@ msgstr "Este campo é necessário."
 msgid "Invalid security token submitted."
 msgstr "O token de segurança enviado é inválido."
 
-#: zine/utils/forms.py:1146
-#: zine/utils/forms.py:1528
+#: zine/utils/forms.py:1146 zine/utils/forms.py:1528
 #, python-format
 msgid "Please provide at least %d item."
 msgid_plural "Please provide at least %d items."
 msgstr[0] "Por favor, forneça pelo menos %d item."
 msgstr[1] "Por favor, forneça pelo menos %d itens."
 
-#: zine/utils/forms.py:1153
-#: zine/utils/forms.py:1535
+#: zine/utils/forms.py:1153 zine/utils/forms.py:1535
 #, python-format
 msgid "Please provide no more than %d item."
 msgid_plural "Please provide no more than %d items."
@@ -3200,12 +3416,12 @@ msgstr "Por favor, insira um número inteiro."
 #: zine/utils/forms.py:1593
 #, python-format
 msgid "Ensure this value is greater than or equal to %s."
-msgstr "Assegure-se que esse valor é maior ou igual a %s."
+msgstr "Assegure-se que este valor é maior ou igual a %s."
 
 #: zine/utils/forms.py:1599
 #, python-format
 msgid "Ensure this value is less than or equal to %s."
-msgstr "Assegure-se que esse valor é menor ou igual a %s."
+msgstr "Assegure-se que este valor é menor ou igual a %s."
 
 #: zine/utils/forms.py:1621
 msgid "True"
@@ -3239,13 +3455,11 @@ msgstr "info"
 msgid "debug"
 msgstr "debug"
 
-#: zine/utils/pagination.py:109
-#: zine/utils/pagination.py:112
+#: zine/utils/pagination.py:109 zine/utils/pagination.py:112
 msgid "Next »"
 msgstr "Próximo »"
 
-#: zine/utils/pagination.py:116
-#: zine/utils/pagination.py:119
+#: zine/utils/pagination.py:116 zine/utils/pagination.py:119
 msgid "« Previous"
 msgstr "« Anterior"
 
@@ -3261,8 +3475,7 @@ msgstr "Esta slug é muito longa."
 msgid "The slug must not start with a slash"
 msgstr "A slug não pode começar com uma barra."
 
-#: zine/utils/validators.py:136
-#: zine/utils/validators.py:139
+#: zine/utils/validators.py:136 zine/utils/validators.py:139
 msgid "You have to enter a valid net address."
 msgstr "Tem que inserir um endereço de internet válido."
 
@@ -3286,11 +3499,19 @@ msgstr "O prefixo URL deve começar com uma barra."
 msgid "URL prefix must not end with a slash."
 msgstr "O prefixo URL não deve terminar com uma barra."
 
-#: zine/utils/zeml.py:299
-msgid "Error when loading dynamic ZEML element. The system ignored the element.  Maybe a disabled plugin caused the problem."
-msgstr "Erro ao carregar um elemento dinâmico ZEML. O sistema ignorou o elemento. Talvez um plugin desabilitado tenha causado o problema."
+#: zine/utils/validators.py:164
+msgid "At least one non-whitespace character is required."
+msgstr "É necessário pelo menos um caracter sem ser espaço."
 
-#: zine/utils/zeml.py:646
+#: zine/utils/zeml.py:300
+msgid ""
+"Error when loading dynamic ZEML element. The system ignored the element."
+"  Maybe a disabled plugin caused the problem."
+msgstr ""
+"Erro ao carregar um elemento dinâmico ZEML. O sistema ignorou o elemento."
+" Talvez um plugin desabilitado tenha causado o problema."
+
+#: zine/utils/zeml.py:659
 #, python-format
 msgid "Error loading dynamic element %s"
 msgstr "Erro ao carregar o elemento dinâmico %s"
@@ -3371,21 +3592,31 @@ msgstr "Sistema"
 
 #: zine/views/admin.py:157
 #, python-format
-msgid "Zine is in maintenance mode. Don't forget to <a href=\"%s\">turn it off again</a> once you finish your changes."
-msgstr "O Zine esta em modo de manutenção. Não se esqueça de <a href=\"%s\">desligá-lo</a> quando terminar as mudanças."
+msgid ""
+"Zine is in maintenance mode. Don't forget to <a href=\"%s\">turn it off "
+"again</a> once you finish your changes."
+msgstr ""
+"O Zine está em modo de manutenção. Não se esqueça de <a "
+"href=\"%s\">desligá-lo</a> quando terminar as mudanças."
 
 #: zine/views/admin.py:166
 #, python-format
 msgid "Could not activate plugin “%(name)s”: %(error)s"
-msgstr "Não possível activar o plugin “%(name)s”: %(error)s"
+msgstr "Não foi possível activar o plugin “%(name)s”: %(error)s"
 
 #: zine/views/admin.py:216
 msgid "No URLs pinged so far because the post is not publicly available"
-msgstr "Nenhum ping para URLs até o momento, porque este artigo não esta disponível ao público"
+msgstr ""
+"Nenhum ping para URLs até o momento porque este artigo não esta "
+"disponível ao público"
 
 #: zine/views/admin.py:219
-msgid "Could not ping URLs because the parser for the post is not available any longer."
-msgstr "Não possível executar o ping para URLs porque o parser para este artigo já não se encontra disponível."
+msgid ""
+"Could not ping URLs because the parser for the post is not available any "
+"longer."
+msgstr ""
+"Não possível executar o ping para URLs porque o parser para este artigo "
+"já não se encontra disponível."
 
 #: zine/views/admin.py:233
 #, python-format
@@ -3533,12 +3764,18 @@ msgstr "Configuração do plugin alterada"
 #: zine/views/admin.py:945
 #, python-format
 msgid "Plugin “%s” added successfully. You can now enable it in the plugin list."
-msgstr "Plugin “%s” adicionado com sucesso. Você pode activá-lo na lista de plugins."
+msgstr ""
+"Plugin “%s” adicionado com sucesso. Você pode activá-lo na lista de "
+"plugins."
 
 #: zine/views/admin.py:972
 #, python-format
-msgid "Could not remove the plugin “%s” because an IO error occurred. Wrong permissions?"
-msgstr "Não foi possível remover o plugin “%s” devido a um erro de IO. Problemas de permissões?"
+msgid ""
+"Could not remove the plugin “%s” because an IO error occurred. Wrong "
+"permissions?"
+msgstr ""
+"Não foi possível remover o plugin “%s” devido a um erro de IO. Problemas "
+"de permissões?"
 
 #: zine/views/admin.py:975
 #, python-format
@@ -3555,7 +3792,7 @@ msgstr "Configurações de cache alteradas com sucesso."
 
 #: zine/views/admin.py:1037
 msgid "Maintenance mode disabled.  The blog is now publicly available."
-msgstr "Modo manutenção desabilitado. O blog esta disponível para o público."
+msgstr "Modo de manutenção desabilitado. O blog esta disponível para o público."
 
 #: zine/views/admin.py:1098
 #, python-format
@@ -3570,39 +3807,42 @@ msgstr "Alterações de registo guardadas."
 msgid "Password changed successfully."
 msgstr "Palavra-passe alterada com sucesso."
 
-#: zine/views/blog.py:52
-#: zine/views/blog.py:84
+#: zine/views/blog.py:52 zine/views/blog.py:84
 msgid "Recent Posts Feed"
 msgstr "Artigos recentes no feed"
 
-#: zine/views/blog.py:114
+#: zine/views/blog.py:115
 #, python-format
 msgid "All posts in category %s"
 msgstr "Todos os artigos na categoria %s"
 
-#: zine/views/blog.py:141
+#: zine/views/blog.py:142
 #, python-format
 msgid "All posts tagged %s"
 msgstr "Todos os artigos classificados como %s"
 
-#: zine/views/blog.py:172
+#: zine/views/blog.py:173
 #, python-format
 msgid "All posts written by %s"
 msgstr "Todos os artigos escritos por %s"
 
-#: zine/views/blog.py:363
+#: zine/views/blog.py:370
 #, python-format
 msgid "Comment %(num)d on %(post)s"
 msgstr "Comentário %(num)d em %(post)s"
 
-#: zine/views/blog.py:420
+#: zine/views/blog.py:427
 msgid "Comments Feed"
 msgstr "Feed dos Comentários"
 
 #: zine/websetup/__init__.py:105
 #, python-format
-msgid "Instance folder does not exist.  You have to create the folder “%s” before proceeding."
-msgstr "A pasta da instância não existe. Deve criar a pasta “%s” antes de continuar."
+msgid ""
+"Instance folder does not exist.  You have to create the folder “%s” "
+"before proceeding."
+msgstr ""
+"A pasta da instância não existe. Deve criar a pasta “%s” antes de "
+"continuar."
 
 #: zine/websetup/__init__.py:127
 msgid "You have to provide a username."
@@ -3626,8 +3866,12 @@ msgstr "As duas palavras-passe não são iguais."
 
 #: zine/websetup/__init__.py:206
 #, python-format
-msgid "The configuration file (%s) could not be opened for writing. Please adjust your permissions and try again."
-msgstr "O arquivo de configuração (%s) não pôde ser aberto para escrita. Por favor ajuste as permissões e tente novamente."
+msgid ""
+"The configuration file (%s) could not be opened for writing. Please "
+"adjust your permissions and try again."
+msgstr ""
+"O arquivo de configuração (%s) não pôde ser aberto para escrita. Por "
+"favor ajuste as permissões e tente novamente."
 
 #: zine/websetup/templates/admin_account.html:3
 msgid "Administrator Account"
@@ -3637,7 +3881,8 @@ msgstr "Conta Administrativa"
 msgid ""
 "\n"
 "    In order to log into your Zine installation you have to provide a\n"
-"    login name for the administration user. You can later rename or delete\n"
+"    login name for the administration user. You can later rename or "
+"delete\n"
 "    that user if you want.\n"
 "  "
 msgstr ""
@@ -3663,15 +3908,20 @@ msgstr "Base de Dados"
 msgid ""
 "\n"
 "    Zine uses a database to store blog posts and other information. The\n"
-"    only information it requires therefore is a database URI. Depending on your\n"
-"    database this URI looks different. Have a look at the following table for\n"
+"    only information it requires therefore is a database URI. Depending "
+"on your\n"
+"    database this URI looks different. Have a look at the following table"
+" for\n"
 "    examples of database URIs.\n"
 "  "
 msgstr ""
 "\n"
-"    O Zine utiliza uma base de dados para armazenar artigos e outras informações. A\n"
-"    única informação requerida agora é o endereço para a base de dados. Dependendo\n"
-"    da base de dados, o endereço pode ser diferente. Dê uma olhada na seguinte tabela\n"
+"    O Zine utiliza uma base de dados para armazenar artigos e outras "
+"informações. A\n"
+"    única informação requerida agora é o endereço para a base de dados. "
+"Dependendo\n"
+"    da base de dados, o endereço pode ser diferente. Dê uma olhada na "
+"seguinte tabela\n"
 "    com exemplos de endereços.\n"
 "  "
 
@@ -3686,13 +3936,15 @@ msgstr "sqlite://database.db"
 #: zine/websetup/templates/database.html:13
 msgid ""
 "\n"
-"        The SQLite database path is either absolute (if it starts with three\n"
+"        The SQLite database path is either absolute (if it starts with "
+"three\n"
 "        slashes on OS X / Linux or two slashes and a drive letter on a\n"
 "        Windows system) or otherwise relative to the instance folder.\n"
 "      "
 msgstr ""
 "\n"
-"        O endereço para a base de dados SQLite é absoluto (se iniciado com\n"
+"        O endereço para a base de dados SQLite é absoluto (se iniciado "
+"com\n"
 "        três barras no OS X / Linux ou duas barras e letra de drive no\n"
 "        Windows) ou relativo à pasta da instância.\n"
 "      "
@@ -3719,7 +3971,7 @@ msgstr "O Setup Falhou"
 
 #: zine/websetup/templates/error.html:4
 msgid "The websetup was not able to finish the Zine installation successfully."
-msgstr "O setup web não foi capaz de finalizar a instalação do Zine com sucesso."
+msgstr "O setup na web não foi capaz de finalizar a instalação do Zine com sucesso."
 
 #: zine/websetup/templates/error.html:5
 msgid ""
@@ -3730,12 +3982,12 @@ msgid ""
 msgstr ""
 "\n"
 "    Se necessitar de ajuda para instalar o Zine dê uma olhada na página\n"
-"    de suporte que estará disponível assim que o beta for publicado :-)\n"
+"    de suporte que estará disponível assim que a beta for publicada :-)\n"
 "  "
 
 #: zine/websetup/templates/finished.html:3
 msgid "Setup Finished"
-msgstr "Setup Finalizado"
+msgstr "Setup Completo"
 
 #: zine/websetup/templates/finished.html:4
 msgid ""
@@ -3754,7 +4006,7 @@ msgstr ""
 #: zine/websetup/templates/layout.html:5
 #: zine/websetup/templates/layout.html:159
 msgid "Zine Setup"
-msgstr "Zine Setup"
+msgstr "Setup do Zine"
 
 #: zine/websetup/templates/layout.html:168
 msgid "An Error Occurred"
@@ -3811,16 +4063,21 @@ msgid ""
 "\n"
 "    Zine knows now about all the information it needs to setup your\n"
 "    instance. After you click on the install button Zine will create\n"
-"    the database tables and insert the default information. Right after that\n"
+"    the database tables and insert the default information. Right after "
+"that\n"
 "    Zine will be online in maintenance mode which means that it's only\n"
-"    visible to the administrator, all other users will get a message that\n"
+"    visible to the administrator, all other users will get a message that"
+"\n"
 "    shows that the blog is in maintenance mode right now.\n"
 "  "
 msgstr ""
 "\n"
-"    O Zine sabe tudo que precisa para fazer a instalação da sua instância.\n"
-"    Após clicar no botão Instalar, o Zine irá criar as tabelas na base de dados\n"
-"    e introduzir as informações por defeito. Logo após o Zine estará online\n"
+"    O Zine sabe tudo que precisa para fazer a instalação da sua "
+"instância.\n"
+"    Após clicar no botão Instalar, o Zine irá criar as tabelas na base de"
+" dados\n"
+"    e introduzir as informações por defeito. Logo após o Zine estará "
+"online\n"
 "    em modo de manutenção, o que significa que estará visível apenas ao\n"
 "    administrador. Todos os outros utilizadores receberão uma mensagem\n"
 "    avisando que o blog está em manutenção no momento.\n"
