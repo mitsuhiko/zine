@@ -4,7 +4,7 @@
 \.DS_Store$
 ^dumps/
 ^.*\.egg-info/
-^zine/i18n/.*?/messages.catalog$
+^zine/i18n/.*?/messages.mo$
 ^zine/docs/.*?\.page$
 ^zine/plugins/.*?/docs/.*?\.page$
 .coverage

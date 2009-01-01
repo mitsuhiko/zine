@@ -653,7 +653,7 @@ class Zine(object):
 
         # initialize i18n/l10n system
         self.locale = Locale(self.cfg['language'])
-        self.translations = i18n.load_translations(self.locale)
+        self.translations = i18n.load_core_translations(self.locale)
 
         # init themes
         _ = i18n.gettext
