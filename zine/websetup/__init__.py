@@ -23,7 +23,7 @@ from zine.config import ConfigurationTransactionError
 from zine.models import User
 from zine.utils.crypto import gen_pwhash, gen_secret_key, new_iid
 from zine.utils.validators import is_valid_email, check
-from zine.i18n import load_translations, has_language, list_languages
+from zine.i18n import load_core_translations, has_language, list_languages
 from werkzeug import Request, Response, redirect
 from jinja2 import Environment, FileSystemLoader
 
@@ -221,7 +221,7 @@ class WebSetup(object):
             lang = (request.accept_languages.best or 'en').split('-')[0].lower()
         if not has_language(lang):
             lang = 'en'
-        request.translations = load_translations(lang)
+        request.translations = load_core_translations(lang)
         request.translations.language = lang
         response = None
 
