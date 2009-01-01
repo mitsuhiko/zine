@@ -73,7 +73,23 @@ DEFAULT_THEME_SETTINGS = {
     'date.datetime_format.short':   None,
     'date.datetime_format.medium':  None,
     'date.datetime_format.full':    None,
-    'date.datetime_format.long':    None
+    'date.datetime_format.long':    None,
+
+    # query optimizations for overview pages.  Themes can change the
+    # eager/lazy loading settings of some queries to remove unnecessary
+    # overhead that is not in use for what they want to display.  For
+    # example a theme that wants to load a headline-overview of all the
+    # posts in a specific tag but no text at all it makes no sense to
+    # load the text and more just to throw away the information.
+    # for more information have a look at PostQuery.lightweight
+    'sql.author.lazy':              frozenset(['comments']),
+    'sql.archive.lazy':             frozenset(['comments']),
+    'sql.category.lazy':            frozenset(['comments']),
+    'sql.tag.lazy':                 frozenset(['comments']),
+    'sql.author.deferred':          frozenset(),
+    'sql.archive.deferred':         frozenset(),
+    'sql.category.deferred':        frozenset(),
+    'sql.tag.deferred':             frozenset()
 }
 
 

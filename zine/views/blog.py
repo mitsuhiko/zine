@@ -77,9 +77,10 @@ def archive(req, year=None, month=None, day=None, page=1):
 
     url_args = dict(year=year, month=month, day=day)
     per_page = req.app.theme.settings['archive.per_page']
-    data = Post.query.published().for_index().date_filter(year, month, day) \
-                     .get_list(page=page, endpoint='blog/archive',
-                               url_args=url_args, per_page=per_page)
+    data = Post.query.theme_lightweight('archive_overview') \
+               .published().for_index().date_filter(year, month, day) \
+               .get_list(page=page, endpoint='blog/archive',
+                         url_args=url_args, per_page=per_page)
 
     add_link('alternate', url_for('blog/atom_feed', **url_args),
              'application/atom+xml', _(u'Recent Posts Feed'))
@@ -108,9 +109,10 @@ def show_category(req, slug, page=1):
     """
     category = Category.query.filter_by(slug=slug).first(True)
     per_page = req.app.theme.settings['category.per_page']
-    data = category.posts.published().get_list(page=page, per_page=per_page,
-                                               endpoint='blog/show_category',
-                                               url_args=dict(slug=slug))
+    data = category.posts.theme_lightweight('category') \
+                   .published().get_list(page=page, per_page=per_page,
+                                         endpoint='blog/show_category',
+                                         url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', category=slug),
              'application/atom+xml', _(u'All posts in category %s') % category.name)
@@ -136,7 +138,8 @@ def show_tag(req, slug, page=1):
     """
     tag = Tag.query.filter_by(slug=slug).first(True)
     per_page = req.app.theme.settings['tag.per_page']
-    data = tag.posts.published().get_list(page=page, endpoint='blog/show_tag',
+    data = tag.posts.theme_lightweight('tag') \
+                    .published().get_list(page=page, endpoint='blog/show_tag',
                                           per_page=per_page,
                                           url_args=dict(slug=slug))
 
@@ -168,10 +171,10 @@ def show_author(req, username, page=1):
         raise NotFound()
 
     per_page = req.app.theme.settings['author.per_page']
-    data = Post.query.published().filter_by(author=user) \
-               .get_list(page=page, per_page=per_page,
-                         endpoint='blog/show_author',
-                         url_args=dict(username=user.username))
+    data = user.posts.theme_lightweight('author').published() \
+                     .get_list(page=page, per_page=per_page,
+                               endpoint='blog/show_author',
+                               url_args=dict(username=user.username))
 
     add_link('alternate', url_for('blog/atom_feed', author=user.username),
              'application/atom+xml', _(u'All posts written by %s') %
