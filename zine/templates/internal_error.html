@@ -3,7 +3,7 @@
 {% block body %}
   <h1>{{ _('Internal Error') }}</h1>
   <p>
-    {% trans %}Zine encountered an internal error during processing:{% endtras %}
+    {% trans %}Zine encountered an internal error during processing:{% endtrans %}
   </p>
   <p class="error">{{ error.message }}
   {% if error.help_text %}
