@@ -247,7 +247,9 @@ class Request(RequestBase):
                                            app.cfg['secret_key'])
         user_id = session.get('uid')
         if user_id:
-            user = User.query.get(user_id)
+            user = User.query.options(db.eagerload('groups'),
+                                      db.eagerload('groups', '_privileges')) \
+                             .get(user_id)
         if user is None:
             user = User.query.get_nobody()
         self.user = user
@@ -651,7 +653,7 @@ class Zine(object):
 
         # initialize i18n/l10n system
         self.locale = Locale(self.cfg['language'])
-        self.translations = i18n.load_translations(self.locale)
+        self.translations = i18n.load_core_translations(self.locale)
 
         # init themes
         _ = i18n.gettext

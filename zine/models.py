@@ -274,6 +274,20 @@ class AnonymousUser(User):
 class PostQuery(db.Query):
     """Add some extra methods to the post model."""
 
+    def lightweight(self, deferred=None, lazy=('comments',)):
+        """Send a lightweight query which deferes some more expensive
+        things such as comment queries or even text and parser data.
+        """
+        args = map(db.lazyload, lazy or ())
+        if deferred:
+            args.extend(map(db.defer, deferred))
+        # undefer the _comment_count query which is used by comment_count
+        # for lightweight post objects.  See Post.comment_count for more
+        # details.
+        if lazy and 'comments' in lazy:
+            args.append(db.undefer('_comment_count'))
+        return self.options(*args)
+
     def type(self, content_type):
         """Filter all posts by a given type."""
         return self.filter_by(content_type=content_type)
@@ -491,6 +505,14 @@ class Post(_ZEMLDualContainer):
     def comment_count(self):
         """The number of visible comments."""
         req = get_request()
+
+        # if the model was loaded with .lightweight() there are no comments
+        # but a _comment_count we can use.
+        if not db.attribute_loaded(self, 'comments'):
+            return self._comment_count
+
+        # otherwise the comments are already available and we can savely
+        # filter it.
         if req.user.is_manager:
             return len(self.comments)
         return len([x for x in self.comments if not x.blocked])
@@ -997,9 +1019,11 @@ class Tag(object):
 db.mapper(User, users, properties={
     'id':               users.c.user_id,
     'display_name':     db.synonym('_display_name', map_column=True),
-    'posts':            db.dynamic_loader(Post, backref='author',
+    'posts':            db.dynamic_loader(Post,
+                                          backref=db.backref('author', lazy=False),
                                           cascade='all, delete, delete-orphan'),
-    'comments':         db.dynamic_loader(Comment, backref='user',
+    'comments':         db.dynamic_loader(Comment,
+                                          backref=db.backref('user', lazy=False),
                                           cascade='all, delete, delete-orphan'),
     '_own_privileges':  db.relation(_Privilege, lazy=True,
                                     secondary=user_privileges,
@@ -1008,7 +1032,7 @@ db.mapper(User, users, properties={
 })
 db.mapper(Group, groups, properties={
     'id':               groups.c.group_id,
-    'users':            db.dynamic_loader(User, backref='groups',
+    'users':            db.dynamic_loader(User, backref=db.backref('groups', lazy=True),
                                           secondary=group_users),
     '_privileges':      db.relation(_Privilege, lazy=True,
                                     secondary=group_privileges,
@@ -1057,5 +1081,10 @@ db.mapper(Post, posts, properties={
     'categories':       db.relation(Category, secondary=post_categories, lazy=False,
                                     order_by=[db.asc(categories.c.name)]),
     'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
-                                    order_by=[tags.c.name])
+                                    order_by=[tags.c.name]),
+    '_comment_count':   db.column_property(
+        db.select([db.func.count(comments.c.comment_id)],
+                  (comments.c.post_id == posts.c.post_id) &
+                  (comments.c.status == COMMENT_MODERATED)
+        ).label('comment_count'), deferred=True)
 }, order_by=posts.c.pub_date.desc())

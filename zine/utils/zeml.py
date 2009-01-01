@@ -35,6 +35,7 @@ _entity_re = re.compile(r'&([^;]+);')
 _entity_re = re.compile(r'&([^;]+);')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
 _autoparagraphed_elements = set(['div', 'blockquote'])
+_missing = object()
 
 _entities = {
     'Aacute':       u'\xc1',        'aacute':       u'\xe1',
@@ -507,6 +508,18 @@ class _BaseElement(object):
     def __nonzero__(self):
         return bool(self.children or self.text or self.tail or
                     self.attributes)
+
+    def __eq__(self, other):
+        if self.__class__ != other.__class__:
+            return False
+        for key in 'name', 'children', 'attributes', 'text', 'tail':
+            if getattr(self, key, _missing) != \
+               getattr(other, key, _missing):
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     @property
     def non_blank(self):
