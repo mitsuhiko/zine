@@ -107,6 +107,13 @@ def secure_database_uri(uri):
     return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
 
 
+def attribute_loaded(model, attribute):
+    """Returns true if the attribute of the model was already loaded."""
+    # XXX: this works but it relys on a specific implementation in
+    # SQLAlchemy.  Figure out if SA provides a way to query that information.
+    return attribute in model.__dict__
+
+
 class ZEMLParserData(MutableType, TypeDecorator):
     """Holds parser data."""
 
@@ -178,6 +185,7 @@ db.session = session
 db.ZEMLParserData = ZEMLParserData
 db.mapper = session.mapper
 db.association_proxy = association_proxy
+db.attribute_loaded = attribute_loaded
 
 #: called at the end of a request
 cleanup_session = session.remove

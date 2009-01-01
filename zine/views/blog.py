@@ -107,8 +107,9 @@ def show_category(req, slug, page=1):
     """
     category = Category.query.filter_by(slug=slug).first(True)
     data = Post.query.filter(Post.categories.contains(category)) \
-               .published().get_list(page=page, endpoint='blog/show_category',
-                                     url_args=dict(slug=slug))
+               .lightweight().published() \
+               .get_list(page=page, endpoint='blog/show_category',
+                         url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', category=slug),
              'application/atom+xml', _(u'All posts in category %s') % category.name)
@@ -133,7 +134,7 @@ def show_tag(req, slug, page=1):
     :URL endpoint: ``blog/show_tag``
     """
     tag = Tag.query.filter_by(slug=slug).first(True)
-    data = Post.query.filter(Post.tags.contains(tag)) \
+    data = Post.query.filter(Post.tags.contains(tag)).lightweight() \
                .published().get_list(page=page, endpoint='blog/show_tag',
                                      url_args=dict(slug=slug))
 
@@ -164,7 +165,7 @@ def show_author(req, username, page=1):
     if user is None or not user.is_author:
         raise NotFound()
 
-    data = Post.query.published().filter_by(author=user) \
+    data = Post.query.published().filter_by(author=user).lightweight() \
                .get_list(page=page, per_page=30, endpoint='blog/show_author',
                          url_args=dict(username=user.username))
 

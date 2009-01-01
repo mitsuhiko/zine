@@ -34,6 +34,7 @@ Zine 0.1.2
 - Fixed the bug that made it impossible to set the slug to the
   publication defined on new entry creation.
 - ZEML handles newlines in elements properly now.
+- optimized some queries.
 
 
 Zine 0.1.1
