@@ -70,13 +70,12 @@ def copy_core_translations(src_dir, lib_dir, share_dir):
         shutil.rmtree(share_dir)
     os.makedirs(share_dir)
     for language in os.listdir(src_dir):
-        if not os.path.isfile(join(src_dir, language, 'messages.catalog')):
+        lang_src = join(src_dir, language, 'messages.mo')
+        if not os.path.isfile(lang_src):
             continue
-        lang_share_dir = join(share_dir, language)
-        os.makedirs(lang_share_dir)
-        shutil.copy2(join(src_dir, language, 'messages.catalog'),
-                     lang_share_dir)
-        os.symlink(lang_share_dir, join(lib_dir, language))
+        lang_share_dir = join(share_dir, language, 'LC_MESSAGES')
+        silent(os.makedirs, lang_share_dir)
+        shutil.copy2(lang_src, join(lang_share_dir, 'zine.mo'))
 
 
 def copy_plugins(src_dir, lib_dir, share_dir):
@@ -144,10 +143,16 @@ def main(prefix):
         copy_folder(join(zine_source, package),
                     join(lib_dir, 'zine', package))
 
+    # old zine installations had the translations at a different
+    # location.  Delete them if we find them there.
+    old_translations = join(share_dir, 'i18n')
+    if os.path.isdir(old_translations):
+        os.rmtree(old_translations)
+
     # copy the core translations
     copy_core_translations(join(zine_source, 'i18n'),
                            join(lib_dir, 'zine', 'i18n'),
-                           join(share_dir, 'i18n'))
+                           join(dest_dir, 'share', 'locale'))
 
     # copy the plugins over
     copy_plugins(join(zine_source, 'plugins'),

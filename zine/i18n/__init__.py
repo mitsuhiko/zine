@@ -66,7 +66,8 @@ from pytz import timezone, UTC
 from werkzeug.exceptions import NotFound
 
 import zine
-from zine.environment import LOCALE_PATH
+from zine.environment import LOCALE_PATH, LOCALE_DOMAIN, \
+     USE_GETTEXT_LOOKUP
 from zine.utils import dump_json
 
 
@@ -81,7 +82,7 @@ TIME_FORMATS = ['%H:%M', '%H:%M:%S', '%I:%M %p', '%I:%M:%S %p']
 _js_translations = WeakKeyDictionary()
 
 
-def load_translations(locale):
+def load_core_translations(locale):
     """Load the translation for a locale.  If a locale does not exist
     the return value a fake translation object.  If the locale is unknown
     a `UnknownLocaleError` is raised.
@@ -93,13 +94,14 @@ def load_translations(locale):
 
     The application code combines them into one translations object.
     """
-    return ZineTranslations.load(LOCALE_PATH, locale)
+    return ZineTranslations.load(LOCALE_PATH, locale, LOCALE_DOMAIN,
+                                 USE_GETTEXT_LOOKUP)
 
 
-class CustomAttrsTranslations(object):
+class _CustomAttrsTranslations(object):
     _info = None
     _plural_expr = None
-    client_keys = set()
+    client_keys = frozenset()
 
     def _get_plural_expr(self):
         if not self._plural_expr:
@@ -115,7 +117,7 @@ class CustomAttrsTranslations(object):
     del _get_plural_expr, _set_plural_expr
 
 
-class ZineTranslations(TranslationsBase, CustomAttrsTranslations):
+class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
 
     def __init__(self, fileobj=None, locale=None):
         TranslationsBase.__init__(self, fileobj=fileobj)
@@ -136,10 +138,12 @@ class ZineTranslations(TranslationsBase, CustomAttrsTranslations):
             pass
 
     @classmethod
-    def load(cls, path, locale=None, domain='messages'):
+    def load(cls, path, locale=None, domain='messages',
+             gettext_lookup=False):
+        """Load the translations from the given path."""
         locale = Locale.parse(locale)
-        catalog = os.path.join(path, str(locale), domain + '.mo')
-        if os.path.isfile(catalog):
+        catalog = find_catalog(path, domain, locale, gettext_lookup)
+        if catalog:
             return ZineTranslations(fileobj=open(catalog), locale=locale)
         return ZineNullTranslations(locale=locale)
 
@@ -151,7 +155,7 @@ class ZineTranslations(TranslationsBase, CustomAttrsTranslations):
         return bool(self._catalog)
 
 
-class ZineNullTranslations(NullTranslations, CustomAttrsTranslations):
+class ZineNullTranslations(NullTranslations, _CustomAttrsTranslations):
 
     def __init__(self, fileobj=None, locale=None):
         NullTranslations.__init__(self, fileobj)
@@ -172,6 +176,18 @@ def get_translations():
         return zine.application.get_application().translations
     except AttributeError:
         return None
+
+
+def find_catalog(path, domain, locale, gettext_lookup=False):
+    """Finds the catalog for the given locale on the path.  Return sthe
+    filename of the .mo file if found, otherwise `None` is returned.
+    """
+    args = [path, str(Locale.parse(locale)), domain + '.mo']
+    if gettext_lookup:
+        args.insert(-1, 'LC_MESSAGES')
+    catalog = os.path.join(*args)
+    if os.path.isfile(catalog):
+        return catalog
 
 
 def gettext(string):
@@ -412,18 +428,19 @@ def list_languages(self_translated=True):
     else:
         locale = None
 
+    found = set(['en'])
     languages = [('en', Locale('en').get_display_name())]
 
-    for filename in os.listdir(LOCALE_PATH):
-        if filename == 'en' or not \
-           os.path.isfile(os.path.join(LOCALE_PATH, filename,
-                                       'messages.mo')):
-            continue
+    for locale in os.listdir(LOCALE_PATH):
         try:
-            l = Locale.parse(filename)
-        except UnknownLocaleError:
+            l = Locale.parse(locale)
+        except (ValueError, UnknownLocaleError):
             continue
-        languages.append((str(l), l.get_display_name()))
+        if str(l) not in found and \
+           find_catalog(LOCALE_PATH, LOCALE_DOMAIN, l,
+                        USE_GETTEXT_LOOKUP) is not None:
+            languages.append((str(l), l.get_display_name()))
+            found.add(str(l))
 
     languages.sort(key=lambda x: x[1].lower())
     return languages

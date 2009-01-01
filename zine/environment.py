@@ -53,6 +53,14 @@ PACKAGE_CONTENTS = realpath(dirname(__file__))
 # the path to the folder where the "zine" package is stored in.
 PACKAGE_LOCATION = realpath(join(PACKAGE_CONTENTS, pardir))
 
+# name of the domain for the builtin translations
+LOCALE_DOMAIN = 'messages'
+
+# true if the LC_MESSAGES folder is in use for the core domains
+# (gettext based lookup is used then).  This does not affect
+# translations from non-core plugins
+USE_GETTEXT_LOOKUP = False
+
 # check development mode first.  If there is a shared folder we must be
 # in development mode.
 SHARED_DATA = join(PACKAGE_CONTENTS, 'shared')
@@ -65,11 +73,13 @@ if isdir(SHARED_DATA):
 # a Zine installation on a posix system
 elif PLATFORM == 'posix':
     MODE = 'posix'
-    share = join(PACKAGE_LOCATION, pardir, pardir, 'share', 'zine')
+    share = join(PACKAGE_LOCATION, pardir, pardir, 'share')
     BUILTIN_PLUGIN_FOLDER = realpath(join(PACKAGE_LOCATION, 'plugins'))
-    BUILTIN_TEMPLATE_PATH = realpath(join(share, 'templates', 'core'))
-    SHARED_DATA = realpath(join(share, 'htdocs', 'core'))
-    LOCALE_PATH = realpath(join(share, 'i18n'))
+    BUILTIN_TEMPLATE_PATH = realpath(join(share, 'zine', 'templates', 'core'))
+    SHARED_DATA = realpath(join(share, 'zine', 'htdocs', 'core'))
+    LOCALE_PATH = realpath(join(share, 'locale'))
+    LOCALE_DOMAIN = 'zine'
+    USE_GETTEXT_LOOKUP = True
     del share
 
 # a Zine installation on windows
