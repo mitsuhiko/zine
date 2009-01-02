@@ -22,6 +22,8 @@ domains = ['messages']
 def main():
     global parser
     parser = OptionParser(usage='%prog [path]')
+    parser.add_option('--locale', '-l', dest='locale',
+                      help="update the specified locale")
     options, args = parser.parse_args()
     if not args:
         print 'Updating core strings'
@@ -35,6 +37,13 @@ def main():
     else:
         parser.error('incorrent number of arguments')
 
+    if options.locale:
+        for domain in domains:
+            filepath = path.join(root, options.locale, domain + '.po')
+            if not path.exists(filepath):
+                parser.error("unknown locale. %s not found." % filepath)
+
+
     f = file(path.join(root, 'messages.pot'))
     try:
         template = read_po(f)
@@ -45,6 +54,9 @@ def main():
     for lang in listdir(root):
         for domain in domains:
             filename = path.join(root, lang, domain + '.po')
+            if options.locale and filename != \
+                               path.join(root, options.locale, domain + '.po'):
+                continue
             if path.exists(filename):
                 print 'Updating %r' % lang
                 locale = Locale.parse(lang)
@@ -61,7 +73,7 @@ def main():
                 f = file(filename, 'w')
                 try:
                     write_po(f, catalog, ignore_obsolete=True,
-                             include_previous=False)
+                             include_previous=False, width=79)
                 finally:
                     f.close()
 
