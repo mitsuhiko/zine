@@ -776,7 +776,7 @@ class Zine(object):
                                              url_scheme=scheme)
 
         # mark the app as finished and override the setup functions
-        def _error():
+        def _error(*args, **kwargs):
             raise RuntimeError('Cannot register new callbacks after '
                                'application setup phase.')
         self.__dict__.update(dict.fromkeys(self._setup_only, _error))
