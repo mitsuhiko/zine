@@ -8,6 +8,12 @@ Zine 0.2
 
 (Codename yet to be chosen; Release date yet unknown)
 
+- Themes can specify the number of items they want to have on a
+  tag/category/author post listing.
+- Themes have now control over the complexity of SQL queries sent.
+  They can defer the loading of columns and lazily load relations
+  to disable loading of unnecessary data.
+
 
 Zine 0.1.2
 ----------
