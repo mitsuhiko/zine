@@ -40,6 +40,8 @@ To install Zine on your system you have to configure and "make install" it::
 Zine installs itself into `/usr/lib/zine` and `/usr/share/zine`.  Please
 note that this does not install the dependencies.
 
+Note to package maintainers: for staged installs use DESTDIR variable
+
 The following example shows how to set up Zine for `mod_wsgi`.
 
 1.  Create a new folder `/var/zine/yourblog` where `yourblog` is a name
