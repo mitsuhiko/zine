@@ -996,7 +996,7 @@ class Parser(object):
     void_elements = set(['br', 'img', 'area', 'hr', 'param', 'input',
                          'embed', 'col'])
     block_elements = set(['div', 'p', 'form', 'ul', 'ol', 'li', 'table', 'tr',
-                          'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'tl',
+                          'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'dl',
                           'dt', 'dd', 'blockquote', 'h1', 'h2', 'h3', 'h4',
                           'h5', 'h6'])
     breaking_rules = [
