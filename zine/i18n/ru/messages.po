@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
 "POT-Creation-Date: 2009-01-02 02:02+0000\n"
-"PO-Revision-Date: 2009-01-02 01:08+0100\n"
+"PO-Revision-Date: 2009-01-02 21:55+0100\n"
 "Last-Translator: Nikita Kabardin <wackum@gmail.com>\n"
 "Language-Team: ru <LL@li.org>\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.0dev-r466\n"
+"Generated-By: Babel 0.9.4\n"
 
 #: zine/application.py:661
 msgid "Default Theme"
@@ -157,7 +157,7 @@ msgstr "Почта* (не публикуется)"
 msgid "You have to enter a valid e-mail address."
 msgstr "Введите правильный адрес e-mail."
 
-#: zine/forms.py:102 zine/forms.py:400 zine/forms.py:713
+#: zine/forms.py:102 zine/forms.py:399 zine/forms.py:712
 msgid "Website"
 msgstr "Сайт"
 
@@ -165,7 +165,7 @@ msgstr "Сайт"
 msgid "You have to enter a valid URL or omit the field."
 msgstr "Введите правильный URL или оставьте поле пустым."
 
-#: zine/forms.py:105 zine/forms.py:224 zine/forms.py:402 zine/parsers.py:99
+#: zine/forms.py:105 zine/forms.py:224 zine/forms.py:401 zine/parsers.py:99
 msgid "Text"
 msgstr "Текст"
 
@@ -225,12 +225,12 @@ msgstr "Опубликовано"
 msgid "Publication date"
 msgstr "Дата публикации"
 
-#: zine/forms.py:230 zine/forms.py:501
+#: zine/forms.py:230 zine/forms.py:500
 #: zine/templates/admin/manage_categories.html:8
 msgid "Slug"
 msgstr "Ярлык"
 
-#: zine/forms.py:231 zine/forms.py:397 zine/templates/admin/_post_helpers.html:5
+#: zine/forms.py:231 zine/forms.py:396 zine/templates/admin/_post_helpers.html:5
 #: zine/templates/admin/information.html:163
 #: zine/templates/admin/inspect_import.html:50
 msgid "Author"
@@ -246,7 +246,7 @@ msgstr "Теги"
 msgid "Categories"
 msgstr "Категории"
 
-#: zine/forms.py:237 zine/forms.py:404 zine/templates/admin/write_page.html:22
+#: zine/forms.py:237 zine/forms.py:403 zine/templates/admin/write_page.html:22
 msgid "Parser"
 msgstr "Парсер"
 
@@ -262,7 +262,7 @@ msgstr "Разрешить pingback"
 msgid "Ping links"
 msgstr "Ping-ссылки"
 
-#: zine/forms.py:278 zine/forms.py:422
+#: zine/forms.py:278 zine/forms.py:421
 #, python-format
 msgid "%s (missing)"
 msgstr "%s (отсутствует)"
@@ -276,279 +276,279 @@ msgstr "Такой ярлык уже используется"
 msgid "Selected parser is no longer available on the system."
 msgstr "Выбранный парсер больше не доступен в системе."
 
-#: zine/forms.py:398 zine/forms.py:711
+#: zine/forms.py:397 zine/forms.py:710
 msgid "Email"
 msgstr "E-mail"
 
-#: zine/forms.py:403 zine/templates/admin/_post_helpers.html:8
+#: zine/forms.py:402 zine/templates/admin/_post_helpers.html:8
 #: zine/templates/admin/import.html:24 zine/templates/admin/inspect_import.html:48
 msgid "Date"
 msgstr "Дата"
 
-#: zine/forms.py:405 zine/templates/admin/block_comment.html:2
+#: zine/forms.py:404 zine/templates/admin/block_comment.html:2
 #: zine/templates/admin/block_comment.html:4
 msgid "Block Comment"
 msgstr "Заблокировать комментарий"
 
-#: zine/forms.py:406 zine/forms.py:469
+#: zine/forms.py:405 zine/forms.py:468
 msgid "Reason"
 msgstr "Причина"
 
-#: zine/forms.py:478
+#: zine/forms.py:477
 #, python-format
 msgid "blocked by %s"
 msgstr "заблокировал(а) %s"
 
-#: zine/forms.py:502 zine/templates/admin/manage_categories.html:9
+#: zine/forms.py:501 zine/templates/admin/manage_categories.html:9
 msgid "Name"
 msgstr "Имя"
 
-#: zine/forms.py:504 zine/forms.py:709 zine/templates/admin/plugins.html:18
+#: zine/forms.py:503 zine/forms.py:708 zine/templates/admin/plugins.html:18
 msgid "Description"
 msgstr "Описание"
 
-#: zine/forms.py:523
+#: zine/forms.py:522
 msgid "This slug is already in use"
 msgstr "Такой ярлык уже используется"
 
-#: zine/forms.py:606 zine/templates/admin/manage_groups.html:8
+#: zine/forms.py:605 zine/templates/admin/manage_groups.html:8
 msgid "Groupname"
 msgstr "Имя группы"
 
-#: zine/forms.py:609 zine/forms.py:717 zine/templates/admin/information.html:102
+#: zine/forms.py:608 zine/forms.py:716 zine/templates/admin/information.html:102
 msgid "Privileges"
 msgstr "Привилегии"
 
-#: zine/forms.py:626
+#: zine/forms.py:625
 msgid "This groupname is already in use"
 msgstr "Такое имя группы уже используется"
 
-#: zine/forms.py:647
+#: zine/forms.py:646
 msgid "What should Zine do with users assigned to this group?"
 msgstr "Что сделать с пользователями этой группы?"
 
-#: zine/forms.py:650
+#: zine/forms.py:649
 msgid "Do nothing, just detach the membership"
 msgstr "Ничего не делать, просто отменить членство в группе"
 
-#: zine/forms.py:651
+#: zine/forms.py:650
 msgid "Move the users to another group"
 msgstr "Переместить пользователей в другую группу"
 
-#: zine/forms.py:653
+#: zine/forms.py:652
 msgid "Relocate users to"
 msgstr "Переместить пользователей в"
 
-#: zine/forms.py:666
+#: zine/forms.py:665
 msgid "You have to select a group that gets the users assigned."
 msgstr "Выберите группу"
 
-#: zine/forms.py:704 zine/forms.py:739 zine/templates/admin/login.html:23
+#: zine/forms.py:703 zine/forms.py:738 zine/templates/admin/login.html:23
 #: zine/templates/admin/manage_users.html:8
 #: zine/websetup/templates/admin_account.html:10
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: zine/forms.py:707 zine/forms.py:740 zine/templates/admin/manage_users.html:9
+#: zine/forms.py:706 zine/forms.py:739 zine/templates/admin/manage_users.html:9
 msgid "Realname"
 msgstr "Полное имя"
 
-#: zine/forms.py:708
+#: zine/forms.py:707
 msgid "Display name"
 msgstr "Отображаемое имя"
 
-#: zine/forms.py:715 zine/templates/admin/login.html:25
+#: zine/forms.py:714 zine/templates/admin/login.html:25
 #: zine/websetup/templates/admin_account.html:12
 msgid "Password"
 msgstr "Пароль"
 
-#: zine/forms.py:719 zine/views/admin.py:113
+#: zine/forms.py:718 zine/views/admin.py:113
 msgid "Groups"
 msgstr "Группы"
 
-#: zine/forms.py:721
+#: zine/forms.py:720
 msgid "List as author"
 msgstr "Выводить как автора"
 
-#: zine/forms.py:722
+#: zine/forms.py:721
 msgid "This user is listed as author"
 msgstr "Этот пользователь выводится в качестве автора"
 
-#: zine/forms.py:751
+#: zine/forms.py:750
 msgid "This username is already in use"
 msgstr "Имя пользователя уже используется"
 
-#: zine/forms.py:786
+#: zine/forms.py:785
 msgid "What should Zine do with posts written by this user?"
 msgstr "Что сделать с записями, уже созданными пользователем?"
 
-#: zine/forms.py:788
+#: zine/forms.py:787
 msgid "Delete them permanently"
 msgstr "Удалить их полностью"
 
-#: zine/forms.py:789
+#: zine/forms.py:788
 msgid "Reassign posts"
 msgstr "Передать записи"
 
-#: zine/forms.py:792
+#: zine/forms.py:791
 msgid "Reassign posts to"
 msgstr "Передать записи пользователю"
 
-#: zine/forms.py:807
+#: zine/forms.py:806
 msgid "You have to select the user that gets the posts assigned."
 msgstr "Выберите пользователя, которому будут переданы записи."
 
-#: zine/forms.py:848
+#: zine/forms.py:847
 msgid "Filename"
 msgstr "Имя файла"
 
-#: zine/forms.py:849
+#: zine/forms.py:848
 msgid "Log Level"
 msgstr "Уровень логгирования"
 
-#: zine/forms.py:854 zine/forms.py:1024
+#: zine/forms.py:853 zine/forms.py:1023
 msgid "Blog title"
 msgstr "Название блога"
 
-#: zine/forms.py:855
+#: zine/forms.py:854
 msgid "Blog tagline"
 msgstr "Краткое описание блога"
 
-#: zine/forms.py:856
+#: zine/forms.py:855
 msgid "Blog email"
 msgstr "E-mail блога"
 
-#: zine/forms.py:857
+#: zine/forms.py:856
 msgid "Language"
 msgstr "Язык"
 
-#: zine/forms.py:858
+#: zine/forms.py:857
 msgid "Timezone"
 msgstr "Часовой пояс"
 
-#: zine/forms.py:860
+#: zine/forms.py:859
 msgid "Cookie Name"
 msgstr "Имя Cookie"
 
-#: zine/forms.py:862
+#: zine/forms.py:861
 msgid "Comments enabled"
 msgstr "Комментарии разрешены"
 
-#: zine/forms.py:863
+#: zine/forms.py:862
 msgid "enable comments per default"
 msgstr "по умолчанию, разрешать комментирование"
 
-#: zine/forms.py:865
+#: zine/forms.py:864
 msgid "Comment Moderation"
 msgstr "Модерирование комментариев"
 
-#: zine/forms.py:868
+#: zine/forms.py:867
 msgid "Pingbacks enabled"
 msgstr "Pingback"
 
-#: zine/forms.py:869
+#: zine/forms.py:868
 msgid "enable pingbacks per default"
 msgstr "по умолчанию, разрешать pingback"
 
-#: zine/forms.py:871
+#: zine/forms.py:870
 msgid "Use flat comments"
 msgstr "Использовать простые комментарии"
 
-#: zine/forms.py:872
+#: zine/forms.py:871
 msgid "All comments are posted top-level"
 msgstr "Все комментарии появляются сверху"
 
-#: zine/forms.py:874
+#: zine/forms.py:873
 msgid "Default parser"
 msgstr "Парсер по умолчанию"
 
-#: zine/forms.py:876
+#: zine/forms.py:875
 msgid "Comment parser"
 msgstr "Парсер комментариев"
 
-#: zine/forms.py:878
+#: zine/forms.py:877
 msgid "Posts per page"
 msgstr "Записей на страницу"
 
-#: zine/forms.py:893
+#: zine/forms.py:892
 msgid "Blog URL prefix"
 msgstr "URL-префикс блога"
 
-#: zine/forms.py:895
+#: zine/forms.py:894
 msgid "Admin URL prefix"
 msgstr "URL-префикс панели управления"
 
-#: zine/forms.py:897
+#: zine/forms.py:896
 msgid "Category URL prefix"
 msgstr "URL-префикс категорий"
 
-#: zine/forms.py:899
+#: zine/forms.py:898
 msgid "Tag URL prefix"
 msgstr "URL-префикс тегов"
 
-#: zine/forms.py:901
+#: zine/forms.py:900
 msgid "Author Profiles URL prefix"
 msgstr "URL-префикс профилей авторов"
 
-#: zine/forms.py:903
+#: zine/forms.py:902
 msgid "Limit slugs to ASCII"
 msgstr "Использовать только ASCII"
 
-#: zine/forms.py:904
+#: zine/forms.py:903
 msgid "Automatically generated slugs are limited to ASCII"
 msgstr "Ярлыки, созданные автоматически, используют только ASCII"
 
-#: zine/forms.py:925
+#: zine/forms.py:924
 msgid "Cache system"
 msgstr "Система кэширования"
 
-#: zine/forms.py:927
+#: zine/forms.py:926
 msgid "Default cache timeout"
 msgstr "Таймаут кэширования по умолчанию"
 
-#: zine/forms.py:929
+#: zine/forms.py:928
 msgid "Enable eager caching"
 msgstr "Включить интенсивное кэширование"
 
-#: zine/forms.py:930
+#: zine/forms.py:929
 msgid "Enable"
 msgstr "Включить"
 
-#: zine/forms.py:937
+#: zine/forms.py:936
 msgid "You have to provide at least one server to use memcached."
 msgstr "Чтобы использовать memcached, введите хотя бы один сервер."
 
-#: zine/forms.py:941
+#: zine/forms.py:940
 msgid "You have to provide cache folder to use filesystem cache."
 msgstr ""
 "Чтобы использовать файловое кэширование, вы должны указать директорию "
 "хранения."
 
-#: zine/forms.py:951
+#: zine/forms.py:950
 msgid "Dump Download URL"
 msgstr "URL дампа"
 
-#: zine/forms.py:957
+#: zine/forms.py:956
 msgid "Feed Download URL"
 msgstr "URL потока"
 
-#: zine/forms.py:974
+#: zine/forms.py:973
 msgid "Use default value"
 msgstr "Использовать значение по умолчанию"
 
-#: zine/forms.py:1010
+#: zine/forms.py:1009
 msgid "Create new user"
 msgstr "Создать пользователя"
 
-#: zine/forms.py:1026
+#: zine/forms.py:1025
 msgid "Blog description"
 msgstr "Описание блога"
 
-#: zine/forms.py:1031
+#: zine/forms.py:1030
 msgid "Load config values"
 msgstr "Загрузить значения конфигурации"
 
-#: zine/forms.py:1032
+#: zine/forms.py:1031
 msgid "Load the configuration values from the import."
 msgstr "Использовать параметры конфигурации из импорта."
 
@@ -631,7 +631,8 @@ msgid "can enter admin panel"
 msgstr "может входить в панель управления"
 
 #: zine/privileges.py:154
-msgid "can administrate the blog"
+#, fuzzy
+msgid "can administer the blog"
 msgstr "может администрировать блог"
 
 #: zine/privileges.py:155
