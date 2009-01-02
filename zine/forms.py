@@ -328,7 +328,6 @@ class PostForm(forms.Form):
             self.post.text = self.data['text']
         add_redirect = self.post.is_published and old_slug != self.post.slug
 
-        print self.data['pub_date']
         self.post.touch_times(self.data['pub_date'])
         self.post.bind_slug(self.data['slug'])
 
