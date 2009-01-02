@@ -50,7 +50,7 @@ The following example shows how to set up Zine for `mod_wsgi`.
 4.  Open your Apache vhost config or your Apache config, whatever you use
     and add the following lines::
 
-        WSGIScriptAlias /yourblog /var/zine/yourblog/zine.wsgi
+        WSGIScriptAlias /yourblog /var/lib/zine/yourblog/zine.wsgi
 
     This tells Apache that it should hook your blog into the webserver at
     `/yourblog`.  You can also move it to a different vhost and mount it
