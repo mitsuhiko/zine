@@ -34,6 +34,8 @@ def is_untranslated(obj):
 
 def main():
     parser = OptionParser(usage='%prog [path]')
+    parser.add_option('--statistics', '-s', default=False,
+                      action='store_true', help="show statistics")
     options, args = parser.parse_args()
     if not args:
         print 'Compiling builtin languages'
@@ -54,7 +56,7 @@ def main():
 
             if path.isfile(translations):
                 mo_file = open(translations.replace('.po', '.mo'), 'wb')
-                print 'Compiling %r' % lang
+                print 'Compiling %r' % lang,
                 f = file(translations)
                 try:
                     catalog = read_po(f, locale=lang)
@@ -68,11 +70,30 @@ def main():
 
                 # Gather client messages
                 client_messages = set()
+                if options.statistics:
+                    translated = fuzzy = percentage = 0
                 for message in catalog:
+                    if options.statistics:
+                        if message.string:
+                            translated +=1
+                        if 'fuzzy' in message.flags:
+                            fuzzy += 1
                     for fname, _ in message.locations:
                         if fname.endswith('.js'):
                             client_messages.add(message)
                             break
+                if len(catalog):
+                    percentage = translated * 100 // len(catalog)
+                    print "-> %d of %d messages (%d%%) translated" % (
+                        translated, len(catalog), percentage),
+                    if fuzzy:
+                        if fuzzy == 1:
+                            print "%d of which is fuzzy" % fuzzy,
+                        else:
+                            print "%d of which are fuzzy" % fuzzy,
+                    print
+                else:
+                    print
 
                 # Dump pickled data into standard catalog
                 pickle.dump(client_messages, mo_file, 2)

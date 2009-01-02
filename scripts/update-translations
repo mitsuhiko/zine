@@ -24,6 +24,8 @@ def main():
     parser = OptionParser(usage='%prog [path]')
     parser.add_option('--locale', '-l', dest='locale',
                       help="update the specified locale")
+    parser.add_option('--statistics', '-s', default=False,
+                      action='store_true', help="show statistics")
     options, args = parser.parse_args()
     if not args:
         print 'Updating core strings'
@@ -58,7 +60,7 @@ def main():
                                path.join(root, options.locale, domain + '.po'):
                 continue
             if path.exists(filename):
-                print 'Updating %r' % lang
+                print 'Updating %r' % lang,
                 locale = Locale.parse(lang)
                 f = file(filename)
                 try:
@@ -75,6 +77,25 @@ def main():
                     write_po(f, catalog, ignore_obsolete=True,
                              include_previous=False, width=79)
                 finally:
+                    if options.statistics:
+                        translated = fuzzy = percentage = 0
+                        for message in list(catalog)[1:]:
+                            if message.string:
+                                translated +=1
+                            if 'fuzzy' in message.flags:
+                                fuzzy += 1
+                        if len(catalog):
+                            percentage = translated * 100 // len(catalog)
+                            print "-> %d of %d messages (%d%%) translated" % (
+                                translated, len(catalog), percentage),
+                            if fuzzy:
+                                if fuzzy == 1:
+                                    print "%d of which is fuzzy" % fuzzy,
+                                else:
+                                    print "%d of which are fuzzy" % fuzzy,
+                            print
+                    else:
+                        print
                     f.close()
 
 
