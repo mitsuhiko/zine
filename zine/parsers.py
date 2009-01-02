@@ -6,7 +6,7 @@
     This module holds the base parser informations and the dict of
     default parsers.
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from werkzeug import escape

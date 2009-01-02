@@ -49,7 +49,7 @@
 
     New languages are added with `add-translation`.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os
@@ -101,7 +101,6 @@ def load_core_translations(locale):
 class _CustomAttrsTranslations(object):
     _info = None
     _plural_expr = None
-    client_keys = frozenset()
 
     def _get_plural_expr(self):
         if not self._plural_expr:
@@ -120,8 +119,9 @@ class _CustomAttrsTranslations(object):
 class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
 
     def __init__(self, fileobj=None, locale=None):
-        TranslationsBase.__init__(self, fileobj=fileobj)
+        self.client_keys = set()
         self.locale = locale
+        TranslationsBase.__init__(self, fileobj=fileobj)
 
     def _parse(self, fileobj):
         TranslationsBase._parse(self, fileobj)
@@ -132,7 +132,7 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
             pickled_data_pointer_pos = struct.unpack('i', fileobj.read())
             fileobj.seek(pickled_data_pointer_pos[0])
             # Load pickled data
-            self.client_keys = pickle.load(fileobj)
+            self.client_keys.update(pickle.load(fileobj))
         except EOFError:
             # Catalog does not contain any pickled data at the end of it
             pass
@@ -160,6 +160,7 @@ class ZineNullTranslations(NullTranslations, _CustomAttrsTranslations):
     def __init__(self, fileobj=None, locale=None):
         NullTranslations.__init__(self, fileobj)
         self.locale = locale
+        self.client_keys = set()
 
     def merge(self, translations):
         """Update the translations with others."""

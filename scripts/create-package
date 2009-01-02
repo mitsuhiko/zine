@@ -6,7 +6,7 @@
     This script dumps Zine with all files required files into a .tar.gz
     and .zip archive for distribution.
 
-    :copyright: 2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re

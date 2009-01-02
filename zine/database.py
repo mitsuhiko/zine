@@ -10,7 +10,7 @@
     :mod:`zine.api` module.
 
 
-    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Christopher Grebs,
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
                              Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """

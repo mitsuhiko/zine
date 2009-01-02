@@ -4,7 +4,7 @@
 
     This package implements various functions used all over the code.
 
-    :copyright: 2007 by Armin Ronacher, Georg Brandl.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os

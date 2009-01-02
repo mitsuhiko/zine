@@ -5,7 +5,7 @@
 
     This script is invoked by the makefile to install Zine on a POSIX system.
 
-    :copyright: 2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import sys

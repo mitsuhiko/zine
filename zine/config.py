@@ -8,7 +8,7 @@
     changes the application is reloaded automatically.
 
 
-    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio, Lukas Meuser.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os

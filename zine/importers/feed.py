@@ -6,7 +6,7 @@
     This importer can import web feeds.  Currently it is limited to ATOM
     plus optional Zine extensions.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from pickle import loads

@@ -16,7 +16,7 @@
       Old postings still contain the old uids though, so
       they need to be regenerated.
 
-    :copyright: 2008 by Christopher Denter
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 

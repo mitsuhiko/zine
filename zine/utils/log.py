@@ -10,7 +10,7 @@
     We are not using the python logging system because it registers the loggers
     in a central spot and it's pretty slow.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re

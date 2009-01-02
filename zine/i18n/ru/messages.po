@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
-"POT-Creation-Date: 2008-12-25 13:50+0300\n"
-"PO-Revision-Date: 2008-12-28 23:39+0100\n"
+"POT-Creation-Date: 2009-01-01 22:20+0000\n"
+"PO-Revision-Date: 2009-01-02 01:08+0100\n"
 "Last-Translator: Nikita Kabardin <wackum@gmail.com>\n"
 "Language-Team: ru <LL@li.org>\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
@@ -18,22 +18,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.4\n"
 
-#: zine/application.py:659
+#: zine/application.py:661
 msgid "Default Theme"
 msgstr "Тема по умолчанию"
 
-#: zine/application.py:660
+#: zine/application.py:662
 msgid "Simple default theme that doesn't contain any style information."
 msgstr "Простая стандартная тема, не содержащая никаких стилей."
 
-#: zine/application.py:717
+#: zine/application.py:719
 #, python-format
 msgid "Theme “%s” is no longer available, falling back to default theme."
 msgstr "Тема «%s» более недоступна, возвращаемся к стандартной теме."
 
-#: zine/application.py:740
-#, python-format
-msgid "Copyright %(years)s by the Pocoo Team"
+#: zine/application.py:742
+#, fuzzy, python-format
+msgid "Copyright %(years)s by the Zine Team"
 msgstr "%(years)s «Pocoo Team»"
 
 #: zine/config.py:34
@@ -157,7 +157,7 @@ msgstr "Почта* (не публикуется)"
 msgid "You have to enter a valid e-mail address."
 msgstr "Введите правильный адрес e-mail."
 
-#: zine/forms.py:102 zine/forms.py:405 zine/forms.py:715
+#: zine/forms.py:102 zine/forms.py:400 zine/forms.py:713
 msgid "Website"
 msgstr "Сайт"
 
@@ -165,7 +165,7 @@ msgstr "Сайт"
 msgid "You have to enter a valid URL or omit the field."
 msgstr "Введите правильный URL или оставьте поле пустым."
 
-#: zine/forms.py:105 zine/forms.py:224 zine/forms.py:407 zine/parsers.py:99
+#: zine/forms.py:105 zine/forms.py:224 zine/forms.py:402 zine/parsers.py:99
 msgid "Text"
 msgstr "Текст"
 
@@ -228,12 +228,12 @@ msgstr "Опубликовано"
 msgid "Publication date"
 msgstr "Дата публикации"
 
-#: zine/forms.py:230 zine/forms.py:506
+#: zine/forms.py:230 zine/forms.py:501
 #: zine/templates/admin/manage_categories.html:8
 msgid "Slug"
 msgstr "Ярлык"
 
-#: zine/forms.py:231 zine/forms.py:402
+#: zine/forms.py:231 zine/forms.py:397
 #: zine/templates/admin/_post_helpers.html:5
 #: zine/templates/admin/information.html:163
 #: zine/templates/admin/inspect_import.html:50
@@ -250,7 +250,7 @@ msgstr "Теги"
 msgid "Categories"
 msgstr "Категории"
 
-#: zine/forms.py:237 zine/forms.py:409 zine/templates/admin/write_page.html:22
+#: zine/forms.py:237 zine/forms.py:404 zine/templates/admin/write_page.html:22
 msgid "Parser"
 msgstr "Парсер"
 
@@ -266,226 +266,235 @@ msgstr "Разрешить pingback"
 msgid "Ping links"
 msgstr "Ping-ссылки"
 
-#: zine/forms.py:278 zine/forms.py:427
+#: zine/forms.py:278 zine/forms.py:422
 #, python-format
 msgid "%s (missing)"
 msgstr "%s (отсутствует)"
 
-#: zine/forms.py:293 zine/forms.py:527
-msgid "This slug is already in use"
+#: zine/forms.py:293
+#, fuzzy
+msgid "This slug is already in use."
 msgstr "Такой ярлык уже используется"
 
 #: zine/forms.py:298
 msgid "Selected parser is no longer available on the system."
 msgstr "Выбранный парсер больше не доступен в системе."
 
-#: zine/forms.py:403 zine/forms.py:713
+#: zine/forms.py:398 zine/forms.py:711
 msgid "Email"
 msgstr "E-mail"
 
-#: zine/forms.py:408 zine/templates/admin/_post_helpers.html:8
+#: zine/forms.py:403 zine/templates/admin/_post_helpers.html:8
 #: zine/templates/admin/import.html:24
 #: zine/templates/admin/inspect_import.html:48
 msgid "Date"
 msgstr "Дата"
 
-#: zine/forms.py:410 zine/templates/admin/block_comment.html:2
+#: zine/forms.py:405 zine/templates/admin/block_comment.html:2
 #: zine/templates/admin/block_comment.html:4
 msgid "Block Comment"
 msgstr "Заблокировать комментарий"
 
-#: zine/forms.py:411 zine/forms.py:474
+#: zine/forms.py:406 zine/forms.py:469
 msgid "Reason"
 msgstr "Причина"
 
-#: zine/forms.py:483
+#: zine/forms.py:478
 #, python-format
 msgid "blocked by %s"
 msgstr "заблокировал(а) %s"
 
-#: zine/forms.py:507 zine/templates/admin/manage_categories.html:9
+#: zine/forms.py:502 zine/templates/admin/manage_categories.html:9
 msgid "Name"
 msgstr "Имя"
 
-#: zine/forms.py:508 zine/forms.py:711 zine/templates/admin/plugins.html:18
+#: zine/forms.py:504 zine/forms.py:709 zine/templates/admin/plugins.html:18
 msgid "Description"
 msgstr "Описание"
 
-#: zine/forms.py:610 zine/templates/admin/manage_groups.html:8
+#: zine/forms.py:523
+msgid "This slug is already in use"
+msgstr "Такой ярлык уже используется"
+
+#: zine/forms.py:606 zine/templates/admin/manage_groups.html:8
 msgid "Groupname"
 msgstr "Имя группы"
 
-#: zine/forms.py:612 zine/forms.py:719
+#: zine/forms.py:609 zine/forms.py:717
 #: zine/templates/admin/information.html:102
 msgid "Privileges"
 msgstr "Привилегии"
 
-#: zine/forms.py:629
+#: zine/forms.py:626
 msgid "This groupname is already in use"
 msgstr "Такое имя группы уже используется"
 
-#: zine/forms.py:650
+#: zine/forms.py:647
 msgid "What should Zine do with users assigned to this group?"
 msgstr "Что сделать с пользователями этой группы?"
 
-#: zine/forms.py:653
+#: zine/forms.py:650
 msgid "Do nothing, just detach the membership"
 msgstr "Ничего не делать, просто отменить членство в группе"
 
-#: zine/forms.py:654
+#: zine/forms.py:651
 msgid "Move the users to another group"
 msgstr "Переместить пользователей в другую группу"
 
-#: zine/forms.py:656
+#: zine/forms.py:653
 msgid "Relocate users to"
 msgstr "Переместить пользователей в"
 
-#: zine/forms.py:669
+#: zine/forms.py:666
 msgid "You have to select a group that gets the users assigned."
 msgstr "Выберите группу"
 
-#: zine/forms.py:707 zine/forms.py:741 zine/templates/admin/login.html:23
+#: zine/forms.py:704 zine/forms.py:739 zine/templates/admin/login.html:23
 #: zine/templates/admin/manage_users.html:8
 #: zine/websetup/templates/admin_account.html:10
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: zine/forms.py:709 zine/forms.py:742 zine/templates/admin/manage_users.html:9
+#: zine/forms.py:707 zine/forms.py:740 zine/templates/admin/manage_users.html:9
 msgid "Realname"
 msgstr "Полное имя"
 
-#: zine/forms.py:710
+#: zine/forms.py:708
 msgid "Display name"
 msgstr "Отображаемое имя"
 
-#: zine/forms.py:717 zine/templates/admin/login.html:25
+#: zine/forms.py:715 zine/templates/admin/login.html:25
 #: zine/websetup/templates/admin_account.html:12
 msgid "Password"
 msgstr "Пароль"
 
-#: zine/forms.py:721 zine/views/admin.py:113
+#: zine/forms.py:719 zine/views/admin.py:113
 msgid "Groups"
 msgstr "Группы"
 
-#: zine/forms.py:723
+#: zine/forms.py:721
 msgid "List as author"
 msgstr "Выводить как автора"
 
-#: zine/forms.py:724
+#: zine/forms.py:722
 msgid "This user is listed as author"
 msgstr "Этот пользователь выводится в качестве автора"
 
-#: zine/forms.py:753
+#: zine/forms.py:751
 msgid "This username is already in use"
 msgstr "Имя пользователя уже используется"
 
-#: zine/forms.py:788
+#: zine/forms.py:786
 msgid "What should Zine do with posts written by this user?"
 msgstr "Что сделать с записями, уже созданными пользователем?"
 
-#: zine/forms.py:790
+#: zine/forms.py:788
 msgid "Delete them permanently"
 msgstr "Удалить их полностью"
 
-#: zine/forms.py:791
+#: zine/forms.py:789
 msgid "Reassign posts"
 msgstr "Передать записи"
 
-#: zine/forms.py:794
+#: zine/forms.py:792
 msgid "Reassign posts to"
 msgstr "Передать записи пользователю"
 
-#: zine/forms.py:809
+#: zine/forms.py:807
 msgid "You have to select the user that gets the posts assigned."
 msgstr "Выберите пользователя, которому будут переданы записи."
 
-#: zine/forms.py:850
+#: zine/forms.py:848
 msgid "Filename"
 msgstr "Имя файла"
 
-#: zine/forms.py:851
+#: zine/forms.py:849
 msgid "Log Level"
 msgstr "Уровень логгирования"
 
-#: zine/forms.py:856 zine/forms.py:1025
+#: zine/forms.py:854 zine/forms.py:1024
 msgid "Blog title"
 msgstr "Название блога"
 
-#: zine/forms.py:857
+#: zine/forms.py:855
 msgid "Blog tagline"
 msgstr "Краткое описание блога"
 
-#: zine/forms.py:858
+#: zine/forms.py:856
 msgid "Blog email"
 msgstr "E-mail блога"
 
-#: zine/forms.py:859
+#: zine/forms.py:857
 msgid "Language"
 msgstr "Язык"
 
-#: zine/forms.py:860
+#: zine/forms.py:858
 msgid "Timezone"
 msgstr "Часовой пояс"
 
-#: zine/forms.py:862
+#: zine/forms.py:860
 msgid "Cookie Name"
 msgstr "Имя Cookie"
 
-#: zine/forms.py:864
+#: zine/forms.py:862
 msgid "Comments enabled"
 msgstr "Комментарии разрешены"
 
-#: zine/forms.py:865
+#: zine/forms.py:863
 msgid "enable comments per default"
 msgstr "по умолчанию, разрешать комментирование"
 
-#: zine/forms.py:867
+#: zine/forms.py:865
 msgid "Comment Moderation"
 msgstr "Модерирование комментариев"
 
-#: zine/forms.py:870
+#: zine/forms.py:868
 msgid "Pingbacks enabled"
 msgstr "Pingback"
 
-#: zine/forms.py:871
+#: zine/forms.py:869
 msgid "enable pingbacks per default"
 msgstr "по умолчанию, разрешать pingback"
 
-#: zine/forms.py:873
+#: zine/forms.py:871
 msgid "Use flat comments"
 msgstr "Использовать простые комментарии"
 
-#: zine/forms.py:874
+#: zine/forms.py:872
 msgid "All comments are posted top-level"
 msgstr "Все комментарии появляются сверху"
 
-#: zine/forms.py:876
+#: zine/forms.py:874
 msgid "Default parser"
 msgstr "Парсер по умолчанию"
 
-#: zine/forms.py:878
+#: zine/forms.py:876
 msgid "Comment parser"
 msgstr "Парсер комментариев"
 
-#: zine/forms.py:880
+#: zine/forms.py:878
 msgid "Posts per page"
 msgstr "Записей на страницу"
 
-#: zine/forms.py:895
+#: zine/forms.py:893
 msgid "Blog URL prefix"
 msgstr "URL-префикс блога"
 
-#: zine/forms.py:897
+#: zine/forms.py:895
 msgid "Admin URL prefix"
 msgstr "URL-префикс панели управления"
 
-#: zine/forms.py:899
+#: zine/forms.py:897
 msgid "Category URL prefix"
 msgstr "URL-префикс категорий"
 
-#: zine/forms.py:901
+#: zine/forms.py:899
 msgid "Tag URL prefix"
 msgstr "URL-префикс тегов"
+
+#: zine/forms.py:901
+msgid "Author Profiles URL prefix"
+msgstr "URL-префикс профилей авторов"
 
 #: zine/forms.py:903
 msgid "Limit slugs to ASCII"
@@ -495,61 +504,57 @@ msgstr "Использовать только ASCII"
 msgid "Automatically generated slugs are limited to ASCII"
 msgstr "Ярлыки, созданные автоматически, используют только ASCII"
 
-#: zine/forms.py:907
-msgid "Author Profiles URL prefix"
-msgstr "URL-префикс профилей авторов"
-
-#: zine/forms.py:926
+#: zine/forms.py:925
 msgid "Cache system"
 msgstr "Система кэширования"
 
-#: zine/forms.py:928
+#: zine/forms.py:927
 msgid "Default cache timeout"
 msgstr "Таймаут кэширования по умолчанию"
 
-#: zine/forms.py:930
+#: zine/forms.py:929
 msgid "Enable eager caching"
 msgstr "Включить интенсивное кэширование"
 
-#: zine/forms.py:931
+#: zine/forms.py:930
 msgid "Enable"
 msgstr "Включить"
 
-#: zine/forms.py:938
+#: zine/forms.py:937
 msgid "You have to provide at least one server to use memcached."
 msgstr "Чтобы использовать memcached, введите хотя бы один сервер."
 
-#: zine/forms.py:942
+#: zine/forms.py:941
 msgid "You have to provide cache folder to use filesystem cache."
 msgstr ""
 "Чтобы использовать файловое кэширование, вы должны указать директорию "
 "хранения."
 
-#: zine/forms.py:952
+#: zine/forms.py:951
 msgid "Dump Download URL"
 msgstr "URL дампа"
 
-#: zine/forms.py:958
+#: zine/forms.py:957
 msgid "Feed Download URL"
 msgstr "URL потока"
 
-#: zine/forms.py:975
+#: zine/forms.py:974
 msgid "Use default value"
 msgstr "Использовать значение по умолчанию"
 
-#: zine/forms.py:1011
+#: zine/forms.py:1010
 msgid "Create new user"
 msgstr "Создать пользователя"
 
-#: zine/forms.py:1027
+#: zine/forms.py:1026
 msgid "Blog description"
 msgstr "Описание блога"
 
-#: zine/forms.py:1032
+#: zine/forms.py:1031
 msgid "Load config values"
 msgstr "Загрузить значения конфигурации"
 
-#: zine/forms.py:1033
+#: zine/forms.py:1032
 msgid "Load the configuration values from the import."
 msgstr "Использовать параметры конфигурации из импорта."
 
@@ -675,7 +680,7 @@ msgstr "может модерировать комментарии"
 msgid "no documented plugins installed."
 msgstr "не установлено документированных плагинов."
 
-#: zine/i18n/__init__.py:460
+#: zine/i18n/__init__.py:478
 msgid "now"
 msgstr "сейчас"
 
@@ -1123,7 +1128,7 @@ msgid "Tagged as"
 msgstr "Указаны теги"
 
 #: zine/templates/_entry.html:18
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid "%(comments)s comment"
 msgid_plural "%(comments)s comments"
 msgstr[0] "%(comments)s комментарий"
@@ -1195,6 +1200,38 @@ msgstr "Добро пожаловать"
 #: zine/templates/index.html:10
 msgid "So far there are no entries in this blog."
 msgstr "В этом блоге пока что нет записей."
+
+#: zine/templates/internal_error.html:2
+#, fuzzy
+msgid "Zine Internal Error"
+msgstr "Внутренняя ошибка сервера Zine"
+
+#: zine/templates/internal_error.html:4
+#, fuzzy
+msgid "Internal Error"
+msgstr "Внутренняя ошибка сервера"
+
+#: zine/templates/internal_error.html:6
+msgid "Zine encountered an internal error during processing:"
+msgstr ""
+
+#: zine/templates/internal_error.html:13
+msgid ""
+"\n"
+"    If you have troubles fixing the problem have a look at the Zine\n"
+"    documentation.\n"
+"  "
+msgstr ""
+
+#: zine/templates/internal_error.html:17
+msgid ""
+"\n"
+"    This error is only visible to blog administrators.  If a regular user"
+"\n"
+"    triggered the error an entry to the log is added and a generic error\n"
+"    message is displayed.\n"
+"  "
+msgstr ""
 
 #: zine/templates/maintenance.html:40
 msgid "Maintenance Mode"
@@ -1292,6 +1329,7 @@ msgid "No pages."
 msgstr "Нет страниц."
 
 #: zine/templates/admin/_post_helpers.html:32
+#, fuzzy
 msgid "Your draft:"
 msgid_plural "Your drafts:"
 msgstr[0] "Ваш черновик:"
@@ -1320,8 +1358,8 @@ msgstr ""
 "    "
 
 #: zine/templates/admin/about_zine.html:12
-#, python-format
-msgid "© Copyright %(years)s by the Pocoo Team. Some rights reserved."
+#, fuzzy, python-format
+msgid "© Copyright %(years)s by the Zine Team. Some rights reserved."
 msgstr "© %(years)s «Pocoo Team». Некоторые права защищены."
 
 #: zine/templates/admin/about_zine.html:15
@@ -1789,10 +1827,10 @@ msgid "Delete Category"
 msgstr "Удалить категорию"
 
 #: zine/templates/admin/delete_category.html:7
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "\n"
-"        Do you really want to delete category “%(category_name)s”?el\n"
+"        Do you really want to delete category “%(category_name)s”?\n"
 "      "
 msgstr ""
 "\n"
@@ -1843,7 +1881,7 @@ msgstr ""
 
 #: zine/templates/admin/delete_entry.html:10
 #: zine/templates/admin/delete_page.html:10
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid ""
 "\n"
 "      This will also delete %(comment_count)s comment.\n"
@@ -1941,7 +1979,7 @@ msgstr ""
 "    "
 
 #: zine/templates/admin/delete_user.html:9
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid ""
 "\n"
 "      What should happen to the %(post_count)s post this user wrote?\n"
@@ -2308,7 +2346,7 @@ msgid "Howdy.  Welcome to the Zine administration interface %(user)s."
 msgstr "Привет, %(user)s. Добро пожаловать в интерфейс администрирования Zine."
 
 #: zine/templates/admin/index.html:11
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid "You have written <strong>%(your_posts)s</strong> post so far."
 msgid_plural "You have written <strong>%(your_posts)s</strong> posts so far."
 msgstr[0] "Вы создали <strong>%(your_posts)s</strong> запись."
@@ -3088,7 +3126,7 @@ msgid ""
 msgstr "от <em>%(domain)s</em>, добавил %(author)s @ %(submitted)s, %(comments)s"
 
 #: zine/templates/admin/reddit.html:12
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid "%d comment"
 msgid_plural "%d comments"
 msgstr[0] "%d комментарий"
@@ -3221,7 +3259,7 @@ msgid "Complete archive"
 msgstr "Полный архив"
 
 #: zine/templates/widgets/tag_cloud.html:7
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid "%(count)s post tagged %(tag)s"
 msgid_plural "%(count)s posts tagged %(tag)s"
 msgstr[0] "%(count)s записи установлен тег %(tag)s"
@@ -3253,7 +3291,7 @@ msgid "Invalid security token submitted."
 msgstr "Использован неверный код безопасности."
 
 #: zine/utils/forms.py:1146 zine/utils/forms.py:1528
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid "Please provide at least %d item."
 msgid_plural "Please provide at least %d items."
 msgstr[0] "Укажите как минимум %d объект."
@@ -3261,7 +3299,7 @@ msgstr[1] "Укажите как минимум %d объекта."
 msgstr[2] "Укажите как минимум %d объектов."
 
 #: zine/utils/forms.py:1153 zine/utils/forms.py:1535
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid "Please provide no more than %d item."
 msgid_plural "Please provide no more than %d items."
 msgstr[0] "Укажите не более %d объекта."
@@ -3269,7 +3307,7 @@ msgstr[1] "Укажите не более %d объектов."
 msgstr[2] "Укажите не более %d объектов."
 
 #: zine/utils/forms.py:1266
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid "Please enter at least %d character."
 msgid_plural "Please enter at least %d characters."
 msgstr[0] "Введите как минимум %d символ."
@@ -3277,7 +3315,7 @@ msgstr[1] "Введите как минимум %d символа."
 msgstr[2] "Введите как минимум %d символов."
 
 #: zine/utils/forms.py:1273
-#, gpython-format
+#, gpython-format, python-format, fuzzy
 msgid "Please enter no more than %d character."
 msgid_plural "Please enter no more than %d characters."
 msgstr[0] "Введите не более %d символа."
@@ -3400,7 +3438,11 @@ msgstr "URL-префикс должен начинаться со слеша."
 msgid "URL prefix must not end with a slash."
 msgstr "URL-префикс не должен заканчиваться слешем."
 
-#: zine/utils/zeml.py:299
+#: zine/utils/validators.py:164
+msgid "At least one non-whitespace character is required."
+msgstr ""
+
+#: zine/utils/zeml.py:300
 msgid ""
 "Error when loading dynamic ZEML element. The system ignored the element."
 "  Maybe a disabled plugin caused the problem."
@@ -3408,7 +3450,7 @@ msgstr ""
 "Ошибка загрузки динамического элемента ZEML, он был проигнорирован. "
 "Возможно, проблема вызвана каким-то отключенным расширением."
 
-#: zine/utils/zeml.py:646
+#: zine/utils/zeml.py:659
 #, python-format
 msgid "Error loading dynamic element %s"
 msgstr "Ошибка загрузки динамического элемента %s"
@@ -3706,27 +3748,27 @@ msgstr "Пароль успешно изменен."
 msgid "Recent Posts Feed"
 msgstr "Поток последних записей"
 
-#: zine/views/blog.py:114
+#: zine/views/blog.py:115
 #, python-format
 msgid "All posts in category %s"
 msgstr "Все записи в категории %s"
 
-#: zine/views/blog.py:141
+#: zine/views/blog.py:142
 #, python-format
 msgid "All posts tagged %s"
 msgstr "Для всех записей установлен тег %s"
 
-#: zine/views/blog.py:172
+#: zine/views/blog.py:173
 #, python-format
 msgid "All posts written by %s"
 msgstr "Все записи пользователя %s"
 
-#: zine/views/blog.py:363
+#: zine/views/blog.py:370
 #, python-format
 msgid "Comment %(num)d on %(post)s"
 msgstr "Комментарий %(num)d к %(post)s"
 
-#: zine/views/blog.py:420
+#: zine/views/blog.py:427
 msgid "Comments Feed"
 msgstr "Поток комментариев"
 

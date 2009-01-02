@@ -5,7 +5,7 @@
 
     The builtin (JSON) services.
 
-    :copyright: 2007-2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from werkzeug import abort

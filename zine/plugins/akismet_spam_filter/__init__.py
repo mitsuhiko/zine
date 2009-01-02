@@ -5,7 +5,7 @@
 
     Do spam checking via Akismet of comments.
 
-    :copyright: 2007-2008 by Armin Ronacher, Pedro Algarvio.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from os.path import dirname, join
