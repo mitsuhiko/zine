@@ -6,7 +6,7 @@
  * new div for the fish and a second one for the bubble. Then it assigns some
  * classes and registeres a click action for the fish that sends a request.
  *
- * :copyright: 2007-2008 by Armin Ronacher.
+ * :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
  * :license: BSD, see LICENSE for more details.
  */
 

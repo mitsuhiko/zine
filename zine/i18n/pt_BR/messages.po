@@ -1,6 +1,6 @@
 # Portuguese (Brazil) translations for Zine.
 # Copyright (C) 2008 The Pocoo Team
-# This file is distributed under the same license as the PROJECT project.
+# This file is distributed under the same license as the Zine project.
 # Vinicius Figueiredo <viniciusfs@gmail.com>, 2008
 # Rodrigo Moraes <rodrigo.moraes@gmail.com>, 2008
 msgid ""
@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: Zine 0.1.2\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
 "POT-Creation-Date: 2009-01-01 22:20+0000\n"
-"PO-Revision-Date: 2009-01-01 23:47+0000\n"
+"PO-Revision-Date: 2009-01-02 01:08+0100\n"
 "Last-Translator: Vinícius Figueiredo <viniciusfs@gmail.com>\n"
 "Language-Team: pt_BR <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.0dev-r466\n"
+"Generated-By: Babel 0.9.4\n"
 
 #: zine/application.py:661
 msgid "Default Theme"
@@ -31,8 +31,8 @@ msgid "Theme “%s” is no longer available, falling back to default theme."
 msgstr "Tema “%s” não está disponível, voltando ao tema padrão."
 
 #: zine/application.py:742
-#, python-format
-msgid "Copyright %(years)s by the Pocoo Team"
+#, fuzzy, python-format
+msgid "Copyright %(years)s by the Zine Team"
 msgstr "Direitos Autorais %(years)s por Pocoo Team"
 
 #: zine/config.py:34
@@ -1352,8 +1352,8 @@ msgstr ""
 "      uma interface simples e intuitiva.\n"
 
 #: zine/templates/admin/about_zine.html:12
-#, python-format
-msgid "© Copyright %(years)s by the Pocoo Team. Some rights reserved."
+#, fuzzy, python-format
+msgid "© Copyright %(years)s by the Zine Team. Some rights reserved."
 msgstr "© Direitos Autorais %(years)s por Pocoo Team. Alguns direitos reservados."
 
 #: zine/templates/admin/about_zine.html:15

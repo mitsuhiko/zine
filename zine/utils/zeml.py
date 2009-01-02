@@ -8,7 +8,7 @@
 
     The rules for ZEML are documented as part of the parser.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re

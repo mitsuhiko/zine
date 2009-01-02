@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: Zine 0.1\n"
 "Report-Msgid-Bugs-To: armin.ronacher@active-4.com\n"
 "POT-Creation-Date: 2009-01-01 22:20+0000\n"
-"PO-Revision-Date: 2008-12-28 23:39+0100\n"
+"PO-Revision-Date: 2009-01-02 01:08+0100\n"
 "Last-Translator: Georg Brandl <georg@python.org>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.0dev-r466\n"
+"Generated-By: Babel 0.9.4\n"
 
 #: zine/application.py:661
 msgid "Default Theme"
@@ -33,8 +33,8 @@ msgstr ""
 
 #: zine/application.py:742
 #, python-format
-msgid "Copyright %(years)s by the Pocoo Team"
-msgstr "Copyright %(years)s by the Pocoo Team"
+msgid "Copyright %(years)s by the Zine Team"
+msgstr "Copyright %(years)s by the Zine Team"
 
 #: zine/config.py:34
 msgid "My Zine Blog"
@@ -272,9 +272,8 @@ msgid "%s (missing)"
 msgstr "%s (fehlt)"
 
 #: zine/forms.py:293
-#, fuzzy
 msgid "This slug is already in use."
-msgstr "Dieser Slug wird bereits verwendet"
+msgstr "Dieser URL Bezeichner wird bereits verwendet"
 
 #: zine/forms.py:298
 msgid "Selected parser is no longer available on the system."
@@ -1207,14 +1206,12 @@ msgid "So far there are no entries in this blog."
 msgstr "Momentan gibt es keine Einträge in diesem Blog."
 
 #: zine/templates/internal_error.html:2
-#, fuzzy
 msgid "Zine Internal Error"
-msgstr "Zine Internal Server Error"
+msgstr "Interner Zine Fehler"
 
 #: zine/templates/internal_error.html:4
-#, fuzzy
 msgid "Internal Error"
-msgstr "Internal Server Error"
+msgstr "Interner Fehler"
 
 #: zine/templates/internal_error.html:6
 msgid "Zine encountered an internal error during processing:"
@@ -1363,8 +1360,8 @@ msgstr ""
 
 #: zine/templates/admin/about_zine.html:12
 #, python-format
-msgid "© Copyright %(years)s by the Pocoo Team. Some rights reserved."
-msgstr "© Copyright %(years)s by the Pocoo Team. Some rights reserved."
+msgid "© Copyright %(years)s by the Zine Team. Some rights reserved."
+msgstr "© Copyright %(years)s by the Zine Team. Some rights reserved."
 
 #: zine/templates/admin/about_zine.html:15
 msgid ""
@@ -1868,7 +1865,7 @@ msgid "Delete Category"
 msgstr "Kategorie löschen"
 
 #: zine/templates/admin/delete_category.html:7
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "\n"
 "        Do you really want to delete category “%(category_name)s”?\n"

@@ -7,7 +7,7 @@
     API as well as some core importers we implement as part of the software
     and not as plugin.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os

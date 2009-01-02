@@ -21,7 +21,7 @@
         application = get_wsgi_app('/path/to/instance')
 
 
-    :copyright: 2007-2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 __version__ = '0.1.2-dev'

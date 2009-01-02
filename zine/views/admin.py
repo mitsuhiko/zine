@@ -7,7 +7,7 @@
     available for admins, editors and authors but not for subscribers. For
     subscribers a simplified account management system exists at /account.
 
-    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs, Pedro Algarvio,
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
                              Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """

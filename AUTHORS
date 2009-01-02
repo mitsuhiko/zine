@@ -1,20 +1,31 @@
-Zine is written and maintained by Armin Ronacher <armin.ronacher@active-4.com>.
+Zine is written and maintained by the Zine Team and various contributors:
 
-Other contributors (as mentionend in :copyright:s) are:
+Project Leader:
+
+- Armin Ronacher <armin.ronacher@active-4.com>
+
+Developers:
 
 - Georg Brandl
-- Ali Afshar
-- Christopher Grebs
-- Pedro Algarvio
 - Lukas Meuser
+- Christopher Grebs
+
+Contributors:
+
+- Pedro Algarvio
 - Jason Kirtland
+- Ali Afshar
 - Christopher Lenz
+- Tim Hatch
+- Rafael Weber
+- Ronny Pfannschmidt
 
 Translators:
 
 - Nikita Kabardin; into Russian
 - Christopher Grebs, Armin Ronacher; into German
 - Vinicius Figueiredo; into Brazilian Portuguese
+- Pedro Algarvio; into Portuguese
 
 Authors of libraries or code snippets included in Zine:
 

@@ -7,7 +7,7 @@
     and a couple of helper functions and classes.
 
 
-    :copyright: 2007-2008 by Armin Ronacher.
+    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from os import path, remove, makedirs, walk
@@ -739,8 +739,8 @@ class Zine(object):
             widgets=self.widgets,
             zine={
                 'version':      zine.__version__,
-                'copyright':    _(u'Copyright %(years)s by the Pocoo Team')
-                                % {'years': '2007-2008'}
+                'copyright':    _(u'Copyright %(years)s by the Zine Team')
+                                % {'years': '2008'}
             }
         )
 

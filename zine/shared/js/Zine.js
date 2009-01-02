@@ -5,7 +5,7 @@
  * Part of the Zine core framework. Provides default script
  * functions for the base templates.
  *
- * :copyright: 2007 by Armin Ronacher.
+ * :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
  * :license: BSD, see LICENSE for more details.
  */
 
