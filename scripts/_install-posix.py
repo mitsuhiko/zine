@@ -19,6 +19,10 @@ join = os.path.join
 
 PACKAGES = '_dynamic _ext importers utils views websetup docs'.split()
 SCRIPTS = 'create-apache-config server shell'.split()
+DESTDIR = os.environ.get('DESTDIR')
+
+if DESTDIR is not None:
+    DESTDIR = os.path.abspath(DESTDIR)
 
 
 def silent(f, *args):
@@ -26,6 +30,20 @@ def silent(f, *args):
         return f(*args)
     except:
         pass
+
+
+def rel_path(path, start):
+    start_list = os.path.abspath(start).split(os.path.sep)
+    path_list = os.path.abspath(path).split(os.path.sep)
+    offset = len(os.path.commonprefix([start_list, path_list]))
+    parts = [os.path.pardir] * (len(start_list) - offset) + path_list[offset:]
+    if not parts:
+        return os.path.curdir
+    return join(*parts)
+
+
+def rel_symlink(src, dst):
+    os.symlink(rel_path(src, os.path.dirname(dst)), dst)
 
 
 def copy_folder(src, dst, recurse=True, skip=(), delete_if_exists=False):
@@ -53,7 +71,7 @@ def copy_servers(source, destination, lib_dir, python):
                 lines[0] = '#!%s\n' % python
             for idx, line in enumerate(lines):
                 if line.startswith('ZINE_LIB ='):
-                    lines[idx] = 'ZINE_LIB = %r\n' % lib_dir
+                    lines[idx] = 'ZINE_LIB = %r\n' % strip_destdir(lib_dir)
                     break
         finally:
             f.close()
@@ -97,7 +115,8 @@ def copy_plugins(src_dir, lib_dir, share_dir):
             if os.path.exists(src_folder):
                 dst_folder = join(share_dir, new_folder, plugin)
                 copy_folder(src_folder, dst_folder, delete_if_exists=True)
-                os.symlink(dst_folder, join(plugin_lib_dir, folder))
+                lib_folder = join(plugin_lib_dir, folder)
+                rel_symlink(dst_folder, lib_folder)
 
 
 def copy_scripts(source, destination, lib_dir):
@@ -105,7 +124,7 @@ def copy_scripts(source, destination, lib_dir):
     f = file(join(source, '_init_zine.py'))
     try:
         contents = f.read().replace('ZINE_LIB = None',
-                                    'ZINE_LIB = %r' % lib_dir)
+                                    'ZINE_LIB = %r' % strip_destdir(lib_dir))
     finally:
         f.close()
     f = file(join(destination, '_init_zine.py'), 'w')
@@ -117,9 +136,15 @@ def copy_scripts(source, destination, lib_dir):
         shutil.copy2(join(source, script), destination)
 
 
+def strip_destdir(path):
+    if DESTDIR is None or not path.startswith(DESTDIR):
+        return path
+    return path[len(DESTDIR):]
+
+
 def main(prefix):
-    if 'DESTDIR' in os.environ:
-        dest_dir = join(os.environ['DESTDIR'], prefix.lstrip('/'))
+    if DESTDIR is not None:
+        dest_dir = join(DESTDIR, prefix.lstrip('/'))
     else:
         dest_dir = prefix
 
