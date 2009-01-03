@@ -16,6 +16,7 @@
 import sys
 from os.path import isdir, join, dirname
 from optparse import OptionParser
+from subprocess import call
 
 
 sys.path.append(dirname(__file__))
@@ -34,9 +35,11 @@ def main():
         parser.error('instance not found.  Specify path to instance')
 
     import zine
-    plugin = zine.setup(instance, True).plugins[args[0]]
-    if plugin is None:
+    try:
+        plugin = zine.setup(instance).plugins[args[0]]
+    except KeyError:
         parser.error('Plugin not found')
+    print plugin.path
 
     output_filename = None
     if len(args) == 2:
@@ -51,6 +54,11 @@ def main():
             output_filename = join(output_filename, plugin_filename)
         else:
             output_filename = plugin_filename
+    elif not output_filename.endswith('.plugin'):
+            output_filename += '.plugin'
+
+    compile_script = join(dirname(__file__), 'compile-translations')
+    call([compile_script, plugin.path, '-s'])
 
     plugin.dump(output_filename)
     print 'Plugin written to %s' % output_filename
