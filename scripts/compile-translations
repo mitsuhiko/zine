@@ -82,7 +82,7 @@ def main():
                         if fname.endswith('.js'):
                             client_messages.add(message)
                             break
-                if len(catalog):
+                if options.statistics and len(catalog):
                     percentage = translated * 100 // len(catalog)
                     print "-> %d of %d messages (%d%%) translated" % (
                         translated, len(catalog), percentage),
