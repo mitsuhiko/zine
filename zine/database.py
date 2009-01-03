@@ -102,9 +102,10 @@ def create_engine(uri, relative_to=None, echo=False):
 
 def secure_database_uri(uri):
     """Returns the database uri with confidental information stripped."""
-    scheme, netloc, path, params, query, fragment = urlparse.urlparse(uri)
-    netloc = re.sub('([^:]*):([^@]*)@(.*)', r'\1:***@\3', netloc)
-    return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
+    obj = make_url(uri)
+    if obj.password:
+        obj.password = '***'
+    return unicode(obj).replace(':%2A%2A%2A@', ':***@')
 
 
 def attribute_loaded(model, attribute):

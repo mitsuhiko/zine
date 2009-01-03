@@ -37,6 +37,8 @@ Zine 0.1.2
 - optimized some queries.
 - Under some circumstances text after elements appered multiple times
   in ZEML.
+- the information export page strips confidental information in database
+  URIs now (passwords).
 
 
 Zine 0.1.1
