@@ -755,8 +755,8 @@ class _HTMLSerializer(object):
             if element.name not in self.void_elements:
                 self.serialize_body(element, write)
                 write(u'</%s>' % element.name)
-        if element.tail:
-            write(escape(element.tail))
+            if element.tail:
+                write(escape(element.tail))
 
 
 html_serializer = _HTMLSerializer()
@@ -1146,8 +1146,6 @@ class Parser(object):
                     break
                 elif not self.breaking_rules.get(element.name):
                     closable = False
-        # if we reach this point we had no idea what to do with the end
-        # tag and just ignore it.
 
     def read_until(self, string):
         """Reads everything to the string but doesn't consume the string."""

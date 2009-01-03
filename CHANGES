@@ -35,6 +35,8 @@ Zine 0.1.2
   publication defined on new entry creation.
 - ZEML handles newlines in elements properly now.
 - optimized some queries.
+- Under some circumstances text after elements appered multiple times
+  in ZEML.
 
 
 Zine 0.1.1
