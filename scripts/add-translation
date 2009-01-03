@@ -10,7 +10,7 @@
     :license: BSD, see LICENSE for more details.
 """
 from os import makedirs
-from os.path import dirname, join, realpath, pardir, isdir
+from os.path import dirname, join, realpath, pardir, isdir, isfile
 from optparse import OptionParser
 from datetime import datetime
 from babel import Locale, UnknownLocaleError
@@ -61,7 +61,7 @@ def write_catalog(catalog, folder):
         makedirs(target)
     f = file(join(target, 'messages.po'), 'w')
     try:
-        write_po(f, catalog)
+        write_po(f, catalog, width=79)
     finally:
         f.close()
 
@@ -76,18 +76,17 @@ def create_plugin_lang(locale, path):
     catalog = create_from_pot(locale, join(path, 'i18n', 'messages.pot'))
 
     # incorporate existing translations from the application
-    path = join(zine, 'i18n', str(locale), 'LC_MESSAGES', 'messages.po')
-    if isfile(path):
-        f = file(path)
+    zinepath = join(zine, 'i18n', str(locale), 'messages.po')
+    if isfile(zinepath):
+        f = file(zinepath)
         try:
             translated = read_po(f)
         finally:
             f.close()
 
         for message in translated:
-            if message.id:
-                if message.id in catalog:
-                    catalog[message.id] = message.clone()
+            if message.id and message.id in catalog:
+                catalog[message.id].string = message.string
 
     write_catalog(catalog, join(path, 'i18n'))
     print 'Created catalog for %s' % locale

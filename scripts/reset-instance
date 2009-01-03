@@ -10,7 +10,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import sys
-from os import mkdir, path
+from os import mkdir, path, listdir, unlink
 from shutil import rmtree
 from optparse import OptionParser
 
@@ -26,6 +26,7 @@ def main():
     parser.add_option('--blog-url', dest='blog_url', default='http://localhost:4000/')
     parser.add_option('--database', dest='database_uri', default='sqlite:///zine.db')
     parser.add_option('--language', dest='lang', default='en')
+    parser.add_option('--keep-plugins', default=False)
 
     options, args = parser.parse_args()
     if not args:
@@ -39,8 +40,16 @@ def main():
 
     print 'Resetting instance', instance
 
-    rmtree(instance)
-    mkdir(instance)
+    if not options.keep_plugins:
+        rmtree(instance)
+        mkdir(instance)
+    else:
+        for file in listdir(instance):
+            fpath = path.join(instance, file)
+            if path.isfile(fpath):
+                unlink(fpath)
+            elif path.isdir(fpath) and file != 'plugins':
+                rmtree(fpath)
 
     import zine.application
     from zine import setup
