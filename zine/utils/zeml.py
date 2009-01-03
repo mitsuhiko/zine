@@ -510,7 +510,7 @@ class _BaseElement(object):
                     self.attributes)
 
     def __eq__(self, other):
-        if self.__class__ != other.__class__:
+        if self.__class__ is not other.__class__:
             return False
         for key in 'name', 'children', 'attributes', 'text', 'tail':
             if getattr(self, key, _missing) != \
@@ -634,6 +634,11 @@ class DynamicElement(_BaseElement):
 
     def __nonzero__(self):
         return True
+
+    def __eq__(self, other):
+        if self.__class__ is not other.__class__:
+            return False
+        return self.__getstate__() == other.__getstate__()
 
     def __getstate__(self):
         rv = dict(self.__dict__)
