@@ -26,7 +26,7 @@ def main():
     parser.add_option('--blog-url', dest='blog_url', default='http://localhost:4000/')
     parser.add_option('--database', dest='database_uri', default='sqlite:///zine.db')
     parser.add_option('--language', dest='lang', default='en')
-    parser.add_option('--keep-plugins', default=False)
+    parser.add_option('--keep-plugins', default=False, action='store_true')
 
     options, args = parser.parse_args()
     if not args:
