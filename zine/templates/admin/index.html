@@ -76,9 +76,9 @@
       <p>{% trans reddit='<a href="http://www.reddit.com/r/zine/">reddit</a>' %}
         Zine is present at {{ reddit }}.  The latest popular items in the Zine
         subreddit are listed below:
-        {% endtrans %}
+        {% endtrans %}</p>
       <script type="text/javascript">
-        $('div.reddit').append($('<div>').load('?load=reddit'));
+	$('<div>').load('?load=reddit').appendTo('div.reddit');
       </script>
     </div>
   </div>
