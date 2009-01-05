@@ -48,9 +48,10 @@ def require_admin_privilege(expr=None):
 def load_zine_reddit():
     """Load the zine reddit."""
     import urllib
-    reddit_url = 'http://www.reddit.com/r/zine'
+    reddit_url = 'http://www.reddit.com'
+    reddit_zine_url = reddit_url + '/r/zine'
 
-    f = urllib.urlopen(reddit_url + '.json')
+    f = urllib.urlopen(reddit_zine_url + '.json')
     try:
         data = load_json(f.read())
     finally:
@@ -59,6 +60,8 @@ def load_zine_reddit():
     result = []
     for item in islice(data['data']['children'], 20):
         d = item['data']
+        if not d['url'].startswith("http"):
+            d['url'] = reddit_url + d['url']
         result.append({
             'author':       d['author'],
             'created':      datetime.utcfromtimestamp(d['created']),
@@ -67,8 +70,8 @@ def load_zine_reddit():
             'comments':     d['num_comments'],
             'url':          d['url'],
             'domain':       d['domain'],
-            'author_url':   'http://www.reddit.com/user/%s/' %
+            'author_url':   reddit_url + '/user/%s/' %
                             url_quote(d['author']),
-            'comment_url':  '%s/comments/%s' % (reddit_url, d['id'])
+            'comment_url':  '%s/comments/%s' % (reddit_zine_url, d['id'])
         })
     return result
