@@ -101,6 +101,7 @@ def make_urls(app):
         Rule('/change_password', endpoint='admin/change_password')
     ]
     other_urls = [
+        Rule('/<slug>', endpoint='blog/post', build_only=True),
         Rule('/_services/', endpoint='blog/service_rsd'),
         Rule('/_services/json/<path:identifier>', endpoint='blog/json_service'),
         Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service'),
