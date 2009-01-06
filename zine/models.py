@@ -535,7 +535,7 @@ class Post(_ZEMLDualContainer):
         prefix = get_application().cfg['blog_url_prefix'].lstrip('/')
         if prefix:
             prefix += '/'
-        full_slug = u'%s%s/%s/%s/%s' % (
+        full_slug = u'%s%04d/%02d/%02d/%s' % (
             prefix,
             self.pub_date.year,
             self.pub_date.month,
