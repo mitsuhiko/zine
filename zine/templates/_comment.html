@@ -1,5 +1,4 @@
 {% macro render_comment(comment, add_reply_link=false) %}
-  {%- if comment.visible %}
     <div class="comment{% if comment.is_pingback %} pingback{% endif %}{%
       if comment.blocked %} blocked{% endif %}" id="comment-{{ comment.id }}">
       <div class="text">{{ comment.body }}</div>
@@ -15,23 +14,30 @@
       {% endif -%}
       </p>
     </div>
-  {%- endif %}
 {%- endmacro %}
 
 {% macro render_comments(post) %}
   {%- if cfg.use_flat_comments %}
     <ol id="comments">
     {%- for comment in post.comments %}
+      {%- if comment.visible %}
       <li class="comment">{{ render_comment(comment) }}</li>
+      {%- endif %}
     {%- endfor %}
     </ol>
   {%- else %}
     <ul id="comments">
     {%- for comment in post.root_comments recursive %}
-      <li class="comment">{{ render_comment(comment, post.comments_enabled
-        and not cfg.use_flat_comments) }}{% if
-        comment.children %}<ul class="sub_comments">{{
-          loop(comment.children) }}</ul>{% endif %}</li>
+      {%- if comment.visible or comment.children %}
+      <li class="comment">
+      {%- if comment.visible %}
+      {{ render_comment(comment, post.comments_enabled and not cfg.use_flat_comments) }}
+      {%- endif %}
+      {%- if comment.children %}
+      <ul class="sub_comments">{{ loop(comment.children) }}</ul>
+      {%- endif %}
+      </li>
+      {%- endif %}
     {%- endfor %}
     </ul>
   {%- endif %}
