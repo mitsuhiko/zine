@@ -8,7 +8,7 @@
     TODO: this parser does not support `<intro>` sections and has a
           very bad implementation as it requires multiple parsing steps.
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from zine.api import *

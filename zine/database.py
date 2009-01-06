@@ -10,7 +10,7 @@
     :mod:`zine.api` module.
 
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
                              Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """

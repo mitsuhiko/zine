@@ -9,7 +9,7 @@
     are ways to tweak it a bit, but if one wants to have that functionality for
     other languages a different plugin is a better idea.
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re

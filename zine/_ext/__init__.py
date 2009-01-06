@@ -11,6 +11,6 @@
     -   pottymouth: used by the text parser to convert arbitary text into
         nice looking HTML as ZEML tree.
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """

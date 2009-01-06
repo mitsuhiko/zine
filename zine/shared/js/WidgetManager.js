@@ -5,7 +5,7 @@
  * This provides the JavaScript interface to the widget manager from the
  * Zine admin panel.
  *
- * :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+ * :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
  * :license: BSD, see LICENSE for more details.
  */
 (function() {

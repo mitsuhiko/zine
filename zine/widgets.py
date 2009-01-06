@@ -13,7 +13,7 @@
     Additionally widgets could be moved around from the admin panel in the
     future.
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
                                        Christopher Grebs, Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """

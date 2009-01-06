@@ -9,7 +9,7 @@
           raise `forms.ValidationError`\s.  They are used in hand validated
           forms currently which should be replaced by real forms soon.
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re

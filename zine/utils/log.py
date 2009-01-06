@@ -10,7 +10,7 @@
     We are not using the python logging system because it registers the loggers
     in a central spot and it's pretty slow.
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
