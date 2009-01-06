@@ -260,7 +260,8 @@ def index(request):
             Post.author_id == request.user.id
         ).count(),
         last_posts=Post.query.published(ignore_privileges=True)
-            .order_by(Post.pub_date.desc()).limit(5).all()
+            .order_by(Post.pub_date.desc()).limit(5).all(),
+        show_reddit = request.app.cfg['dashboard_reddit']
     )
 
 

@@ -515,6 +515,10 @@ div.dashboard div.reddit {
     clear: both;
 }
 
+div.dashboard div.clear {
+    clear: both;
+}
+
 div.dashboard div.reddit div.table {
     width: 100%;
     margin: 5px 0 0 0;

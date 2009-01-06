@@ -71,6 +71,7 @@
       </ul>
       {% endif %}
     </div>
+    {% if show_reddit %}
     <div class="reddit">
       <h2>{{ _('Zine at Reddit') }}</h2>
       <p>{% trans reddit='<a href="http://www.reddit.com/r/zine/">reddit</a>' %}
@@ -81,5 +82,7 @@
 	$('<div>').load('?load=reddit').appendTo('div.reddit');
       </script>
     </div>
+    {% endif %}
+    <div class="clear"></div>
   </div>
 {% endblock %}
