@@ -9,6 +9,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import os
 from thread import allocate_lock
 from time import time, sleep
 
@@ -140,3 +141,16 @@ def get_wsgi_app(instance_folder):
             _dispatch_lock.release()
         return app(environ, start_response)
     return application
+
+
+def override_environ_config(pool_size=None, pool_recycle=None,
+                            pool_timeout=None, behind_proxy=None):
+    """Some configuration parameters are not stored in the zine.ini but
+    in the os environment.  These are process wide configuration settings
+    used for different deployments.
+    """
+    for key, value in locals().items():
+        if value is not None:
+            if key == 'behind_proxy':
+                value = int(bool(value))
+            os.environ['ZINE_' + key.upper()] = str(value)

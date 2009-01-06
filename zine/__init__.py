@@ -33,5 +33,5 @@ __url__ = 'http://zine.pocoo.org/'
 # does not start with two leading underscores is wiped out on reload and
 # the core module is *not* reloaded, thus stuff will get lost if it's not
 # properly listed.
-from zine._core import setup, get_wsgi_app
-__all__ = ('setup', 'get_wsgi_app')
+from zine._core import setup, get_wsgi_app, override_environ_config
+__all__ = ('setup', 'get_wsgi_app', 'override_environ_config')

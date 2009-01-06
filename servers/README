@@ -21,3 +21,38 @@ The following files exist currently:
 
 Just take the file of choice, copy it to where you want it to be and
 adjust it.
+
+All this files have some variables you can configure and invoke the
+actual handler code.  Variables written in uppercase are there for
+you to change if you want.
+
+Some of these can be set from the process environment as well (for
+example via the apache `SetEnv` directive) if you prefix them with
+``ZINE_``.  This works for the following keys:
+
+`POOL_SIZE`
+    The size of the pool to be maintained.  This is the largest number
+    of connections that will be kept persistently in the pool.  Note
+    that the pool begins with no connections; once this number of
+    connections is requested, that number of connections will remain.
+    Defaults to 5.
+    If you are deploying Zine in a forking environment you want to set
+    this number to 1 or 2.
+
+`POOL_RECYCLE`
+    If set to non -1, number of seconds between connection recycling,
+    which means upon checkout, if this timeout is surpassed the
+    connection will be closed and replaced with a newly opened
+    connection.  Defaults to -1.
+
+`POOL_TIMEOUT`
+    The number of seconds to wait before giving up on returning a
+    connection.  Defaults to 30.
+
+`BEHIND_PROXY`
+    If you are proxying into Zine somehow (caching proxies or external
+    fastcgi/http servers) set this value to True to enable proxy support.
+    Do not set this to True if you are not using proxies as this would
+    be a security risk.
+    If you specify this value from the process environment use the values
+    ``1`` and ``0`` instead of ``True`` and ``False``.
