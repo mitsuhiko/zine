@@ -11,7 +11,7 @@
     last request could not send any more requests to external files. Those
     would already be returned by the normal Zine installation.
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import sys

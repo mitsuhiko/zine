@@ -7,10 +7,10 @@
     and a couple of helper functions and classes.
 
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from os import path, remove, makedirs, walk
+from os import path, remove, makedirs, walk, environ
 from time import time
 from itertools import izip
 from datetime import datetime, timedelta
@@ -231,6 +231,7 @@ class InternalError(UserException):
 class Request(RequestBase):
     """This class holds the incoming request data."""
 
+
     def __init__(self, environ, app=None):
         RequestBase.__init__(self, environ)
         if app is None:
@@ -254,6 +255,11 @@ class Request(RequestBase):
             user = User.query.get_nobody()
         self.user = user
         self.session = session
+
+    @property
+    def is_behind_proxy(self):
+        """Are we behind a proxy?"""
+        return environ.get('ZINE_BEHIND_PROXY') == '1'
 
     def login(self, user, permanent=False):
         """Log the given user in. Can be user_id, username or

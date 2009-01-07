@@ -6,7 +6,7 @@
 
     Simple configure script that creates a makefile.
 
-    :copyright: 2008 by Armin Ronacher.
+    :copyright: 2009 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
 import os

@@ -6,7 +6,7 @@
     This module holds the base parser informations and the dict of
     default parsers.
 
-    :copyright: (c) 2008 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from werkzeug import escape
@@ -126,7 +126,8 @@ class PlainTextParser(BaseParser):
 
     def parse(self, input_data, reason):
         from zine._ext.pottymouth import PottyMouth
-        parser = PottyMouth(emdash=False, ellipsis=False, smart_quotes=False)
+        parser = PottyMouth(emdash=False, ellipsis=False, smart_quotes=False,
+                            youtube=False, image=False)
         node = parser.parse(input_data)
         return self._to_zeml(node)
 

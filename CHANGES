@@ -39,6 +39,8 @@ Zine 0.1.2
   in ZEML.
 - the information export page strips confidental information in database
   URIs now (passwords).
+- the text parser no longer supports images and youtube links for security
+  and sanity reasons.
 
 
 Zine 0.1.1
