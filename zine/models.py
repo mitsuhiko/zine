@@ -9,7 +9,7 @@
                              Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """
-from math import ceil, log
+from math import log
 from datetime import date, datetime, timedelta
 from urlparse import urljoin
 
