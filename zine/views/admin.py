@@ -212,7 +212,6 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         } for type, msg in request.session.pop('admin/flashed_messages', [])],
         'active_pane': _active_menu_item
     }
-    print 123, _active_menu_item
     return render_response(template_name, **values)
 
 
