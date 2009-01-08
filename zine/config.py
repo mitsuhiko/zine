@@ -127,7 +127,10 @@ DEFAULT_VARS = {
     'plugins':                  CommaSeparated(TextField(), default=list),
 
     # importer settings
-    'blogger_auth_token':       TextField(default=u'')
+    'blogger_auth_token':       TextField(default=u''),
+
+    #admin settings
+    'dashboard_reddit':         BooleanField(default=True)
 }
 
 HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',
