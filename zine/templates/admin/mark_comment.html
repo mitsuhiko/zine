@@ -1,0 +1,14 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Report Comment As %s") % form_action }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Report Comment As %s") }}</h1>
+  {% call form() %}
+    <div>
+      <p>{% trans comment_author=form.comment.author|e %}
+        Do you really want to report the comment by {{ comment_author }} as {{ form_action }} ?
+      {% endtrans %}</p>
+      <input type="submit" name="cancel" value="{{ _('No') }}">
+      <input type="submit" name="confirm" value="{{ _('Yes') }}">
+    </div>
+  {% endcall %}
+{% endblock %}
