@@ -216,7 +216,7 @@ def show_akismet_config(req):
 def show_akismet_stats(req):
     """Show the akismet control panel."""
     api_key = req.app.cfg['akismet_spam_filter/apikey']
-    blog_url = 'wikinotification.ufsoft.org' #req.app.cfg['zine/blog_url']
+    blog_url = req.app.cfg['zine/blog_url']
 
     if req.app.cfg['maintenance_mode']:
         js_file = 'jquery.uicore.plus.tabs.js'
