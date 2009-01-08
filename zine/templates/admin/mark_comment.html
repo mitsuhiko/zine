@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 {% block title %}{{ _("Report Comment As %s") % form_action }}{% endblock %}
 {% block contents %}
-  <h1>{{ _("Report Comment As %s") }}</h1>
+  <h1>{{ _("Report Comment As %s") % form_action  }}</h1>
   {% call form() %}
     <div>
       <p>{% trans comment_author=form.comment.author|e %}

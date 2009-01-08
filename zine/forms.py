@@ -485,12 +485,12 @@ class MarkCommentForm(_CommentBoundForm):
         self.req = get_request()
         _CommentBoundForm.__init__(self, comment, initial)
 
-    def report_as_spam(self):
+    def mark_as_spam(self):
         emit_event('before-comment-mark-spam', self.comment)
         self.comment.status = COMMENT_BLOCKED_SPAM
         self.comment.blocked_msg = _("Comment reported as spam by %s" %
                                     get_request().user.display_name)
-    def report_as_ham(self):
+    def mark_as_ham(self):
         emit_event('before-comment-mark-ham', self.comment)
         emit_event('before-comment-approved', self.comment)
         self.comment.status = COMMENT_MODERATED
