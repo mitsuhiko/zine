@@ -147,7 +147,6 @@ def do_spamcheck(req, comment):
 
 def do_submit_spam(comment):
     """Contribute to akismet; submit spam."""
-    print 'on do_submit_spam'
     # comment is spam, don't submit it to akismet again
     if comment.blocked:
         return
