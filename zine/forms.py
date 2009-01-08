@@ -488,7 +488,7 @@ class MarkCommentForm(_CommentBoundForm):
     def report_as_spam(self):
         emit_event('before-comment-mark-spam', self.comment)
         self.comment.status = COMMENT_BLOCKED_SPAM
-        self.comment.blocked_msg = _("Comment marked as spam by %s" %
+        self.comment.blocked_msg = _("Comment reported as spam by %s" %
                                     get_request().user.display_name)
     def report_as_ham(self):
         emit_event('before-comment-mark-ham', self.comment)
