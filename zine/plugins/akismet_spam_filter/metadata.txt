@@ -3,13 +3,20 @@ Plugin URL: http://zine.pocoo.org/plugins/akismet_spam_filter
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: BSD
-Version: 0.1
+Version: 0.2
+Contributors: Pedro Algarvio <ufs@ufsoft.org>
 Description: <a href="http://akismet.com/">Akismet</a> checks your comments\
- against the Akismet web service to see if they look like spam or not. You\
- need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a>\
- to use it. You can review the spam it catches under "Comments" after\
- configuring it.
+ against the Akismet web service to see if they look like spam or not. It\
+ also allows you to contribute back by reporting spam/ham. You need a\
+ <a href="http://wordpress.com/api-keys/">WordPress.com API key</a>\ to use it.\
+ You can review the spam it catches under "Comments" after configuring it.
 Description[de]: <a href="http://akismet.com/">Akismet</a> überprüft Kommentare\
  mit dem Akismet Web-Service auf Spam. Du benötigst dazu einen\
  <a href="http://wordpress.com/api-keys/">WordPress.com API Schlüssel</a>.\
  Aussortierter Spam kann unter "Kommentare" kontrolliert werden.
+ Description[pt_PT]: <a href="http://akismet.com/">Akismet</a> verifica os seus\
+  comentários contra o sistema web Akismet para ver se se parecem com spam ou\
+  não. Permite-lhe também contribuir de volta ao reportar spam/ham. Necessita\
+  de uma <a href="http://wordpress.com/api-keys/">chave API WordPress.com</a>\
+  para o utilizar. Pode rever o Spam que captura na categoria "Comentários"\
+  após a sua configuração.
