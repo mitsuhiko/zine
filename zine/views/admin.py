@@ -689,13 +689,13 @@ def report_comment_spam(request, comment_id):
         if request.form.get('confirm'):
             form.mark_as_spam()
             db.commit()
-            flash(_(u'Comment by %s reported as SPAM successfully.') %
+            flash(_(u'Comment by %s reported as Spam successfully.') %
                   escape(comment.author), 'configure')
         return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/mark_comment.html',
                                  'comments.overview', form=form.as_widget(),
-                                 form_action=_('SPAM'))
+                                 form_action=_('Spam'))
 
 @require_admin_privilege(MODERATE_COMMENTS)
 def report_comment_ham(request, comment_id):
@@ -709,13 +709,13 @@ def report_comment_ham(request, comment_id):
         if request.form.get('confirm'):
             form.mark_as_ham()
             db.commit()
-            flash(_(u'Comment by %s reported as NOT SPAM successfully.') %
+            flash(_(u'Comment by %s reported as NOT Spam successfully.') %
                   escape(comment.author), 'configure')
         return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/mark_comment.html',
                                  'comments.overview', form=form.as_widget(),
-                                 form_action=_(u'NOT SPAM'))
+                                 form_action=_(u'NOT Spam'))
 
 @require_admin_privilege(MANAGE_CATEGORIES)
 def manage_categories(request, page):
