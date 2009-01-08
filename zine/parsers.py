@@ -127,7 +127,7 @@ class PlainTextParser(BaseParser):
     def parse(self, input_data, reason):
         from zine._ext.pottymouth import PottyMouth
         parser = PottyMouth(emdash=False, ellipsis=False, smart_quotes=False,
-                            youtube=False, image=False)
+                            youtube=False, image=False, italic=False)
         node = parser.parse(input_data)
         return self._to_zeml(node)
 
