@@ -19,25 +19,27 @@
 {% macro render_comments(post) %}
   {%- if cfg.use_flat_comments %}
     <ol id="comments">
-    {%- for comment in post.comments %}
-      {%- if comment.visible %}
+    {%- for comment in post.visible_comments %}
       <li class="comment">{{ render_comment(comment) }}</li>
-      {%- endif %}
+    {%- else %}
+      {# invisble LI to make validators happy.  We do not omit the
+         list itself because javascript might still want to reference it. #}
+      <li style="display: none"></li>
     {%- endfor %}
     </ol>
   {%- else %}
     <ul id="comments">
-    {%- for comment in post.root_comments recursive %}
-      {%- if comment.visible or comment.children %}
+    {%- for comment in post.visible_root_comments recursive %}
       <li class="comment">
-      {%- if comment.visible %}
-      {{ render_comment(comment, post.comments_enabled and not cfg.use_flat_comments) }}
-      {%- endif %}
-      {%- if comment.children %}
-      <ul class="sub_comments">{{ loop(comment.children) }}</ul>
-      {%- endif %}
+        {{ render_comment(comment, post.comments_enabled) }}
+        {%- if comment.children %}
+          <ul class="sub_comments">{{ loop(comment.children) }}</ul>
+        {%- endif %}
       </li>
-      {%- endif %}
+    {%- else %}
+      {# invisble LI to make validators happy.  We do not omit the
+         list itself because javascript might still want to reference it. #}
+      <li style="display: none"></li>
     {%- endfor %}
     </ul>
   {%- endif %}

@@ -502,6 +502,20 @@ class Post(_ZEMLDualContainer):
         return [x for x in self.comments if x.parent is None]
 
     @property
+    def visible_comments(self):
+        """Return only the comments for this post that are visible to
+        the user.
+        """
+        return [x for x in self.comments if x.visible]
+
+    @property
+    def visible_root_comments(self):
+        """Return only the comments for this post that are visible to
+        the user and that don't have a parent.
+        """
+        return [x for x in self.comments if x.visible and x.parent is None]
+
+    @property
     def comment_count(self):
         """The number of visible comments."""
         req = get_request()
