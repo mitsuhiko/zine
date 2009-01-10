@@ -9,7 +9,7 @@
                              Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """
-from math import ceil, log
+from math import log
 from datetime import date, datetime, timedelta
 from urlparse import urljoin
 
@@ -788,24 +788,31 @@ class CommentQuery(db.Query):
         """Return only the approved comments."""
         return self.filter(Comment.status == COMMENT_MODERATED)
 
-    def blocked(self):
-        """Filter all blocked comments.  Blocked comments are all comments but
-        unmoderated and moderated comments.
+    def all_blocked(self):
+        """Return all blocked comments, by user, by spam checker or by system.
         """
         return self.filter(Comment.status.in_([COMMENT_BLOCKED_USER,
                                                COMMENT_BLOCKED_SPAM,
                                                COMMENT_BLOCKED_SYSTEM]))
+
+    def blocked(self):
+        """Filter all comments blocked by user(s)
+        """
+        return self.filter(Comment.status == COMMENT_BLOCKED_USER)
+
     def unmoderated(self):
         """Filter all the unmoderated comments and comments blocked by a user
         or system.
         """
-        return self.filter(Comment.status.in_([COMMENT_UNMODERATED,
-                                               COMMENT_BLOCKED_USER,
-                                               COMMENT_BLOCKED_SYSTEM]))
+        return self.filter(Comment.status == COMMENT_UNMODERATED)
 
     def spam(self):
         """Filter all the spam comments."""
         return self.filter(Comment.status == COMMENT_BLOCKED_SPAM)
+
+    def system(self):
+        """Filter all the spam comments."""
+        return self.filter(Comment.status == COMMENT_BLOCKED_SYSTEM)
 
     def latest(self, limit=None, ignore_privileges=False, ignore_blocked=True):
         """Filter the list of non blocked comments for anonymous users or

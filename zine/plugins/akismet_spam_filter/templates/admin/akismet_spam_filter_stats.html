@@ -1,0 +1,110 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Akismet Statistics") }}{% endblock %}
+{% block html_head %}
+  {{ super() }}
+  <style type="text/css">
+    .ui-tabs-hide { display: none; }
+  </style>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $("#akismet-stats > ul").tabs();
+      $('.ui-tabs-selected').addClass('active');
+      $('.ui-tabs-nav').bind('tabsshow', function(event, ui) {
+          $('.ui-tabs-nav > li').removeClass('active');
+          $('.ui-tabs-selected').addClass('active');
+      });
+    });
+  </script>
+{% endblock %}
+{% block contents %}
+  <h1>{{ _("Akismet Statistics") }}</h1>
+  <div id="akismet-stats">
+    <ul class="ctxnavbar">
+      <li><a href="#chart-spam"><span>Spam</span></a></li>
+      <li><a href="#chart-ham"><span>Ham</span></a></li>
+      <li><a href="#chart-missed"><span>Missed Spam</span></a></li>
+      <li><a href="#chart-fp"><span>False Positive</span></a></li>
+      <li><a href="#chart-pie"><span>Yummy Pie</span></a></li>
+    </ul>
+    <div id="chart-spam">
+      <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+              codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0"
+              width="100%" height="265" id="ie_chart" align="middle">
+        <param name="allowScriptAccess" value="always" />
+        <param name="movie" value="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dspam" />
+        <param name="quality" value="high" />
+        <param name="bgcolor" value="#FFFFFF" />
+        <embed src="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dspam"
+               quality="high" bgcolor="#FFFFFF" width="100%" height="265"
+               name="chart" align="middle" allowScriptAccess="always"
+               type="application/x-shockwave-flash"
+               pluginspage="http://www.macromedia.com/go/getflashplayer"
+               id="chart"/>
+      </object>
+    </div>
+    <div id="chart-ham">
+      <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+              codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0"
+              width="100%" height="265" id="ie_chart" align="middle">
+        <param name="allowScriptAccess" value="always" />
+        <param name="movie" value="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dham" />
+        <param name="quality" value="high" />
+        <param name="bgcolor" value="#FFFFFF" />
+        <embed src="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dham"
+               quality="high" bgcolor="#FFFFFF" width="100%" height="265"
+               name="chart" align="middle" allowScriptAccess="always"
+               type="application/x-shockwave-flash"
+               pluginspage="http://www.macromedia.com/go/getflashplayer"
+               id="chart"/>
+      </object>
+    </div>
+    <div id="chart-missed">
+      <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+              codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0"
+              width="100%" height="265" id="ie_chart" align="middle">
+        <param name="allowScriptAccess" value="always" />
+        <param name="movie" value="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dmissed" />
+        <param name="quality" value="high" />
+        <param name="bgcolor" value="#FFFFFF" />
+        <embed src="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dmissed"
+               quality="high" bgcolor="#FFFFFF" width="100%" height="265"
+               name="chart" align="middle" allowScriptAccess="always"
+               type="application/x-shockwave-flash"
+               pluginspage="http://www.macromedia.com/go/getflashplayer"
+               id="chart"/>
+      </object>
+    </div>
+    <div id="chart-fp">
+      <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+              codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0"
+              width="100%" height="265" id="ie_chart" align="middle">
+        <param name="allowScriptAccess" value="always" />
+        <param name="movie" value="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dfp" />
+        <param name="quality" value="high" />
+        <param name="bgcolor" value="#FFFFFF" />
+        <embed src="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dfp"
+               quality="high" bgcolor="#FFFFFF" width="100%" height="265"
+               name="chart" align="middle" allowScriptAccess="always"
+               type="application/x-shockwave-flash"
+               pluginspage="http://www.macromedia.com/go/getflashplayer"
+               id="chart"/>
+      </object>
+    </div>
+    <div id="chart-pie">
+      <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+              codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0"
+              width="100%" height="265" id="ie_chart" align="middle">
+        <param name="allowScriptAccess" value="always" />
+        <param name="movie" value="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dpie" />
+        <param name="quality" value="high" />
+        <param name="bgcolor" value="#FFFFFF" />
+        <embed src="http://{{ api_key }}.web.akismet.com/1.0/open-flash-chart.swf?data=http:%2F%2F{{ api_key }}.web.akismet.com%2F1.0%2Fuser-graph.php%3Fblog%3D{{blog_url}}%26type%3Dpie"
+               quality="high" bgcolor="#FFFFFF" width="100%" height="265"
+               name="chart" align="middle" allowScriptAccess="always"
+               type="application/x-shockwave-flash"
+               pluginspage="http://www.macromedia.com/go/getflashplayer"
+               id="chart"/>
+      </object>
+    </div>
+  </div>
+{% endblock %}

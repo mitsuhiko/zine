@@ -1,5 +1,5 @@
-^instance$
-^instance/
+^[i|I]nstance$
+^[i|I]nstance/
 \.py[co]$
 \.DS_Store$
 ^dumps/

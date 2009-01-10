@@ -12,14 +12,18 @@
          }}">{{ _("Edit") }}</a> |
        <a href="{{ url_for('admin/delete_comment', comment_id=comment.id)|e
          }}">{{ _("Delete") }}</a> |
-       {% if comment.is_spam %}<a href="{{ url_for('admin/approve_comment',
-         comment_id=comment.id)|e }}">{{ _("Not Spam") }}</a>
+       {% if comment.is_spam %}<a href="{{ url_for('admin/report_comment_ham',
+         comment_id=comment.id)|e }}">{{ _("Report Not Spam") }}</a>
        {% elif comment.blocked %}
        <a href="{{ url_for('admin/approve_comment',
-         comment_id=comment.id)|e }}">{{ _("Approve") }}</a>
+         comment_id=comment.id)|e }}">{{ _("Approve") }}</a> |
+       <a href="{{ url_for('admin/report_comment_spam',
+         comment_id=comment.id)|e }}">{{ _("Report Spam") }}</a>
        {% else %}
          <a href="{{ url_for('admin/block_comment',
-           comment_id=comment.id)|e }}">{{ _("Block") }}</a>
+           comment_id=comment.id)|e }}">{{ _("Block") }}</a> |
+         <a href="{{ url_for('admin/report_comment_spam',
+         comment_id=comment.id)|e }}">{{ _("Report Spam") }}</a>
        {% endif %}
      ]
      <a href="{{ url_for(comment.post)|e }}">{{
