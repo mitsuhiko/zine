@@ -267,7 +267,8 @@ class Request(RequestBase):
         user = None
         cookie_name = app.cfg['session_cookie_name']
         session = SecureCookie.load_cookie(self, cookie_name,
-                                           app.cfg['secret_key'])
+                                           app.cfg['secret_key']
+                                              .encode('utf-8'))
         user_id = session.get('uid')
         if user_id:
             user = User.query.options(db.eagerload('groups'),
