@@ -51,7 +51,7 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
      DeleteGroupForm, ThemeOptionsForm, DeleteImportForm, ExportForm, \
-     MaintenanceModeForm, make_config_form, make_import_form
+     MaintenanceModeForm, MarkCommentForm, make_config_form, make_import_form
 
 
 #: how many posts / comments should be displayed per page?
@@ -92,8 +92,12 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('unmoderated', url_for('admin/show_unmoderated_comments'),
              _(u'Awaiting Moderation (%d)') %
              Comment.query.unmoderated().count()),
+            ('approved', url_for('admin/show_approved_comments'),
+             _(u'Approved Comments (%d)') % Comment.query.approved().count()),
+            ('blocked', url_for('admin/show_blocked_comments'),
+             _(u'Blocked Comments (%d)') % Comment.query.blocked().count()),
             ('spam', url_for('admin/show_spam_comments'),
-             _(u'Spam (%d)') % Comment.query.spam().count())
+             _(u'Spam Comments (%d)') % Comment.query.spam().count())
         ])
     ]
 
@@ -205,7 +209,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         'messages': [{
             'type':     type,
             'msg':      msg
-        } for type, msg in request.session.pop('admin/flashed_messages', [])]
+        } for type, msg in request.session.pop('admin/flashed_messages', [])],
+        'active_pane': _active_menu_item
     }
     return render_response(template_name, **values)
 
@@ -469,11 +474,11 @@ def delete_page(request, post):
                                  form=form.as_widget())
 
 
-def _handle_comments(identifier, title, query, page):
+def _handle_comments(identifier, title, query, page,
+                     endpoint='admin/manage_comments'):
     request = get_request()
     comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/manage_comments', page, PER_PAGE,
-                                 query.count())
+    pagination = AdminPagination(endpoint, page, PER_PAGE, query.count())
     if not comments and page != 1:
         raise NotFound()
 
@@ -496,6 +501,34 @@ def _handle_comments(identifier, title, query, page):
                 flash(_(u'Approved all the selected comments.'))
                 return redirect_to('admin/manage_comments')
 
+            # or block them all
+            elif 'block' in request.form:
+                if 'confirm' in request.form:
+                    form.block_selection()
+                    db.commit()
+                    flash(_(u'Blocked all the selected comments.'))
+                    return redirect_to('admin/manage_comments')
+                return render_admin_response('admin/block_comments.html',
+                                             form=form.as_widget())
+
+            # or mark them all as spam
+            elif 'spam' in request.form:
+                if 'confirm' in request.form:
+                    form.mark_selection_as_spam()
+                    db.commit()
+                    flash(_(u'Reported all the selected comments as SPAM.'))
+                    return redirect_to('admin/manage_comments')
+                return render_admin_response('admin/mark_spam_comments.html',
+                                             form=form.as_widget())
+            # or mark them all as ham
+            elif 'ham' in request.form:
+                if 'confirm' in request.form:
+                    form.mark_selection_as_ham()
+                    db.commit()
+                    flash(_(u'Reported all the selected comments as NOT SPAM.'))
+                    return redirect_to('admin/manage_comments')
+                return render_admin_response('admin/mark_ham_comments.html',
+                                             form=form.as_widget())
     tab = 'comments'
     if identifier is not None:
         tab += '.' + identifier
@@ -510,18 +543,32 @@ def manage_comments(request, page):
     return _handle_comments('overview', _(u'All Comments'),
                             Comment.query, page)
 
-
 @require_admin_privilege(MODERATE_COMMENTS)
 def show_unmoderated_comments(request, page):
     """Show all unmoderated and user-blocked comments."""
     return _handle_comments('unmoderated', _(u'Comments Awaiting Moderation'),
-                            Comment.query.unmoderated(), page)
+                            Comment.query.unmoderated(), page,
+                            endpoint='admin/show_unmoderated_comments')
 
+@require_admin_privilege(MODERATE_COMMENTS)
+def show_approved_comments(request, page):
+    """Show all moderated comments."""
+    return _handle_comments('approved', _(u'Approved Commments'),
+                            Comment.query.approved(), page,
+                            endpoint='admin/show_approved_comments')
+
+@require_admin_privilege(MODERATE_COMMENTS)
+def show_blocked_comments(request, page):
+    """Show all spam comments."""
+    return _handle_comments('blocked', _(u'Blocked'),
+                            Comment.query.blocked(), page,
+                            endpoint='admin/show_blocked_comments')
 
 @require_admin_privilege(MODERATE_COMMENTS)
 def show_spam_comments(request, page):
     """Show all spam comments."""
-    return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page)
+    return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page,
+                            endpoint='admin/show_spam_comments')
 
 
 @require_admin_privilege(MODERATE_COMMENTS)
@@ -631,6 +678,45 @@ def block_comment(request, comment_id):
     return render_admin_response('admin/block_comment.html',
                                  'comments.overview', form=form.as_widget())
 
+@require_admin_privilege(MODERATE_COMMENTS)
+def report_comment_spam(request, comment_id):
+    """Block a comment."""
+    comment = Comment.query.get(comment_id)
+    if comment is None:
+        raise NotFound()
+    form = MarkCommentForm(comment)
+
+    if request.method == 'POST' and form.validate(request.form):
+        if request.form.get('confirm'):
+            form.mark_as_spam()
+            db.commit()
+            flash(_(u'Comment by %s reported as Spam successfully.') %
+                  escape(comment.author), 'configure')
+        return form.redirect('admin/manage_comments')
+
+    return render_admin_response('admin/mark_comment.html',
+                                 'comments.overview', form=form.as_widget(),
+                                 form_action=_('Spam'))
+
+@require_admin_privilege(MODERATE_COMMENTS)
+def report_comment_ham(request, comment_id):
+    """Block a comment."""
+    comment = Comment.query.get(comment_id)
+    if comment is None:
+        raise NotFound()
+    form = MarkCommentForm(comment)
+
+    if request.method == 'POST' and form.validate(request.form):
+        if request.form.get('confirm'):
+            form.mark_as_ham()
+            db.commit()
+            flash(_(u'Comment by %s reported as NOT Spam successfully.') %
+                  escape(comment.author), 'configure')
+        return form.redirect('admin/manage_comments')
+
+    return render_admin_response('admin/mark_comment.html',
+                                 'comments.overview', form=form.as_widget(),
+                                 form_action=_(u'NOT Spam'))
 
 @require_admin_privilege(MANAGE_CATEGORIES)
 def manage_categories(request, page):
