@@ -57,6 +57,14 @@ def make_urls(app):
              endpoint='admin/show_unmoderated_comments'),
         Rule('/comments/unmoderated/page/<int:page>',
              endpoint='admin/show_unmoderated_comments'),
+        Rule('/comments/approved', defaults={'page': 1},
+             endpoint='admin/show_approved_comments'),
+        Rule('/comments/approved/page/<int:page>',
+             endpoint='admin/show_approved_comments'),
+        Rule('/comments/blocked', defaults={'page': 1},
+             endpoint='admin/show_blocked_comments'),
+        Rule('/comments/blocked/page/<int:page>',
+             endpoint='admin/show_blocked_comments'),
         Rule('/comments/spam', defaults={'page': 1},
              endpoint='admin/show_spam_comments'),
         Rule('/comments/spam/page/<int:page>', endpoint='admin/show_spam_comments'),
@@ -64,6 +72,8 @@ def make_urls(app):
         Rule('/comments/<int:comment_id>/delete', endpoint='admin/delete_comment'),
         Rule('/comments/<int:comment_id>/approve', endpoint='admin/approve_comment'),
         Rule('/comments/<int:comment_id>/block', endpoint='admin/block_comment'),
+        Rule('/comments/<int:comment_id>/spam', endpoint='admin/report_comment_spam'),
+        Rule('/comments/<int:comment_id>/ham', endpoint='admin/report_comment_ham'),
         Rule('/categories/', endpoint='admin/manage_categories', defaults={'page': 1}),
         Rule('/categories/page/<int:page>', endpoint='admin/manage_categories'),
         Rule('/categories/new', endpoint='admin/new_category'),
@@ -101,6 +111,7 @@ def make_urls(app):
         Rule('/change_password', endpoint='admin/change_password')
     ]
     other_urls = [
+        Rule('/<slug>', endpoint='blog/post', build_only=True),
         Rule('/_services/', endpoint='blog/service_rsd'),
         Rule('/_services/json/<path:identifier>', endpoint='blog/json_service'),
         Rule('/_services/xml/<path:identifier>', endpoint='blog/xml_service'),
