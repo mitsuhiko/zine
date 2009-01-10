@@ -6,7 +6,6 @@
     The core models and query helper functions.
 
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
-                             Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """
 from math import ceil, log

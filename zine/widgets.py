@@ -14,7 +14,6 @@
     future.
 
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
-                                       Christopher Grebs, Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """
 from zine.application import render_template

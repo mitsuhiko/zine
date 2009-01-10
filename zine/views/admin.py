@@ -8,7 +8,6 @@
     subscribers a simplified account management system exists at /account.
 
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
-                             Ali Afshar.
     :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
