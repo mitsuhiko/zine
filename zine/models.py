@@ -922,6 +922,11 @@ class Comment(_ZEMLContainer):
         return self.visible_for_user(request.user)
 
     @property
+    def visible_children(self):
+        """Only the children that are visible for the current user."""
+        return [x for x in self.children if x.visible]
+
+    @property
     def blocked(self):
         """This is true if the status is anything but moderated."""
         return self.status != COMMENT_MODERATED

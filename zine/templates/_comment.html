@@ -32,8 +32,8 @@
     {%- for comment in post.visible_root_comments recursive %}
       <li class="comment">
         {{ render_comment(comment, post.comments_enabled) }}
-        {%- if comment.children %}
-          <ul class="sub_comments">{{ loop(comment.children) }}</ul>
+        {%- if comment.visible_children %}
+          <ul class="sub_comments">{{ loop(comment.visible_children) }}</ul>
         {%- endif %}
       </li>
     {%- else %}
