@@ -162,6 +162,5 @@ def is_not_whitespace_only():
     non-whitespace character"""
     def validator(form, value):
         if not value.strip():
-            raise ValidationError(_('At least one non-whitespace character '
-                                    'is required.'))
+            raise ValidationError(_(u'The text must not be empty.'))
     return validator
