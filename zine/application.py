@@ -747,7 +747,7 @@ class Zine(object):
             zine={
                 'version':      zine.__version__,
                 'copyright':    _(u'Copyright %(years)s by the Zine Team')
-                                % {'years': '2008'}
+                                % {'years': '2008-2009'}
             }
         )
 
