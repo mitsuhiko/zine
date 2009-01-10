@@ -1011,7 +1011,7 @@ def make_config_form():
 
 
 def make_import_form(blog):
-    user_choices = [(None, _(u'Create new user'))] + [
+    user_choices = [('__zine_create_user', _(u'Create new user'))] + [
         (user.id, user.username)
         for user in User.query.order_by('username').all()
     ]
