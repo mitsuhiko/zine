@@ -280,7 +280,7 @@ class Writer(object):
             self.z('uri', text=c.www, parent=author)
             if c.user is not None:
                 author.attrib['dependency'] = self.users[c.user.id] \
-                                                  .attrib[self.z.dependency]
+                                                  .attrib['dependency']
             self.z('published', text=format_iso8601(c.pub_date),
                    parent=comment)
             self.z('blocked', text=c.blocked and 'yes' or 'no',
