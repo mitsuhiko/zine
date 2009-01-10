@@ -41,6 +41,7 @@ Zine 0.1.2
   URIs now (passwords).
 - the text parser no longer supports images and youtube links for security
   and sanity reasons.
+- Fixed a bug where changing the comment parser did not trigger the parsing.
 
 
 Zine 0.1.1

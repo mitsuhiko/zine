@@ -423,8 +423,13 @@ class EditCommentForm(_CommentBoundForm):
 
     def save_changes(self):
         """Save the changes back to the database."""
-        forms.set_fields(self.comment, self.data, 'text', 'pub_date', 'parser',
+        old_parser = self.comment.parser
+        forms.set_fields(self.comment, self.data, 'pub_date', 'parser',
                          'blocked_msg')
+
+        if (self.data['text'] != self.comment.text
+            or self.data['parser'] != old_parser):
+            self.comment.text = self.data['text']
 
         # update status
         if self.data['blocked']:
