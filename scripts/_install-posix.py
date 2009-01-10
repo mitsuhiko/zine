@@ -172,7 +172,7 @@ def main(prefix):
     # location.  Delete them if we find them there.
     old_translations = join(share_dir, 'i18n')
     if os.path.isdir(old_translations):
-        os.rmtree(old_translations)
+        shutil.rmtree(old_translations)
 
     # copy the core translations
     copy_core_translations(join(zine_source, 'i18n'),
