@@ -1,0 +1,14 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Block Comments") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Block Comments") }}</h1>
+  {% call form() %}
+    <div>
+      <p>{{ _('Do you really want to block the selected comments?') }}</p>
+      {{ form.selected_comments.hidden() }}
+      <input type="hidden" name="confirm" value="yes">
+      <input type="submit" name="cancel" value="{{ _('No') }}">
+      <input type="submit" name="block" value="{{ _('Yes') }}">
+    </div>
+  {% endcall %}
+{% endblock %}

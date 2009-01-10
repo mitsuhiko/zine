@@ -18,7 +18,7 @@ try:
     from pygments import highlight
     from pygments.lexers import get_lexer_by_name
     from pygments.formatters import HtmlFormatter
-    from pygments.styles import get_all_styles
+    from pygments.styles import get_all_styles, get_style_by_name
     have_pygments = True
 except ImportError:
     have_pygments = False
@@ -31,7 +31,11 @@ from zine.utils.zeml import HTMLElement, ElementHandler
 from zine.utils.http import redirect_to
 
 
+#: cache for formatters
 _formatters = {}
+
+#: dict of styles
+STYLES = dict((x, None) for x in get_all_styles())
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
@@ -86,6 +90,19 @@ def get_current_style():
     return get_application().cfg['pygments_support/style']
 
 
+def lookup_style(name):
+    """Return the style object for the given name."""
+    rv = STYLES.get(name, 'default')
+    if rv is None:
+        return get_style_by_name(name)
+    return rv
+
+
+def add_style(name, style):
+    """Register a new style for pygments."""
+    STYLES[name] = style
+
+
 def get_formatter(style=None, preview=False):
     """Helper function that returns a formatter in either preview or
     normal mode for the style provided or the current style if not
@@ -103,7 +120,9 @@ def get_formatter(style=None, preview=False):
             cls = 'highlight_preview'
         else:
             cls = 'syntax'
-        formatter = HtmlFormatter(style=style, cssclass=cls)
+        style_cls = lookup_style(style)
+        formatter = HtmlFormatter(style=lookup_style(style),
+                                  cssclass=cls)
     except ValueError:
         return None
     if not preview:
@@ -132,9 +151,9 @@ def show_config(req):
     for the pygments plugin. So far this only allows changing the style.
     """
     active_style = get_current_style()
-    styles = set(get_all_styles())
+    styles = sorted([(x, x.title()) for x in STYLES])
     form = ConfigurationForm(initial=dict(style=active_style))
-    form.fields['style'].choices = sorted(styles)
+    form.fields['style'].choices = styles
 
     if req.method == 'POST' and form.validate(req.form):
         active_style = form['style']

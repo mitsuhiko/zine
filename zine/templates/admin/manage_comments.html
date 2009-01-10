@@ -16,8 +16,29 @@
     {%- endfor %}
     </ul>
     <div class="actions">
+      {% if admin.active_pane == 'comments.unmoderated' %}
+      <input type="submit" name="approve" value="{{ _('Approve') }}">
+      <input type="submit" name="block" value="{{ _('Block') }}">
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
+      {% elif admin.active_pane == 'comments.approved' %}
+      <input type="submit" name="block" value="{{ _('Block') }}">
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
+      {% elif admin.active_pane == 'comments.blocked' %}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
+      {% elif admin.active_pane == 'comments.spam' %}
+      <input type="submit" name="ham" value="{{ _('Report as Not Spam') }}">
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+      {% elif admin.active_pane == 'comments.overview' %}
+      <input type="submit" name="approve" value="{{ _('Approve') }}">
+      <input type="submit" name="block" value="{{ _('Block') }}">
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
+      <input type="submit" name="ham" value="{{ _('Report as Not Spam') }}">
+      {% endif %}
     </div>
     <script type="text/javascript">
       $(function() {
