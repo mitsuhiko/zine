@@ -30,17 +30,18 @@ atom = Namespace(ATOM_NS)
 xml = Namespace(XML_NS)
 
 
-def _get_text_content(elements):
+def _get_text_content(elements, fallback=True):
     """Return the text content from the best element match."""
-    if not elements:
-        return u''
     for element in elements:
         if element.attrib.get('type') == 'text':
             return element.text or u''
-    for element in elements:
-        if element.attrib.get('type') == 'html':
-            return to_text(element)
-    return to_text(elements[0])
+    if fallback:
+        if not elements:
+            return u''
+        for element in elements:
+            if element.attrib.get('type') == 'html':
+                return to_text(element)
+        return to_text(elements[0])
 
 
 def _get_html_content(elements):
@@ -393,7 +394,7 @@ class ZEAExtension(Extension):
         author = self._authors.get(dependency)
         if author is None:
             element = self._lookup_user(self._dependencies,
-                                        id=dependency)[0]
+                                        id=str(dependency))[0]
             author = Author(
                 element.findtext(zine.username),
                 element.findtext(zine.email),
@@ -430,6 +431,11 @@ class ZEAExtension(Extension):
             blog.element.find(zine.configuration)))
 
     def postprocess_post(self, post):
+        post.parser_data = _parser_data(post.element.findtext(zine.parser_data))
+        content = _get_text_content(post.element.findall(atom.content),
+                                    fallback=False)
+        if content is not None:
+            post.body = content
         content_type = post.element.findtext(zine.content_type)
         if content_type is not None:
             post.content_type = content_type
@@ -454,7 +460,7 @@ class ZEAExtension(Extension):
             author = element.find(zine.author)
             dependency = author.attrib.get('dependency')
             if dependency is not None:
-                author = self._get_author(author)
+                author = self._get_author(dependency)
                 email = www = None
             else:
                 email = author.findtext(zine.email)

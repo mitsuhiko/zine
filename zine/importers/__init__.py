@@ -169,7 +169,8 @@ def _perform_import(app, blog, d):
                     old_post.pings_enabled, parser=old_post.parser,
                     uid=old_post.uid)
         if old_post.parser_data is not None:
-            post.parser_data = old_post.parser_data
+            post.parser_data.clear()
+            post.parser_data.update(old_post.parser_data)
         yield u'<li><strong>%s</strong>' % escape(post.title)
 
         for tag in old_post.tags:

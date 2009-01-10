@@ -24,6 +24,8 @@ Zine 0.1.2
 - importer no longer creates new users if a user was selected in the
   dropdown.
 - fixed importing of ZXA feeds with tags.
+- improved importing of ZXA feeds (importers import the correct
+  syntax instead of HTML now)
 - fixed wrong content type exporting in ZXA feeds.
 - fixed bug in tag-cloud query.  Too many items were counted for
   each tag.
