@@ -44,6 +44,7 @@ Zine 0.1.2
 - the text parser no longer supports images and youtube links for security
   and sanity reasons.
 - Fixed a bug where changing the comment parser did not trigger the parsing.
+- Fixed some display bugs in the admin panel for webkit.
 
 
 Zine 0.1.1
