@@ -51,8 +51,7 @@ div.header div.metanav {
     font-size: 12px;
     color: #eee;
     -moz-border-radius: 0 0 0 10px;
-    -webkit-border-radius: 0 0 0 10px;
-    border-radius: 0 0 0 10px;
+    -webkit-border-bottom-left-radius: 10px;
 }
 
 div.header div.metanav a {
@@ -101,7 +100,7 @@ div.body ul.navbar li {
 
 div.body ul.navbar li a {
     display: block;
-    background: transparent url(img/dialogbg.png) repeat-x center left;
+    background: transparent url(img/dialogbg.png) repeat-x 0 -90px;
     padding: 0 10px 0 10px;
     color: #fff;
     text-decoration: none;
@@ -110,7 +109,9 @@ div.body ul.navbar li a {
     line-height: 24px!important;
     height: 24px!important;
     -moz-border-radius: 2px 2px 0 0;
-    -webkit-border-radius: 2px 2px 0 0;
+    -webkit-border-radius: 2px;
+    -webkit-border-bottom-left-radius: 0;
+    -webkit-border-bottom-right-radius: 0;
     border-radius: 2px 2px 0 0;
 }
 
@@ -155,7 +156,9 @@ div.body ul.ctxnavbar li a {
     line-height: 21px!important;
     height: 21px!important;
     -moz-border-radius: 2px 2px 0 0;
-    -webkit-border-radius: 2px 2px 0 0;
+    -webkit-border-radius: 2px;
+    -webkit-border-bottom-left-radius: 0;
+    -webkit-border-bottom-right-radius: 0;
     border-radius: 2px 2px 0 0;
 }
 
@@ -348,12 +351,15 @@ div.contents table {
 div.contents table th:first-child {
     -moz-border-radius: 5px 0 0 0;
     -webkit-border-radius: 5px 0 0 0;
+    -webkit-border-radius: 0;
+    -webkit-border-top-left-radius: 5px;
     border-radius: 5px 0 0 0;
 }
 
 div.contents table th:last-child {
     -moz-border-radius: 0 5px 0 0;
-    -webkit-border-radius: 0 5px 0 0;
+    -webkit-border-radius: 0;
+    -webkit-border-top-right-radius: 5px;
     border-radius: 0 5px 0 0;
 }
 
@@ -415,8 +421,9 @@ div.formbox {
     border: 1px solid #DBE8F1;
     padding: 2px;
     -moz-border-radius: 10px 10px 0 0;
-    -webkit-border-radius: 10px 10px 0 0;
-    border-radius: 1px0 10px 0 0;
+    -webkit-border-radius: 0;
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-top-right-radius: 10px;
 }
 
 div.formbox h3 {
@@ -426,8 +433,9 @@ div.formbox h3 {
     color: #222E4B;
     font-size: 1em;
     -moz-border-radius: 7px 7px 0 0;
-    -webkit-border-radius: 7px 7px 0 0;
-    border-radius: 7px 7px 0 0;
+    -webkit-border-radius: 0;
+    -webkit-border-top-left-radius: 7px;
+    -webkit-border-top-right-radius: 7px;
     font-weight: normal;
 }
 
