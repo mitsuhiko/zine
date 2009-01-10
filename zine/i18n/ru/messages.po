@@ -3353,7 +3353,7 @@ msgstr "URL-префикс не должен заканчиваться слеш
 
 #: zine/utils/validators.py:165
 msgid "The text must not be empty."
-msgstr ""
+msgstr "Текст не должен быть пустым."
 
 #: zine/utils/zeml.py:300
 msgid ""
