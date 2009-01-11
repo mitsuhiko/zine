@@ -109,7 +109,8 @@ def make_urls(app):
 
     # add the more complex url rule for archive and show post
     tmp = '/'
-    for digits, part in [(4, 'year'), (2, 'month'), (2, 'day')]:
+    for digits, part in zip(app.cfg['fixed_url_date_digits'] and (4, 2, 2)
+                            or (0, 0, 0), ('year', 'month', 'day')):
         tmp += '<int(fixed_digits=%d):%s>/' % (digits, part)
         blog_urls.extend([
             Rule(tmp, defaults={'page': 1}, endpoint='blog/archive'),

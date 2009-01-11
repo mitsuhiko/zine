@@ -74,6 +74,7 @@ DEFAULT_VARS = {
     'profiles_url_prefix':      TextField(default=u'/authors',
                                           validators=[is_valid_url_prefix()]),
     'ascii_slugs':              BooleanField(default=True),
+    'fixed_url_date_digits':    BooleanField(default=False),
 
     # cache settings
     'enable_eager_caching':     BooleanField(default=False),
