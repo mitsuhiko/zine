@@ -169,13 +169,13 @@ def show_akismet_config(req):
 
 
 class AkismetBlockedCommentsCounterWidget(Widget):
-    NAME = 'get_akismet_blocked_comments'
-    TEMPLATE = 'akismet_widget.html'
+    name = 'akismet_blocked_comments'
+    template = 'akismet_widget.html'
 
     def __init__(self, show_title=False, title='Akismet Blocked Comments'):
         self.show_title = show_title
         self.title = title
-        self.spam_comments = Comment.objects.filter(
+        self.spam_comments = Comment.query.filter(
             Comment.blocked_msg == BLOCKED_MSG).count()
 
     @staticmethod
