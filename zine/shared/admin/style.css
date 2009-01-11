@@ -317,6 +317,11 @@ div.contents input[name="delete"]:hover {
     color: white;
 }
 
+div.contents input[name="spam"]:hover {
+    background-color: #fc0;
+    color: white;
+}
+
 div.contents input[name="save"] {
     font-weight: bold;
 }
