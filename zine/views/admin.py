@@ -92,11 +92,11 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
              _(u'Awaiting Moderation (%d)') %
              Comment.query.unmoderated().count()),
             ('approved', url_for('admin/show_approved_comments'),
-             _(u'Approved Comments (%d)') % Comment.query.approved().count()),
+             _(u'Approved (%d)') % Comment.query.approved().count()),
             ('blocked', url_for('admin/show_blocked_comments'),
-             _(u'Blocked Comments (%d)') % Comment.query.blocked().count()),
+             _(u'Blocked (%d)') % Comment.query.blocked().count()),
             ('spam', url_for('admin/show_spam_comments'),
-             _(u'Spam Comments (%d)') % Comment.query.spam().count())
+             _(u'Spam (%d)') % Comment.query.spam().count())
         ])
     ]
 
