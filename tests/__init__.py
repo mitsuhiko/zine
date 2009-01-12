@@ -13,7 +13,7 @@
     be patched to remove this incompatibility, the patch is at
     http://tinyurl.com/doctest-patch
 
-    :copyright: 2009 by Lukas Meuser.
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 

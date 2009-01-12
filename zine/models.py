@@ -561,17 +561,24 @@ class Post(_ZEMLDualContainer):
 
     def set_auto_slug(self):
         """Generate a slug for this post."""
+        cfg = get_application().cfg
         slug = gen_slug(self.title)
         if not slug:
             slug = self.pub_date.strftime('%H:%M')
-        prefix = get_application().cfg['blog_url_prefix'].lstrip('/')
+        prefix = cfg['blog_url_prefix'].lstrip('/')
         if prefix:
             prefix += '/'
-        full_slug = u'%s%04d/%d/%d/%s' % (
+        if cfg['fixed_url_date_digits']:
+            date_pattern = '%04d/%02d/%02d'
+        else:
+            date_pattern = '%d/%d/%d'
+        full_slug = u'%s%s/%s' % (
             prefix,
-            self.pub_date.year,
-            self.pub_date.month,
-            self.pub_date.day,
+            date_pattern % (
+                self.pub_date.year,
+                self.pub_date.month,
+                self.pub_date.day,
+            ),
             slug
         )
 

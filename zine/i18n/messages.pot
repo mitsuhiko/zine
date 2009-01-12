@@ -1,5 +1,5 @@
 # Translations template for PROJECT.
-# Copyright (C) 2009 The Pocoo Team
+# Copyright (C) 2009 The Zine Team
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
 #
