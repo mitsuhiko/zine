@@ -10,6 +10,7 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+import sys
 from os import path, remove, makedirs, walk, environ
 from time import time
 from itertools import izip
@@ -24,7 +25,7 @@ from jinja2 import Environment, BaseLoader, TemplateNotFound
 
 from werkzeug import Request as RequestBase, Response as ResponseBase, \
      SharedDataMiddleware, url_quote, routing, redirect as _redirect, \
-     escape, cached_property
+     escape, cached_property, url_encode
 from werkzeug.exceptions import HTTPException, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
@@ -57,6 +58,12 @@ DEFAULT_THEME_SETTINGS = {
     'pagination.gray_next_link':    True,
     'pagination.simple':            False,
 
+    # how many posts per page?
+    'author.per_page':              30,
+    'archive.per_page':             None,
+    'category.per_page':            None,
+    'tag.per_page':                 None,
+
     # datetime formatting settings
     'date.date_format.default':     'medium',
     'date.datetime_format.default': 'medium',
@@ -67,7 +74,23 @@ DEFAULT_THEME_SETTINGS = {
     'date.datetime_format.short':   None,
     'date.datetime_format.medium':  None,
     'date.datetime_format.full':    None,
-    'date.datetime_format.long':    None
+    'date.datetime_format.long':    None,
+
+    # query optimizations for overview pages.  Themes can change the
+    # eager/lazy loading settings of some queries to remove unnecessary
+    # overhead that is not in use for what they want to display.  For
+    # example a theme that wants to load a headline-overview of all the
+    # posts in a specific tag but no text at all it makes no sense to
+    # load the text and more just to throw away the information.
+    # for more information have a look at PostQuery.lightweight
+    'sql.author.lazy':              frozenset(['comments']),
+    'sql.archive.lazy':             frozenset(['comments']),
+    'sql.category.lazy':            frozenset(['comments']),
+    'sql.tag.lazy':                 frozenset(['comments']),
+    'sql.author.deferred':          frozenset(),
+    'sql.archive.deferred':         frozenset(),
+    'sql.category.deferred':        frozenset(),
+    'sql.tag.deferred':             frozenset()
 }
 
 
@@ -1245,6 +1268,48 @@ class Zine(object):
                                         expires=expires, session_expires=expires)
 
         return response(environ, start_response)
+
+    def perform_subrequest(self, path, query=None, method='GET', data=None,
+                           timeout=None):
+        """Perform an internal subrequest against Zine.  This method spawns a
+        separate thread and lets an internal WSGI client answer the request.
+        The return value is then converted into a zine response object and
+        returned.
+
+        A separate thread is spawned so that the internal request does not
+        caused troubles for the current one in terms of persistent database
+        objects.
+
+        This is for example used in the `open_url` method to allow access to
+        blog local resources without dead-locking if the WSGI server does not
+        support concurrency (single threaded and just one process for example).
+        """
+        from werkzeug import Client
+        from threading import Event, Thread
+        event = Event()
+        response = []
+        input_stream = None
+        if hasattr(data, 'read'):
+            input_stream = data
+            data = None
+
+        def make_request():
+            try:
+                client = Client(self, Response)
+                response.append(client.open(path, self.cfg['blog_url'],
+                                            method=method, data=data,
+                                            query_string=url_encode(query),
+                                            input_stream=input_stream))
+            except:
+                response.append(sys.exc_info())
+            event.set()
+
+        Thread(target=make_request).start()
+        event.wait(timeout)
+        if isinstance(response[0], tuple):
+            exc_type, exc_value, tb = response[0]
+            raise exc_type, exc_value, tb
+        return response[0]
 
     def __call__(self, environ, start_response):
         """Make the application object a WSGI application."""

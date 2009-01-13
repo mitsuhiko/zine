@@ -1,0 +1,14 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Report Comments As Spam") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Report Comments As Spam") }}</h1>
+  {% call form() %}
+    <div>
+      <p>{{ _('Do you really want to report the selected comments as Spam?') }}</p>
+      {{ form.selected_comments.hidden() }}
+      <input type="hidden" name="confirm" value="yes">
+      <input type="submit" name="cancel" value="{{ _('No') }}">
+      <input type="submit" name="spam" value="{{ _('Yes') }}">
+    </div>
+  {% endcall %}
+{% endblock %}

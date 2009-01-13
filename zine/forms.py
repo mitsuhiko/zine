@@ -17,7 +17,7 @@ from zine.config import DEFAULT_VARS
 from zine.database import db, posts, comments
 from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
-     COMMENT_BLOCKED_USER
+     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
 from zine.privileges import bind_privileges
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
@@ -498,6 +498,24 @@ class BlockCommentForm(_CommentBoundForm):
         self.comment.status = COMMENT_BLOCKED_USER
         self.comment.bocked_msg = msg
 
+class MarkCommentForm(_CommentBoundForm):
+    """Form used to block comments."""
+
+    def __init__(self, comment, initial=None):
+        self.req = get_request()
+        _CommentBoundForm.__init__(self, comment, initial)
+
+    def mark_as_spam(self):
+        emit_event('before-comment-mark-spam', self.comment)
+        self.comment.status = COMMENT_BLOCKED_SPAM
+        self.comment.blocked_msg = _("Comment reported as spam by %s" %
+                                    get_request().user.display_name)
+    def mark_as_ham(self):
+        emit_event('before-comment-mark-ham', self.comment)
+        emit_event('before-comment-approved', self.comment)
+        self.comment.status = COMMENT_MODERATED
+        self.comment.blocked_msg = u''
+
 
 class _CategoryBoundForm(forms.Form):
     """Internal baseclass for category bound forms."""
@@ -599,11 +617,34 @@ class CommentMassModerateForm(forms.Form):
             emit_event('before-comment-deleted', comment)
             db.delete(comment)
 
-    def approve_selection(self):
-        for comment in self.iter_selection():
+    def approve_selection(self, comment=None):
+        if comment:
             emit_event('before-comment-approved', comment)
             comment.status = COMMENT_MODERATED
             comment.blocked_msg = u''
+        else:
+            for comment in self.iter_selection():
+                emit_event('before-comment-approved', comment)
+                comment.status = COMMENT_MODERATED
+                comment.blocked_msg = u''
+
+    def block_selection(self):
+        for comment in self.iter_selection():
+            emit_event('before-comment-blocked', comment)
+            comment.status = COMMENT_BLOCKED_USER
+            comment.blocked_msg = _("Comment blocked by %s" %
+                                    get_request().user.display_name)
+
+    def mark_selection_as_spam(self):
+        for comment in self.iter_selection():
+            emit_event('before-comment-mark-spam', comment)
+            comment.status = COMMENT_BLOCKED_SPAM
+            comment.blocked_msg = _("Comment marked as spam by %s" %
+                                    get_request().user.display_name)
+    def mark_selection_as_ham(self):
+        for comment in self.iter_selection():
+            emit_event('before-comment-mark-ham', comment)
+            self.approve_selection(comment)
 
 
 class _GroupBoundForm(forms.Form):
