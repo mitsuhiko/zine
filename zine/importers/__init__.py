@@ -167,7 +167,7 @@ def _perform_import(app, blog, d):
                     old_post.text, old_post.slug, old_post.pub_date,
                     old_post.updated, old_post.comments_enabled,
                     old_post.pings_enabled, parser=old_post.parser,
-                    uid=old_post.uid)
+                    uid=old_post.uid, content_type=old_post.content_type)
         if old_post.parser_data is not None:
             post.parser_data.clear()
             post.parser_data.update(old_post.parser_data)
@@ -434,7 +434,8 @@ class Post(_Element):
     def __init__(self, slug, title, link, pub_date, author, intro, body,
                  tags=None, categories=None, comments=None,
                  comments_enabled=True, pings_enabled=True, updated=None,
-                 uid=None, parser=None, parser_data=None):
+                 uid=None, parser=None, parser_data=None,
+                 content_type='entry'):
         self.slug = slug
         self.title = title
         self.link = link
@@ -451,6 +452,7 @@ class Post(_Element):
         self.uid = uid or self.link
         self.parser = parser or 'html'
         self.parser_data = parser_data
+        self.content_type = content_type
 
     @property
     def text(self):
