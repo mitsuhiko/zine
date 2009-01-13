@@ -209,11 +209,15 @@ class HTTPHandler(URLHandler):
     STATE_IDLE, STATE_SENDING, STATE_SENT = range(3)
 
     def __init__(self, parsed_url, timeout=DEFAULT_TIMEOUT,
-                 default_method=None):
+                 method=None):
         URLHandler.__init__(self, parsed_url, timeout)
         self.headers = Headers()
         self._state = self.STATE_IDLE
-        self._method = default_method
+        self._method = method
+
+    @property
+    def method(self):
+        return self._method or 'GET'
 
     def send(self, data):
         if self._state == self.STATE_IDLE:
@@ -234,21 +238,18 @@ class HTTPHandler(URLHandler):
         self.send(data)
         self._state = self.STATE_SENT
 
-    def open(self, data=None, method=None):
+    def open(self, data=None):
         # if no method is set switch between GET and POST based on
         # the data.  This is for example the case if the URL was
         # opened with open_url().
-        if method is self._method is None:
+        if self._method is None:
             if data:
-                method = 'POST'
+                self._method = 'POST'
             else:
-                method = 'GET'
+                self._method = 'GET'
 
         if self._state != self.STATE_IDLE:
             raise CannotSendRequest()
-
-        if method is not None:
-            self._method = method
 
         if self.http_version == '1.1':
             if 'host' not in self.headers:
