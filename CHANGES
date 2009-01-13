@@ -9,6 +9,15 @@ Zine 0.2
 (Codename yet to be chosen; Release date yet unknown)
 
 
+Zine 0.1.3
+----------
+
+(Bugfix release)
+
+- The pingback system skips already pinged URLs now to speed things up.
+- Fixed the author feed.
+
+
 Zine 0.1.2
 ----------
 

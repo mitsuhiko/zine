@@ -338,7 +338,7 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
 
     # feed for an author
     if author is not None:
-        author = Category.query.filter_by(username=author).first(True)
+        author = User.query.filter_by(username=author).first(True)
         query = query.filter(Post.author == author)
 
     # feed for dates
