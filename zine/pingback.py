@@ -129,7 +129,7 @@ def handle_pingback_request(source_uri, target_uri):
         try:
             endpoint, values = app.url_adapter.match(path_info)
         except RequestRedirect, e:
-            path_info = e.new_url
+            path_info = e.new_url[len(blog_url):]
         except NotFound, e:
             raise Fault(33, 'The specified target URL does not exist.')
         else:
