@@ -132,7 +132,7 @@ def handle_pingback_request(source_uri, target_uri):
     # next we check if the source URL does indeed exist
     try:
         response = open_url(source_uri)
-    except urllib2.HTTPError:
+    except NetException:
         raise Fault(16, 'The source URL does not exist.')
 
     # we only accept pingbacks for links below our blog URL

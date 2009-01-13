@@ -15,7 +15,8 @@ import urlparse
 import socket
 import httplib
 
-from werkzeug import Response, Headers, url_decode
+from werkzeug import Response, Headers, url_decode, cached_property
+from werkzeug.contrib.iterio import IterO
 
 from zine.application import Response, get_application
 from zine.utils.datastructures import OrderedDict
@@ -39,22 +40,23 @@ def open_url(url, data=None, timeout=DEFAULT_TIMEOUT,
     can be disabled by setting `allow_internal_requests` to False.
     """
     app = get_application()
-    blog_url = urlparse.urlsplit(app.cfg['blog_url'])
     parts = urlparse.urlsplit(url)
-    if allow_internal_requests and \
-       parts.scheme in ('http', 'https') and \
-       blog_url.netloc == parts.netloc and \
-       parts.path.startswith(blog_url.path):
-        path = parts.path[len(blog_url.path):].lstrip('/')
-        method = kwargs.pop('method', None)
-        if method is None:
-            method = data is not None and 'POST' or 'GET'
-        make_response = lambda *a: URLResponse(url, *a)
-        return app.perform_subrequest(path.decode('utf-8'),
-                                      url_decode(parts.query),
-                                      method, data, timeout=timeout,
-                                      response_wrapper=make_response,
-                                      **kwargs)
+    if app is not None:
+        blog_url = urlparse.urlsplit(app.cfg['blog_url'])
+        if allow_internal_requests and \
+           parts.scheme in ('http', 'https') and \
+           blog_url.netloc == parts.netloc and \
+           parts.path.startswith(blog_url.path):
+            path = parts.path[len(blog_url.path):].lstrip('/')
+            method = kwargs.pop('method', None)
+            if method is None:
+                method = data is not None and 'POST' or 'GET'
+            make_response = lambda *a: URLResponse(url, *a)
+            return app.perform_subrequest(path.decode('utf-8'),
+                                          url_decode(parts.query),
+                                          method, data, timeout=timeout,
+                                          response_wrapper=make_response,
+                                          **kwargs)
     handler = _url_handlers.get(parts.scheme)
     if handler is None:
         raise URLError('unsupported URL schema %r' % parts.scheme)
@@ -102,6 +104,37 @@ def get_content_length(data_or_fp):
         except (AttributeError, OSError):
             pass
 
+
+class StreamBuffer(IterO):
+    """Provides a stream interface to an iterator.
+
+    This class includes a fix for a bug in werkzeug < 0.5.  Once we rewrite
+    Werkzeug 0.5 or higher this subclass can go away.
+    """
+
+    def read(self, n=-1):
+        if self.closed:
+            raise ValueError('I/O operation on closed file')
+        if n < 0:
+            self._buf += ''.join(self._gen)
+            return self._buf[self.pos:]
+        new_pos = self.pos + n
+        buf = []
+        try:
+            tmp_end_pos = len(self._buf)
+            while new_pos > tmp_end_pos:
+                item = self._gen.next()
+                tmp_end_pos += len(item)
+                buf.append(item)
+        except StopIteration:
+            pass
+        if buf:
+            self._buf += ''.join(buf)
+        new_pos = max(0, new_pos)
+        try:
+            return self._buf[self.pos:new_pos]
+        finally:
+            self.pos = new_pos
 
 class NetException(ZineException):
     pass
@@ -329,6 +362,10 @@ class URLResponse(Response):
     def __init__(self, url, body, status=200, headers=None):
         Response.__init__(self, body, status, headers)
         self.url = url
+
+    @cached_property
+    def stream(self):
+        return StreamBuffer(self.data)
 
 
 class HTTPResponse(URLResponse):

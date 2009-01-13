@@ -9,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 from os.path import dirname, join
-from urllib import urlopen
 
 from werkzeug import escape, url_encode
 
@@ -21,6 +20,7 @@ from zine.models import COMMENT_BLOCKED_SPAM, COMMENT_MODERATED, Comment
 from zine.privileges import BLOG_ADMIN, MODERATE_COMMENTS, require_privilege
 from zine.utils.validators import ValidationError, check
 from zine.utils.http import redirect_to
+from zine.utils.net import open_url
 from zine.utils import forms
 
 
@@ -54,13 +54,13 @@ def send_request(apikey, key_root, data, endpoint):
         endpoint
     )
     try:
-        f = urlopen(url, url_encode(data))
+        response = open_url(url, data=url_encode(data))
     except:
         return
     try:
-        return f.read().strip()
+        return response.data.strip()
     finally:
-        f.close()
+        response.close()
 
 
 def is_valid_key(message=None, memorize=False):

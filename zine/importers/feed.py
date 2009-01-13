@@ -22,6 +22,7 @@ from zine.utils.xml import Namespace, to_text
 from zine.utils.http import redirect_to
 from zine.utils.zeml import load_parser_data
 from zine.utils.exceptions import UserException
+from zine.utils.net import open_url
 from zine.zxa import ZINE_NS, ATOM_NS, XML_NS, ZINE_TAG_URI, ZINE_CATEGORY_URI
 
 
@@ -300,7 +301,7 @@ class FeedImporter(Importer):
             feed = request.files.get('feed')
             if form.data['download_url']:
                 try:
-                    feed = urllib.urlopen(form.data['download_url'])
+                    feed = open_url(form.data['download_url']).stream
                 except Exception, e:
                     error = _(u'Error downloading from URL: %s') % e
             elif not feed:

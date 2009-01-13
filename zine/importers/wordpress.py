@@ -9,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
-import urllib
 from time import strptime
 from datetime import datetime
 from lxml import etree
@@ -22,6 +21,7 @@ from zine.utils.admin import flash
 from zine.utils.xml import Namespace, html_entities, escape
 from zine.utils.zeml import parse_html, inject_implicit_paragraphs
 from zine.utils.http import redirect_to
+from zine.utils.net import open_url
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED, \
      STATUS_DRAFT, STATUS_PUBLISHED
 
@@ -204,7 +204,7 @@ class WordPressImporter(Importer):
             dump = request.files.get('dump')
             if form.data['download_url']:
                 try:
-                    dump = urllib.urlopen(form.data['download_url'])
+                    dump = open_url(form.data['download_url']).stream
                 except Exception, e:
                     error = _(u'Error downloading from URL: %s') % e
             elif not dump:

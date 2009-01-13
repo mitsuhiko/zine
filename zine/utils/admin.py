@@ -17,6 +17,7 @@ from werkzeug import url_quote
 
 from zine.privileges import ENTER_ADMIN_PANEL, require_privilege
 from zine.utils import local, load_json
+from zine.utils.net import open_url
 from zine.i18n import _
 
 
@@ -47,15 +48,14 @@ def require_admin_privilege(expr=None):
 
 def load_zine_reddit():
     """Load the zine reddit."""
-    import urllib
     reddit_url = 'http://www.reddit.com'
     reddit_zine_url = reddit_url + '/r/zine'
 
-    f = urllib.urlopen(reddit_zine_url + '.json')
+    response = open_url(reddit_zine_url + '.json')
     try:
-        data = load_json(f.read())
+        data = load_json(response.data)
     finally:
-        f.close()
+        response.close()
 
     result = []
     for item in islice(data['data']['children'], 20):
