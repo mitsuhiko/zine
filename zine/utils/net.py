@@ -15,9 +15,9 @@ import urlparse
 import socket
 import httplib
 
-from werkzeug import Response, Headers
+from werkzeug import Response, Headers, url_decode
 
-from zine.application import Response
+from zine.application import Response, get_application
 from zine.utils.datastructures import OrderedDict
 from zine.utils.exceptions import ZineException
 
@@ -27,14 +27,32 @@ from zine.utils.exceptions import ZineException
 DEFAULT_TIMEOUT = 2
 
 
-def open_url(url, data=None, timeout=DEFAULT_TIMEOUT, **kwargs):
+def open_url(url, data=None, timeout=DEFAULT_TIMEOUT,
+             allow_internal_requests=True, **kwargs):
     """This function parses the URL and opens the connection.  The
     following protocols are supported:
 
     -   `http`
     -   `https`
+
+    Per default requests to Zine itself trigger an internal request.  This
+    can be disabled by setting `allow_internal_requests` to False.
     """
+    app = get_application()
+    blog_url = urlparse.urlsplit(app.cfg['blog_url'])
     parts = urlparse.urlsplit(url)
+    if allow_internal_requests and \
+       parts.scheme in ('http', 'https') and \
+       blog_url.netloc == parts.netloc and \
+       parts.path.startswith(blog_url.path):
+        path = parts.path[len(blog_url.path):].lstrip('/')
+        method = kwargs.pop('method', None)
+        if method is None:
+            method = data is not None and 'POST' or 'GET'
+        return app.perform_subrequest(path.decode('utf-8'),
+                                      url_decode(parts.query),
+                                      method, data, timeout=timeout,
+                                      **kwargs)
     handler = _url_handlers.get(parts.scheme)
     if handler is None:
         raise URLError('unsupported URL schema %r' % parts.scheme)
@@ -57,11 +75,11 @@ def create_connection(address, timeout=DEFAULT_TIMEOUT):
             sock.settimeout(timeout)
             sock.connect(sa)
             return sock
-        except error, msg:
+        except socket.error, msg:
             if sock is not None:
                 sock.close()
 
-    raise error, msg
+    raise ConnectionError(msg)
 
 
 def find_content_length(data_or_fp):
@@ -87,6 +105,10 @@ class BadStatusLine(NetException):
 
 
 class URLError(NetException):
+    pass
+
+
+class ConnectionError(NetException):
     pass
 
 
@@ -243,7 +265,7 @@ class HTTPHandler(URLHandler):
         # the data.  This is for example the case if the URL was
         # opened with open_url().
         if self._method is None:
-            if data:
+            if data is not None:
                 self._method = 'POST'
             else:
                 self._method = 'GET'
@@ -307,8 +329,6 @@ class HTTPResponse(Response):
                 yield data
         Response.__init__(self, make_iterable(), resp.status, headers)
         self._httplib_resp = resp
-        if resp.will_close:
-            self.close()
 
     def close(self):
         Response.close(self)
