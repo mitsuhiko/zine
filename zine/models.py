@@ -8,7 +8,7 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from math import ceil, log
+from math import log
 from datetime import date, datetime, timedelta
 from urlparse import urljoin
 
@@ -275,19 +275,38 @@ class AnonymousUser(User):
 class PostQuery(db.Query):
     """Add some extra methods to the post model."""
 
-    def lightweight(self, deferred=None, lazy=('comments',)):
+    def lightweight(self, deferred=None, lazy=None):
         """Send a lightweight query which deferes some more expensive
         things such as comment queries or even text and parser data.
         """
-        args = map(db.lazyload, lazy or ())
+        if lazy is None:
+            lazy = ('comments',)
+        args = map(db.lazyload, lazy)
+        undefer_comment_count = 'comments' in lazy
         if deferred:
+            deferred = set(deferred)
+            if 'comment_count' in deferred:
+                undefer_comment_count = False
+                deferred.remove('comment_count')
             args.extend(map(db.defer, deferred))
         # undefer the _comment_count query which is used by comment_count
         # for lightweight post objects.  See Post.comment_count for more
         # details.
-        if lazy and 'comments' in lazy:
+        if undefer_comment_count:
             args.append(db.undefer('_comment_count'))
         return self.options(*args)
+
+    def theme_lightweight(self, key):
+        """A query for lightweight settings based on the theme.  For example
+        to use the lightweight settings for the author overview page you can
+        use this query::
+
+            Post.query.theme_lightweight('author_overview')
+        """
+        theme_settings = get_application().theme.settings
+        deferred = theme_settings.get('sql.%s.deferred' % key)
+        lazy = theme_settings.get('sql.%s.lazy' % key)
+        return self.lightweight(deferred, lazy)
 
     def type(self, content_type):
         """Filter all posts by a given type."""
@@ -777,24 +796,31 @@ class CommentQuery(db.Query):
         """Return only the approved comments."""
         return self.filter(Comment.status == COMMENT_MODERATED)
 
-    def blocked(self):
-        """Filter all blocked comments.  Blocked comments are all comments but
-        unmoderated and moderated comments.
+    def all_blocked(self):
+        """Return all blocked comments, by user, by spam checker or by system.
         """
         return self.filter(Comment.status.in_([COMMENT_BLOCKED_USER,
                                                COMMENT_BLOCKED_SPAM,
                                                COMMENT_BLOCKED_SYSTEM]))
+
+    def blocked(self):
+        """Filter all comments blocked by user(s)
+        """
+        return self.filter(Comment.status == COMMENT_BLOCKED_USER)
+
     def unmoderated(self):
         """Filter all the unmoderated comments and comments blocked by a user
         or system.
         """
-        return self.filter(Comment.status.in_([COMMENT_UNMODERATED,
-                                               COMMENT_BLOCKED_USER,
-                                               COMMENT_BLOCKED_SYSTEM]))
+        return self.filter(Comment.status == COMMENT_UNMODERATED)
 
     def spam(self):
         """Filter all the spam comments."""
         return self.filter(Comment.status == COMMENT_BLOCKED_SPAM)
+
+    def system(self):
+        """Filter all the spam comments."""
+        return self.filter(Comment.status == COMMENT_BLOCKED_SYSTEM)
 
     def latest(self, limit=None, ignore_privileges=False, ignore_blocked=True):
         """Filter the list of non blocked comments for anonymous users or
@@ -1048,6 +1074,7 @@ db.mapper(User, users, properties={
     'display_name':     db.synonym('_display_name', map_column=True),
     'posts':            db.dynamic_loader(Post,
                                           backref=db.backref('author', lazy=False),
+                                          query_class=PostQuery,
                                           cascade='all, delete, delete-orphan'),
     'comments':         db.dynamic_loader(Comment,
                                           backref=db.backref('user', lazy=False),
@@ -1060,6 +1087,7 @@ db.mapper(User, users, properties={
 db.mapper(Group, groups, properties={
     'id':               groups.c.group_id,
     'users':            db.dynamic_loader(User, backref=db.backref('groups', lazy=True),
+                                          query_class=UserQuery,
                                           secondary=group_users),
     '_privileges':      db.relation(_Privilege, lazy=True,
                                     secondary=group_privileges,
@@ -1071,7 +1099,8 @@ db.mapper(_Privilege, privileges, properties={
 })
 db.mapper(Category, categories, properties={
     'id':               categories.c.category_id,
-    'posts':            db.dynamic_loader(Post, secondary=post_categories)
+    'posts':            db.dynamic_loader(Post, secondary=post_categories,
+                                          query_class=PostQuery)
 }, order_by=categories.c.name)
 db.mapper(Comment, comments, properties={
     'id':           comments.c.comment_id,
@@ -1092,7 +1121,8 @@ db.mapper(PostLink, post_links, properties={
 })
 db.mapper(Tag, tags, properties={
     'id':           tags.c.tag_id,
-    'posts':        db.dynamic_loader(Post, secondary=post_tags)
+    'posts':        db.dynamic_loader(Post, secondary=post_tags,
+                                      query_class=PostQuery)
 }, order_by=tags.c.name)
 db.mapper(Post, posts, properties={
     'id':               posts.c.post_id,
