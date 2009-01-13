@@ -681,6 +681,7 @@ class Zine(object):
         from zine import pingback
         self.add_api('pingback', True, pingback.service)
         self.pingback_endpoints = pingback.endpoints.copy()
+        self.pingback_url_handlers = pingback.url_handlers[:]
 
         # register our builtin importers
         from zine.importers import importers
@@ -873,6 +874,14 @@ class Zine(object):
         called on pingbacks.
         """
         self.pingback_endpoints[endpoint] = callback
+
+    @setuponly
+    def add_pingback_url_handler(self, callback):
+        """Register a new URL handler as a pingback URL handler.  URL
+        handlers for pingbacks are looked up after no endpoint could be
+        found.
+        """
+        self.pingback_url_handlers.append(callback)
 
     @setuponly
     def add_theme(self, name, template_path=None, metadata=None,

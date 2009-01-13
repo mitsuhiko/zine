@@ -52,25 +52,51 @@ class PingbackError(UserException):
     remote server.
     """
 
-    def __init__(self, fault_code):
+    _ = lambda x: x
+    default_messages = {
+        16: _(u'source URL does not exist'),
+        17: _(u'The source URL does not contain a link to the target URL'),
+        32: _(u'The specified target URL does not exist'),
+        33: _(u'The specified target URL cannot be used as a target'),
+        48: _(u'The pingback has already been registered'),
+        49: _(u'Access Denied')
+    }
+    del _
+
+    def __init__(self, fault_code, internal_message=None):
         UserException.__init__(self)
         self.fault_code = fault_code
+        self._internal_message = internal_message
+
+    def as_fault(self):
+        """Return the pingback errors XMLRPC fault."""
+        return Fault(self.fault_code, self.internal_message or
+                     'unknown server error')
 
     @property
     def ignore_silently(self):
+        """If the error can be ignored silently."""
         return self.fault_code in (17, 33, 48, 49)
 
     @property
+    def means_missing(self):
+        """If the error means that the resource is missing or not
+        accepting pingbacks.
+        """
+        return self.fault_code in (32, 33)
+
+    @property
+    def internal_message(self):
+        if self._internal_message is not None:
+            return self._internal_message
+        return self.default_messages.get(self.fault_code) or 'server error'
+
+    @property
     def message(self):
-        return {
-            16: _(u'source URL does not exist'),
-            17: _(u'The source URL does not contain a link to the target URL'),
-            32: _(u'The specified target URL does not exist'),
-            33: _(u'The specified target URL cannot be used as a target'),
-            48: _(u'The pingback has already been registered'),
-            49: _(u'Access Denied')
-        }.get(self.fault_code, _(u'An unknown server error (%s) occurred') %
-              self.fault_code)
+        msg = self.default_messages.get(self.fault_code)
+        if msg is not None:
+            return _(msg)
+        return _(u'An unknown server error (%s) occurred') % self.fault_code
 
 
 def pingback(source_uri, target_uri):
@@ -109,6 +135,12 @@ def handle_pingback_request(source_uri, target_uri):
     """
     app = get_application()
 
+    # next we check if the source URL does indeed exist
+    try:
+        url = urllib2.urlopen(source_uri)
+    except urllib2.HTTPError:
+        raise Fault(16, 'The source URL does not exist.')
+
     # we only accept pingbacks for links below our blog URL
     blog_url = app.cfg['blog_url']
     if not blog_url.endswith('/'):
@@ -116,37 +148,46 @@ def handle_pingback_request(source_uri, target_uri):
     if not target_uri.startswith(blog_url):
         raise Fault(32, 'The specified target URL does not exist.')
     path_info = target_uri[len(blog_url):]
+    handler = endpoint = values = None
 
-    # next we check if the source URL does indeed exist
-    try:
-        url = urllib2.urlopen(source_uri)
-    except urllib2.HTTPError:
-        raise Fault(16, 'The source URL does not exist.')
-
-    # now it's time to look up our url endpoint for the target uri.
-    # if we have one we check if that endpoint is listening for pingbacks.
     while 1:
         try:
             endpoint, values = app.url_adapter.match(path_info)
         except RequestRedirect, e:
             path_info = e.new_url[len(blog_url):]
         except NotFound, e:
-            raise Fault(33, 'The specified target URL does not exist.')
-        else:
             break
+        else:
+            if endpoint in app.pingback_endpoints:
+                handler = app.pingback_endpoints[endpoint]
 
-    if endpoint not in app.pingback_endpoints:
-        raise Fault(33, 'The specified target URL does not accept pingbacks.')
+    # if we have an endpoint based handler use that one first
+    raise_later = None
+    if handler is not None:
+        try:
+            handler(url, target_uri, **values)
+        except PingbackError, e:
+            raise_later = e
 
-    # now we have the endpoint and the values and can dispatch our pingback
-    # request to the endpoint handler
-    handler = app.pingback_endpoints[endpoint]
+    # if the handler was none or an acception happend in the
+    if handler is None or (raise_later is not None and
+                           raise_later.means_missing):
+        for handler in app.pingback_url_handlers:
+            try:
+                if handler(url, target_uri, path_info):
+                    raise_later = None
+                    break
+            except PingbackError, e:
+                raise_later = e
+                # fatal error, abort
+                if not raise_later.means_missing:
+                    break
+        else:
+            raise_later = PingbackError(33)
 
-    # the handler can still decide not to support pingbacks and return a
-    # fault code and fault message as tuple.  otherwise none.
-    rv = handler(url, target_uri, **values)
-    if rv is not None:
-        raise Fault(*rv)
+    # now if we have an exception raise it as XMLRPC fault
+    if raise_later is not None:
+        raise raise_later.as_fault()
 
     # return some debug info
     return u'\n'.join((
@@ -182,7 +223,7 @@ def get_excerpt(url_info, url_hint, body_limit=1024 * 512):
         after = chunk[match.end():]
         raw_body = '%s\0%s' % (strip_tags(before).replace('\0', ''),
                                strip_tags(after).replace('\0', ''))
-        body_match = re.compile(r'(?:^|\b)(.{0,120})\0(.{0,120})\b') \
+        body_match = re.compile(r'(?:^|\b)(.{0,120})\0(.{0,120})(?:\b|$)') \
                        .search(raw_body)
         if body_match:
             break
@@ -216,29 +257,31 @@ def inject_header(f):
     return oncall
 
 
-def pingback_post(url_info, target_uri, year, month, day, slug):
-    """This is the pingback handler for `zine.views.blog.show_post`."""
-    post = Post.query.get_by_timestamp_and_slug(year, month, day, slug)
+def pingback_post(url_info, target_uri, slug):
+    """This is the pingback handler for posts."""
+    post = Post.query.filter_by(slug=slug).first()
+    if post is None:
+        return False
+
     if post is None or not post.pings_enabled:
-        return 33, 'no such post'
+        raise PingbackError(33, 'no such post')
     elif not post.can_read():
-        return 49, 'access denied'
+        raise PingbackError(49, 'access denied')
     title, excerpt = get_excerpt(url_info, target_uri)
     if not title:
-        return 17, 'no title provided'
+        raise PingbackError(17, 'no title provided')
     elif not excerpt:
-        return 17, 'no useable link to target'
+        raise PingbackError(17, 'no useable link to target')
     old_pingback = Comment.query.filter(
         (Comment.is_pingback == True) &
         (Comment.www == url_info.url)
     ).first()
     if old_pingback:
-        return 48, 'pingback has already been registered'
-    excerpt = escape(excerpt)
-    Comment(post, title, '', url_info.url, u'<p>%s</p>' % escape(excerpt),
-            is_pingback=True, submitter_ip=get_request().remote_addr,
-            parser='plain')
+        raise PingbackError(48, 'pingback has already been registered')
+    Comment(post, title, excerpt, '', url_info.url, is_pingback=True,
+            submitter_ip=get_request().remote_addr, parser='text')
     db.commit()
+    return True
 
 
 # the pingback service the application registers on creation
@@ -247,6 +290,9 @@ service.register_function(handle_pingback_request, 'pingback.ping')
 
 # a dict of default pingback endpoints (non plugin endpoints)
 # these are used as defaults for pingback endpoints on startup
-endpoints = {
-    'blog/show_post':       pingback_post
-}
+endpoints = {}
+
+# a dict of default pingback URL handlers (non plugin handlers)
+# that are called one after another to find out if a yet unhandled
+# URL reacts to pingbacks.
+url_handlers = [pingback_post]
