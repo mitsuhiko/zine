@@ -22,7 +22,7 @@ from zine.privileges import assert_privilege, require_privilege, \
      CREATE_ENTRIES, EDIT_OWN_ENTRIES, EDIT_OTHER_ENTRIES, \
      CREATE_PAGES, EDIT_OWN_PAGES, EDIT_OTHER_PAGES, MODERATE_COMMENTS, \
      MANAGE_CATEGORIES, BLOG_ADMIN
-from zine.i18n import _
+from zine.i18n import _, ngettext
 from zine.application import get_request, url_for, emit_event, \
      render_response, get_application
 from zine.models import User, Group, Post, Category, Comment, \
@@ -209,17 +209,19 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     return render_response(template_name, **values)
 
 
-def ping_post_links(request, post):
+def ping_post_links(form):
     """A helper that pings the links in a post."""
-    if request.app.cfg['maintenance_mode'] or not post.is_published:
+    pinged_successfully = []
+    if form.request.app.cfg['maintenance_mode'] or \
+       not form.post.is_published:
         flash(_(u'No URLs pinged so far because the post is not '
                 u'publicly available'))
-    elif post.parser_missing:
+    elif form.post.parser_missing:
         flash(_(u'Could not ping URLs because the parser for the '
                 u'post is not available any longer.'), 'error')
     else:
-        this_url = url_for(post, _external=True)
-        for url in post.find_urls():
+        this_url = url_for(form.post, _external=True)
+        for url in form.find_new_links():
             host = urlparse(url)[1].decode('utf-8', 'ignore')
             html_url = '<a href="%s">%s</a>' % (
                 escape(url, True),
@@ -234,8 +236,12 @@ def ping_post_links(request, post):
                         'error': e.message
                     }, 'error')
             else:
-                flash(_(u'%s was pinged successfully.') %
-                        html_url)
+                pinged_successfully.append(html_url)
+    if pinged_successfully:
+        flash(ngettext(u'The following link was pinged successfully: %s',
+                       u'The following links where pinged successfully: %s',
+                       len(pinged_successfully)) %
+              u', '.join(pinged_successfully))
 
 
 @require_admin_privilege()
@@ -356,7 +362,7 @@ def edit_entry(request, post=None):
             db.commit()
             emit_event('after-post-saved', post)
             if form['ping_links']:
-                ping_post_links(request, post)
+                ping_post_links(form)
             if 'save_and_continue' in request.form:
                 return redirect_to('admin/edit_post', post_id=post.id)
             return form.redirect('admin/new_entry')

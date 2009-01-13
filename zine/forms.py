@@ -283,6 +283,20 @@ class PostForm(forms.Form):
 
         forms.Form.__init__(self, initial)
 
+        # if we have have an old post and the parser is not missing and
+        # it was published when the form was created we collect the old
+        # posts so that we don't have to ping them another time.
+        self._old_links = set()
+        if self.post is not None and not self.post.parser_missing and \
+           self.post.is_published:
+            self._old_links.update(self.post.find_urls())
+
+    def find_new_links(self):
+        """Return a list of all new links."""
+        for link in self.post.find_urls():
+            if not link in self._old_links:
+                yield link
+
     def validate_slug(self, value):
         """Make sure the slug is unique."""
         query = Post.query.filter_by(slug=value)
@@ -314,6 +328,7 @@ class PostForm(forms.Form):
         post.bind_categories(data['categories'])
         post.bind_tags(data['tags'])
         self._set_common_attributes(post)
+        self.post = post
         return post
 
     def save_changes(self):
@@ -527,9 +542,11 @@ class EditCategoryForm(_CategoryBoundForm):
             raise ValidationError(_('This slug is already in use'))
 
     def make_category(self):
-        """A helper function taht creates a category object from the data."""
-        return Category(self.data['name'], self.data['description'],
-                        self.data['slug'] or None)
+        """A helper function that creates a category object from the data."""
+        category = Category(self.data['name'], self.data['description'],
+                            self.data['slug'] or None)
+        self.category = category
+        return category
 
     def save_changes(self):
         """Save the changes back to the database.  This also adds a redirect
@@ -637,6 +654,7 @@ class EditGroupForm(_GroupBoundForm):
         """A helper function that creates a new group object."""
         group = Group(self.data['groupname'])
         self._set_common_attributes(group)
+        self.group = group
         return group
 
     def save_changes(self):
@@ -773,6 +791,7 @@ class EditUserForm(_UserBoundForm):
         user = User(self.data['username'], self.data['password'],
                     self.data['email'])
         self._set_common_attributes(user)
+        self.user = user
         return user
 
     def save_changes(self):

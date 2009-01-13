@@ -98,10 +98,12 @@ class _ZEMLContainer(object):
 
     def find_urls(self):
         """Iterate over all urls in the text.  This will only work if the
-        parser for this post is available.  If it's not the behavior is
-        undefined.  The urls returned are absolute urls.
+        parser for this post is available, otherwise an exception is raised.
+        The URLs returned are absolute URLs.
         """
         from zine.parsers import parse
+        if self.parser_missing:
+            raise TypeError('parser is missing, urls cannot be looked up.')
         found = set()
         this_url = url_for(self, _external=True)
         tree = parse(self.text, self.parser, 'linksearch')
