@@ -219,7 +219,7 @@ class URLHandler(object):
         self.send(buffer)
 
     def open(self, data=None):
-        """Return a response object."""
+        """Return a `URLResponse` object."""
         return Response()
 
 
@@ -313,7 +313,14 @@ class HTTPSHandler(HTTPHandler):
                            self.key_file, self.cert_file)
 
 
-class HTTPResponse(Response):
+class URLResponse(Response):
+
+    def __init__(self, url, body, status=200, headers=None):
+        Response.__init__(self, body, status, headers)
+        self.url = url
+
+
+class HTTPResponse(URLResponse):
 
     def __init__(self, http_handler):
         self._socket = http_handler.socket
@@ -327,7 +334,8 @@ class HTTPResponse(Response):
                 if not data:
                     break
                 yield data
-        Response.__init__(self, make_iterable(), resp.status, headers)
+        URLResponse.__init__(self, http_handler.url, make_iterable(),
+                             resp.status, headers)
         self._httplib_resp = resp
 
     def close(self):
