@@ -112,12 +112,38 @@ class StreamBuffer(IterO):
     Werkzeug 0.5 or higher this subclass can go away.
     """
 
+    def seek(self, pos, mode=0):
+        if self.closed:
+            raise ValueError('I/O operation on closed file')
+        if mode == 1:
+            pos += self.pos
+        elif mode == 2:
+            self.read()
+            self.pos = min(self.pos, self.pos + pos)
+            return
+        elif mode != 0:
+            raise IOError('Invalid argument')
+        buf = []
+        try:
+            tmp_end_pos = len(self._buf)
+            while pos > tmp_end_pos:
+                item = self._gen.next()
+                tmp_end_pos += len(item)
+                buf.append(item)
+        except StopIteration:
+            pass
+        if buf:
+            self._buf += ''.join(buf)
+        self.pos = max(0, pos)
+
     def read(self, n=-1):
         if self.closed:
             raise ValueError('I/O operation on closed file')
         if n < 0:
             self._buf += ''.join(self._gen)
-            return self._buf[self.pos:]
+            result = self._buf[self.pos:]
+            self.pos += len(result)
+            return result
         new_pos = self.pos + n
         buf = []
         try:
@@ -134,7 +160,50 @@ class StreamBuffer(IterO):
         try:
             return self._buf[self.pos:new_pos]
         finally:
-            self.pos = new_pos
+            self.pos = min(new_pos, len(self._buf))
+
+    def readline(self, length=None):
+        if self.closed:
+            raise ValueError('I/O operation on closed file')
+        nl_pos = self._buf.find('\n', self.pos)
+        buf = []
+        try:
+            pos = self.pos
+            while nl_pos < 0:
+                item = self._gen.next()
+                local_pos = item.find('\n')
+                buf.append(item)
+                if local_pos >= 0:
+                    nl_pos = pos + local_pos
+                    break
+                pos += len(item)
+        except StopIteration:
+            pass
+        if buf:
+            self._buf += ''.join(buf)
+        if nl_pos < 0:
+            new_pos = len(self._buf)
+        else:
+            new_pos = nl_pos + 1
+        if length is not None and self.pos + length < new_pos:
+            new_pos = self.pos + length
+        try:
+            return self._buf[self.pos:new_pos]
+        finally:
+            self.pos = min(new_pos, len(self._buf))
+
+    def readlines(self, sizehint=0):
+        total = 0
+        lines = []
+        line = self.readline()
+        while line:
+            lines.append(line)
+            total += len(line)
+            if 0 < sizehint <= total:
+                break
+            line = self.readline()
+        return lines
+
 
 class NetException(ZineException):
     pass
