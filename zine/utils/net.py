@@ -34,7 +34,7 @@ def open_url(url, data=None, timeout=DEFAULT_TIMEOUT, **kwargs):
     -   `http`
     -   `https`
     """
-    parts = urlparse.urlparse(url)
+    parts = urlparse.urlsplit(url)
     handler = _url_handlers.get(parts.scheme)
     if handler is None:
         raise URLError('unsupported URL schema %r' % parts.scheme)
@@ -148,7 +148,7 @@ class URLHandler(object):
 
     @property
     def url(self):
-        return urlparse.urlunparse(self.parsed_url)
+        return urlparse.urlunsplit(self.parsed_url)
 
     @property
     def socket(self):
@@ -222,6 +222,8 @@ class HTTPHandler(URLHandler):
 
     def send_request(self, data):
         path = self.parsed_url.path or '/'
+        if self.parsed_url.query:
+            path += '?' + self.parsed_url.query
         self.send_buffered('%s %s HTTP/%s\r\n' % (self._method, str(path),
                                                   self.http_version))
         self.send_buffered('\r\n'.join('%s: %s' % item for item in
