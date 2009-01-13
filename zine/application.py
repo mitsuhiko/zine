@@ -1270,7 +1270,7 @@ class Zine(object):
         return response(environ, start_response)
 
     def perform_subrequest(self, path, query=None, method='GET', data=None,
-                           timeout=None):
+                           timeout=None, response_wrapper=Response):
         """Perform an internal subrequest against Zine.  This method spawns a
         separate thread and lets an internal WSGI client answer the request.
         The return value is then converted into a zine response object and
@@ -1295,7 +1295,7 @@ class Zine(object):
 
         def make_request():
             try:
-                client = Client(self, Response)
+                client = Client(self, response_wrapper)
                 response.append(client.open(path, self.cfg['blog_url'],
                                             method=method, data=data,
                                             query_string=url_encode(query),

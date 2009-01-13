@@ -36,7 +36,7 @@ from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment
 from zine.utils.exceptions import UserException
 from zine.utils.xml import XMLRPC, strip_tags
-from zine.utils.net import open_url
+from zine.utils.net import open_url, NetException
 
 
 _title_re = re.compile(r'<title>(.*?)</title>(?i)')
@@ -114,7 +114,7 @@ def handle_pingback_request(source_uri, target_uri):
     # next we check if the source URL does indeed exist
     try:
         response = open_url(source_uri)
-    except urllib2.HTTPError:
+    except NetException, e:
         raise Fault(16, 'The source URL does not exist.')
 
     # now it's time to look up our url endpoint for the target uri.

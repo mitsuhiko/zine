@@ -49,17 +49,24 @@ def open_url(url, data=None, timeout=DEFAULT_TIMEOUT,
         method = kwargs.pop('method', None)
         if method is None:
             method = data is not None and 'POST' or 'GET'
+        make_response = lambda *a: URLResponse(url, *a)
         return app.perform_subrequest(path.decode('utf-8'),
                                       url_decode(parts.query),
                                       method, data, timeout=timeout,
+                                      response_wrapper=make_response,
                                       **kwargs)
     handler = _url_handlers.get(parts.scheme)
     if handler is None:
         raise URLError('unsupported URL schema %r' % parts.scheme)
     if isinstance(data, basestring):
         data = StringIO(data)
-    obj = handler(parts, timeout, **kwargs)
-    return obj.open(data)
+    try:
+        obj = handler(parts, timeout, **kwargs)
+        return obj.open(data)
+    except Exception, e:
+        if not isinstance(e, NetException):
+            e = NetException('%s: %s' % (e.__class__.__name__, str(e)))
+        raise e
 
 
 def create_connection(address, timeout=DEFAULT_TIMEOUT):
@@ -82,7 +89,11 @@ def create_connection(address, timeout=DEFAULT_TIMEOUT):
     raise ConnectionError(msg)
 
 
-def find_content_length(data_or_fp):
+def get_content_length(data_or_fp):
+    """Try to get the content length from the given string or file
+    pointer.  If the length can't be determined the return value
+    is None.
+    """
     try:
         return len(data_or_fp)
     except TypeError:
@@ -280,7 +291,7 @@ class HTTPHandler(URLHandler):
                 self.headers['Accept-Encoding'] = 'identity'
 
         if 'content-length' not in self.headers:
-            content_length = find_content_length(data)
+            content_length = get_content_length(data)
             if content_length is not None:
                 self.headers['Content-Length'] = content_length
 
