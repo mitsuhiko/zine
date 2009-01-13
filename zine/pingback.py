@@ -83,7 +83,7 @@ def pingback(source_uri, target_uri):
     try:
         pingback_uri = response.headers['X-Pingback']
     except KeyError:
-        match = _pingback_re.search(url.read())
+        match = _pingback_re.search(response.data)
         if match is None:
             raise PingbackError(33)
         pingback_uri = unescape(match.group(1))
