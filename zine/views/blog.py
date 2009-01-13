@@ -235,7 +235,6 @@ def show_entry(req, post, comment_form):
     This view supports pingbacks via `zine.pingback.pingback_post`
 
     :Template name: ``show_entry.html``
-    :URL endpoint: ``blog/show_post``
     """
     response = comment_form.create_if_valid(req)
     if response is not None:
