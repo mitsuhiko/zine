@@ -147,6 +147,23 @@ def show_tag(req, slug, page=1):
     return render_response('show_tag.html', tag=tag, **data)
 
 
+def tags(req):
+    """
+    Show a tagcloud.
+
+    Available template variables:
+
+        `tags`:
+            list of tag summaries that contain the size of the cloud
+            item, the name of the tag and it's slug
+
+    :Template name: ``tags.html``
+    :URL endpoint: ``blog/tags``
+    """
+    return render_response('tags.html',
+                           tags=Tag.query.get_cloud())
+
+
 def show_author(req, username, page=1):
     """Show the user profile of an author / editor or administrator.
 
