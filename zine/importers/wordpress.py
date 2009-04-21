@@ -148,6 +148,28 @@ def parse_feed(fd):
         if status == STATUS_PUBLISHED:
             slug = pub_date.strftime('%Y/%m/%d/') + post_name
 
+        wpcommentids = {} # Store wordpress comment ids mapped to Comment objects
+        comments = [] # Also store as a list to preserve sequence
+        for x in item.findall(WORDPRESS.comment):
+            if x.findtext(WORDPRESS.comment_approved) != 'spam':
+                commentid = x.findtext(WORDPRESS.comment_id)
+                commentobj = Comment(
+                    x.findtext(WORDPRESS.comment_author),
+                    x.findtext(WORDPRESS.comment_content),
+                    x.findtext(WORDPRESS.comment_author_email),
+                    x.findtext(WORDPRESS.comment_author_url),
+                    wpcommentids.get(x.findtext(WORDPRESS.comment_parent), None),
+                    parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
+                    x.findtext(WORDPRESS.comment_author_ip),
+                    'html',
+                    x.findtext(WORDPRESS.comment_type) in ('pingback',
+                                                   'traceback'),
+                    (COMMENT_UNMODERATED, COMMENT_MODERATED)
+                    [x.findtext(WORDPRESS.comment_approved) == '1']
+                    )
+                wpcommentids[commentid] = commentobj
+                comments.append(commentobj)
+
         post = Post(
             slug,
             item.findtext('title'),
@@ -160,21 +182,7 @@ def parse_feed(fd):
              if x.text in tags],
             [categories[x.text] for x in item.findall('category')
              if x.text in categories],
-            [Comment(
-                x.findtext(WORDPRESS.comment_author),
-                x.findtext(WORDPRESS.comment_content),
-                x.findtext(WORDPRESS.comment_author_email),
-                x.findtext(WORDPRESS.comment_author_url),
-                None,
-                parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
-                x.findtext(WORDPRESS.comment_author_ip),
-                'html',
-                x.findtext(WORDPRESS.comment_type) in ('pingback',
-                                                       'traceback'),
-                (COMMENT_UNMODERATED, COMMENT_MODERATED)
-                    [x.findtext(WORDPRESS.comment_approved) == '1']
-            ) for x in item.findall(WORDPRESS.comment)
-              if x.findtext(WORDPRESS.comment_approved) != 'spam'],
+            comments,
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
             parser='html'
