@@ -9,7 +9,7 @@
   {%- for post in posts %}
     <tr class="{{ loop.cycle('odd', 'even') }}{% if post.is_draft %} draft{% endif %}">
       <td class="title"><a href="{{ url_for('admin/edit_post', post_id=post.id)
-        }}">{{ post.title|e }}</a>
+        }}">{%- if post.title %}{{ post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>
       <td class="author"><a href="{{ url_for('admin/edit_user',
         user_id=post.author.id) }}">{{ post.author.display_name|e }}</a>
       <td class="categories">{% for category in post.categories
