@@ -987,7 +987,9 @@ class URLOptionsForm(_ConfigForm):
             if key not in skip:
                 old = t[key]
                 if old != value:
-                    if key not in ['ascii_slugs', 'fixed_url_date_digits']:
+                    if key in ['blog_url_prefix', 'admin_url_prefix',
+                               'category_url_prefix', 'tags_url_prefix',
+                               'profiles_url_prefix']:
                         change_url_prefix(old, value)
                     t[key] = value
 
