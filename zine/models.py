@@ -27,6 +27,7 @@ from zine.privileges import Privilege, _Privilege, privilege_attribute, \
      VIEW_DRAFTS
 from zine.application import get_application, get_request, url_for
 
+from zine.i18n import to_blog_timezone
 
 #: all kind of states for a post
 STATUS_DRAFT = 1
@@ -570,17 +571,31 @@ class Post(_ZEMLDualContainer):
         prefix = cfg['blog_url_prefix'].lstrip('/')
         if prefix:
             prefix += '/'
+        pub_date = to_blog_timezone(self.pub_date)
         if cfg['fixed_url_date_digits']:
-            date_pattern = '%04d/%02d/%02d'
+            year = '%04d' % pub_date.year
+            month = '%02d' % pub_date.month
+            day = '%02d' % pub_date.day
+            hour = '%02d' % pub_date.hour
+            minute = '%02d' % pub_date.minute
+            second = '%02d' % pub_date.second
         else:
-            date_pattern = '%d/%d/%d'
-        full_slug = u'%s%s/%s' % (
+            year = '%d' % pub_date.year
+            month = '%d' % pub_date.month
+            day = '%d' % pub_date.day
+            hour = '%d' % pub_date.hour
+            minute = '%d' % pub_date.minute
+            second = '%d' % pub_date.second
+
+        full_slug = u'%s%s%s' % (
             prefix,
-            date_pattern % (
-                self.pub_date.year,
-                self.pub_date.month,
-                self.pub_date.day,
-            ),
+            cfg['post_url_format'].replace(
+                '%year%', year).replace(
+                '%month%', month).replace(
+                '%day%', day).replace(
+                '%hour%', hour).replace(
+                '%minute%', minute).replace(
+                '%second%', second),
             slug
         )
 
@@ -660,7 +675,7 @@ class Post(_ZEMLDualContainer):
         for this thread defined.
         """
         # published posts are always accessible
-        if self.status == STATUS_PUBLISHED and \
+        if self.status == STATUS_PUBLISHED and self.pub_date is not None and \
            self.pub_date <= datetime.utcnow():
             return True
 

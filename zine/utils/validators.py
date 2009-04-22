@@ -157,6 +157,41 @@ def is_valid_url_prefix():
     return validator
 
 
+def is_valid_url_format():
+    """Validates URL format.
+    
+    >>> check(is_valid_url_format, '/%year%')
+    False
+    >>> check(is_valid_url_format, '%year%')
+    True
+    >>> check(is_valid_url_format, '%year%/%month%/')
+    True
+    >>> check(is_valid_url_format, '%year%/%month%/%day%/')
+    True
+    >>> check(is_valid_url_format, '%year%/%month%/%day%/%hour%%minute%-')
+    True
+    >>> check(is_valid_url_format, '%other%')
+    False
+    """
+    def validator(form, value):
+        if '<' in value or '>' in value or '\\' in value:
+            raise ValidationError(_(u'Invalid character, <, > or \\ are not '
+            'allowed.'))
+        if value:
+            if value.startswith('/'):
+                raise ValidationError(_(u'URL format cannot start with a slash.'))
+            if value.find('//') >= 0:
+                raise ValidationError(_(u'URL cannot contain //.'))
+            if value.find('/../') >= 0 or value.startswith('../'):
+                raise ValidationError(_(u'URL cannot contain a reference to'
+                'parent path.'))
+            for match in re.findall('%.*?%', value):
+                if match not in ['%year%', '%month%', '%day%',
+                                 '%hour%', '%minute%', '%second%']:
+                    raise ValidationError(_(u'Unknown format code %s.' % match))
+    return validator
+
+
 def is_not_whitespace_only():
     """Make sure the value does consist of at least one
     non-whitespace character"""

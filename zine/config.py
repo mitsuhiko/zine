@@ -21,7 +21,7 @@ from zine.utils import log
 from zine.utils.forms import TextField, IntegerField, BooleanField, \
     ChoiceField, CommaSeparated
 from zine.utils.validators import ValidationError, is_valid_url_prefix, \
-    is_netaddr
+    is_valid_url_format, is_netaddr
 from zine.application import InternalError
 
 
@@ -73,6 +73,8 @@ DEFAULT_VARS = {
                                           validators=[is_valid_url_prefix()]),
     'profiles_url_prefix':      TextField(default=u'/authors',
                                           validators=[is_valid_url_prefix()]),
+    'post_url_format':          TextField(default=u'%year%/%month%/%day%/%slug%',
+                                          validators=[is_valid_url_format()]),
     'ascii_slugs':              BooleanField(default=True),
     'fixed_url_date_digits':    BooleanField(default=False),
 

@@ -335,6 +335,9 @@ class PostForm(forms.Form):
         """Save the changes back to the database.  This also adds a redirect
         if the slug changes.
         """
+        if not self.data['pub_date']:
+            # If user deleted publication timestamp, make a new one.
+            self.data['pub_date'] = datetime.utcnow()
         old_slug = self.post.slug
         old_parser = self.post.parser
         forms.set_fields(self.post, self.data, 'title', 'author', 'parser')
@@ -963,17 +966,28 @@ class URLOptionsForm(_ConfigForm):
                                    lazy_gettext(u'Tag URL prefix'))
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
+    post_url_format = config_field('post_url_format',
+        lazy_gettext(u'Post permalink URL format'),
+        help_text=lazy_gettext(u'Use %year%, %month%, %day%, %hour%, '
+                               u'%minute% and %second%. Changes here will '
+                               u'only affect new posts. The slug will be '
+                               u'appended to this.'))
     ascii_slugs = config_field('ascii_slugs',
                                lazy_gettext(u'Limit slugs to ASCII'),
                                help_text=lazy_gettext(u'Automatically '
                                u'generated slugs are limited to ASCII'))
+    fixed_url_date_digits = config_field('fixed_url_date_digits',
+                                     lazy_gettext(u'Use zero-padded dates'),
+                                     help_text=lazy_gettext(u'Dates are zero '
+                                     u'padded like 2009/04/22 instead of '
+                                     u'2009/4/22'))
 
     def _apply(self, t, skip):
         for key, value in self.data.iteritems():
             if key not in skip:
                 old = t[key]
                 if old != value:
-                    if key != 'ascii_slugs':
+                    if key not in ['ascii_slugs', 'fixed_url_date_digits']:
                         change_url_prefix(old, value)
                     t[key] = value
 
