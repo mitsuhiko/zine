@@ -445,7 +445,7 @@ def edit_page(request, post=None):
             db.commit()
             emit_event('after-post-saved', post)
             if form['ping_links']:
-                ping_post_links(request, post)
+                ping_post_links(form)
             if 'save_and_continue' in request.form:
                 return redirect_to('admin/edit_post', post_id=post.id)
             return form.redirect('admin/new_page')

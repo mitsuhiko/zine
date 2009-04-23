@@ -21,6 +21,7 @@ from datetime import datetime, MAXYEAR
 from zine.i18n import _
 from zine.database import db, posts
 from zine.utils.xml import escape
+from zine.utils.text import increment_string
 from zine.models import COMMENT_MODERATED
 from zine.privileges import BLOG_ADMIN, ENTER_ADMIN_PANEL, require_privilege
 
@@ -166,8 +167,12 @@ def _perform_import(app, blog, d):
         if old_post.already_imported or not d['posts'][old_post.id]:
             continue
 
+        slug = old_post.slug
+        while Post.query.autoflush(False).filter_by(slug=slug) \
+                  .limit(1).count():
+            slug = increment_string(slug)
         post = Post(old_post.title, prepare_author(old_post.author),
-                    old_post.text, old_post.slug, old_post.pub_date,
+                    old_post.text, slug, old_post.pub_date,
                     old_post.updated, old_post.comments_enabled,
                     old_post.pings_enabled, parser=old_post.parser,
                     uid=old_post.uid, content_type=old_post.content_type)

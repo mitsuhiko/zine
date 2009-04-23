@@ -22,6 +22,7 @@ from zine.utils.xml import Namespace, html_entities, escape
 from zine.utils.zeml import parse_html, inject_implicit_paragraphs
 from zine.utils.http import redirect_to
 from zine.utils.net import open_url
+from zine.utils.text import gen_timestamped_slug
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED, \
      STATUS_DRAFT, STATUS_PUBLISHED
 
@@ -142,13 +143,14 @@ def parse_feed(fd):
         }.get(item.findtext(WORDPRESS.status), STATUS_PUBLISHED)
         post_name = item.findtext(WORDPRESS.post_name)
         pub_date = parse_wordpress_date(item.findtext(WORDPRESS.post_date_gmt))
+        content_type={'post': 'entry', 'page': 'page'}.get(
+                                item.findtext(WORDPRESS.post_type), 'entry')
         slug = None
 
         if pub_date is None or post_name is None:
             status = STATUS_DRAFT
         if status == STATUS_PUBLISHED:
-            # FIXME: Use the new slug autogeneration code. Respect user settings
-            slug = pub_date.strftime('%Y/%m/%d/') + post_name
+            slug = gen_timestamped_slug(post_name, content_type, pub_date)
 
         comments = {} # Store WordPress comment ids mapped to Comment objects
         for x in item.findall(WORDPRESS.comment):
@@ -196,7 +198,8 @@ def parse_feed(fd):
             comments.values(),
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
-            parser='html'
+            parser='html',
+            content_type=content_type
         )
         posts.append(post)
 

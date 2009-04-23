@@ -18,7 +18,8 @@ from zine.database import users, categories, posts, post_links, \
      post_categories, post_tags, tags, comments, groups, group_users, \
      privileges, user_privileges, group_privileges, db
 from zine.utils import zeml
-from zine.utils.text import gen_slug, build_tag_uri, increment_string
+from zine.utils.text import gen_slug, gen_timestamped_slug, build_tag_uri, \
+     increment_string
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
@@ -568,36 +569,8 @@ class Post(_ZEMLDualContainer):
         slug = gen_slug(self.title)
         if not slug:
             slug = self.pub_date.strftime('%H:%M')
-        prefix = cfg['blog_url_prefix'].lstrip('/')
-        if prefix:
-            prefix += '/'
-        pub_date = to_blog_timezone(self.pub_date)
-        if cfg['fixed_url_date_digits']:
-            year = '%04d' % pub_date.year
-            month = '%02d' % pub_date.month
-            day = '%02d' % pub_date.day
-            hour = '%02d' % pub_date.hour
-            minute = '%02d' % pub_date.minute
-            second = '%02d' % pub_date.second
-        else:
-            year = '%d' % pub_date.year
-            month = '%d' % pub_date.month
-            day = '%d' % pub_date.day
-            hour = '%d' % pub_date.hour
-            minute = '%d' % pub_date.minute
-            second = '%d' % pub_date.second
 
-        full_slug = u'%s%s%s' % (
-            prefix,
-            cfg['post_url_format'].replace(
-                '%year%', year).replace(
-                '%month%', month).replace(
-                '%day%', day).replace(
-                '%hour%', hour).replace(
-                '%minute%', minute).replace(
-                '%second%', second),
-            slug
-        )
+        full_slug = gen_timestamped_slug(slug, self.content_type, self.pub_date)
 
         if full_slug != self.slug:
             while Post.query.autoflush(False).filter_by(slug=full_slug) \

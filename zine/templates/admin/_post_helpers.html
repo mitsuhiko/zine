@@ -19,7 +19,7 @@
       <td class="comments"><a href="{{
         url_for('admin/show_post_comments', post_id=post.id)
         }}">{{ post.comments|count }}</a>
-      <td class="date">{{ post.pub_date|datetimeformat('short') if post.pub_date }}
+      <td class="date">{{ post.pub_date }}
   {%- else %}
     <tr><td colspan="5">{{ _("No pages.") }}</td></tr>
   {%- endfor %}
