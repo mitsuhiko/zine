@@ -97,7 +97,7 @@ def _perform_import(app, blog, d):
         """Adds an author to the author mapping and returns it."""
         if author.id not in author_mapping:
             author_rewrite = d['authors'][author.id]
-            if author_rewrite is not None:
+            if author_rewrite != '__zine_create_user':
                 user = User.query.get(int(author_rewrite))
             else:
                 user = User(author.username, None, author.email,
