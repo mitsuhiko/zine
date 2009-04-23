@@ -226,7 +226,9 @@ class PostForm(forms.Form):
     status = forms.ChoiceField(lazy_gettext(u'Publication status'), choices=[
                                (STATUS_DRAFT, lazy_gettext(u'Draft')),
                                (STATUS_PUBLISHED, lazy_gettext(u'Published'))])
-    pub_date = forms.DateTimeField(lazy_gettext(u'Publication date'))
+    pub_date = forms.DateTimeField(lazy_gettext(u'Publication date'),
+        help_text=lazy_gettext(u'To update to current time, '
+                               'clear this field and save.'))
     slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()])
     author = forms.ModelField(User, 'username', lazy_gettext('Author'),
                               widget=forms.SelectBox)

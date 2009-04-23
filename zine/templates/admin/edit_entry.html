@@ -22,7 +22,14 @@
       <h3>{{ form.text.label() }}</h3>
       {{ form.text(rows=12) }}
     </div>
-    {{ render_formbox(form.status, collapsed=false) }}
+    <div class="formbox toggleable">
+      <h3>{{ form.status.label() }}</h3>
+      {{ form.status()}}
+      {%- if form.status.help_text %} <span class="explanation">{{ form.status.help_text }}</span>{%- endif %}
+      {{ form.pub_date.label() }}
+      {{ form.pub_date()}}
+      {%- if form.pub_date.help_text %} <span class="explanation">{{ form.pub_date.help_text }}</span>{%- endif %}
+    </div>
     {{ render_formbox(form.tags) }}
     <div class="formbox toggleable collapsed">
       <h3>{{ form.categories.label() }}</h3>
@@ -37,7 +44,6 @@
         {{ form.ping_links.as_li() }}
       </ul>
     </div>
-    {{ render_formbox(form.pub_date) }}
     {{ render_formbox(form.slug) }}
     {{ render_formbox(form.author) }}
     {% if not form.new %}
