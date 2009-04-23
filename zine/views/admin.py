@@ -40,6 +40,7 @@ from zine.i18n import parse_datetime, format_system_datetime, \
      list_timezones, has_timezone, list_languages, has_language
 from zine.importers import list_import_queue, load_import_dump, \
      delete_import_dump
+from zine.parsers import parse
 from zine.pluginsystem import install_package, InstallationError, \
      SetupError, get_object_name
 from zine.pingback import pingback, PingbackError
@@ -353,6 +354,18 @@ def edit_entry(request, post=None):
             return form.redirect('admin/manage_entries')
         elif 'delete' in request.form:
             return redirect_to('admin/delete_post', post_id=post.id)
+        elif 'preview' in request.form:
+            form = EntryForm(post, request.form)
+            text = request.form['text']
+            parser = request.form['parser']
+            try:
+                text = parse(text, parser=parser)
+            except ValueError:
+                flash(_('Parser "%s" does not exist. Displaying raw text instead.' % escape(parser)), type='error')
+
+            return render_admin_response('admin/edit_entry.html', active_tab,
+                                         form=form.as_widget(True),
+                                         text=text)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
@@ -431,6 +444,18 @@ def edit_page(request, post=None):
             return form.redirect('admin/manage_pages')
         elif 'delete' in request.form:
             return redirect_to('admin/delete_post', post_id=post.id)
+        elif 'preview' in request.form:
+            form = PageForm(post, request.form)
+            text = request.form['text']
+            parser = request.form['parser']
+            try:
+                text = parse(text, parser=parser)
+            except ValueError:
+                flash(_('Parser "%s" does not exist. Displaying raw text instead.' % escape(parser)), type='error')
+
+            return render_admin_response('admin/edit_page.html', active_tab,
+                                         form=form.as_widget(True),
+                                         text=text)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()

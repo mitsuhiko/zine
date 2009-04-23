@@ -6,3 +6,15 @@
     {%- if field.help_text %} <span class="explanation">{{ field.help_text }}</span>{%- endif %}
   </div>
 {% endmacro %}
+
+{% macro render_post_actions(form) %}
+  <div class="actions">
+    <input type="submit" name="save" value="{{ _('Save') }}">
+    <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">
+    {%- if not form.new %}
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+    {%- endif %}
+    <input type="submit" name="cancel" value="{{ _('Cancel') }}">
+    <input type="submit" name="preview" value="{{ _('Preview') }}">
+  </div>
+{% endmacro %}

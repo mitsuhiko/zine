@@ -1,10 +1,19 @@
 {% extends "admin/layout.html" %}
-{% from "admin/_form_helpers.html" import render_formbox %}
+{% from "admin/_form_helpers.html" import render_formbox, render_post_actions %}
 {% block title %}{{
   _("New Page") if form.new else _("Edit Page “%s”") % form.post.title
 }}{% endblock %}
 {% block contents %}
+  {% if form.preview %}
+    <h1>{{ _('Preview') }} (<a href="#form_start">{{ _('skip') }}</a>)</h1>
+    <div class="preview" id="preview">
+      <div class="text">
+      {{text}}
+      </div>
+    </div>
+  {% endif %}
   <h1>{{ self.title() }}</h1>
+  <a name="form_start" /></a>
   {% call form() %}
     {%- if form.parser_missing %}
       <ul class="errors">
@@ -22,6 +31,7 @@
       <h3>{{ form.text.label() }}</h3>
       {{ form.text(rows=12) }}
     </div>
+    {{ render_post_actions(form) }}
     {{ render_formbox(form.slug, collapsed=false) }}
     <div class="formbox toggleable">
       <h3>{{ form.status.label() }}</h3>
@@ -48,13 +58,6 @@
         <a href="{{ url_for(form.post) }}">{{ _("View Page") }}</a>
       </p>
     {% endif %}
-    <div class="actions">
-      <input type="submit" name="save" value="{{ _('Save') }}">
-      <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">
-      {%- if not form.new %}
-        <input type="submit" name="delete" value="{{ _('Delete') }}">
-      {%- endif %}
-      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
-    </div>
+    {{ render_post_actions(form) }}
   {% endcall %}
 {% endblock %}

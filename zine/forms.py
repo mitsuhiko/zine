@@ -314,10 +314,11 @@ class PostForm(forms.Form):
             raise ValidationError(_('Selected parser is no longer '
                                     'available on the system.'))
 
-    def as_widget(self):
+    def as_widget(self, preview=False):
         widget = forms.Form.as_widget(self)
         widget.new = self.post is None
         widget.post = self.post
+        widget.preview = preview
         widget.parser_missing = self.parser_missing
         return widget
 

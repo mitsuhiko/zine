@@ -473,6 +473,12 @@ div.formbox ul {
     padding: 5px 0 5px 10px;
 }
 
+div.preview {
+    border: 1px solid #B4D2E7;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
 ul.errors {
     background-color: #FCF7F7;
     border: 1px solid #E8B5B5;
