@@ -148,8 +148,7 @@ def parse_feed(fd):
         if status == STATUS_PUBLISHED:
             slug = pub_date.strftime('%Y/%m/%d/') + post_name
 
-        wpcommentids = {} # Store wordpress comment ids mapped to Comment objects
-        comments = [] # Also store as a list to preserve sequence
+        comments = {} # Store WordPress comment ids mapped to Comment objects
         for x in item.findall(WORDPRESS.comment):
             if x.findtext(WORDPRESS.comment_approved) != 'spam':
                 commentid = x.findtext(WORDPRESS.comment_id)
@@ -158,7 +157,7 @@ def parse_feed(fd):
                     x.findtext(WORDPRESS.comment_content),
                     x.findtext(WORDPRESS.comment_author_email),
                     x.findtext(WORDPRESS.comment_author_url),
-                    wpcommentids.get(x.findtext(WORDPRESS.comment_parent), None),
+                    comments.get(x.findtext(WORDPRESS.comment_parent), None),
                     parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
                     x.findtext(WORDPRESS.comment_author_ip),
                     'html',
@@ -167,8 +166,7 @@ def parse_feed(fd):
                     (COMMENT_UNMODERATED, COMMENT_MODERATED)
                     [x.findtext(WORDPRESS.comment_approved) == '1']
                     )
-                wpcommentids[commentid] = commentobj
-                comments.append(commentobj)
+                comments[commentid] = commentobj
 
         post = Post(
             slug,
@@ -182,7 +180,7 @@ def parse_feed(fd):
              if x.text in tags],
             [categories[x.text] for x in item.findall('category')
              if x.text in categories],
-            comments,
+            comments.values(),
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
             parser='html'
