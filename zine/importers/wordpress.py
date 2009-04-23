@@ -134,6 +134,7 @@ def parse_feed(fd):
         categories[category.name] = category
 
     posts = []
+    clean_empty_tags = re.compile("\<(?P<tag>\w+?)\>[\r\n]?\</(?P=tag)\>")
 
     for item in tree.findall('item'):
         status = {
@@ -146,6 +147,7 @@ def parse_feed(fd):
         if pub_date is None or post_name is None:
             status = STATUS_DRAFT
         if status == STATUS_PUBLISHED:
+            # FIXME: Use the new slug autogeneration code. Respect user settings
             slug = pub_date.strftime('%Y/%m/%d/') + post_name
 
         comments = {} # Store WordPress comment ids mapped to Comment objects
@@ -158,7 +160,8 @@ def parse_feed(fd):
                     x.findtext(WORDPRESS.comment_author_email),
                     x.findtext(WORDPRESS.comment_author_url),
                     comments.get(x.findtext(WORDPRESS.comment_parent), None),
-                    parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
+                    parse_wordpress_date(x.findtext(
+                                                WORDPRESS.comment_date_gmt)),
                     x.findtext(WORDPRESS.comment_author_ip),
                     'html',
                     x.findtext(WORDPRESS.comment_type) in ('pingback',
@@ -168,14 +171,24 @@ def parse_feed(fd):
                     )
                 comments[commentid] = commentobj
 
+        post_body = item.findtext(CONTENT.encoded)
+        post_intro = item.findtext('description')
+        if post_intro == None or len(post_intro) == 0:
+            find_more_results = re.split('<!--more ?.*?-->', post_body)
+            if len(find_more_results) > 1:
+                post_intro = clean_empty_tags.sub('',
+                                       _wordpress_to_html(find_more_results[0]))
+                post_body = find_more_results[1]
+        post_body = clean_empty_tags.sub('', _wordpress_to_html(post_body))
+
         post = Post(
             slug,
             item.findtext('title'),
             item.findtext('link'),
             pub_date,
             get_author(item.findtext(DC_METADATA.creator)),
-            item.findtext('description'),
-            _wordpress_to_html(item.findtext(CONTENT.encoded)),
+            post_intro,
+            post_body,
             [tags[x.text] for x in item.findall('tag')
              if x.text in tags],
             [categories[x.text] for x in item.findall('category')
