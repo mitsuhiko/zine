@@ -44,7 +44,7 @@
         {{ form.ping_links.as_li() }}
       </ul>
     </div>
-    {{ render_formbox(form.slug) }}
+    {{ render_formbox(form.slug, collapsed=not form.slug.value and true or false) }}
     {{ render_formbox(form.author) }}
     {% if not form.new %}
       <p class="preview">

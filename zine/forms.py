@@ -227,9 +227,9 @@ class PostForm(forms.Form):
                                (STATUS_DRAFT, lazy_gettext(u'Draft')),
                                (STATUS_PUBLISHED, lazy_gettext(u'Published'))])
     pub_date = forms.DateTimeField(lazy_gettext(u'Publication date'),
-        help_text=lazy_gettext(u'To update to current time, '
-                               'clear this field and save.'))
-    slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()])
+        help_text=lazy_gettext(u'Clear this field to update to current time'))
+    slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()],
+        help_text=lazy_gettext(u'Clear this field to autogenerate a new slug'))
     author = forms.ModelField(User, 'username', lazy_gettext('Author'),
                               widget=forms.SelectBox)
     tags = forms.CommaSeparated(forms.TextField(), lazy_gettext(u'Tags'))
