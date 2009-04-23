@@ -100,12 +100,15 @@ def _perform_import(app, blog, d):
             if author_rewrite != '__zine_create_user':
                 user = User.query.get(int(author_rewrite))
             else:
-                user = User(author.username, None, author.email,
-                            author.real_name, author.description,
-                            author.www, author.is_author)
-                if author.pw_hash:
-                    user.pw_hash = author.pw_hash
-                user.own_privileges.update(author.privileges)
+                query = User.query.filter_by(username=author.username)
+                user = query.first()
+                if user is None:
+                    user = User(author.username, None, author.email,
+                                author.real_name, author.description,
+                                author.www, author.is_author)
+                    if author.pw_hash:
+                        user.pw_hash = author.pw_hash
+                    user.own_privileges.update(author.privileges)
             author_mapping[author.id] = user
         return author_mapping[author.id]
 
