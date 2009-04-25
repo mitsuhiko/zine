@@ -22,6 +22,7 @@ from zine.utils.xml import Namespace, html_entities, escape
 from zine.utils.zeml import parse_html, inject_implicit_paragraphs
 from zine.utils.http import redirect_to
 from zine.utils.net import open_url
+from zine.utils.text import gen_timestamped_slug
 from zine.models import COMMENT_UNMODERATED, COMMENT_MODERATED, \
      STATUS_DRAFT, STATUS_PUBLISHED
 
@@ -134,6 +135,7 @@ def parse_feed(fd):
         categories[category.name] = category
 
     posts = []
+    clean_empty_tags = re.compile("\<(?P<tag>\w+?)\>[\r\n]?\</(?P=tag)\>")
 
     for item in tree.findall('item'):
         status = {
@@ -141,12 +143,45 @@ def parse_feed(fd):
         }.get(item.findtext(WORDPRESS.status), STATUS_PUBLISHED)
         post_name = item.findtext(WORDPRESS.post_name)
         pub_date = parse_wordpress_date(item.findtext(WORDPRESS.post_date_gmt))
+        content_type={'post': 'entry', 'page': 'page'}.get(
+                                item.findtext(WORDPRESS.post_type), 'entry')
         slug = None
 
         if pub_date is None or post_name is None:
             status = STATUS_DRAFT
         if status == STATUS_PUBLISHED:
-            slug = pub_date.strftime('%Y/%m/%d/') + post_name
+            slug = gen_timestamped_slug(post_name, content_type, pub_date)
+
+        comments = {} # Store WordPress comment ids mapped to Comment objects
+        for x in item.findall(WORDPRESS.comment):
+            if x.findtext(WORDPRESS.comment_approved) != 'spam':
+                commentid = x.findtext(WORDPRESS.comment_id)
+                commentobj = Comment(
+                    x.findtext(WORDPRESS.comment_author),
+                    x.findtext(WORDPRESS.comment_content),
+                    x.findtext(WORDPRESS.comment_author_email),
+                    x.findtext(WORDPRESS.comment_author_url),
+                    comments.get(x.findtext(WORDPRESS.comment_parent), None),
+                    parse_wordpress_date(x.findtext(
+                                                WORDPRESS.comment_date_gmt)),
+                    x.findtext(WORDPRESS.comment_author_ip),
+                    'html',
+                    x.findtext(WORDPRESS.comment_type) in ('pingback',
+                                                   'traceback'),
+                    (COMMENT_UNMODERATED, COMMENT_MODERATED)
+                    [x.findtext(WORDPRESS.comment_approved) == '1']
+                    )
+                comments[commentid] = commentobj
+
+        post_body = item.findtext(CONTENT.encoded)
+        post_intro = item.findtext('description')
+        if post_intro == None or len(post_intro) == 0:
+            find_more_results = re.split('<!--more ?.*?-->', post_body)
+            if len(find_more_results) > 1:
+                post_intro = clean_empty_tags.sub('',
+                                       _wordpress_to_html(find_more_results[0]))
+                post_body = find_more_results[1]
+        post_body = clean_empty_tags.sub('', _wordpress_to_html(post_body))
 
         post = Post(
             slug,
@@ -154,30 +189,17 @@ def parse_feed(fd):
             item.findtext('link'),
             pub_date,
             get_author(item.findtext(DC_METADATA.creator)),
-            item.findtext('description'),
-            _wordpress_to_html(item.findtext(CONTENT.encoded)),
+            post_intro,
+            post_body,
             [tags[x.text] for x in item.findall('tag')
              if x.text in tags],
             [categories[x.text] for x in item.findall('category')
              if x.text in categories],
-            [Comment(
-                x.findtext(WORDPRESS.comment_author),
-                x.findtext(WORDPRESS.comment_content),
-                x.findtext(WORDPRESS.comment_author_email),
-                x.findtext(WORDPRESS.comment_author_url),
-                None,
-                parse_wordpress_date(x.findtext(WORDPRESS.comment_date_gmt)),
-                x.findtext(WORDPRESS.comment_author_ip),
-                'html',
-                x.findtext(WORDPRESS.comment_type) in ('pingback',
-                                                       'traceback'),
-                (COMMENT_UNMODERATED, COMMENT_MODERATED)
-                    [x.findtext(WORDPRESS.comment_approved) == '1']
-            ) for x in item.findall(WORDPRESS.comment)
-              if x.findtext(WORDPRESS.comment_approved) != 'spam'],
+            comments.values(),
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
-            parser='html'
+            parser='html',
+            content_type=content_type
         )
         posts.append(post)
 

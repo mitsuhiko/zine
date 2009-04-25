@@ -17,7 +17,7 @@ from zine.config import DEFAULT_VARS
 from zine.database import db, posts, comments
 from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
-     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
+     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM, COMMENT_DELETED
 from zine.privileges import bind_privileges
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
@@ -226,8 +226,10 @@ class PostForm(forms.Form):
     status = forms.ChoiceField(lazy_gettext(u'Publication status'), choices=[
                                (STATUS_DRAFT, lazy_gettext(u'Draft')),
                                (STATUS_PUBLISHED, lazy_gettext(u'Published'))])
-    pub_date = forms.DateTimeField(lazy_gettext(u'Publication date'))
-    slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()])
+    pub_date = forms.DateTimeField(lazy_gettext(u'Publication date'),
+        help_text=lazy_gettext(u'Clear this field to update to current time'))
+    slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()],
+        help_text=lazy_gettext(u'Clear this field to autogenerate a new slug'))
     author = forms.ModelField(User, 'username', lazy_gettext('Author'),
                               widget=forms.SelectBox)
     tags = forms.CommaSeparated(forms.TextField(), lazy_gettext(u'Tags'))
@@ -312,10 +314,11 @@ class PostForm(forms.Form):
             raise ValidationError(_('Selected parser is no longer '
                                     'available on the system.'))
 
-    def as_widget(self):
+    def as_widget(self, preview=False):
         widget = forms.Form.as_widget(self)
         widget.new = self.post is None
         widget.post = self.post
+        widget.preview = preview
         widget.parser_missing = self.parser_missing
         return widget
 
@@ -335,6 +338,9 @@ class PostForm(forms.Form):
         """Save the changes back to the database.  This also adds a redirect
         if the slug changes.
         """
+        if not self.data['pub_date']:
+            # If user deleted publication timestamp, make a new one.
+            self.data['pub_date'] = datetime.utcnow()
         old_slug = self.post.slug
         old_parser = self.post.parser
         forms.set_fields(self.post, self.data, 'title', 'author', 'parser')
@@ -463,12 +469,7 @@ class DeleteCommentForm(_CommentBoundForm):
 
     def delete_comment(self):
         """Deletes the comment from the db."""
-        #! plugins can use this to react to comment deletes.  They can't
-        #! stop the deleting of the comment but they can delete information
-        #! in their own tables so that the database is consistent
-        #! afterwards.
-        emit_event('before-comment-deleted', self.comment)
-        db.delete(self.comment)
+        delete_comment(self.comment)
 
 
 class ApproveCommentForm(_CommentBoundForm):
@@ -614,8 +615,7 @@ class CommentMassModerateForm(forms.Form):
 
     def delete_selection(self):
         for comment in self.iter_selection():
-            emit_event('before-comment-deleted', comment)
-            db.delete(comment)
+            delete_comment(comment)
 
     def approve_selection(self, comment=None):
         if comment:
@@ -963,17 +963,30 @@ class URLOptionsForm(_ConfigForm):
                                    lazy_gettext(u'Tag URL prefix'))
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
+    post_url_format = config_field('post_url_format',
+        lazy_gettext(u'Post permalink URL format'),
+        help_text=lazy_gettext(u'Use %year%, %month%, %day%, %hour%, '
+                               u'%minute% and %second%. Changes here will '
+                               u'only affect new posts. The slug will be '
+                               u'appended to this.'))
     ascii_slugs = config_field('ascii_slugs',
                                lazy_gettext(u'Limit slugs to ASCII'),
                                help_text=lazy_gettext(u'Automatically '
                                u'generated slugs are limited to ASCII'))
+    fixed_url_date_digits = config_field('fixed_url_date_digits',
+                                     lazy_gettext(u'Use zero-padded dates'),
+                                     help_text=lazy_gettext(u'Dates are zero '
+                                     u'padded like 2009/04/22 instead of '
+                                     u'2009/4/22'))
 
     def _apply(self, t, skip):
         for key, value in self.data.iteritems():
             if key not in skip:
                 old = t[key]
                 if old != value:
-                    if key != 'ascii_slugs':
+                    if key in ['blog_url_prefix', 'admin_url_prefix',
+                               'category_url_prefix', 'tags_url_prefix',
+                               'profiles_url_prefix']:
                         change_url_prefix(old, value)
                     t[key] = value
 
@@ -1028,6 +1041,38 @@ class DeleteImportForm(forms.Form):
 
 class ExportForm(forms.Form):
     """This form is used to implement the export dialog."""
+
+
+def delete_comment(comment):
+    """
+    Deletes or marks for deletion the specified comment, depending on the
+    comment's position in the comment thread. Comments are not pruned from
+    the database until all their children are.
+    """
+    if comment.children:
+        # We don't have to check if the children are also marked deleted or not
+        # because if they still exist, it means somewhere down the tree is a
+        # comment that is not deleted.
+        comment.status = COMMENT_DELETED
+        comment.text = u''
+        # We do not mess with comment.user or comment._author, _email and _www
+        # because if we change user to None, the comment deletes itself!
+    else:
+        parent = comment.parent
+        #! plugins can use this to react to comment deletes.  They can't
+        #! stop the deleting of the comment but they can delete information
+        #! in their own tables so that the database is consistent
+        #! afterwards.
+        emit_event('before-comment-deleted', comment)
+        db.delete(comment)
+        while parent is not None and parent.is_deleted:
+            if not parent.children:
+                newparent = parent.parent
+                emit_event('before-comment-deleted', parent)
+                db.delete(parent)
+                parent = newparent
+            else:
+                parent = None
 
 
 def make_config_form():

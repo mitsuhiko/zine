@@ -375,7 +375,8 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
         for post in query.for_index().order_by(Post.pub_date.desc()) \
                          .limit(15).all():
             links = [link.as_dict() for link in post.links]
-            feed.add(post.title, unicode(post.body), content_type='html',
+            feed.add(post.title or '%s @ %s' % (post.author.display_name,
+                     post.pub_date), unicode(post.body), content_type='html',
                      author=post.author.display_name, links=links,
                      url=url_for(post, _external=True), id=post.uid,
                      updated=post.last_update, published=post.pub_date)

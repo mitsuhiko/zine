@@ -18,7 +18,8 @@ from zine.database import users, categories, posts, post_links, \
      post_categories, post_tags, tags, comments, groups, group_users, \
      privileges, user_privileges, group_privileges, db
 from zine.utils import zeml
-from zine.utils.text import gen_slug, build_tag_uri, increment_string
+from zine.utils.text import gen_slug, gen_timestamped_slug, build_tag_uri, \
+     increment_string
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
@@ -27,6 +28,7 @@ from zine.privileges import Privilege, _Privilege, privilege_attribute, \
      VIEW_DRAFTS
 from zine.application import get_application, get_request, url_for
 
+from zine.i18n import to_blog_timezone
 
 #: all kind of states for a post
 STATUS_DRAFT = 1
@@ -38,6 +40,7 @@ COMMENT_UNMODERATED = 1
 COMMENT_BLOCKED_USER = 2
 COMMENT_BLOCKED_SPAM = 3
 COMMENT_BLOCKED_SYSTEM = 4
+COMMENT_DELETED = 5
 
 #: moderation modes
 MODERATE_NONE = 0
@@ -567,22 +570,8 @@ class Post(_ZEMLDualContainer):
         slug = gen_slug(self.title)
         if not slug:
             slug = self.pub_date.strftime('%H:%M')
-        prefix = cfg['blog_url_prefix'].lstrip('/')
-        if prefix:
-            prefix += '/'
-        if cfg['fixed_url_date_digits']:
-            date_pattern = '%04d/%02d/%02d'
-        else:
-            date_pattern = '%d/%d/%d'
-        full_slug = u'%s%s/%s' % (
-            prefix,
-            date_pattern % (
-                self.pub_date.year,
-                self.pub_date.month,
-                self.pub_date.day,
-            ),
-            slug
-        )
+
+        full_slug = gen_timestamped_slug(slug, self.content_type, self.pub_date)
 
         if full_slug != self.slug:
             while Post.query.autoflush(False).filter_by(slug=full_slug) \
@@ -660,7 +649,7 @@ class Post(_ZEMLDualContainer):
         for this thread defined.
         """
         # published posts are always accessible
-        if self.status == STATUS_PUBLISHED and \
+        if self.status == STATUS_PUBLISHED and self.pub_date is not None and \
            self.pub_date <= datetime.utcnow():
             return True
 
@@ -867,7 +856,7 @@ class Comment(_ZEMLContainer):
         else:
             assert email is www is None, \
                 'email and www can only be provided if the author is ' \
-                'an anonmous user'
+                'an anonymous user'
             self.user = author
 
         if parser is None:
@@ -967,13 +956,18 @@ class Comment(_ZEMLContainer):
 
     @property
     def is_spam(self):
-        """This is true if the comment is currently flagges as spam."""
+        """This is true if the comment is currently flagged as spam."""
         return self.status == COMMENT_BLOCKED_SPAM
 
     @property
     def is_unmoderated(self):
         """True if the comment is not yet approved."""
         return self.status == COMMENT_UNMODERATED
+
+    @property
+    def is_deleted(self):
+        """True if the comment has been deleted."""
+        return self.status == COMMENT_DELETED
 
     def get_url_values(self):
         return url_for(self.post) + '#comment-%d' % self.id

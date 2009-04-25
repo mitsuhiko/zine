@@ -48,6 +48,49 @@ def gen_unicode_slug(text, delim=u'-'):
     return unicode(delim.join(_punctuation_re.split(text.lower())))
 
 
+def gen_timestamped_slug(slug, content_type, pub_date):
+    """Generate a timestamped slug, suitable for use as final URL path."""
+    from zine.application import get_application
+    from zine.i18n import to_blog_timezone
+    cfg = get_application().cfg
+    pub_date = to_blog_timezone(pub_date)
+
+    prefix = cfg['blog_url_prefix'].lstrip('/')
+    if prefix:
+        prefix += '/'
+
+    if content_type == 'entry':
+        if cfg['fixed_url_date_digits']:
+            year = '%04d' % pub_date.year
+            month = '%02d' % pub_date.month
+            day = '%02d' % pub_date.day
+            hour = '%02d' % pub_date.hour
+            minute = '%02d' % pub_date.minute
+            second = '%02d' % pub_date.second
+        else:
+            year = '%d' % pub_date.year
+            month = '%d' % pub_date.month
+            day = '%d' % pub_date.day
+            hour = '%d' % pub_date.hour
+            minute = '%d' % pub_date.minute
+            second = '%d' % pub_date.second
+
+        full_slug = u'%s%s%s' % (
+            prefix,
+            cfg['post_url_format'].replace(
+                '%year%', year).replace(
+                '%month%', month).replace(
+                '%day%', day).replace(
+                '%hour%', hour).replace(
+                '%minute%', minute).replace(
+                '%second%', second),
+            slug
+            )
+    else:
+        full_slug = u'%s%s' % (prefix, slug)
+    return full_slug
+
+
 def increment_string(string):
     """Increment a string by one:
 

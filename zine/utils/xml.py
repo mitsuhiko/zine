@@ -257,7 +257,7 @@ class Namespace(object):
 
     >>> ns = Namespace('http://zine.pocoo.org/')
     >>> ns.foo
-    u'{zine.pocoo.org}foo'
+    u'{http://zine.pocoo.org/}foo'
     """
 
     def __init__(self, uri):

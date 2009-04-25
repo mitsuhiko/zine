@@ -29,7 +29,7 @@
     {% endtrans %}</p>
     <ul>
     {%- for author in blog.authors %}
-      <li>{{ form.authors[author.id]() }} &mdash; {{ author.username|e }}</li>
+      <li>{{ author.username|e }} &rarr; {{ form.authors[author.id]() }}</li>
     {%- else %}
       <li><em>{{ _("no author information") }}</em></li>
     {%- endfor %}

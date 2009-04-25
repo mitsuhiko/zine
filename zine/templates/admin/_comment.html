@@ -26,6 +26,6 @@
          comment_id=comment.id)|e }}">{{ _("Report Spam") }}</a>
        {% endif %}
      ]
-     <a href="{{ url_for(comment.post)|e }}">{{
-       comment.post.title|e }}</a></p>
+     <a href="{{ url_for(comment.post)|e }}">{%- if comment.post.title %}{{
+       comment.post.title|e }}{%- else %}<em>#</em>{%- endif %}</a></p>
 {%- endmacro %}

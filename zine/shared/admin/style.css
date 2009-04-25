@@ -1,8 +1,8 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Trebuchet MS', sans-serif;
-    font-size: 15px;
+    font-family: sans-serif;
+    font-size: 13px;
     background-color: #456981;
 }
 
@@ -473,6 +473,12 @@ div.formbox ul {
     padding: 5px 0 5px 10px;
 }
 
+div.preview {
+    border: 1px solid #B4D2E7;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
 ul.errors {
     background-color: #FCF7F7;
     border: 1px solid #E8B5B5;
@@ -658,7 +664,6 @@ table.postlist td.tags {
 
 table.postlist td.date {
     color: #444;
-    font-size: 0.8em;
 }
 
 table.postlist .comments {

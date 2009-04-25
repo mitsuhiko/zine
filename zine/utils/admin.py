@@ -30,9 +30,13 @@ def flash(msg, type='info'):
 
     The flashes messages appear only in the admin interface!
     """
-    assert type in ('info', 'add', 'remove', 'error', 'ok', 'configure')
+    assert type in \
+        ('info', 'add', 'remove', 'error', 'ok', 'configure', 'warning')
     if type == 'error':
         msg = (u'<strong>%s:</strong> ' % _('Error')) + msg
+    if type == 'warning':
+        msg = (u'<strong>%s:</strong> ' % _('Warning')) + msg
+    
     local.request.session.setdefault('admin/flashed_messages', []).\
             append((type, msg))
 

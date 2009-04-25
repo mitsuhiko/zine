@@ -50,7 +50,7 @@
           by <a href="mailto:{{ comment.email|e }}">{{
           comment.author|e }}</a>,
           {{ comment.pub_date|datetimeformat('short') }}
-          on <a href="{{ url_for(comment.post) }}">{{ comment.post.title|e }}</a>
+          on <a href="{{ url_for(comment.post) }}">{%- if comment.post.title %}{{ comment.post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>
           <p class="actions">
             <a href="{{ url_for('admin/edit_comment', comment_id=comment.id)|e
              }}">{{ _("Edit") }}</a> |
@@ -66,7 +66,7 @@
       <ul class="last_posts">
       {%- for post in last_posts %}
         <li><a href="{{ url_for('admin/edit_post', post_id=post.id)
-          }}">{{ post.title|e }}</a>, {{ post.pub_date|datetimeformat('short') }}
+          }}">{%- if post.title %}{{ post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>, {{ post.pub_date|datetimeformat('short') }}
       {%- endfor %}
       </ul>
       {% endif %}

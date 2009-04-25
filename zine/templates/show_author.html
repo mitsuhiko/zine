@@ -12,7 +12,7 @@
     <h3>{{ _("Posts written by user") }}</h3>
     <ul>
     {%- for post in posts %}
-      <li>{% trans post='<a href="%s">%s</a>' % (url_for(post)|e, post.title|e), date=post.pub_date|datetimeformat|e %}{{ post }}, on {{ date }}{% endtrans %}</li>
+      <li>{%- if post.title %}{% trans post='<a href="%s">%s</a>' % (url_for(post)|e, post.title|e), date=post.pub_date|datetimeformat|e %}{{ post }}, on {{ date }}{% endtrans %}{%- else %}{% trans post='<a href="%s"><em>#</em></a>' % url_for(post)|e, date=post.pub_date|datetimeformat|e %}{{ post }}, on {{ date }}{% endtrans %}{%- endif %}</li>
     {%- endfor %}
     </ul>
   {%- endif %}
