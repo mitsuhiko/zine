@@ -1070,7 +1070,7 @@ db.mapper(User, users, properties={
                                           cascade='all, delete, delete-orphan'),
     'comments':         db.dynamic_loader(Comment,
                                           backref=db.backref('user', lazy=False),
-                                          cascade='all, delete, delete-orphan'),
+                                          cascade='all, delete'),
     '_own_privileges':  db.relation(_Privilege, lazy=True,
                                     secondary=user_privileges,
                                     collection_class=set,

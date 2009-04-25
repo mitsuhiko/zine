@@ -1055,8 +1055,8 @@ def delete_comment(comment):
         # comment that is not deleted.
         comment.status = COMMENT_DELETED
         comment.text = u''
-        # We do not mess with comment.user or comment._author, _email and _www
-        # because if we change user to None, the comment deletes itself!
+        comment.user = None
+        comment._author = comment._email = comment._www = None
     else:
         parent = comment.parent
         #! plugins can use this to react to comment deletes.  They can't
