@@ -40,6 +40,7 @@ COMMENT_UNMODERATED = 1
 COMMENT_BLOCKED_USER = 2
 COMMENT_BLOCKED_SPAM = 3
 COMMENT_BLOCKED_SYSTEM = 4
+COMMENT_DELETED = 5
 
 #: moderation modes
 MODERATE_NONE = 0
@@ -855,7 +856,7 @@ class Comment(_ZEMLContainer):
         else:
             assert email is www is None, \
                 'email and www can only be provided if the author is ' \
-                'an anonmous user'
+                'an anonymous user'
             self.user = author
 
         if parser is None:
@@ -955,13 +956,18 @@ class Comment(_ZEMLContainer):
 
     @property
     def is_spam(self):
-        """This is true if the comment is currently flagges as spam."""
+        """This is true if the comment is currently flagged as spam."""
         return self.status == COMMENT_BLOCKED_SPAM
 
     @property
     def is_unmoderated(self):
         """True if the comment is not yet approved."""
         return self.status == COMMENT_UNMODERATED
+
+    @property
+    def is_deleted(self):
+        """True if the comment has been deleted."""
+        return self.status == COMMENT_DELETED
 
     def get_url_values(self):
         return url_for(self.post) + '#comment-%d' % self.id

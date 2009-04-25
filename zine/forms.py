@@ -17,7 +17,7 @@ from zine.config import DEFAULT_VARS
 from zine.database import db, posts, comments
 from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
      STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
-     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
+     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM, COMMENT_DELETED
 from zine.privileges import bind_privileges
 from zine.utils import forms, log
 from zine.utils.http import redirect_to
@@ -469,12 +469,7 @@ class DeleteCommentForm(_CommentBoundForm):
 
     def delete_comment(self):
         """Deletes the comment from the db."""
-        #! plugins can use this to react to comment deletes.  They can't
-        #! stop the deleting of the comment but they can delete information
-        #! in their own tables so that the database is consistent
-        #! afterwards.
-        emit_event('before-comment-deleted', self.comment)
-        db.delete(self.comment)
+        delete_comment(self.comment)
 
 
 class ApproveCommentForm(_CommentBoundForm):
@@ -620,8 +615,7 @@ class CommentMassModerateForm(forms.Form):
 
     def delete_selection(self):
         for comment in self.iter_selection():
-            emit_event('before-comment-deleted', comment)
-            db.delete(comment)
+            delete_comment(comment)
 
     def approve_selection(self, comment=None):
         if comment:
@@ -1047,6 +1041,38 @@ class DeleteImportForm(forms.Form):
 
 class ExportForm(forms.Form):
     """This form is used to implement the export dialog."""
+
+
+def delete_comment(comment):
+    """
+    Deletes or marks for deletion the specified comment, depending on the
+    comment's position in the comment thread. Comments are not pruned from
+    the database until all their children are.
+    """
+    if comment.children:
+        # We don't have to check if the children are also marked deleted or not
+        # because if they still exist, it means somewhere down the tree is a
+        # comment that is not deleted.
+        comment.status = COMMENT_DELETED
+        comment.text = u''
+        # We do not mess with comment.user or comment._author, _email and _www
+        # because if we change user to None, the comment deletes itself!
+    else:
+        parent = comment.parent
+        #! plugins can use this to react to comment deletes.  They can't
+        #! stop the deleting of the comment but they can delete information
+        #! in their own tables so that the database is consistent
+        #! afterwards.
+        emit_event('before-comment-deleted', comment)
+        db.delete(comment)
+        while parent is not None and parent.is_deleted:
+            if not parent.children:
+                newparent = parent.parent
+                emit_event('before-comment-deleted', parent)
+                db.delete(parent)
+                parent = newparent
+            else:
+                parent = None
 
 
 def make_config_form():

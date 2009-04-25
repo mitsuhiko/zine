@@ -650,7 +650,7 @@ def delete_comment(request, comment_id):
     back to the index so that he doesn't end up an a "page not found" error page.
     """
     comment = Comment.query.get(comment_id)
-    if comment is None:
+    if comment is None or comment.is_deleted:
         return redirect_to('admin/manage_comments')
 
     form = DeleteCommentForm(comment)
