@@ -443,7 +443,7 @@ class Post(_Element):
                  tags=None, categories=None, comments=None,
                  comments_enabled=True, pings_enabled=True, updated=None,
                  uid=None, parser=None, parser_data=None,
-                 content_type='entry'):
+                 content_type='entry', extra=None):
         self.slug = slug
         self.title = title
         self.link = link
@@ -461,6 +461,7 @@ class Post(_Element):
         self.parser = parser or 'html'
         self.parser_data = parser_data
         self.content_type = content_type
+        self.extra = extra or {}
 
     @property
     def text(self):
