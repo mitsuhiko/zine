@@ -202,7 +202,11 @@ def _perform_import(app, blog, d):
                     else:
                         parent = _create_comment(comment.parent)
                     to_create.discard(comment.parent)
-                rv = Comment(post, comment.author, comment.body,
+                if isinstance(comment.author, Author):
+                    author = prepare_author(comment.author)
+                else:
+                    author = comment.author
+                rv = Comment(post, author, comment.body,
                              comment.author_email, comment.author_url, parent,
                              comment.pub_date, comment.remote_addr,
                              comment.parser, comment.is_pingback,

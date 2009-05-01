@@ -5,6 +5,8 @@
       <p class="meta">{% if comment.is_pingback %}{{ _("Pingback by") }}
         {%- else %}{{ _("Comment by") }}{% endif %} {% if comment.www
         %}<a href="{{ comment.www|e }}">{{ comment.author|e }}</a>{%
+        elif not comment.author %}<span class="anonymous">{%
+        trans %}Anonymous{% endtrans %}</span>{%
         else %}{{ comment.author|e }}{% endif %} &mdash; {{
         comment.pub_date|datetimeformat }} |
         <a href="#comment-{{ comment.id }}">#</a>

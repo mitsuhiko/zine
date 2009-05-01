@@ -156,6 +156,10 @@ ul#comments, ol#comments {
     opacity: 0.8;
 }
 
+#comments li.comment .anonymous {
+    font-style: italic;
+}
+
 ul.sub_comments, ol.sub_comments {
     list-style: none;
     margin: 0.5em 0 0.5em 0;
