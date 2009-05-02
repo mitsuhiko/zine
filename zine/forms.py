@@ -438,7 +438,7 @@ class EditCommentForm(_CommentBoundForm):
         ))
         self.parser.choices = self.app.list_parsers()
         self.parser_missing = comment.parser_missing
-        if self.parser_missing:
+        if self.parser_missing and comment.parser is not None:
             self.parser.choices.append((comment.parser, _('%s (missing)') %
                                         comment.parser.title()))
 

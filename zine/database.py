@@ -127,7 +127,15 @@ class ZEMLParserData(MutableType, TypeDecorator):
 
     def process_result_value(self, value, dialect):
         from zine.utils.zeml import load_parser_data
-        return load_parser_data(value)
+        try:
+            return load_parser_data(value)
+        except ValueError: # Parser data invalid. Database corruption?
+            from zine.i18n import _
+            from zine.utils import log
+            log.exception(_(u'Error when loading parsed data from database. '
+                            u'Maybe the database was manually edited and got '
+                            u'corrupted? The system returned an empty value.'))
+            return {}
 
     def copy_value(self, value):
         from copy import deepcopy
