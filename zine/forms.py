@@ -963,6 +963,16 @@ class URLOptionsForm(_ConfigForm):
                                    lazy_gettext(u'Tag URL prefix'))
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
+    upload_url_prefix = config_field('upload_url_prefix',
+        lazy_gettext(u'Uploaded files URL prefix'),
+        help_text=lazy_gettext(u'If you change this, links to uploaded files '\
+                               u'from existing posts will not be automatically '\
+                               u'corrected. You must edit those posts manually. '\
+                               u'This setting will take effect when Zine is '\
+                               u'restarted.'))
+    upload_path_format = config_field('upload_path_format',
+        lazy_gettext(u'Uploaded files path format'),
+        help_text=lazy_gettext(u'Path to which post attachments are saved.'))
     post_url_format = config_field('post_url_format',
         lazy_gettext(u'Post permalink URL format'),
         help_text=lazy_gettext(u'Use %year%, %month%, %day%, %hour%, '
@@ -984,9 +994,7 @@ class URLOptionsForm(_ConfigForm):
             if key not in skip:
                 old = t[key]
                 if old != value:
-                    if key in ['blog_url_prefix', 'admin_url_prefix',
-                               'category_url_prefix', 'tags_url_prefix',
-                               'profiles_url_prefix']:
+                    if key == 'blog_url_prefix':
                         change_url_prefix(old, value)
                     t[key] = value
 

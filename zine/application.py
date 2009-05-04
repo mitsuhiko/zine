@@ -796,6 +796,9 @@ class Zine(object):
         # now add the middleware for static file serving
         self.add_shared_exports('core', SHARED_DATA)
         self.add_middleware(SharedDataMiddleware, self._shared_exports)
+        self.add_middleware(SharedDataMiddleware, {
+            self.cfg['upload_url_prefix']: path.join(self.instance_folder, 'uploads')
+            })
 
         # set up the urls
         self.url_map = routing.Map(self._url_rules)

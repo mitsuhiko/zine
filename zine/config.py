@@ -37,6 +37,15 @@ DEFAULT_VARS = {
     'blog_email':               TextField(default=u''),
     'timezone':                 ChoiceField(choices=sorted(list_timezones()),
                                             default=u'UTC'),
+    'primary_author':           TextField(default=u'',
+                                    help_text=lazy_gettext(u'If this blog is '\
+                                                           u'written primarily '\
+                                                           u'by one author, '\
+                                                           u'some themes can '\
+                                                           u'skip the author\'s '\
+                                                           u'name on posts '\
+                                                           u'unless written '\
+                                                           u'by a guest.')),
     'maintenance_mode':         BooleanField(default=False),
     'session_cookie_name':      TextField(default=u'zine_session'),
     'theme':                    TextField(default=u'default'),
@@ -73,6 +82,10 @@ DEFAULT_VARS = {
                                           validators=[is_valid_url_prefix()]),
     'profiles_url_prefix':      TextField(default=u'/authors',
                                           validators=[is_valid_url_prefix()]),
+    'upload_url_prefix':        TextField(default=u'/files',
+                                          validators=[is_valid_url_prefix()]),
+    'upload_path_format':       TextField(default=u'%year%/%month%/%day%/',
+                                          validators=[is_valid_url_format()]),
     'post_url_format':          TextField(default=u'%year%/%month%/%day%/',
                                           validators=[is_valid_url_format()]),
     'ascii_slugs':              BooleanField(default=True),
