@@ -489,14 +489,18 @@ def _handle_comments(identifier, title, query, page,
 
     form = CommentMassModerateForm(comments)
 
+    tab = 'comments'
+    if identifier is not None:
+        tab += '.' + identifier
+
     if request.method == 'POST':
         if 'cancel' not in request.form and form.validate(request.form):
             if 'delete' in request.form:
                 if 'confirm' in request.form:
                     form.delete_selection()
                     db.commit()
-                    return redirect_to('admin/manage_comments')
-                return render_admin_response('admin/delete_comments.html',
+                    return redirect_to(endpoint)
+                return render_admin_response('admin/delete_comments.html', tab,
                                              form=form.as_widget())
 
             # or approve them all
@@ -504,7 +508,7 @@ def _handle_comments(identifier, title, query, page,
                 form.approve_selection()
                 db.commit()
                 flash(_(u'Approved all the selected comments.'))
-                return redirect_to('admin/manage_comments')
+                return redirect_to(endpoint)
 
             # or block them all
             elif 'block' in request.form:
@@ -512,8 +516,8 @@ def _handle_comments(identifier, title, query, page,
                     form.block_selection()
                     db.commit()
                     flash(_(u'Blocked all the selected comments.'))
-                    return redirect_to('admin/manage_comments')
-                return render_admin_response('admin/block_comments.html',
+                    return redirect_to(endpoint)
+                return render_admin_response('admin/block_comments.html', tab,
                                              form=form.as_widget())
 
             # or mark them all as spam
@@ -522,21 +526,18 @@ def _handle_comments(identifier, title, query, page,
                     form.mark_selection_as_spam()
                     db.commit()
                     flash(_(u'Reported all the selected comments as SPAM.'))
-                    return redirect_to('admin/manage_comments')
+                    return redirect_to(endpoint)
                 return render_admin_response('admin/mark_spam_comments.html',
-                                             form=form.as_widget())
+                                             tab, form=form.as_widget())
             # or mark them all as ham
             elif 'ham' in request.form:
                 if 'confirm' in request.form:
                     form.mark_selection_as_ham()
                     db.commit()
                     flash(_(u'Reported all the selected comments as NOT SPAM.'))
-                    return redirect_to('admin/manage_comments')
+                    return redirect_to(endpoint)
                 return render_admin_response('admin/mark_ham_comments.html',
-                                             form=form.as_widget())
-    tab = 'comments'
-    if identifier is not None:
-        tab += '.' + identifier
+                                             tab, form=form.as_widget())
     return render_admin_response('admin/manage_comments.html', tab,
                                  comments_title=title, form=form.as_widget(),
                                  pagination=pagination)
