@@ -598,7 +598,7 @@ class CommentMassModerateForm(forms.Form):
     per_page = forms.ChoiceField(choices=[20, 40, 60, 80, 100],
                                  label=lazy_gettext('Comments Per Page:'))
 
-    def __init__(self, comments, initial=None, per_page=40):
+    def __init__(self, comments, initial=None):
         self.comments = comments
         self.selected_comments.choices = [c.id for c in self.comments]
         forms.Form.__init__(self, initial)
