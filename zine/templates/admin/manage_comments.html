@@ -16,6 +16,11 @@
     {%- endfor %}
     </ul>
     <div class="actions">
+      <div id="per_page" style="float: right;">
+        {{ form.per_page.label() }}
+        {{ form.per_page() }}
+        <input type="submit" id="per_page_update" value="{{ _('Update') }}">
+      </div>
       {% if admin.active_pane == 'comments.unmoderated' %}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
       <input type="submit" name="block" value="{{ _('Block') }}">
@@ -49,6 +54,11 @@
             });
           })
           .appendTo('div.actions');
+        $('#f_per_page').bind('change', function() {
+          console.log('fooo');
+          $(this).parents('form:first').submit();
+        });
+        $('#per_page_update').remove();
       });
     </script>
     {%- if pagination.necessary %}

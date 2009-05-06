@@ -482,12 +482,18 @@ def delete_page(request, post):
 def _handle_comments(identifier, title, query, page,
                      endpoint='admin/manage_comments'):
     request = get_request()
-    comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination(endpoint, page, PER_PAGE, query.count())
+    per_page = int(request.values.get('per_page', PER_PAGE))
+    if per_page != PER_PAGE:
+        url_args = {'per_page': per_page}
+    else:
+        url_args = {}
+    comments = query.limit(per_page).offset(per_page * (page - 1)).all()
+    pagination = AdminPagination(endpoint, page, per_page, query.count(),
+                                 url_args=url_args)
     if not comments and page != 1:
         raise NotFound()
 
-    form = CommentMassModerateForm(comments)
+    form = CommentMassModerateForm(comments, initial=dict(per_page=per_page))
 
     tab = 'comments'
     if identifier is not None:
@@ -574,7 +580,7 @@ def show_blocked_comments(request, page):
 def show_spam_comments(request, page):
     """Show all spam comments."""
     return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page,
-                            endpoint='admin/show_spam_comments')
+                             endpoint='admin/show_spam_comments')
 
 
 @require_admin_privilege(MODERATE_COMMENTS)
