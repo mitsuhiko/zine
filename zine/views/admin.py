@@ -483,10 +483,7 @@ def _handle_comments(identifier, title, query, page,
                      endpoint='admin/manage_comments'):
     request = get_request()
     per_page = int(request.values.get('per_page', PER_PAGE))
-    if per_page != PER_PAGE:
-        url_args = {'per_page': per_page}
-    else:
-        url_args = {}
+    url_args = per_page != PER_PAGE and {'per_page': per_page} or {}
     comments = query.limit(per_page).offset(per_page * (page - 1)).all()
     pagination = AdminPagination(endpoint, page, per_page, query.count(),
                                  url_args=url_args)
@@ -508,6 +505,15 @@ def _handle_comments(identifier, title, query, page,
                     return redirect_to(endpoint)
                 return render_admin_response('admin/delete_comments.html', tab,
                                              form=form.as_widget())
+            # delete all comments
+            elif 'delete_all' in request.form:
+                if 'confirm' in request.form:
+                    form.comments = query.all()
+                    form.delete_all_comments()
+                    db.commit()
+                    return redirect_to(endpoint)
+                return render_admin_response('admin/delete_comments_all.html',
+                                             tab, form=form.as_widget())
 
             # or approve them all
             elif 'approve' in request.form:

@@ -33,10 +33,12 @@
       {% elif admin.active_pane == 'comments.blocked' %}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="delete_all" value="{{ _('Delete All') }}">
       <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
       {% elif admin.active_pane == 'comments.spam' %}
       <input type="submit" name="ham" value="{{ _('Report as Not Spam') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="delete_all" value="{{ _('Delete All') }}">
       {% elif admin.active_pane == 'comments.overview' %}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
       <input type="submit" name="block" value="{{ _('Block') }}">

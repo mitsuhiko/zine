@@ -619,6 +619,11 @@ class CommentMassModerateForm(forms.Form):
             emit_event('before-comment-deleted', comment)
             db.delete(comment)
 
+    def delete_all_comments(self):
+        for comment in self.comments:
+            emit_event('before-comment-deleted', comment)
+            db.delete(comment)
+
     def approve_selection(self, comment=None):
         if comment:
             emit_event('before-comment-approved', comment)
