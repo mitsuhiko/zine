@@ -479,14 +479,16 @@ def delete_page(request, post):
                                  form=form.as_widget())
 
 
-def _handle_comments(identifier, title, query, page,
+def _handle_comments(identifier, title, query, page, post_id=None,
                      endpoint='admin/manage_comments'):
     request = get_request()
     per_page = int(request.values.get('per_page', PER_PAGE))
     url_args = per_page != PER_PAGE and {'per_page': per_page} or {}
     comments = query.limit(per_page).offset(per_page * (page - 1)).all()
+
+
     pagination = AdminPagination(endpoint, page, per_page, query.count(),
-                                 url_args=url_args)
+                                 post_id=post_id, url_args=url_args)
     if not comments and page != 1:
         raise NotFound()
 
@@ -612,7 +614,9 @@ def show_post_comments(request, page, post_id):
         escape(post.title)
     )
     return _handle_comments(None, _(u'Comments for “%s”') % link,
-                            Comment.query.comments_for_post(post), page)
+                            Comment.query.comments_for_post(post), page,
+                            post_id = post_id,
+                            endpoint='admin/show_post_comments')
 
 
 @require_admin_privilege(MODERATE_COMMENTS)
