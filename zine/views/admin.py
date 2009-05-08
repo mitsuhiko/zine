@@ -495,16 +495,13 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
     pagination = AdminPagination(endpoint, page, per_page, query.count(),
                                  post_id=post_id)
 
-    if not comments and page != 1:
+    if not comments and page > 1:
         # Since we can tweak how many comments are shown, maybe we've just
         # changed how many we want to see per-page and there are not enought
         # pages now for the chosen ammount
         # Redirect to page-1 until comments are found.
         return redirect(url_for(endpoint, page=page-1, per_page=per_page,
                                 post_id=post_id))
-    elif not comments and page == 1:
-        # We might have redirected too much, raise a 404 now!?
-        raise NotFound()
 
     form = CommentMassModerateForm(comments, initial=dict(per_page=per_page))
 
@@ -518,7 +515,7 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                 if 'confirm' in request.form:
                     form.delete_selection()
                     db.commit()
-                    return redirect_to(endpoint)
+                    return redirect_to(endpoint, page=page, per_page=per_page)
                 return render_admin_response('admin/delete_comments.html', tab,
                                              form=form.as_widget())
             # delete all comments in current tab
@@ -538,7 +535,7 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                         db.delete(comment)
                     db.commit()
                     flash(_(u'Deleted %d %s comments.') % (count, identifier))
-                    return redirect_to(endpoint)
+                    return redirect_to(endpoint, page=page, per_page=per_page)
                 return render_admin_response('admin/delete_comments_all.html',
                                              tab, form=form.as_widget(),
                                              comment_kind = identifier,
@@ -549,7 +546,7 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                 form.approve_selection()
                 db.commit()
                 flash(_(u'Approved all the selected comments.'))
-                return redirect_to(endpoint)
+                return redirect_to(endpoint, page=page, per_page=per_page)
 
             # or block them all
             elif 'block' in request.form:
@@ -557,7 +554,7 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                     form.block_selection()
                     db.commit()
                     flash(_(u'Blocked all the selected comments.'))
-                    return redirect_to(endpoint)
+                    return redirect_to(endpoint, page=page, per_page=per_page)
                 return render_admin_response('admin/block_comments.html', tab,
                                              form=form.as_widget())
 
@@ -567,7 +564,7 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                     form.mark_selection_as_spam()
                     db.commit()
                     flash(_(u'Reported all the selected comments as SPAM.'))
-                    return redirect_to(endpoint)
+                    return redirect_to(endpoint, page=page, per_page=per_page)
                 return render_admin_response('admin/mark_spam_comments.html',
                                              tab, form=form.as_widget())
             # or mark them all as ham
@@ -576,7 +573,7 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                     form.mark_selection_as_ham()
                     db.commit()
                     flash(_(u'Reported all the selected comments as NOT SPAM.'))
-                    return redirect_to(endpoint)
+                    return redirect_to(endpoint, page=page, per_page=per_page)
                 return render_admin_response('admin/mark_ham_comments.html',
                                              tab, form=form.as_widget())
     return render_admin_response(
