@@ -505,12 +505,23 @@ def _handle_comments(identifier, title, query, page,
                     return redirect_to(endpoint)
                 return render_admin_response('admin/delete_comments.html', tab,
                                              form=form.as_widget())
-            # delete all comments
+            # delete all comments in current tab
             elif 'delete_all' in request.form:
-                if 'confirm' in request.form:
-                    form.comments = query.all()
-                    form.delete_all_comments()
+                if identifier not in ('spam', 'blocked'):
+                    flash(_('“Delete All” can only be issued for “Spam” and '
+                            '“Blocked” comment types.'), 'error')
+                elif 'confirm' in request.form:
+                    comments = query.all()
+                    # Don't use .count() means a 2nd query and it's
+                    # aprox. 0.111 secs slower; rough average calculation :)
+                    count = len(comments)
+                    for comment in comments:
+                        # Although we're deleting spam or blocked comments,
+                        # they're still comments, so emit the right event
+                        emit_event('before-comment-deleted', comment)
+                        db.delete(comment)
                     db.commit()
+                    flash(_(u'Deleted %d %s comments.') % (count, identifier))
                     return redirect_to(endpoint)
                 return render_admin_response('admin/delete_comments_all.html',
                                              tab, form=form.as_widget())
