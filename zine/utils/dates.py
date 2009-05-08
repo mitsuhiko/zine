@@ -49,9 +49,9 @@ def parse_iso8601(value):
         args = map(int, tz[1:].split(':'))
         delta = timedelta(hours=args[0], minutes=args[1])
         if tz[0] == '+':
-            rv += delta
-        else:
             rv -= delta
+        else:
+            rv += delta
 
     return rv
 
