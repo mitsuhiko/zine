@@ -540,7 +540,9 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                     flash(_(u'Deleted %d %s comments.') % (count, identifier))
                     return redirect_to(endpoint)
                 return render_admin_response('admin/delete_comments_all.html',
-                                             tab, form=form.as_widget())
+                                             tab, form=form.as_widget(),
+                                             comment_kind = identifier,
+                                             comment_count=query.count())
 
             # or approve them all
             elif 'approve' in request.form:

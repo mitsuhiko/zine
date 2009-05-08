@@ -4,7 +4,8 @@
   <h1>{{ _("Delete All Comments") }}</h1>
   {% call form() %}
     <div>
-      <p>{{ _('Do you really want to delete ALL comments?') }}</p>
+      <p>{{ _('Do you really want to delete ALL(%d) %s comments; '
+              'not just the ones shown on the page you were in?') % (comment_count, comment_kind) }}</p>
       <input type="hidden" name="confirm" value="yes">
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="delete_all" value="{{ _('Yes') }}">
