@@ -15,6 +15,7 @@
       <li>{{ _("No comments.") }}</li>
     {%- endfor %}
     </ul>
+    {% if form.comments %}
     <div class="actions">
       <div id="per_page" style="float: right;">
         {{ form.per_page.label() }}
@@ -68,6 +69,7 @@
         $('#per_page_update').hide();
       });
     </script>
+    {% endif %}
     {%- if pagination.necessary %}
     <div class="pagination">
       {{ pagination.generate() }}
