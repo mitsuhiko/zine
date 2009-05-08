@@ -561,9 +561,10 @@ def _handle_comments(identifier, title, query, page,
                     return redirect_to(endpoint)
                 return render_admin_response('admin/mark_ham_comments.html',
                                              tab, form=form.as_widget())
-    return render_admin_response('admin/manage_comments.html', tab,
-                                 comments_title=title, form=form.as_widget(),
-                                 pagination=pagination)
+    return render_admin_response(
+        'admin/manage_comments.html', tab, comments_title=title,
+        form=form.as_widget(), pagination=pagination,
+        akismet_active = request.app.plugins['akismet_spam_filter'].active)
 
 
 @require_admin_privilege(MODERATE_COMMENTS)

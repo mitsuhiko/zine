@@ -13,17 +13,24 @@
        <a href="{{ url_for('admin/delete_comment', comment_id=comment.id)|e
          }}">{{ _("Delete") }}</a> |
        {% if comment.is_spam %}<a href="{{ url_for('admin/report_comment_ham',
-         comment_id=comment.id)|e }}">{{ _("Report Not Spam") }}</a>
+         comment_id=comment.id)|e }}">{{ akismet_active and _("Mark and Report as Not Spam")
+                                         or  _("Mark as Not Spam") }}</a>
        {% elif comment.blocked %}
        <a href="{{ url_for('admin/approve_comment',
          comment_id=comment.id)|e }}">{{ _("Approve") }}</a> |
+       {% if comment.status == 1 %} <!-- unmoderated comments -->
+       <a href="{{ url_for('admin/block_comment',
+           comment_id=comment.id)|e }}">{{ _("Block") }}</a> |
+       {% endif %}
        <a href="{{ url_for('admin/report_comment_spam',
-         comment_id=comment.id)|e }}">{{ _("Report Spam") }}</a>
+         comment_id=comment.id)|e }}">{{ akismet_active and _("Mark and Report as Spam") or
+                                         _("Mark as Spam") }}</a>
        {% else %}
          <a href="{{ url_for('admin/block_comment',
            comment_id=comment.id)|e }}">{{ _("Block") }}</a> |
          <a href="{{ url_for('admin/report_comment_spam',
-         comment_id=comment.id)|e }}">{{ _("Report Spam") }}</a>
+         comment_id=comment.id)|e }}">{{ akismet_active and _("Mark and Report as Spam") or
+                                         _("Mark as Spam") }}</a>
        {% endif %}
      ]
      <a href="{{ url_for(comment.post)|e }}">{{
