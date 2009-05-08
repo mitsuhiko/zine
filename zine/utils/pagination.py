@@ -72,6 +72,7 @@ class Pagination(object):
         prev = None
         next = None
         get_link = lambda x: url_for(self.endpoint, page=x,
+                                     per_page=self.per_page,
                                      post_id=self.post_id, **self.url_args)
 
         if simple:
