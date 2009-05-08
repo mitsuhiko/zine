@@ -53,7 +53,6 @@ def send_request(apikey, key_root, data, endpoint):
         AKISMET_VERSION,
         endpoint
     )
-    print "Request -> %s  DATA: %r" % (url, data)
     try:
         response = open_url(url, data=url_encode(data))
     except:
@@ -81,7 +80,6 @@ def is_valid_key(message=None, memorize=False):
             raise ValidationError(_('Could not verify key because of a '
                                     'server to server connection error.'))
         elif resp != 'valid':
-            print resp
             raise ValidationError(message)
         if memorize:
             _verified_keys.add(cachekey)
