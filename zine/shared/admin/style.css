@@ -759,7 +759,24 @@ div.themes div.theme h2 {
     text-align: center;
 }
 
-div.themes div.theme h2 a {
+div.themes div.theme p.select {
+    margin: 0;
+    text-align: center;
+}
+
+div.themes div.theme p.select a {
+    display: block;
+    width: 240px;
+    background-color: #F7FAFD;
+    border: solid #B4D2E7;
+    border-width: 1px 1px 0 1px;
+    -moz-border-radius: 5px 5px 0 0;
+    -webkit-border-radius: 5px 5px 0 0;
+    border-radius: 5px 5px 0 0;
+    margin: 0 auto;
+    padding: 5px 0;
+    font-family: 'Georgia', sans-serif;
+    font-weight: bold;
     text-decoration: none;
 }
 
@@ -771,6 +788,7 @@ div.themes div.theme div.detail {
 div.themes div.theme img.preview {
     display: block;
     margin: auto;
+    border: 1px solid #B4D2E7;
 }
 
 div.themes div.theme div.detail blockquote {
