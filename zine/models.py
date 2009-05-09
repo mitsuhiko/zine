@@ -25,7 +25,7 @@ from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
 from zine.privileges import Privilege, _Privilege, privilege_attribute, \
      add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN, \
-     VIEW_DRAFTS
+     VIEW_DRAFTS, VIEW_PROTECTED
 from zine.application import get_application, get_request, url_for
 
 from zine.i18n import to_blog_timezone
@@ -324,20 +324,23 @@ class PostQuery(db.Query):
             return self.filter_by(content_type=types[0].strip())
         return self.filter(Post.content_type.in_([x.strip() for x in types]))
 
-    def published(self, ignore_privileges=None):
+    def published(self, ignore_privileges=None, user=None):
         """Return a queryset for only published posts."""
-        req = get_request()
-        user = req and req.user
-        
         if not user:
+            req = get_request()
+            user = req and req.user
+        
+        if not user or not user.has_privilege(VIEW_PROTECTED):
             return self.filter(
                 (Post.status == STATUS_PUBLISHED) &
                 (Post.pub_date <= datetime.utcnow())
             )
         else:
             return self.filter(
-                ((Post.status == STATUS_PUBLISHED) | (Post.status == STATUS_PROTECTED) | 
-                 ((Post.status == STATUS_PRIVATE) & (Post.author_id == user.id))) &
+                ((Post.status == STATUS_PUBLISHED) |
+                 (Post.status == STATUS_PROTECTED) | 
+                 ((Post.status == STATUS_PRIVATE) &
+                  (Post.author_id == user.id))) &
                 (Post.pub_date <= datetime.utcnow())
             )
 
@@ -488,7 +491,7 @@ class Post(_ZEMLDualContainer):
     def __init__(self, title, author, text, slug=None, pub_date=None,
                  last_update=None, comments_enabled=True,
                  pings_enabled=True, status=STATUS_PUBLISHED,
-                 parser=None, uid=None, content_type='entry'):
+                 parser=None, uid=None, content_type='entry', extra=None):
         app = get_application()
         self.content_type = content_type
         self.title = title
@@ -498,7 +501,10 @@ class Post(_ZEMLDualContainer):
 
         self.parser = parser
         self.text = text or u''
-        self.extra = {}
+        if extra:
+            self.extra = dict(extra)
+        else:
+            self.extra = {}
 
         self.comments_enabled = comments_enabled
         self.pings_enabled = pings_enabled

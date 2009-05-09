@@ -10,6 +10,7 @@
     :license: BSD, see LICENSE for more details.
 """
 from pickle import loads
+from zine.utils import load_json
 from lxml import etree
 from zine.application import get_application
 from zine.i18n import _, lazy_gettext
@@ -72,7 +73,11 @@ def _to_bool(value):
 
 def _pickle(value):
     if value:
-        return loads(value.decode('base64'))
+        try:
+            return load_json(value)
+        except ValueError:
+            # Not JSON? Try pickle.
+            return loads(value.decode('base64'))
 
 
 def _parser_data(value):
