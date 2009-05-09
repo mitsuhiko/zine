@@ -33,6 +33,8 @@ from zine.i18n import to_blog_timezone
 #: all kind of states for a post
 STATUS_DRAFT = 1
 STATUS_PUBLISHED = 2
+STATUS_PROTECTED = 3
+STATUS_PRIVATE = 4
 
 #: Comment Status
 COMMENT_MODERATED = 0
@@ -324,10 +326,20 @@ class PostQuery(db.Query):
 
     def published(self, ignore_privileges=None):
         """Return a queryset for only published posts."""
-        return self.filter(
-            (Post.status == STATUS_PUBLISHED) &
-            (Post.pub_date <= datetime.utcnow())
-        )
+        req = get_request()
+        user = req and req.user
+        
+        if not user:
+            return self.filter(
+                (Post.status == STATUS_PUBLISHED) &
+                (Post.pub_date <= datetime.utcnow())
+            )
+        else:
+            return self.filter(
+                ((Post.status == STATUS_PUBLISHED) | (Post.status == STATUS_PROTECTED) | 
+                 ((Post.status == STATUS_PRIVATE) & (Post.author_id == user.id))) &
+                (Post.pub_date <= datetime.utcnow())
+            )
 
     def drafts(self, ignore_user=False, user=None):
         """Return a query that returns all drafts for the current user.

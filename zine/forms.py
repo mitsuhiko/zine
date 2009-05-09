@@ -15,8 +15,9 @@ from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.config import DEFAULT_VARS
 from zine.database import db, posts, comments
-from zine.models import User, Group, Comment, Post, Category, STATUS_DRAFT, \
-     STATUS_PUBLISHED, COMMENT_UNMODERATED, COMMENT_MODERATED, \
+from zine.models import User, Group, Comment, Post, Category, \
+     STATUS_DRAFT, STATUS_PUBLISHED, STATUS_PROTECTED, STATUS_PRIVATE, \
+     COMMENT_UNMODERATED, COMMENT_MODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM, COMMENT_DELETED
 from zine.privileges import bind_privileges
 from zine.utils import forms, log
@@ -225,7 +226,9 @@ class PostForm(forms.Form):
                            widget=forms.Textarea)
     status = forms.ChoiceField(lazy_gettext(u'Publication status'), choices=[
                                (STATUS_DRAFT, lazy_gettext(u'Draft')),
-                               (STATUS_PUBLISHED, lazy_gettext(u'Published'))])
+                               (STATUS_PUBLISHED, lazy_gettext(u'Published')),
+                               (STATUS_PROTECTED, lazy_gettext(u'Protected')),
+                               (STATUS_PRIVATE, lazy_gettext(u'Private'))])
     pub_date = forms.DateTimeField(lazy_gettext(u'Publication date'),
         help_text=lazy_gettext(u'Clear this field to update to current time'))
     slug = forms.TextField(lazy_gettext(u'Slug'), validators=[is_valid_slug()],
