@@ -329,13 +329,25 @@ class PostQuery(db.Query):
         if not user:
             req = get_request()
             user = req and req.user
-        
-        if not user or not user.has_privilege(VIEW_PROTECTED):
+
+        if not user:
+            # Anonymous. Return only public entries.
             return self.filter(
                 (Post.status == STATUS_PUBLISHED) &
                 (Post.pub_date <= datetime.utcnow())
             )
+        elif not user.has_privilege(VIEW_PROTECTED):
+            # Authenticated user without protected viewing privilege
+            # Return public and their own private entries
+            return self.filter(
+                ((Post.status == STATUS_PUBLISHED) |
+                 ((Post.status == STATUS_PRIVATE) &
+                  (Post.author_id == user.id))) &
+                (Post.pub_date <= datetime.utcnow())
+            )
         else:
+            # Authenticated and can view protected.
+            # Return public, protected and their own private
             return self.filter(
                 ((Post.status == STATUS_PUBLISHED) |
                  (Post.status == STATUS_PROTECTED) | 
@@ -678,6 +690,12 @@ class Post(_ZEMLDualContainer):
         if user.has_privilege(VIEW_DRAFTS):
             return True
 
+        # if this is protected and user can view protected, allow them
+        if self.status == STATUS_PROTECTED and self.pub_date is not None and \
+            self.pub_date <= datetime.utcnow() and \
+            user.has_privilege(VIEW_PROTECTED):
+             return True
+
         # if we have the privilege to edit other entries or if we are
         # a blog administrator we can always look at posts.
         if user.has_privilege(self.EDIT_OTHER_PRIVILEGE):
@@ -695,6 +713,16 @@ class Post(_ZEMLDualContainer):
     def is_published(self):
         """`True` if the post is visible for everyone."""
         return self.can_read(AnonymousUser())
+
+    @property
+    def is_private(self):
+        """`True` if the post is marked private."""
+        return self.status == STATUS_PRIVATE
+
+    @property
+    def is_protected(self):
+        """`True` if the post is marked protected."""
+        return self.status == STATUS_PROTECTED
 
     @property
     def is_scheduled(self):
