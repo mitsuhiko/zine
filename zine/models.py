@@ -350,7 +350,7 @@ class PostQuery(db.Query):
             # Return public, protected and their own private
             return self.filter(
                 ((Post.status == STATUS_PUBLISHED) |
-                 (Post.status == STATUS_PROTECTED) | 
+                 (Post.status == STATUS_PROTECTED) |
                  ((Post.status == STATUS_PRIVATE) &
                   (Post.author_id == user.id))) &
                 (Post.pub_date <= datetime.utcnow())
@@ -599,7 +599,7 @@ class Post(_ZEMLDualContainer):
         cfg = get_application().cfg
         slug = gen_slug(self.title)
         if not slug:
-            slug = self.pub_date.strftime('%H:%M')
+            slug = to_blog_timezone(self.pub_date).strftime('%H%M')
 
         full_slug = gen_timestamped_slug(slug, self.content_type, self.pub_date)
 

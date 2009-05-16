@@ -355,17 +355,17 @@ def edit_entry(request, post=None):
         elif 'delete' in request.form:
             return redirect_to('admin/delete_post', post_id=post.id)
         elif 'preview' in request.form:
-            form = EntryForm(post, request.form)
-            text = request.form['text']
-            parser = request.form['parser']
-            try:
-                text = parse(text, parser=parser)
-            except ValueError:
-                flash(_('Parser "%s" does not exist. Displaying raw text instead.' % escape(parser)), type='error')
+            if form.validate(request.form):
+                text = form['text']
+                parser = form['parser']
+                try:
+                    text = parse(text, parser=parser)
+                except ValueError:
+                    flash(_('Parser "%s" does not exist. Displaying raw text instead.' % escape(parser)), type='error')
 
-            return render_admin_response('admin/edit_entry.html', active_tab,
-                                         form=form.as_widget(True),
-                                         text=text)
+                return render_admin_response('admin/edit_entry.html', active_tab,
+                                             form=form.as_widget(True),
+                                             text=text)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
@@ -445,17 +445,17 @@ def edit_page(request, post=None):
         elif 'delete' in request.form:
             return redirect_to('admin/delete_post', post_id=post.id)
         elif 'preview' in request.form:
-            form = PageForm(post, request.form)
-            text = request.form['text']
-            parser = request.form['parser']
-            try:
-                text = parse(text, parser=parser)
-            except ValueError:
-                flash(_('Parser "%s" does not exist. Displaying raw text instead.' % escape(parser)), type='error')
+            if form.validate(request.form):
+                text = form['text']
+                parser = form['parser']
+                try:
+                    text = parse(text, parser=parser)
+                except ValueError:
+                    flash(_('Parser "%s" does not exist. Displaying raw text instead.' % escape(parser)), type='error')
 
-            return render_admin_response('admin/edit_page.html', active_tab,
-                                         form=form.as_widget(True),
-                                         text=text)
+                return render_admin_response('admin/edit_entry.html', active_tab,
+                                             form=form.as_widget(True),
+                                             text=text)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()

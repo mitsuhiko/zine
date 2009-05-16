@@ -221,7 +221,8 @@ class PostForm(forms.Form):
     two builtin subclasses for the builtin content types 'entry' and 'page'.
     """
     title = forms.TextField(lazy_gettext(u'Title'), max_length=150,
-                            validators=[is_not_whitespace_only()], required=True)
+                            validators=[is_not_whitespace_only()],
+                            required=False)
     text = forms.TextField(lazy_gettext(u'Text'), max_length=65000,
                            widget=forms.Textarea)
     status = forms.ChoiceField(lazy_gettext(u'Publication status'), choices=[
