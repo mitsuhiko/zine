@@ -365,7 +365,7 @@ def edit_entry(request, post=None):
 
                 return render_admin_response('admin/edit_entry.html', active_tab,
                                              form=form.as_widget(True),
-                                             text=text)
+                                             text=text, taglist=form.taglist)
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
@@ -385,7 +385,7 @@ def edit_entry(request, post=None):
                 return redirect_to('admin/edit_post', post_id=post.id)
             return form.redirect('admin/new_entry')
     return render_admin_response('admin/edit_entry.html', active_tab,
-                                 form=form.as_widget())
+                                 form=form.as_widget(), taglist=form.taglist())
 
 
 @require_admin_privilege()
@@ -455,7 +455,7 @@ def edit_page(request, post=None):
 
                 return render_admin_response('admin/edit_entry.html', active_tab,
                                              form=form.as_widget(True),
-                                             text=text)
+                                             text=text, taglist=form.taglist())
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
@@ -475,7 +475,7 @@ def edit_page(request, post=None):
                 return redirect_to('admin/edit_post', post_id=post.id)
             return form.redirect('admin/new_page')
     return render_admin_response('admin/edit_page.html', active_tab,
-                                 form=form.as_widget())
+                                 form=form.as_widget(), taglist=form.taglist())
 
 
 @require_admin_privilege()

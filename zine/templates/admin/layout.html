@@ -8,6 +8,7 @@
   {{ get_page_metadata() }}
   <script type="text/javascript" src="{{ url_for('core/shared', filename='js/Admin.js') }}"></script>
   {%- endblock %}
+  {% block page_head %}{% endblock %}
 </head>
 <body>
   <div class="header">
