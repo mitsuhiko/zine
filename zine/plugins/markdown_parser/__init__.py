@@ -14,7 +14,10 @@
 from zine.api import *
 from zine.parsers import BaseParser
 from zine.utils.zeml import parse_html
-from zine.plugins.markdown_parser import markdown as md
+try:
+    import markdown as md
+except ImportError:
+    from zine.plugins.markdown_parser import local_markdown as md
 
 
 class MarkdownParser(BaseParser):
@@ -23,7 +26,10 @@ class MarkdownParser(BaseParser):
     name = _(u'Markdown')
 
     def parse(self, input_data, reason):
-        parser = md.Markdown(safe_mode=reason == 'comment' and 'escape')
+        parser = md.Markdown(safe_mode=reason == 'comment' and 'escape',
+                             extensions=['codehilite'],
+                             extension_configs={'codehilite':
+                                                    {'css_class': 'syntax'}})
         return parse_html(parser.convert(input_data))
 
 
