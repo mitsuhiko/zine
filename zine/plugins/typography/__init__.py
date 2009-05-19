@@ -51,6 +51,32 @@ class ConfigurationForm(forms.Form):
     single_closing_quote = forms.TextField(required=True)
 
 
+def _handle_typography(element):
+    handle_typography = element.attributes.pop('typography', None)
+    if handle_typography is None:
+        handle_typography = element.name not in _ignored_elements
+    else:
+        handle_typography = handle_typography.lower() == 'true'
+    return handle_typography
+
+
+def _iter_typography_all(elements):
+    for element in elements:
+        handle_typography = _handle_typography(element)
+        if handle_typography:
+            yield element
+            for child in _iter_typography_all(element.children):
+                yield child
+
+
+def _typography_walk(element):
+    handle_typography = _handle_typography(element)
+    if handle_typography:
+        yield element
+        for child in _iter_typography_all(element.children):
+            yield child
+
+
 def process_doc_tree(doctree, input_data, reason):
     """Parse time callback function that replaces all pre blocks with a
     'syntax' attribute the highlighted sourcecode.
@@ -70,18 +96,12 @@ def process_doc_tree(doctree, input_data, reason):
 
     cfg = get_application().cfg
     used_signs = dict((k, cfg['typography/' + k]) for ignore, k, ignore in _rules)
-    for element in doctree.walk():
-        handle_typography = element.attributes.pop('typography', None)
-        if handle_typography is None:
-            handle_typography = element.name not in _ignored_elements
-        else:
-            handle_typography = handle_typography.lower() == 'true'
-        if handle_typography:
-            if element.text:
-                element.text = apply_typography(element.text)
-            for child in element.children:
-                if child.tail:
-                    child.tail = apply_typography(child.tail)
+    for element in _typography_walk(doctree):
+        if element.text:
+            element.text = apply_typography(element.text)
+        for child in element.children:
+            if child.tail:
+                child.tail = apply_typography(child.tail)
 
 
 def add_config_link(req, navigation_bar):
