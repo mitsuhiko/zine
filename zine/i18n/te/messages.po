@@ -817,7 +817,7 @@ msgstr "నిర్వహణ"
 #: zine/plugins/vessel_theme/templates/_widgets.html:6
 #, python-format
 msgid "logged in as %(username)s."
-msgstr "%(Username)s గా ప్రవేశం పొంది ఉన్నారు."
+msgstr "%(username)s గా ప్రవేశం పొంది ఉన్నారు."
 
 #: zine/plugins/miniblog_theme/templates/_widgets.html:8
 #: zine/plugins/vessel_theme/templates/_widgets.html:7
@@ -829,12 +829,12 @@ msgstr "నిర్వహణ కక్ష్యకు పొండి"
 #: zine/templates/layout.html:19
 #, python-format
 msgid "Proudly powered by %(zine)s."
-msgstr "%(Zine)s చే సగర్వంగా సమర్పింపబడుతున్నది"
+msgstr "%(zine)s చే సగర్వంగా సమర్పింపబడుతున్నది"
 
 #: zine/plugins/myrtle_theme/templates/layout.html:27
 #, python-format
 msgid "Proudly powered by %(zine)s, %(theme)s designed by %(author)s."
-msgstr "%(Zine)s చే సగర్వంగా సమర్పింపబడుతున్నది, %(author)s చే  డిజైన్ చేయబడింది."
+msgstr "%(zine)s చే సగర్వంగా సమర్పింపబడుతున్నది, %(author)s చే  డిజైన్ చేయబడింది."
 
 #: zine/plugins/myrtle_theme/templates/layout.html:32
 #: zine/websetup/templates/finished.html:10
