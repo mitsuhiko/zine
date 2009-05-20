@@ -1,0 +1,3887 @@
+# Translations template for PROJECT.
+# Copyright (C) 2009 The Pocoo Team
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <samanarayan@gmail.com>, 2009.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
+"POT-Creation-Date: 2009-01-10 22:36+0100\n"
+"PO-Revision-Date: 2009-05-20 10:40+0530\n"
+"Last-Translator: Narayana Sarma <samanarayan@gmail.com>\n"
+"Language-Team: Telugu <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.4\n"
+
+#: zine/application.py:668
+msgid "Default Theme"
+msgstr "కనీస నేపథ్యం "
+
+#: zine/application.py:669
+msgid "Simple default theme that doesn't contain any style information."
+msgstr "స్టైలు గురించిన సమాచారం ఏదీ లేని ఒక సాధారణమైన, కనీసపు నేపథ్యం"
+
+#: zine/application.py:726
+#, python-format
+msgid "Theme “%s” is no longer available, falling back to default theme."
+msgstr "మీరు ఎంపిక చేసుకున్న "%s" నేపథ్యం ప్రస్తుతం అందుబాటులో లేదు, అందువల్ల  మళ్ళీ కనీస నేపధ్యాన్నే ఉపయోగిస్తున్నాను."
+
+#: zine/application.py:749
+#, python-format
+msgid "Copyright %(years)s by the Zine Team"
+msgstr "జైన్ బృందం వారి కాపీరైటు %(years)s"
+
+#: zine/config.py:34
+msgid "My Zine Blog"
+msgstr "నా జైన్ బ్లాగు"
+
+#: zine/config.py:35
+msgid "just another Zine blog"
+msgstr "ఇది ఇంకో జైన్ బ్లాగు"
+
+#: zine/config.py:82
+msgid "No Cache"
+msgstr "సేకరించి పెట్టుకున్నది ఏదీ లేదు"
+
+#: zine/config.py:83
+msgid "Simple Cache"
+msgstr "సాధారణ  సేకరణ"
+
+#: zine/config.py:84
+msgid "memcached"
+msgstr "జ్ఞప్తి లోనికి స్వీకరించాను "
+
+#: zine/config.py:85
+msgid "Filesystem"
+msgstr "ఫైలింగు వ్యవస్థ"
+
+#: zine/config.py:102
+msgid "Automatically approve all comments"
+msgstr "అన్ని వ్యాఖ్యల్నీ  ఆటోమాటిగ్గా అనుమతించు"
+
+#: zine/config.py:103
+msgid "An administrator must always approve the comment"
+msgstr "ప్రతి వ్యాఖ్యనీ కార్య నిర్వాహకులొకరు అనుమతించవలసి ఉంటుంది"
+
+#: zine/config.py:104
+msgid "Automatically approve comments by known comment authors"
+msgstr "పరిచయం ఉన్న వ్యాఖ్యాకారులు  వెలిబుచ్చే అభిప్రాయాల్ని ఆటోమాటిగ్గా అనుమతించు"
+
+#: zine/config.py:187
+msgid ""
+"\n"
+"    <p>\n"
+"      This error can happen if the configuration file is not writeable.\n"
+"      Make sure the folder of the configuration file is writeable and\n"
+"      that the file itself is writeable as well.\n"
+"    "
+msgstr "కాన్ఫిగరేషన్ ఫైలును తిరగ రాసేందుకు అనుమతిలేకపోతే ఈ పొరపాటు జరిగే అవకాశం ఉన్నది.\n"
+"				కాన్ఫిగరేషన్ ఫైలు, దానితో పాటు ఆ ఫైలు  ఉండే ఫోల్డరు- రెండూ  కూడా \n"
+"				రైటబుల్ అయ్యేట్లు చూడండి." 
+#: zine/config.py:199
+#, python-format
+msgid "Could not save configuration file: %s"
+msgstr "కాన్ఫిగరేషన్ ఫైలును  కాపాడలేకపోయాను: %s"
+
+#: zine/forms.py:46
+#, python-format
+msgid "User “%(value)s” does not exist."
+msgstr ""%(value)s" అనే పేరుతో ఏ యూజరూ లేరు"
+
+#: zine/forms.py:47
+msgid "You have to enter a username."
+msgstr "మీరు ఏదో ఒక యూజర్ పేరు రాయాలి"
+
+#: zine/forms.py:49
+#, python-format
+msgid "Failed login attempt, user “%s” does not exist"
+msgstr "ప్రవేశించేందుకు మీరు చేసిన ప్రయత్నం వ్యర్థమైంది, "%s" అనే యూజర్ ఎవ్వరూ లేరు"
+
+#: zine/forms.py:57
+#, python-format
+msgid "Failed login attempt from “%s”, invalid password"
+msgstr "ప్రవేశించేదుకు "%s" చేసిన ప్రయత్నం వ్యర్థమైంది, సంకేతపదం తప్పు"
+
+#: zine/forms.py:59
+msgid "Incorrect password."
+msgstr "సంకేతపదం తప్పు"
+
+#: zine/forms.py:64
+msgid "Old password"
+msgstr "పాత సంకేతపదం"
+
+#: zine/forms.py:66
+msgid "New password"
+msgstr "కొత్త సంకేతపదం"
+
+#: zine/forms.py:68
+msgid "Repeat password"
+msgstr "సంకేతపదాన్ని తిరిగి ఇంకోసారి రాయండి"
+
+#: zine/forms.py:78
+msgid "The old password you've entered is wrong."
+msgstr "మీరు రాసిన పాత సంకేతపదం తప్పైంది"
+
+#: zine/forms.py:83
+msgid "The two passwords don't match."
+msgstr "సంకేతపదాలు రెండూ సరిపోలటం లేదు"
+
+#: zine/forms.py:92
+msgid "Name*"
+msgstr "మీ పేరు"
+
+#: zine/forms.py:94
+msgid "Your name is too long."
+msgstr "మీ పేరు చాలా పొడుగ్గా ఉంది"
+
+#: zine/forms.py:95
+msgid "You have to enter your name."
+msgstr "మీ పేరును  రాయండి , మీరు."
+
+#: zine/forms.py:97
+msgid "Mail* (not published)"
+msgstr "టపా* (ఇంకా ప్రచురింపబడలేదు)"
+
+#: zine/forms.py:100 zine/utils/validators.py:77
+msgid "You have to enter a valid e-mail address."
+msgstr "మీరు వ్రాసిన ఇ-మెయిలు అడ్రసును సరిచూసుకోండి."
+
+#: zine/forms.py:102 zine/forms.py:399 zine/forms.py:717
+msgid "Website"
+msgstr "వెబ్సైటు"
+
+#: zine/forms.py:103
+msgid "You have to enter a valid URL or omit the field."
+msgstr "మీరు ఈ స్థలాన్ని ఖాళీగానైనా వదిలివేయండి, లేదా  సరైన యూఆరెల్ నైనా రాయండి"
+
+#: zine/forms.py:105 zine/forms.py:224 zine/forms.py:401 zine/parsers.py:99
+msgid "Text"
+msgstr "ప్రధానాంశం"
+
+#: zine/forms.py:107
+msgid "Your comment is too short."
+msgstr "మీ వ్యాఖ్య మరీ చిన్నగా ఉన్నది."
+
+#: zine/forms.py:108
+msgid "Your comment is too long."
+msgstr "మీ వ్యాఖ్య మరీ పొడుగ్గా ఉన్నది."
+
+#: zine/forms.py:109
+msgid "You have to enter a comment."
+msgstr "మీరు ఒక వ్యాఖ్యను రాయండి."
+
+#. this message is only displayed if the user tempered with
+#. the form data
+#: zine/forms.py:132
+msgid "Invalid object referenced."
+msgstr "ఉపయోగించ దలచిన ఆబ్జెక్టు  చెల్లదు."
+
+#: zine/forms.py:136
+msgid "Post is closed for commenting."
+msgstr "ఈ టపాకు ఇక  వ్యాఖ్యలు రాసే వీలు లేదు."
+
+#: zine/forms.py:174
+msgid "Comment waiting for approval"
+msgstr "అనుమతికై ఎదురుచూస్తున్న వ్యాఖ్య"
+
+#: zine/forms.py:193
+msgid "Disable plugin guard"
+msgstr "ప్లగిన్ రక్షణ కవచాన్ని తొలగించండి."
+
+#: zine/forms.py:194
+msgid "If the plugin guard is disabled errors on plugin setup are not caught."
+msgstr "ప్లగిన్ రక్షణ కవచాన్ని  తొలగించినట్లైతే  ఇక ప్లగిన్ సెటప్  లో  తప్పిదాల్ని పట్టుకునే  వీలుండదు"
+
+#: zine/forms.py:222 zine/templates/admin/_post_helpers.html:4
+#: zine/templates/admin/import.html:25 zine/templates/admin/inspect_import.html:49
+#: zine/templates/admin/write_page.html:7
+msgid "Title"
+msgstr "టపా పేరు"
+
+#: zine/forms.py:226
+msgid "Publication status"
+msgstr "ప్రచురితమైందా, లేదా?"
+
+#: zine/forms.py:227
+msgid "Draft"
+msgstr "చిత్తు ప్రతి"
+
+#: zine/forms.py:228
+msgid "Published"
+msgstr "ప్రచురితం"
+
+#: zine/forms.py:229
+msgid "Publication date"
+msgstr "ప్రచురణ తేదీ"
+
+#: zine/forms.py:230 zine/forms.py:505
+#: zine/templates/admin/manage_categories.html:8
+msgid "Slug"
+msgstr "స్లగ్ సాధనం"
+
+#: zine/forms.py:231 zine/forms.py:396 zine/templates/admin/_post_helpers.html:5
+#: zine/templates/admin/information.html:163
+#: zine/templates/admin/inspect_import.html:50
+msgid "Author"
+msgstr "రచన"
+
+#: zine/forms.py:233 zine/templates/widgets/tag_cloud.html:2
+msgid "Tags"
+msgstr "టాగులు"
+
+#: zine/forms.py:235 zine/templates/_entry.html:4
+#: zine/templates/admin/_post_helpers.html:6
+#: zine/templates/widgets/category_list.html:2 zine/views/admin.py:79
+msgid "Categories"
+msgstr "విభాగాలు"
+
+#: zine/forms.py:237 zine/forms.py:403 zine/templates/admin/write_page.html:22
+msgid "Parser"
+msgstr "పార్సర్ "
+
+#: zine/forms.py:238
+msgid "Enable comments"
+msgstr "వ్యాఖ్యల్ని అనుమతించు"
+
+#: zine/forms.py:239
+msgid "Enable pingbacks"
+msgstr "పింగ్ బ్యాక్ లను అనుమతించు"
+
+#: zine/forms.py:240
+msgid "Ping links"
+msgstr "పింగ్ లింకులు"
+
+#: zine/forms.py:278 zine/forms.py:421
+#, python-format
+msgid "%s (missing)"
+msgstr "%s (లేదు)"
+
+#: zine/forms.py:293
+msgid "This slug is already in use."
+msgstr "ఈ సాధనం ఇప్పటికే వినియోగంలో‌ఉన్నది."
+
+#: zine/forms.py:298
+msgid "Selected parser is no longer available on the system."
+msgstr "ఎంపిక చేసుకున్న పార్సర్   ఇప్పుడు వ్యవస్థలో లేదు"
+
+#: zine/forms.py:397 zine/forms.py:715
+msgid "Email"
+msgstr "ఇ-మెయిలు"
+
+#: zine/forms.py:402 zine/templates/admin/_post_helpers.html:8
+#: zine/templates/admin/import.html:24 zine/templates/admin/inspect_import.html:48
+msgid "Date"
+msgstr "తేదీ"
+
+#: zine/forms.py:404 zine/templates/admin/block_comment.html:2
+#: zine/templates/admin/block_comment.html:4
+msgid "Block Comment"
+msgstr "వ్యాఖ్యను నిరోధించు"
+
+#: zine/forms.py:405 zine/forms.py:473
+msgid "Reason"
+msgstr "కారణం"
+
+#: zine/forms.py:482
+#, python-format
+msgid "blocked by %s"
+msgstr ""%s"చే నిరోధించబడింది."
+
+#: zine/forms.py:506 zine/templates/admin/manage_categories.html:9
+msgid "Name"
+msgstr "పేరు"
+
+#: zine/forms.py:508 zine/forms.py:713 zine/templates/admin/plugins.html:18
+msgid "Description"
+msgstr "వర్ణన"
+
+#: zine/forms.py:527
+msgid "This slug is already in use"
+msgstr "ఈ సాధనం  ఇప్పటికే వినియోగంలో ఉన్నది."
+
+#: zine/forms.py:610 zine/templates/admin/manage_groups.html:8
+msgid "Groupname"
+msgstr "గ్రూప్ పేరు"
+
+#: zine/forms.py:613 zine/forms.py:721 zine/templates/admin/information.html:102
+msgid "Privileges"
+msgstr "అధికారాలు"
+
+#: zine/forms.py:630
+msgid "This groupname is already in use"
+msgstr "ఈ గ్రూప్ పేరు ఇప్పటికే ఉపయోగంలో ఉన్నది"
+
+#: zine/forms.py:651
+msgid "What should Zine do with users assigned to this group?"
+msgstr "ఈ గ్రూపుకు చెందే  యూజర్లతో జైన్ ఏం చేయాలి?"
+
+#: zine/forms.py:654
+msgid "Do nothing, just detach the membership"
+msgstr "ఏమీ చేయకు, కేవలం సభ్యత్వాన్ని తొలగించు"
+
+#: zine/forms.py:655
+msgid "Move the users to another group"
+msgstr "యూజర్లను వేరే గ్రూపుకు తరలించు"
+
+#: zine/forms.py:657
+msgid "Relocate users to"
+msgstr "యూజర్లను ఇక్కడికి తరలించు"
+
+#: zine/forms.py:670
+msgid "You have to select a group that gets the users assigned."
+msgstr "యూజర్లను  చేర్చుకునే గ్రూపును మీరు ఎంపిక చేసుకోవాలి."
+
+#: zine/forms.py:708 zine/forms.py:743 zine/templates/admin/login.html:23
+#: zine/templates/admin/manage_users.html:8
+#: zine/websetup/templates/admin_account.html:10
+msgid "Username"
+msgstr "యూజర్ పేరు"
+
+#: zine/forms.py:711 zine/forms.py:744 zine/templates/admin/manage_users.html:9
+msgid "Realname"
+msgstr "అసలు పేరు"
+
+#: zine/forms.py:712
+msgid "Display name"
+msgstr "తెరపై చూపవలసిన పేరు"
+
+#: zine/forms.py:719 zine/templates/admin/login.html:25
+#: zine/websetup/templates/admin_account.html:12
+msgid "Password"
+msgstr "సంకేత పదం"
+
+#: zine/forms.py:723 zine/views/admin.py:113
+msgid "Groups"
+msgstr "గ్రూపులు"
+
+#: zine/forms.py:725
+msgid "List as author"
+msgstr "రచయిత గా గుర్తించు"
+
+#: zine/forms.py:726
+msgid "This user is listed as author"
+msgstr "ఈ యూజర్ రచయిత గా గుర్తించబడ్డారు"
+
+#: zine/forms.py:755
+msgid "This username is already in use"
+msgstr "ఈ యూజర్ పేరు ఇప్పటికే వినియోగంలో‌ఉన్నది"
+
+#: zine/forms.py:790
+msgid "What should Zine do with posts written by this user?"
+msgstr "ఈ యూజర్ వ్రాసిన టపాలను జైన్ ఏం చేయాలి?"
+
+#: zine/forms.py:792
+msgid "Delete them permanently"
+msgstr "వాటిని సంపూర్ణం గా తొలగించు"
+
+#: zine/forms.py:793
+msgid "Reassign posts"
+msgstr "టపాలను  తిరిగి ఆపాదించు"
+
+#: zine/forms.py:796
+msgid "Reassign posts to"
+msgstr "టపాలను వీరికి ఆపాదించు"
+
+#: zine/forms.py:811
+msgid "You have to select the user that gets the posts assigned."
+msgstr "టపాలను ఆపాదించుకొనగలిగే యూజర్ ను మీరు ఎంపిక చేసుకోవాలి"
+
+#: zine/forms.py:852
+msgid "Filename"
+msgstr "ఫైలు పేరు"
+
+#: zine/forms.py:853
+msgid "Log Level"
+msgstr "లాగ్ స్థాయి"
+
+#: zine/forms.py:858 zine/forms.py:1028
+msgid "Blog title"
+msgstr "బ్లాగ్ పేరు"
+
+#: zine/forms.py:859
+msgid "Blog tagline"
+msgstr "బ్లాగ్  పేరుకు వివరణ"
+
+#: zine/forms.py:860
+msgid "Blog email"
+msgstr "బ్లాగ్ ఇ-మెయిలు"
+
+#: zine/forms.py:861
+msgid "Language"
+msgstr "భాష"
+
+#: zine/forms.py:862
+msgid "Timezone"
+msgstr "కాలమానం"
+
+#: zine/forms.py:864
+msgid "Cookie Name"
+msgstr "కుకీ పేరు"
+
+#: zine/forms.py:866
+msgid "Comments enabled"
+msgstr "వ్యాఖ్యలు అనుమతించబడ్డాయి"
+
+#: zine/forms.py:867
+msgid "enable comments per default"
+msgstr "వద్దని చెప్పకపోతే వ్యాఖ్యలను అనుమతించు"
+
+#: zine/forms.py:869
+msgid "Comment Moderation"
+msgstr "వ్యాఖ్యలను సవరించటం"
+
+#: zine/forms.py:872
+msgid "Pingbacks enabled"
+msgstr "పింగ్ బ్యాక్ లు అనుమతించబడ్డాయి"
+
+#: zine/forms.py:873
+msgid "enable pingbacks per default"
+msgstr "వద్దని చెప్పకపోతే పింగ్ బ్యాక్ లను అనుమతించు"
+
+#: zine/forms.py:875
+msgid "Use flat comments"
+msgstr "ఫ్లాట్ వ్యాఖ్యలను ఉపయోగించు"
+
+#: zine/forms.py:876
+msgid "All comments are posted top-level"
+msgstr "అన్ని వ్యాఖ్యలూ  పై స్థాయికి అందించబడ్డాయి"
+
+#: zine/forms.py:878
+msgid "Default parser"
+msgstr "కనీసంగా ఉన్న పార్సర్"
+
+#: zine/forms.py:880"\n"
+msgid "Comment parser"
+msgstr "వ్యాఖ్యల పార్సర్"
+
+#: zine/forms.py:882
+msgid "Posts per page"
+msgstr "ఒక పేజీలో చూపవలసిన టపాల సంఖ్య"
+
+#: zine/forms.py:897
+msgid "Blog URL prefix"
+msgstr "బ్లాగ్ యూఆరెల్ ప్రధమ భాగం"
+
+#: zine/forms.py:899
+msgid "Admin URL prefix"
+msgstr "అధికార కక్ష్య యూఆరెల్ ప్రథమ భాగం"
+
+#: zine/forms.py:901
+msgid "Category URL prefix"
+msgstr "వర్గపు యూఆరెల్ ప్రథమ భాగం"
+
+#: zine/forms.py:903
+msgid "Tag URL prefix"
+msgstr "ట్యాగ్ యూఆరెల్ ప్రథమ భాగం"
+
+#: zine/forms.py:905
+msgid "Author Profiles URL prefix"
+msgstr "రచయితల వివరాల యూఆరెల్ ప్రథమ భాగం"
+
+#: zine/forms.py:907
+msgid "Limit slugs to ASCII"
+msgstr "స్లగ్గులను ఆస్కీ కి పరిమితం చెయ్యి"
+
+#: zine/forms.py:908
+msgid "Automatically generated slugs are limited to ASCII"
+msgstr "ఆటోమాటిగ్గా తయారయ్యే స్లగ్గులు ఆస్కీకి పరిమితం చేయబడ్డాయి"
+
+#: zine/forms.py:929
+msgid "Cache system"
+msgstr "సేకరణ వ్యవస్థ"
+
+#: zine/forms.py:931
+msgid "Default cache timeout"
+msgstr "సేకరణకై  కనీసంగా కేటాయించబడ్డ  సమయం "
+
+#: zine/forms.py:933
+msgid "Enable eager caching"
+msgstr "త్వరితంగా సేకరించటాన్ని అనుమతించు"
+
+#: zine/forms.py:934
+msgid "Enable"
+msgstr "అనుమతించు"
+
+#: zine/forms.py:941
+msgid "You have to provide at least one server to use memcached."
+msgstr "memcached ని ఉపయోగించాలంటే  మీరు కనీసం ఒక సర్వర్ నైనా కేటాయించాలి."
+
+#: zine/forms.py:945
+msgid "You have to provide cache folder to use filesystem cache."
+msgstr "ఫైలింగు వ్యవస్థ క్యాష్ ని ఉపయోగించాలంటే మీరు క్యాష్ ఫోల్డరును కేటాయించాలి."
+
+#: zine/forms.py:955
+msgid "Dump Download URL"
+msgstr "డంప్ ని  తెచ్చుకునేందుకు యూఆరెల్"
+
+#: zine/forms.py:961
+msgid "Feed Download URL"
+msgstr "ఫీడ్ ని తెచ్చుకునేందుకు యూఆరెల్"
+
+#: zine/forms.py:978
+msgid "Use default value"
+msgstr "కనీస విలువను వాడు"
+
+#: zine/forms.py:1014
+msgid "Create new user"
+msgstr "కొత్త యూజర్ ను సృజించు"
+
+#: zine/forms.py:1030
+msgid "Blog description"
+msgstr "బ్లాగు వివరణ"
+
+#: zine/forms.py:1035
+msgid "Load config values"
+msgstr "కాన్ఫిగరేషన్ లోని విలువలను వాడుకో"
+
+#: zine/forms.py:1036
+msgid "Load the configuration values from the import."
+msgstr "దిగుమతి నుండి కాన్ఫిగరేషన్ విలువలను వాడుకో"
+
+#: zine/parsers.py:75
+msgid "Zine-Markup"
+msgstr "జైన్- మార్కప్"
+
+#: zine/parsers.py:87
+msgid "HTML"
+msgstr "హెచ్టీయమ్మెల్"
+
+#: zine/pingback.py:66
+msgid "source URL does not exist"
+msgstr "ఉత్పత్తి స్థానపు యూఆరెల్ లేదు"
+
+#: zine/pingback.py:67
+msgid "The source URL does not contain a link to the target URL"
+msgstr "ఉత్పత్తి స్థానపు యూఆరెల్ లో లక్ష్యపు యూఆరెల్ కు లంకె లేదు"
+
+#: zine/pingback.py:68
+msgid "The specified target URL does not exist"
+msgstr "మీరు చెప్పిన లక్ష్యపు యూఆరెల్ లేదు"
+
+#: zine/pingback.py:69
+msgid "The specified target URL cannot be used as a target"
+msgstr "మీరు చెప్పిన లక్ష్యపు యూఆరెల్ ని  లక్ష్యంగా వాడుకునేందుకు వీలు లేదు"
+
+#: zine/pingback.py:70
+msgid "The pingback has already been registered"
+msgstr "ఈ  పింగ్ బ్యాక్ ముందుగానే నమోదై ఉన్నది"
+
+#: zine/pingback.py:71 zine/templates/403.html:2 zine/templates/403.html:4
+msgid "Access Denied"
+msgstr "ప్రవేశము లేదు"
+
+#: zine/pingback.py:72
+#, python-format
+msgid "An unknown server error (%s) occurred"
+msgstr "సర్వర్ పొరపాటు ఏదో "(%s)" జరిగింది"
+
+#: zine/pluginsystem.py:332
+msgid ""
+"Could not install the plugin because the uploaded file is not a valid plugin"
+" file."
+msgstr "ప్లగిన్ ని స్థిరపరచటం  వీలవ్వలేదు. ఎందుకంటే  దిగుమతైన ఫైలు చెల్లుబాటయ్యే  ప్లగిన్ ఫైలు కాదు."
+
+#: zine/pluginsystem.py:334
+msgid ""
+"The plugin uploaded has a newer package version than this Zine installation "
+"can handle."
+msgstr "ఇక్కడి జైన్ వ్యవస్థ  నడప గలిగే  ప్యాకేజ్ వర్షన్ కంటే దిగుమతైన ప్లగిన్ లోని వర్షన్ కొత్తది"
+
+#: zine/pluginsystem.py:337
+msgid "A plugin with the same UID is already installed. Aborted."
+msgstr "ఇదే యూఐడిగల ఒక ప్లగిన్ ముందుగానే నెలకొని ఉన్నది.  చర్య రద్దు చేయబడింది."
+
+#: zine/pluginsystem.py:339
+msgid ""
+"Could not install the package because the installer wasn't able to write the"
+" package information. Wrong permissions?"
+msgstr "ప్యాకేజీని స్థిర పరచటం వీలవ్వలేదు- ఎందుకంటే ప్యాకేజీలోని సమాచారాన్ని "
+"				 ఇన్స్టాలర్ వ్రాయలేకపోయింది. సరైన అనుమతులు  లేవా?"
+
+#: zine/pluginsystem.py:361
+msgid "Plugin setup error"
+msgstr "ప్లగిన్ సెటప్ లో  పొరపాటు"
+
+#: zine/pluginsystem.py:372
+#, python-format
+msgid "Exception happend on setup: %(error)s (%(file)s, line %(line)d)"
+msgstr "సెటప్ లో అవాంతరం ! %(error)s (%(file)s, line %(line)d)"
+
+#: zine/privileges.py:153
+msgid "can enter admin panel"
+msgstr "నిర్వహణ  వ్యవస్థలోనికి ప్రవేశించవచ్చు"
+
+#: zine/privileges.py:154
+msgid "can administer the blog"
+msgstr "బ్లాగును నిర్వహించవచ్చు"
+
+#: zine/privileges.py:155
+msgid "can create new entries"
+msgstr "కొత్త సృజనలు చేయవచ్చు"
+
+#: zine/privileges.py:156
+msgid "can edit his own entries"
+msgstr "తన సృజనల్ని తాను సరిదిద్దుకొనవచ్చు"
+
+#: zine/privileges.py:157
+msgid "can edit another person's entries"
+msgstr "ఇతరుల సృజనల్ని సరిదిద్దవచ్చు"
+
+#: zine/privileges.py:158
+msgid "can create new pages"
+msgstr "కొత్త పేజీలను సృష్టించవచ్చు"
+
+#: zine/privileges.py:159
+msgid "can edit his own pages"
+msgstr "తన పేజీలను తాను సరిదిద్దుకొనవచ్చు"
+
+#: zine/privileges.py:160
+msgid "can edit another person's pages"
+msgstr "ఇతరుల పేజీలను సరిదిద్దవచ్చు"
+
+#: zine/privileges.py:161
+msgid "can view drafts"
+msgstr "చిత్తు ప్రతులను చూడవచ్చు"
+
+#: zine/privileges.py:162
+msgid "can manage categories"
+msgstr "విభాగాలను నిర్వహించవచ్చు"
+
+#: zine/privileges.py:163
+msgid "can moderate comments"
+msgstr "వ్యాఖ్యలను మితీకరించవచ్చు"
+
+#: zine/docs/__init__.py:67
+msgid "no documented plugins installed."
+msgstr "అధికారికమైన ప్లగిన్లు ఏవీఇన్స్టాల్ అవలేదు."
+
+#: zine/i18n/__init__.py:478
+msgid "now"
+msgstr "ఇప్పుడే"
+
+#: zine/importers/__init__.py:152
+msgid "set blog title from dump"
+msgstr "డంప్ నుండి బ్లాగ్ పేరును ఎంపిక చేసుకో"
+
+#: zine/importers/__init__.py:155
+msgid "set blog tagline from dump"
+msgstr "డంప్ నుండి బ్లాగ్ పేరుకుండే వివరణను ఎంపిక చేసుకో"
+
+#: zine/importers/__init__.py:211 zine/importers/__init__.py:226
+msgid "done"
+msgstr "పని పూర్తైంది"
+
+#: zine/importers/__init__.py:214
+msgid "Committing transaction..."
+msgstr "ఫలితాన్ని వ్రాస్తున్నాను..."
+
+#: zine/importers/__init__.py:219
+msgid "Updating configuration..."
+msgstr "కాన్ఫిగరేషన్ ను తిరగ రాస్తున్నాను..."
+
+#: zine/importers/feed.py:89
+msgid "Unknown feed uploaded."
+msgstr "తెలీని ఫీడ్ ఏదో దిగుమతైంది."
+
+#: zine/importers/feed.py:135
+msgid "Importing of RSS feeds is currently not possible."
+msgstr "ఆరెస్సెస్ ఫీడులను దిగుమతి చేసుకోవటం ప్రస్తుతానికి సాధ్యపడదు."
+
+#: zine/importers/feed.py:294
+msgid "Feed Importer"
+msgstr "ఫీడు దిగుమతిదారు"
+
+#: zine/importers/feed.py:305 zine/importers/wordpress.py:209
+#, python-format
+msgid "Error downloading from URL: %s"
+msgstr "%s యూఆరెల్ నుండి తెచ్చుకోవటంలో పొరపాటు"
+
+#: zine/importers/feed.py:312 zine/importers/wordpress.py:216
+msgid "Error parsing uploaded file"
+msgstr "దిగుమతైన ఫైలును చదివి అర్థం చేసుకోవటంలో పొరపాటు"
+
+#: zine/importers/feed.py:313
+#, python-format
+msgid "Error parsing feed: %s"
+msgstr "‌%s ఫీడును  చదివి అర్థం చేసుకోవటంలో పొరపాటు"
+
+#: zine/importers/feed.py:316 zine/importers/wordpress.py:220
+msgid "Added imported items to queue."
+msgstr "దిగుమతైనవాటిని క్యూలో పెట్టాను"
+
+#: zine/importers/wordpress.py:217
+#, python-format
+msgid "Error parsing uploaded file: %s"
+msgstr "దిగుమతైన  %s ఫైలును  చదివి అర్థం చేసుకోవటంలో పొరపాటు:"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:68
+msgid "The key is invalid."
+msgstr "కీ చెల్లదు"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:79
+msgid "Could not verify key because of a server to server connection error."
+msgstr "సర్వర్ నుండి సర్వర్ కు కనెక్షన్ సరిగా లేనందువల్ల కీ ని సరిచూసేందుకు వీలవ్వలేదు"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:147
+msgid "Akismet"
+msgstr "అకిస్మత్"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:162
+msgid "Akismet has been successfully enabled."
+msgstr "అకిస్మత్ పని చేస్తోంది- చర్య విజయవంతం"%(Zine)s చే సగర్వంగా సమర్పింపబడుతున్నది
+
+#: zine/plugins/akismet_spam_filter/__init__.py:164
+msgid "Akismet disabled."
+msgstr "అకిస్మత్  పని చేయటంలేదు."
+
+#: zine/plugins/akismet_spam_filter/__init__.py:183
+msgid "Comments Blocked by Akismet"
+msgstr "వ్యాఖ్యలు అకిస్మత్ చే నిరోధించబడ్డాయి"
+
+#: zine/plugins/akismet_spam_filter/templates/akismet_widget.html:4
+#, python-format
+msgid "Akismet has blocked <b>%(spam_comments)s</b> comments."
+msgstr "<b>%(spam_comments)s</b> వ్యాఖ్యలు అకిస్మత్ చే నిరోధింపబడ్డాయి."
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:2
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:4
+msgid "Akismet Configuration"
+msgstr "అకిస్మత్ కాన్ఫిగరేషన్"
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:5
+#, python-format
+msgid ""
+"\n"
+"    Akismet will help you to reduce or even completely eliminate the comment"
+" spam\n"
+"    you get on your site. If you don't have a WordPress.com account yet, you"
+" can\n"
+"    get one at <a href=\"%(api_link)s\">WordPress.com</a>.\n"
+"  "
+msgstr "\n"
+"		మీ సైటుకు వచ్చే స్పాం వ్యాఖ్యల్ని తగ్గించేందుకు, చివరికి  పూర్తిగా తొలగించేందుకు కూడా\n" 
+"		అకిస్మత్ మీకు సహాయం చేస్తుంది.\n"
+"		మీకు  ఇంకా wordpress.com అకౌంటు లేనట్లైతే, మీరు దాన్ని \n"
+"		<a href=\"%(api_link)s\">WordPress.ccom</a>.\n వద్ద  పొందవచ్చు."
+
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:14
+msgid "Update Key"
+msgstr "కీ ని అప్ డేట్ చేయండి"
+
+#: zine/plugins/creole_parser/__init__.py:52
+msgid "Creole"
+msgstr "క్రియోల్ పార్సర్"
+
+#: zine/plugins/dark_vessel_colorscheme/__init__.py:21
+msgid "Dark"
+msgstr "డార్క్"
+
+#: zine/plugins/eric_the_fish/__init__.py:92
+#: zine/plugins/eric_the_fish/templates/admin/eric_the_fish.html:2
+#: zine/plugins/eric_the_fish/templates/admin/eric_the_fish.html:4
+msgid "Eric The Fish"
+msgstr "గొప్ప చేప- ఎరిక్ "
+
+#: zine/plugins/eric_the_fish/__init__.py:105
+msgid "The skin could not be changed."
+msgstr "స్కిన్ ను మార్చటం వీలు కాలేదు."
+
+#: zine/plugins/eric_the_fish/templates/admin/eric_the_fish.html:5
+msgid ""
+"\n"
+"    This is Eric's configuration page. From here you can configure what\n"
+"    Eric looks like.\n"
+"  "
+msgstr ""
+"\n"
+"		ఇది ఎరిక్ కాన్ఫిగరేషన్ పేజీ.  ఎరిక్ ఎలా కనబడాలో మీరిక్కడ  కాన్ఫిగర్ చేయవచ్చు."
+
+
+#: zine/plugins/markdown_parser/__init__.py:23
+msgid "Markdown"
+msgstr "మార్క్ డౌన్"
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:5
+#: zine/plugins/vessel_theme/templates/_widgets.html:4
+#: zine/templates/admin/layout.html:6 zine/templates/admin/login.html:5
+msgid "Administration"
+msgstr "నిర్వహణ"
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:7
+#: zine/plugins/vessel_theme/templates/_widgets.html:6
+#, python-format
+msgid "logged in as %(username)s."
+msgstr "%(Username)s గా ప్రవేశం పొంది ఉన్నారు."
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:8
+#: zine/plugins/vessel_theme/templates/_widgets.html:7
+msgid "go to admin panel"
+msgstr "నిర్వహణ కక్ష్యకు పొండి"
+
+#: zine/plugins/miniblog_theme/templates/layout.html:26
+#: zine/plugins/vessel_theme/templates/layout.html:27
+#: zine/templates/layout.html:19
+#, python-format
+msgid "Proudly powered by %(zine)s."
+msgstr "%(Zine)s చే సగర్వంగా సమర్పింపబడుతున్నది"
+
+#: zine/plugins/myrtle_theme/templates/layout.html:27
+#, python-format
+msgid "Proudly powered by %(zine)s, %(theme)s designed by %(author)s."
+msgstr "%(Zine)s చే సగర్వంగా సమర్పింపబడుతున్నది, %(author)s చే  డిజైన్ చేయబడింది."
+
+#: zine/plugins/myrtle_theme/templates/layout.html:32
+#: zine/websetup/templates/finished.html:10
+msgid "Admin Panel"
+msgstr "నిర్వహణ కక్ష్య"
+
+#: zine/plugins/myrtle_theme/templates/layout.html:33
+#: zine/templates/admin/layout.html:18
+msgid "Logout"
+msgstr "నిష్క్రమించు"
+
+#: zine/plugins/pygments_support/__init__.py:144"%(post)s, on %(date)s
+msgid "Pygments theme changed successfully."
+msgstr "పిగ్మెంట్స్ నేపధ్యాన్ని  మార్చటంలో విజయం సాధించాను."
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:2
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:4
+msgid "Pygments"
+msgstr "పిగ్మెంట్స్"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:5
+msgid ""
+"\n"
+"    Pygments allows you to select one of many themes for your code tags.\n"
+"    You can preview and select one below.\n"
+"  "
+msgstr "మీ నిర్దేశాల ట్యాగులకోసం ఒక  నేపధ్యాన్ని ఎంపిక చేసుకునేందుకు గాను పిగ్మెంట్స్  \న్"
+"				అనేక నేపధ్యాల్ని  చూపిస్తుంది.  క్రింది నేపధ్యాలను ముందుగా చూసి, ఒకదాన్ని ఎంపిక చేసుకోండి."
+
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:13
+#: zine/views/admin.py:106
+msgid "Theme"
+msgstr "నేపథ్యం"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:15
+msgid "Preview"
+msgstr "ముందుగా ఓసారి చూపు"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:16
+msgid "Select"
+msgstr "ఎంపిక చేసుకో"
+
+#: zine/plugins/typography/__init__.py:94
+#: zine/plugins/typography/templates/admin/typography.html:2
+#: zine/plugins/typography/templates/admin/typography.html:33
+msgid "Typography"
+msgstr "టైపోగ్రఫీ"
+
+#: zine/plugins/typography/__init__.py:111
+msgid "Typography settings could not be changed."
+msgstr "టైపోగ్రఫీ సెటింగులను మార్చేందుకు వీలవలేదు."
+
+#: zine/plugins/typography/__init__.py:113
+msgid "Typography settings changed."
+msgstr "టైపోగ్రఫీ సెటింగులు మారాయి."
+
+#: zine/plugins/typography/templates/admin/typography.html:34
+msgid ""
+"\n"
+"    From here you can configure the typography settings. Note that the\n"
+"    typography plugin has hardcoded semantics at the moment, so there is\n"
+"    no way to change the algorithm from this config panel.\n"
+"  "
+msgstr ""
+"\n"
+" 	ఇక్కడ మీరు టైపోగ్రఫీ సెటింగులను మార్చుకోవచ్చు.  ప్రస్తుతం టైపోగ్రఫీ ప్లగిన్ లో వాడే సెమాంటిక్స్ కొంచెం\n"
+"		దృఢంగా ఉన్నై; అందువల్ల ఈ కాన్ఫిగ్ పానల్ నుండి అల్గారిధంను మార్చేందుకు వీలవదని గుర్తించండి."
+
+#: zine/plugins/typography/templates/admin/typography.html:41
+msgid "Double Quote Pairs"
+msgstr "డబల్ కోట్ జంట"
+
+#: zine/plugins/typography/templates/admin/typography.html:46
+msgid "Single Quote Pairs"
+msgstr "సింగిల్ కోట్ జంట"
+
+#: zine/plugins/typography/templates/admin/typography.html:53
+msgid "Use Common Character"
+msgstr "ఉమ్మడి కారక్టర్నొకదాన్ని వాడండి"
+
+#: zine/plugins/typography/templates/admin/typography.html:59
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:11
+#: zine/templates/admin/basic_options.html:12 zine/templates/admin/cache.html:100
+#: zine/templates/admin/configuration.html:30
+#: zine/templates/admin/edit_category.html:14
+#: zine/templates/admin/edit_comment.html:38
+#: zine/templates/admin/edit_entry.html:50 zine/templates/admin/edit_group.html:13
+#: zine/templates/admin/edit_page.html:46 zine/templates/admin/edit_user.html:27
+#: zine/templates/admin/pages_config.html:23
+#: zine/templates/admin/url_options.html:13
+#: zine/templates/admin/write_page.html:51
+msgid "Save"
+msgstr "దాచి ఉంచు"
+
+#: zine/plugins/vessel_theme/__init__.py:25
+msgid "Blue"
+msgstr "నీలి రంగు"
+
+#: zine/plugins/vessel_theme/__init__.py:26
+msgid "Gray"
+msgstr "బూడిద రంగు"
+
+#: zine/plugins/vessel_theme/__init__.py:27
+msgid "Green"
+msgstr "ఆకుపచ్చ రంగు"
+
+#: zine/plugins/vessel_theme/__init__.py:33
+msgid "Color variation"
+msgstr "రంగుల మార్పు"
+
+#: zine/plugins/vessel_theme/__init__.py:62
+msgid "Color variation changed successfully."
+msgstr "రంగుల్ని మార్చటం విజయవంతమైంది."
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:2
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:4
+msgid "Configure Vessel Theme"
+msgstr "వెస్సెల్ నేపథ్యాన్ని కాన్ఫిగర్ చేయండి"
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:5
+msgid ""
+"\n"
+"    This theme comes with various color variations you can choose from.\n"
+"  "
+msgstr "ఈ నేపధ్యం అనేక రంగుల్లో లభిస్తుంది.  రంగుల్ని మీరు ఎంపిక చేసుకోవచ్చు."
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:12
+#: zine/templates/admin/change_password.html:9
+#: zine/templates/admin/edit_category.html:16
+#: zine/templates/admin/edit_comment.html:40
+#: zine/templates/admin/edit_entry.html:55 zine/templates/admin/edit_group.html:18
+#: zine/templates/admin/edit_page.html:51 zine/templates/admin/edit_user.html:32
+#: zine/templates/admin/inspect_import.html:75
+#: zine/templates/admin/write_page.html:55
+msgid "Cancel"
+msgstr "రద్దు చేయి"
+
+#: zine/shared/js/Admin.js:50
+msgid "Bookmarklet"
+msgstr "బుక్ మార్క్ లెట్"
+
+#: zine/shared/js/Admin.js:52
+msgid ""
+"Right click on the following link and choose “Add to favorites” or “Bookmark"
+" link” to create a posting shortcut."
+msgstr ""
+"క్రింది లంకెపై రైట్ క్లిక్ చేసి, ఆపైన " ఇష్టాలకు  కలుపు", లేదా " లంకెను బుక్ మార్క్  చేయి" లను  ఎంపిక చేసుకున్నట్లైతే\n"
+"టపాకు షార్ట్ కట్ ఒకటి తయారు చేయ బడుతుంది."
+
+#: zine/shared/js/Admin.js:56
+msgid ""
+"Next time you visit an interesting page, just select some text and click on "
+"the bookmark."
+msgstr ""
+"ఈసారి మీకేదైనా చక్కని పేజీ తారసపడితే, అందులోని అంశాన్ని కొంత ఎంపిక చేసుకొని,"
+" బుక్ మార్క్  ను క్లిక్ చేయండి."
+
+
+
+#: zine/shared/js/Admin.js:60
+msgid "Blog It!"
+msgstr "దీన్ని బ్లాగుకు జతచేయండి!"
+
+#: zine/shared/js/Admin.js:62
+msgid ""
+"Right click on this link and choose “Add to favorites” or “Bookmark link” to"
+" create a posting shortcut."
+msgstr ""
+"ఈ  లంకెపై రైట్ క్లిక్ చేసి, ఆపైన " ఇష్టాలకు  కలుపు", లేదా " లంకెను బుక్ మార్క్  చేయి" లను  ఎంపిక చేసుకున్నట్లైతే\n"
+"టపాకు షార్ట్ కట్ ఒకటి తయారు చేయ బడుతుంది."
+
+
+#: zine/shared/js/Zine.js:31
+#, python-format
+msgid "Replying to comment by %s."
+msgstr "%s గారి వ్యాఖ్యలకు జవాబిస్తున్నాను."
+
+#: zine/shared/js/Zine.js:33
+msgid "(Create as top level comment)"
+msgstr "(పై స్థాయి వ్యాఖ్యగా సృజించు)"
+
+#: zine/templates/403.html:5
+msgid ""
+"\n"
+"    The access to the requested resource was restricted.\n"
+"  "
+msgstr ""
+"\n"
+"			మీరు కోరిన వనరు  అందరికీ లభించకుండా కట్టడి చేయబడింది."
+
+
+#: zine/templates/404.html:2 zine/templates/404.html:4
+msgid "Page Not Found"
+msgstr "పేజీ  కనబడలేదు"
+
+#: zine/templates/404.html:5
+msgid "Sorry, the page you requested does not exist."
+msgstr "క్షమించాలి, మీరు కోరిన పేజీ లేదు."
+
+#: zine/templates/404.html:6
+msgid ""
+"You may have followed a bad link or mis-typed a URL.\n"
+"    That’s most likely what went wrong."
+msgstr ""
+"మీరు సరిగా లేని లంకెను అనుసరించి ఉండాలి, లేదా యూఆరెల్ ను తప్పుగా\n"
+"		టైపు చేసి ఉండాలి. తప్పు అక్కడే జరిగిందనిపిస్తున్నది."
+
+#: zine/templates/404.html:8
+#, python-format
+msgid ""
+"You may want to\n"
+"    have a look at the <a href=\"%(index_link)s\">blog index</a>."
+msgstr ""
+"మీరు ఒకసారి  <a href=\"%(index_link)s\">blog index</a> ని చూస్తే మంచిది."
+
+
+#: zine/templates/500.html:2
+msgid "Zine Internal Server Error"
+msgstr "జైన్ అంతర్గత సర్వర్ పొరపాటు"
+
+#: zine/templates/500.html:4
+msgid "Internal Server Error"
+msgstr "అంతర్గత సర్వర్  పొరపాటు"
+
+#: zine/templates/500.html:5
+msgid ""
+"\n"
+"    An internal error happened in the application. The blog administrator\n"
+"    has been informed about the problem.\n"
+"  "
+msgstr ""
+" 	ఉపకరణంలో అంతర్గతంగా ఒక  తప్పు ఏర్పడింది.  ఈ సమస్య  గురించి బ్లాగ్  నిర్వాహకునికి తెలియజేశాం."
+
+#: zine/templates/_comment.html:5
+msgid "Pingback by"
+msgstr "పింగ్ బ్యాక్  చేసే వారు"
+
+#: zine/templates/_comment.html:6
+msgid "Comment by"
+msgstr "వ్యాఖ్యను రాసిన వారు"
+
+#: zine/templates/_comment.html:13
+msgid "reply to this comment"
+msgstr "ఈ వ్యాఖ్యకు బదులివ్వు"
+
+#: zine/templates/_comment.html:62
+msgid "Submit Comment"
+msgstr "వ్యాఖ్యను సమర్పించండి"
+
+#: zine/templates/_comment.html:63
+msgid "Reset Form"
+msgstr "ఫారం ని మళ్ళీ తెరు"
+
+#: zine/templates/_entry.html:11
+msgid "Tagged as"
+msgstr "ఉన్న ట్యాగులు"
+
+#: zine/templates/_entry.html:18
+#, python-format
+msgid "%(comments)s comment"
+msgid_plural "%(comments)s comments"
+msgstr[0] "వ్యాఖ్య"
+msgstr[1] "వ్యాఖ్యలు"
+
+#: zine/templates/_entry.html:22 zine/templates/admin/_comment.html:12
+#: zine/templates/admin/index.html:56
+msgid "Edit"
+msgstr "సరిదిద్దు"
+
+#: zine/templates/_entry.html:31 zine/templates/show_entry.html:8
+#, python-format
+msgid "written by %(author)s, on %(pub_date)s."
+msgstr "%(author)s చే, %(pub_date)s న వ్రాయబడింది."
+
+#: zine/templates/_entry.html:36
+#, python-format
+msgid "<strong>Scheduled Post:</strong> This entry will appear in %(time_span)s."
+msgstr "<strong>కాల నిశ్చితమైన టపా:</strong> ఈ టపా %(time_span)s లో కనబడగలదు."
+
+#: zine/templates/_entry.html:45
+msgid "Read on"
+msgstr "ఇంకా చదవండి"
+
+#: zine/templates/archive.html:2 zine/templates/archive.html:6
+#: zine/templates/widgets/post_archive_summary.html:2
+msgid "Archive"
+msgstr "సంగ్రహం చెయ్యి"
+
+#: zine/templates/archive.html:12
+msgid "empty archive"
+msgstr "సంగ్రహాన్ని ఖాళీ చెయ్యి"
+
+#: zine/templates/archive.html:17
+#, python-format
+msgid "Archive for %(year)s"
+msgstr "%(year)s సంవత్సరాల వరకు సంగ్రహం గా ఉంచు"
+
+#: zine/templates/archive.html:19
+#, python-format
+msgid "Archive for %(month)s"
+msgstr "%(month)s నెలల వరకు సంగ్రహంగా ఉంచు"
+
+#: zine/templates/archive.html:21
+#, python-format
+msgid "Archive for %(day)s"
+msgstr "%(day)s రోజులవరకు సంగ్రహంగా ఉంచు"
+
+#: zine/templates/authors.html:2 zine/templates/authors.html:4
+#: zine/templates/admin/inspect_import.html:23
+msgid "Authors"
+msgstr "రచన"
+
+#: zine/templates/error_layout.html:5
+msgid "Zine Error"
+msgstr "జైన్ సమస్య"
+
+#: zine/templates/index.html:2
+msgid "Index"
+msgstr "విషయ సూచిక"
+
+#: zine/templates/index.html:8
+msgid "Welcome"
+msgstr "స్వాగతం"
+
+#: zine/templates/index.html:10
+msgid "So far there are no entries in this blog."
+msgstr "ఇంత వరకూ ఈ బ్లాగులో  ఏమీ రాయలేదు" 
+
+#: zine/templates/internal_error.html:2
+msgid "Zine Internal Error"
+msgstr "జైన్ అంతర్గత సమస్య"
+
+#: zine/templates/internal_error.html:4
+msgid "Internal Error"
+msgstr "అంతర్గత సమస్య"
+
+#: zine/templates/internal_error.html:6
+msgid "Zine encountered an internal error during processing:"
+msgstr "పనిని నిర్వర్తిస్తున్నప్పుడు జైన్ కు ఒక అంతర్గత సమస్య ఎదురైంది:"
+
+#: zine/templates/internal_error.html:13
+msgid ""
+"\n"
+"    If you have troubles fixing the problem have a look at the Zine\n"
+"    documentation.\n"
+"  "
+msgstr ""
+"		సమస్యను పరిష్కరించటంలో మీకేదైనా  సహాయం అవసరమైతే జైన్ \n"
+"		పత్రావళిని సందర్శించండి.\n"
+
+#: zine/templates/internal_error.html:17
+msgid ""
+"\n"
+"    This error is only visible to blog administrators.  If a regular user\n"
+"    triggered the error an entry to the log is added and a generic error\n"
+"    message is displayed.\n"
+"  "
+msgstr ""
+"\n"
+"		ఈ  పొరపాటు కేవలం బ్లాగ్ నిర్వాహక వర్గానికి మాత్రమే కనబడుతున్నది.  సాధారణ యూజర్  వల్ల \n"
+"		ఈ సమస్య  మొదలై నట్లైతే, లాగ్ ఫైలులో ఆ వివరాలు రాయబడతాయి., అంతేకాక యూజర్ కు \n"
+"		'పొరపాటు ' అని ఒక సామాన్య సూచన చూపబడుతుంది.\n"
+
+
+#: zine/templates/maintenance.html:40
+msgid "Maintenance Mode"
+msgstr "సవరించబడుతున్నది"
+
+#: zine/templates/maintenance.html:41
+msgid ""
+"\n"
+"      This Zine instance is currently in maintenance mode.\n"
+"      Please wait until the administrator reopens the blog."
+msgstr "ఈ జైన్ వ్యవస్థ ప్రస్తుతం సవరించబడుతున్నది.\n"
+"				నిర్వాహకులు బ్లాగును  తిరిగి తెరిచేంతవరకూ దయచేసి వేచి ఉండండి."
+
+#: zine/templates/page.html:10 zine/templates/show_entry.html:22
+#: zine/templates/admin/_post_helpers.html:7
+#: zine/templates/admin/inspect_import.html:51 zine/views/admin.py:90
+msgid "Comments"
+msgstr "వ్యాఖ్యలు"
+
+#: zine/templates/page.html:14 zine/templates/show_entry.html:26
+msgid "Leave a Reply"
+msgstr "ఏదైనా సమాధానం  ఇచ్చి పోండి"
+
+#: zine/templates/server_error.html:2
+msgid "Zine Maintenance Mode"
+msgstr "జైన్ సవరణ స్థితి"
+
+#: zine/templates/show_author.html:12
+msgid "Posts written by user"
+msgstr "యూజర్ వ్రాసిన టపాలు"
+
+#: zine/templates/show_author.html:15
+#, python-format
+msgid "%(post)s, on %(date)s"
+msgstr "%(date)s వ తేదీన , %(post)s టపాలు"
+
+#: zine/templates/show_category.html:2
+#, python-format
+msgid "Show “%(category)s”"
+msgstr "“%(category)s”ని చూపించు"
+
+#: zine/templates/show_category.html:5
+#, python-format
+msgid "Entries in the Category “%(category)s”"
+msgstr "“%(category)s” అనే విభాగంలో ఉన్న అంశాలు"
+
+#: zine/templates/show_category.html:10 zine/templates/show_tag.html:10
+msgid "No public posts found"
+msgstr "అందరికోసమూ ఉద్దేశించిన టపాలేవీ కనబడలేదు"
+
+#: zine/templates/show_tag.html:2
+#, python-format
+msgid "Show “%(tag)s”"
+msgstr "“%(tag)s”లను చూపించు"
+
+#: zine/templates/show_tag.html:5
+#, python-format
+msgid "Entries tagged “%(tag)s”"
+msgstr "“%(tag)s”అని టాగులున్న అంశాలు"
+
+#: zine/templates/admin/_comment.html:14
+#: zine/templates/admin/edit_category.html:15
+#: zine/templates/admin/edit_comment.html:39
+#: zine/templates/admin/edit_entry.html:53 zine/templates/admin/edit_group.html:16
+#: zine/templates/admin/edit_page.html:49 zine/templates/admin/edit_user.html:30
+#: zine/templates/admin/index.html:58 zine/templates/admin/inspect_import.html:74
+#: zine/templates/admin/manage_comments.html:20
+#: zine/templates/admin/write_page.html:53
+msgid "Delete"
+msgstr "తొలగించు"
+
+#: zine/templates/admin/_comment.html:16
+msgid "Not Spam"
+msgstr "స్పాం కాదు"
+
+#: zine/templates/admin/_comment.html:19 zine/templates/admin/index.html:60
+#: zine/templates/admin/manage_comments.html:19
+msgid "Approve"
+msgstr "అనుమతించు"
+
+#: zine/templates/admin/_comment.html:22
+msgid "Block"
+msgstr "నిరోధించు"
+
+#: zine/templates/admin/_post_helpers.html:18
+msgid "no categories"
+msgstr "విభాగాలు లేవు"
+
+#: zine/templates/admin/_post_helpers.html:24
+msgid "No pages."
+msgstr "పేజీలు లేవు"
+
+#: zine/templates/admin/_post_helpers.html:32
+msgid "Your draft:"
+msgid_plural "Your drafts:"
+msgstr[0] "మీ చిత్తు ప్రతి"
+msgstr[1] "మీ చిత్తు ప్రతులు"
+
+#: zine/templates/admin/about_zine.html:2 zine/templates/admin/about_zine.html:4
+msgid "About Zine"
+msgstr "జైన్ గురించి"
+
+#: zine/templates/admin/about_zine.html:7
+msgid ""
+"\n"
+"      Zine is an open source content publishing platform emphasizing ease\n"
+"      of use and extensibility. It provides powerful internal "
+"infrastructure,\n"
+"      a simple and intuitive user interface.\n"
+"    "
+msgstr ""
+"\n"
+"			ఓపెన్ సోర్స్     విషయ  ప్రచురణ  రంగస్థలం జైన్ ,\n"
+"			'ఉపయోగించటానికి సులభంగా ఉండటం, పొడిగించటానికి అనువుగా ఉండటం'- అనే రెండు లక్షణాలు \n"
+"			ప్రాతిపదికగా తయారు చేయబడింది.  శక్తివంతమైన అంతర్గత  వనరుల్ని అందించే  జైన్ కు,\n" 
+"			సులభమూ మరియు  జ్ఞానవంతమూ అయిన చక్కని  యూజర్ ఇంటర్ఫేసు ఉన్నది.\n"
+
+
+
+#: zine/templates/admin/about_zine.html:12
+#, python-format
+msgid "© Copyright %(years)s by the Zine Team. Some rights reserved."
+msgstr "జైన్ బృందం   %(years)s సంవత్సరాల  © కాపీరైటు . కొన్ని హక్కులు  కేవలం  వారివే."
+
+#: zine/templates/admin/about_zine.html:15
+msgid ""
+"\n"
+"      Redistribution and use in source and binary forms, with or without\n"
+"      modification, are permitted provided that the following conditions\n"
+"      are met:"
+msgstr ""
+"\n"
+"			మార్పు చేసిగానీ, మార్పులేవీ చేయకుండాగానీ, జైన్ ను\n"
+"			మౌలిక భాషా రూపంలోను, మరియు బైనరీ రూపంలో కూడాను,  స్వయంగా ఉపయోగించుకోవచ్చు,\n" 
+"			తిరిగి పంపిణీ చేయవచ్చు- అయితే క్రింది  షరతులకు  లోబడి వర్తించాలి: \n"
+
+
+#: zine/templates/admin/about_zine.html:20
+msgid ""
+"Redistributions of source code must retain the above\n"
+"        copyright notice, this list of conditions and the following\n"
+"        disclaimer."
+msgstr ""
+"				పైన పేర్కొన్న  కాపీరైటు  హెచ్చరిక, ఈ షరతుల పట్టిక, మరియు \n"
+"				క్రింది డిస్క్లెయిమర్  -తిరిగి పంపిణీ చేయబడే  మౌలిక భాషా రూపాల్లో \n"
+"				యీ మూడూ తప్పని సరిగా ఉండాలి.\n"
+
+#: zine/templates/admin/about_zine.html:23
+msgid ""
+"Redistributions in binary form must reproduce the above\n"
+"        copyright notice, this list of conditions and the following\n"
+"        disclaimer in the documentation and/or other materials provided\n"
+"        with the distribution."
+msgstr ""
+"తిరిగి పంపిణీ కి లోనయ్యే  బైనరీ రూపాల డాక్యుమెంటేషన్ లోను, మరియు/లేదా \n"
+"				ఆ పంపిణీతోబాటు సరఫరా అయ్యే ఇతర  అంశాలలోను తప్పని సరిగా పైన పేర్కొన్న\n"
+"			  కాపీరైటు  హెచ్చరిక, ఈ షరతుల పట్టిక, మరియు 	క్రింది డిస్క్లెయిమర్ -\n"
+"				మూడింటినీ యథాతథంగా పొందుపరచాలి.\n"
+
+#: zine/templates/admin/about_zine.html:27
+msgid ""
+"The names of the contributors may not be used to endorse\n"
+"        or promote products derived from this software without specific\n"
+"        prior written permission."
+msgstr ""
+" ఈ  సాఫ్ట్వేర్  ద్వారా నిర్మించిన ఉత్పత్తులను  ప్రోత్సహించేందుకు గాని, లేదా \n"
+"				బలపరచేందుకుగాని , ప్రత్యేకమైన, వ్రాతపూర్వకమైన  ముందస్తు అనుమతి లేకుండా\n"
+"				దీనికి తోడ్పడిన వ్యక్తుల పేర్లను  వాడుకొనరాదు.\n"
+
+#: zine/templates/admin/about_zine.html:32
+msgid ""
+"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n"
+"      “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n"
+"      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n"
+"      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n"
+"      OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n"
+"      SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n"
+"      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n"
+"      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
+"      THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
+"      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
+"      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+msgstr ""
+"కాపీరైటు హక్కుదారులచేత, మరియు  దీనికి తోడ్పడిన వ్యక్తులచేత ఈ  సాఫ్ట్వేర్  'ఉన్నది ఉన్నట్లు 'గా \n"
+" 		అందజేయబడుతున్నది: దీనిపై  కేవలం వ్యాపారపరమైన స్థిరతకు సంబంధించిన వారంటీలు, లేదా\n"
+"			మరే  ప్రత్యేకమైన ఉద్దేశానికి అవసరమయ్యే అర్హతలకు  సంబంధించిన వారంటీలు మాత్రమే కాక \n"
+"			ప్రత్యేకించి పేర్కొన్న, లేదా  కేవలం ఉద్దేశించ బడిన  వారంటీలు కూడా- 'ఏవీ కూడా చెల్లవు  ' అని \n"
+"			తెలియజేయబడుతున్నది. ప్రత్యామ్నాయ సరుకులు లేదా సేవల  వినియోగం, ఉపయోగం లేకుండా పోవటం,\n"
+" 		డాటా నష్టపోవటం, లేదా లాభాల్లో నష్టం, లేదా వ్యాపారం లో ఆటంకం వాటిల్లటాలతో సహా మరే ఇతర \n"
+"			డైరెక్టు నష్టాలు, లేదా  ఇండైరెక్టు నష్టాలు, కాలవశాన కలిగే నష్టాలు, ప్రత్యేక నష్టాలు, ఉత్కృష్టమైన  \‌n"			
+"			నష్టాలు, లేక పరిణామ శీలమైన నష్టాలు- ఏవైనా సరే, అవి ఏ విధంగా సంభవించినా సరే, వాటి\n"
+"			పట్ల బాధ్యత వహించటానికి సంబంధించిన ఏ సిద్ధాంతం పరంగానైనా సరే- ఒప్పందాల్లో ఉండటం వల్లగాని,\n"
+"			ఖచ్చితమైన బాధ్యత వల్లగాని, లేదా అశ్రద్ధ ఉండటం, లేక మరే ఇతరమైన సివిల్ వ్యవహారంగా గాని-\n "
+"			అవి ఈ సాఫ్ట్వేరు  వినియోగం వల్ల  ఏ రకంగా సంక్రమించినప్పటికీ, లేదా అటువంటి నష్టాలు వాటిల్లే\n"
+"			సందర్భాలు  ఉండవచ్చని ముందుగానే తెలుసుకోగల్గినప్పటికీ కూడాను- ఈ కాపీరైటు హక్కుదారులకు\n"
+"			లేదా దీనికి తోడ్పడిన వ్యక్తులకు  ఏలాంటి బాధ్యతా ఉండదు.\n"
+""
+
+#: zine/templates/admin/approve_comment.html:2
+#: zine/templates/admin/approve_comment.html:4
+msgid "Approve Comment"
+msgstr "వ్యాఖ్యను ఆమోదించు"
+
+#: zine/templates/admin/approve_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to approve the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"			%(comment_author)s గారి వ్యాఖ్యను మీరు నిజంగా ఆమోదించ దలచారా?\n"
+
+
+#: zine/templates/admin/approve_comment.html:11
+#: zine/templates/admin/block_comment.html:12
+#: zine/templates/admin/delete_category.html:11
+#: zine/templates/admin/delete_comment.html:11
+#: zine/templates/admin/delete_comments.html:11
+#: zine/templates/admin/delete_entry.html:18
+#: zine/templates/admin/delete_group.html:17
+#: zine/templates/admin/delete_import.html:12
+#: zine/templates/admin/delete_page.html:18
+#: zine/templates/admin/delete_user.html:18
+#: zine/templates/admin/remove_plugin.html:13
+#: zine/templates/admin/unblock_comment.html:13
+msgid "Yes"
+msgstr "అవును"
+
+#: zine/templates/admin/approve_comment.html:12
+#: zine/templates/admin/block_comment.html:11
+#: zine/templates/admin/delete_category.html:10
+#: zine/templates/admin/delete_comment.html:10
+#: zine/templates/admin/delete_comments.html:10
+#: zine/templates/admin/delete_entry.html:17
+#: zine/templates/admin/delete_group.html:16
+#: zine/templates/admin/delete_import.html:11
+#: zine/templates/admin/delete_page.html:17
+#: zine/templates/admin/delete_user.html:17
+#: zine/templates/admin/remove_plugin.html:12
+#: zine/templates/admin/unblock_comment.html:12
+msgid "No"
+msgstr "కాదు"
+
+#: zine/templates/admin/basic_options.html:2
+#: zine/templates/admin/basic_options.html:4
+msgid "Basic Options"
+msgstr "మౌలిక మైన ఎంపికలు"
+
+#: zine/templates/admin/basic_options.html:5
+msgid ""
+"\n"
+"    From here you can configure the basic blog settings like the blog\n"
+"    title and tagline.\n"
+"  "
+msgstr ""
+"\n"
+"			ఇక్కడినుండి మీరు బ్లాగు పేరు, ఆ పేరు యొక్క వివరణ వంటి  మౌలిక ఎంపికల్ని\n"
+"			కాన్ఫిగర్ చేసుకోవచ్చు.\n"
+
+#: zine/templates/admin/block_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to block the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"				మీరు నిజంగానే %(comment_author)s గారి వ్యాఖ్యల్ని నిరోధించ దలచారా?\n"
+
+#: zine/templates/admin/blogger_perform_import.html:2
+#: zine/templates/admin/blogger_perform_import.html:4
+#: zine/templates/admin/perform_import.html:2
+#: zine/templates/admin/perform_import.html:4
+msgid "Importing..."
+msgstr "దిగుమతి చేసుకుంటున్నాను..."
+
+#: zine/templates/admin/blogger_perform_import.html:5
+msgid ""
+"\n"
+"    The importer will download your data from Blogger.com\n"
+"    This can take some time.\n"
+"    <strong>Don't hit cancel!</strong>\n"
+"  "
+msgstr ""
+"			బ్లాగర్.కామ్ నుండి మీ సమాచారాన్ని  ఇంపోర్టర్ దిగుమతి చేసుకుంటుంది.\n"
+"			దీనికి కొంత సమయం పట్టవచ్చు.\n"
+"			<strong>'రద్దు చేయి ' ని నొక్కకండి!</strong>\n"
+
+#: zine/templates/admin/blogger_perform_import.html:11
+msgid ""
+"\n"
+"    Data import completed successfully. You can review your import here:\n"
+"  "
+msgstr ""
+"\n"
+"			సమాచారపు దిగుమతి విజయవంతంగా పూర్తైంది.  మీ  దిగుమతిని  మీరు ఇక్కడ సమీక్షించవచ్చు:\n"
+
+#: zine/templates/admin/blogger_perform_import.html:15
+msgid "Import review page"
+msgstr "సమీక్ష పేజీని దిగుమతి చేయి"
+
+#: zine/templates/admin/cache.html:2 zine/templates/admin/cache.html:4
+msgid "Cache Options"
+msgstr "క్యాష్  ఎంపికలు"
+
+#: zine/templates/admin/cache.html:6
+msgid ""
+"\n"
+"      Zine comes with a cache system that allows you to survive a sudden\n"
+"      storm of visitors. The caching system has different backends you can\n"
+"      choose from and also different settings that you should set depending "
+"on\n"
+"      the type of server you have and the number of visitors.\n"
+"    "
+msgstr ""
+"\n"
+"				జైన్ మీకిచ్చే క్యాష్ వ్యవస్థ, అకస్మాత్తుగా ఏర్పడే సందర్శకుల తుఫాను మిమ్మల్ని ముంచెత్తకుండా\n"
+"				చూడగలదు.  మీరు ఎంపిక చేసుకునేందుకు వీలైన వేర్వేరు బ్యాకెండులు ఈ క్యాష్ వ్యవస్థకు  \n"
+"				ఉన్నాయి.  అంతేకాక మీ సర్వర్ రకాన్ని బట్టి, మీ సందర్శకుల సంఖ్యను బట్టి మీరు  \n"
+"				అమర్చుకోవలసిన  విభిన్న సెటింగులు కూడా ఈ వ్యవస్థలో‌ఉన్నాయి.\n"
+
+#: zine/templates/admin/cache.html:12
+msgid ""
+"\n"
+"      Keep in mind that if caching is enabled templates will be cached too "
+"and\n"
+"      as a result of that, they are not reloaded. If you are trying to "
+"develop \n"
+"      plugins it might be a good idea to disable all caching.\n"
+"    "
+msgstr ""
+"\n"
+"			గమనిక:  క్యాషింగును అనుమతించినట్లైతే టెంప్లేటులు కూడా క్యాష్ చేయబడతాయి-\n"
+"			తత్ఫలితంగా అవి ప్రతిసారీ తిరిగి లోడ్ అవ్వవు.  అందువల్ల, మీరు ప్లగిన్ లను అభివృద్ధి \n"
+"			చేసేందుకు ప్రయత్నిస్తున్నట్లైతే, క్యాషింగ్ మొత్తాన్నీ  ఆపివేయటం  మంచిది.\n"
+"\n"
+
+#: zine/templates/admin/cache.html:28
+msgid "Cache System"
+msgstr "క్యాష్ వ్యవస్థ"
+
+#: zine/templates/admin/cache.html:29
+msgid "Currently Zine supports three caching systems:"
+msgstr "ప్రస్తుతం  క్యాషింగ్ వ్యవస్థలు మూడింటిని అనుమతిస్తుంది జైన్:"
+
+#: zine/templates/admin/cache.html:31
+msgid ""
+"<strong>Simple Cache</strong>: The simple cache is a very\n"
+"          basic memory cache inside the server process. This cache works "
+"only\n"
+"          if you have a persistent environment. Roughly speaking this cache\n"
+"          works better the higher the number of threads in a process and the"
+"\n"
+"          lower the number or processes. If you have the chance to use a\n"
+"          memcached you should not use the simple cache."
+msgstr ""
+"<strong>సాధారణ క్యాష్ </strong>:  సర్వర్ ప్రక్రియలో చాలా ప్రాథమికమైన మెమరీ క్యాష్\n"
+"					సాధారణ క్యాష్.  మీకు గట్టి పట్టుదల గల  వాతావరణం ఉంటే ఈ క్యాష్ పని చేస్తుంది\n"
+"					మొరటుగా చెప్పాలంటే, ప్రక్రియల సంఖ్య ఎంత తక్కువ ఉండి, ఒక్కో ప్రక్రియకూ  ఎన్ని ఎక్కువ\n"
+"					థ్రెడ్లు ఉంటే ఈ క్యాష్ అంత బాగా పనిచేస్తుంది.  మీకు  ఒకవేళ  memcached ని ఉపయోగించే\n"
+"					వీలు ఉన్నట్లైతే మీరు ఈ సాధారణ క్యాష్ ను వాడరాదు.\n"
+
+#: zine/templates/admin/cache.html:37
+msgid ""
+"<strong>memcached</strong>: This cache system uses one\n"
+"          or multiple remote memcached servers for storing the cache\n"
+"          information. It requires at least one running memcached daemon. "
+"This\n"
+"          is useful for high traffic sites."
+msgstr ""
+"<strong>memcached</strong>: ఈ క్యాష్ వ్యవస్థ  క్యాష్ సమాచారాన్ని  నిలువ చేసేందుకు ఒకటి లేదా \n"
+"					ఒకటి కంటే ఎక్కువ సుదూర memcached సర్వర్లను ఉపయోగించుకుంటుంది.  దీనికై కనీసం\n"
+"					ఒక memcached డీమన్ అయినా పని చేస్తూ ఉండాల్సి వస్తుంది.  ఎక్కువ  మంది సందర్శకులుండే\n"
+"					సైట్లకు ఇది ఉపయోగం.\n"
+
+#: zine/templates/admin/cache.html:41
+msgid ""
+"<strong>Filesystem</strong>: This cache system stores the\n"
+"          cache information on the filesystem. If IO is a problem for you,\n"
+"          you should not use this cache. However for most of the cases the \n"
+"          filesystem it should be fast enough."
+msgstr ""
+"<strong>ఫైలింగు వ్యవస్థ </strong>:  ఈ క్యాష్ వ్యవస్థ క్యాష్ సమాచారాన్ని  ఫైలింగు వ్యవస్థలోనే \n"
+"					నిలువ చేస్తుంది.  ఒకవేళ మీకు ఐఓ సమస్య అయినట్లైతే మీరు ఈ క్యాష్ ను వాడరాదు.\n"
+"					అయితే  ఫైలింగు వ్యవస్థలోని అనేక సందర్భాలలో ఈ విధానం త్వరితం అవ్వవచ్చు.\n"
+
+#: zine/templates/admin/cache.html:46
+msgid "Per default no cache system is active."
+msgstr "కనీసంగా ఏ ఒక్క క్యాష్ వ్యవస్థా పనిచేయటం లేదు."
+
+#: zine/templates/admin/cache.html:49
+msgid "Memcached Options"
+msgstr "memcached ఎంపికలు"
+
+#: zine/templates/admin/cache.html:50
+msgid ""
+"\n"
+"        In order to use the memcached system you have to provide the address"
+"\n"
+"        of at least one machine running memcached.  For further details have"
+"\n"
+"        a look at <a href=\"http://www.danga.com/memcached/\">the memcached\n"
+"        webpage</a>.  Separate multiple addresses with commas.  This also\n"
+"        requires either the <a href=\"http://gijsbert.org/cmemcache/\"\n"
+"        >cmemcache</a> or <a href=\"ftp://ftp.tummy.com/pub/python-"
+"memcached/\"\n"
+"        >python-memcached</a> module.\n"
+"      "
+msgstr ""
+"\n"
+"					మీరు memcached వ్యవస్థను ఉపయోగించాలంటే, memcachedను నడిపిస్తున్న  \n"
+"					యంత్రం కనీసం ఒక్కదాని అడ్రసును  అయినా అందించాల్సి ఉంటుంది.  వివరాలకు చూడండి:\n"
+"					<a href=\"http://www.danga.com/memcached/\"> memcached\n"
+"        	వెబ్ పేజీ </a>. ఒకటి కంటే ఎక్కువ అడ్రసులున్నట్లైతే వాటిని కామాలద్వారా  వేరుచేయాలి. \n"
+"					దీనికోసం కూడా  <a href=\"http://gijsbert.org/cmemcache/\"\n"
+"        >cmemcache</a> లేదా <a href=\"ftp://ftp.tummy.com/pub/python-"
+"memcached/\"\n"
+"        >python-memcached</a> మాడ్యూలు అవసరమౌతాయి.\n"
+
+
+#: zine/templates/admin/cache.html:59
+msgid ""
+"\n"
+"        If you for example have a memcached running on localhost (127.0.0.1)"
+"\n"
+"        port 11211 you would have to enter <code>127.0.0.1:11211</code> into"
+"\n"
+"        the following text field.\n"
+"      "
+msgstr ""
+"\n"
+"					ఉదాహరణకు, మీ యంత్రంలో  localhost (127.0.0.1), port 11211 వద్ద memchad \n"
+"					నడుస్తున్నదనుకుందాం.  అప్పుడు మీరు  క్రింది  ‌text field లో <code>127.0.0.1:11211</code>\n"
+"					అని రాయాలి.\n"
+
+
+#: zine/templates/admin/cache.html:67
+msgid "Filesystem Options"
+msgstr "ఫైలింగు వ్యవస్థ ఎంపికలు"
+
+#: zine/templates/admin/cache.html:68
+msgid ""
+"\n"
+"        When using the filesystem cache you can control where Zine puts\n"
+"        all the cache data.  This path is relative to your Zine instance\n"
+"        folder and will be created automatically by Zine.  Keep in mind\n"
+"        that if you change that path and old cache data is left in the old\n"
+"        folder, Zine won't clean up the data left for you.\n"
+"      "
+msgstr ""
+"\n"
+"					ఫైలింగు సిస్టమ్ క్యాష్ ని వాడుతున్నప్పుడు, క్యాష్ డాటా మొత్తాన్నీ జైన్ ఎక్కడ పెట్టాలన్న దాన్ని\n"
+"					మీరు నియంత్రించవచ్చు. దాని పాత్ మీ జైన్ ఇన్స్టెంస్  ఫోల్డరు కు తారతమ్యంగా ఉండి, \n"
+"					అదికూడా జైన్ చే ఆటోమాటిగ్గా తయారు చేయబడుతుంది.  అయితే, మీరు ఆ మార్గాన్ని\n"
+"					మార్చి, పాత క్యాష్ డాటాను పాత ఫోల్డరులోనే వదిలి పెట్టినప్పుడు, అలా వదిలిపెట్టిన \n"
+"					సమాచారాన్ని  మీకు బదులు గా జైన్ శుభ్రం చేయదని మాత్రం గుర్తుపెట్టుకోండి. \n"
+
+#: zine/templates/admin/cache.html:75
+msgid ""
+"\n"
+"        One thing you have to keep in mind is that the cache path "
+"<em>must</em>\n"
+"        be a directory that only Zine uses for file management. The\n"
+"        Zine code cleans up there from time to time and it could delete\n"
+"        files that are otherwise not tracked by Zine. This is especially\n"
+"        the case if you try to cache into <code>/tmp</code> or a similar\n"
+"        folder that all kinds of applications use for storing temporary "
+"files.\n"
+"      "
+msgstr ""
+"\n"
+"					ఒక సంగతిని మీరు గుర్తు పెట్టుకోవాలి:  క్యాష్ పాత్ గా మీరు ఇచ్చే ఫోల్డరును ఫైలింగ్ నిర్వహణకోసం\n"
+"					కేవలం జైన్ మాత్రమే వాడేలా ఉండాలి.  జైన్ ఆదేశ వ్యవస్థ దానిని సమయానుసారంగా పరిశుభ్రం \n"
+"					చేస్తుంటుంది; జైన్ అనుసరించని ఫైళ్లను అది తొలగించివేసే అవకాశం లేకపోలేదు.  మీరు  క్యాష్ \n"
+"					ఫైళ్లను ఇతర ఉపకరణాలు తాత్కాలికంగా ఫైళ్ళను నిలువ ఉంచే <code>/tmp</code>లో గాని,\n"
+"				  లేదా దాని వంటి మరే ఇతర ఫోల్డరులోకిగాని క్యాష్ చేసినప్పుడు ప్రత్యేకంగా ఇలా జరగవచ్చు. \n"
+
+
+#: zine/templates/admin/cache.html:85
+msgid "General Cache Settings"
+msgstr "సాధారణ క్యాష్  సెటింగులు"
+
+#: zine/templates/admin/cache.html:86
+msgid ""
+"\n"
+"      The following configuration values are cache system-independent. You\n"
+"      can use them to fine-tune the caching. The timeout is the number of\n"
+"      seconds an item is cached per default. Some items have different cache"
+"\n"
+"      timeouts though. If “eager caching” is enabled the cache system will\n"
+"      cache a lot more but it will have visible side-effects. For example\n"
+"      new blog posts won't appear on the index or in the feed for up to the\n"
+"      default timeout.\n"
+"    "
+msgstr ""
+"\n"
+"				క్రింద ఇవ్వబడిన కాన్ఫిగరేషన్ విలువలు ఏ క్యాష్ వ్యవస్థకైనా వర్తిస్తాయి.  క్యాషింగును చక్కదిద్ది, దానిని\n"
+"				కొద్దికొద్దిగా సవరించేందుకు మీరు వీటిని వాడుకోవచ్చు.  ఏదైనా అంశాన్ని జైన్ వ్యవస్థ కనీసం ఎన్ని \n"
+"				సెకనుల పాటు క్యాష్ చేసి ఉంచాలో 'కాల పరిమితి ' అనే సంఖ్య తెలియజేస్తుంది. అయితే కొన్ని  \n"
+"				అంశాలకుండే  కాల పరిమితులు వేరుగా ఉంటాయి. ఒకవేళ 'ఈగర్ క్యాషింగ్'ను అనుమతించినట్లైతే \n"
+"				క్యాష్ వ్యవస్థ మరింత సమాచారాన్ని క్యాష్ చేసుకుంటుంది, కానీ‌ దాని వల్ల స్పష్టమైన అవాంఛనీయ \n"
+"				పరిణామాలు కొన్ని తలెత్తవచ్చు.  ఉదాహరణకు, కాలపరిమితి పూర్తయ్యేవరకు  బ్లాగు  \n"
+"				విషయ సూచికలో గాని, లేదా బ్లాగు ఫీడులో గాని కొత్త టపాలు కనిపించక పోవచ్చు.\n"
+
+#: zine/templates/admin/cache.html:101
+msgid "Clear Cache"
+msgstr "క్యాష్ ని ఖాళీ చేయి"
+
+#: zine/templates/admin/change_password.html:2
+#: zine/templates/admin/change_password.html:4
+#: zine/templates/admin/change_password.html:8 zine/templates/admin/layout.html:17
+msgid "Change Password"
+msgstr "సంకేత పదాన్ని మార్చు"
+
+#: zine/templates/admin/configuration.html:2
+#: zine/templates/admin/configuration.html:4 zine/views/admin.py:131
+msgid "Configuration Editor"
+msgstr "కాన్ఫిగరేషన్ ని  సరిదిద్దే ఉపకరణం"
+
+#: zine/templates/admin/configuration.html:5
+msgid ""
+"\n"
+"    Here you can tune all registered configuration values. Note that some of"
+"\n"
+"    them (especially the core configuration values) can easily break your\n"
+"    installation if set to an illegal value. Don't alter any of those values"
+"\n"
+"    if you don't know what effect they have. This editor is especially\n"
+"    useful if you want to configure plugins that don't provide a "
+"configuration\n"
+"    page (yet).\n"
+"  "
+msgstr ""
+"\n"
+"			నమోదైన కాన్ఫిగరేషన్ విలువలనన్నింటినీ మీరు ఇక్కడ  సరిదిద్దవచ్చు.  వీటిలో  మౌలిక కాన్ఫిగరేషన్ \n"
+"			విలువలవంటి కొన్నింటికి అసంబద్ధమైన విలువలనిచ్చినప్పుడు మీ జైన్ ఇన్స్టలేషన్ ఇక \n"
+"			పనిచేయక, మొరాయించే   ప్రమాదం కూడా ఉన్నది. అందువల్ల, ప్రభావం ఎలా ఉంటుందో తెలియని  \n"
+"			అంశాల్ని వేటినీ మీరు   మార్చకండి. కాన్ఫిగరేషన్ పేజీని (ఇంకా) ఇవ్వని ప్లగిన్లను కాన్ఫిగర్ \n"
+"			చేయాలంటే ఈ ఉపకరణం ప్రత్యేకమైన వెసులుబాటునిస్తుంది.\n"
+
+
+#: zine/templates/admin/configuration.html:31
+msgid "Disable Editor"
+msgstr "మార్పు చేయటాన్ని అనుమతించకు"
+
+#: zine/templates/admin/configuration.html:34
+msgid ""
+"\n"
+"        The configuration editor is disabled because of this. If you really "
+"want\n"
+"        to use it, click the button to proceed.\n"
+"      "
+msgstr ""
+"\n"
+"				దీనివల్ల కాన్ఫిగరేషన్ మార్పులు అనుమతించబడటంలేదు. అయినప్పటికీ మార్పులు చేయాలంటే \n"
+"				ఈ బొత్తామును నొక్కండి.\n"
+
+#: zine/templates/admin/configuration.html:39
+msgid "Enable Editor"
+msgstr "సరిదిద్దే ఉపకరణాన్ని అనుమతించు"
+
+#: zine/templates/admin/delete_category.html:2
+#: zine/templates/admin/delete_category.html:4
+msgid "Delete Category"
+msgstr "విభాగాన్ని తొలగించు"
+
+#: zine/templates/admin/delete_category.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete category “%(category_name)s”?\n"
+"      "
+msgstr ""
+"\n"
+"				“%(category_name)s” అనే విభాగాన్ని నిజంగా తొలగించ దలచారా?\n"
+"\n"
+
+#: zine/templates/admin/delete_comment.html:2
+#: zine/templates/admin/delete_comment.html:4
+msgid "Delete Comment"
+msgstr "వ్యాఖ్యను తొలగించు"
+
+#: zine/templates/admin/delete_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"				%(comment_author)s గారి వ్యాఖ్యను మీరు నిజంగా తొలగించ దలచారా?\n"
+"\n"
+
+#: zine/templates/admin/delete_comments.html:2
+#: zine/templates/admin/delete_comments.html:4
+msgid "Delete Comments"
+msgstr "వ్యాఖ్యలను తొలగించు"
+
+#: zine/templates/admin/delete_comments.html:7
+msgid "Do you really want to delete the selected comments?"
+msgstr "ఎంపికైన వ్యాఖ్యలను మీరు నిజంగా తొలగించ దలచారా?"
+
+#: zine/templates/admin/delete_entry.html:2
+#: zine/templates/admin/delete_entry.html:4
+msgid "Delete Entry"
+msgstr "వ్రాసిన అంశాన్ని తొలగించు"
+
+#: zine/templates/admin/delete_entry.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete entry “%(entry_title)s”?\n"
+"    "
+msgstr ""
+"\n"
+"				“%(entry_title)s” అనే పేరుతో వ్రాయబడిన అంశాన్ని  మీరు నిజంగా తొలగించదలచారా?\n"
+"\n"
+
+#: zine/templates/admin/delete_entry.html:10
+#: zine/templates/admin/delete_page.html:10
+#, python-format
+msgid ""
+"\n"
+"      This will also delete %(comment_count)s comment.\n"
+"    "
+msgid_plural ""
+"\n"
+"      This will also delete %(comment_count)s comments.\n"
+"    "
+msgstr[0] ""
+"\n"
+"				దీనివల్ల %(comment_count)s వ్యాఖ్య కూడా తొలగించబడుతుంది.\n"
+"		"
+msgstr[1] ""
+"\n"
+"				దీనివల్ల %(comment_count)s వ్యాఖ్యలు కూడా తొలగించబడతాయి.\n"
+"		"
+
+#: zine/templates/admin/delete_group.html:2
+#: zine/templates/admin/delete_group.html:4
+msgid "Delete Group"
+msgstr "సమూహాన్ని తొలగించు"
+
+#: zine/templates/admin/delete_group.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete the group “%(name)s”?\n"
+"    "
+msgstr ""
+"\n"
+"			 మీరు నిజంగా“%(name)s” అనే సమూహాన్ని తొలగించ దలచారా? \n"
+"		"
+
+#: zine/templates/admin/delete_group.html:9
+msgid ""
+"\n"
+"      What should happen to the users assigned with this group?\n"
+"    "
+msgstr ""
+"\n"
+"			ప్రస్తుతం ఈ సమూహానికి  చెందిన యూజర్లను ఏం చేయాలి? \n"
+"		"
+
+#: zine/templates/admin/delete_import.html:2
+#: zine/templates/admin/delete_import.html:4
+msgid "Delete Import Dump"
+msgstr "దిగుమతైన డంప్ ను తొలగించు"
+
+#: zine/templates/admin/delete_import.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete the imported dump “%(dump_title)s”?\n"
+"      "
+msgstr ""
+"\n"
+"				మీరు నిజంగానే “%(dump_title)s” అనే పేరుతో దిగుమతైన డంప్ ను తొలగించ దలచారా?\n"
+"		"
+
+#: zine/templates/admin/delete_page.html:2 zine/templates/admin/delete_page.html:4
+msgid "Delete Page"
+msgstr "పేజీని తొలగించు"
+
+#: zine/templates/admin/delete_page.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete page “%(page_title)s”?\n"
+"    "
+msgstr ""
+"\n"
+"			మీరు నిజంగా “%(page_title)s” అనే పేజీని తొలగించ దలచారా?\n"
+"	"
+
+#: zine/templates/admin/delete_user.html:2 zine/templates/admin/delete_user.html:4
+msgid "Delete User"
+msgstr "యూజర్ ను తొలగించు"
+
+#: zine/templates/admin/delete_user.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete the user “%(username)s”?\n"
+"    "
+msgstr ""
+"\n"
+"			మీరు నిజంగానే “%(username)s” అనే  యూజర్ ని తొలగించ దలచారా?\n"
+"		"
+
+#: zine/templates/admin/delete_user.html:9
+#, python-format
+msgid ""
+"\n"
+"      What should happen to the %(post_count)s post this user wrote?\n"
+"    "
+msgid_plural ""
+"\n"
+"      What should happen to the %(post_count)s posts this user wrote?\n"
+"    "
+msgstr[0] ""
+"\n"
+"				ఈ యూజర్ వ్రాసిన%(post_count)s టపాను ఏం చేయాలి? \n"
+"		"
+msgstr[1] ""
+"\n"
+"				ఈ యూజర్ వ్రాసిన%(post_count)s టపాలను ఏం చేయాలి?\n"
+"		"
+
+#: zine/templates/admin/edit_category.html:3
+#: zine/templates/admin/edit_category.html:5
+msgid "Edit Category"
+msgstr "విభాగాన్ని సరిదిద్దు"
+
+#: zine/templates/admin/edit_comment.html:3
+#: zine/templates/admin/edit_comment.html:5
+msgid "Edit Comment"
+msgstr "వ్యాఖ్యను సరిదిద్దు"
+
+#: zine/templates/admin/edit_entry.html:4 zine/templates/admin/index.html:19
+#: zine/templates/admin/manage_entries.html:10
+msgid "New Entry"
+msgstr "కొత్త అంశం"
+
+#: zine/templates/admin/edit_entry.html:4
+#, python-format
+msgid "Edit Entry “%s”"
+msgstr "ఈ అంశాన్ని సరిదిద్దు"
+
+#: zine/templates/admin/edit_entry.html:11 zine/templates/admin/edit_page.html:11
+msgid "Important:"
+msgstr "గమనిక:"
+
+#: zine/templates/admin/edit_entry.html:12 zine/templates/admin/edit_page.html:12
+msgid ""
+"This post was created with a parser that is no longer\n"
+"        available.  You won't be able to save the post with the same parser\n"
+"        unless you re-activate the plugin that provided it."
+msgstr ""
+"ఈ టపా తయారీలో వాడిన పార్సర్ ప్రస్తుతం అందుబాటులో లేదు.  అందువల్ల\n"
+"				ఆ పార్సర్ ను  మీకు	అందించిన ప్లగిన్ ను తిరిగి యాక్టివేట్ చేసుకుంటే తప్ప,\n"
+"				మీ టపాను (అదే పార్సర్ తో) భద్రపరచటం వీలవదు.  \n"
+
+#: zine/templates/admin/edit_entry.html:29
+#: zine/templates/admin/manage_categories.html:21
+msgid "No categories."
+msgstr "విభాగాలు లేవు"
+
+#: zine/templates/admin/edit_entry.html:33 zine/templates/admin/edit_page.html:31
+msgid "Discussion"
+msgstr "చర్చ"
+
+#: zine/templates/admin/edit_entry.html:45
+msgid "View Entry"
+msgstr "ఈ అంశాన్ని చూపించు"
+
+#: zine/templates/admin/edit_entry.html:51 zine/templates/admin/edit_group.html:14
+#: zine/templates/admin/edit_page.html:47 zine/templates/admin/edit_user.html:28
+msgid "Save and continue editing"
+msgstr "భద్రపరచి, సరిదిద్దటం కొనసాగించు"
+
+#: zine/templates/admin/edit_group.html:3
+#: zine/templates/admin/manage_groups.html:22
+msgid "New Group"
+msgstr "కొత్త సమూహం"
+
+#: zine/templates/admin/edit_group.html:3
+msgid "Edit Group"
+msgstr "సమూహాన్ని సరిదిద్దు"
+
+#: zine/templates/admin/edit_page.html:4 zine/templates/admin/manage_pages.html:10
+#: zine/templates/admin/write_page.html:2 zine/templates/admin/write_page.html:4
+msgid "New Page"
+msgstr "కొత్త పేజీ"
+
+#: zine/templates/admin/edit_page.html:4
+#, python-format
+msgid "Edit Page “%s”"
+msgstr "“%s” అనే పేజీని సరిదిద్దు"
+
+#: zine/templates/admin/edit_page.html:42 zine/templates/admin/write_page.html:46
+msgid "View Page"
+msgstr "పేజీని చూపించు"
+
+#: zine/templates/admin/edit_user.html:3 zine/templates/admin/manage_users.html:24
+msgid "New User"
+msgstr "కొత్త యూజర్"
+
+#: zine/templates/admin/edit_user.html:3
+msgid "Edit User"
+msgstr "యూజర్  వివరాలను సరిదిద్దు"
+
+#: zine/templates/admin/export.html:2 zine/templates/admin/export.html:4
+#: zine/templates/admin/export.html:21 zine/templates/admin/information.html:206
+#: zine/views/admin.py:128
+msgid "Export"
+msgstr "ఎగుమతి చేయి"
+
+#: zine/templates/admin/export.html:5
+msgid ""
+"\n"
+"    Here you can dump your Zine database information into an standardized\n"
+"    format (Atom) with Zine extensions which we call “Zine eXtended\n"
+"    Atom” (ZineXA).  You can use this file to import your posts into another"
+"\n"
+"    weblog software that supports Atom.  You should not use this file for\n"
+"    Zine migrations as this file will not include attachments, the blog\n"
+"    configuration and probably data stored by plugins.\n"
+"  "
+msgstr ""
+"\n"
+"			మీ జైన్ డాటాబేస్ లోని సమాచారాన్ని మీరు ఇక్కడ 'ఆటం' అనే ఒక ప్రామాణిక  ఫార్మాటులో \n"
+"			కూర్చి పెట్టవచ్చు.  వీటి ఎక్స్టెన్షన్లను మేం 'జైన్ extended Atom(ZineXA)' అని వ్యవహరిస్తాం.\n"
+"			ఆటం కు మద్దతిచ్చే  ఇతర వెబ్ లాగ్ సాఫ్ట్వేర్ దేనిలోకైనా మీరు ఈ టపాలను ఎగుమతి చేసుకోవచ్చు.\n"
+"			జైన్  మైగ్రేషన్లకోసం మీరు ఈ ఫైలును వాడుకొని లాభం లేదు- ఎందుకంటే  ఈ ఫైలులో‌ అటాచ్మెంట్లు,\n"
+"			బ్లాగు కాన్ఫిగరేషన్ వివరాలు, బహుశ: ప్లగిన్లు  నిలువఉంచుకున్న సమాచారం- ఇవేవీ ఉండవు.\n"
+
+#: zine/templates/admin/export.html:13
+msgid ""
+"\n"
+"    Please keep in mind that the exported file will contain confidential\n"
+"    information such as password hashes and database passwords from the\n"
+"    configuration.\n"
+"  "
+msgstr ""
+"\n"
+"			దయచేసి గుర్తించండి:  మీరు ఎగుమతి చేస్తున్న ఫైలులో కాన్ఫిగరేషన్  కు చెందిన సంకేతపదాల \n"
+"			హ్యాష్ లు, డాటాబేస్ సంకేత పదాల వంటి రహస్య సమాచారం కూడా నిక్షిప్తమై ఉంటుంది.\n"
+
+#: zine/templates/admin/help.html:8
+msgid "Table Of Contents"
+msgstr "విషయ సూచిక"
+
+#: zine/templates/admin/help_404.html:4
+msgid "Documentation Not Found"
+msgstr "మరింత వివరణ లభించలేదు"
+
+#: zine/templates/admin/help_404.html:5
+msgid "The online documentation could not be found."
+msgstr "అంతర్జాలపు వివరణ దస్తావేజులు కనబడలేదు."
+
+#: zine/templates/admin/help_404.html:6
+msgid ""
+"Possibly you have to generate the docs first by running the\n"
+"\t  <tt>build-documentation</tt> script from zine's scripts\n"
+"\t  folder."
+msgstr ""
+"బహుశ: మీరు ముందుగా  జైన్ scripts ఫోల్డరునుండి \n"
+"\t  <tt>build-documentation</tt> అనే స్క్రిప్టును  నడిపి, దానిద్వారా \n"
+"దస్తావేజులను సృజించవలసి ఉంటుంది.\n"
+
+#: zine/templates/admin/import.html:2 zine/templates/admin/import.html:4
+#: zine/templates/admin/import_blogger.html:41
+#: zine/templates/admin/import_feed.html:17
+#: zine/templates/admin/import_wordpress.html:19 zine/views/admin.py:127
+msgid "Import"
+msgstr "దిగుమతి చేసుకో"
+
+#: zine/templates/admin/import.html:5
+msgid ""
+"\n"
+"    If you have posts or comments in another system, Zine can import those\n"
+"    into this blog.  The data imported doesn't directly end up in the blog "
+"but a\n"
+"    queue so that you can pick which data you want to import.  To get "
+"started,\n"
+"    choose a system to import from below:\n"
+"  "
+msgstr ""
+"\n"
+"			వేరే వ్యవస్థ దేనిలోనైనా మీకు  టపాలుగానీ , వ్యాఖ్యలుగానీ ఉన్నట్లైతే, జైన్ వాటిని ఈ  బ్లాగు లోనికి దిగుమతి \n"
+"			చేసుకోగలదు.  ఇలా దిగుమతి  అయిన సమాచారం  నేరుగా బ్లాగులోకి వచ్చి కూర్చోదు-\n"
+"			కానీ ఒక 'క్యూ' చివరన చేరుకుంటుంది.  మీరు దిగుమతి చేసుకోవలసిన ప్రత్యేక డాటాను   \n"
+"			దీనినుండి మీరు ఎంపిక చేసుకోవచ్చు.  ఈ పనిని ప్రారంభించేందుకుగాను, ముందుగా \n"
+"			మీరు దిగుమతి చేసుకోవాలనుకున్న సమాచారం ఏ వ్యవస్థకు చెందిందో  క్రింది జాబితాలో గుర్తించండి:\n"
+
+#: zine/templates/admin/import.html:17
+msgid ""
+"\n"
+"      The following list lists all the imports that are not yet in the "
+"database\n"
+"      or deleted.  Click on one of the links to inspect the imported data "
+"and\n"
+"      select what you want to have in the database.\n"
+"    "
+msgstr ""
+"\n"
+"				డాటాబేస్ లో లేని/ తొలగించబడిన దిగుమతులన్నిటి పేర్లూ ఈ క్రింది జాబితాలో ఉన్నాయి:\n"
+"				ఇలా దిగుమతైన సమాచారాన్ని పరిశీలించి, డాటాబేస్ లో ఏ ఏ అంశాలు ఉండాలో ఎంపిక \n"
+"				చేసుకునేందుకుగాను వీటిలో ఏ లంకెపైనైనా క్లిక్ చేయండి.\n"
+"\n"
+
+#: zine/templates/admin/import.html:26
+msgid "Importer Used"
+msgstr "ఉపయోగించిన దిగుమతిదారు"
+
+#: zine/templates/admin/import_blogger.html:14
+#: zine/templates/admin/import_blogger.html:16
+msgid "Import from Blogger.com"
+msgstr "Blogger.com నుండి  దిగుమతి చేసుకో"
+
+#: zine/templates/admin/import_blogger.html:17
+msgid ""
+"\n"
+"  This importer allows you to import a blog from Blogger.com.\n"
+"  "
+msgstr ""
+"\n"
+"Blogger.com నుండి ఒక బ్లాగును  దిగుమతి చేసుకోవటం \n"
+"  ఈ దిగుమతిదారుద్వారా  మీకు వీలవుతుంది.\n"
+"		"
+
+#: zine/templates/admin/import_blogger.html:24
+#, python-format
+msgid ""
+"\n"
+"  You are authenticated with %(google)s.\n"
+"  "
+msgstr ""
+"\n"
+"		%(google)s మీ వాస్తవికతను అంగీకరిస్తున్నది.  \n"
+"\n"
+"		"
+
+#: zine/templates/admin/import_blogger.html:30
+msgid "Select Blog To Import"
+msgstr "దిగుమతి చేసుకొనవలసిన బ్లాగును ఎంపిక చేసుకోండి"
+
+#: zine/templates/admin/import_blogger.html:42
+msgid "Log out of Google"
+msgstr "గూగుల్ నుండి  నిష్క్రమించండి."
+
+#: zine/templates/admin/import_blogger.html:50
+#, python-format
+msgid ""
+"\n"
+"  You are not authenticated with %(google)s. You need to authenticate to "
+"continue\n"
+"  the import. This link will take you to %(google)s, and once you are\n"
+"  authenticated you will be redirected back to this importer. This is the\n"
+"  preferred way to authenticate, and although it's a bit clumsy, it is safe."
+"\n"
+"  "
+msgstr ""
+"\n"
+"		మీ వాస్తవికతను ఇంకా  %(google)s గుర్తించవలసి ఉన్నది.  దిగుమతిని కొనసాగించాలంటే\n"
+"		మీరు వారిచే గుర్తించబడాలి; అంగీకరింపబడాలి. ఈ లంకె మిమ్మల్ని  %(google)s కు  \n"
+"		తీసుకుపోతుంది. ఒకసారి మీరు అంగీకరింపబడ్డ తరువాత  మీరు తిరిగి ఈ దిగుమతిదారు \n"
+"		వద్దకు పంపబడతారు.  వాస్తవికతను  గుర్తింపజేసుకునేందుకు ఈ మార్గమే సరైనది-\n"
+"		కొంచెం  వికారంగా అనిపించినప్పటికీ, ఈ పద్ధతి భద్రమైనది- కనుక ఉత్తమం.\n"
+"		"
+
+#: zine/templates/admin/import_blogger.html:57
+#, python-format
+msgid ""
+"\n"
+"    <a href=\"%(url)s\">Log into your %(google)s account</a>\n"
+"  "
+msgstr ""
+"\n"
+"    <a href=\"%(url)s\">మీ  %(google)s అకౌంటులోనికి లాగిన్ అవ్వండి</a>\n"
+"  "
+
+#: zine/templates/admin/import_feed.html:2 zine/templates/admin/import_feed.html:4
+msgid "Import from Feed"
+msgstr "ఫీడ్ నుండి దిగుమతి చేసుకో"
+
+#: zine/templates/admin/import_feed.html:5
+msgid ""
+"\n"
+"    This importer can be used to import standard compliant feeds with "
+"optional\n"
+"    proprietary extensions.  Because of different incompatible RSS standards"
+"\n"
+"    this importer can currently only handle Atom feeds.\n"
+"  "
+msgstr ""
+"\n"
+"    ప్రామాణికమైన ఫీడులను  దిగుమతి చేసుకునేందుకు ఈ దిగుమతిదారును ఉపయోగించవచ్చు. ఈ \n"
+"   	ఫీడులలో  అంతగా ప్రామాణికం కాని, స్వకీయమైన extensionలు ఎంపిక చేసుకునే వీలుండవచ్చు.\n"
+"   	ఒకదానితో ఒకటి సరిపోలని RSS ప్రమాణాలుండటం వల్ల, ఈ దిగుమతిదారు ప్రస్తుతానికి కేవలం\n"
+"  		ఆటం ఫీడులను మాత్రమే చేపట్టగలుగుతున్నది.\n"
+
+
+#: zine/templates/admin/import_feed.html:13
+msgid "Upload Feed"
+msgstr "ఫీడును ఎక్కించు"
+
+#: zine/templates/admin/import_wordpress.html:2
+#: zine/templates/admin/import_wordpress.html:4
+msgid "Import from WordPress"
+msgstr "WordPress నుండి దిగుమతి చేసుకో"
+
+#: zine/templates/admin/import_wordpress.html:5
+msgid ""
+"\n"
+"    This importer allows you to import posts and comments from your "
+"WordPress\n"
+"    blog into your new Zine blog.  Either upload your WordPress eXtended\n"
+"    RSS (WXR) file created in the WordPress admin panel or give the importer"
+"\n"
+"    the location of such a file on an external URL and it will import the "
+"posts,\n"
+"    comments, custom fields, and categories into this blog.\n"
+"  "
+msgstr ""
+"\n"
+"			మీ పాత WordPress బ్లాగు నుండి  కొత్త జైన్ బ్లాగుకు మీ టపాల్ని, వ్యాఖ్యల్ని దిగుమతి చేసుకునేందుకు\n"
+"			ఈ దిగుమతిదారు సహాయపడుతుంది.  దీనికోసం WordPress బ్లాగు నిర్వహణ కక్ష్యలో  \n"
+"			తయారుచేసిన WordPress eXtended RSS (WXR)ఫైలును అప్లోడ్ చేయండి.  లేదా,\n"
+"			అలాంటి ఫైలు యొక్క అంతర్జాలపు యూఆరెల్ ను ఈ దిగుమతిదారుకు అందజేయండి- అప్పుడు\n"
+"			అది మీ టపాల్ని, మీ ప్రత్యేకమైన ఫీల్డులను, విభాగాలను ఈ బ్లాగులోకి దిగుమతి చేస్తుంది.\n"
+"  "
+
+#: zine/templates/admin/import_wordpress.html:15
+msgid "Upload Dump"
+msgstr "డంప్ ను ఎక్కించండి"
+
+#: zine/templates/admin/index.html:2 zine/templates/admin/index.html:5
+#: zine/views/admin.py:84
+msgid "Dashboard"
+msgstr "డాష్ బోర్డ్ "
+
+#: zine/templates/admin/index.html:8
+#, python-format
+msgid "Howdy.  Welcome to the Zine administration interface %(user)s."
+msgstr "బాగున్నారా, %(user)s? జైన్ నిర్వహణ మాధ్యమానికి స్వాగతం "
+
+#: zine/templates/admin/index.html:11
+#, python-format
+msgid "You have written <strong>%(your_posts)s</strong> post so far."
+msgid_plural "You have written <strong>%(your_posts)s</strong> posts so far."
+msgstr[0] "మీరు ఇప్పటివరకూ <strong>%(your_posts)s</strong>టపా మాత్రం వ్రాశారు."
+msgstr[1] "మీరు ఇప్పటివరకూ<strong>%(your_posts)s</strong>టపాలు వ్రాశారు."
+
+#: zine/templates/admin/index.html:17
+msgid "Quickstart"
+msgstr "సత్వరం ప్రారంభం"
+
+#: zine/templates/admin/index.html:20
+msgid "Moderate Comments"
+msgstr "వ్యాఖ్యలను మోడరేట్ చేయండి"
+
+#: zine/templates/admin/index.html:21 zine/templates/admin/manage_entries.html:3
+#: zine/templates/admin/manage_entries.html:5
+msgid "Manage Entries"
+msgstr "వ్రాసిన అంశాలను పునర్వ్యవస్థీకరించండి"
+
+#: zine/templates/admin/index.html:22
+msgid "Configure Zine"
+msgstr "జైన్ ను కాన్ఫిగర్ చేయండి"
+
+#: zine/templates/admin/index.html:23
+msgid "Manage Plugins"
+msgstr "ప్లగిన్లను పునర్వ్యవస్థీకరించండి"
+
+#: zine/templates/admin/index.html:24 zine/templates/admin/manage_users.html:2
+#: zine/templates/admin/manage_users.html:4
+msgid "Manage Users"
+msgstr "యూజర్లను పునర్వ్యవస్థీకరించండి"
+
+#: zine/templates/admin/index.html:25
+msgid "Get Help"
+msgstr "సహాయం పొందండి"
+
+#: zine/templates/admin/index.html:27
+#, python-format
+msgid ""
+"\n"
+"        If you need help, have a look at the <a "
+"href=\"%(help)s\">documentation</a>.  If that doesn't solve your problems "
+"you might\n"
+"        find answers in the <a href=\"%(support)s\">support section</a> of "
+"the\n"
+"        <a href=\"%(website)s\">Zine website</a>.\n"
+"      "
+msgstr ""
+"\n"
+"        	మీకు గనక  సహాయం అవసరమైతే  <a "href=\"%(help)s\">డాక్యుమెంటేషన్ </a>\n"
+"					ను చూడండి. ఒకవేళ దానితో మీ సమస్యలు తీరనట్లైతే, వాటి పరిష్కారం బహుశ:\n"
+"        <a href=\"%(website)s\">జైన్ వెబ్సైటు</a>యొక్క\n"
+"        <a href=\"%(support)s\">మద్దతు విభాగం</a> లో లభించవచ్చు- చూడండి.\n"
+"      "
+
+#: zine/templates/admin/index.html:37
+msgid "Drafts"
+msgstr "చిత్తు ప్రతులు"
+
+#: zine/templates/admin/index.html:46
+msgid "Comments Awaiting Approval"
+msgstr "ఆమోదాన్ని కోరుతున్న వ్యాఖ్యలు"
+
+#: zine/templates/admin/index.html:65
+msgid "Last Posts"
+msgstr "పాత టపాలు"
+
+#: zine/templates/admin/index.html:76
+msgid "Zine at Reddit"
+msgstr "రెడ్డిట్ వద్ద జైన్"
+
+#: zine/templates/admin/index.html:77
+#, python-format
+msgid ""
+"\n"
+"        Zine is present at %(reddit)s.  The latest popular items in the Zine"
+"\n"
+"        subreddit are listed below:\n"
+"        "
+msgstr ""
+"\n"
+"        జైన్  %(reddit)s వద్ద లభిస్తుంది. జైన్ సబ్ రెడ్డిట్ లో"
+"\n"
+"        గల ఆకర్షణీయమైన అంశాలు క్రింది జాబితాలో ఇవ్వబడ్డాయి:\n"
+"        "
+
+#: zine/templates/admin/information.html:4
+#: zine/templates/admin/information.html:20
+msgid "About The System"
+msgstr "జైన్ వ్యవస్థ గురించి"
+
+#: zine/templates/admin/information.html:21
+msgid "Zine Environment"
+msgstr "జైన్ వాతావరణం"
+
+#: zine/templates/admin/information.html:23
+msgid "Zine Version"
+msgstr "జైన్ విడుదల వర్షన్"
+
+#: zine/templates/admin/information.html:25
+msgid "Distribution Mode"
+msgstr "పంపిణీ తరహా"
+
+#: zine/templates/admin/information.html:27
+msgid "Package Location"
+msgstr "ప్యాకేజీ ఉన్న స్థానం"
+
+#: zine/templates/admin/information.html:29
+msgid "Shared Data"
+msgstr "పంచుకొన్న  సమాచారం"
+
+#: zine/templates/admin/information.html:31
+msgid "Builtin Templates"
+msgstr "వ్యవస్థలో భాగంగా తయారైన టెంప్లేటులు"
+
+#: zine/templates/admin/information.html:33
+msgid "Builtin Plugins"
+msgstr "వ్యవస్థలో భాగంగా తయారైన ప్లగిన్లు"
+
+#: zine/templates/admin/information.html:35
+msgid "Builtin Translations"
+msgstr "వ్యవస్థలో భాగంగా తయారైన అనువాదాలు"
+
+#: zine/templates/admin/information.html:37
+msgid "Path to Instance"
+msgstr "ఇంస్టెన్సు కు మార్గం"
+
+#: zine/templates/admin/information.html:39
+msgid "Database URI"
+msgstr "డాటాబేసు యూఆరెల్"
+
+#: zine/templates/admin/information.html:42
+msgid "Hosting Environment"
+msgstr "హోస్ట్ చేస్తున్న వాతావరణం"
+
+#: zine/templates/admin/information.html:44
+msgid "Python Version"
+msgstr "పైథాన్ విడుదల వర్షన్"
+
+#: zine/templates/admin/information.html:46
+msgid "Platform"
+msgstr "ప్లాట్ ఫాం"
+
+#: zine/templates/admin/information.html:48
+msgid "Persistent Environment"
+msgstr "గట్టి పట్టుదల గలిగిన వాతావరణం"
+
+#: zine/templates/admin/information.html:49
+#: zine/templates/admin/information.html:59
+msgid "yes"
+msgstr "అవును"
+
+#: zine/templates/admin/information.html:49
+#: zine/templates/admin/information.html:55
+#: zine/templates/admin/information.html:59
+msgid "no"
+msgstr "కాదు"
+
+#: zine/templates/admin/information.html:50
+msgid "Multithreaded"
+msgstr "బహుళమైన థ్రెడ్లు గల"
+
+#: zine/templates/admin/information.html:53
+#, python-format
+msgid "yes (%(count)s active threads)"
+msgstr "అవును.(%(count)s థ్రెడ్లు ప్రస్తుతం పనిచేస్తున్నాయి)"
+
+#: zine/templates/admin/information.html:58
+msgid "Multiprocess"
+msgstr "బహుళమైన ప్రాసెస్ లు"
+
+#: zine/templates/admin/information.html:60
+msgid "WSGI Version"
+msgstr "WSGI విడుదల వర్షన్"
+
+#: zine/templates/admin/information.html:63
+msgid "URL Endpoints"
+msgstr "యూఆరెల్ అంత్యాలు"
+
+#: zine/templates/admin/information.html:64
+msgid ""
+"\n"
+"    The following endpoints are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    ఈ ఇంస్టెన్సు లో క్రింది అంత్యాలు నమోదై ఉన్నాయి:\n"
+"  "
+
+#: zine/templates/admin/information.html:72
+msgid "Absolute URL Handlers"
+msgstr "సంపూర్ణ యూఆరెల్  తో పనిచేసే అంశాలు "
+
+#: zine/templates/admin/information.html:73
+msgid ""
+"\n"
+"    The following absolute URL handlers are registered on this instance:\n"
+"  "
+msgstr "సంపూర్ణ యూఆరెల్ తో పనిచేసే ఈ క్రింది అంశాలు ప్రస్తుత ఇంస్టెన్సు లో నమోదై ఉన్నాయి."
+
+#: zine/templates/admin/information.html:81
+msgid "View Handlers"
+msgstr "హాండ్లర్లను చూపించు"
+
+#: zine/templates/admin/information.html:82
+msgid ""
+"\n"
+"    The following view handlers for endpoints are registered on this "
+"instance:\n"
+"  "
+msgstr ""
+"\n"
+"     యూఆరెల్ అంత్యాలకోసం క్రింది వ్యూ హాండ్లర్లు ఈ ఇంస్టెన్సు లో నమోదై ఉన్నాయి.\n"
+"  "
+
+#: zine/templates/admin/information.html:90
+msgid "Content Types"
+msgstr "విషయంలోని రకాలు"
+
+#: zine/templates/admin/information.html:91
+msgid ""
+"\n"
+"    The following content types are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    ఈ ఇంస్టెన్సు లో క్రింద చూపిన రకాల విషయాలు నమోదై ఉన్నాయి:\n"
+"  "
+
+#: zine/templates/admin/information.html:103
+msgid ""
+"\n"
+"    The following privileges are known to the system:\n"
+"  "
+msgstr ""
+"\n"
+"    వ్యవస్థకు క్రింది అధికారాలు తెలుసు:\n"
+"  "
+
+#: zine/templates/admin/information.html:111
+msgid "Services"
+msgstr "సేవలు"
+
+#: zine/templates/admin/information.html:112
+msgid ""
+"\n"
+"    The following servicepoints are registered on this instance to be "
+"callable\n"
+"    via one of the available services.\n"
+"    "
+msgstr ""
+"\n"
+"    ఈ ఇంస్టెన్సులో క్రింద పేర్కొన్న  సేవా స్థానాలు  నమోదై ఉన్నాయి.\n"
+"    అందుబాటులో ఉన్న ఏదో ఒక సేవ  ద్వారా వాటిని సంప్రతించి పని చేయించుకోవచ్చు.\n"
+"    "
+
+#: zine/templates/admin/information.html:121
+msgid "Installed APIs"
+msgstr "వ్యవస్థలో నెలకొని ఉన్న ఎపీఐ లు"
+
+#: zine/templates/admin/information.html:122
+msgid ""
+"\n"
+"    The following APIs are installed on this blog instance. APIs marked with"
+"\n"
+"    a star (*) are preferred.\n"
+"  "
+msgstr ""
+"\n"
+"    ఈ బ్లాగు ఇన్స్టెన్సులో   క్రింద చూపిన ఎపీఐలు నెలకొని ఉన్నాయి.  వీనిలో  నక్షత్రం (*)గుర్తు   \n"
+"    గల ఏపీఐ లు మేలైనవి: \n"
+"  "
+
+#: zine/templates/admin/information.html:135
+msgid "ZEML Element Handlers"
+msgstr "ZEML ఎలిమెంట్ హాండ్లర్లు"
+
+#: zine/templates/admin/information.html:136
+msgid ""
+"\n"
+"    The following ZEML element handlers are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    ఈ ఇంస్టెన్సులో క్రింద చూపిన ZEML ఎలిమెంట్ హాండ్లర్లు నమోదై ఉన్నాయి\n"
+"  "
+
+#: zine/templates/admin/information.html:143
+msgid "no ZEML element handlers installed."
+msgstr "ZEML ఎలిమెంట్ హ్యాండ్లర్లు ఏవీ వ్యవస్థలో లేవు."
+
+#: zine/templates/admin/information.html:146
+msgid "Parsers"
+msgstr "పరిశీలించే పార్సర్లు"
+
+#: zine/templates/admin/information.html:147
+msgid ""
+"\n"
+"    The following parsers are currently installed:\n"
+"  "
+msgstr ""
+"\n"
+"    క్రింది పార్సర్లు ప్రస్తుతం వ్యవస్థలో నెలకొని ఉన్నాయి:\n"
+"  "
+
+#: zine/templates/admin/information.html:156 zine/views/admin.py:107
+msgid "Plugins"
+msgstr "ప్లగిన్లు"
+
+#: zine/templates/admin/information.html:160
+msgid "active"
+msgstr "చురుకైనవి"
+
+#: zine/templates/admin/information.html:161
+msgid "UID"
+msgstr "యూజర్ పేరు"
+
+#: zine/templates/admin/information.html:165
+msgid "Location"
+msgstr "నివాస స్థానం"
+
+#: zine/templates/admin/information.html:170
+msgid "Configuration Variables"
+msgstr "కాన్ఫిగరేషన్ చలరాసులు"
+
+#: zine/templates/admin/information.html:173
+#: zine/templates/admin/write_page.html:11
+msgid "Key"
+msgstr "మీట"
+
+#: zine/templates/admin/information.html:174
+msgid "Value"
+msgstr "విలువ"
+
+#: zine/templates/admin/information.html:175
+msgid "Default"
+msgstr "కనీస విలువ"
+
+#: zine/templates/admin/information.html:185
+msgid "Template Globals"
+msgstr "టెంప్లేటులోని గ్లోబల్ విలువలు"
+
+#: zine/templates/admin/information.html:191
+msgid "Template Filters"
+msgstr "టెంప్లేటు ఫిల్టర్లు"
+
+#: zine/templates/admin/information.html:198
+msgid ""
+"\n"
+"    You can export this list and share it for troubleshooting by clicking\n"
+"    on the button below.  The resulting file is stripped of confidential\n"
+"    information such as passwords.\n"
+"  "
+msgstr ""
+"\n"
+"    క్రింది బొత్తామును నొక్కటంద్వారా మీరు ఈ జాబితాను ఇతరులతో‌పంచుకోవటం కోసం \n"
+"    ఎగుమతి చే సి, సమస్యాపరిష్కారానికి తోడ్పడవచ్చు. ఫలితంగా  తయారయ్యే  ఫైలులో \n"
+"    సంకేత పదాల వంటి రహస్య సమాచారం ఏదీ ఉండదు.\n"
+"  "
+
+#: zine/templates/admin/inspect_import.html:2
+#: zine/templates/admin/inspect_import.html:4
+msgid "Inspect Import"
+msgstr "దిగుమతైనదానిని పరిశీలించు"
+
+#: zine/templates/admin/inspect_import.html:5
+msgid ""
+"\n"
+"    Here you can now inspect the imported data and select the data you want\n"
+"    to import into the database.\n"
+"  "
+msgstr ""
+"\n"
+"    	ఇక్కడ మీరు దిగుమతైన సమాచారాన్ని పరిశీలించవచ్చు; మరియు  దానినుండి డాటాబేస్ లోనికి \n"
+"    	పంపవలసిన సమాచారాన్ని ఎంపిక చేసుకోవచ్చు.\n"
+"  "
+
+#: zine/templates/admin/inspect_import.html:10
+msgid "Blog Details"
+msgstr "బ్లాగ్ వివరాలు"
+
+#: zine/templates/admin/inspect_import.html:17
+msgid "Dump ID"
+msgstr "డంప్  గుర్తింపు"
+
+#: zine/templates/admin/inspect_import.html:19
+msgid ""
+"If you have a special installation and want to rewrite the import "
+"programmatically you need this identifier."
+msgstr ""
+"ఒకవేళ మీవద్ద ప్రత్యేకమైన ఇంస్టలేషన్ ఉండి, దిగుమతైన సమాచారాన్ని  ఏదైనా ప్రోగ్రాం\n "
+"ద్వారా తిరిగి వ్రాయాలనుకుంటే, మీకు ఈ ఐడెంటిఫైయర్ అవసరమౌతుంది. "
+
+#: zine/templates/admin/inspect_import.html:24
+msgid ""
+"\n"
+"      Chose the authors whose posts you want to import.  In the dropdown you"
+"\n"
+"      can select one of the already existing users if you want to change the"
+"\n"
+"      author during importing.  In the default settings a new and inactive "
+"user\n"
+"      without a password is created.\n"
+"    "
+msgstr ""
+"\n"
+"     	మీరు దిగుమతి చేసుకోవాలనుకున్న టపాల రచయితలను ఎంపిక చేసుకోండి.  ఒకవేళ, దిగుమతి \n"
+"      	అవుతున్న సమయంలోనే  గనక  మీరు  వారిని మార్చాలనుకుంటే , డ్రాప్ డౌన్ మెను లో ఇప్పటికే ఉన్న \n"
+"      	యూజర్లనుండి ఒకరిని ఎంపిక చేసుకోవచ్చు.  అలాంటప్పుడు కనీస సెటింగులలో-సంకేతపదం ఏదీ\n"
+"      	లేని ఒక కొత్త  యూజర్, ఇంతవరకూ ఏ పనీ చేయనివారు- ఒకరు సృజించబడతారు.\n"
+"    "
+
+#: zine/templates/admin/inspect_import.html:34
+msgid "no author information"
+msgstr "రచయిత గురించిన సమాచారం ఏదీ‌లేదు"
+
+#: zine/templates/admin/inspect_import.html:37
+msgid ""
+"\n"
+"      Authors are only converted if at least one of their posts is coverted."
+"\n"
+"      So if you unselect all the posts by a user in the list below it "
+"doesn't\n"
+"      matter what you select here.\n"
+"    "
+msgstr ""
+"\n"
+"      ఎవరైనా రచయిత వ్రాసిన  టపాల్లోంచి  కనీసం ఒక్కటైనా   దిగుమతి చేయబడితే తప్ప, ఇతరత్రాగా \n"
+"      ఆ  రచయితలు దిగుమతవ్వరు.అందువల్ల, క్రింది జాబితాలో , ఏ యూజర్ వ్రాసిన టపాల్నైనా \n"
+"      అన్నింటినీ తిరస్కరించినట్లైతే, ఇక మీరు ఇక్కడ  ఏది ఎంపిక చేసుకున్నా   ఏమీ అవ్వదు.\n"
+"    "
+
+#: zine/templates/admin/inspect_import.html:42
+msgid "Posts"
+msgstr "టపాలు"
+
+#: zine/templates/admin/inspect_import.html:43
+msgid ""
+"\n"
+"      Posts marked with a blue background are already imported.\n"
+"    "
+msgstr ""
+"\n"
+"      నీలి రంగుతో గుర్తించబడి  ఉన్న టపాలు ఇప్పటికే దిగుమతైనవి.\n"
+"    "
+
+#: zine/templates/admin/inspect_import.html:63
+msgid "unpublished"
+msgstr "ప్రచురితం కానివి"
+
+#: zine/templates/admin/inspect_import.html:73
+msgid "Import into Blog"
+msgstr "బ్లాగులోనికి దిగుమతి చేసుకో"
+
+#: zine/templates/admin/layout.html:14
+#, python-format
+msgid "%(blog_title)s Administration"
+msgstr "%(blog_title)s నిర్వహణ"
+
+#: zine/templates/admin/layout.html:16
+msgid "View Blog"
+msgstr "బ్లాగును చూపించు"
+
+#: zine/templates/admin/layout.html:47
+#, python-format
+msgid "Powered by %(zine)s %(version)s."
+msgstr "%(zine)s %(version)s చే  సుసంపన్నం."
+
+#: zine/templates/admin/log.html:2 zine/templates/admin/log.html:4
+#: zine/views/admin.py:129
+msgid "Log"
+msgstr "లాగ్"
+
+#: zine/templates/admin/log.html:5
+msgid ""
+"\n"
+"    The log shows you important information about your system.  Whenever\n"
+"    problems happen, you can see it here.\n"
+"  "
+msgstr ""
+"\n"
+"    మీ వ్యవస్థను గురించిన ముఖ్య సమాచారాన్ని ఈ లాగ్ లో చూడవచ్చు.  \n"
+"    \n"
+"  "
+
+#: zine/templates/admin/log.html:9
+msgid "Recorded Events"
+msgstr "నమోదు చేసిన సంఘటనలు"
+
+#: zine/templates/admin/log.html:20
+msgid "The logfile is empty"
+msgstr "ఈ లాగ్ ఫైలు ఖాళీగా ఉన్నది"
+
+#: zine/templates/admin/log.html:27
+msgid "▼ Down"
+msgstr "▼ క్రిందికి"
+
+#: zine/templates/admin/log.html:32
+msgid "Up ▲"
+msgstr "పైకి  ▲"
+
+#: zine/templates/admin/log.html:36
+msgid "Log Settings"
+msgstr ""
+
+#: zine/templates/admin/log.html:40 zine/templates/admin/plugins.html:60
+msgid "Apply"
+msgstr "మార్పుల్ని నమోదు చేయి"
+
+#: zine/templates/admin/login.html:5 zine/templates/admin/login.html:15
+#: zine/templates/admin/login.html:36
+msgid "Login"
+msgstr "లాగిన్"
+
+#: zine/templates/admin/login.html:11
+msgid "&laquo; back to the blog index"
+msgstr "&laquo; తిరిగి బ్లాగ్ విషయ సూచికకు పో"
+
+#: zine/templates/admin/login.html:30
+msgid "Remember me"
+msgstr "నన్ను గుర్తుపెట్టుకో"
+
+#: zine/templates/admin/maintenance.html:2 zine/templates/admin/maintenance.html:4
+#: zine/views/admin.py:126
+msgid "Maintenance"
+msgstr "పరిపోషణ"
+
+#: zine/templates/admin/maintenance.html:5
+msgid ""
+"\n"
+"    From here you can set your blog into maintenance mode and do "
+"administrative\n"
+"    tasks.  It's recommend to enable maintenance mode before doing software\n"
+"    upgrades, imports, exports or plugin installations.  While it's not "
+"stricly\n"
+"    necessary for the latter it's good idea to test the changes before going"
+"\n"
+"    live with them.  As long as maintenance mode is enabled users will see a"
+"\n"
+"    message that says that the blog is in maintenance mode.\n"
+"  "
+msgstr ""
+"\n"
+"    ఇక్కడినుండి మీరు మీ బ్లాగును సవరణ స్థితిలోకి మార్చి, దానిలో నిర్వహణా పరమైన  మార్పులు \n"
+"    చేయవచ్చు. సాఫ్ట్వేరు ను పై స్థాయికి మారుస్తున్నా, లేక దిగుమతులు/ఎగుమతులు చేస్తున్నా,  \n"
+"    లేక ప్లగిన్లను స్థిరీకరిస్తున్నా- ఈ సందర్భాలన్నింటిలోనూ ముందుగా మీ బ్లాగును సవరణ స్థితిలోకి  \n"
+"    మార్చి ఉంచటం మంచిది. ఈ  చివరి సందర్భంలో ఇదంత అవసరం కాకపోవచ్చు; అయినప్పటికీ  \n"
+"    ముందుగా మార్పులు ఎలా ఉంటాయో పరీక్షించి చూసుకొని, ఆపైన వాటితో బతకటం అనేది \n"
+"    సామాన్యంగా ఒక మంచి ఆలోచన.  ఇలా సవరణ స్థితిని అవలంబించినంతకాలమూ యూజర్లకు\n"
+"		 'బ్లాగు సవరణ స్థితిలో ఉన్నద'ని ఒక  సూచన కనబడుతూంటుంది.\n"	
+"  "
+
+#: zine/templates/admin/maintenance.html:16
+msgid "Disable maintenance mode"
+msgstr "సవరణ స్థితిని తొలగించు"
+
+#: zine/templates/admin/maintenance.html:17
+msgid "Enable maintenance mode"
+msgstr "సవరణ స్థితిలోనికి పో"
+
+#: zine/templates/admin/manage_categories.html:2
+#: zine/templates/admin/manage_categories.html:4
+msgid "Manage Categories"
+msgstr "విభాగాలను నిర్వహించు"
+
+#: zine/templates/admin/manage_categories.html:7
+#: zine/templates/admin/manage_groups.html:7
+#: zine/templates/admin/manage_users.html:7
+msgid "ID"
+msgstr "గుర్తింపు "
+
+#: zine/templates/admin/manage_categories.html:10
+msgid "Number of Posts"
+msgstr "టపాల సంఖ్య"
+
+#: zine/templates/admin/manage_categories.html:26
+msgid "New Category"
+msgstr "కొత్త విభాగం"
+
+#: zine/templates/admin/manage_comments.html:15
+msgid "No comments."
+msgstr "వ్యాఖ్యలేమీ లేవు"
+
+#: zine/templates/admin/manage_comments.html:24
+msgid "Toggle selection"
+msgstr "ఎంపికను టాగుల్ చేయి"
+
+#: zine/templates/admin/manage_groups.html:2
+#: zine/templates/admin/manage_groups.html:4
+msgid "Manage Groups"
+msgstr "సమూహాల నిర్వహణ చేయి"
+
+#: zine/templates/admin/manage_groups.html:17
+msgid "No groups."
+msgstr "సమూహాలు లేవు"
+
+#: zine/templates/admin/manage_pages.html:3
+#: zine/templates/admin/manage_pages.html:5
+msgid "Manage Pages"
+msgstr "పేజీలను నిర్వహించు"
+
+#: zine/templates/admin/manage_users.html:10
+msgid "Mail"
+msgstr "మెయిలు"
+
+#: zine/templates/admin/pages_config.html:2
+#: zine/templates/admin/pages_config.html:4
+msgid "Pages Configuration"
+msgstr "పేజీల కాన్ఫిగరేషన్"
+
+#: zine/templates/admin/pages_config.html:5
+msgid ""
+"\n"
+"    Configure your pages settings.\n"
+"  "
+msgstr ""
+"\n"
+"    మీ పేజీల సెటింగులను కాన్ఫిగరు చేయండి\n"
+"  "
+
+#: zine/templates/admin/pages_config.html:10
+msgid "Show page title"
+msgstr "పేజీ పేరును చూపించు"
+
+#: zine/templates/admin/pages_config.html:13
+msgid "Show the title of the page on top of the page body"
+msgstr "పేజీకి పై భాగంలో పేజీ పేరును చూపు."
+
+#: zine/templates/admin/pages_config.html:16
+msgid "Show children"
+msgstr "ఈ పేజీ సంతానాన్ని చూపించు"
+
+#: zine/templates/admin/pages_config.html:19
+msgid "Show the child-pages on the bottom of the page body"
+msgstr "పేజీ లోని విషయానికి  క్రిందుగా   ఈపేజీ సంతానాన్ని చూపించు"
+
+#: zine/templates/admin/perform_import.html:5
+msgid ""
+"\n"
+"    The importer converts now all the collected and selected data for\n"
+"    Zine and inserts it into the database.  This can take some time.\n"
+"    <strong>Don't hit cancel!</strong>\n"
+"  "
+msgstr ""
+"\n"
+"    జైన్ కోసం సేకరించి, ఎంపికచేసుకున్న సమాచారాన్ని  మొత్తాన్నీ ఈ దిగుమతిదారు ఇప్పుడు\n"
+"    మార్చుకొని , డాటాబేసులో చేర్చుతుంది.  దీనికి కొంత సమయం పట్టవచ్చు.\n"
+"    <strong>ఆలోగా 'రద్దు'చేయమనకండి!.</strong>\n"
+"  "
+
+#: zine/templates/admin/perform_import.html:11
+msgid ""
+"\n"
+"    Imported data successfully.\n"
+"  "
+msgstr ""
+"\n"
+"    సమాచారాన్ని దిగుమతి చేసుకోవటం విజయవంతంగా పూర్తైంది.\n"
+"  "
+
+#: zine/templates/admin/plugins.html:2 zine/templates/admin/plugins.html:4
+msgid "Plugin Management"
+msgstr "ప్లగిన్ల నిర్వహణ"
+
+#: zine/templates/admin/plugins.html:7
+msgid ""
+"\n"
+"      Plugins extend the functionality of the Zine system. Because of\n"
+"      security and convenience reasons you have to enable plugins by hand.\n"
+"      Some plugins could conflict with each other so it's up to you to\n"
+"      decide which plugins you want to enable. In case of doubt have a look\n"
+"      at the installation instructions of the plugin you've added.\n"
+"    "
+msgstr ""
+"\n"
+"      జైన్ వ్యవస్థ యొక్క పనితీరును, సామర్ధ్యాన్ని  ప్లగిన్లు పొడిగిస్తాయి. భద్రత దృష్ట్యాను,\n"
+"      వీలును దృష్టిలో ఉంచుకొని కూడాను, మీరే  స్వయంగా ప్లగిన్లను ఎనేబుల్ చేసుకోవాల్సి ఉంటుంది.\n"
+"      కొన్ని ప్లగిన్లు  ఒకదానితో ఒకదానితో ఒకటి  సరిపోవు- అందువల్ల ఏ ఏ ప్లగిన్లను  ఏకకాలంలో\n"
+"      అనుమతించాలనేది మీరే  నిర్ణయించుకోవాలి. ఒకవేళ అనుమానం వస్తే, మీరు కొత్తగా\n"
+"      కలిపిన ప్లగిన్ యొక్క స్థిరీకరణ సూచనలను మరోసారి తిరగవేసుకోండి.\n"
+"    "
+
+#: zine/templates/admin/plugins.html:16
+msgid "Plugin"
+msgstr "ప్లగిన్"
+
+#: zine/templates/admin/plugins.html:17
+msgid "Version"
+msgstr "విడుదల వర్షన్"
+
+#: zine/templates/admin/plugins.html:19
+msgid "Activate"
+msgstr "పనిచేయించు"
+
+#: zine/templates/admin/plugins.html:27
+#, python-format
+msgid ""
+"\n"
+"          By %(author)s\n"
+"          "
+msgstr ""
+"\n"
+"          సృజన: %(author)s\n"
+"          "
+
+#: zine/templates/admin/plugins.html:31
+#, python-format
+msgid ""
+"\n"
+"            and %(contributors)s\n"
+"          "
+msgstr ""
+"\n"
+"            మరియు: %(contributors)s\n"
+"          "
+
+#: zine/templates/admin/plugins.html:38
+msgid "Remove plugin"
+msgstr "ప్లగిన్ ను తొలగించు"
+
+#: zine/templates/admin/plugins.html:45
+msgid "Plugin Guard"
+msgstr "ప్లగిన్ రక్షణ కవచం"
+
+#: zine/templates/admin/plugins.html:46
+msgid ""
+"\n"
+"      Normally the plugin guard is enabled and catches exceptions during\n"
+"      plugin setup.  In some situations however this is not wanted, for\n"
+"      example if you want to debug a broken plugin.\n"
+"    "
+msgstr ""
+"\n"
+"      సాధారణంగా ప్లగిన్లను సెటప్ చేసేటప్పుడు ప్లగిన్  రక్షణ కవచం చురుకుగా ఉండి, ఆ సమయంలో \n"
+"      ఏవైనా విపరీత పరిణామాలు తలెత్తితే  గుర్తించి, పట్టుకుంటుంది. అయితే కొన్ని సమయాలలో \n"
+"      ఇది అనవసరమనిపించవచ్చు.  ఉదా: చెడిపోయిన ప్లగిన్లో తప్పుల్ని సవరించేందుకు మీరు\n"
+"    	 ప్రయత్నించే  సందర్భం.\n"
+
+#: zine/templates/admin/plugins.html:52
+msgid "Add New Plugin"
+msgstr "కొత్త ప్లగిన్ ను చేర్చు"
+
+#: zine/templates/admin/plugins.html:53
+msgid ""
+"\n"
+"      If you have a plugin as Zine <tt>.plugin</tt> file you can upload it\n"
+"      to your Zine instance using the following form. Plugins added this way"
+"\n"
+"      can also be completely removed.\n"
+"    "
+msgstr ""
+"\n"
+"      ఒకవేళ మీవద్ద జైన్<tt>.plugin</tt> రూపంలో ఉన్న ప్లగిన్ ఫైలు ఉన్నట్లైతే, మీరు ఈ క్రింది ఫారంని\n"
+"      వాడి, దాన్ని మీ జైన్ ఇంస్టెన్సులోనికి ఎగుమతి చేయవచ్చు.  ఈ విధంగా చేర్చబడ్డ ప్లగిన్లను  తరువాత \n"
+"      ఎప్పుడైనా పూర్తిగా తొలగించుకోవచ్చు.\n"
+"    "
+
+#: zine/templates/admin/reddit.html:7
+#, python-format
+msgid ""
+"from <em>%(domain)s</em>, submitted by %(author)s @ %(submitted)s, "
+"%(comments)s"
+msgstr ""
+"<em>%(domain)s</em>నుండి, %(author)s @ %(submitted)sచే  పంపబడ్డాయి, "
+"%(comments)s"
+
+#: zine/templates/admin/reddit.html:12
+#, python-format
+msgid "%d comment"
+msgid_plural "%d comments"
+msgstr[0] ""
+msgstr[1] ""
+
+#: zine/templates/admin/reddit.html:20
+msgid "No items on the frontpage"
+msgstr "ముందుపేజీలో ఏమీ లేవు."
+
+#: zine/templates/admin/remove_plugin.html:2
+#: zine/templates/admin/remove_plugin.html:4
+msgid "Remove Plugin"
+msgstr "ప్లగిన్లను తొలగించు"
+
+#: zine/templates/admin/remove_plugin.html:7
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to remove the plugin “%(plugin_name)s” permanently\n"
+"      from the instance folder? If you do so you have to reinstall the "
+"plugin\n"
+"      if you want to use it again.\n"
+"    "
+msgstr ""
+"\n"
+"      ఇంస్టెన్సు ఫోల్డరు నుండి “%(plugin_name)s”ను నిజంగానే పూర్తిగా తొలగించుదామనుకుంటున్నారా?\n"
+"      అలాచేసిన తరువాత ఎప్పుడైనా మీకు ఆ ప్లగిన్ ను వాడుకోవాలనిపిస్తే, దానిని తిరిగి \n"
+"      ఇంస్టాల్ చేసుకోవాల్సి వస్తుంది.\n"
+"    "
+
+#: zine/templates/admin/theme.html:2 zine/templates/admin/theme.html:4
+msgid "Theme Manager"
+msgstr "నేపథ్యాల నిర్వహణ"
+
+#: zine/templates/admin/theme.html:16
+#, python-format
+msgid "by %(author)s"
+msgstr "సృజన: %(author)s"
+
+#: zine/templates/admin/theme.html:27
+msgid "Configure Theme"
+msgstr "నేపథ్యాన్ని కాన్ఫిగరు చేయి"
+
+#: zine/templates/admin/unblock_comment.html:2
+#: zine/templates/admin/unblock_comment.html:4
+msgid "Unblock Comment"
+msgstr "వ్యాఖ్యను అడ్డగించకు"
+
+#: zine/templates/admin/unblock_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to unblock the comment by %(comment_author)s\n"
+"      which was blocked with the following reason: %(reason)s?\n"
+"    "
+msgstr ""
+"\n"
+"      గతంలో ' %(reason)s' అనే కారణంవల్ల %(comment_author)sగారి వ్యాఖ్య \n"
+"      నిరోధించబడింది. మీరిప్పుడు దాన్ని నిజంగానే  అడ్డుకోకుండా  అనుమతించమంటున్నారా? \n"
+"    "
+
+#: zine/templates/admin/url_options.html:2 zine/templates/admin/url_options.html:4
+msgid "URL Options"
+msgstr "యూఆరెల్ ఎంపికలు"
+
+#: zine/templates/admin/url_options.html:5
+msgid ""
+"\n"
+"    Here you can change some basic URL configuration settings.  This is "
+"especially\n"
+"    useful if you have plugins installed that that add a new index page or "
+"if you\n"
+"    want to move the administration to a different location.\n"
+"  "
+msgstr ""
+"\n"
+"    మీరు ఇక్కడ కొన్ని మౌలికమైన యూఆరెల్ కాన్ఫిగరేషన్ సెటింగులు చేయవచ్చు. కొత్తగా విషయసూచిక\n"
+"    పేజీని కలిపే ప్లగిన్లు  ఇంస్టాల్ చేసుకొని ఉంటేనో, లేదా బ్లాగు నిర్వహణను వేరే ప్రదేశానికి మార్చే \n"
+"    సందర్భాలలోనో ఈ  సెటింగులు చక్కగా ఉపకరిస్తాయి.\n"
+"  "
+
+#: zine/templates/admin/write_page.html:13
+msgid ""
+"\n"
+"        The key is used to build the url. If no key is given it's just the "
+"title-slug.\n"
+"      "
+msgstr ""
+"\n"
+"        మీరిచ్చే  'కీ'ని ఉపయోగించి  యూఆరెల్  నిర్మించబడుతుంది.  ఒకవేళ ఏలాంటి 'కీ' నీ\n"
+"      	 ఇవ్వకపోయినట్లైతే, బ్లాగు పేరుకు సంబంధించిన 'టైటిల్ స్లగ్' నే వాడుకోవటం జరుగుతుంది.\n"
+"		"
+
+#: zine/templates/admin/write_page.html:18
+msgid "Content"
+msgstr "విషయం"
+
+#: zine/templates/admin/write_page.html:29
+msgid "Parent Page"
+msgstr "ఆధారమైన పేజీ"
+
+#: zine/templates/admin/write_page.html:40
+msgid "Position"
+msgstr "స్థానము"
+
+#: zine/templates/widgets/latest_comments.html:2
+msgid "Latest Comments"
+msgstr "సరికొత్త వ్యాఖ్యలు"
+
+#: zine/templates/widgets/latest_comments.html:7
+msgid "by"
+msgstr "రచన"
+
+#: zine/templates/widgets/latest_posts.html:2
+msgid "Latest Posts"
+msgstr "సరికొత్త టపాలు"
+
+#: zine/templates/widgets/pages_navigation.html:2
+msgid "Navigation"
+msgstr "ఒకచోటి నుండి ఒకచోటికి పోవటం"
+
+#: zine/templates/widgets/post_archive_summary.html:11
+msgid "Complete archive"
+msgstr "పూర్తి సంగ్రహం"
+
+#: zine/templates/widgets/tag_cloud.html:7
+#, python-format
+msgid "%(count)s post tagged %(tag)s"
+msgid_plural "%(count)s posts tagged %(tag)s"
+msgstr[0] "%(count)s టపా  %(tag)sలచే ట్యాగు చేయబడింది"
+msgstr[1] "%(count)s టపాలు  %(tag)sలచే  ట్యాగు చేయబడ్డాయి."
+
+#: zine/utils/admin.py:34
+msgid "Error"
+msgstr "తప్పు"
+
+#: zine/utils/exceptions.py:59
+msgid "unkown file"
+msgstr "తెలియని ఫైలు"
+
+#: zine/utils/forms.py:681
+msgid "No choices."
+msgstr "ఎంపిక చేసుకునేందుకు ఏవీ లేవు."
+
+#: zine/utils/forms.py:781
+msgid "Submit"
+msgstr "సమర్పించు"
+
+#: zine/utils/forms.py:925
+msgid "This field is required."
+msgstr "ఇక్కడ  సమాచారం ఇవ్వవలసిందే"
+
+#: zine/utils/forms.py:1093
+msgid "Invalid security token submitted."
+msgstr "సమర్పించిన భద్రత టోకెన్ చెల్లదు"
+
+#: zine/utils/forms.py:1146 zine/utils/forms.py:1528
+#, python-format
+msgid "Please provide at least %d item."
+msgid_plural "Please provide at least %d items."
+msgstr[0] "దయచేసి కనీసం %d అంశాన్నైనా వ్రాయండి."
+msgstr[1] "దయచేసి కనీసం  %d అంశాలనైనా వ్రాయండి"
+
+#: zine/utils/forms.py:1153 zine/utils/forms.py:1535
+#, python-format
+msgid "Please provide no more than %d item."
+msgid_plural "Please provide no more than %d items."
+msgstr[0] "దయచేసి ఒక్క టి కంటే ఎక్కువ అంశాలను ఇవ్వకండి."
+msgstr[1] "దయచేసి %d కంటే ఎక్కువ అంశాలను వ్రాయకండి."
+
+#: zine/utils/forms.py:1266
+#, python-format
+msgid "Please enter at least %d character."
+msgid_plural "Please enter at least %d characters."
+msgstr[0] "దయచేసి కనీసం ఒక  కారక్టరును  ఇవ్వండి."
+msgstr[1] "దయచేసి కనీసం %d కారక్టర్లను వ్రాయండి"
+
+#: zine/utils/forms.py:1273
+#, python-format
+msgid "Please enter no more than %d character."
+msgid_plural "Please enter no more than %d characters."
+msgstr[0] "దయచేసి  %dకంటే  ఎక్కువ కారక్టర్లను వాడకండి. "
+msgstr[1] "దయచేసి %d కంటే ఎక్కువ కారక్టర్లను వాడకండి."
+
+#: zine/utils/forms.py:1297
+msgid "Please enter a valid date."
+msgstr "దయచేసి చెల్లుబాటయ్యే తేదీని ఒకదాన్ని వాడండి.
+
+"
+
+#: zine/utils/forms.py:1333
+#, python-format
+msgid "“%(value)s” does not exist"
+msgstr "'%(value)s"" లేదు"
+
+#: zine/utils/forms.py:1392
+msgid "Invalid value."
+msgstr "విలువ చెల్లదు"
+
+#: zine/utils/forms.py:1393
+msgid "Key does not exist."
+msgstr "'కీ' లేదు."
+
+#: zine/utils/forms.py:1463
+msgid "Please enter a valid choice."
+msgstr "దయచేసి మీ ఎంపిక చెల్లేటట్లు చూసుకోండి."
+
+#: zine/utils/forms.py:1522
+#, python-format
+msgid "“%s” is not a valid choice"
+msgstr ""%s" అనేది  ఒక  చెల్లని  ఎంపిక"
+
+#: zine/utils/forms.py:1567
+msgid "Please enter a whole number."
+msgstr "దయచేసి ఒక పూర్ణాంకాన్ని ఇవ్వండి."
+
+#: zine/utils/forms.py:1593
+#, python-format
+msgid "Ensure this value is greater than or equal to %s."
+msgstr "ఈ  విలువ  %sకంటే ఎక్కువగాగాని, కనీసం సమానంగా గాని ఉండేలా చూడండి. "
+
+#: zine/utils/forms.py:1599
+#, python-format
+msgid "Ensure this value is less than or equal to %s."
+msgstr "ఈ  విలువ  %sకంటే తక్కువగాగాని, కనీసం సమానంగా గాని ఉండేలా చూడండి."
+
+#: zine/utils/forms.py:1621
+msgid "True"
+msgstr "సత్యం"
+
+#: zine/utils/forms.py:1622
+msgid "False"
+msgstr "అసత్యం"
+
+#: zine/utils/log.py:35
+msgid "critical"
+msgstr "ప్రమాదకరమైన"
+
+#: zine/utils/log.py:36
+msgid "error"
+msgstr "తప్పు"
+
+#: zine/utils/log.py:37
+msgid "warning"
+msgstr "హెచ్చరిక"
+
+#: zine/utils/log.py:38
+msgid "notice"
+msgstr "గమనిక"
+
+#: zine/utils/log.py:39
+msgid "info"
+msgstr "సమాచారము"
+
+#: zine/utils/log.py:40
+msgid "debug"
+msgstr "తప్పులు వెతుకు"
+
+#: zine/utils/pagination.py:109 zine/utils/pagination.py:112
+msgid "Next »"
+msgstr "తరువాతది  »"
+
+#: zine/utils/pagination.py:116 zine/utils/pagination.py:119
+msgid "« Previous"
+msgstr "« ముందుది"
+
+#: zine/utils/validators.py:98
+msgid "You have to enter a valid URL."
+msgstr "మీరు  చెల్లే యూఆరెల్ ఒకదాన్ని ఇవ్వాలి"
+
+#: zine/utils/validators.py:116
+msgid "The slug is too long"
+msgstr "ఈ స్లగ్ చాలా పొడుగ్గా ఉంది"
+
+#: zine/utils/validators.py:118
+msgid "The slug must not start with a slash"
+msgstr "ఈ స్లగ్ '\ లేదా /' గుర్తులతో  మొదలవ్వరాదు"
+
+#: zine/utils/validators.py:136 zine/utils/validators.py:139
+msgid "You have to enter a valid net address."
+msgstr "మీరు ఇచ్చే నెట్ అడ్రసు చెల్లేది అయిఉండాలి"
+
+#: zine/utils/validators.py:141
+msgid "The port has to be numeric"
+msgstr "ఈ పోర్టు విలువ ఒక సంఖ్య అవ్వాలి"
+
+#: zine/utils/validators.py:149
+msgid "Invalid character, < or > are not allowed."
+msgstr "చెల్లదు. మీరిచ్చే విలువలో  < or > లు ఉండరాదు."
+
+#: zine/utils/validators.py:151
+msgid "URL prefix must not be a sole slash."
+msgstr "యూఆరెల్ ప్రథమ భాగం  కేవలం '/' కారాదు."
+
+#: zine/utils/validators.py:154
+msgid "URL prefix must start with a slash."
+msgstr "యూఆరెల్ ప్రథమభాగం '/' గుర్తుతో మొదలవ్వాలి."
+
+#: zine/utils/validators.py:156
+msgid "URL prefix must not end with a slash."
+msgstr "యూఆరెల్ ప్రథమభాగం  '/' గుర్తుతో అంతం కారాదు."
+
+#: zine/utils/validators.py:165
+msgid "The text must not be empty."
+msgstr "ప్రదేశాన్ని ఖాళీగా ఉంచరాదు."
+
+#: zine/utils/zeml.py:300
+msgid ""
+"Error when loading dynamic ZEML element. The system ignored the element.  "
+"Maybe a disabled plugin caused the problem."
+msgstr ""
+"గతిశీలమైన ZEML ఎలిమెంటును  ఎక్కించుకోవటంలో పొరపాటు.  వ్యవస్థ ఆ ఎలిమెంటును వదిలివేసింది. "
+"డిజేబుల్ అయిన ప్లగిన్ ఏదో ఈ సమస్యకు  కారణం అయిఉండచ్చు."
+
+#: zine/utils/zeml.py:664
+#, python-format
+msgid "Error loading dynamic element %s"
+msgstr "%s అనే గతిశీలమైన ఎలిమెంటును ఎక్కించుకోవటంలో పొరపాటు."
+
+#: zine/views/admin.py:77
+msgid "Entries"
+msgstr "టపాలు"
+
+#: zine/views/admin.py:78
+msgid "Pages"
+msgstr "పేజీలు"
+
+#: zine/views/admin.py:85
+msgid "Write"
+msgstr "వ్రాయి"
+
+#: zine/views/admin.py:86
+msgid "Entry"
+msgstr "టపా"
+
+#: zine/views/admin.py:87
+msgid "Page"
+msgstr "పేజీ"
+
+#: zine/views/admin.py:89
+msgid "Manage"
+msgstr "నిర్వహించు"
+
+#: zine/views/admin.py:91
+msgid "Overview"
+msgstr "సారాంశం"
+
+#: zine/views/admin.py:93
+#, python-format
+msgid "Awaiting Moderation (%d)"
+msgstr "(%d)మోడరేషన్ కోసం వేచి ఉన్నాయి."
+
+#: zine/views/admin.py:96
+#, python-format
+msgid "Spam (%d)"
+msgstr "(%d) స్పాము"
+
+#: zine/views/admin.py:103
+msgid "Options"
+msgstr "ఎంచుకునే అవకాశాలు"
+
+#: zine/views/admin.py:104
+msgid "Basic"
+msgstr "మౌలికమైన"
+
+#: zine/views/admin.py:105
+msgid "URLs"
+msgstr "యూఆరెల్ లు"
+
+#: zine/views/admin.py:108
+msgid "Cache"
+msgstr "క్యాష్"
+
+#: zine/views/admin.py:112
+msgid "Users"
+msgstr "యూజర్లు"
+
+#: zine/views/admin.py:118
+msgid "Help"
+msgstr "సహాయం"
+
+#: zine/views/admin.py:119
+msgid "About"
+msgstr "దీని గురించి"
+
+#: zine/views/admin.py:124
+msgid "Information"
+msgstr "సమాచారం"
+
+#: zine/views/admin.py:134
+msgid "System"
+msgstr "వ్యవస్థ"
+
+#: zine/views/admin.py:157
+#, python-format
+msgid ""
+"Zine is in maintenance mode. Don't forget to <a href=\"%s\">turn it off "
+"again</a> once you finish your changes."
+msgstr ""
+"జైన్  ఇప్పుడు  సవరణ స్థితిలో ఉన్నది.  ఒకసారి మీకిష్టమైన మార్పులు చేసిన తరువాత  ఆ స్థితిని <a href=\"%s\">"
+"మార్చి, జైన్ ను సాధారణ స్థితికి తేవటం మర్చిపోకండి."
+
+
+#: zine/views/admin.py:166
+#, python-format
+msgid "Could not activate plugin “%(name)s”: %(error)s"
+msgstr "%(name)s: %(error)s అనే ప్లగిన్లను  ప్రారంభించటం వీలవలేదు."
+
+#: zine/views/admin.py:216
+msgid "No URLs pinged so far because the post is not publicly available"
+msgstr "ఈ టపా ఇతరులెవరికీ అందుబాటులో  లేదు కనుక ఏ  యూఆరెల్ లూ  ఇంతవరకూ పింగ్ చేయబడలేదు."
+
+#: zine/views/admin.py:219
+msgid ""
+"Could not ping URLs because the parser for the post is not available any "
+"longer."
+msgstr ""
+"టపాకు సంబంధించిన పార్సర్  ప్రస్తుతం అందుబాటులో లేదు కనుక  యూఆరెల్ లను పింగ్ చేయటం వీలవలేదు."
+
+#: zine/views/admin.py:233
+#, python-format
+msgid "Could not ping %(url)s: %(error)s"
+msgstr "%(url)s: %(error)s లను పింగ్ చేయటం కుదరలేదు."
+
+#: zine/views/admin.py:238
+#, python-format
+msgid "%s was pinged successfully."
+msgstr "%s ని  పింగ్ చేయటం విజయవంతం"
+
+#: zine/views/admin.py:277
+msgid "Text here..."
+msgstr "ఇక్కడ రాయండి..."
+
+#: zine/views/admin.py:279
+msgid "Untitled Page"
+msgstr "పేరు లేని పేజీ"
+
+#: zine/views/admin.py:349
+#, python-format
+msgid "The entry %s was created successfully."
+msgstr "%s అనే  అంశాన్ని చక్కగా సృజించాను"
+
+#: zine/views/admin.py:352
+#, python-format
+msgid "The entry %s was updated successfully."
+msgstr "%s అనే అంశాన్ని  విజయవంతంగా ముందుకు సవరించాను"
+
+#: zine/views/admin.py:385
+#, python-format
+msgid "The entry %s was deleted successfully."
+msgstr "%s అనే అంశాన్ని  చక్కగా తొలగించాను"
+
+#: zine/views/admin.py:427
+#, python-format
+msgid "The page %s was created successfully."
+msgstr "%s పేజీని చక్కగా సృష్టించటమైంది."
+
+#: zine/views/admin.py:430
+#, python-format
+msgid "The page %s was updated successfully."
+msgstr "%s పేజీని విజయవంతంగా ముందుకు సవరించాను."
+
+#: zine/views/admin.py:463
+#, python-format
+msgid "The page %s was deleted successfully."
+msgstr "%s పేజీని  తొలగించటం విజయవంతమైంది."
+
+#: zine/views/admin.py:496
+msgid "Approved all the selected comments."
+msgstr "ఎంపిక చేసిన వ్యాఖ్యలన్నిటినీ అనుమతించాను"
+
+#: zine/views/admin.py:510
+msgid "All Comments"
+msgstr "అన్ని వ్యాఖ్యలూ"
+
+#: zine/views/admin.py:517
+msgid "Comments Awaiting Moderation"
+msgstr "మితీకరణ కోసం వేచిఉన్న వ్యాఖ్యలు"
+
+#: zine/views/admin.py:524
+msgid "Spam"
+msgstr "స్పాము"
+
+#: zine/views/admin.py:537
+#, python-format
+msgid "Comments for “%s”"
+msgstr "'%s' కోసం వ్యాఖ్యలు"
+
+#: zine/views/admin.py:558
+#, python-format
+msgid "Comment by %s moderated successfully."
+msgstr "%s చేసిన వ్యాఖ్యను  చక్కగా మితీకరించాను."
+
+#: zine/views/admin.py:607
+#, python-format
+msgid "Comment by %s approved successfully."
+msgstr "%s చేసిన వ్యాఖ్యను చక్కగా అనుమతించాను."
+
+#: zine/views/admin.py:627
+#, python-format
+msgid "Comment by %s blocked successfully."
+msgstr "%s చేసిన వ్యాఖ్యను విజయవంతంగా నిరోధించాను."
+
+#: zine/views/admin.py:667
+#, python-format
+msgid "Category %s created successfully."
+msgstr "%s అనే విభాగపు  సృజన విజయవంతమైంది."
+
+#: zine/views/admin.py:671
+#, python-format
+msgid "Category %s updated successfully."
+msgstr "%s అనే విభాగాన్ని విజయవంతంగా ముందుకు సవరించాను."
+
+#: zine/views/admin.py:700
+#, python-format
+msgid "Category %s deleted successfully."
+msgstr "%s అనే విభాగాన్ని  విజయవంతంగా తొలగించాను."
+
+#: zine/views/admin.py:740
+#, python-format
+msgid "User %s created successfully."
+msgstr "%s అనే యూజర్ ను చక్కగా సృజించాను."
+
+#: zine/views/admin.py:744
+#, python-format
+msgid "User %s edited successfully."
+msgstr "%s అనే యూజర్ వివరాలను మార్చటం విజయవంతమైంది."
+
+#: zine/views/admin.py:768
+msgid "You cannot delete yourself."
+msgstr "మిమ్మల్ని మీరు తొలగించుకోలేరు."
+
+#: zine/views/admin.py:808
+#, python-format
+msgid "Group %s created successfully."
+msgstr "%sఅనే సమూహాన్ని సృజించటం పూర్తైంది."
+
+#: zine/views/admin.py:812
+#, python-format
+msgid "Group %s edited successfully."
+msgstr "%s అనే సమూహపు వివరాలను మార్చటం పూర్తైంది."
+
+#: zine/views/admin.py:863
+msgid "Configuration altered successfully."
+msgstr "కాన్ఫిగరేషన్ ను మార్చటం విజయవంతమైంది."
+
+#: zine/views/admin.py:890
+msgid "URL configuration changed."
+msgstr "యూఆరెల్ కాన్ఫిగరేషన్ మార్చబడింది."
+
+#: zine/views/admin.py:911
+msgid "Theme changed successfully."
+msgstr "నేపథ్యం మార్పు విజయవంతమైంది."
+
+#: zine/views/admin.py:925
+msgid "This theme is not configurable"
+msgstr "ఈ నేపథ్యాన్ని కాన్పిగర్ చేయటం సాధ్యం కాదు."
+
+#: zine/views/admin.py:937
+msgid "Plugin configuration changed"
+msgstr "ప్లగిన్ కాన్ఫిగరేషన్ మార్చబడింది."
+
+#: zine/views/admin.py:946
+#, python-format
+msgid "Plugin “%s” added successfully. You can now enable it in the plugin list."
+msgstr "'%s' అనే ప్లగిన్ ని విజయవంతంగా కలిపాను.  మీరిప్పుడు ప్లగిన్ల  జాబితాలోంచి  దాన్ని  ఎనేబుల్ చేసుకోవచ్చు."
+
+#: zine/views/admin.py:973
+#, python-format
+msgid ""
+"Could not remove the plugin “%s” because an IO error occurred. Wrong "
+"permissions?"
+msgstr "ఐఓ సమస్య ఎదురవ్వటం కారణంగా  %s అనే ప్లగిన్ ను తొలగించలేకపోయాను.  సరైన అనుమతులు లేవా? "
+
+#: zine/views/admin.py:976
+#, python-format
+msgid "The plugin “%s” was removed from the instance successfully."
+msgstr "%s ప్లగిన్ ను ఇంస్టెన్సు నుండి  విజయవంతంగా తొలగించాను."
+
+#: zine/views/admin.py:994
+msgid "The cache was cleared successfully."
+msgstr "క్యాష్ ను ఖాళీ చేయటం విజయవంతమైంది."
+
+#: zine/views/admin.py:998
+msgid "Cache settings were changed successfully."
+msgstr "క్యాష్ సెటింగులను మార్చటం విజయవంతమైంది."
+
+#: zine/views/admin.py:1038
+msgid "Maintenance mode disabled.  The blog is now publicly available."
+msgstr "సవరణ స్థితి పోయింది. బ్లాగు ఇప్పుడు అందరికీ అందుబాటులోకి వచ్చింది."
+
+#: zine/views/admin.py:1099
+#, python-format
+msgid "The imported dump “%s” was deleted successfully."
+msgstr "దిగుమతి చేసుకున్న డంప్  “%s”ని విజయవంతంగా తొలగించాను. "
+
+#: zine/views/admin.py:1226
+msgid "Log changes saved."
+msgstr "లాగ్ లో చేయబడ్డ  మార్పుల్ని  భద్రం చేశాను."
+
+#: zine/views/admin.py:1250
+msgid "Password changed successfully."
+msgstr "సంకేత పదాన్ని  మార్చటం విజయవంతమైంది."
+
+#: zine/views/blog.py:52 zine/views/blog.py:84
+msgid "Recent Posts Feed"
+msgstr "సరికొత్త టపాల ఫీడు"
+
+#: zine/views/blog.py:115
+#, python-format
+msgid "All posts in category %s"
+msgstr "%s విభాగం లోని అన్ని టపాలూ"
+
+#: zine/views/blog.py:142
+#, python-format
+msgid "All posts tagged %s"
+msgstr "ట్యాగు చేయబడ్డ %s లోని అన్ని టపాలూ"
+
+#: zine/views/blog.py:173
+#, python-format
+msgid "All posts written by %s"
+msgstr "%s వ్రాసిన అన్ని టపాలూ"
+
+#: zine/views/blog.py:370
+#, python-format
+msgid "Comment %(num)d on %(post)s"
+msgstr "%(post)s టపాపై  %(num)dవ  వ్యాఖ్య"
+
+#: zine/views/blog.py:427
+msgid "Comments Feed"
+msgstr "వ్యాఖ్యల ఫీడు"
+
+#: zine/websetup/__init__.py:105
+#, python-format
+msgid ""
+"Instance folder does not exist.  You have to create the folder “%s” before "
+"proceeding."
+msgstr ""
+"ఇంస్టెన్సు అనే పేరుగల ఫోల్డరు లేదు.  ముందుకు సాగాలంటే , మీరు "%s" అనే ఫోల్డరును సృష్టించాలి."
+
+#: zine/websetup/__init__.py:127
+msgid "You have to provide a username."
+msgstr "మీరు ఒక యూజర్ పేరును వ్రాయాలి"
+
+#: zine/websetup/__init__.py:130
+msgid "You have to enter a mail address."
+msgstr "మీరొక మెయిలు అడ్రసును ఇవ్వాలి."
+
+#: zine/websetup/__init__.py:132
+msgid "The mail address is not valid."
+msgstr "మీరిచ్చిన మెయిలు అడ్రసు చెల్లదు."
+
+#: zine/websetup/__init__.py:135
+msgid "You have to enter a password."
+msgstr "మీరొక సంకేత పదాన్ని ఇవ్వాలి."
+
+#: zine/websetup/__init__.py:137
+msgid "The two passwords do not match."
+msgstr "మీరిచ్చిన సంకేత పదాలు రెండూ సరిపోలటం లేదు."
+
+#: zine/websetup/__init__.py:206
+#, python-format
+msgid ""
+"The configuration file (%s) could not be opened for writing. Please adjust "
+"your permissions and try again."
+msgstr ""
+"(%s) కాన్ఫిగరేషన్ ఫైలును వ్రాసేందుకు వీలుగా తెరవటం సాధ్య పడలేదు.  దయచేసి మీ అనుమతులను "
+"సవరించి, మళ్ళీ ప్రయత్నించండి."
+#: zine/websetup/templates/admin_account.html:3
+msgid "Administrator Account"
+msgstr "నిర్వాహకుని అకౌంటు"
+
+#: zine/websetup/templates/admin_account.html:4
+msgid ""
+"\n"
+"    In order to log into your Zine installation you have to provide a\n"
+"    login name for the administration user. You can later rename or delete\n"
+"    that user if you want.\n"
+"  "
+msgstr ""
+"\n"
+"    ఈ జైన్ వ్యవస్థలోనికి లాగిన్  అయ్యేందుకుగాను   నిర్వాహకుని అకౌంటుకోసం మీరు ఒక లాగిన్ పేరును\n"
+"    ఇవ్వవలసి ఉన్నది. తరువాత ఎప్పుడైనా మీరు దాని పేరును మార్చుకోవచ్చు; లేదా  దాన్ని పూర్తిగా\n"
+"    తొలగించుకోవచ్చు కూడాను.\n"
+"  "
+
+#: zine/websetup/templates/admin_account.html:14
+msgid "Password (repeat)"
+msgstr "సంకేతపదం (రెండవసారి)"
+
+#: zine/websetup/templates/admin_account.html:16
+msgid "E-Mail"
+msgstr "ఇ-మెయిలు"
+
+#: zine/websetup/templates/database.html:3
+msgid "Database"
+msgstr "డాటాబేసు"
+
+#: zine/websetup/templates/database.html:4
+msgid ""
+"\n"
+"    Zine uses a database to store blog posts and other information. The\n"
+"    only information it requires therefore is a database URI. Depending on "
+"your\n"
+"    database this URI looks different. Have a look at the following table "
+"for\n"
+"    examples of database URIs.\n"
+"  "
+msgstr ""
+"\n"
+"    బ్లాగు టపాలను, మరియు ఇతర సమాచారాన్ని నిలువ చేసేందుకుగాను జైన్ ఒక డాటాబేసును \n"
+"    ఉపయోగించుకుంటుంది.  అందువల్ల దానికి కావలసిన ఒకే ఒక్క సమాచారం ఆ డాటాబేసు యొక్క\n"
+"    యూఆరై.  మీ డాటాబేసును బట్టి ఈ  యూఆరై  కనబడే తీరు మారుతుంటుంది.  డాటాబేసు \n"
+"    యూఆరైల ఉదాహరణలకోసం ఈ క్రింది పట్టికను చూడండి:\n"
+"  "
+
+#: zine/websetup/templates/database.html:11
+msgid "SQLite"
+msgstr "ఎస్ క్యూ లైట్"
+
+#: zine/websetup/templates/database.html:12
+msgid "sqlite://database.db"
+msgstr "sqlite://database.db"
+
+#: zine/websetup/templates/database.html:13
+msgid ""
+"\n"
+"        The SQLite database path is either absolute (if it starts with three"
+"\n"
+"        slashes on OS X / Linux or two slashes and a drive letter on a\n"
+"        Windows system) or otherwise relative to the instance folder.\n"
+"      "
+msgstr ""
+"\n"
+"        ఎస్ క్యూ లైట్ డాటాబేసు యొక్క పాత్  రెండు విధాలుగా ఉండవచ్చు.  ఒకటి, యాబ్సొల్యూట్ -\n"
+"        (మీ ఆపరేటింగ్ సిస్టం  X / linux అయితే  ఇది మూడు -'///' లతో ప్రారంభం ఔతుంది; మీది \n"
+"        విండోస్ వ్యవస్థ అయితే  రెండు-'//' లూ మరియు ఒక డ్రైవ్ అక్షరం తో మొదలౌతుంది), ఇక \n"
+"      	 రెండవది,మీ ఇంస్టెన్సు ఫోల్డరుకు తారతమ్యంగా ఉంటుంది.\n"
+"		"
+#: zine/websetup/templates/database.html:18
+msgid "MySQL"
+msgstr "మై ఎస్ క్యూ ఎల్"
+
+#: zine/websetup/templates/database.html:19
+msgid "mysql://username:password@host/database_name"
+msgstr "mysql://username:password@host/database_name"
+
+#: zine/websetup/templates/database.html:20
+msgid "Postgres"
+msgstr "పోస్ట్గెస్"
+
+#: zine/websetup/templates/database.html:21
+msgid "postgres://username:password@host/database_name"
+msgstr "postgres://username:password@host/database_name"
+
+#: zine/websetup/templates/error.html:3
+msgid "Setup Failed"
+msgstr "సెటప్  ఫెయిలయింది"
+
+#: zine/websetup/templates/error.html:4
+msgid "The websetup was not able to finish the Zine installation successfully."
+msgstr "వెబ్ సెటప్  జైన్ ఇంస్టలేషన్ ను సరిగా పూర్తిచేయలేకపోయింది."
+
+#: zine/websetup/templates/error.html:5
+msgid ""
+"\n"
+"    If you need help for setting up Zine have a look at the support\n"
+"    wepage that will be there once a beta is available :-)\n"
+"  "
+msgstr ""
+"\n"
+"    జైన్ ను సెటప్ చేయటంలో మీకేదైనా సహాయం అవసరమైతే మీరు సపోర్టు  వెబ్ పేజీని చూడచ్చు..\n"
+"    అయితే బీటా వర్షన్ విడుదలైన తర్వాతగాని  అది అందుబాటులోకి రాదు! :-)\n"
+"  "
+
+#: zine/websetup/templates/finished.html:3
+msgid "Setup Finished"
+msgstr "సెటప్ పూర్తైంది."
+
+#: zine/websetup/templates/finished.html:4
+msgid ""
+"\n"
+"    The setup was finished successfully. You can now go to the\n"
+"    admin panel and start configuring your blog. Don't forget\n"
+"    to disable the maintenance mode after you finish your configuration.\n"
+"  "
+msgstr ""
+"\n"
+"    సెటప్ విజయవంతంగా పూర్తైంది.  మీరిప్పుడు నిర్వహణ కక్ష్యలోనికి వెళ్ళి, మీ బ్లాగును \n"
+"    కాన్ఫిగర్ చేయటం మొదలుపెట్టుకోవచ్చు.  మీ కాన్పిగరేషన్ పని పూర్తైన తరువాత \n"
+"    సవరణ స్థితిని రద్దుచేసి, వ్యవస్థను సాధారణ స్థితిలోనికి మార్చటం మరువకండి.\n"
+"  "
+
+#: zine/websetup/templates/layout.html:5 zine/websetup/templates/layout.html:159
+msgid "Zine Setup"
+msgstr "జైన్ సెటప్"
+
+#: zine/websetup/templates/layout.html:168
+msgid "An Error Occurred"
+msgstr "ఒక పొరపాటు జరిగింది"
+
+#: zine/websetup/templates/layout.html:174
+msgid "Next"
+msgstr "తరువాతది"
+
+#: zine/websetup/templates/layout.html:174
+msgid "Install"
+msgstr "ఇంస్టాల్  చేయి"
+
+#: zine/websetup/templates/layout.html:175
+msgid "Back"
+msgstr "వెనక్కి"
+
+#: zine/websetup/templates/start.html:3
+msgid "Welcome To The Zine Setup"
+msgstr "జైన్ సెటప్ కు స్వాగతం"
+
+#: zine/websetup/templates/start.html:4
+msgid ""
+"\n"
+"    Welcome to the Zine Setup. This Wizard will ask you some\n"
+"    basic questions and setup Zine for you.\n"
+"  "
+msgstr ""
+"\n"
+"    జైన్ సెటప్ కు స్వాగతం.  ఇప్పుడు ఈ సాధనం మిమ్మల్ని కొన్ని  సాధారణమైన ప్రశ్నలు \n"
+"    అడిగి, ఆపైన జైన్ ను  మీరు కోరిన విధంగా సెటప్ చేసి పెడుతుంది.\n"
+"  "
+
+#: zine/websetup/templates/start.html:8
+msgid ""
+"\n"
+"    The setup tried to determine the language from your browser\n"
+"    settings.  If you want to step through the wizard in another\n"
+"    language select it from the dropdown menu below and press next.\n"
+"  "
+msgstr ""
+"\n"
+"    మీ బ్రౌజర్ సెటింగుల ఆధారంగా మీ భాషను గుర్తించేందుకు సెటప్ ప్రయత్నించింది. మిగిలిన \n"
+"    సెటప్ కార్యక్రమాన్ని మీరు వేరొక భాషలో నిర్వహించుదామనుకుంటే, క్రింది డ్రాప్ డౌన్ మెనులో \n"
+"    ఆ భాషను ఎంపిక చేసుకొని, 'తరువాత ' బొత్తామును నొక్కండి.\n"
+"  "
+
+#: zine/websetup/templates/summary.html:3
+msgid "Setup Starting"
+msgstr "సెటప్ ప్రారంభమౌతోంది"
+
+#: zine/websetup/templates/summary.html:4
+msgid ""
+"\n"
+"    Zine knows now about all the information it needs to setup your\n"
+"    instance. After you click on the install button Zine will create\n"
+"    the database tables and insert the default information. Right after that"
+"\n"
+"    Zine will be online in maintenance mode which means that it's only\n"
+"    visible to the administrator, all other users will get a message that\n"
+"    shows that the blog is in maintenance mode right now.\n"
+"  "
+msgstr ""
+"\n"
+"    మీ ఇంస్టెన్సును సెటప్ చేసేందుకుగాను అవసరమైన సమాచారమంతా ఇప్పుడు జైన్ కు అందింది.\n"
+"    మీరొకసారి ఇంస్టాల్ బొత్తామును నొక్కిన తరువాత, జైన్ డాటాబేసు పట్టికల్ని నిర్మించి, వాటిలో \n"
+"    కనీస సమాచారాన్ని నింపుతుంది.  ఆ వెంటనే జైన్  వ్యవస్థ 'ఆన్ లైన్ 'లోనే, 'సవరణ స్థితి'లో\n" 
+"    ప్రారంభమౌతుంది. అంటే ఈ స్థితిలో జైన్ కేవలం నిర్వాహకునికి మాత్రమే కనబడుతుంది;\n"
+"    మిగిలిన యూజర్లందరికీ 'బ్లాగు ప్రస్తుతం సవరణ స్థితిలో ఉన్న ది' అని ఒక సందేశం  \n"
+"    అందుతుంది. \n"
+"  "
+
