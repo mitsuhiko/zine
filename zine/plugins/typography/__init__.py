@@ -36,10 +36,22 @@ _rules = [
     (re.compile(r'\(r\)'), 'registered', u'®'),
     (re.compile(r'\(tm\)'), 'trademark', u'™'),
     (re.compile(r'\d\s+(x)\s+\d(?u)'), 'multiplication_sign', u'×'),
+    (re.compile(r'(?:^|\s)(\')\d{2}(?u)'), 'single_abbr_quote', u'’'),
+    (re.compile(r'\w(\')\w(?u)'), 'single_abbr_quote', u'’'),
     (re.compile(r'(?:^|\s)(\')(?u)'), 'single_opening_quote', u'‘'),
     (re.compile(r'\S(\')(?u)'), 'single_closing_quote', u'’'),
     (re.compile(r'(?:^|\s)(")(?u)'), 'double_opening_quote', u'“'),
     (re.compile(r'\S(")(?u)'), 'double_closing_quote', u'”')
+]
+
+_tail_test = re.compile(r'\S$(?u)')
+
+#: These rules apply on typographical marks following a tag closure.
+#: For example: This is <a href="#">something</a>'s example
+_tail_rules = [
+    (re.compile(r'^(\')\w(?u)'), 'single_abbr_quote', u'’'),
+    (re.compile(r'^(\')'), 'single_closing_quote', u'’'),
+    (re.compile(r'^(\")'), 'double_closing_quote', u'”')
 ]
 
 
@@ -81,7 +93,7 @@ def process_doc_tree(doctree, input_data, reason):
     """Parse time callback function that replaces all pre blocks with a
     'syntax' attribute the highlighted sourcecode.
     """
-    def apply_typography(text):
+    def apply_typography(text, tail=False):
         def handle_match(m):
             all = m.group()
             if not m.groups():
@@ -90,6 +102,9 @@ def process_doc_tree(doctree, input_data, reason):
             return all[:m.start(1) - offset] + \
                    used_signs[sign] + \
                    all[m.end(1) - offset:]
+        if tail:
+            for regex, sign, ignore in _tail_rules:
+                text = regex.sub(handle_match, text)
         for regex, sign, ignore in _rules:
             text = regex.sub(handle_match, text)
         return text
@@ -101,7 +116,7 @@ def process_doc_tree(doctree, input_data, reason):
             element.text = apply_typography(element.text)
         for child in element.children:
             if child.tail:
-                child.tail = apply_typography(child.tail)
+                child.tail = apply_typography(child.tail, tail=_tail_test.search(child.text) and True)
 
 
 def add_config_link(req, navigation_bar):
