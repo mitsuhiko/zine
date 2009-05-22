@@ -1,0 +1,87 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Markdown Parser Options") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Markdown Parser Options") }}</h1>
+  <p>{% trans mdext='http://www.freewisdom.org/projects/python-markdown/Available_Extensions' %}
+    Markdown comes with several extensions to the basic markup syntax. You can
+    enable them here by specifying one per line. The Markdown-Python site has a
+    <a href="{{ mdext }}">list of available extensions</a>.
+  {% endtrans %}</p>
+  <h2>{{ _("Common Extensions") }}</h2>
+  <ul class="errors"><li>{% trans upgrade="easy_install -U Markdown" %}
+    <strong>Note:</strong>
+    These extensions are part of the standard
+    Markdown-Python distribution from 2.0 onwards. You may need to upgrade
+    using <code>{{ upgrade }}</code> before they become available. Zine includes
+    Markdown 1.7 and will fallback to it if a system-wide Markdown is not
+    present.
+  {% endtrans %}</li></ul>
+  <dl>
+    <dt>abbr</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Abbreviations" %}
+      Adds the ability to define abbreviations. Specifically, any defined
+      abbreviation is wrapped in an <code>&lt;abbr&gt;</code> tag.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <dt>def_list</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Definition_Lists" %}
+      Adds the ability to create definition lists.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <dt>fenced_code</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Fenced_Code_Blocks" %}
+      Adds a secondary way to define code blocks which overcomes
+      a few limitations of the standard indented code blocks.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <dt>footnotes</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Footnotes" %}
+      Adds footnote syntax.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <dt>headerid</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/HeaderId" %}
+      Adds an ‘id’ attribute to HTML header elements (<code>h1-h6</code>)
+      in Markdown’s output.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <dt>tables</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Tables" %}
+      Adds the ability to create tables in Markdown documents.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <dt>extra</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Extra" %}
+      Shortcut to load the <code>abbr</code>, <code>def_list</code>,
+      <code>fenced_code</code>, <code>footnotes</code>, <code>headerid</code>
+      and <code>tables</code> extensions.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <dt>codehilite</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/CodeHilite" %}
+      Adds code/syntax highlighting to standard Markdown code blocks using
+      Pygments. You must have the Zine Pygments Support plugin enabled for
+      this to work.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <dt>toc</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Table_of_Contents" %}
+      Adds a Table of Contents to a Markdown document.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd>
+    <!-- Hide wikilink until Zine has a mechanism for expanding partial slugs.
+    <dt>wikilink</dt>
+    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/WikiLinks" %}
+      Adds WikiLinks. Specifically, any "[[bracketed]]" word
+      is converted to a link.
+      <a href="{{ more }}">More info</a>.
+    {% endtrans %}</dd> -->
+  </dl>
+  <h2>{{ _("Configuration") }}</h2>
+  {% call form() %}
+    {{ form.as_dl() }}
+    <div class="actions">
+      <input type="submit" value="{{ _('Save') }}">
+    </div>
+  {% endcall %}
+{% endblock %}
