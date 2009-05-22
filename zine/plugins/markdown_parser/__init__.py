@@ -35,8 +35,8 @@ class ConfigurationForm(forms.Form):
     extensions = forms.LineSeparated(forms.TextField(),
                                                     _(u'Enabled Extensions'))
     makeintro = forms.BooleanField(_(u'Make Intro Section'),
-        help_text=_(u'Place <!--more-> on a line by itself with blank lines '\
-                    u'above and below to cut the post at that point.'))
+        help_text=_(u'Place &lt;!--more--&gt; on a line by itself with blank '\
+                    u'lines above and below to cut the post at that point.'))
 
 
 @require_privilege(BLOG_ADMIN)
