@@ -176,7 +176,7 @@ def _perform_import(app, blog, d):
                     old_post.updated, old_post.comments_enabled,
                     old_post.pings_enabled, parser=old_post.parser,
                     uid=old_post.uid, content_type=old_post.content_type,
-                    status=old_post.status)
+                    status=old_post.status, extra=old_post.extra)
         if old_post.parser_data is not None:
             post.parser_data.clear()
             post.parser_data.update(old_post.parser_data)

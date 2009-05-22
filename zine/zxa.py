@@ -13,7 +13,6 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from cPickle import dumps
 from datetime import datetime
 from itertools import chain
 
@@ -21,6 +20,7 @@ import zine
 from lxml import etree
 from zine.api import *
 from zine.models import Post, User
+from zine.utils import dump_json
 from zine.utils.text import build_tag_uri
 from zine.utils.dates import format_iso8601
 from zine.utils.xml import escape, XML_NS
@@ -215,7 +215,7 @@ class Writer(object):
         self.z('description', text=user.description, parent=rv)
         self.z('www', text=user.www, parent=rv)
         self.z('is_author', text=user.is_author and 'yes' or 'no', parent=rv)
-        self.z('extra', text=dumps(user.extra).encode('base64'))
+        self.z('extra', text=dump_json(user.extra), parent=rv)
         for participant in self.participants:
             participant.process_user(rv, user)
         privileges = self.z('privileges', parent=rv)
@@ -247,6 +247,7 @@ class Writer(object):
                and 'yes' or 'no', parent=entry)
         self.z('status', text=str(post.status), parent=entry)
         self.z('content_type', text=str(post.content_type), parent=entry)
+        self.z('extra', text=dump_json(post.extra), parent=entry)
 
         self.atom('content', type='text', text=post.text, parent=entry)
         self.atom('content', type='html', text=post.body.to_html(), parent=entry)

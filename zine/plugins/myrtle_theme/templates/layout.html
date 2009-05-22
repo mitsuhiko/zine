@@ -3,6 +3,7 @@
 <html lang="{{ cfg.language|e }}">
 <head>
   <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
+  <meta name="DC.title" content="{{ self.title() }} &mdash; {{ cfg.blog_title|e }}">
   <link rel="stylesheet" type="text/css" href="{{ shared_url('myrtle_theme::style.css') }}">
   {{ get_page_metadata() }}
 </head>

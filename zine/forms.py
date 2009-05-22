@@ -15,12 +15,12 @@ from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.config import DEFAULT_VARS
 from zine.database import db, posts, comments
-from zine.models import User, Group, Comment, Post, Category, \
+from zine.models import User, Group, Comment, Post, Category, Tag, \
      STATUS_DRAFT, STATUS_PUBLISHED, STATUS_PROTECTED, STATUS_PRIVATE, \
      COMMENT_UNMODERATED, COMMENT_MODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM, COMMENT_DELETED
 from zine.privileges import bind_privileges
-from zine.utils import forms, log
+from zine.utils import forms, log, dump_json
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
      is_valid_url, is_valid_slug, is_netaddr, is_not_whitespace_only
@@ -221,7 +221,8 @@ class PostForm(forms.Form):
     two builtin subclasses for the builtin content types 'entry' and 'page'.
     """
     title = forms.TextField(lazy_gettext(u'Title'), max_length=150,
-                            validators=[is_not_whitespace_only()], required=True)
+                            validators=[is_not_whitespace_only()],
+                            required=False)
     text = forms.TextField(lazy_gettext(u'Text'), max_length=65000,
                            widget=forms.Textarea)
     status = forms.ChoiceField(lazy_gettext(u'Publication status'), choices=[
@@ -364,6 +365,11 @@ class PostForm(forms.Form):
                          'status')
         post.bind_categories(self.data['categories'])
         post.bind_tags(self.data['tags'])
+
+    def taglist(self):
+        """Return all available tags as a JSON-encoded list."""
+        tags = [t.name for t in Tag.query.all()]
+        return dump_json(tags)
 
 
 class EntryForm(PostForm):

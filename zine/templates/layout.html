@@ -3,6 +3,7 @@
 <html lang="{{ cfg.language|e }}">
 <head>
   <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }}</title>
+  <meta name="DC.title" content="{{ self.title() }} &mdash; {{ cfg.blog_title|e }}">
   {{- get_page_metadata() }}
   {%- block head %}{% endblock %}
 </head>
