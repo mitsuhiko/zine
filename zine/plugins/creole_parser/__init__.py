@@ -10,9 +10,10 @@
 """
 from urlparse import urljoin
 
-from creoleparser import Parser, Creole10
-from creoleparser.elements import InlineElement
+from creoleparser import create_dialect, creole11_base, Parser, parse_args
+from creoleparser.elements import BlockElement
 from genshi.core import END, START, TEXT
+import genshi.builder
 from werkzeug import url_quote
 
 from zine.api import *
@@ -27,27 +28,36 @@ def path_func(page_name):
     return urljoin(root, url_quote(page_name))
 
 
-class ZineCreole(Creole10):
-
-    def __init__(self):
-        Creole10.__init__(self,
-            wiki_links_base_url=u'',
-            wiki_links_path_func=path_func,
-            wiki_links_space_char=u'_',
-            no_wiki_monospace=True,
-            use_additions=False
-        )
-        # support for <intro> ... </intro>
-        self.intro_marker = InlineElement('intro', ('<intro>', '</intro>'),
-                                          self.inline_elements +
-                                          self.block_elements)
-        self.block_elements.insert(0, self.intro_marker)
+def intro_tag(body, *pos, **kw):
+    contents = creole_parser.generate(body)
+    return genshi.builder.tag.intro(contents).generate()
 
 
-creole_parser = Parser(dialect=ZineCreole())
+def macro_func(macro_name, arg_string, body, isblock, environ):
+    pos, kw = parse_args(arg_string)
+    if macro_name == 'intro' and isblock and body:
+        return intro_tag(body, *pos, **kw)
+
+
+zinecreole = create_dialect(creole11_base, wiki_links_base_url=u'',
+                                     wiki_links_path_func=path_func,
+                                     wiki_links_space_char=u'_',
+                                     no_wiki_monospace=True,
+                                     macro_func=macro_func)
+
+creole_parser = Parser(dialect=zinecreole())
 
 
 class CreoleParser(BaseParser):
+    """
+    Creole wiki markup parser.
+
+    >>> p = CreoleParser(app=None)
+    >>> p.parse(u'Hello **there**', 'entry').to_html()
+    u'<p>Hello <strong>there</strong></p>\\n'
+    >>> p.parse(u'<<intro>>\\nHello //again//\\n<</intro>>\\n that was the __intro__.', 'entry').to_html()
+    u'<intro><p>Hello <em>again</em></p>\\n</intro><p> that was the <u>intro</u>.</p>\\n'
+    """
 
     name = _(u'Creole')
 
