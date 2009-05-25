@@ -47,6 +47,8 @@ def require_admin_privilege(expr=None):
     """
     if expr:
         expr = ENTER_ADMIN_PANEL & expr
+    else:
+        expr = ENTER_ADMIN_PANEL
     return require_privilege(expr)
 
 
