@@ -18,8 +18,6 @@ import os
 import sys
 import urlparse
 from os import path
-from cPickle import loads as load_pickle
-from struct import error
 from datetime import datetime, timedelta
 from types import ModuleType
 
@@ -35,7 +33,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from werkzeug import url_decode
 from werkzeug.exceptions import NotFound
 
-from zine.utils import local_manager, load_json, dump_json
+from zine.utils import local_manager
 
 
 _sqlite_re = re.compile(r'sqlite:(?:(?://(.*?))|memory)(?:\?(.*))?$')
@@ -131,46 +129,13 @@ class ZEMLParserData(MutableType, TypeDecorator):
         from zine.utils.zeml import load_parser_data
         try:
             return load_parser_data(value)
-        except (ValueError, error): # Parser data invalid. Database corruption?
+        except ValueError: # Parser data invalid. Database corruption?
             from zine.i18n import _
             from zine.utils import log
             log.exception(_(u'Error when loading parsed data from database. '
                             u'Maybe the database was manually edited and got '
                             u'corrupted? The system returned an empty value.'))
             return {}
-
-    def copy_value(self, value):
-        from copy import deepcopy
-        return deepcopy(value)
-
-
-class JsonDictPickleFallback(MutableType, TypeDecorator):
-    """
-    Stores as JSON and loads from JSON, with pickle fallback for compatibility
-    with older Zine installations."""
-
-    impl = sqlalchemy.Binary
-    
-    def process_result_value(self, value, dialect):
-        if value is None:
-            return None
-        else:
-            try:
-                # the extra str() call is for databases like postgres that
-                # insist on using buffers for binary data.
-                return load_json(str(value))
-            except ValueError:
-                try:
-                    return load_pickle(str(value))
-                except ValueError:
-                    # Database corrupted? Return raw data
-                    return {'dump': str(value)}
-
-    def process_bind_param(self, value, dialect):
-        if value is None:
-            return None
-        else:
-            return dump_json(value)
 
     def copy_value(self, value):
         from copy import deepcopy
@@ -226,7 +191,6 @@ db.get_engine = get_engine
 db.create_engine = create_engine
 db.session = session
 db.ZEMLParserData = ZEMLParserData
-db.JsonDictPickleFallback = JsonDictPickleFallback
 db.mapper = session.mapper
 db.association_proxy = association_proxy
 db.attribute_loaded = attribute_loaded
@@ -244,7 +208,7 @@ users = db.Table('users', metadata,
     db.Column('real_name', db.String(180)),
     db.Column('display_name', db.String(180)),
     db.Column('description', db.Text),
-    db.Column('extra', db.JsonDictPickleFallback),
+    db.Column('extra', db.PickleType),
     db.Column('pw_hash', db.String(70)),
     db.Column('email', db.String(250)),
     db.Column('www', db.String(200)),
@@ -298,7 +262,7 @@ posts = db.Table('posts', metadata,
     db.Column('comments_enabled', db.Boolean),
     db.Column('pings_enabled', db.Boolean),
     db.Column('content_type', db.String(40), index=True),
-    db.Column('extra', db.JsonDictPickleFallback),
+    db.Column('extra', db.PickleType),
     db.Column('status', db.Integer)
 )
 
