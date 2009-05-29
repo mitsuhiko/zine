@@ -36,7 +36,7 @@ def flash(msg, type='info'):
         msg = (u'<strong>%s:</strong> ' % _('Error')) + msg
     if type == 'warning':
         msg = (u'<strong>%s:</strong> ' % _('Warning')) + msg
-    
+
     local.request.session.setdefault('admin/flashed_messages', []).\
             append((type, msg))
 
