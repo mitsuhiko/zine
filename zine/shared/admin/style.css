@@ -481,8 +481,18 @@ div.formbox ul {
 
 div.preview {
     border: 1px solid #B4D2E7;
-    padding: 1em;
-    margin-bottom: 1em;
+    padding: 0;
+    margin: 0 0 1em 0;
+}
+
+div.preview div.text {
+    margin: 1em;
+}
+
+div.preview h2.title {
+    margin: 0;
+    font-size: 18px;
+    padding: 4px;
 }
 
 ul.errors {

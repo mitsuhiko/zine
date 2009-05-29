@@ -19,17 +19,16 @@ $(document).ready(function() {
 --></script>
 {% endblock %}
 {% block contents %}
+  <h1>{{ self.title() }}</h1>
   {% if form.preview %}
-    <h1>{{ _('Preview') }} (<a href="#form_start">{{ _('skip') }}</a>)</h1>
     <div class="preview" id="preview">
+      <h2 class="title">{{ _('Preview') }} (<a href="#entry_form">{{ _('skip') }}</a>)</h2>
       <div class="text">
       {{text}}
       </div>
     </div>
   {% endif %}
-  <h1>{{ self.title() }}</h1>
-  <a name="form_start" /></a>
-  {% call form() %}
+  {% call form(id="entry_form") %}
     {%- if form.parser_missing %}
       <ul class="errors">
         <li><strong>{{ _("Important:") }}</strong>
