@@ -346,6 +346,12 @@ div.contents div.actions {
     border-bottom: 1px solid #B4D2E7;
 }
 
+div.contents div.secondary div.actions {
+    margin: 0;
+    padding: 3px;
+    border-top: 0;
+}
+
 div.contents table {
     margin: 0.4em 0 0.2em 0;
     border-collapse: collapse;
