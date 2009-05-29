@@ -17,21 +17,30 @@
       <div class="error">{{ form.all_errors[0]|e }}</div>
     {%- endif %}
     {# we use render rather than just calling because we want
-       our own stylish error reporting on this page. #}
+       our own stylish error reporting on this page.  Also the
+       JavaScript is declared right after the text fields so
+       that ueber-quick users don't conflict with the javascript.
+       Imagine a user entering his password into the password
+       field and suddenly the page finished loading and the
+       focus is back in the username field and the password is
+       entered there by accident making it visible to everybody #}
     {% call form.render(action=url_for('admin/login')) %}
       <dl>
         <dt>{{ _("Username") }}
         <dd>{{ form.user.render() }}
+            <script type="text/javascript">$('#f_user').focus();</script>
         <dt>{{ _("Password") }}
         <dd>{{ form.password.render() }}
+            <script type="text/javascript">
+              // move focus to password field if user field is nonempty
+              if ($('#f_user').val() != '')
+                $('#f_password').focus();
+            </script>
       </dl>
       <p>
         {{ form.permanent.render() }}
         <label for="f_permanent">{{ _('Remember me') }}</label>
       </p>
-      <script type="text/javascript">
-        $('#f_user').focus();
-      </script>
       <div class="actions">
         <input type="submit" value="{{ _('Login') }}">
       </div>
