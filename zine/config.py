@@ -99,7 +99,7 @@ DEFAULT_VARS = {
         (u'simple', lazy_gettext(u'Simple Cache')),
         (u'memcached', lazy_gettext(u'memcached')),
         (u'filesystem', lazy_gettext(u'Filesystem'))
-                                            ], default=u'null'),
+    ], default=u'null'),
     'memcached_servers':        CommaSeparated(TextField(
                                                     validators=[is_netaddr()]),
                                                default=list),

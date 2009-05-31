@@ -194,7 +194,6 @@ class XMLRPC(object):
         if method_name not in self.funcs:
             return ''
         import inspect
-        print self.funcs
         return inspect.getdoc(self.funcs[method_name])
 
     def _dispatch(self, method, args):
