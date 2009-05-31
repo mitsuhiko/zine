@@ -965,10 +965,8 @@ class Comment(_ZEMLContainer):
         # update the comment count on the post if the moderation flag
         # changed from blocked to unblocked or vice versa
         if was_blocked != now_blocked:
-            if now_blocked:
-                self.post._comment_count -= 1
-            else:
-                self.post._comment_count += 1
+            self.post._comment_count = (self.post._comment_count or 0) + \
+                                       (now_blocked and -1 or +1)
 
     status = property(_get_status, _set_status)
     del _get_status, _set_status

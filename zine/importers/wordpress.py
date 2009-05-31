@@ -152,35 +152,43 @@ def parse_feed(fd):
         if status == STATUS_PUBLISHED:
             slug = gen_timestamped_slug(post_name, content_type, pub_date)
 
-        comments = {} # Store WordPress comment ids mapped to Comment objects
+        # Store WordPress comment ids mapped to Comment objects
+        comments = {}
         for x in item.findall(WORDPRESS.comment):
-            if x.findtext(WORDPRESS.comment_approved) != 'spam':
-                commentid = x.findtext(WORDPRESS.comment_id)
-                commentobj = Comment(
-                    x.findtext(WORDPRESS.comment_author),
-                    x.findtext(WORDPRESS.comment_content),
-                    x.findtext(WORDPRESS.comment_author_email),
-                    x.findtext(WORDPRESS.comment_author_url),
-                    comments.get(x.findtext(WORDPRESS.comment_parent), None),
-                    parse_wordpress_date(x.findtext(
-                                                WORDPRESS.comment_date_gmt)),
-                    x.findtext(WORDPRESS.comment_author_ip),
-                    'html',
-                    x.findtext(WORDPRESS.comment_type) in ('pingback',
-                                                   'traceback'),
-                    (COMMENT_UNMODERATED, COMMENT_MODERATED)
+            if x.findtext(WORDPRESS.comment_approved) == 'spam':
+                continue
+            commentobj = Comment(
+                x.findtext(WORDPRESS.comment_author),
+                x.findtext(WORDPRESS.comment_content),
+                x.findtext(WORDPRESS.comment_author_email),
+                x.findtext(WORDPRESS.comment_author_url),
+                comments.get(x.findtext(WORDPRESS.comment_parent), None),
+                parse_wordpress_date(x.findtext(
+                                            WORDPRESS.comment_date_gmt)),
+                x.findtext(WORDPRESS.comment_author_ip),
+                'html',
+                x.findtext(WORDPRESS.comment_type) in ('pingback',
+                                                       'traceback'),
+                (COMMENT_UNMODERATED, COMMENT_MODERATED)
                     [x.findtext(WORDPRESS.comment_approved) == '1']
-                    )
-                comments[commentid] = commentobj
+            )
+            comments[x.findtext(WORDPRESS.comment_id)] = commentobj
 
         post_body = item.findtext(CONTENT.encoded)
         post_intro = item.findtext('description')
-        if post_intro == None or len(post_intro) == 0:
+        if post_intro and not post_body:
+            post_body = post_intro
+            post_intro = None
+        elif post_body:
             find_more_results = re.split('<!--more ?.*?-->', post_body)
             if len(find_more_results) > 1:
                 post_intro = clean_empty_tags.sub('',
                                        _wordpress_to_html(find_more_results[0]))
                 post_body = find_more_results[1]
+        else:
+            # hmm. nothing to process. skip that entry
+            continue
+
         post_body = clean_empty_tags.sub('', _wordpress_to_html(post_body))
 
         post = Post(
@@ -235,6 +243,7 @@ class WordPressImporter(Importer):
             try:
                 blog = parse_feed(dump)
             except Exception, e:
+                raise
                 log.exception(_(u'Error parsing uploaded file'))
                 flash(_(u'Error parsing uploaded file: %s') % e, 'error')
             else:
