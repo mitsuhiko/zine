@@ -83,10 +83,12 @@ DEFAULT_THEME_SETTINGS = {
     # posts in a specific tag but no text at all it makes no sense to
     # load the text and more just to throw away the information.
     # for more information have a look at PostQuery.lightweight
+    'sql.index.lazy':               frozenset(['comments']),
     'sql.author.lazy':              frozenset(['comments']),
     'sql.archive.lazy':             frozenset(['comments']),
     'sql.category.lazy':            frozenset(['comments']),
     'sql.tag.lazy':                 frozenset(['comments']),
+    'sql.index.deferred':           frozenset(),
     'sql.author.deferred':          frozenset(),
     'sql.archive.deferred':         frozenset(),
     'sql.category.deferred':        frozenset(),

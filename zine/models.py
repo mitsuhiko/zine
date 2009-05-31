@@ -134,6 +134,31 @@ class _ZEMLDualContainer(_ZEMLContainer):
             return self.parser_data.get('intro')
 
 
+class CommentCounterExtension(db.AttributeExtension):
+    """A simple attribute extension that helps the post to reflect
+    the number of public comments on the post table.
+
+    This will not count or "uncount" blocked or unmoderated comments.
+    To fight this problem there is a :meth:`Post.sync_comment_count`
+    method that should be called after comment moderation on affected
+    comments.
+    """
+
+    def append(self, state, value, initiator):
+        instance = state.obj()
+        if not value.blocked:
+            instance._comment_count += 1
+        return value
+
+    def remove(self, state, value, initiator):
+        instance = state.obj()
+        if not value.blocked:
+            instance._comment_count -= 1
+
+    def set(self, state, value, oldvalue, initiator):
+        return value
+
+
 class UserQuery(db.Query):
     """Add some extra query methods to the user object."""
 
@@ -284,21 +309,7 @@ class PostQuery(db.Query):
         """Send a lightweight query which deferes some more expensive
         things such as comment queries or even text and parser data.
         """
-        if lazy is None:
-            lazy = ('comments',)
-        args = map(db.lazyload, lazy)
-        undefer_comment_count = 'comments' in lazy
-        if deferred:
-            deferred = set(deferred)
-            if 'comment_count' in deferred:
-                undefer_comment_count = False
-                deferred.remove('comment_count')
-            args.extend(map(db.defer, deferred))
-        # undefer the _comment_count query which is used by comment_count
-        # for lightweight post objects.  See Post.comment_count for more
-        # details.
-        if undefer_comment_count:
-            args.append(db.undefer('_comment_count'))
+        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred)
         return self.options(*args)
 
     def theme_lightweight(self, key):
@@ -580,7 +591,7 @@ class Post(_ZEMLDualContainer):
 
         # otherwise the comments are already available and we can savely
         # filter it.
-        if req.user.is_manager:
+        if req and req.user.is_manager:
             return len(self.comments)
         return len([x for x in self.comments if not x.blocked])
 
@@ -938,6 +949,25 @@ class Comment(_ZEMLContainer):
     author = _union_property('author', 'display_name')
     del _union_property
 
+    def _get_status(self):
+        return self._status
+
+    def _set_status(self, value):
+        was_blocked = self.blocked
+        self._status = value
+        now_blocked = self.blocked
+
+        # update the comment count on the post if the moderation flag
+        # changed from blocked to unblocked or vice versa
+        if was_blocked != now_blocked:
+            if now_blocked:
+                self.post._comment_count -= 1
+            else:
+                self.post._comment_count += 1
+
+    status = property(_get_status, _set_status)
+    del _get_status, _set_status
+
     @property
     def anonymous(self):
         """True if this comment is an anonymous comment."""
@@ -1146,6 +1176,7 @@ db.mapper(Comment, comments, properties={
     'author':       db.synonym('_author', map_column=True),
     'email':        db.synonym('_email', map_column=True),
     'www':          db.synonym('_www', map_column=True),
+    'status':       db.synonym('_status', map_column=True),
     'children':     db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
         order_by=[db.asc(comments.c.pub_date)],
@@ -1170,16 +1201,13 @@ db.mapper(Post, posts, properties={
                                         comments.c.post_id,
                                     order_by=[db.asc(comments.c.pub_date)],
                                     lazy=False,
-                                    cascade='all, delete, delete-orphan'),
+                                    cascade='all, delete, delete-orphan',
+                                    extension=CommentCounterExtension()),
     'links':            db.relation(PostLink, backref='post',
                                     cascade='all, delete, delete-orphan'),
     'categories':       db.relation(Category, secondary=post_categories, lazy=False,
                                     order_by=[db.asc(categories.c.name)]),
     'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
                                     order_by=[tags.c.name]),
-    '_comment_count':   db.column_property(
-        db.select([db.func.count(comments.c.comment_id)],
-                  (comments.c.post_id == posts.c.post_id) &
-                  (comments.c.status == COMMENT_MODERATED)
-        ).label('comment_count'), deferred=True)
+    'comment_count':    db.synonym('_comment_count', map_column=True)
 }, order_by=posts.c.pub_date.desc())

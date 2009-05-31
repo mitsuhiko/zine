@@ -23,6 +23,7 @@ from types import ModuleType
 
 import sqlalchemy
 from sqlalchemy import orm
+from sqlalchemy.orm.interfaces import AttributeExtension
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.util import to_list
@@ -194,6 +195,7 @@ db.ZEMLParserData = ZEMLParserData
 db.mapper = session.mapper
 db.association_proxy = association_proxy
 db.attribute_loaded = attribute_loaded
+db.AttributeExtension = AttributeExtension
 
 #: called at the end of a request
 cleanup_session = session.remove
@@ -260,6 +262,7 @@ posts = db.Table('posts', metadata,
     db.Column('author_id', db.Integer, db.ForeignKey('users.user_id')),
     db.Column('parser_data', db.ZEMLParserData),
     db.Column('comments_enabled', db.Boolean),
+    db.Column('comment_count', db.Integer, nullable=False, default=0),
     db.Column('pings_enabled', db.Boolean),
     db.Column('content_type', db.String(40), index=True),
     db.Column('extra', db.PickleType),

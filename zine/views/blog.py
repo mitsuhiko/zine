@@ -44,8 +44,9 @@ def index(req, page=1):
     :Template name: ``index.html``
     :URL endpoint: ``blog/index``
     """
-    data = Post.query.published().for_index().get_list(endpoint='blog/index',
-                                                       page=page)
+    data = Post.query.theme_lightweight('index').published() \
+               .for_index().get_list(endpoint='blog/index',
+                                     page=page)
 
     add_link('alternate', url_for('blog/atom_feed'), 'application/atom+xml',
              _(u'Recent Posts Feed'))
@@ -347,7 +348,7 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
                     subtitle=req.app.cfg['blog_tagline'])
 
     # the feed only contains published items
-    query = Post.query.published()
+    query = Post.query.lightweight(lazy=('comments',)).published()
 
     # feed for a category
     if category is not None:
