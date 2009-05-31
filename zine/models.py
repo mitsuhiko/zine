@@ -335,13 +335,13 @@ class PostQuery(db.Query):
             return self.filter_by(content_type=types[0])
         return self.filter(Post.content_type.in_(types))
 
-    def published(self, ignore_privileges=None, user=None):
+    def published(self, ignore_privileges=False, user=None):
         """Return a queryset for only published posts."""
         if not user:
             req = get_request()
             user = req and req.user
 
-        if not user:
+        if ignore_privileges or not user:
             # Anonymous. Return only public entries.
             return self.filter(
                 (Post.status == STATUS_PUBLISHED) &
@@ -604,6 +604,11 @@ class Post(_ZEMLDualContainer):
     def is_draft(self):
         """True if this post is unpublished."""
         return self.status == STATUS_DRAFT
+
+    def sync_comment_count(self):
+        """Sync the reflected comment count."""
+        self._comment_count = self.query \
+            .published(ignore_privileges=True).count()
 
     def set_auto_slug(self):
         """Generate a slug for this post."""

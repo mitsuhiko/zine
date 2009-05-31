@@ -48,7 +48,8 @@ class PostArchiveSummary(Widget):
     template = 'widgets/post_archive_summary.html'
 
     def __init__(self, detail='months', limit=6, show_title=False):
-        self.__dict__.update(Post.query.get_archive_summary(detail, limit))
+        self.__dict__.update(Post.query.lightweight(lazy=('comments',))
+                                 .get_archive_summary(detail, limit))
         self.show_title = show_title
 
 
@@ -59,10 +60,11 @@ class LatestPosts(Widget):
     template = 'widgets/latest_posts.html'
 
     def __init__(self, limit=5, show_title=False, content_types=None):
+        query = Post.query.lightweight(lazy=('comments',))
         if content_types is None:
-            query = Post.query.for_index()
+            query = query.for_index()
         else:
-            query = Post.query.filter(Post.content_type.in_(content_types))
+            query = query.filter(Post.content_type.in_(content_types))
         self.posts = query.latest().limit(limit).all()
         self.show_title = show_title
 
