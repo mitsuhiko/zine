@@ -105,7 +105,7 @@ def secure_database_uri(uri):
     obj = make_url(uri)
     if obj.password:
         obj.password = '***'
-    return unicode(obj).replace(':%2A%2A%2A@', ':***@')
+    return unicode(obj).replace(u':%2A%2A%2A@', u':***@', 1)
 
 
 def attribute_loaded(model, attribute):

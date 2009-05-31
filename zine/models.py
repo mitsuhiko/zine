@@ -332,8 +332,8 @@ class PostQuery(db.Query):
         """Return all the types for the index."""
         types = get_application().cfg['index_content_types']
         if len(types) == 1:
-            return self.filter_by(content_type=types[0].strip())
-        return self.filter(Post.content_type.in_([x.strip() for x in types]))
+            return self.filter_by(content_type=types[0])
+        return self.filter(Post.content_type.in_(types))
 
     def published(self, ignore_privileges=None, user=None):
         """Return a queryset for only published posts."""
@@ -1141,7 +1141,7 @@ db.mapper(User, users, properties={
     'id':               users.c.user_id,
     'display_name':     db.synonym('_display_name', map_column=True),
     'posts':            db.dynamic_loader(Post,
-                                          backref=db.backref('author', lazy=False),
+                                          backref=db.backref('author', lazy=True),
                                           query_class=PostQuery,
                                           cascade='all, delete, delete-orphan'),
     'comments':         db.dynamic_loader(Comment,
@@ -1205,9 +1205,9 @@ db.mapper(Post, posts, properties={
                                     extension=CommentCounterExtension()),
     'links':            db.relation(PostLink, backref='post',
                                     cascade='all, delete, delete-orphan'),
-    'categories':       db.relation(Category, secondary=post_categories, lazy=False,
+    'categories':       db.relation(Category, secondary=post_categories, lazy=True,
                                     order_by=[db.asc(categories.c.name)]),
-    'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
+    'tags':             db.relation(Tag, secondary=post_tags, lazy=True,
                                     order_by=[tags.c.name]),
     'comment_count':    db.synonym('_comment_count', map_column=True)
 }, order_by=posts.c.pub_date.desc())
