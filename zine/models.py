@@ -312,6 +312,13 @@ class PostQuery(db.Query):
         args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
         return self.options(*args)
 
+    def summary_lightweight(self):
+        """A query with lightweight settings for summaries.  (Like widgets
+        etc.)  Does not load text or comments or anything related.
+        """
+        return self.lightweight(lazy=('comments', 'categories', 'tags'),
+                                deferred=('parser_data', 'text', 'extra'))
+
     def theme_lightweight(self, key):
         """A query for lightweight settings based on the theme.  For example
         to use the lightweight settings for the author overview page you can
@@ -1208,9 +1215,9 @@ db.mapper(Post, posts, properties={
                                     extension=CommentCounterExtension()),
     'links':            db.relation(PostLink, backref='post',
                                     cascade='all, delete, delete-orphan'),
-    'categories':       db.relation(Category, secondary=post_categories, lazy=True,
+    'categories':       db.relation(Category, secondary=post_categories, lazy=False,
                                     order_by=[db.asc(categories.c.name)]),
-    'tags':             db.relation(Tag, secondary=post_tags, lazy=True,
+    'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
                                     order_by=[tags.c.name]),
     'comment_count':    db.synonym('_comment_count', map_column=True)
 }, order_by=posts.c.pub_date.desc())
