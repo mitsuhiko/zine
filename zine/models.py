@@ -309,7 +309,7 @@ class PostQuery(db.Query):
         """Send a lightweight query which deferes some more expensive
         things such as comment queries or even text and parser data.
         """
-        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred)
+        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
         return self.options(*args)
 
     def theme_lightweight(self, key):
