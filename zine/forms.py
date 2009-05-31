@@ -605,6 +605,8 @@ class DeleteCategoryForm(_CategoryBoundForm):
 class CommentMassModerateForm(forms.Form):
     """This form is used for comment mass moderation."""
     selected_comments = forms.MultiChoiceField(widget=forms.CheckboxGroup)
+    per_page = forms.ChoiceField(choices=[20, 40, 60, 80, 100],
+                                 label=lazy_gettext('Comments Per Page:'))
 
     def __init__(self, comments, initial=None):
         self.comments = comments

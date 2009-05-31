@@ -504,15 +504,35 @@ def delete_page(request, post):
                                  form=form.as_widget())
 
 
-def _handle_comments(identifier, title, query, page,
+def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                      endpoint='admin/manage_comments'):
     request = get_request()
-    comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination(endpoint, page, PER_PAGE, query.count())
-    if not comments and page != 1:
-        raise NotFound()
+    if request.method == 'POST' and 'per_page_update' in request.form:
+        # Don't even filter the database query since we're redirecting
+        return redirect(url_for(endpoint, page=page, post_id=post_id,
+                                per_page=request.values.get('per_page')))
 
-    form = CommentMassModerateForm(comments)
+    if isinstance(per_page, basestring):
+        per_page = int(per_page)
+    comments = query.limit(per_page).offset(per_page * (page - 1)).all()
+
+
+    pagination = AdminPagination(endpoint, page, per_page, query.count(),
+                                 post_id=post_id)
+
+    if not comments and page > 1:
+        # Since we can tweak how many comments are shown, maybe we've just
+        # changed how many we want to see per-page and there are not enought
+        # pages now for the chosen ammount
+        # Redirect to page-1 until comments are found.
+        return redirect(url_for(endpoint, page=page-1, per_page=per_page,
+                                post_id=post_id))
+
+    form = CommentMassModerateForm(comments, initial=dict(per_page=per_page))
+
+    tab = 'comments'
+    if identifier is not None:
+        tab += '.' + identifier
 
     if request.method == 'POST':
         if 'cancel' not in request.form and form.validate(request.form):
@@ -520,16 +540,38 @@ def _handle_comments(identifier, title, query, page,
                 if 'confirm' in request.form:
                     form.delete_selection()
                     db.commit()
-                    return redirect_to('admin/manage_comments')
-                return render_admin_response('admin/delete_comments.html',
+                    return redirect_to(endpoint, page=page, per_page=per_page)
+                return render_admin_response('admin/delete_comments.html', tab,
                                              form=form.as_widget())
+            # delete all comments in current tab
+            elif 'delete_all' in request.form:
+                if identifier not in ('spam', 'blocked'):
+                    flash(_('“Delete All” can only be issued for “Spam” and '
+                            '“Blocked” comment types.'), 'error')
+                elif 'confirm' in request.form:
+                    comments = query.all()
+                    # Don't use .count() means a 2nd query and it's
+                    # aprox. 0.111 secs slower; rough average calculation :)
+                    count = len(comments)
+                    for comment in comments:
+                        # Although we're deleting spam or blocked comments,
+                        # they're still comments, so emit the right event
+                        emit_event('before-comment-deleted', comment)
+                        db.delete(comment)
+                    db.commit()
+                    flash(_(u'Deleted %d %s comments.') % (count, identifier))
+                    return redirect_to(endpoint, page=page, per_page=per_page)
+                return render_admin_response('admin/delete_comments_all.html',
+                                             tab, form=form.as_widget(),
+                                             comment_kind = identifier,
+                                             comment_count=query.count())
 
             # or approve them all
             elif 'approve' in request.form:
                 form.approve_selection()
                 db.commit()
                 flash(_(u'Approved all the selected comments.'))
-                return redirect_to('admin/manage_comments')
+                return redirect_to(endpoint, page=page, per_page=per_page)
 
             # or block them all
             elif 'block' in request.form:
@@ -537,8 +579,8 @@ def _handle_comments(identifier, title, query, page,
                     form.block_selection()
                     db.commit()
                     flash(_(u'Blocked all the selected comments.'))
-                    return redirect_to('admin/manage_comments')
-                return render_admin_response('admin/block_comments.html',
+                    return redirect_to(endpoint, page=page, per_page=per_page)
+                return render_admin_response('admin/block_comments.html', tab,
                                              form=form.as_widget())
 
             # or mark them all as spam
@@ -547,62 +589,60 @@ def _handle_comments(identifier, title, query, page,
                     form.mark_selection_as_spam()
                     db.commit()
                     flash(_(u'Reported all the selected comments as SPAM.'))
-                    return redirect_to('admin/manage_comments')
+                    return redirect_to(endpoint, page=page, per_page=per_page)
                 return render_admin_response('admin/mark_spam_comments.html',
-                                             form=form.as_widget())
+                                             tab, form=form.as_widget())
             # or mark them all as ham
             elif 'ham' in request.form:
                 if 'confirm' in request.form:
                     form.mark_selection_as_ham()
                     db.commit()
                     flash(_(u'Reported all the selected comments as NOT SPAM.'))
-                    return redirect_to('admin/manage_comments')
+                    return redirect_to(endpoint, page=page, per_page=per_page)
                 return render_admin_response('admin/mark_ham_comments.html',
-                                             form=form.as_widget())
-    tab = 'comments'
-    if identifier is not None:
-        tab += '.' + identifier
-    return render_admin_response('admin/manage_comments.html', tab,
-                                 comments_title=title, form=form.as_widget(),
-                                 pagination=pagination)
+                                             tab, form=form.as_widget())
+    return render_admin_response(
+        'admin/manage_comments.html', tab, comments_title=title,
+        form=form.as_widget(), pagination=pagination,
+        akismet_active = request.app.plugins['akismet_spam_filter'].active)
 
 
 @require_admin_privilege(MODERATE_COMMENTS)
-def manage_comments(request, page):
+def manage_comments(request, page, per_page):
     """Show all the comments."""
     return _handle_comments('overview', _(u'All Comments'),
-                            Comment.query, page)
+                            Comment.query, page, per_page)
 
 @require_admin_privilege(MODERATE_COMMENTS)
-def show_unmoderated_comments(request, page):
+def show_unmoderated_comments(request, page, per_page):
     """Show all unmoderated and user-blocked comments."""
     return _handle_comments('unmoderated', _(u'Comments Awaiting Moderation'),
-                            Comment.query.unmoderated(), page,
+                            Comment.query.unmoderated(), page, per_page,
                             endpoint='admin/show_unmoderated_comments')
 
 @require_admin_privilege(MODERATE_COMMENTS)
-def show_approved_comments(request, page):
+def show_approved_comments(request, page, per_page):
     """Show all moderated comments."""
     return _handle_comments('approved', _(u'Approved Commments'),
-                            Comment.query.approved(), page,
+                            Comment.query.approved(), page, per_page,
                             endpoint='admin/show_approved_comments')
 
 @require_admin_privilege(MODERATE_COMMENTS)
-def show_blocked_comments(request, page):
+def show_blocked_comments(request, page, per_page):
     """Show all spam comments."""
     return _handle_comments('blocked', _(u'Blocked'),
-                            Comment.query.blocked(), page,
+                            Comment.query.blocked(), page, per_page,
                             endpoint='admin/show_blocked_comments')
 
 @require_admin_privilege(MODERATE_COMMENTS)
-def show_spam_comments(request, page):
+def show_spam_comments(request, page, per_page):
     """Show all spam comments."""
     return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page,
-                            endpoint='admin/show_spam_comments')
+                            per_page, endpoint='admin/show_spam_comments')
 
 
 @require_admin_privilege(MODERATE_COMMENTS)
-def show_post_comments(request, page, post_id):
+def show_post_comments(request, page, post_id, per_page):
     """Show all comments for a single post."""
     post = Post.query.get(post_id)
     if post is None:
@@ -612,7 +652,9 @@ def show_post_comments(request, page, post_id):
         escape(post.title)
     )
     return _handle_comments(None, _(u'Comments for “%s”') % link,
-                            Comment.query.comments_for_post(post), page)
+                            Comment.query.comments_for_post(post), page,
+                            per_page, post_id=post_id,
+                            endpoint='admin/show_post_comments')
 
 
 @require_admin_privilege(MODERATE_COMMENTS)

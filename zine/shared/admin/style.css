@@ -312,7 +312,8 @@ div.contents input[type="radio"]:focus {
     border: none;
 }
 
-div.contents input[name="delete"]:hover {
+div.contents input[name="delete"]:hover,
+div.contents input[name="delete_all"]:hover {
     background-color: #d00;
     color: white;
 }

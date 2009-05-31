@@ -15,29 +15,43 @@
       <li>{{ _("No comments.") }}</li>
     {%- endfor %}
     </ul>
+    {% if form.comments %}
     <div class="actions">
+      <div id="per_page" style="float: right;">
+        {{ form.per_page.label() }}
+        {{ form.per_page() }}
+        <input type="submit" name="per_page_update" id="per_page_update" value="{{ _('Update') }}">
+      </div>
       {% if admin.active_pane == 'comments.unmoderated' %}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
       <input type="submit" name="block" value="{{ _('Block') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
-      <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
+      <input type="submit" name="spam"
+             value="{{ akismet_active and _('Mark and Report as Spam') or _('Mark as Spam') }}">
       {% elif admin.active_pane == 'comments.approved' %}
       <input type="submit" name="block" value="{{ _('Block') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
-      <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
+      <input type="submit" name="spam"
+             value="{{ akismet_active and _('Mark and Report as Spam') or _('Mark as Spam') }}">
       {% elif admin.active_pane == 'comments.blocked' %}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
-      <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
+      <input type="submit" name="delete_all" value="{{ _('Delete All') }}">
+      <input type="submit" name="spam"
+             value="{{ akismet_active and _('Mark and Report as Spam') or _('Mark as Spam') }}">
       {% elif admin.active_pane == 'comments.spam' %}
-      <input type="submit" name="ham" value="{{ _('Report as Not Spam') }}">
+      <input type="submit" name="ham"
+             value="{{ akismet_active and _('Mark and Report as Not Spam') or _('Mark as Not Spam')}}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
+      <input type="submit" name="delete_all" value="{{ _('Delete All') }}">
       {% elif admin.active_pane == 'comments.overview' %}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
       <input type="submit" name="block" value="{{ _('Block') }}">
       <input type="submit" name="delete" value="{{ _('Delete') }}">
-      <input type="submit" name="spam" value="{{ _('Report as Spam') }}">
-      <input type="submit" name="ham" value="{{ _('Report as Not Spam') }}">
+      <input type="submit" name="spam"
+             value="{{ akismet_active and _('Mark and Report as Spam') or _('Mark as Spam') }}">
+      <input type="submit" name="ham"
+             value="{{ akismet_active and _('Mark and Report as Not Spam') or _('Mark as Not Spam')}}">
       {% endif %}
     </div>
     <script type="text/javascript">
@@ -49,8 +63,13 @@
             });
           })
           .appendTo('div.actions');
+        $('#f_per_page').bind('change', function() {
+          $('#per_page_update').click();
+        });
+        $('#per_page_update').hide();
       });
     </script>
+    {% endif %}
     {%- if pagination.necessary %}
     <div class="pagination">
       {{ pagination.generate() }}
