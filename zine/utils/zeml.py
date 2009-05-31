@@ -18,6 +18,7 @@ import cPickle as pickle
 from copy import deepcopy
 from cStringIO import StringIO
 from operator import itemgetter
+from itertools import imap
 from urlparse import urlparse
 
 from werkzeug import escape
@@ -510,13 +511,15 @@ class _BaseElement(object):
                     self.attributes)
 
     def __eq__(self, other):
-        if self.__class__ is not other.__class__:
+        try:
+            return self.__class__ is other.__class__ and \
+                   self.name == other.name and \
+                   self.children == other.children and \
+                   self.attributes == other.attributes and \
+                   self.text == other.text and \
+                   self.tail == other.tail
+        except:
             return False
-        for key in 'name', 'children', 'attributes', 'text', 'tail':
-            if getattr(self, key, _missing) != \
-               getattr(other, key, _missing):
-                return False
-        return True
 
     def __ne__(self, other):
         return not self.__eq__(other)

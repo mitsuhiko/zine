@@ -20,6 +20,7 @@ import urlparse
 from os import path
 from datetime import datetime, timedelta
 from types import ModuleType
+from copy import deepcopy
 
 import sqlalchemy
 from sqlalchemy import orm
@@ -139,7 +140,6 @@ class ZEMLParserData(MutableType, TypeDecorator):
             return {}
 
     def copy_value(self, value):
-        from copy import deepcopy
         return deepcopy(value)
 
 
@@ -148,7 +148,7 @@ class Query(orm.Query):
 
     def first(self, raise_if_missing=False):
         """Return the first result of this `Query` or None if the result
-        doesn't contain any row.  If `raise_if_missing` is set to `True`
+        doesn't contain any rows.  If `raise_if_missing` is set to `True`
         a `NotFound` exception is raised if no row is found.
         """
         rv = orm.Query.first(self)

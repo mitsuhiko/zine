@@ -164,7 +164,9 @@ class OrderedDict(dict):
     >>> d
     OrderedDict([('a', 'b'), ('c', 'd'), ('foo', 'bar'), ('spam', [])])
 
-    .. _proposal: http://thread.gmane.org/gmane.comp.python.devel/95316
+    For performance reasons the ordering is not taken into account when
+    comparing two ordered dicts.
+
     .. _ordereddict: http://www.xs4all.nl/~anthon/Python/ordereddict/
     """
     _keys = _PickleProtocol2Sucks()
@@ -183,12 +185,8 @@ class OrderedDict(dict):
             self._keys.append(key)
         dict.__setitem__(self, key, item)
 
-    def __deepcopy__(self, memo=None):
-        if memo is None:
-            memo = {}
+    def __deepcopy__(self, memo):
         d = memo.get(id(self), missing)
-        if d is not missing:
-            return d
         memo[id(self)] = d = self.__class__()
         dict.__init__(d, deepcopy(self.items(), memo))
         d._keys = self._keys[:]
@@ -203,23 +201,6 @@ class OrderedDict(dict):
 
     def __reversed__(self):
         return reversed(self._keys)
-
-    def __eq__(self, other):
-        if isinstance(other, OrderedDict):
-            if not dict.__eq__(self, other):
-                return False
-            return self.items() == other.items()
-        return dict.__eq__(self, other)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __cmp__(self, other):
-        if isinstance(other, OrderedDict):
-            return cmp(self.items(), other.items())
-        elif isinstance(other, dict):
-            return dict.__cmp__(self, other)
-        return NotImplemented
 
     @classmethod
     def fromkeys(cls, iterable, default=None):
