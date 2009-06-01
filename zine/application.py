@@ -256,9 +256,9 @@ class InternalError(UserException):
 class Request(RequestBase):
     """This class holds the incoming request data."""
 
-
     def __init__(self, environ, app=None):
         RequestBase.__init__(self, environ)
+        self.queries = []
         if app is None:
             app = get_application()
         self.app = app
@@ -657,7 +657,8 @@ class Zine(object):
 
         # connect to the database
         self.database_engine = db.create_engine(self.cfg['database_uri'],
-                                                self.instance_folder)
+                                                self.instance_folder,
+                                                self.cfg['database_debug'])
 
         # now setup the cache system
         self.cache = get_cache(self)
@@ -1218,6 +1219,12 @@ class Zine(object):
                                                  next=request.path))
         except HTTPException, e:
             response = e.get_response(request)
+
+        # in debug mode on HTML responses we inject the collected queries.
+        if self.cfg['database_debug'] and response.mimetype == 'text/html' and \
+           isinstance(response.response, (list, tuple)):
+            from zine.utils.debug import inject_query_info
+            inject_query_info(request, response)
 
         return response
 

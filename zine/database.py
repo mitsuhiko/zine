@@ -16,6 +16,7 @@
 import re
 import os
 import sys
+import time
 import urlparse
 from os import path
 from datetime import datetime, timedelta
@@ -24,6 +25,7 @@ from copy import deepcopy
 
 import sqlalchemy
 from sqlalchemy import orm
+from sqlalchemy.interfaces import ConnectionProxy
 from sqlalchemy.orm.interfaces import AttributeExtension
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.ext.declarative import declarative_base
@@ -36,6 +38,12 @@ from werkzeug import url_decode
 from werkzeug.exceptions import NotFound
 
 from zine.utils import local_manager
+
+
+if sys.platform == 'win32':
+    _timer = time.clock
+else:
+    _timer = time.time
 
 
 _sqlite_re = re.compile(r'sqlite:(?:(?://(.*?))|memory)(?:\?(.*))?$')
@@ -52,7 +60,7 @@ def get_engine():
     return get_application().database_engine
 
 
-def create_engine(uri, relative_to=None, echo=False):
+def create_engine(uri, relative_to=None, debug=False):
     """Create a new engine.  This works a bit like SQLAlchemy's
     `create_engine` with the difference that it automaticaly set's MySQL
     engines to 'utf-8', and paths for SQLite are relative to the path
@@ -84,7 +92,7 @@ def create_engine(uri, relative_to=None, echo=False):
         if info.drivername == 'mysql':
             info.query.setdefault('charset', 'utf8')
 
-    options = {'convert_unicode': True, 'echo': echo}
+    options = {'convert_unicode': True}
 
     # alternative pool sizes / recycle settings and more.  These are
     # interpreter wide and not from the config for the following reasons:
@@ -97,6 +105,9 @@ def create_engine(uri, relative_to=None, echo=False):
         value = os.environ.get('ZINE_DATABASE_' + key.upper())
         if value is not None:
             options[key] = int(value)
+
+    if debug:
+        options['proxy'] = ConnectionDebugProxy()
 
     return sqlalchemy.create_engine(info, **options)
 
@@ -114,6 +125,19 @@ def attribute_loaded(model, attribute):
     # XXX: this works but it relys on a specific implementation in
     # SQLAlchemy.  Figure out if SA provides a way to query that information.
     return attribute in model.__dict__
+
+
+class ConnectionDebugProxy(ConnectionProxy):
+    """Helps debugging the database."""
+
+    def cursor_execute(self, execute, cursor, statement, parameters, context, executemany):
+        start = _timer()
+        try:
+            return execute(cursor, statement, parameters, context)
+        finally:
+            from zine.application import get_request
+            request = get_request()
+            request.queries.append((statement, parameters, start, _timer()))
 
 
 class ZEMLParserData(MutableType, TypeDecorator):

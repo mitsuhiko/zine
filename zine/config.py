@@ -31,6 +31,7 @@ _dev_mode = environment.MODE == 'development'
 DEFAULT_VARS = {
     # general settings
     'database_uri':             TextField(default=u''),
+    'database_debug':           BooleanField(default=False),
     'blog_title':               TextField(default=lazy_gettext(u'My Zine Blog')),
     'blog_tagline':             TextField(default=lazy_gettext(u'just another Zine blog')),
     'blog_url':                 TextField(default=u''),
