@@ -52,7 +52,7 @@ def get_engine():
     return get_application().database_engine
 
 
-def create_engine(uri, relative_to=None, echo=True):
+def create_engine(uri, relative_to=None, echo=False):
     """Create a new engine.  This works a bit like SQLAlchemy's
     `create_engine` with the difference that it automaticaly set's MySQL
     engines to 'utf-8', and paths for SQLite are relative to the path

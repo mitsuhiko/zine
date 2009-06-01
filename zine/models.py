@@ -305,6 +305,10 @@ class AnonymousUser(User):
 class _PostQueryBase(db.Query):
     """Add some extra methods to the post model."""
 
+    def get(self, id):
+        """Get a comment by comment id."""
+        return self.filter(Post.id == id).first()
+
     def lightweight(self, deferred=None, lazy=None):
         """Send a lightweight query which deferes some more expensive
         things such as comment queries or even text and parser data.
@@ -863,6 +867,10 @@ class Category(object):
 
 class CommentQuery(db.Query):
     """The manager for comments"""
+
+    def get(self, id):
+        """Get a comment by comment id."""
+        return self.filter(Comment.id == id).first()
 
     def approved(self):
         """Return only the approved comments."""
