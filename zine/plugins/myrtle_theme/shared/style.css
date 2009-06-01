@@ -267,7 +267,7 @@ div.sidebar div.tag-cloud {
 }
 
 /* :::: POST LIST PAGES :::: */
-div.post h3 {
+div.entry h3 {
     font-size: 1.9em;
     font-weight: normal;
     margin: 1em 0 0 0;
@@ -277,19 +277,19 @@ div.post h3 {
     font-variant: small-caps;
 }
 
-div.post h3 a {
+div.entry h3 a {
     color: #21421e;
     display: block;
     padding: 1px 5px 2px 5px;
     text-decoration: none;
 }
 
-div.post h3 a:hover {
+div.entry h3 a:hover {
     background-color: #21421e;
     color: #dae7d9;
 }
 
-div.post p.meta {
+div.entry p.meta {
     color: #888;
     margin: 0;
     padding: 4px 0 4px 5px;
@@ -297,11 +297,11 @@ div.post p.meta {
     background-image: url(img/metabg.png);
 }
 
-div.post p.meta a {
+div.entry p.meta a {
     color: #444;
 }
 
-div.post p.related {
+div.entry p.related {
     text-align: right;
     font-size: 0.9em;
     padding: 3px 5px 3px 5px;
@@ -312,15 +312,15 @@ div.post p.related {
     color: #555;
 }
 
-div.post p.related a {
+div.entry p.related a {
     color: #222;
 }
 
-div.post div.text {
+div.entry div.text {
     margin: 5px;
 }
 
-div.post div.intro {
+div.entry div.intro {
     margin: 5px;
     color: #444;
     font-style: italic;
