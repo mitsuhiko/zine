@@ -17,7 +17,7 @@
     :license: BSD, see LICENSE for more details.
 """
 from zine.application import render_template
-from zine.models import Post, Category, Tag, Comment
+from zine.models import Post, SummarizedPost, Category, Tag, Comment
 
 
 class Widget(object):
@@ -48,8 +48,8 @@ class PostArchiveSummary(Widget):
     template = 'widgets/post_archive_summary.html'
 
     def __init__(self, detail='months', limit=6, show_title=False):
-        self.__dict__.update(Post.query.summary_lightweight()
-                                 .get_archive_summary(detail, limit))
+        self.__dict__.update(SummarizedPost.query
+            .get_archive_summary(detail, limit))
         self.show_title = show_title
 
 
@@ -60,11 +60,11 @@ class LatestPosts(Widget):
     template = 'widgets/latest_posts.html'
 
     def __init__(self, limit=5, show_title=False, content_types=None):
-        query = Post.query.summary_lightweight()
         if content_types is None:
-            query = query.for_index()
+            query = SummarizedPost.query.for_index()
         else:
-            query = query.filter(Post.content_type.in_(content_types))
+            query = SummarizedPost.query.filter(SummarizedPost
+                .content_type.in_(content_types))
         self.posts = query.latest().limit(limit).all()
         self.show_title = show_title
 

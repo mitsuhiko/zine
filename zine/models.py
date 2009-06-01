@@ -16,7 +16,7 @@ from werkzeug.exceptions import NotFound
 
 from zine.database import users, categories, posts, post_links, \
      post_categories, post_tags, tags, comments, groups, group_users, \
-     privileges, user_privileges, group_privileges, db
+     privileges, user_privileges, group_privileges, texts, db
 from zine.utils import zeml
 from zine.utils.text import gen_slug, gen_timestamped_slug, build_tag_uri, \
      increment_string
@@ -302,7 +302,7 @@ class AnonymousUser(User):
         return False
 
 
-class PostQuery(db.Query):
+class _PostQueryBase(db.Query):
     """Add some extra methods to the post model."""
 
     def lightweight(self, deferred=None, lazy=None):
@@ -311,25 +311,6 @@ class PostQuery(db.Query):
         """
         args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
         return self.options(*args)
-
-    def summary_lightweight(self):
-        """A query with lightweight settings for summaries.  (Like widgets
-        etc.)  Does not load text or comments or anything related.
-        """
-        return self.lightweight(lazy=('comments', 'categories', 'tags'),
-                                deferred=('parser_data', 'text', 'extra'))
-
-    def theme_lightweight(self, key):
-        """A query for lightweight settings based on the theme.  For example
-        to use the lightweight settings for the author overview page you can
-        use this query::
-
-            Post.query.theme_lightweight('author_overview')
-        """
-        theme_settings = get_application().theme.settings
-        deferred = theme_settings.get('sql.%s.deferred' % key)
-        lazy = theme_settings.get('sql.%s.lazy' % key)
-        return self.lightweight(deferred, lazy)
 
     def type(self, content_type):
         """Filter all posts by a given type."""
@@ -512,46 +493,8 @@ class PostQuery(db.Query):
         return q.all()
 
 
-class Post(_ZEMLDualContainer):
+class _PostBase(object):
     """Represents one blog post."""
-
-    query = db.query_property(PostQuery)
-    parser_reason = 'post'
-
-    def __init__(self, title, author, text, slug=None, pub_date=None,
-                 last_update=None, comments_enabled=True,
-                 pings_enabled=True, status=STATUS_PUBLISHED,
-                 parser=None, uid=None, content_type='entry', extra=None):
-        app = get_application()
-        self.content_type = content_type
-        self.title = title
-        self.author = author
-        if parser is None:
-            parser = app.cfg['default_parser']
-
-        self.parser = parser
-        self.text = text or u''
-        if extra:
-            self.extra = dict(extra)
-        else:
-            self.extra = {}
-
-        self.comments_enabled = comments_enabled
-        self.pings_enabled = pings_enabled
-        self.status = status
-
-        # set times now, they depend on status being set
-        self.touch_times(pub_date)
-        if last_update is not None:
-            self.last_update = last_update
-
-        # now bind the slug for which we need the times set.
-        self.bind_slug(slug)
-
-        # generate a UID if none is given
-        if uid is None:
-            uid = build_tag_uri(app, self.pub_date, content_type, self.slug)
-        self.uid = uid
 
     @property
     def _privileges(self):
@@ -761,6 +704,77 @@ class Post(_ZEMLDualContainer):
             self.__class__.__name__,
             self.title
         )
+
+
+class PostQuery(_PostQueryBase):
+    """Add some extra methods to the post model."""
+
+    def theme_lightweight(self, key):
+        """A query for lightweight settings based on the theme.  For example
+        to use the lightweight settings for the author overview page you can
+        use this query::
+
+            Post.query.theme_lightweight('author_overview')
+        """
+        theme_settings = get_application().theme.settings
+        deferred = theme_settings.get('sql.%s.deferred' % key)
+        lazy = theme_settings.get('sql.%s.lazy' % key)
+        return self.lightweight(deferred, lazy)
+
+
+class SummarizedPostQuery(_PostQueryBase):
+    """Add some extra methods to the summarized post model."""
+
+
+class Post(_PostBase, _ZEMLDualContainer):
+    """A full blown post."""
+
+    query = db.query_property(PostQuery)
+    parser_reason = 'post'
+
+    def __init__(self, title, author, text, slug=None, pub_date=None,
+                 last_update=None, comments_enabled=True,
+                 pings_enabled=True, status=STATUS_PUBLISHED,
+                 parser=None, uid=None, content_type='entry', extra=None):
+        app = get_application()
+        self.content_type = content_type
+        self.title = title
+        self.author = author
+        if parser is None:
+            parser = app.cfg['default_parser']
+
+        self.parser = parser
+        self.text = text or u''
+        if extra:
+            self.extra = dict(extra)
+        else:
+            self.extra = {}
+
+        self.comments_enabled = comments_enabled
+        self.pings_enabled = pings_enabled
+        self.status = status
+
+        # set times now, they depend on status being set
+        self.touch_times(pub_date)
+        if last_update is not None:
+            self.last_update = last_update
+
+        # now bind the slug for which we need the times set.
+        self.bind_slug(slug)
+
+        # generate a UID if none is given
+        if uid is None:
+            uid = build_tag_uri(app, self.pub_date, content_type, self.slug)
+        self.uid = uid
+
+
+class SummarizedPost(_PostBase):
+    """Like a regular post but without text and parser data."""
+
+    query = db.query_property(SummarizedPostQuery)
+
+    def __init__(self):
+        raise TypeError('You cannot create %r instance' % type(self).__name__)
 
 
 class PostLink(object):
@@ -1180,13 +1194,19 @@ db.mapper(Category, categories, properties={
     'posts':            db.dynamic_loader(Post, secondary=post_categories,
                                           query_class=PostQuery)
 }, order_by=categories.c.name)
-db.mapper(Comment, comments, properties={
+db.mapper(Comment, db.join(comments, texts), properties={
     'id':           comments.c.comment_id,
-    'text':         db.synonym('_text', map_column=True),
-    'author':       db.synonym('_author', map_column=True),
-    'email':        db.synonym('_email', map_column=True),
-    'www':          db.synonym('_www', map_column=True),
-    'status':       db.synonym('_status', map_column=True),
+    'text_id':      [comments.c.text_id, texts.c.text_id],
+    '_text':        texts.c.text,
+    'text':         db.synonym('_text'),
+    '_author':      comments.c.author,
+    'author':       db.synonym('_author'),
+    '_email':       comments.c.email,
+    'email':        db.synonym('_email'),
+    '_www':         comments.c.www,
+    'www':          db.synonym('_www'),
+    '_status':      comments.c.status,
+    'status':       db.synonym('_status'),
     'children':     db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
         order_by=[db.asc(comments.c.pub_date)],
@@ -1203,9 +1223,11 @@ db.mapper(Tag, tags, properties={
     'posts':        db.dynamic_loader(Post, secondary=post_tags,
                                       query_class=PostQuery)
 }, order_by=tags.c.name)
-db.mapper(Post, posts, properties={
+db.mapper(Post, db.join(posts, texts), properties={
     'id':               posts.c.post_id,
-    'text':             db.synonym('_text', map_column=True),
+    'text_id':          [posts.c.text_id, texts.c.text_id],
+    '_text':            texts.c.text,
+    'text':             db.synonym('_text'),
     'comments':         db.relation(Comment, backref='post',
                                     primaryjoin=posts.c.post_id ==
                                         comments.c.post_id,
@@ -1219,5 +1241,21 @@ db.mapper(Post, posts, properties={
                                     order_by=[db.asc(categories.c.name)]),
     'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
                                     order_by=[tags.c.name]),
+    '_comment_count':   posts.c.comment_count,
+    'comment_count':    db.synonym('_comment_count')
+}, order_by=posts.c.pub_date.desc())
+db.mapper(SummarizedPost, posts, properties={
+    'id':               posts.c.post_id,
+    'comments':         db.relation(Comment,
+                                    primaryjoin=posts.c.post_id ==
+                                        comments.c.post_id,
+                                    order_by=[db.asc(comments.c.pub_date)],
+                                    lazy=True, viewonly=True),
+    'links':            db.relation(PostLink, viewonly=True, lazy=True),
+    'categories':       db.relation(Category, secondary=post_categories, lazy=True,
+                                    order_by=[db.asc(categories.c.name)],
+                                    viewonly=True),
+    'tags':             db.relation(Tag, secondary=post_tags, lazy=True,
+                                    viewonly=True, order_by=[tags.c.name]),
     'comment_count':    db.synonym('_comment_count', map_column=True)
 }, order_by=posts.c.pub_date.desc())

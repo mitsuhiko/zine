@@ -52,7 +52,7 @@ def get_engine():
     return get_application().database_engine
 
 
-def create_engine(uri, relative_to=None, echo=False):
+def create_engine(uri, relative_to=None, echo=True):
     """Create a new engine.  This works a bit like SQLAlchemy's
     `create_engine` with the difference that it automaticaly set's MySQL
     engines to 'utf-8', and paths for SQLite are relative to the path
@@ -251,6 +251,13 @@ categories = db.Table('categories', metadata,
     db.Column('description', db.Text)
 )
 
+texts = db.Table('texts', metadata,
+    db.Column('text_id', db.Integer, primary_key=True),
+    db.Column('text', db.Text),
+    db.Column('parser_data', db.ZEMLParserData),
+    db.Column('extra', db.PickleType)
+)
+
 posts = db.Table('posts', metadata,
     db.Column('post_id', db.Integer, primary_key=True),
     db.Column('pub_date', db.DateTime),
@@ -258,15 +265,13 @@ posts = db.Table('posts', metadata,
     db.Column('slug', db.String(200), index=True, nullable=False),
     db.Column('uid', db.String(250)),
     db.Column('title', db.String(150)),
-    db.Column('text', db.Text),
+    db.Column('text_id', db.Integer, db.ForeignKey('texts.text_id')),
     db.Column('author_id', db.Integer, db.ForeignKey('users.user_id')),
-    db.Column('parser_data', db.ZEMLParserData),
     db.Column('comments_enabled', db.Boolean),
     db.Column('comment_count', db.Integer, nullable=False, default=0),
     db.Column('pings_enabled', db.Boolean),
     db.Column('content_type', db.String(40), index=True),
-    db.Column('extra', db.PickleType),
-    db.Column('status', db.Integer)
+    db.Column('status', db.Integer),
 )
 
 post_links = db.Table('post_links', metadata,
@@ -303,9 +308,8 @@ comments = db.Table('comments', metadata,
     db.Column('author', db.String(160)),
     db.Column('email', db.String(250)),
     db.Column('www', db.String(200)),
-    db.Column('text', db.Text),
+    db.Column('text_id', db.Integer, db.ForeignKey('texts.text_id')),
     db.Column('is_pingback', db.Boolean, nullable=False),
-    db.Column('parser_data', db.ZEMLParserData),
     db.Column('parent_id', db.Integer, db.ForeignKey('comments.comment_id')),
     db.Column('pub_date', db.DateTime),
     db.Column('blocked_msg', db.String(250)),
