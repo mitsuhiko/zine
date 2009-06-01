@@ -289,8 +289,7 @@ class AnonymousUser(User):
     is_somebody = is_author = False
     display_name = 'Nobody'
     real_name = description = username = ''
-    own_privileges = privileges = \
-        property(lambda x: frozenset())
+    own_privileges = privileges = property(lambda x: frozenset())
 
     def __init__(self):
         pass
