@@ -283,7 +283,6 @@ def load(stream):
             rv = object.__new__(RootElement)
             rv.text = _load()
             rv.children = _load(rv)
-            rv.is_dirty = False
             return rv
         elif char is 'E':
             rv = object.__new__(Element)
@@ -601,13 +600,12 @@ class Element(_BaseElement):
 
 class RootElement(_BaseElement):
     """Wraps all elements."""
-    __slots__ = ('text', 'children', 'is_dirty')
+    __slots__ = ('text', 'children')
     is_root = True
     is_dynamic = True
 
     def __init__(self):
         self.text = u''
-        self.is_dirty = False
         self.children = []
 
     def __deepcopy__(self, memo):

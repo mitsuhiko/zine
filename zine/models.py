@@ -67,6 +67,12 @@ class _ZEMLContainer(object):
         app = get_application()
         return self.parser not in app.parsers
 
+    def touch_parser_data(self):
+        """Mark the parser data as modified."""
+        # this is enough for sqlalchemy to pick it up as as change.
+        # it will only compare the object's identity.
+        self.parser_data = dict(self.parser_data)
+
     def _get_parser(self):
         if self.parser_data is not None:
             return self.parser_data.get('parser')
@@ -75,6 +81,7 @@ class _ZEMLContainer(object):
         if self.parser_data is None:
             self.parser_data = {}
         self.parser_data['parser'] = value
+        self.touch_parser_data()
 
     parser = property(_get_parser, _set_parser, doc="The name of the parser.")
     del _get_parser, _set_parser
@@ -87,8 +94,7 @@ class _ZEMLContainer(object):
 
     def _parse_text(self, text):
         from zine.parsers import parse
-        self.parser_data['body'] = parse(text, self.parser,
-                                         'post', mark_dirty=True)
+        self.parser_data['body'] = parse(text, self.parser, 'post')
 
     def _get_text(self):
         return self._text
@@ -98,6 +104,7 @@ class _ZEMLContainer(object):
             self.parser_data = {}
         self._text = value
         self._parse_text(value)
+        self.touch_parser_data()
 
     text = property(_get_text, _set_text, doc="The raw text.")
     del _get_text, _set_text
@@ -126,8 +133,7 @@ class _ZEMLDualContainer(_ZEMLContainer):
     def _parse_text(self, text):
         from zine.parsers import parse
         self.parser_data['intro'], self.parser_data['body'] = \
-            zeml.split_intro(parse(text, self.parser, self.parser_reason,
-                                   mark_dirty=True))
+            zeml.split_intro(parse(text, self.parser, self.parser_reason))
 
     @property
     def intro(self):
