@@ -8,8 +8,8 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-import sys
 import re
+import sys
 
 from werkzeug import escape
 
@@ -43,16 +43,12 @@ def find_calling_context(skip=2):
 
 def render_query_table(queries):
     """Renders a nice table of all queries in the page."""
-    min = sys.maxint
-    max = 0
+    total = 0
     stylesheet = url_for('core/shared', filename='debug.css')
     result = [u'<style type="text/css">@import url(%s)</style>' % stylesheet,
               u'<div class="_database_debug_table"><ul>']
     for statement, parameters, start, end, calling_context in queries:
-        if end > max:
-            max = end
-        if start < min:
-            min = start
+        total += (end - start)
         result.append(u'<li><pre>%s</pre><div class="detail"><em>%s</em> | '
                       u'<strong>took %.3f ms</strong></div></li>' % (
             statement,
@@ -61,7 +57,7 @@ def render_query_table(queries):
         ))
     result.append(u'<li><strong>%d queries in %.2f ms</strong></ul></div>' % (
         len(queries),
-        (max - min) * 1000
+        total * 1000
     ))
     return u'\n'.join(result)
 

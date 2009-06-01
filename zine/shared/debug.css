@@ -12,6 +12,7 @@ div._database_debug_table ul {
     margin: 0;
     padding: 0;
     list-style: none;
+    font-family: 'Arial', sans-serif;
 }
 
 div._database_debug_table ul li {
@@ -22,7 +23,6 @@ div._database_debug_table ul li {
 div._database_debug_table ul li div.detail {
     display: block;
     text-align: right;
-    font-family: 'Arial', sans-serif;
     margin: 3px 0 0 0;
 }
 

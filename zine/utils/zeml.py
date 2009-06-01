@@ -283,6 +283,7 @@ def load(stream):
             rv = object.__new__(RootElement)
             rv.text = _load()
             rv.children = _load(rv)
+            rv.is_dirty = False
             return rv
         elif char is 'E':
             rv = object.__new__(Element)
@@ -320,7 +321,7 @@ def dump_parser_data(parser_data):
 
 def load_parser_data(value):
     if value is None:
-        return
+        return {}
     # the extra str() call is for databases like postgres that
     # insist on using buffers for binary data.
     in_ = StringIO(str(value))
@@ -600,12 +601,13 @@ class Element(_BaseElement):
 
 class RootElement(_BaseElement):
     """Wraps all elements."""
-    __slots__ = ('text', 'children')
+    __slots__ = ('text', 'children', 'is_dirty')
     is_root = True
     is_dynamic = True
 
     def __init__(self):
         self.text = u''
+        self.is_dirty = False
         self.children = []
 
     def __deepcopy__(self, memo):

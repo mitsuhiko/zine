@@ -87,7 +87,8 @@ class _ZEMLContainer(object):
 
     def _parse_text(self, text):
         from zine.parsers import parse
-        self.parser_data['body'] = parse(text, self.parser, 'post')
+        self.parser_data['body'] = parse(text, self.parser,
+                                         'post', mark_dirty=True)
 
     def _get_text(self):
         return self._text
@@ -125,7 +126,8 @@ class _ZEMLDualContainer(_ZEMLContainer):
     def _parse_text(self, text):
         from zine.parsers import parse
         self.parser_data['intro'], self.parser_data['body'] = \
-            zeml.split_intro(parse(text, self.parser, self.parser_reason))
+            zeml.split_intro(parse(text, self.parser, self.parser_reason,
+                                   mark_dirty=True))
 
     @property
     def intro(self):

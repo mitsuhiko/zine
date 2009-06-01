@@ -146,15 +146,27 @@ class ConnectionDebugProxy(ConnectionProxy):
 
 
 class ZEMLParserData(MutableType, TypeDecorator):
-    """Holds parser data."""
+    """Holds parser data.  The implementation is rather ugly because it does
+    not really compare the trees for performance reasons but only the dirty
+    flags.  This might change in future versions if there is some sort of
+    support for this kind of hackery in SQLAlchemy or if we find a fast way
+    to compare the trees.
+    """
 
     impl = sqlalchemy.Binary
 
     def process_bind_param(self, value, dialect):
         if value is None:
             return
-        from zine.utils.zeml import dump_parser_data
-        return dump_parser_data(value)
+        from zine.utils.zeml import dump_parser_data, RootElement
+        rv = dump_parser_data(value)
+
+        # mark all root elements after dumping as nondirty
+        for key, element in value.iteritems():
+            if isinstance(element, RootElement):
+                element.is_dirty = False
+
+        return rv
 
     def process_result_value(self, value, dialect):
         from zine.utils.zeml import load_parser_data
@@ -167,6 +179,23 @@ class ZEMLParserData(MutableType, TypeDecorator):
                             u'Maybe the database was manually edited and got '
                             u'corrupted? The system returned an empty value.'))
             return {}
+
+    def compare_values(self, lhs, rhs):
+        # if the parser changed, we're unequal
+        if lhs['parser'] != lhs['parser']:
+            return False
+
+        # the rest of the parser data is assumed to be root elements.
+        # if the dirty flags do not match, we will assume unequalnes
+        # otherwise equalness.  We do not check the trees themselves
+        # for performance reasons.
+        for key, value in lhs.iteritems():
+            if key == 'parser':
+                continue
+            if key not in rhs or rhs[key].is_dirty != value.is_dirty:
+                return False
+
+        return True
 
     def copy_value(self, value):
         return deepcopy(value)

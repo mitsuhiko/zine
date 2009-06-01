@@ -18,7 +18,7 @@ from zine.utils.zeml import parse_html, parse_zeml, sanitize, Element, \
 from zine.utils.xml import replace_entities
 
 
-def parse(input_data, parser=None, reason='unknown'):
+def parse(input_data, parser=None, reason='unknown', mark_dirty=False):
     """Generate a doc tree out of the data provided.  If we are not in unbound
     mode the `process-doc-tree` event is sent so that plugins can modify
     the tree in place. The reason is useful for plugins to find out if they
@@ -52,6 +52,9 @@ def parse(input_data, parser=None, reason='unknown'):
         item = callback(tree, input_data, reason)
         if item is not None:
             tree = item
+
+    if mark_dirty:
+        tree.is_dirty = True
 
     return tree
 
