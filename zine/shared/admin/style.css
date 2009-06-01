@@ -942,6 +942,10 @@ div.contents table.config-table th:last-child {
     border-radius: 0;
 }
 
+table.config-table td {
+    vertical-align: top;
+}
+
 table.config-table td.default {
     text-align: right;
 }

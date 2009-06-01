@@ -869,7 +869,7 @@ class CommentQuery(db.Query):
         (not text etc.)
         """
         return self.lightweight(deferred=('post.text', 'post.parser_data',
-                                          'post.extra'), lazy=('post',))
+                                          'post.extra'), lazy=('user',))
 
     def approved(self):
         """Return only the approved comments."""

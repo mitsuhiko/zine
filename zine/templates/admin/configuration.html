@@ -20,7 +20,7 @@
         {% for field in category %}
         <tr>
           <td>{{ field.localname|e }}</td>
-          <td>{{ field['value']() }}</td>
+          <td>{{ field['value']() }}{{ field.errors() }}</td>
           <td class="default">{{ field.use_default() }}</td>
         </tr>
         {% endfor %}

@@ -16,6 +16,7 @@ import re
 from urlparse import urlparse
 
 from zine.i18n import lazy_gettext, _
+from zine.utils.text import _placeholder_re, _slug_parts
 
 
 _mail_re = re.compile(r'''(?xi)
@@ -159,7 +160,7 @@ def is_valid_url_prefix():
 
 def is_valid_url_format():
     """Validates URL format.
-    
+
     >>> check(is_valid_url_format, '/%year%')
     False
     >>> check(is_valid_url_format, '%year%')
@@ -185,10 +186,10 @@ def is_valid_url_format():
             if value.find('/../') >= 0 or value.startswith('../'):
                 raise ValidationError(_(u'URL cannot contain a reference to'
                 'parent path.'))
-            for match in re.findall('%.*?%', value):
-                if match not in ['%year%', '%month%', '%day%',
-                                 '%hour%', '%minute%', '%second%']:
-                    raise ValidationError(_(u'Unknown format code %s.' % match))
+            for match in _placeholder_re.finditer(value):
+                if match.group(1) not in _slug_parts:
+                    raise ValidationError(_(u'Unknown format code %s.') %
+                                          match.group())
     return validator
 
 

@@ -1180,7 +1180,11 @@ def configuration(request):
             request.session['ace_on'] = False
         elif form.validate(request.form):
             form.apply()
+            flash(_(u'Configuration updated successfully.'), 'configure')
             return redirect_to('admin/configuration')
+        else:
+            flash(_(u'Could not save the configuration because the '
+                    u'configuration is invalid.'), 'error')
 
     return render_admin_response('admin/configuration.html',
                                  'system.configuration',
