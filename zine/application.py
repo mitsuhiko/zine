@@ -1221,7 +1221,8 @@ class Zine(object):
             response = e.get_response(request)
 
         # in debug mode on HTML responses we inject the collected queries.
-        if self.cfg['database_debug'] and response.mimetype == 'text/html' and \
+        if self.cfg['database_debug'] and \
+           getattr(response, 'mimetype', None) == 'text/html' and \
            isinstance(response.response, (list, tuple)):
             from zine.utils.debug import inject_query_info
             inject_query_info(request, response)
