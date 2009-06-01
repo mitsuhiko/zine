@@ -304,17 +304,6 @@ class AnonymousUser(User):
 class _PostQueryBase(db.Query):
     """Add some extra methods to the post model."""
 
-    def get(self, id):
-        """Get a comment by comment id."""
-        return self.filter(Post.id == id).first()
-
-    def lightweight(self, deferred=None, lazy=None):
-        """Send a lightweight query which deferes some more expensive
-        things such as comment queries or even text and parser data.
-        """
-        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
-        return self.options(*args)
-
     def type(self, content_type):
         """Filter all posts by a given type."""
         return self.filter_by(content_type=content_type)
@@ -867,9 +856,12 @@ class Category(object):
 class CommentQuery(db.Query):
     """The manager for comments"""
 
-    def get(self, id):
-        """Get a comment by comment id."""
-        return self.filter(Comment.id == id).first()
+    def post_lightweight(self):
+        """Lightweight query that sets loading options for a light post
+        (not text etc.)
+        """
+        return self.lightweight(deferred=('post.text', 'post.parser_data',
+                                          'post.extra'), lazy=('post',))
 
     def approved(self):
         """Return only the approved comments."""
@@ -1047,6 +1039,8 @@ class Comment(_ZEMLContainer):
         to a user that submited a comment which is not yet moderated.
         """
         request = get_request()
+        if request is None:
+            return True
         if self.id in request.session.get('visible_comments', ()):
             return True
         return self.visible_for_user(request.user)
@@ -1218,10 +1212,11 @@ db.mapper(Comment, db.join(comments, texts), properties={
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
         order_by=[db.asc(comments.c.pub_date)],
         backref=db.backref('parent', remote_side=[comments.c.comment_id],
-                           primaryjoin=comments.c.parent_id == comments.c.comment_id),
+                           primaryjoin=comments.c.parent_id ==
+                                comments.c.comment_id),
         lazy=True
     )
-}, order_by=comments.c.pub_date.desc())
+}, order_by=comments.c.pub_date.desc(), primary_key=[comments.c.comment_id])
 db.mapper(PostLink, post_links, properties={
     'id':           post_links.c.link_id,
 })
@@ -1235,7 +1230,7 @@ db.mapper(Post, db.join(posts, texts), properties={
     'text_id':          [posts.c.text_id, texts.c.text_id],
     '_text':            texts.c.text,
     'text':             db.synonym('_text'),
-    'comments':         db.relation(Comment, backref='post',
+    'comments':         db.relation(Comment, backref=db.backref('post', lazy=True),
                                     primaryjoin=posts.c.post_id ==
                                         comments.c.post_id,
                                     order_by=[db.asc(comments.c.pub_date)],
@@ -1250,7 +1245,7 @@ db.mapper(Post, db.join(posts, texts), properties={
                                     order_by=[tags.c.name]),
     '_comment_count':   posts.c.comment_count,
     'comment_count':    db.synonym('_comment_count')
-}, order_by=posts.c.pub_date.desc())
+}, order_by=posts.c.pub_date.desc(), primary_key=[posts.c.post_id])
 db.mapper(SummarizedPost, posts, properties={
     'id':               posts.c.post_id,
     'comments':         db.relation(Comment,

@@ -266,7 +266,7 @@ def index(request):
 
     return render_admin_response('admin/index.html', 'dashboard',
         drafts=Post.query.drafts().all(),
-        unmoderated_comments=Comment.query.unmoderated().all(),
+        unmoderated_comments=Comment.query.post_lightweight().unmoderated().all(),
         your_posts=Post.query.filter(
             Post.author_id == request.user.id
         ).count(),
@@ -361,7 +361,8 @@ def edit_entry(request, post=None):
                 try:
                     text = parse(text, parser=parser)
                 except ValueError:
-                    flash(_('Parser "%s" does not exist. Displaying raw text instead.' % escape(parser)), type='error')
+                    flash(_(u'Parser "%s" does not exist. Displaying raw '
+                            u'text instead.' % escape(parser)), type='error')
 
                 return render_admin_response('admin/edit_entry.html', active_tab,
                                              form=form.as_widget(True),
@@ -451,7 +452,8 @@ def edit_page(request, post=None):
                 try:
                     text = parse(text, parser=parser)
                 except ValueError:
-                    flash(_('Parser "%s" does not exist. Displaying raw text instead.' % escape(parser)), type='error')
+                    flash(_(u'Parser "%s" does not exist. Displaying raw '
+                            u'text instead.' % escape(parser)), type='error')
 
                 return render_admin_response('admin/edit_entry.html', active_tab,
                                              form=form.as_widget(True),
@@ -514,7 +516,8 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
 
     if isinstance(per_page, basestring):
         per_page = int(per_page)
-    comments = query.limit(per_page).offset(per_page * (page - 1)).all()
+    comments = query.post_lightweight().limit(per_page) \
+                    .offset(per_page * (page - 1)).all()
 
 
     pagination = AdminPagination(endpoint, page, per_page, query.count(),

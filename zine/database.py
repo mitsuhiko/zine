@@ -106,6 +106,7 @@ def create_engine(uri, relative_to=None, debug=False):
         if value is not None:
             options[key] = int(value)
 
+    # if debugging is enabled, hook the ConnectionDebugProxy in
     if debug:
         options['proxy'] = ConnectionDebugProxy()
 
@@ -130,14 +131,18 @@ def attribute_loaded(model, attribute):
 class ConnectionDebugProxy(ConnectionProxy):
     """Helps debugging the database."""
 
-    def cursor_execute(self, execute, cursor, statement, parameters, context, executemany):
+    def cursor_execute(self, execute, cursor, statement, parameters,
+                       context, executemany):
         start = _timer()
         try:
             return execute(cursor, statement, parameters, context)
         finally:
             from zine.application import get_request
+            from zine.utils.debug import find_calling_context
             request = get_request()
-            request.queries.append((statement, parameters, start, _timer()))
+            if request is not None:
+                request.queries.append((statement, parameters, start,
+                                        _timer(), find_calling_context()))
 
 
 class ZEMLParserData(MutableType, TypeDecorator):
@@ -169,6 +174,13 @@ class ZEMLParserData(MutableType, TypeDecorator):
 
 class Query(orm.Query):
     """Default query class."""
+
+    def lightweight(self, deferred=None, lazy=None):
+        """Send a lightweight query which deferes some more expensive
+        things such as comment queries or even text and parser data.
+        """
+        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
+        return self.options(*args)
 
     def first(self, raise_if_missing=False):
         """Return the first result of this `Query` or None if the result
