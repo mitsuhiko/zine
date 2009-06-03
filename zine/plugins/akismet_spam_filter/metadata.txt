@@ -8,7 +8,7 @@ Contributors: Pedro Algarvio <ufs@ufsoft.org>
 Description: <a href="http://akismet.com/">Akismet</a> checks your comments\
  against the Akismet web service to see if they look like spam or not. It\
  also allows you to contribute back by reporting spam/ham. You need a\
- <a href="http://wordpress.com/api-keys/">WordPress.com API key</a>\ to use it.\
+ <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it.\
  You can review the spam it catches under "Comments" after configuring it.
 Description[de]: <a href="http://akismet.com/">Akismet</a> überprüft Kommentare\
  mit dem Akismet Web-Service auf Spam. Du benötigst dazu einen\
