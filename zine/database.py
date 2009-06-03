@@ -370,6 +370,14 @@ redirects = db.Table('redirects', metadata,
     db.Column('new', db.String(200))
 )
 
+notification_subscriptions = db.Table('notification_subscriptions', metadata,
+    db.Column('subscription_id', db.Integer, primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id')),
+    db.Column('notification_system', db.String(50)),
+    db.Column('notification_id', db.String(100)),
+    db.UniqueConstraint('user_id', 'notification_system', 'notification_id')
+)
+
 
 def init_database(engine):
     """This is called from the websetup which explains why it takes an engine

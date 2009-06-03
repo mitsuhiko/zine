@@ -514,8 +514,6 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
         return redirect(url_for(endpoint, page=page, post_id=post_id,
                                 per_page=request.values.get('per_page')))
 
-    if isinstance(per_page, basestring):
-        per_page = int(per_page)
     comments = query.post_lightweight().limit(per_page) \
                     .offset(per_page * (page - 1)).all()
 
