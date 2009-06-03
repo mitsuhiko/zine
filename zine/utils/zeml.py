@@ -366,7 +366,7 @@ def _query(elements, expr):
             test = lambda x: x.attributes.get(key) != value
         elif '~=' in expr:
             key, value = expr.split('~=', 1)
-            test = lambda x: value in x.attributes.get(key).split()
+            test = lambda x: value in x.attributes.get(key, '').split()
         elif '=' in expr:
             key, value = expr.split('=', 1)
             test = lambda x: x.attributes.get(key) == value
@@ -495,6 +495,14 @@ class _BaseElement(object):
         html_serializer.serialize(self, write)
         if stream is None:
             return u''.join(buffer)
+
+    def to_text(self):
+        """Convers the element to text."""
+        result = [self.text]
+        for child in self.children:
+            result.append(child.to_text())
+            result.append(child.tail)
+        return u''.join(result)
 
     children = property(lambda x: [])
     attributes = property(lambda x: Attributes())
@@ -1006,7 +1014,7 @@ class Parser(object):
     block_elements = set(['div', 'p', 'form', 'ul', 'ol', 'li', 'table', 'tr',
                           'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'dl',
                           'dt', 'dd', 'blockquote', 'h1', 'h2', 'h3', 'h4',
-                          'h5', 'h6'])
+                          'h5', 'h6', 'pre'])
     breaking_rules = [
         (['p'], set(['#block'])),
         (['li'], set(['li'])),

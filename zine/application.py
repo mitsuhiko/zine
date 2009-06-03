@@ -703,6 +703,12 @@ class Zine(object):
         self.importers = {}
         self.feed_importer_extensions = []
 
+        # the notification manager
+        from zine.notifications import NotificationManager, \
+             EMailNotificationSystem
+        self.notification_manager = NotificationManager()
+        self.add_notification_system(EMailNotificationSystem)
+
         # register the pingback API.
         from zine import pingback
         self.add_api('pingback', True, pingback.service)
@@ -1101,6 +1107,13 @@ class Zine(object):
                                   on_before_metadata_assembled)
         """
         self._event_manager.connect(event, callback, position)
+
+    @setuponly
+    def add_notification_system(self, system):
+        """Add the notification system to the list of notification systems
+        the NotificationManager holds.
+        """
+        self.notification_manager.systems[system.key] = system(self)
 
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""

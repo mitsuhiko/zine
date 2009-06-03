@@ -101,19 +101,21 @@ class EMail(object):
             except SMTPException, e:
                 raise RuntimeError(str(e))
 
-        msg = MIMEText(self.text)
-        msg['From'] = self.from_addr
-        msg['To'] = ', '.join(self.to_addrs)
-        msg['Subject'] = self.subject
+        from_addr = self.from_addr.encode('utf-8')
+        to_addrs = [x.encode('utf-8') for x in to_addrs]
 
-        msgtext = msg.as_string()
-        recrlf = re.compile("\r?\n")
-        msgtext = '\r\n'.join(recrlf.split(msgtext.encode('utf-8')))
+        msg = MIMEText(self.text)
+        msg['From'] = from_addr
+        msg['To'] = ', '.join(self.to_addrs)
+        msg['Subject'] = self.subject.encode('utf-8')
+        msg['Content-Transfer-Encoding'] = '8bit'
+        msg['Content-Type'] = 'text/plain; charset=utf-8'
+
+        msgtext = '\r\n'.join(msg.as_string().encode('utf-8').splitlines())
 
         try:
             try:
-                return smtp.sendmail(self.from_addr, self.to_addrs,
-                                     msgtext)
+                return smtp.sendmail(from_addr, to_addrs, msgtext)
             except SMTPException, e:
                 raise RuntimeError(str(e))
         finally:

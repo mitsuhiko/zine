@@ -106,6 +106,19 @@ def transliterate(string, table='long'):
     return unicodedata.normalize('NFKC', unicode(string)).translate(table)
 
 
+def wrap(text, width):
+    r"""A word-wrap function that preserves existing line breaks
+    and most spaces in the text. Expects that existing line breaks are
+    posix newlines (\n).
+    """
+    # code from http://code.activestate.com/recipes/148061/
+    return reduce(lambda line, word, width=width: '%s%s%s' %
+                  (line,
+                   ' \n'[len(line) - line.rfind('\n') - 1 +
+                         (word and len(word.split('\n', 1)[0]) or 0) >= width], word),
+                   text.split(' '))
+
+
 def build_tag_uri(app, date, resource, identifier):
     """Build a unique tag URI.
        The tag URI must obey the ABNF defined in
