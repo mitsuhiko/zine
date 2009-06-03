@@ -321,11 +321,11 @@ class NotificationManager(object):
     plugins the notification is handed over by looking up a database table
     in the form:
 
-        user_id  | system | notification id
-        ---------+--------+--------------------------
-        joe_user | jabber | ON_NEW_COMMENT
-        joe_user | email  | ON_ZINE_UPGRADE_AVAILABLE
-        joe_user | sms    | ON_SERVER_EXPLODED
+        user_id  | notification_system | notification id
+        ---------+---------------------+--------------------------
+        1        | jabber              | ON_NEW_COMMENT
+        1        | email               | ON_ZINE_UPGRADE_AVAILABLE
+        1        | sms                 | ON_SERVER_EXPLODED
 
     The NotificationManager also assures that only users interested in
     a particular type of notifications receive a message.
