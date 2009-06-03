@@ -509,6 +509,13 @@ ul.errors li {
     font-size: 0.9em;
 }
 
+div.contents dl dd.explanation {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+    font-style: italic;
+}
+
 /* :::: PAGINATION :::: */
 div.pagination span.commata {
     display: none;

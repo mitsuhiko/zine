@@ -8,7 +8,16 @@
     want to move the administration to a different location.
   {% endtrans %}</p>
   {% call form() %}
-    {{ form.as_dl() }}
+    <dl>
+    {{ form.blog_url_prefix.as_dd() }}
+    {{ form.admin_url_prefix.as_dd() }}
+    {{ form.category_url_prefix.as_dd() }}
+    {{ form.tags_url_prefix.as_dd() }}
+    {{ form.profiles_url_prefix.as_dd() }}
+    {{ form.post_url_format.as_dd(size=50) }}
+    {{ form.ascii_slugs.as_dd() }}
+    {{ form.fixed_url_date_digits.as_dd() }}
+    </dl>
     <div class="actions">
       <input type="submit" value="{{ _('Save') }}">
     </div>

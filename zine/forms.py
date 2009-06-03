@@ -978,8 +978,7 @@ class URLOptionsForm(_ConfigForm):
         lazy_gettext(u'Post permalink URL format'),
         help_text=lazy_gettext(u'Use %year%, %month%, %day%, %hour%, '
                                u'%minute% and %second%. Changes here will '
-                               u'only affect new posts. The slug will be '
-                               u'appended to this.'))
+                               u'only affect new posts.'))
     ascii_slugs = config_field('ascii_slugs',
                                lazy_gettext(u'Limit slugs to ASCII'),
                                help_text=lazy_gettext(u'Automatically '
