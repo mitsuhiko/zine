@@ -16,7 +16,8 @@ from werkzeug.exceptions import NotFound
 
 from zine.database import users, categories, posts, post_links, \
      post_categories, post_tags, tags, comments, groups, group_users, \
-     privileges, user_privileges, group_privileges, texts, db
+     privileges, user_privileges, group_privileges, texts, \
+     notification_subscriptions, db
 from zine.utils import zeml
 from zine.utils.text import gen_slug, gen_timestamped_slug, build_tag_uri, \
      increment_string
@@ -794,7 +795,7 @@ class PostLink(object):
 
     def as_dict(self):
         """Return the values as dict.  Useful for feed building."""
-        result = {'href': href}
+        result = {'href': self.href}
         for key in 'rel', 'type', 'hreflang', 'title', 'length':
             value = getattr(self, key, None)
             if value is not None:
@@ -1169,6 +1170,28 @@ class Tag(object):
         )
 
 
+class NotificationSubscription(object):
+    """NotificationSubscriptions are part of the notification system.
+    An `NotificationSubscription` object expresses that the user the interest
+    belongs to _is interested in_ the occurrence of a certain kind of event.
+    That data is then used to inform the user once such an interesting event
+    occurs. The NotificationSubscription also knows via what notification
+    system the user wants to be notified.
+    """
+    def __init__(self, user_id, notification_system, notification_id):
+        self.user_id = user_id
+        self.notification_system = notification_system
+        self.notification_id = notification_id
+
+    def __repr__(self):
+        return "<%s (%s, %r, %r)>" % (
+            self.__class__.__name__,
+            self.user_id,
+            self.notification_system,
+            self.notification_id
+        )
+
+
 # connect the tables.
 db.mapper(User, users, properties={
     'id':               users.c.user_id,
@@ -1269,3 +1292,7 @@ db.mapper(SummarizedPost, posts, properties={
                                     viewonly=True, order_by=[tags.c.name]),
     'comment_count':    db.synonym('_comment_count', map_column=True)
 }, order_by=posts.c.pub_date.desc())
+db.mapper(NotificationSubscription, notification_subscriptions, properties={
+    'id':               notification_subscriptions.c.subscription_id,
+    'user':             db.relation(User, uselist=False, lazy=False)
+})

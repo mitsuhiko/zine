@@ -743,7 +743,7 @@ class DeleteGroupForm(_GroupBoundForm):
     def delete_group(self):
         """Deletes a group."""
         if self.data['action'] == 'relocate':
-            new_group = Group.query.filter_by(data['reassign_to'].id).first()
+            new_group = Group.query.filter_by(self.data['reassign_to'].id).first()
             for user in self.group.users:
                 if not new_group in user.groups:
                     user.groups.append(new_group)

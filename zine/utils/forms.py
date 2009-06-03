@@ -16,9 +16,7 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-import re
 from datetime import datetime
-from unicodedata import normalize
 from itertools import chain
 from threading import Lock
 try:
@@ -26,14 +24,13 @@ try:
 except ImportError:
     from sha import new as sha1
 
-from werkzeug import html, escape, cached_property, MultiDict
+from werkzeug import html, escape, MultiDict
 
 from zine.application import get_request, url_for
 from zine.database import db
 from zine.i18n import _, ngettext, lazy_gettext, parse_datetime, \
      format_system_datetime
 from zine.utils.http import get_redirect_target, _redirect, redirect_to
-from zine.utils.crypto import gen_random_identifier
 from zine.utils.validators import ValidationError
 from zine.utils.datastructures import OrderedDict, missing
 
@@ -1258,22 +1255,24 @@ class TextField(Field):
 
     def convert(self, value):
         value = _to_string(value)
-        if self.required and not value:
-            raise ValidationError(self.messages['required'])
-        if self.min_length is not None and len(value) < self.min_length:
-            message = self.messages['too_short']
-            if message is None:
-                message = ngettext(u'Please enter at least %d character.',
-                                   u'Please enter at least %d characters.',
-                                   self.min_length) % self.min_length
-            raise ValidationError(message)
-        if self.max_length is not None and len(value) > self.max_length:
-            message = self.messages['too_long']
-            if message is None:
-                message = ngettext(u'Please enter no more than %d character.',
-                                   u'Please enter no more than %d characters.',
-                                   self.max_length) % self.max_length
-            raise ValidationError(message)
+        if self.required:
+            if not value:
+                raise ValidationError(self.messages['required'])
+        elif value:
+            if self.min_length is not None and len(value) < self.min_length:
+                message = self.messages['too_short']
+                if message is None:
+                    message = ngettext(u'Please enter at least %d character.',
+                                       u'Please enter at least %d characters.',
+                                       self.min_length) % self.min_length
+                raise ValidationError(message)
+            if self.max_length is not None and len(value) > self.max_length:
+                message = self.messages['too_long']
+                if message is None:
+                    message = ngettext(u'Please enter no more than %d character.',
+                                       u'Please enter no more than %d characters.',
+                                       self.max_length) % self.max_length
+                raise ValidationError(message)
         return value
 
     def should_validate(self, value):
