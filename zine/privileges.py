@@ -154,7 +154,6 @@ def _register(name, description, privilege_dependencies=()):
 
 
 _register('ENTER_ADMIN_PANEL', lazy_gettext(u'can enter admin panel'))
-_register('ENTER_ACCOUNT_PANEL', lazy_gettext(u'can enter his account panel'))
 _register('BLOG_ADMIN', lazy_gettext(u'can administer the blog'))
 _register('CREATE_ENTRIES', lazy_gettext(u'can create new entries'),
           (ENTER_ADMIN_PANEL,))
@@ -178,6 +177,13 @@ _register('MODERATE_OWN_ENTRIES', lazy_gettext(u'can moderate comments on it\'s 
 _register('MODERATE_OWN_PAGES', lazy_gettext(u'can moderate comments on it\'s own pages'),
           (ENTER_ADMIN_PANEL, CREATE_PAGES))
 _register('VIEW_PROTECTED', lazy_gettext(u'can view protected entries'))
+
+# Regular users permissions
+_register('ENTER_ACCOUNT_PANEL', lazy_gettext(u'can enter his account panel'))
+_register('EDIT_OWN_COMMENTS', lazy_gettext(u'can edit own comments'),
+          (ENTER_ACCOUNT_PANEL,))
+_register('DELETE_OWN_COMMENTS', lazy_gettext(u'can delete own comments'),
+          (ENTER_ACCOUNT_PANEL,))
 
 
 CONTENT_TYPE_PRIVILEGES = {

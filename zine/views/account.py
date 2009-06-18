@@ -8,10 +8,11 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from zine.application import get_request, url_for, emit_event, \
-     render_response, get_application
-from zine.forms import LoginForm
+
+from zine.api import *
+from zine.forms import LoginForm, EditProfileForm
 from zine.i18n import _, ngettext
+from zine.models import Comment
 from zine.privileges import ENTER_ADMIN_PANEL
 from zine.utils.account import flash, require_account_privilege
 from zine.utils.http import redirect_back, redirect_to
@@ -33,7 +34,8 @@ def render_account_response(template_name, _active_menu_item=None, **values):
 
     # set up the core navigation bar
     navigation_bar = [
-        ('dashboard', url_for('account/index'), _(u'Dashboard'), [])
+        ('dashboard', url_for('account/index'), _(u'Dashboard'), []),
+        ('profile', url_for('account/profile'), _(u'Profile'), [])
     ]
 
     # add the about items to the navigation bar
@@ -95,12 +97,6 @@ def render_account_response(template_name, _active_menu_item=None, **values):
     return render_response(template_name, **values)
 
 
-@require_account_privilege()
-def index(request):
-    """Show account details page"""
-    return render_account_response('account/index.html', 'dashboard')
-
-
 def login(request):
     """Show a login page."""
     if request.user.is_somebody:
@@ -148,3 +144,27 @@ def help(req, page=''):
         raise NotFound()
 
     return render_account_response('account/help.html', 'system.help', **parts)
+
+
+@require_account_privilege()
+def index(request):
+    """Show account details page"""
+    your_comments = Comment.query.filter(Comment.user_id==request.user.id)
+    return render_account_response('account/index.html', 'dashboard',
+                                   your_comments=your_comments.count())
+
+@require_account_privilege()
+def profile(request):
+    form = EditProfileForm(request.user)
+    if request.method == 'POST':
+        if request.form.get('cancel'):
+            return form.redirect('account/index')
+#        elif request.form.get('delete') and user:
+#            return redirect_to('admin/delete_user', user_id=user.id)
+        elif form.validate(request.form):
+            form.save_changes()
+            db.commit()
+            flash(_(u'Your profile was updated successfully.'), 'info')
+            return form.redirect('account/index')
+    return render_account_response('account/edit_profile.html', 'profile',
+                                   form=form.as_widget())

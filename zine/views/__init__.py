@@ -36,6 +36,7 @@ all_views = {
     'account/logout':           account.logout,
     'account/about_zine':       account.about_zine,
     'account/help':             account.help,
+    'account/profile':          account.profile,
 
     # admin views
     'admin/index':              admin.index,

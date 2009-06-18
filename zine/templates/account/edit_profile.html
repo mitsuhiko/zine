@@ -1,0 +1,26 @@
+{% extends "account/layout.html" %}
+{% from "admin/_form_helpers.html" import render_formbox %}
+{% block title %}{{ _('Edit Profile') }}{% endblock %}
+{% block contents %}
+  <h1>{{ self.title()|e }}</h1>
+  {% call form() %}
+    {{ render_formbox(form.username, toggleable=false, disabled=true) }}
+    {{ render_formbox(form.real_name, toggleable=false) }}
+    <div class="formbox toggleable collapsed">
+      <h3>{{ form.password.label() }}</h3>
+      {{ form.password() }}
+      {{ form.password_confirm() }} <span class="explanation">{{ form.password_confirm.help_text }}</span>
+    </div>
+    {{ render_formbox(form.email) }}
+    {{ render_formbox(form.www) }}
+    {{ render_formbox(form.display_name) }}
+    <div class="formbox">
+      <h3>{{ form.description.label() }}</h3>
+      {{ form.description(rows=5) }}
+    </div>
+    <div class="actions">
+      <input type="submit" name="save" value="{{ _('Update Profile') }}">
+      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
+    </div>
+  {% endcall %}
+{% endblock %}

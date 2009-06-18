@@ -926,6 +926,69 @@ class DeleteUserForm(_UserBoundForm):
         emit_event('before-user-deleted', self.user, self.data)
         db.delete(self.user)
 
+class EditProfileForm(_UserBoundForm):
+    """Edit or create a user's profile."""
+
+    username = forms.TextField(lazy_gettext(u'Username'), max_length=30,
+                               validators=[is_not_whitespace_only()],
+                               required=True)
+    real_name = forms.TextField(lazy_gettext(u'Realname'), max_length=180)
+    display_name = forms.ChoiceField(lazy_gettext(u'Display name'))
+    description = forms.TextField(lazy_gettext(u'Description'),
+                                  max_length=5000, widget=forms.Textarea)
+    email = forms.TextField(lazy_gettext(u'Email'), required=True,
+                            validators=[is_valid_email()])
+    www = forms.TextField(lazy_gettext(u'Website'),
+                          validators=[is_valid_url()])
+    password = forms.TextField(lazy_gettext(u'Password'),
+                               widget=forms.PasswordInput)
+    password_confirm = forms.TextField(lazy_gettext(u'Confirm Password'),
+                                       widget=forms.PasswordInput,
+                                       help_text=lazy_gettext(u'Confirm password'))
+
+    def __init__(self, user=None, initial=None):
+        if user is not None:
+            initial = forms.fill_dict(initial,
+                username=user.username,
+                real_name=user.real_name,
+                display_name=user._display_name,
+                description=user.description,
+                email=user.email,
+                www=user.www
+            )
+        _UserBoundForm.__init__(self, user, initial)
+        self.display_name.choices = [
+            (u'$username', user and user.username or _('Username')),
+            (u'$real_name', user and user.real_name or _('Realname'))
+        ]
+
+    def validate_email(self, value):
+        query = User.query.filter_by(email=value)
+        if self.user is not None:
+            query = query.filter(User.id != self.user.id)
+        if query.first() is not None:
+            raise ValidationError(_('This email address is already in use'))
+
+    def validate_password(self, value):
+        if 'password_confirm' in self.data:
+            password_confirm = self.data['password_confirm']
+        else:
+            password_confirm = self.request.values.get('password_confirm', '')
+        if ((not value == password_confirm) or (value and not password_confirm)
+            or (password_confirm and not value)):
+            raise ValidationError(_('Passwords do not match'))
+
+
+    def save_changes(self):
+        """Apply the changes."""
+        if self.data['password']:
+            self.user.set_password(self.data['password'])
+        self.user.real_name = self.data['real_name']
+        self.user.display_name = self.data['display_name']
+        self.user.description = self.data['description']
+        self.user.email = self.data['email']
+        self.user.www = self.data['www']
+
 
 class _ConfigForm(forms.Form):
     """Internal baseclass for forms that operate on config values."""
