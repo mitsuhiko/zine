@@ -39,6 +39,7 @@ def make_urls(app):
             Rule('/', endpoint='account/index'),
             Rule('/login', endpoint='account/login'),
             Rule('/logout', endpoint='account/logout'),
+            Rule('/delete', endpoint='account/delete'),
             Rule('/profile', endpoint='account/profile'),
             Rule('/system/about', endpoint='account/about_zine'),
             Rule('/system/help/', endpoint='account/help'),

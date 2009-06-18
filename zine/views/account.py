@@ -10,7 +10,7 @@
 """
 
 from zine.api import *
-from zine.forms import LoginForm, EditProfileForm
+from zine.forms import LoginForm, DeleteAccountForm, EditProfileForm
 from zine.i18n import _, ngettext
 from zine.models import Comment
 from zine.privileges import ENTER_ADMIN_PANEL
@@ -159,12 +159,27 @@ def profile(request):
     if request.method == 'POST':
         if request.form.get('cancel'):
             return form.redirect('account/index')
-#        elif request.form.get('delete') and user:
-#            return redirect_to('admin/delete_user', user_id=user.id)
+        elif request.form.get('delete'):
+            return redirect_to('account/delete')
         elif form.validate(request.form):
             form.save_changes()
             db.commit()
             flash(_(u'Your profile was updated successfully.'), 'info')
             return form.redirect('account/index')
     return render_account_response('account/edit_profile.html', 'profile',
+                                   form=form.as_widget())
+
+@require_account_privilege()
+def delete_account(request):
+    form = DeleteAccountForm(request.user)
+    if request.method == 'POST':
+        if request.form.get('cancel'):
+            return form.redirect('account/profile')
+        elif request.form.get('confirm') and form.validate(request.form):
+            form.add_invalid_redirect_target('account/profile')
+            form.delete_user()
+            request.logout()
+            db.commit()
+            return render_response('account/sorry_to_see_you_go.html')
+    return render_account_response('account/delete_account.html', 'profile',
                                    form=form.as_widget())

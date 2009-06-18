@@ -34,6 +34,7 @@ all_views = {
     'account/index':            account.index,
     'account/login':            account.login,
     'account/logout':           account.logout,
+    'account/delete':           account.delete_account,
     'account/about_zine':       account.about_zine,
     'account/help':             account.help,
     'account/profile':          account.profile,

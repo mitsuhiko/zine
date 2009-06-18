@@ -990,6 +990,24 @@ class EditProfileForm(_UserBoundForm):
         self.user.www = self.data['www']
 
 
+class DeleteAccountForm(_UserBoundForm):
+    """Used for a user to delete a his own account."""
+
+    def __init__(self, user, initial=None):
+        _UserBoundForm.__init__(self, user, forms.fill_dict(initial,
+            action='delete'
+        ))
+
+    def delete_user(self):
+        """Deletes the user's account."""
+        #! plugins can use this to react to user deletes.  They can't stop
+        #! the deleting of the user but they can delete information in
+        #! their own tables so that the database is consistent afterwards.
+        #! Additional to the user object the form data is submitted.
+        emit_event('before-user-deleted', self.user, self.data)
+        db.delete(self.user)
+
+
 class _ConfigForm(forms.Form):
     """Internal baseclass for forms that operate on config values."""
 
