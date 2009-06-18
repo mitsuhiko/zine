@@ -154,6 +154,7 @@ def _register(name, description, privilege_dependencies=()):
 
 
 _register('ENTER_ADMIN_PANEL', lazy_gettext(u'can enter admin panel'))
+_register('ENTER_ACCOUNT_PANEL', lazy_gettext(u'can enter his account panel'))
 _register('BLOG_ADMIN', lazy_gettext(u'can administer the blog'))
 _register('CREATE_ENTRIES', lazy_gettext(u'can create new entries'),
           (ENTER_ADMIN_PANEL,))

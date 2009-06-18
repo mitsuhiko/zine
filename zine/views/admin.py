@@ -1496,21 +1496,3 @@ def help(req, page=''):
 
     return render_admin_response('admin/help.html', 'system.help', **parts)
 
-
-def login(request):
-    """Show a login page."""
-    if request.user.is_somebody:
-        return redirect_to('admin/index')
-    form = LoginForm()
-
-    if request.method == 'POST' and form.validate(request.form):
-        request.login(form['user'], form['permanent'])
-        return form.redirect('admin/index')
-
-    return render_response('admin/login.html', form=form.as_widget())
-
-
-def logout(request):
-    """Just logout and redirect to the login screen."""
-    request.logout()
-    return redirect_back('admin/login')

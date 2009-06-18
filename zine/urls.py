@@ -34,12 +34,20 @@ def make_urls(app):
             Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_tag'),
             Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_tag'),
             Rule('/<string:tag>/feed.atom', endpoint='blog/atom_feed')
+        ]),
+        Submount(app.cfg['account_url_prefix'], [
+            Rule('/', endpoint='account/index'),
+            Rule('/login', endpoint='account/login'),
+            Rule('/logout', endpoint='account/logout'),
+            Rule('/system/about', endpoint='account/about_zine'),
+            Rule('/system/help/', endpoint='account/help'),
+            Rule('/system/help/<path:page>', endpoint='account/help'),
         ])
     ]
     admin_urls = [
         Rule('/', endpoint='admin/index'),
-        Rule('/login', endpoint='admin/login'),
-        Rule('/logout', endpoint='admin/logout'),
+        Rule('/login', endpoint='admin/login', redirect_to='account/login'),    # XXX: Remove on Zine 0.3
+        Rule('/logout', endpoint='admin/logout', redirect_to='account/logout'), # XXX: Remove on Zine 0.3
         Rule('/_bookmarklet', endpoint='admin/bookmarklet'),
         Rule('/entries/', endpoint='admin/manage_entries', defaults={'page': 1}),
         Rule('/entries/page/<int:page>', endpoint='admin/manage_entries'),
@@ -113,7 +121,8 @@ def make_urls(app):
         Rule('/system/about', endpoint='admin/about_zine'),
         Rule('/system/help/', endpoint='admin/help'),
         Rule('/system/help/<path:page>', endpoint='admin/help'),
-        Rule('/change_password', endpoint='admin/change_password'),
+        Rule('/change_password', endpoint='admin/change_password',
+             redirect_to='account/index')   # XXX: Remove on Zine 0.3
         Rule('/notifications', endpoint='admin/notification_settings')
     ]
     other_urls = [

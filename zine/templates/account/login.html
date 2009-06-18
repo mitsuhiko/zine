@@ -24,7 +24,7 @@
        field and suddenly the page finished loading and the
        focus is back in the username field and the password is
        entered there by accident making it visible to everybody #}
-    {% call form.render(action=url_for('admin/login')) %}
+    {% call form.render(action=url_for('account/login')) %}
       <dl>
         <dt>{{ _("Username") }}
         <dd>{{ form.user.render() }}
