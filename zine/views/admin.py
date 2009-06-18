@@ -21,7 +21,7 @@ from werkzeug.exceptions import NotFound, BadRequest, Forbidden
 from zine.privileges import assert_privilege, require_privilege, \
      CREATE_ENTRIES, EDIT_OWN_ENTRIES, EDIT_OTHER_ENTRIES, \
      CREATE_PAGES, EDIT_OWN_PAGES, EDIT_OTHER_PAGES, MODERATE_COMMENTS, \
-     MANAGE_CATEGORIES, BLOG_ADMIN
+     MODERATE_OWN_ENTRIES, MODERATE_OWN_PAGES, MANAGE_CATEGORIES, BLOG_ADMIN
 from zine.i18n import _, ngettext
 from zine.application import get_request, url_for, emit_event, \
      render_response, get_application
@@ -73,33 +73,67 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     """
     request = get_request()
 
-    manage_items = [
-        ('entries', url_for('admin/manage_entries'), _(u'Entries')),
-        ('pages', url_for('admin/manage_pages'), _(u'Pages')),
-        ('categories', url_for('admin/manage_categories'), _(u'Categories'))
-    ]
-
     # set up the core navigation bar
     navigation_bar = [
-        ('dashboard', url_for('admin/index'), _(u'Dashboard'), []),
-        ('write', url_for('admin/new_entry'), _(u'Write'), [
-            ('entry', url_for('admin/new_entry'), _(u'Entry')),
-            ('page', url_for('admin/new_page'), _(u'Page'))
-        ]),
-        ('manage', url_for('admin/manage_entries'), _(u'Manage'), manage_items),
-        ('comments', url_for('admin/manage_comments'), _(u'Comments'), [
-            ('overview', url_for('admin/manage_comments'), _(u'Overview')),
-            ('unmoderated', url_for('admin/show_unmoderated_comments'),
-             _(u'Awaiting Moderation (%d)') %
-             Comment.query.unmoderated().count()),
-            ('approved', url_for('admin/show_approved_comments'),
-             _(u'Approved (%d)') % Comment.query.approved().count()),
-            ('blocked', url_for('admin/show_blocked_comments'),
-             _(u'Blocked (%d)') % Comment.query.blocked().count()),
-            ('spam', url_for('admin/show_spam_comments'),
-             _(u'Spam (%d)') % Comment.query.spam().count())
-        ])
+        ('dashboard', url_for('admin/index'), _(u'Dashboard'), [])
     ]
+
+    write_nav = []
+    if request.user.has_privilege(CREATE_ENTRIES):
+        write_nav.append(('entry', url_for('admin/new_entry'), _(u'Entry')))
+    if request.user.has_privilege(CREATE_PAGES):
+        write_nav.append(('page', url_for('admin/new_page'), _(u'Page')))
+    if request.user.has_privilege(CREATE_ENTRIES | CREATE_PAGES):
+        navigation_bar.append(
+            ('write', url_for('admin/new_entry'), _(u'Write'), write_nav)
+        )
+
+    manage_items = []
+    if request.user.has_privilege(EDIT_OWN_ENTRIES):
+        manage_items.append(
+            ('entries', url_for('admin/manage_entries'), _(u'Entries'))
+        )
+    if request.user.has_privilege(EDIT_OWN_PAGES):
+        manage_items.append(
+            ('pages', url_for('admin/manage_pages'), _(u'Pages')),
+        )
+    if request.user.has_privilege(MANAGE_CATEGORIES):
+        manage_items.append(
+            ('categories', url_for('admin/manage_categories'), _(u'Categories'))
+        )
+    if request.user.has_privilege(EDIT_OWN_ENTRIES | EDIT_OWN_PAGES |
+                                  MANAGE_CATEGORIES):
+        navigation_bar.append(
+            ('manage', url_for('admin/manage_entries'), _(u'Manage'),
+             manage_items)
+        )
+    if request.user.has_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                                  MODERATE_OWN_PAGES):
+        unmoderated = Comment.query.unmoderated()
+        approved = Comment.query.approved()
+        blocked = Comment.query.blocked()
+        spam = Comment.query.spam()
+
+        if request.user.has_privilege(MODERATE_OWN_ENTRIES |
+                                      MODERATE_OWN_PAGES):
+            unmoderated = unmoderated.for_user(request.user)
+            approved = approved.for_user(request.user)
+            blocked = blocked.for_user(request.user)
+            spam = spam.for_user(request.user)
+
+        navigation_bar.append(
+            ('comments', url_for('admin/manage_comments'), _(u'Comments'), [
+                ('overview', url_for('admin/manage_comments'), _(u'Overview')),
+                ('unmoderated', url_for('admin/show_unmoderated_comments'),
+                 _(u'Awaiting Moderation (%d)') % unmoderated.count()),
+                ('approved', url_for('admin/show_approved_comments'),
+                 _(u'Approved (%d)') % approved.count()),
+                ('blocked', url_for('admin/show_blocked_comments'),
+                 _(u'Blocked (%d)') % blocked.count()),
+                ('spam', url_for('admin/show_spam_comments'),
+                 _(u'Spam (%d)') % spam.count())
+            ])
+        )
 
     # set up the administration menu bar
     if request.user.has_privilege(BLOG_ADMIN):
@@ -123,6 +157,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         ('help', url_for('admin/help'), _(u'Help')),
         ('about', url_for('admin/about_zine'), _(u'About'))
     ]
+
     if request.user.has_privilege(BLOG_ADMIN):
         system_items[0:0] = [
             ('information', url_for('admin/information'),
@@ -157,7 +192,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
 
     # if we are in maintenance_mode the user should know that, no matter
     # on which page he is.
-    if request.app.cfg['maintenance_mode']:
+    if request.app.cfg['maintenance_mode'] and \
+                                        request.user.has_privilege(BLOG_ADMIN):
         flash(_(u'Zine is in maintenance mode. Don\'t forget to '
                 u'<a href="%s">turn it off again</a> once you finish your '
                 u'changes.') % url_for('admin/maintenance'))
@@ -265,11 +301,9 @@ def index(request):
         return render_response('admin/reddit.html', items=load_zine_reddit())
 
     return render_admin_response('admin/index.html', 'dashboard',
-        drafts=Post.query.drafts().all(),
-        unmoderated_comments=Comment.query.post_lightweight().unmoderated().all(),
-        your_posts=Post.query.filter(
-            Post.author_id == request.user.id
-        ).count(),
+        drafts=Post.query.drafts().all(), unmoderated_comments=
+            Comment.query.post_lightweight().unmoderated().for_user(request.user).all(),
+        your_posts=Post.query.filter(Post.author_id==request.user.id).count(),
         last_posts=Post.query.published(ignore_privileges=True)
             .order_by(Post.pub_date.desc()).limit(5).all(),
         show_reddit = request.app.cfg['dashboard_reddit']
@@ -415,11 +449,12 @@ def manage_pages(request, page):
                                  pages=pages, pagination=pagination)
 
 
-@require_admin_privilege()
+@require_admin_privilege(EDIT_OWN_PAGES | EDIT_OTHER_PAGES)
 def edit_page(request, post=None):
     """Edit an existing entry or create a new one."""
     active_tab = post and 'manage.pages' or 'write.page'
     form = PageForm(post)
+
 
     if post is None:
         assert_privilege(CREATE_PAGES)
@@ -454,7 +489,7 @@ def edit_page(request, post=None):
                                  form=form.as_widget())
 
 
-@require_admin_privilege()
+@require_admin_privilege(EDIT_OWN_PAGES | EDIT_OTHER_PAGES)
 def delete_page(request, post):
     """This dialog deletes a page.  Usually users are redirected here from the
     edit post view or the page indexpage.  If the page was not deleted the
@@ -462,7 +497,7 @@ def delete_page(request, post):
     page if the information is invalid.
     """
     form = PostDeleteForm(post)
-    if not post.can_edit():
+    if not post.can_edit(request.user):
         raise Forbidden()
 
     if request.method == 'POST':
@@ -488,8 +523,11 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
         return redirect(url_for(endpoint, page=page, post_id=post_id,
                                 per_page=request.values.get('per_page')))
 
+    if request.user.has_privilege(MODERATE_OWN_ENTRIES | MODERATE_OWN_PAGES):
+        query = query.for_user(request.user)
+
     comments = query.post_lightweight().limit(per_page) \
-                    .offset(per_page * (page - 1)).all()
+                    .offset(per_page * (page - 1))
 
 
     pagination = AdminPagination(endpoint, page, per_page, query.count(),
@@ -582,41 +620,47 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
         akismet_active = request.app.plugins['akismet_spam_filter'].active)
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def manage_comments(request, page, per_page):
     """Show all the comments."""
     return _handle_comments('overview', _(u'All Comments'),
                             Comment.query, page, per_page)
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def show_unmoderated_comments(request, page, per_page):
     """Show all unmoderated and user-blocked comments."""
     return _handle_comments('unmoderated', _(u'Comments Awaiting Moderation'),
                             Comment.query.unmoderated(), page, per_page,
                             endpoint='admin/show_unmoderated_comments')
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def show_approved_comments(request, page, per_page):
     """Show all moderated comments."""
     return _handle_comments('approved', _(u'Approved Commments'),
                             Comment.query.approved(), page, per_page,
                             endpoint='admin/show_approved_comments')
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def show_blocked_comments(request, page, per_page):
     """Show all spam comments."""
     return _handle_comments('blocked', _(u'Blocked'),
                             Comment.query.blocked(), page, per_page,
                             endpoint='admin/show_blocked_comments')
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def show_spam_comments(request, page, per_page):
     """Show all spam comments."""
     return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page,
                             per_page, endpoint='admin/show_spam_comments')
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def show_post_comments(request, page, post_id, per_page):
     """Show all comments for a single post."""
     post = Post.query.get(post_id)
@@ -632,7 +676,8 @@ def show_post_comments(request, page, post_id, per_page):
                             endpoint='admin/show_post_comments')
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def edit_comment(request, comment_id):
     """Edit a comment.  Unlike the post edit screen it's not possible to
     create new comments from here, that has to happen from the post page.
@@ -640,6 +685,8 @@ def edit_comment(request, comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = EditCommentForm(comment)
 
     if request.method == 'POST' and form.validate(request.form):
@@ -657,11 +704,12 @@ def edit_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def delete_comment(request, comment_id):
-    """This dialog delets a comment.  Usually users are redirected here from the
-    comment moderation page or the comment edit page.  If the comment was not
-    deleted, the user is taken back to the page he's coming from or back to
+    """This dialog deletes a comment.  Usually users are redirected here from
+    the comment moderation page or the comment edit page.  If the comment was
+    not deleted, the user is taken back to the page he's coming from or back to
     the edit page if the information is invalid.  The same happens if the post
     was deleted but if the referrer is the edit page. Then the user is taken
     back to the index so that he doesn't end up an a "page not found" error page.
@@ -669,6 +717,8 @@ def delete_comment(request, comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None or comment.is_deleted:
         return redirect_to('admin/manage_comments')
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
 
     form = DeleteCommentForm(comment)
 
@@ -686,12 +736,15 @@ def delete_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def approve_comment(request, comment_id):
     """Approve a comment"""
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = ApproveCommentForm(comment)
 
     if request.method == 'POST' and form.validate(request.form):
@@ -706,12 +759,15 @@ def approve_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def block_comment(request, comment_id):
     """Block a comment."""
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = BlockCommentForm(comment)
 
     if request.method == 'POST' and form.validate(request.form):
@@ -725,12 +781,15 @@ def block_comment(request, comment_id):
     return render_admin_response('admin/block_comment.html',
                                  'comments.overview', form=form.as_widget())
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def report_comment_spam(request, comment_id):
     """Block a comment."""
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = MarkCommentForm(comment)
 
     if request.method == 'POST' and form.validate(request.form):
@@ -745,12 +804,15 @@ def report_comment_spam(request, comment_id):
                                  'comments.overview', form=form.as_widget(),
                                  form_action=_('Spam'))
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def report_comment_ham(request, comment_id):
     """Block a comment."""
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = MarkCommentForm(comment)
 
     if request.method == 'POST' and form.validate(request.form):
@@ -811,8 +873,8 @@ def edit_category(request, category_id=None):
             flash(msg % html_category_detail, msg_type)
             return redirect_to('admin/manage_categories')
 
-    return render_admin_response('admin/edit_category.html', 'manage.categories',
-                                 form=form.as_widget())
+    return render_admin_response('admin/edit_category.html',
+                                 'manage.categories', form=form.as_widget())
 
 
 @require_admin_privilege(MANAGE_CATEGORIES)
@@ -969,7 +1031,8 @@ def delete_group(request, group_id):
         if request.form.get('cancel'):
             return form.redirect('admin/edit_group', group_id=group.id)
         elif request.form.get('confirm') and form.validate(request.form):
-            form.add_invalid_redirect_target('admin/edit_group', group_id=group.id)
+            form.add_invalid_redirect_target('admin/edit_group',
+                                             group_id=group.id)
             form.delete_group()
             db.commit()
             return form.redirect('admin/manage_groups')
@@ -1045,8 +1108,10 @@ def theme(request):
                 return redirect_to('admin/theme')
 
     return render_admin_response('admin/theme.html', 'options.theme',
-        themes=sorted(request.app.themes.values(),
-                      key=lambda x: x.name == 'default' or x.display_name.lower()),
+        themes=sorted(
+            request.app.themes.values(),
+            key=lambda x: x.name == 'default' or x.display_name.lower()
+        ),
         current_theme=request.app.theme,
         form=form.as_widget()
     )

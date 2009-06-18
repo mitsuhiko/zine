@@ -64,9 +64,10 @@ class _Privilege(object):
 
 class Privilege(_Expr):
 
-    def __init__(self, name, explanation):
+    def __init__(self, name, explanation, privilege_dependencies=()):
         self.name = name
         self.explanation = explanation
+        self.dependencies = privilege_dependencies
 
     def __call__(self, privileges):
         return self in privileges
@@ -92,20 +93,22 @@ def add_admin_privilege(privilege):
 def bind_privileges(container, privileges):
     """Binds the privileges to the container.  The privileges can be a list
     of privilege names, the container must be a set.  This is called for
-    the http roundtrip in the form validation.
+    the HTTP round-trip in the form validation.
     """
     app = get_application()
     current_map = dict((x.name, x) for x in container)
     currently_attached = set(x.name for x in container)
     new_privileges = set(privileges)
 
-    # remove outdated privileges
+    # remove out-dated privileges
     for name in currently_attached.difference(new_privileges):
         container.remove(current_map[name])
 
     # add new privileges
     for name in new_privileges.difference(currently_attached):
         container.add(app.privileges[name])
+        for privilege in app.privileges[name].dependencies:
+            container.add(privilege)
 
 
 def require_privilege(expr):
@@ -142,9 +145,9 @@ def privilege_attribute(lowlevel_attribute):
                                 creator=creator_func)
 
 
-def _register(name, description):
+def _register(name, description, privilege_dependencies=()):
     """Register a new builtin privilege."""
-    priv = Privilege(name, description)
+    priv = Privilege(name, description, privilege_dependencies)
     DEFAULT_PRIVILEGES[name] = priv
     globals()[name] = priv
     __all__.append(name)
@@ -152,15 +155,27 @@ def _register(name, description):
 
 _register('ENTER_ADMIN_PANEL', lazy_gettext(u'can enter admin panel'))
 _register('BLOG_ADMIN', lazy_gettext(u'can administer the blog'))
-_register('CREATE_ENTRIES', lazy_gettext(u'can create new entries'))
-_register('EDIT_OWN_ENTRIES', lazy_gettext(u'can edit their own entries'))
-_register('EDIT_OTHER_ENTRIES', lazy_gettext(u'can edit another person\'s entries'))
-_register('CREATE_PAGES', lazy_gettext(u'can create new pages'))
-_register('EDIT_OWN_PAGES', lazy_gettext(u'can edit their own pages'))
-_register('EDIT_OTHER_PAGES', lazy_gettext(u'can edit another person\'s pages'))
+_register('CREATE_ENTRIES', lazy_gettext(u'can create new entries'),
+          (ENTER_ADMIN_PANEL,))
+_register('EDIT_OWN_ENTRIES', lazy_gettext(u'can edit their own entries'),
+          (ENTER_ADMIN_PANEL, CREATE_ENTRIES))
+_register('EDIT_OTHER_ENTRIES', lazy_gettext(u'can edit another person\'s entries'),
+          (ENTER_ADMIN_PANEL,))
+_register('CREATE_PAGES', lazy_gettext(u'can create new pages'),
+          (ENTER_ADMIN_PANEL,))
+_register('EDIT_OWN_PAGES', lazy_gettext(u'can edit their own pages'),
+          (ENTER_ADMIN_PANEL, CREATE_PAGES))
+_register('EDIT_OTHER_PAGES', lazy_gettext(u'can edit another person\'s pages'),
+          (ENTER_ADMIN_PANEL,))
 _register('VIEW_DRAFTS', lazy_gettext(u'can view drafts'))
-_register('MANAGE_CATEGORIES', lazy_gettext(u'can manage categories'))
-_register('MODERATE_COMMENTS', lazy_gettext(u'can moderate comments'))
+_register('MANAGE_CATEGORIES', lazy_gettext(u'can manage categories'),
+          (ENTER_ADMIN_PANEL,))
+_register('MODERATE_COMMENTS', lazy_gettext(u'can moderate comments'),
+          (ENTER_ADMIN_PANEL,))
+_register('MODERATE_OWN_ENTRIES', lazy_gettext(u'can moderate comments on it\'s own entries'),
+          (ENTER_ADMIN_PANEL, CREATE_ENTRIES))
+_register('MODERATE_OWN_PAGES', lazy_gettext(u'can moderate comments on it\'s own pages'),
+          (ENTER_ADMIN_PANEL, CREATE_PAGES))
 _register('VIEW_PROTECTED', lazy_gettext(u'can view protected entries'))
 
 

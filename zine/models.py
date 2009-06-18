@@ -26,7 +26,7 @@ from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
 from zine.privileges import Privilege, _Privilege, privilege_attribute, \
      add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN, \
-     VIEW_DRAFTS, VIEW_PROTECTED
+     VIEW_DRAFTS, VIEW_PROTECTED, MODERATE_OWN_ENTRIES, MODERATE_OWN_PAGES
 from zine.application import get_application, get_request, url_for
 
 from zine.i18n import to_blog_timezone
@@ -919,10 +919,28 @@ class CommentQuery(db.Query):
             req = get_request()
             if req:
                 user = req.user
-                if not user.has_privilege(MODERATE_COMMENTS):
+                if not user.has_privilege(MODERATE_COMMENTS |
+                                          MODERATE_OWN_ENTRIES |
+                                          MODERATE_OWN_PAGES):
                     query = query.approved()
 
+                elif user.has_privilege(MODERATE_OWN_ENTRIES |
+                                        MODERATE_OWN_PAGES):
+                    query = query.for_user(user)
+
         return query
+
+    def for_user(self, user=None):
+        request = get_request()
+        user = user or request.user
+        if user.has_privilege(MODERATE_COMMENTS):
+            return self
+        elif user.has_privilege(MODERATE_OWN_ENTRIES | MODERATE_OWN_PAGES):
+            return self.filter(Comment.post_id.in_(
+                db.session.query(Post.id).filter(Post.author_id==user.id))
+            )
+        return self
+
 
     def comments_for_post(self, post):
         """Return all comments for the blog post."""
@@ -1034,23 +1052,30 @@ class Comment(_ZEMLContainer):
 
     def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""
-        if not self.blocked:
-            return True
+        request = get_request()
         if user is None:
-            user = get_request().user
-        return user.has_privilege(MODERATE_COMMENTS)
+            user = request.user
+        if user.has_privilege(MODERATE_OWN_ENTRIES | MODERATE_OWN_PAGES):
+            # Comment belongs to a post the user is the author. It's visible.
+            return self.post.author is user
+        elif user.has_privilege(MODERATE_COMMENTS):
+            # User is able to manage comments. It's visible.
+            return True
+        elif self.id in request.session.get('visible_comments', ()):
+            # Comment was made visible for current request. It's visible
+            return True
+        # Finally, comment is visible if not blocked
+        return not self.blocked
 
     @property
     def visible(self):
         """Check the current session it can see the comment or check against the
         current user.  To display a comment for a request you can use the
         `make_visible_for_request` function.  This is useful to show a comment
-        to a user that submited a comment which is not yet moderated.
+        to a user that submitted a comment which is not yet moderated.
         """
         request = get_request()
         if request is None:
-            return True
-        if self.id in request.session.get('visible_comments', ()):
             return True
         return self.visible_for_user(request.user)
 
