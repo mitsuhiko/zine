@@ -558,7 +558,7 @@ class _PostBase(object):
 
     def sync_comment_count(self):
         """Sync the reflected comment count."""
-        self._comment_count = Comment.query.comments_for_post(post) \
+        self._comment_count = Comment.query.comments_for_post(self) \
             .filter(models.Comment.status==0).count()
 
     def set_auto_slug(self):
