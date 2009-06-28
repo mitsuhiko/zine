@@ -3,7 +3,7 @@
     zine.plugins.creole_parser
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Use Markdown for your blg posts.
+    Use Markdown for your blog posts.
 
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
