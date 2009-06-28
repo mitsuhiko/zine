@@ -31,9 +31,13 @@ atom = Namespace(ATOM_NS)
 xml = Namespace(XML_NS)
 
 
-class SkipPost(Exception):
-    """Raised by an Extension.postprocess_post method if the post should
-    be skipped."""
+class SkipItem(Exception):
+    """Raised by
+
+    * Extension.postprocess_post() if the post should be skipped
+    * Extension.lookup_author() if the author should be skipped
+    * Extension.tag_or_category() if the category should be skipped
+    """
 
 
 def _get_text_content(elements, fallback=True):
@@ -222,7 +226,7 @@ class AtomParser(Parser):
         for extension in self.extensions:
             try:
                 extension.postprocess_post(post)
-            except SkipPost:
+            except SkipItem:
                 return None
 
         return post
@@ -240,9 +244,13 @@ class AtomParser(Parser):
         author = entry.find(atom.author)
         email = author.findtext(atom.email)
         username = author.findtext(atom.name)
+        uri = author.findtext(atom.uri)
 
         for extension in self.extensions:
-            rv = extension.lookup_author(author, entry, username, email)
+            try:
+                rv = extension.lookup_author(author, entry, username, email, uri)
+            except SkipItem:
+                return None
             if rv is not None:
                 _remember_author(rv)
                 return rv
@@ -271,7 +279,10 @@ class AtomParser(Parser):
 
         for category in entry.findall(atom.category):
             for extension in self.extensions:
-                rv = extension.tag_or_category(category)
+                try:
+                    rv = extension.tag_or_category(category)
+                except SkipItem:
+                    break
                 if rv is not None:
                     if isinstance(rv, Tag):
                         tags.append(rv)
@@ -344,7 +355,11 @@ class Extension(object):
         """Called after the whole feed was parsed into a blog object."""
 
     def postprocess_post(self, post):
-        """Postprocess the post."""
+        """Postprocess the post.
+
+        If this method raises `SkipItem`, the post is thrown away without
+        giving it to other Extensions.
+        """
 
     def tag_or_category(self, element):
         """Passed a <category> element for Atom feeds.  Has to return a
@@ -354,9 +369,13 @@ class Extension(object):
         Categories and tags have to be stored in `parser.categories` or
         `parser.tags` so that the category/tag is actually unique.  The
         extension also has to look there first for matching categories.
+
+        If this method raises `SkipItem`, the category is immediately
+        thrown away without giving it to other Extensions or using the
+        default heuristic to create a category.
         """
 
-    def lookup_author(self, author, entry, username, email):
+    def lookup_author(self, author, entry, username, email, uri):
         """Lookup the author for an element.  `author` is an element
         that points to the author relevant element for the feed.
         `entry` points to the whole entry element.
@@ -365,6 +384,10 @@ class Extension(object):
         are unique.  Extensions have to look there first for matching
         author objects.  If an extension does not know how to handle
         the element `None` must be returned.
+
+        If this method raises `SkipItem`, the author is immediately
+        thrown away without giving it to other Extensions or using
+        the default heuristic to create an author object.
         """
 
     def parse_comments(self, post):
@@ -453,7 +476,7 @@ class ZEAExtension(Extension):
         if content_type is not None:
             post.content_type = content_type
 
-    def lookup_author(self, author, entry, username, email):
+    def lookup_author(self, author, entry, username, email, uri):
         dependency = author.attrib.get(zine.dependency)
         if dependency is not None:
             return self._get_author(dependency)
