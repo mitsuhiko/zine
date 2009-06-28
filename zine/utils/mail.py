@@ -9,7 +9,10 @@
 """
 import os
 import re
-from email.MIMEText import MIMEText
+try:
+    from email.mime.text import MIMEText
+except ImportError:
+    from email.MIMEText import MIMEText
 from smtplib import SMTP, SMTPException
 from urlparse import urlparse
 
@@ -91,6 +94,7 @@ class EMail(object):
         msg['From'] = from_addr
         msg['To'] = ', '.join(self.to_addrs)
         msg['Subject'] = self.subject.encode('utf-8')
+        del msg['Content-Transfer-Encoding']
         msg['Content-Transfer-Encoding'] = '8bit'
         msg['Content-Type'] = 'text/plain; charset=utf-8'
         return msg
