@@ -265,6 +265,10 @@ class Namespace(object):
     def __getattr__(self, name):
         return u'{%s}%s' % (self._uri, name)
 
+    def __getitem__(self, name):
+        # to be able to use tag names using dashes
+        return getattr(self, name)
+
     def __repr__(self):
         return str(self)
 
