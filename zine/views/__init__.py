@@ -81,6 +81,8 @@ all_views = {
     'admin/log':                admin.log,
     'admin/about_zine':         admin.about_zine,
     'admin/change_password':    admin.change_password,
+    'admin/notification_settings':
+                                admin.notification_settings,
     'admin/help':               admin.help,
     'admin/login':              admin.login,
     'admin/logout':             admin.logout

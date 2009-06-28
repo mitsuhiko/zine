@@ -1018,6 +1018,17 @@ div.text {
     text-align: justify;
 }
 
+/* :::: NOTIFICATION SETTINGS :::: */
+table.notifications tbody th {
+    background: #fafafa;
+    border: none;
+    -moz-border-radius: 0!important;
+    -webkit-border-radius: 0!important;
+    border-radius: 0!important;
+    font-weight: normal;
+    border-bottom: 1px dotted #ccc;
+}
+
 /* :::: HELP :::: */
 div.help {
     font-family: 'Georgia', serif;

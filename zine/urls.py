@@ -113,7 +113,8 @@ def make_urls(app):
         Rule('/system/help/', endpoint='admin/help'),
         Rule('/system/help/<path:page>', endpoint='admin/help'),
         Rule('/system/configuration', endpoint='admin/configuration'),
-        Rule('/change_password', endpoint='admin/change_password')
+        Rule('/change_password', endpoint='admin/change_password'),
+        Rule('/notifications', endpoint='admin/notification_settings')
     ]
     other_urls = [
         Rule('/<slug>', endpoint='blog/post', build_only=True),

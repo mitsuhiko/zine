@@ -1419,6 +1419,13 @@ def change_password(request):
 
 
 @require_admin_privilege()
+def notification_settings(request):
+    """Allow the user to change his notification settings."""
+    return render_admin_response('admin/notification_settings.html',
+    )
+
+
+@require_admin_privilege()
 def help(req, page=''):
     """Show help page."""
     from zine.docs import load_page, get_resource

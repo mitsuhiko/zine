@@ -84,6 +84,13 @@ class ChangePasswordForm(forms.Form):
             raise ValidationError(_('The two passwords don\'t match.'))
 
 
+class NotificationSettingsForm(forms.Form):
+    """The form for the notification settings page.  A user is able to
+    subscribe to and unsubscribe from notification systems and notification
+    ids.
+    """
+
+
 class NewCommentForm(forms.Form):
     """New comment form for authors."""
     # implementation detail: the maximum length of the column in the

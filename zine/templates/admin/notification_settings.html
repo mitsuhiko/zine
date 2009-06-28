@@ -1,0 +1,34 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ _("Notification Settings") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Notification Settings") }}</h1>
+  <form action="" method="post">
+    <p>Blafasel
+    <table class="notifications">
+      <thead>
+        <tr>
+          <th>&nbsp;
+          <th>E-Mail
+          <th>Jabber
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>When a new comment is received.
+          <td><input type="checkbox">
+          <td><input type="checkbox">
+        </tr>
+        <tr>
+          <th>When a comment requires moderation.
+          <td><input type="checkbox">
+          <td><input type="checkbox">
+        </tr>
+        <tr>
+          <th>When Zine found an urgent security alarm.
+          <td><input type="checkbox">
+          <td><input type="checkbox">
+        </tr>
+      </tbody>
+    </table>
+  </form>
+{% endblock %}
