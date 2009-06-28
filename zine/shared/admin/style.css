@@ -829,6 +829,17 @@ div.themes div.theme div.detail p.author {
     text-align: center;
 }
 
+/* :::: NOTIFICATIONS :::: */
+table.notifications ul.choicegroup {
+    margin: 0;
+    padding: 0;
+}
+
+table.notifications ul.choicegroup li {
+    display: inline;
+    margin: 0;
+}
+
 /* :::: WIDGETS :::: */
 #sidebar {
     border: 2px solid #267696;

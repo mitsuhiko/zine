@@ -14,9 +14,10 @@ from datetime import datetime
 from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.config import DEFAULT_VARS
-from zine.database import db, posts, comments
+from zine.database import db, posts, comments, notification_subscriptions
 from zine.models import User, Group, Comment, Post, Category, Tag, \
-     STATUS_DRAFT, STATUS_PUBLISHED, STATUS_PROTECTED, STATUS_PRIVATE, \
+     NotificationSubscription, STATUS_DRAFT, STATUS_PUBLISHED, \
+     STATUS_PROTECTED, STATUS_PRIVATE, \
      COMMENT_UNMODERATED, COMMENT_MODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM, COMMENT_DELETED
 from zine.privileges import bind_privileges
@@ -82,13 +83,6 @@ class ChangePasswordForm(forms.Form):
     def context_validate(self, data):
         if data['new_password'] != data['check_password']:
             raise ValidationError(_('The two passwords don\'t match.'))
-
-
-class NotificationSettingsForm(forms.Form):
-    """The form for the notification settings page.  A user is able to
-    subscribe to and unsubscribe from notification systems and notification
-    ids.
-    """
 
 
 class NewCommentForm(forms.Form):
@@ -1128,6 +1122,55 @@ def make_config_form():
             t.commit()
 
     return _ConfigForm({'values': values})
+
+
+def make_notification_form(user):
+    """Creates a notification form."""
+    app = get_application()
+    fields = {}
+    subscriptions = {}
+
+    systems = [(s.key, s.name) for s in
+               app.notification_manager.systems.itervalues()]
+
+    for obj in app.notification_types.itervalues():
+        fields[obj.name] = forms.MultiChoiceField(choices=systems,
+                                                  label=obj.description,
+                                                  widget=forms.CheckboxGroup)
+
+    for ns in NotificationSubscription.query.filter_by(user=user).all():
+        subscriptions.setdefault(ns.notification_id, []) \
+            .append(ns.notification_system)
+
+    class _NotificationForm(forms.Form):
+        subscriptions = forms.Mapping(**fields)
+
+        def apply(self):
+            user_subscriptions = {}
+            for subscription in NotificationSubscription \
+                    .query.filter_by(user=user).all():
+                user_subscriptions.setdefault(subscription.notification_id,
+                    set()).add(subscription.notification_system)
+
+            all_systems = set(app.notification_manager.systems)
+            for key, active in self['subscriptions'].iteritems():
+                currently_set = user_subscriptions.get(key, set())
+                active = set(active)
+
+                # remove outdated
+                for system in currently_set.difference(active):
+                    NotificationSubscription.query.filter_by(
+                        user=user,
+                        notification_id=key,
+                        notification_system=system
+                    ).delete()
+
+                # add new
+                for system in active.difference(currently_set):
+                    NotificationSubscription(user=user, notification_id=key,
+                                             notification_system=system)
+
+    return _NotificationForm({'subscriptions': subscriptions})
 
 
 def make_import_form(blog):

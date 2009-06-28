@@ -2,33 +2,30 @@
 {% block title %}{{ _("Notification Settings") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Notification Settings") }}</h1>
-  <form action="" method="post">
-    <p>Blafasel
+  {% call form() %}
+    <p>{{ _('You can configure your notification subscriptions from here.') }}
     <table class="notifications">
       <thead>
         <tr>
           <th>&nbsp;
-          <th>E-Mail
-          <th>Jabber
+          {%- for system in systems %}
+          <th>{{ system.name|e }}
+          {%- endfor %}
         </tr>
       </thead>
       <tbody>
+      {%- for type in notification_types %}
         <tr>
-          <th>When a new comment is received.
-          <td><input type="checkbox">
-          <td><input type="checkbox">
+          <th>{{ type.description|e }}
+          {%- for system in systems %}
+          <td>{{ form.subscriptions[type.name](nolabel=true) }}
+          {%- endfor %}
         </tr>
-        <tr>
-          <th>When a comment requires moderation.
-          <td><input type="checkbox">
-          <td><input type="checkbox">
-        </tr>
-        <tr>
-          <th>When Zine found an urgent security alarm.
-          <td><input type="checkbox">
-          <td><input type="checkbox">
-        </tr>
+      {%- endfor %}
       </tbody>
     </table>
-  </form>
+    <div class="actions">
+      <input type="submit" value="{{ _('Save') }}">
+    </div>
+  {% endcall %}
 {% endblock %}

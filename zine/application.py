@@ -705,9 +705,10 @@ class Zine(object):
 
         # the notification manager
         from zine.notifications import NotificationManager, \
-             EMailNotificationSystem
+             EMailNotificationSystem, DEFAULT_NOTIFICATION_TYPES
         self.notification_manager = NotificationManager()
         self.add_notification_system(EMailNotificationSystem)
+        self.notification_types = DEFAULT_NOTIFICATION_TYPES.copy()
 
         # register the pingback API.
         from zine import pingback
@@ -1111,6 +1112,11 @@ class Zine(object):
         the NotificationManager holds.
         """
         self.notification_manager.systems[system.key] = system(self)
+
+    @setuponly
+    def add_notification_type(self, type):
+        """Registers a new notification type on the instance."""
+        self.notification_types[type.name] = type
 
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""
