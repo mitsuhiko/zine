@@ -108,21 +108,21 @@ class Parser(object):
                            for extension in self.app.feed_importer_extensions
                            if self.feed_type in extension.feed_types]
 
-    def find_tag(self, **critereon):
-        return self._find_criteron(self.tags, critereon)
+    def find_tag(self, **criterion):
+        return self._find_criterion(self.tags, criterion)
 
-    def find_category(self, **critereon):
-        return self._find_criteron(self.categories, critereon)
+    def find_category(self, **criterion):
+        return self._find_criterion(self.categories, criterion)
 
-    def find_author(self, **critereon):
-        return self._find_criteron(self.authors, critereon)
+    def find_author(self, **criterion):
+        return self._find_criterion(self.authors, criterion)
 
-    def find_post(self, **critereon):
-        return self._find_criteron(self.posts, critereon)
+    def find_post(self, **criterion):
+        return self._find_criterion(self.posts, criterion)
 
-    def _find_criteron(self, sequence, d):
+    def _find_criterion(self, sequence, d):
         if len(d) != 1:
-            raise TypeError('one critereon expected')
+            raise TypeError('one criterion expected')
         key, value = d.iteritems().next()
         for item in sequence:
             if getattr(item, key, None) == value:
