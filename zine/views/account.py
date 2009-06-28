@@ -10,7 +10,8 @@
 """
 
 from zine.api import *
-from zine.forms import LoginForm, DeleteAccountForm, EditProfileForm
+from zine.forms import LoginForm, DeleteAccountForm, EditProfileForm, \
+     make_notification_form
 from zine.i18n import _, ngettext
 from zine.models import Comment
 from zine.privileges import ENTER_ADMIN_PANEL
@@ -35,7 +36,9 @@ def render_account_response(template_name, _active_menu_item=None, **values):
     # set up the core navigation bar
     navigation_bar = [
         ('dashboard', url_for('account/index'), _(u'Dashboard'), []),
-        ('profile', url_for('account/profile'), _(u'Profile'), [])
+        ('profile', url_for('account/profile'), _(u'Profile'), []),
+        ('notifications', url_for('account/notification_settings'),
+         _(u'Notifications'), [])
     ]
 
     # add the about items to the navigation bar
@@ -183,3 +186,22 @@ def delete_account(request):
             return render_response('account/sorry_to_see_you_go.html')
     return render_account_response('account/delete_account.html', 'profile',
                                    form=form.as_widget())
+
+
+@require_account_privilege()
+def notification_settings(request):
+    """Allow the user to change his notification settings."""
+    form = make_notification_form(request.user)
+    if request.method == 'POST' and form.validate(request.form):
+        form.apply()
+        db.commit()
+        flash(_('Notification settings changed.'), 'configure')
+        return form.redirect('account/notification_settings')
+
+    return render_account_response('account/notification_settings.html',
+        form=form.as_widget(),
+        systems=sorted(request.app.notification_manager.systems.values(),
+                       key=lambda x: x.name.lower()),
+        notification_types=sorted(request.app.notification_types.values(),
+                                  key=lambda x: x.description.lower())
+    )

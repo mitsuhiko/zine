@@ -1456,25 +1456,6 @@ def change_password(request):
         form=form.as_widget()
     )
 
-
-@require_admin_privilege()
-def notification_settings(request):
-    """Allow the user to change his notification settings."""
-    form = make_notification_form(request.user)
-    if request.method == 'POST' and form.validate(request.form):
-        form.apply()
-        db.commit()
-        flash(_('Notification settings changed.'), 'configure')
-        return form.redirect('admin/notification_settings')
-
-    return render_admin_response('admin/notification_settings.html',
-        form=form.as_widget(),
-        systems=form.system_choices,
-        notification_types=sorted(request.app.notification_types.values(),
-                                  key=lambda x: x.description.lower())
-    )
-
-
 @require_admin_privilege()
 def help(req, page=''):
     """Show help page."""

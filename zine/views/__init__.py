@@ -38,6 +38,8 @@ all_views = {
     'account/about_zine':       account.about_zine,
     'account/help':             account.help,
     'account/profile':          account.profile,
+    'account/notification_settings':
+                                account.notification_settings,
 
     # admin views
     'admin/index':              admin.index,
@@ -89,8 +91,6 @@ all_views = {
     'admin/information':        admin.information,
     'admin/log':                admin.log,
     'admin/about_zine':         admin.about_zine,
-    'admin/notification_settings':
-                                admin.notification_settings,
     'admin/help':               admin.help,
 }
 

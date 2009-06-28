@@ -41,9 +41,10 @@ def make_urls(app):
             Rule('/logout', endpoint='account/logout'),
             Rule('/delete', endpoint='account/delete'),
             Rule('/profile', endpoint='account/profile'),
+            Rule('/notifications', endpoint='account/notification_settings'),
             Rule('/system/about', endpoint='account/about_zine'),
             Rule('/system/help/', endpoint='account/help'),
-            Rule('/system/help/<path:page>', endpoint='account/help'),
+            Rule('/system/help/<path:page>', endpoint='account/help')
         ])
     ]
     admin_urls = [
@@ -124,8 +125,7 @@ def make_urls(app):
         Rule('/system/help/', endpoint='admin/help'),
         Rule('/system/help/<path:page>', endpoint='admin/help'),
         Rule('/change_password', endpoint='admin/change_password',
-             redirect_to='account/index')   # XXX: Remove on Zine 0.3
-        Rule('/notifications', endpoint='admin/notification_settings')
+             redirect_to='account/index'),   # XXX: Remove on Zine 0.3
     ]
     other_urls = [
         Rule('/<slug>', endpoint='blog/post', build_only=True),
