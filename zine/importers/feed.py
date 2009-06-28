@@ -158,7 +158,9 @@ class AtomParser(Parser):
 
     def parse(self):
         for entry in self.tree.findall(atom.entry):
-            self.posts.append(filter(None, self.parse_post(entry)))
+            post = self.parse_post(entry)
+            if post is not None:
+                self.posts.append(post)
 
         self.blog = Blog(
             self.tree.findtext(atom.title),
