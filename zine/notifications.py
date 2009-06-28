@@ -355,4 +355,6 @@ _register('COMMENT_REQUIRES_MODERATION',
 _register('ON_SECURITY_ALERT',
           lazy_gettext(u'When Zine found an urgent security alarm.'))
 
+
+DEFAULT_NOTIFICATION_SYSTEMS = [EMailNotificationSystem]
 del _register

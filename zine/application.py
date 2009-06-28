@@ -705,9 +705,10 @@ class Zine(object):
 
         # the notification manager
         from zine.notifications import NotificationManager, \
-             EMailNotificationSystem, DEFAULT_NOTIFICATION_TYPES
+             DEFAULT_NOTIFICATION_SYSTEMS, DEFAULT_NOTIFICATION_TYPES
         self.notification_manager = NotificationManager()
-        self.add_notification_system(EMailNotificationSystem)
+        for system in DEFAULT_NOTIFICATION_SYSTEMS:
+            self.add_notification_system(system)
         self.notification_types = DEFAULT_NOTIFICATION_TYPES.copy()
 
         # register the pingback API.

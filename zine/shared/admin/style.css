@@ -833,6 +833,7 @@ div.themes div.theme div.detail p.author {
 table.notifications ul.choicegroup {
     margin: 0;
     padding: 0;
+    text-align: center;
 }
 
 table.notifications ul.choicegroup li {

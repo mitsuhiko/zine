@@ -1131,7 +1131,8 @@ def make_notification_form(user):
     subscriptions = {}
 
     systems = [(s.key, s.name) for s in
-               app.notification_manager.systems.itervalues()]
+               sorted(app.notification_manager.systems.values(),
+                      key=lambda x: x.name.lower())]
 
     for obj in app.notification_types.itervalues():
         fields[obj.name] = forms.MultiChoiceField(choices=systems,
@@ -1144,6 +1145,7 @@ def make_notification_form(user):
 
     class _NotificationForm(forms.Form):
         subscriptions = forms.Mapping(**fields)
+        system_choices = systems
 
         def apply(self):
             user_subscriptions = {}

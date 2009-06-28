@@ -1431,8 +1431,7 @@ def notification_settings(request):
 
     return render_admin_response('admin/notification_settings.html',
         form=form.as_widget(),
-        systems=sorted(request.app.notification_manager.systems.values(),
-                       key=lambda x: x.name.lower()),
+        systems=form.system_choices,
         notification_types=sorted(request.app.notification_types.values(),
                                   key=lambda x: x.description.lower())
     )
