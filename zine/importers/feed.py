@@ -31,6 +31,11 @@ atom = Namespace(ATOM_NS)
 xml = Namespace(XML_NS)
 
 
+class SkipPost(Exception):
+    """Raised by an Extension.postprocess_post method if the post should
+    be skipped."""
+
+
 def _get_text_content(elements, fallback=True):
     """Return the text content from the best element match."""
     for element in elements:
@@ -153,7 +158,7 @@ class AtomParser(Parser):
 
     def parse(self):
         for entry in self.tree.findall(atom.entry):
-            self.posts.append(self.parse_post(entry))
+            self.posts.append(filter(None, self.parse_post(entry)))
 
         self.blog = Blog(
             self.tree.findtext(atom.title),
@@ -213,7 +218,10 @@ class AtomParser(Parser):
         self.parse_comments(post)
 
         for extension in self.extensions:
-            extension.postprocess_post(post)
+            try:
+                extension.postprocess_post(post)
+            except SkipPost:
+                return None
 
         return post
 
@@ -432,6 +440,8 @@ class ZEAExtension(Extension):
             blog.element.find(zine.configuration)))
 
     def postprocess_post(self, post):
+        if post.parser_data is not None:
+            return
         post.parser_data = _parser_data(post.element.findtext(zine.parser_data))
         content = _get_text_content(post.element.findall(atom.content),
                                     fallback=False)
