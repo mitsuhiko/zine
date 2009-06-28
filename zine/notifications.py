@@ -344,7 +344,7 @@ class NotificationManager(object):
         for subscription in subscriptions:
             system = self.systems.get(subscription.notification_system)
             if system is not None:
-                system.send(user, notification)
+                system.send(subscription.user, notification)
 
 
 def _register(name, description):

@@ -1178,15 +1178,15 @@ class NotificationSubscription(object):
     occurs. The NotificationSubscription also knows via what notification
     system the user wants to be notified.
     """
-    def __init__(self, user_id, notification_system, notification_id):
-        self.user_id = user_id
+    def __init__(self, user, notification_system, notification_id):
+        self.user = user
         self.notification_system = notification_system
         self.notification_id = notification_id
 
     def __repr__(self):
         return "<%s (%s, %r, %r)>" % (
             self.__class__.__name__,
-            self.user_id,
+            self.user,
             self.notification_system,
             self.notification_id
         )
