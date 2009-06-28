@@ -1,0 +1,10 @@
+Name: Blogger feed importer
+Plugin URL: http://zine.pocoo.org/plugins/blogger_feedimporter
+Author: Georg Brandl <georg@python.org>
+Author URL: http://dev.pocoo.org/
+License: BSD
+Version: 0.1
+Description: This plugin allows you to import the Atom feed export format from\
+ blogger.com.
+Description[de]: Dieses Plugin dient dem Import von Atom-Feeds, die von\
+ blogger.com exportiert wurden.
