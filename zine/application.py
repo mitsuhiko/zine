@@ -37,7 +37,6 @@ from zine.database import db, cleanup_session
 from zine.cache import get_cache
 from zine.utils import ClosingIterator, local, local_manager, dump_json, \
      htmlhelpers
-from zine.utils.mail import split_email
 from zine.utils.datastructures import ReadOnlyMultiMapping
 from zine.utils.exceptions import UserException
 
@@ -437,6 +436,7 @@ class Theme(object):
     @property
     def author_info(self):
         """The author, mail and author URL of the plugin."""
+        from zine.utils.mail import split_email
         return split_email(self.metadata.get('author', u'Nobody')) + \
                (self.metadata.get('author_url'),)
 

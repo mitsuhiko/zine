@@ -72,6 +72,10 @@ DEFAULT_VARS = {
     # debugging tools such as werkzeug.debug
     'passthrough_errors':       BooleanField(default=_dev_mode),
 
+    # if set to true, emails are not send but logged to the instance folder
+    # into a file called mail.log
+    'log_email_only':           BooleanField(default=_dev_mode),
+
     # url settings
     'blog_url_prefix':          TextField(default=u'',
                                           validators=[is_valid_url_prefix()]),

@@ -7,6 +7,7 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+import os
 import re
 from email.MIMEText import MIMEText
 from smtplib import SMTP, SMTPException
@@ -38,8 +39,12 @@ def split_email(s):
 
 
 def send_email(subject, text, to_addrs, quiet=True):
-    """Send a mail using the `EMail` class."""
+    """Send a mail using the `EMail` class.  This will log the email instead
+    if the application configuration wants to log email.
+    """
     e = EMail(subject, text, to_addrs)
+    if e.app.cfg['log_email_only']:
+        return e.log()
     if quiet:
         return e.send_quiet()
     return e.send()
@@ -49,12 +54,12 @@ class EMail(object):
     """Represents one E-Mail message that can be sent."""
 
     def __init__(self, subject=None, text='', to_addrs=None):
-        self.app = app = local.application
+        self.app = app = get_application()
         self.subject = u' '.join(subject.splitlines())
         self.text = text
         from_addr = app.cfg['blog_email']
         if not from_addr:
-            from_addr = 'noreply@' + urlparse(app.cfg['blog_url'])\
+            from_addr = 'noreply@' + urlparse(app.cfg['blog_url']) \
                     [1].split(':')[0]
         self.from_addr = u'%s <%s>' % (
             app.cfg['blog_title'],
@@ -74,10 +79,37 @@ class EMail(object):
             raise ValueError('invalid value for email address')
         self.to_addrs.append(lines[0])
 
-    def send(self):
-        """Send the message."""
+    def as_message(self):
+        """Return the email as MIMEText object."""
         if not self.subject or not self.text or not self.to_addrs:
             raise RuntimeError("Not all mailing parameters filled in")
+
+        from_addr = self.from_addr.encode('utf-8')
+        to_addrs = [x.encode('utf-8') for x in self.to_addrs]
+
+        msg = MIMEText(self.text)
+        msg['From'] = from_addr
+        msg['To'] = ', '.join(self.to_addrs)
+        msg['Subject'] = self.subject.encode('utf-8')
+        msg['Content-Transfer-Encoding'] = '8bit'
+        msg['Content-Type'] = 'text/plain; charset=utf-8'
+        return msg
+
+    def format(self, sep='\r\n'):
+        """Format the message into a string."""
+        return sep.join(self.as_message().as_string()
+            .encode('utf-8').splitlines())
+
+    def log(self):
+        """Logs the email"""
+        f = open(os.path.join(self.app.instance_folder, 'mail.log'), 'a')
+        try:
+            f.write('%s\n%s\n\n' % ('-' * 79, self.format('\n').rstrip()))
+        finally:
+            f.close()
+
+    def send(self):
+        """Send the message."""
         try:
             smtp = SMTP(self.app.cfg['smtp_host'], self.app.cfg['smtp_port'])
         except SMTPException, e:
@@ -101,18 +133,7 @@ class EMail(object):
             except SMTPException, e:
                 raise RuntimeError(str(e))
 
-        from_addr = self.from_addr.encode('utf-8')
-        to_addrs = [x.encode('utf-8') for x in to_addrs]
-
-        msg = MIMEText(self.text)
-        msg['From'] = from_addr
-        msg['To'] = ', '.join(self.to_addrs)
-        msg['Subject'] = self.subject.encode('utf-8')
-        msg['Content-Transfer-Encoding'] = '8bit'
-        msg['Content-Type'] = 'text/plain; charset=utf-8'
-
-        msgtext = '\r\n'.join(msg.as_string().encode('utf-8').splitlines())
-
+        msgtext = self.format()
         try:
             try:
                 return smtp.sendmail(from_addr, to_addrs, msgtext)
@@ -136,3 +157,6 @@ class EMail(object):
             return self.send()
         except Exception:
             return
+
+
+from zine.application import get_application
