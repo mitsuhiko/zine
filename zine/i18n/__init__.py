@@ -126,7 +126,7 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
     def _parse(self, fileobj):
         TranslationsBase._parse(self, fileobj)
         try:
-            # Got the end of file minus 4 bytes 
+            # Got the end of file minus 4 bytes
             fileobj.seek(-4, 2)
             # Read stored pickled data file pointer position
             pickled_data_pointer_pos = struct.unpack('i', fileobj.read())
