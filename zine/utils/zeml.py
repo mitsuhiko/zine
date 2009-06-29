@@ -36,7 +36,6 @@ _entity_re = re.compile(r'&([^;]+);')
 _entity_re = re.compile(r'&([^;]+);')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
 _autoparagraphed_elements = set(['div', 'blockquote'])
-_missing = object()
 
 _entities = {
     'Aacute':       u'\xc1',        'aacute':       u'\xe1',
