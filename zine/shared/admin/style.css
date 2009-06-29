@@ -962,7 +962,11 @@ div.contents table.config-table th:last-child {
 }
 
 table.config-table td {
-    vertical-align: top;
+    vertical-align: middle;
+}
+
+table.config-table tr.value td {
+    height: 3em;
 }
 
 table.config-table td.default {
@@ -971,6 +975,40 @@ table.config-table td.default {
 
 table.config-table td input[type="text"] {
     width: 97%;
+}
+
+table.config-table tr.help_text {
+    background: #F1F8FD;
+    font-size: 0.85em;
+    letter-spacing: 0.04em;
+    color: #3A78A5;
+}
+
+table.config-table tr.errors {
+    background: #FCF7F7;
+    font-size: 0.85em;
+    letter-spacing: 0.04em;
+    color: #802424;
+}
+
+table.config-table tr.errors ul.errors {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+table.config-table tr.errors ul.errors li {
+    font-size: 1em;
+}
+
+table.config-table tr.has_followup td {
+    border-bottom: none;
+}
+
+table.config-table tr.help_text td.text,
+table.config-table tr.errors td.text {
+    padding-left: 15px;
+    padding-right: 25px;
 }
 
 /* :::: IMPORTER PAGE :::: */

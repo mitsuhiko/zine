@@ -743,7 +743,8 @@ class Zine(object):
         for folder in self.cfg['plugin_searchpath']:
             folder = folder.strip()
             if folder:
-                self.plugin_searchpath.append(folder)
+                self.plugin_searchpath.append(
+                    path.join(self.instance_folder, folder))
         self.plugin_searchpath.append(BUILTIN_PLUGIN_FOLDER)
         set_plugin_searchpath(self.plugin_searchpath)
 
@@ -1297,6 +1298,10 @@ class Zine(object):
         # update the session cookie at the request end if the
         # session data requires an update.
         if request.session.should_save:
+            # set the secret key explicitly at the end of the request
+            # to not log out the administrator if he changes the secret
+            # key in the config editor.
+            request.session.secret_key = self.cfg['secret_key']
             cookie_name = self.cfg['session_cookie_name']
             if request.session.get('pmt'):
                 max_age = 60 * 60 * 24 * 31
