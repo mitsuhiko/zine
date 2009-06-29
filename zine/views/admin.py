@@ -109,8 +109,9 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('basic', url_for('admin/basic_options'), _(u'Basic')),
                 ('urls', url_for('admin/urls'), _(u'URLs')),
                 ('theme', url_for('admin/theme'), _(u'Theme')),
-                ('plugins', url_for('admin/plugins'), _(u'Plugins')),
-                ('cache', url_for('admin/cache'), _(u'Cache'))
+                ('cache', url_for('admin/cache'), _(u'Cache')),
+                ('configuration', url_for('admin/configuration'),
+                 _(u'Configuration Editor'))
             ])
         ])
         manage_items.extend([
@@ -129,11 +130,10 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
              _(u'Information')),
             ('maintenance', url_for('admin/maintenance'),
              _(u'Maintenance')),
+            ('plugins', url_for('admin/plugins'), _(u'Plugins')),
             ('import', url_for('admin/import'), _(u'Import')),
             ('export', url_for('admin/export'), _(u'Export')),
-            ('log', url_for('admin/log'), _('Log')),
-            ('configuration', url_for('admin/configuration'),
-             _(u'Configuration Editor'))
+            ('log', url_for('admin/log'), _('Log'))
         ]
 
     navigation_bar.append(('system', system_items[0][1], _(u'System'),
@@ -1109,7 +1109,7 @@ def plugins(request):
 
         return redirect_to('admin/plugins')
 
-    return render_admin_response('admin/plugins.html', 'options.plugins',
+    return render_admin_response('admin/plugins.html', 'system.plugins',
         form=form.as_widget(),
         plugins=sorted(request.app.plugins.values(), key=lambda x: x.name)
     )
@@ -1186,7 +1186,7 @@ def configuration(request):
                     u'configuration is invalid.'), 'error')
 
     return render_admin_response('admin/configuration.html',
-                                 'system.configuration',
+                                 'options.configuration',
                                  form=form.as_widget(), editor_enabled=
                                  request.session.get('ace_on', False))
 
