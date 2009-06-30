@@ -18,6 +18,7 @@ from docutils.nodes import NodeVisitor, SkipNode
 
 
 class ZemlTranslator(NodeVisitor):
+
     def __init__(self, document):
         NodeVisitor.__init__(self, document)
         self.root = RootElement()
@@ -55,6 +56,7 @@ class ZemlTranslator(NodeVisitor):
 
     def unknown_visit(self, node):
         return
+
     def unknown_departure(self, node):
         return
 
@@ -86,6 +88,7 @@ class ZemlTranslator(NodeVisitor):
             self.begin_node(node, tagname, **atts)
         else:
             getattr(self, 'visit_' + node_name, self.unknown_visit)(node)
+
     def dispatch_departure(self, node):
         node_name = node.__class__.__name__
         tagname, _ = self.trivial_nodes.get(node_name, (None, None))

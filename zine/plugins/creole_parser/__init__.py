@@ -40,10 +40,10 @@ def macro_func(macro_name, arg_string, body, isblock, environ):
 
 
 zinecreole = create_dialect(creole11_base, wiki_links_base_url=u'',
-                                     wiki_links_path_func=path_func,
-                                     wiki_links_space_char=u'_',
-                                     no_wiki_monospace=True,
-                                     macro_func=macro_func)
+                            wiki_links_path_func=path_func,
+                            wiki_links_space_char=u'_',
+                            no_wiki_monospace=True,
+                            macro_func=macro_func)
 
 creole_parser = Parser(dialect=zinecreole())
 
