@@ -33,11 +33,39 @@ class ZemlTranslator(NodeVisitor):
     def __init__(self, document):
         NodeVisitor.__init__(self, document)
         self.root = RootElement()
+        self.current = self.root
 
     def unknown_visit(self, node):
         return
     def unknown_departure(self, node):
         return
+
+    def add_text(self, text):
+        if not self.current.children:
+            self.current.text += text
+        else:
+            self.current.children[-1].tail += text
+
+    def begin_node(self, node):
+        self.current.children.append(node)
+        node.parent = self.current
+        self.current = node
+
+    def end_node(self):
+        self.current = self.current.parent
+
+    def visit_Text(self, node):
+        self.add_text(node.astext())
+
+    def visit_emphasis(self, node):
+        self.begin_node(Element('i'))
+    def depart_emphasis(self, node):
+        self.end_node()
+
+    def visit_strong(self, node):
+        self.begin_node(Element('b'))
+    def depart_strong(self, node):
+        self.end_node()
 
 
 class ZemlWriter(Writer):
