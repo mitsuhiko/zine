@@ -13,6 +13,7 @@ Zine 0.2
 - Themes have now control over the complexity of SQL queries sent.
   They can defer the loading of columns and lazily load relations
   to disable loading of unnecessary data.
+- Custom markup systems such as RST and creole are fully supported now.
 
 
 Zine 0.1.3
