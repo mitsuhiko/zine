@@ -88,7 +88,7 @@ class MarkupExtension(object):
             to the given attribute.  Note that inline elements may not support
             arguments in all markup languages.
 
-    The `process` method is given two arguments:
+    The `process` method must be overwritten.  Is given two arguments:
 
         `attributes`
             A dictionary of attributes (options) of the markup element.
@@ -103,7 +103,7 @@ class MarkupExtension(object):
     name = None
     is_void = False
     is_isolated = False
-    is_block_level = False
+    is_block_level = True
     broken_by = None
     attributes = set()
     argument_attribute = None

@@ -676,6 +676,17 @@ class BrokenElement(DynamicElement):
         )
 
 
+class MarkupErrorElement(DynamicElement):
+    """Displayed in the place of erroneous markup."""
+
+    def __init__(self, message):
+        self.message = message
+
+    def render(self):
+        return u'<div class="error"><strong>%s</strong>: %s</div>' % (
+               _('Error in markup'), escape(self.message))
+
+
 class HTMLElement(DynamicElement):
     """An element that stores HTML data."""
 
@@ -1092,6 +1103,11 @@ class Parser(object):
             content = element
             if extension.is_isolated:
                 content = element.text
+            bad_atts = set(element.attributes).difference(extension.attributes)
+            if bad_atts:
+                return MarkupErrorElement(
+                    _('Invalid attribute given to %s tag: %s') %
+                    (extension.name, bad_atts.pop()))
             element = extension.process(element.attributes, content)
         return element
 

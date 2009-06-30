@@ -36,7 +36,11 @@ def make_extension_directive(app, extension):
             content = ''.join(self.content)
             if not extension.is_isolated:
                 content = RstParser(app).parse(content, 'nested')
-            element = extension.process(self.options, content)
+            root_element = extension.process(self.options, content)
+            element = Element('div')
+            element.children = root_element.children
+            for child in element.children:
+                child.parent = element
             return [zeml(zeml=element)]
     for attrname in extension.attributes:
         ExtDirective.option_spec[attrname] = directives.unchanged
