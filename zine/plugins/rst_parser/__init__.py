@@ -34,14 +34,14 @@ def make_extension_directive(app, extension):
             if self.arguments:
                 self.options[extension.argument_attribute] = self.arguments[0]
             content = ''.join(self.content)
+            reason = self.state.document.settings.parsing_reason
             if not extension.is_isolated:
-                reason = self.state.document.settings.parsing_reason
                 content_tmp = RstParser(app).parse(content, reason)
                 content = Element('div')
                 content.children = content_tmp.children
                 for child in content.children:
                     child.parent = content
-            element = extension.process(self.options, content)
+            element = extension.process(self.options, content, reason)
             return [zeml(zeml=element)]
     for attrname in extension.attributes:
         ExtDirective.option_spec[attrname] = directives.unchanged

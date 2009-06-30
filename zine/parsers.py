@@ -96,6 +96,11 @@ class MarkupExtension(object):
             The content of the element; if `is_isolated` is True, this has
             already been parsed with the markup parser and is a ZEML tree,
             otherwise it is raw text.
+        `reason`
+            The parsing reason -- either "post", "comment", "post_preview"
+            or "comment_preview".  The element can change behavior depending
+            on the reason, for example disable potentially unsafe features
+            for comments.
 
     It must return a ZEML tree.
     """
@@ -111,7 +116,7 @@ class MarkupExtension(object):
     def __init__(self, app):
         self.app = app
 
-    def process(self, attributes, content):
+    def process(self, attributes, content, reason):
         """Called each time the element is encountered."""
         raise NotImplementedError
 
@@ -135,7 +140,7 @@ class ZEMLParser(BaseParser):
     name = lazy_gettext('Zine-Markup')
 
     def parse(self, input_data, reason):
-        rv = parse_zeml(input_data, self.app.markup_extensions)
+        rv = parse_zeml(input_data, reason, self.app.markup_extensions)
         if reason == 'comment':
             rv = sanitize(rv)
         return rv

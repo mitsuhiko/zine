@@ -813,9 +813,9 @@ def parse_html(string):
     return _convert(HTMLParser().parseFragment(string), True)
 
 
-def parse_zeml(string, extensions=None):
+def parse_zeml(string, reason, extensions=None):
     """Parses a ZEML string into a element tree."""
-    p = Parser(string, extensions)
+    p = Parser(string, reason, extensions)
     p.parse()
     attach_parents(p.result)
     return p.result
@@ -1015,8 +1015,9 @@ class Parser(object):
         (['dd', 'dt'], set(['dl', 'dt', 'dd']))
     ]
 
-    def __init__(self, string, extensions=None):
+    def __init__(self, string, parsing_reason, extensions=None):
         self.string = unicode(string)
+        self.parsing_reason = parsing_reason
         self.end = len(self.string)
         self.pos = 0
         self.result = RootElement()
@@ -1108,7 +1109,8 @@ class Parser(object):
                 return MarkupErrorElement(
                     _('Invalid attribute given to %s tag: %s') %
                     (extension.name, bad_atts.pop()))
-            element = extension.process(element.attributes, content)
+            element = extension.process(element.attributes, content,
+                                        self.parsing_reason)
         return element
 
     def enter(self, tag):
