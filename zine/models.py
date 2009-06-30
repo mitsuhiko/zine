@@ -95,7 +95,7 @@ class _ZEMLContainer(object):
 
     def _parse_text(self, text):
         from zine.parsers import parse
-        self.parser_data['body'] = parse(text, self.parser, 'post')
+        self.parser_data['body'] = parse(text, self.parser, self.parser_reason)
 
     def _get_text(self):
         return self._text
