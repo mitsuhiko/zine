@@ -138,7 +138,7 @@
   {% endtrans %}</p>
   <ul>
   {%- for handler in markup_extensions %}
-    <li><strong>{{ handler.tag }}</strong> by <code>{{ handler.name }}</code>
+    <li><strong>{{ handler.name }}</strong> by <code>{{ handler.objname }}</code>
   {%- else %}
     <li><em>{{ _('no markup extensions installed.') }}</em>
   {%- endfor %}

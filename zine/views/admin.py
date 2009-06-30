@@ -1332,8 +1332,8 @@ def information(request):
         } for endpoint, view
             in request.app.views.iteritems()], key=lambda x: x['endpoint']),
         markup_extensions=[{
-            'tag':          handler.tag,
-            'name':         get_object_name(handler)
+            'name':         handler.name,
+            'objname':      get_object_name(handler)
         } for handler in sorted(request.app.markup_extensions,
                                 key=lambda x: x.tag)],
         parsers=[{

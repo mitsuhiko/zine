@@ -8,6 +8,8 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+import copy
+
 from zine.utils.zeml import RootElement, Element, HTMLElement, DynamicElement
 
 from docutils import nodes
@@ -92,7 +94,7 @@ class ZemlTranslator(NodeVisitor):
             getattr(self, 'depart_' + node_name, self.unknown_departure)(node)
 
     def visit_zeml(self, node):
-        node = node['zeml'].deepcopy()
+        node = copy.deepcopy(node['zeml'])
         node.parent = self.curnode
         self.curnode.children.append(node)
         raise SkipNode

@@ -57,21 +57,63 @@ def parse(input_data, parser=None, reason='unknown'):
 
 
 class MarkupExtension(object):
-    """Handler for a language-agnostic markup extension."""
+    """Handler for a markup language-agnostic markup extension.
 
-    tag = None
+    The following attributes must/can be set on subclasses:
+
+        `name`
+            The name under which the extension is accessible. This is the tag
+            name for XML-like markup languages, or the directive name for
+            reStructuredText (reST), etc.
+        `is_block_level`
+            True if the element is to be rendered as a block-level element.
+            This may also change how the element is accessed; for example, in
+            reST, inline elements are used as roles, while block-level elements
+            are used as directives.
+        `is_void`
+            True if the element doesn't have content.
+        `is_isolated`
+            True if the element's contents should not be parsed by the markup
+            parser and converted to a ZEML tree.
+        `broken_by`
+            A sequence of element names by which this element is implicitly
+            closed.  Applies only to XML-like markup languages.
+        `attributes`
+            A set of allowed attribute (option) names.  Note that inline elements
+            may not support attributes in all markup languages.
+        `argument_attribute`
+            For markup languages that support arguments to elements as well
+            as attributes, if this is the name of an attribute given in
+            `attributes`, the element will accept one argument and map it
+            to the given attribute.  Note that inline elements may not support
+            arguments in all markup languages.
+
+    The `process` method is given two arguments:
+
+        `attributes`
+            A dictionary of attributes (options) of the markup element.
+        `content`
+            The content of the element; if `is_isolated` is True, this has
+            already been parsed with the markup parser and is a ZEML tree,
+            otherwise it is raw text.
+
+    It must return a ZEML tree.
+    """
+
+    name = None
     is_void = False
     is_isolated = False
-    is_semi_isolated = False
     is_block_level = False
     broken_by = None
+    attributes = set()
+    argument_attribute = None
 
     def __init__(self, app):
         self.app = app
 
-    def process(self, element):
-        """Called if an element was matched."""
-        return element
+    def process(self, attributes, content):
+        """Called each time the element is encountered."""
+        raise NotImplementedError
 
 
 class BaseParser(object):

@@ -66,18 +66,20 @@ EXAMPLE = '''\
 
 
 class SourcecodeExtension(MarkupExtension):
-    """Provides a ``<sourcecode>`` tag."""
-    tag = 'sourcecode'
+    """Provides a ``sourcecode`` markup element."""
+    name = 'sourcecode'
     is_isolated = True
     is_block_level = True
+    attributes = set(['syntax'])
+    argument_attribute = 'syntax'
 
-    def process(self, element):
-        lexer_name = element.attributes.get('syntax', 'text')
+    def process(self, attributes, content):
+        lexer_name = attributes.get('syntax', 'text')
         try:
             lexer = get_lexer_by_name(lexer_name)
         except ValueError:
             lexer = get_lexer_by_name('text')
-        return HTMLElement(highlight(element.text, lexer, get_formatter()))
+        return HTMLElement(highlight(content, lexer, get_formatter()))
 
 
 class ConfigurationForm(forms.Form):

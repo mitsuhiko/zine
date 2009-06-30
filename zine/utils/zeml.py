@@ -802,9 +802,9 @@ def parse_html(string):
     return _convert(HTMLParser().parseFragment(string), True)
 
 
-def parse_zeml(string, element_handlers=None):
+def parse_zeml(string, extensions=None):
     """Parses a ZEML string into a element tree."""
-    p = Parser(string, element_handlers)
+    p = Parser(string, extensions)
     p.parse()
     attach_parents(p.result)
     return p.result
@@ -1004,7 +1004,7 @@ class Parser(object):
         (['dd', 'dt'], set(['dl', 'dt', 'dd']))
     ]
 
-    def __init__(self, string, element_handlers=None):
+    def __init__(self, string, extensions=None):
         self.string = unicode(string)
         self.end = len(self.string)
         self.pos = 0
@@ -1024,19 +1024,17 @@ class Parser(object):
                 self.breaking_rules[element] = breakers.copy()
 
         # register all element handlers.
-        self.element_handlers = {}
-        for element in element_handlers or ():
-            if element.is_isolated:
-                self.isolated_elements.add(element.tag)
-            if element.is_semi_isolated:
-                self.semi_isolated_elements.add(element.tag)
-            if element.is_void:
-                self.void_elements.add(element.tag)
-            if element.broken_by:
-                self.breaking_rules[element.tag] = set(element.broken_by)
-            if element.is_block_level:
-                self.block_elements.add(element.tag)
-            self.element_handlers[element.tag] = element
+        self.extensions = {}
+        for extension in extensions or ():
+            if extension.is_isolated:
+                self.isolated_elements.add(extension.name)
+            if extension.is_void:
+                self.void_elements.add(extension.name)
+            if extension.broken_by:
+                self.breaking_rules[extension.name] = set(extension.broken_by)
+            if extension.is_block_level:
+                self.block_elements.add(extension.name)
+            self.extensions[extension.name] = extension
 
     @property
     def finished(self):
@@ -1089,8 +1087,12 @@ class Parser(object):
         """Called after an element is left.  Calls element handlers to
         process them.
         """
-        if element.name in self.element_handlers:
-            element = self.element_handlers[element.name].process(element)
+        if element.name in self.extensions:
+            extension = self.extensions[element.name]
+            content = element
+            if extension.is_isolated:
+                content = element.text
+            element = extension.process(element.attributes, content)
         return element
 
     def enter(self, tag):
