@@ -1,0 +1,5 @@
+Name: reStructuredText parser
+Plugin URL: http://zine.pocoo.org/plugins/rst_parser
+Author: Georg Brandl <georg@python.org>
+License: BSD
+Version: 0.1
