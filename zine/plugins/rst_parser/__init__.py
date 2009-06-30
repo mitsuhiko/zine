@@ -10,13 +10,13 @@
 """
 from zine.i18n import lazy_gettext
 from zine.parsers import BaseParser
-from zine.utils.zeml import Element
+from zine.utils.zeml import Element, sanitize
 from zine.plugins.rst_parser.translator import ZemlTranslator
 
 from docutils import nodes, utils
 from docutils.core import publish_string
 from docutils.writers import Writer
-from docutils.parsers.rst import directives, Directive
+from docutils.parsers.rst import roles, directives, Directive
 
 
 class zeml(nodes.Element):
@@ -35,7 +35,8 @@ def make_extension_directive(app, extension):
                 self.options[extension.argument_attribute] = self.arguments[0]
             content = ''.join(self.content)
             if not extension.is_isolated:
-                content_tmp = RstParser(app).parse(content, 'nested')
+                reason = self.state.document.settings.parsing_reason
+                content_tmp = RstParser(app).parse(content, reason)
                 content = Element('div')
                 content.children = content_tmp.children
                 for child in content.children:
@@ -95,7 +96,15 @@ class RstParser(BaseParser):
                     roles.register_local_role(
                         extension.name, make_extension_role(extension))
             RstParser.extensions_registered = True
-        return publish_string(source=input_data, writer=ZemlWriter())
+        settings_overrides = {
+            'file_insertion_enabled': False,
+            'parsing_reason': reason,
+        }
+        rv = publish_string(source=input_data, writer=ZemlWriter(),
+                            settings_overrides=settings_overrides)
+        if reason == 'comment':
+            rv = sanitize(rv)
+        return rv
 
 
 def setup(app, plugin):
