@@ -1,5 +1,9 @@
-Name: reStructuredText parser
+Name: reStructuredText Parser
 Plugin URL: http://zine.pocoo.org/plugins/rst_parser
 Author: Georg Brandl <georg@python.org>
 License: BSD
 Version: 0.1
+Description: Adds support for writing posts in \
+ <a href="http://docutils.sf.net/rst.html">reStructuredText</a> markup.
+Description[de]: Fügt Unterstützung für das Schreiben von Blogposts in \
+ <a href="http://docutils.sf.net/rst.html">reStructuredText</a> hinzu.
