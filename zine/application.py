@@ -269,7 +269,7 @@ class Request(RequestBase):
         user = None
         cookie_name = app.cfg['session_cookie_name']
         session = SecureCookie.load_cookie(self, cookie_name,
-                                           self.secret_key)
+                                           app.secret_key)
         user_id = session.get('uid')
         if user_id:
             user = User.query.options(db.eagerload('groups'),
@@ -284,11 +284,6 @@ class Request(RequestBase):
     def is_behind_proxy(self):
         """Are we behind a proxy?"""
         return environ.get('ZINE_BEHIND_PROXY') == '1'
-
-    @property
-    def secret_key(self):
-        """Returns the secret key for the instance (binary!)"""
-        return app.cfg['secret_key'].encode('utf-8')
 
     def login(self, user, permanent=False):
         """Log the given user in. Can be user_id, username or
@@ -845,6 +840,11 @@ class Zine(object):
         application if necessary.
         """
         return self.cfg.changed_external
+
+    @property
+    def secret_key(self):
+        """Returns the secret key for the instance (binary!)"""
+        return self.cfg['secret_key'].encode('utf-8')
 
     @setuponly
     def add_template_filter(self, name, callback):
