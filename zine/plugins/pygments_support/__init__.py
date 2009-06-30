@@ -73,7 +73,7 @@ class SourcecodeExtension(MarkupExtension):
     attributes = set(['syntax'])
     argument_attribute = 'syntax'
 
-    def process(self, attributes, content):
+    def process(self, attributes, content, reason):
         lexer_name = attributes.get('syntax', 'text')
         try:
             lexer = get_lexer_by_name(lexer_name)
