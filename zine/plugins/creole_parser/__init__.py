@@ -12,13 +12,19 @@ from urlparse import urljoin
 
 from creoleparser import create_dialect, creole11_base, Parser, parse_args
 from creoleparser.elements import BlockElement
-from genshi.core import END, START, TEXT
+from genshi.core import END, START, TEXT, QName, Attrs, Stream
 import genshi.builder
 from werkzeug import url_quote
 
 from zine.api import *
 from zine.parsers import BaseParser
-from zine.utils.zeml import RootElement, Element
+from zine.utils.zeml import RootElement, Element, MarkupErrorElement
+
+
+macros_set_up = False
+macros = {}
+macro_result = QName('http://zine.pocoo.org/#creolehack}macro-result')
+MACRO_SIGNAL = object()
 
 
 def path_func(page_name):
@@ -33,10 +39,38 @@ def intro_tag(body, *pos, **kw):
     return genshi.builder.tag.intro(contents).generate()
 
 
+def wrap(tree):
+    return Stream([(MACRO_SIGNAL, tree, (1, 0, None))])
+
+
+def make_macro(extension):
+    def macro(body, args, kwargs, is_block):
+        if extension.is_void and body:
+            return wrap(MarkupErrorElement(
+                _(u'Macro "%s" without body got body') % extension.name))
+        body = body or u''
+        if not extension.is_isolated:
+            arg = CreoleParser().parse(body, 'nested')
+        else:
+            arg = body
+        if extension.argument_attribute and args:
+            kwargs[extension.argument_attribute] = u' '.join(args)
+        return wrap(extension.process(kwargs, arg))
+    return macro
+
+
 def macro_func(macro_name, arg_string, body, isblock, environ):
+    global macros_set_up
     pos, kw = parse_args(arg_string)
     if macro_name == 'intro' and isblock and body:
         return intro_tag(body, *pos, **kw)
+    if not macros_set_up:
+        app = get_application()
+        for extension in app.markup_extensions:
+            macros[extension.name] = make_macro(extension)
+        macros_set_up = True
+    if macro_name in macros:
+        return macros[macro_name](body, pos, kw, isblock)
 
 
 zinecreole = create_dialect(creole11_base, wiki_links_base_url=u'',
@@ -65,7 +99,9 @@ class CreoleParser(BaseParser):
         result = RootElement()
         stack = [result]
         for kind, data, pos in creole_parser.generate(input_data):
-            if kind == START:
+            if kind is MACRO_SIGNAL:
+                stack[-1].children.append(data)
+            elif kind == START:
                 tag, attrs = data
                 # tt is deprecated but creoleparser is using it
                 if tag == 'tt':
