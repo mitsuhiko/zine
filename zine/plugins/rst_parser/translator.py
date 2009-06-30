@@ -10,7 +10,8 @@
 """
 import copy
 
-from zine.utils.zeml import RootElement, Element, HTMLElement, DynamicElement
+from zine.parsers import parse_html
+from zine.utils.zeml import RootElement, Element
 
 from docutils import nodes
 from docutils.nodes import NodeVisitor, SkipNode
@@ -153,7 +154,10 @@ class ZemlTranslator(NodeVisitor):
 
     def visit_raw(self, node):
         if 'html' in node.get('format', '').split():
-            newnode = HTMLElement(node.astext())
-            newnode.parent = self.curnode
-            self.curnode.children.append(newnode)
+            # not just using a HTMLElement so that the elements in here
+            # can be sanitized in comments
+            newnode = parse_html(node.astext())
+            for child in newnode.children:
+                child.parent = self.curnode
+                self.curnode.children.append(child)
         raise SkipNode
