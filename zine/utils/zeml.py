@@ -919,24 +919,6 @@ def inject_implicit_paragraphs(tree):
     return tree
 
 
-class ElementHandler(object):
-    """A dynamic element handler."""
-
-    tag = None
-    is_void = False
-    is_isolated = False
-    is_semi_isolated = False
-    is_block_level = False
-    broken_by = None
-
-    def __init__(self, app):
-        self.app = app
-
-    def process(self, element):
-        """Called if an element was matched."""
-        return element
-
-
 class Parser(object):
     """The ZEML parser.  This parser is able to parse the ZEML syntax which is
     heavily influenced by a mixture of real-world and on-the-paper HTML to get

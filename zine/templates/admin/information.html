@@ -132,15 +132,15 @@
     <li><em>no APIs installed</em></li>
   {%- endfor %}
   </ul>
-  <h2>{{ _("ZEML Element Handlers") }}</h2>
+  <h2>{{ _("Markup Extensions") }}</h2>
   <p>{% trans %}
-    The following ZEML element handlers are registered on this instance:
+    The following markup extensions are registered on this instance:
   {% endtrans %}</p>
   <ul>
-  {%- for handler in zeml_element_handlers %}
+  {%- for handler in markup_extensions %}
     <li><strong>{{ handler.tag }}</strong> by <code>{{ handler.name }}</code>
   {%- else %}
-    <li><em>{{ _('no ZEML element handlers installed.') }}</em>
+    <li><em>{{ _('no markup extensions installed.') }}</em>
   {%- endfor %}
   </ul>
   <h2>{{ _("Parsers") }}</h2>

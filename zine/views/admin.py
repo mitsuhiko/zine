@@ -1331,10 +1331,10 @@ def information(request):
             'handler':      get_object_name(view)
         } for endpoint, view
             in request.app.views.iteritems()], key=lambda x: x['endpoint']),
-        zeml_element_handlers=[{
+        markup_extensions=[{
             'tag':          handler.tag,
             'name':         get_object_name(handler)
-        } for handler in sorted(request.app.zeml_element_handlers,
+        } for handler in sorted(request.app.markup_extensions,
                                 key=lambda x: x.tag)],
         parsers=[{
             'key':          key,

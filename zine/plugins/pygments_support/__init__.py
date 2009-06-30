@@ -26,8 +26,9 @@ except ImportError:
 from zine.api import *
 from zine.views.admin import render_admin_response, flash
 from zine.privileges import BLOG_ADMIN
+from zine.parsers import MarkupExtension
 from zine.utils import forms
-from zine.utils.zeml import HTMLElement, ElementHandler
+from zine.utils.zeml import HTMLElement
 from zine.utils.http import redirect_to
 
 
@@ -64,7 +65,7 @@ EXAMPLE = '''\
 '''
 
 
-class SourcecodeHandler(ElementHandler):
+class SourcecodeExtension(MarkupExtension):
     """Provides a ``<sourcecode>`` tag."""
     tag = 'sourcecode'
     is_isolated = True
@@ -199,7 +200,7 @@ def setup(app, plugin):
     app.connect_event('after-request-setup', inject_style)
     app.add_config_var('pygments_support/style',
                        forms.TextField(default=u'default'))
-    app.add_zeml_element_handler(SourcecodeHandler)
+    app.add_markup_extension(SourcecodeExtension)
     app.add_url_rule('/options/pygments', prefix='admin',
                      view=show_config, endpoint='pygments_support/config')
     app.add_url_rule('/_shared/pygments_support/<style>.css',

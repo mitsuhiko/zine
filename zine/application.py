@@ -673,7 +673,7 @@ class Zine(object):
         self.content_type_handlers = content_type_handlers.copy()
         self.admin_content_type_handlers = admin_content_type_handlers.copy()
         self.parsers = dict((k, v(self)) for k, v in all_parsers.iteritems())
-        self.zeml_element_handlers = []
+        self.markup_extensions = []
         self._url_rules = make_urls(self)
         self._absolute_url_handlers = absolute_url_handlers[:]
         self._services = all_services.copy()
@@ -1072,9 +1072,9 @@ class Zine(object):
         self.parsers[name] = class_(self)
 
     @setuponly
-    def add_zeml_element_handler(self, element_handler):
-        """Register a new ZEML element handler."""
-        self.zeml_element_handlers.append(element_handler(self))
+    def add_markup_extension(self, extension):
+        """Register a new markup extension."""
+        self.markup_extensions.append(extension(self))
 
     @setuponly
     def add_widget(self, widget):

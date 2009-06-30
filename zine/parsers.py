@@ -56,6 +56,24 @@ def parse(input_data, parser=None, reason='unknown'):
     return tree
 
 
+class MarkupExtension(object):
+    """Handler for a language-agnostic markup extension."""
+
+    tag = None
+    is_void = False
+    is_isolated = False
+    is_semi_isolated = False
+    is_block_level = False
+    broken_by = None
+
+    def __init__(self, app):
+        self.app = app
+
+    def process(self, element):
+        """Called if an element was matched."""
+        return element
+
+
 class BaseParser(object):
     """Baseclass for all kinds of parsers."""
 
@@ -75,7 +93,7 @@ class ZEMLParser(BaseParser):
     name = lazy_gettext('Zine-Markup')
 
     def parse(self, input_data, reason):
-        rv = parse_zeml(input_data, self.app.zeml_element_handlers)
+        rv = parse_zeml(input_data, self.app.markup_extensions)
         if reason == 'comment':
             rv = sanitize(rv)
         return rv
