@@ -20,6 +20,7 @@ from zine.models import User, Group, Comment, Post, Category, Tag, \
      STATUS_PROTECTED, STATUS_PRIVATE, \
      COMMENT_UNMODERATED, COMMENT_MODERATED, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM, COMMENT_DELETED
+from zine.parsers import render_preview
 from zine.privileges import bind_privileges
 from zine.utils import forms, log, dump_json
 from zine.utils.http import redirect_to
@@ -252,6 +253,7 @@ class PostForm(forms.Form):
     def __init__(self, post=None, initial=None):
         self.app = get_application()
         self.post = post
+        self.preview = False
 
         if post is not None:
             initial = forms.fill_dict(initial,
@@ -298,6 +300,11 @@ class PostForm(forms.Form):
            self.post.is_published:
             self._old_links.update(self.post.find_urls())
 
+    def validate(self, data):
+        """We only validate if we're not in preview mode."""
+        self.preview = 'preview' in data
+        return forms.Form.validate(self, data) and not self.preview
+
     def find_new_links(self):
         """Return a list of all new links."""
         for link in self.post.find_urls():
@@ -319,11 +326,16 @@ class PostForm(forms.Form):
             raise ValidationError(_('Selected parser is no longer '
                                     'available on the system.'))
 
-    def as_widget(self, preview=False):
+    def render_preview(self):
+        """Renders the preview for the post."""
+        return render_preview(self.data['text'], self.data['parser'])
+
+    def as_widget(self):
         widget = forms.Form.as_widget(self)
         widget.new = self.post is None
         widget.post = self.post
-        widget.preview = preview
+        widget.preview = self.preview
+        widget.render_preview = self.render_preview
         widget.parser_missing = self.parser_missing
         return widget
 

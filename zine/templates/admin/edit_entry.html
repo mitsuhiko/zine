@@ -3,28 +3,13 @@
 {% block title %}{{
   _("New Entry") if form.new else _("Edit Entry “%s”") % form.post.title
 }}{% endblock %}
-{% block page_head %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='jquery.autocomplete.css') }}">
-<script type="text/javascript" src="{{ url_for('core/shared', filename='js/jquery.autocomplete.js') }}"></script>
-<script type="text/javascript"><!--
-$(document).ready(function() {
-	$("#f_tags").autocomplete({{ taglist }}, {
-		highlight: false,
-		multiple: true,
-		multipleSeparator: ", ",
-		scroll: true,
-		scrollHeight: 300
-	});
-      });
---></script>
-{% endblock %}
 {% block contents %}
   <h1>{{ self.title() }}</h1>
   {% if form.preview %}
     <div class="preview" id="preview">
       <h2 class="title">{{ _('Preview') }} (<a href="#entry_form">{{ _('skip') }}</a>)</h2>
       <div class="text">
-      {{text}}
+        {{ form.render_preview() }}
       </div>
     </div>
   {% endif %}

@@ -65,4 +65,15 @@ $(function() {
         return false;
       })));
   })();
+
+  /**
+   * Tag support for the post editor.
+   */
+  $("#f_tags").autocomplete({{ taglist }}, {
+    highlight: false,
+    multiple: true,
+    multipleSeparator: ", ",
+    scroll: true,
+    scrollHeight: 300
+  });
 });

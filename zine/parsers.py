@@ -13,8 +13,8 @@ from werkzeug import escape
 
 from zine.i18n import lazy_gettext
 from zine.application import iter_listeners, get_application
-from zine.utils.zeml import parse_html, parse_zeml, sanitize, Element, \
-     RootElement
+from zine.utils.zeml import parse_html, parse_zeml, sanitize, split_intro, \
+     Element, RootElement
 from zine.utils.xml import replace_entities
 
 
@@ -54,6 +54,18 @@ def parse(input_data, parser=None, reason='unknown'):
             tree = item
 
     return tree
+
+
+def render_preview(text, parser, component='post'):
+    """Renders a preview text for the given text using the parser
+    provided.
+    """
+    tree = parse(text, parser, '%s-preview' % component)
+    intro, body = split_intro(tree)
+    if intro:
+        return u'<div class="intro">%s</div>%s' % (intro.to_html(),
+                                                   body.to_html())
+    return body.to_html()
 
 
 class MarkupExtension(object):
