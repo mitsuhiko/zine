@@ -23,6 +23,10 @@ class zeml(nodes.Element):
     """Docutils node to insert a raw ZEML tree."""
 
 
+class intro(nodes.Element):
+    """Docutils node to insert an intro section."""
+
+
 def make_extension_directive(app, extension):
     class ExtDirective(Directive):
         required_arguments = 0
@@ -52,6 +56,17 @@ def make_extension_directive(app, extension):
     # give it a nice non-generic name
     ExtDirective.__name__ = '%s_directive' % extension.name
     return ExtDirective
+
+
+class IntroDirective(Directive):
+    required_arguments = 0
+    optional_arguments = 0
+    has_content = True
+
+    def run(self):
+        node = intro()
+        self.state.nested_parse(self.content, self.content_offset, node)
+        return [node]
 
 
 def make_extension_role(extension):
@@ -88,6 +103,7 @@ class RstParser(BaseParser):
     def parse(self, input_data, reason):
         if not RstParser.extensions_registered:
             # need to do this only once...
+            directives.register_directive('intro', IntroDirective)
             for extension in self.app.markup_extensions:
                 if extension.is_block_level:
                     directives.register_directive(

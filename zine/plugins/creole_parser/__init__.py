@@ -60,7 +60,7 @@ def make_macro(extension):
             arg = body
         if extension.argument_attribute and args:
             kwargs[extension.argument_attribute] = u' '.join(args)
-        return wrap(extension.process(kwargs, arg))
+        return wrap(extension.process(kwargs, arg, environ['reason']))
     return macro
 
 

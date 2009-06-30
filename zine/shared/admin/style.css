@@ -496,6 +496,10 @@ div.preview h2.title {
     padding: 4px;
 }
 
+div.preview div.text div.intro {
+    border-bottom: 1px solid #aaa;
+}
+
 ul.errors {
     background-color: #FCF7F7;
     border: 1px solid #E8B5B5;

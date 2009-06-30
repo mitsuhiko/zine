@@ -75,6 +75,7 @@ class ZemlTranslator(NodeVisitor):
         'field_body': ('td', {}),
         'inline': ('span', {}),
         'line_block': ('div', {'class': 'line-block'}),
+        'intro': ('intro', {}),
     }
 
     def dispatch_visit(self, node):
