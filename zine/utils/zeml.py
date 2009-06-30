@@ -110,7 +110,7 @@ _entities = {
     'Ntilde':       u'\xd1',        'ntilde':       u'\xf1',
     'nu':           u'\u03bd',      'Nu':           u'\u039d',
     'Oacute':       u'\xd3',        'oacute':       u'\xf3',
-    'oacuteoacuteoacirc':u'\xf4',   'Ocirc':        u'\xd4',
+    'Ocirc':        u'\xd4',
     'ocirc':        u'\xf4',        'oelig':        u'\u0153',
     'OElig':        u'\u0152',      'ograve':       u'\xf2',
     'Ograve':       u'\xd2',        'oline':        u'\u203e',
@@ -560,7 +560,7 @@ class Element(_BaseElement):
         the name of the element as string if the element is named.
 
     `children`
-        A regular liest of `Element` or `DynamicElement` objects.
+        A regular list of `Element` or `DynamicElement` objects.
 
     `attributes`
         an ordered dict of attributes this element has.  If the parser detects
@@ -624,7 +624,7 @@ class RootElement(_BaseElement):
 
 class DynamicElement(_BaseElement):
     """A dynamic element.  A dynamic element has a slightly different
-    interface as a normal element.  By definition it has only one attribute
+    interface than a normal element.  By definition it has only one attribute
     in common with element that is the tail text.
 
     The serializer calls the `to_html` method when it wants to display the
@@ -940,7 +940,7 @@ class ElementHandler(object):
 class Parser(object):
     """The ZEML parser.  This parser is able to parse the ZEML syntax which is
     heavily influenced by a mixture of real-world and on-the-paper HTML to get
-    a easy to read and write markup syntax.
+    an easy to read and write markup syntax.
 
     ZEML always represents fragmentary and never complete documents in the
     sense of HTML.  There is no support for meta elements and similar things by
@@ -972,7 +972,7 @@ class Parser(object):
     The parser has internal sets and mappings of element rules that inform it
     how to deal with elements.
 
-    The following flags for element exists:
+    The following flags for elements exist:
 
     `isolated`
         If an element is isolated everything until the end tag is processed
@@ -986,7 +986,7 @@ class Parser(object):
         `textarea`.
 
     `void`
-        If an element is void it means that the parser will never push it to
+        If an element is void it means that the parser will never push it onto
         the stack of open elements and directly close it.  Void elements can
         never have children.  This is the default flag for elements like `br`.
 
@@ -996,12 +996,12 @@ class Parser(object):
         information is mainly used for breaking rules.
 
     A more complex topic are breaking rules.  Breaking rules specify implicit
-    auto-close rules.  For example the ZEML markup ``<p>foo<p>bar`` is
+    auto-close rules.  For example, the ZEML markup ``<p>foo<p>bar`` is
     equivalent to ``<p>foo</p><p>bar</p>`` because the `p` element is
     automatically closed by all block tags.
 
     An important difference between ZEML and HTML is that in ZEML the text
-    directly behind an element is part of that element.  For example if you
+    directly following an element is part of that element.  For example, if you
     have the ZEML markup ``<p>foo<br>bar``, the `bar` text is the tail of the
     `br` element.
     """
