@@ -1335,7 +1335,7 @@ def information(request):
             'name':         handler.name,
             'objname':      get_object_name(handler)
         } for handler in sorted(request.app.markup_extensions,
-                                key=lambda x: x.tag)],
+                                key=lambda x: x.name)],
         parsers=[{
             'key':          key,
             'name':         parser.name,
