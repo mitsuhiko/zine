@@ -665,13 +665,14 @@ class _InputGroup(Widget):
             return u''
         self._attr_setdefault(attrs)
         empty_msg = attrs.pop('empty_msg', None)
+        label = not attrs.pop('nolabel', False)
         class_ = attrs.pop('class_', attrs.pop('class', None))
         if class_ is None:
             class_ = 'choicegroup'
         attrs['class'] = class_
         choices = [u'<li>%s %s</li>' % (
             choice(),
-            choice.label()
+            label and choice.label() or u''
         ) for choice in self.choices]
         if not choices:
             if empty_msg is None:

@@ -10,20 +10,37 @@
     useful if you want to configure plugins that don't provide a configuration
     page (yet).
   {% endtrans %}</p>
+  <script type="text/javascript">
+    /* scroll the first error into view if there is one. */
+    $(function() {
+      var selector = $('tr.errors');
+      if (selector.length > 0)
+        $('html').animate({scrollTop: selector.prev().offset().top}, 500);
+    });
+  </script>
   {% call form() %}
     {% if editor_enabled %}
       <table class="config-table">
       {% for category in form.values %}
         <tr>
-          <th colspan="3">{{ category.localname }}</th>
+          <th colspan="3">{{ category.localname }}
         </tr>
-        {% for field in category %}
-        <tr>
-          <td>{{ field.localname|e }}</td>
-          <td>{{ field['value']() }}{{ field.errors() }}</td>
-          <td class="default">{{ field.use_default() }}</td>
+        {%- for field in category %}
+        <tr class="value {% if field['value'].help_text or
+          field['value'].errors %} has_followup{% endif %}">
+          <td>{{ field.localname|e }}
+          <td>{{ field['value'].render() }}
+          <td class="default">{{ field.use_default() }}
         </tr>
-        {% endfor %}
+        {%- if field['value'].errors %}
+        <tr class="errors"><td>&nbsp;<td class="text">{{
+          field['value'].errors() }}<td>&nbsp;
+        {%- endif %}
+        {%- if field['value'].help_text %}
+        <tr class="help_text"><td>&nbsp;<td class="text">{{
+          field['value'].help_text|e }}<td>&nbsp;
+        {%- endif %}
+        {%- endfor %}
       {% endfor %}
       </table>
       <div class="actions">

@@ -1,4 +1,4 @@
-Name: Blogger feed importer
+Name: Blogger Feed Importer
 Plugin URL: http://zine.pocoo.org/plugins/blogger_feedimporter
 Author: Georg Brandl <georg@python.org>
 Author URL: http://dev.pocoo.org/

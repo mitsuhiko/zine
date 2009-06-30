@@ -50,7 +50,8 @@ class BloggerExtension(Extension):
 
     def _blogger_entry_kind(self, entry):
         """Find out the "kind" of the entry; returns one of 'post', 'comment',
-        'settings', or 'template'."""
+        'settings', or 'template'.
+        """
         for category in entry.findall(atom.category):
             if category.attrib.get('scheme') != BLOGGER_KIND_SCHEME_URI:
                 continue
@@ -62,7 +63,8 @@ class BloggerExtension(Extension):
 
     def _convert_settings(self, blog):
         """Convert as many blogger-exported settings in self._settings as possible
-        to equivalent Zine settings."""
+        to equivalent Zine settings.
+        """
         get = self._settings.get
         blog.description = get('BLOG_DESCRIPTION', '')
         cfg = blog.configuration

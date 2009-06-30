@@ -705,9 +705,11 @@ class Zine(object):
 
         # the notification manager
         from zine.notifications import NotificationManager, \
-             EMailNotificationSystem
+             DEFAULT_NOTIFICATION_SYSTEMS, DEFAULT_NOTIFICATION_TYPES
         self.notification_manager = NotificationManager()
-        self.add_notification_system(EMailNotificationSystem)
+        for system in DEFAULT_NOTIFICATION_SYSTEMS:
+            self.add_notification_system(system)
+        self.notification_types = DEFAULT_NOTIFICATION_TYPES.copy()
 
         # register the pingback API.
         from zine import pingback
@@ -741,7 +743,8 @@ class Zine(object):
         for folder in self.cfg['plugin_searchpath']:
             folder = folder.strip()
             if folder:
-                self.plugin_searchpath.append(folder)
+                self.plugin_searchpath.append(
+                    path.join(self.instance_folder, folder))
         self.plugin_searchpath.append(BUILTIN_PLUGIN_FOLDER)
         set_plugin_searchpath(self.plugin_searchpath)
 
@@ -1112,6 +1115,11 @@ class Zine(object):
         """
         self.notification_manager.systems[system.key] = system(self)
 
+    @setuponly
+    def add_notification_type(self, type):
+        """Registers a new notification type on the instance."""
+        self.notification_types[type.name] = type
+
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""
         # we call unicode to resolve the translations once.  parser.name
@@ -1290,6 +1298,10 @@ class Zine(object):
         # update the session cookie at the request end if the
         # session data requires an update.
         if request.session.should_save:
+            # set the secret key explicitly at the end of the request
+            # to not log out the administrator if he changes the secret
+            # key in the config editor.
+            request.session.secret_key = self.cfg['secret_key']
             cookie_name = self.cfg['session_cookie_name']
             if request.session.get('pmt'):
                 max_age = 60 * 60 * 24 * 31

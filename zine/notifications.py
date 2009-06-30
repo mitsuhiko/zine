@@ -156,16 +156,9 @@ class NotificationSystem(object):
     def __init__(self, app):
         self.app = app
 
-    @property
-    def name(self):
-        """The name of the notification system."""
-        result = self.__class__.__name__
-        common_suffix = 'NotificationSystem'
-        if result.endswith(common_suffix):
-            result = result[:-len(common_suffix)]
-        return result
-
-    key = property(lambda x: x.name.lower().encode('ascii', 'ignore'))
+    #: subclasses have to overrides this as class attributes.
+    name = None
+    key = None
 
     def send(self, user, notification):
         raise NotImplementedError()
@@ -362,4 +355,6 @@ _register('COMMENT_REQUIRES_MODERATION',
 _register('ON_SECURITY_ALERT',
           lazy_gettext(u'When Zine found an urgent security alarm.'))
 
+
+DEFAULT_NOTIFICATION_SYSTEMS = [EMailNotificationSystem]
 del _register

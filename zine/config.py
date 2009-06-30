@@ -21,7 +21,7 @@ from zine.utils import log
 from zine.utils.forms import TextField, IntegerField, BooleanField, \
     ChoiceField, CommaSeparated
 from zine.utils.validators import ValidationError, is_valid_url_prefix, \
-    is_valid_url_format, is_netaddr
+    is_valid_url_format, is_netaddr, is_valid_email
 from zine.application import InternalError
 
 
@@ -29,52 +29,67 @@ _dev_mode = environment.MODE == 'development'
 
 #: variables the zine core uses
 DEFAULT_VARS = {
-    # general settings
-    'database_uri':             TextField(default=u''),
-    'database_debug':           BooleanField(default=False),
+    # core system settings
+    'database_uri':             TextField(default=u'', help_text=lazy_gettext(
+        u'The database URI.  For more information about database settings '
+        u'consult the Zine help.')),
+    'database_debug':           BooleanField(default=False, help_text=lazy_gettext(
+        u'If enabled the database will collect the SQL statements and add them '
+        u'to the bottom of the page for easier debugging')),
     'blog_title':               TextField(default=lazy_gettext(u'My Zine Blog')),
     'blog_tagline':             TextField(default=lazy_gettext(u'just another Zine blog')),
-    'blog_url':                 TextField(default=u''),
-    'blog_email':               TextField(default=u''),
+    'blog_url':                 TextField(default=u'', help_text=lazy_gettext(
+        u'The base URL of the blog.  This has to be set to a full canonical URL '
+        u'(including http or https).  If not set the application will behave '
+        u'confusingly.  Remember to change this value if you move your blog '
+        u'to a new location.')),
+    'blog_email':               TextField(default=u'', help_text=lazy_gettext(
+        u'The email address given here is by the notification system to send '
+        u'mails from.  Also plugins that send mails will use this address as '
+        u'sender address.'), validators=[is_valid_email]),
     'timezone':                 ChoiceField(choices=sorted(list_timezones()),
-                                            default=u'UTC'),
-    'primary_author':           TextField(default=u'',
-                                    help_text=lazy_gettext(u'If this blog is '\
-                                                           u'written primarily '\
-                                                           u'by one author, '\
-                                                           u'some themes can '\
-                                                           u'skip the author\'s '\
-                                                           u'name on posts '\
-                                                           u'unless written '\
-                                                           u'by a guest.')),
-    'maintenance_mode':         BooleanField(default=False),
-    'session_cookie_name':      TextField(default=u'zine_session'),
+        default=u'UTC', help_text=lazy_gettext(
+        u'The timezone of the blog.  All times and dates in the user interface '
+        u'and on the website will be shown in this timezone.  It\'s save to '
+        u'change the timezone after posts were created because the information '
+        u'in the database is stored as UTC.')),
+    'primary_author':           TextField(default=u'', help_text=lazy_gettext(
+        u'If this blog is written primarily by one author, some themes can ' \
+        u'skip the author\'s name on posts unless written by a guest.')),
+    'maintenance_mode':         BooleanField(default=False, help_text=lazy_gettext(
+        u'If set to true the blog enables the maintainance mode.')),
+    'session_cookie_name':      TextField(default=u'zine_session',
+        help_text=lazy_gettext(u'If there are multiple zine installations on '
+        u'the same host the cookie name should be set to something different '
+        u'for each blog.')),
     'theme':                    TextField(default=u'default'),
-    'secret_key':               TextField(default=u''),
+    'secret_key':               TextField(default=u'', help_text=lazy_gettext(
+        u'The secret key is used for vairous security related tasks in the '
+        u'system.  For example the cookie is signed with this value.  By '
+        u'changing this value all uses are logged out automatically, '
+        u'including the administrator.')),
     'language':                 ChoiceField(choices=list_languages(False),
                                             default=u'en'),
-    'plugin_searchpath':        CommaSeparated(TextField(), default=list),
 
-    # the iid is an internal unique id for the instance.  The setup creates a
-    # uuid5 in hex format if possible (eg: uuid module is present), otherwise
-    # it takes the current timestamp and hexifies it.  Changing this value later
-    # will most likely break plugins with persistent data (pickles)
-    'iid':                      TextField(default=u''),
+    'iid':                      TextField(default=u'', help_text=lazy_gettext(
+        u'The iid uniquely identifies the Zine instance.  Currently this '
+        u'value is unused, but once set you should not modify it.  It will '
+        u'be used for statistics and by plugins to identify your blog.')),
 
-    # logger settings
+    # log and development settings
     'log_file':                 TextField(default=u'zine.log'),
     'log_level':                ChoiceField(choices=[(k, lazy_gettext(k)) for k, v
                                                 in sorted(log.LEVELS.items(),
                                                           key=lambda x: x[1])],
                                             default=u'warning'),
-
-    # if set to true, internal errors are not caught.  This is useful for
-    # debugging tools such as werkzeug.debug
-    'passthrough_errors':       BooleanField(default=_dev_mode),
-
-    # if set to true, emails are not send but logged to the instance folder
-    # into a file called mail.log
-    'log_email_only':           BooleanField(default=_dev_mode),
+    'log_email_only':           BooleanField(default=_dev_mode,
+        help_text=lazy_gettext(u'During development this is helpful to '
+        u'log emails into a mail.log file in your instance folder instead '
+        u'of delivering them to your MTA.')),
+    'passthrough_errors':       BooleanField(default=_dev_mode,
+        help_text=lazy_gettext(u'If this is set to true, errors in Zine '
+        u'are not catched so that debuggers can catch it instead.  This is '
+        u'useful for plugin and core development.')),
 
     # url settings
     'blog_url_prefix':          TextField(default=u'',
@@ -106,7 +121,7 @@ DEFAULT_VARS = {
                                                default=list),
     'filesystem_cache_path':    TextField(default=u'cache'),
 
-    # the default markup parser. Don't ever change this value! The
+    # the default markup parser. Don't ever change the default value! The
     # htmlprocessor module bypasses this test when falling back to
     # the default parser. If there plans to change the default parser
     # for future Zine versions that code must be altered first.
@@ -142,12 +157,16 @@ DEFAULT_VARS = {
     # plugin settings
     'plugin_guard':             BooleanField(default=True),
     'plugins':                  CommaSeparated(TextField(), default=list),
-
-    # importer settings
-    'blogger_auth_token':       TextField(default=u''),
+    'plugin_searchpath':        CommaSeparated(TextField(), default=list,
+        help_text=lazy_gettext(u'It\'s possible to one or more comma '
+        u'separated paths here that are searched for plugins.  If the '
+        u'is not absolute, it\'s considered relative to the instance '
+        u'folder.')),
 
     #admin settings
-    'dashboard_reddit':         BooleanField(default=True)
+    'dashboard_reddit':         BooleanField(default=True, help_text=
+        lazy_gettext(u'Set this to true if you want to see the most recent '
+        u'entries on the Zine reddit on your dashbaord.'))
 }
 
 HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',
