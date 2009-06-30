@@ -269,8 +269,7 @@ class Request(RequestBase):
         user = None
         cookie_name = app.cfg['session_cookie_name']
         session = SecureCookie.load_cookie(self, cookie_name,
-                                           app.cfg['secret_key']
-                                              .encode('utf-8'))
+                                           self.secret_key)
         user_id = session.get('uid')
         if user_id:
             user = User.query.options(db.eagerload('groups'),
@@ -285,6 +284,11 @@ class Request(RequestBase):
     def is_behind_proxy(self):
         """Are we behind a proxy?"""
         return environ.get('ZINE_BEHIND_PROXY') == '1'
+
+    @property
+    def secret_key(self):
+        """Returns the secret key for the instance (binary!)"""
+        return app.cfg['secret_key'].encode('utf-8')
 
     def login(self, user, permanent=False):
         """Log the given user in. Can be user_id, username or
@@ -1301,7 +1305,7 @@ class Zine(object):
             # set the secret key explicitly at the end of the request
             # to not log out the administrator if he changes the secret
             # key in the config editor.
-            request.session.secret_key = self.cfg['secret_key']
+            request.session.secret_key = self.secret_key
             cookie_name = self.cfg['session_cookie_name']
             if request.session.get('pmt'):
                 max_age = 60 * 60 * 24 * 31
