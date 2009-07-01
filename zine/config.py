@@ -161,6 +161,12 @@ DEFAULT_VARS = {
     'smtp_password':            TextField(default=u''),
     'smtp_use_tls':             BooleanField(default=False),
 
+    # network settings
+    'default_network_timeout':  IntegerField(default=5, help_text=lazy_gettext(
+        u'This timeout is used by default for all network related operations. '
+        u'The default should be fine for most environments but if you have a '
+        u'very bad network connection during development you should increase it.')),
+
     # plugin settings
     'plugin_guard':             BooleanField(default=not _dev_mode),
     'plugins':                  CommaSeparated(TextField(), default=list),

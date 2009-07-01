@@ -112,7 +112,7 @@ class BloggerExtension(Extension):
         # if this is a post or another piece of data
         entry = post.element
         kind = self._blogger_entry_kind(entry)
-        if kind == '':
+        if not kind:
             # not a blogger entry
             return
         elif kind == 'post':

@@ -151,6 +151,7 @@ class AtomParser(Parser):
 
     def __init__(self, tree):
         Parser.__init__(self, tree)
+        self.global_author = None 
 
         # use for the category fallback handling if no extension
         # takes over the handling.
@@ -161,6 +162,10 @@ class AtomParser(Parser):
         self._authors_by_email = {}
 
     def parse(self):
+        # atom allows the author to be defined for the whole feed
+        # before the entries.  Capture it here. 
+        self.global_author = self.tree.find(atom.author)
+        
         for entry in self.tree.findall(atom.entry):
             post = self.parse_post(entry)
             if post is not None:
@@ -242,6 +247,8 @@ class AtomParser(Parser):
                 self._authors_by_username[author.username] = author
 
         author = entry.find(atom.author)
+        if author is None:
+            author = self.global_author 
         email = author.findtext(atom.email)
         username = author.findtext(atom.name)
         uri = author.findtext(atom.uri)

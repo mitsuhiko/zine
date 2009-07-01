@@ -5,7 +5,7 @@ For a working Zine instance you need to have the following libraries
 installed:
 
 - Python 2.4 or higher
-- Werkzeug*
+- Werkzeug 0.5.1*
 - Jinja2*
 - A database (MySQL, SQLite or PostgreSQL and others are supported)
 - SQLAlchemy 0.5 [revision>=5491] or higher*

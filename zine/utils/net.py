@@ -23,12 +23,7 @@ from zine.utils.datastructures import OrderedDict
 from zine.utils.exceptions import ZineException
 
 
-#: default timeout is two seconds to not slow down the system
-#: too much.  Nice websites answer in that time.
-DEFAULT_TIMEOUT = 2
-
-
-def open_url(url, data=None, timeout=DEFAULT_TIMEOUT,
+def open_url(url, data=None, timeout=None,
              allow_internal_requests=True, **kwargs):
     """This function parses the URL and opens the connection.  The
     following protocols are supported:
@@ -40,6 +35,8 @@ def open_url(url, data=None, timeout=DEFAULT_TIMEOUT,
     can be disabled by setting `allow_internal_requests` to False.
     """
     app = get_application()
+    if timeout is None:
+        timeout = app.cfg['default_network_timeout'] 
     parts = urlparse.urlsplit(url)
     if app is not None:
         blog_url = urlparse.urlsplit(app.cfg['blog_url'])
@@ -71,7 +68,7 @@ def open_url(url, data=None, timeout=DEFAULT_TIMEOUT,
         raise e
 
 
-def create_connection(address, timeout=DEFAULT_TIMEOUT):
+def create_connection(address, timeout=30):
     """Connect to address and return the socket object."""
     msg = "getaddrinfo returns an empty list"
     host, port = address
@@ -105,106 +102,6 @@ def get_content_length(data_or_fp):
             pass
 
 
-class StreamBuffer(IterO):
-    """Provides a stream interface to an iterator.
-
-    This class includes a fix for a bug in werkzeug < 0.5.  Once we rewrite
-    Werkzeug 0.5 or higher this subclass can go away.
-    """
-
-    def seek(self, pos, mode=0):
-        if self.closed:
-            raise ValueError('I/O operation on closed file')
-        if mode == 1:
-            pos += self.pos
-        elif mode == 2:
-            self.read()
-            self.pos = min(self.pos, self.pos + pos)
-            return
-        elif mode != 0:
-            raise IOError('Invalid argument')
-        buf = []
-        try:
-            tmp_end_pos = len(self._buf)
-            while pos > tmp_end_pos:
-                item = self._gen.next()
-                tmp_end_pos += len(item)
-                buf.append(item)
-        except StopIteration:
-            pass
-        if buf:
-            self._buf += ''.join(buf)
-        self.pos = max(0, pos)
-
-    def read(self, n=-1):
-        if self.closed:
-            raise ValueError('I/O operation on closed file')
-        if n < 0:
-            self._buf += ''.join(self._gen)
-            result = self._buf[self.pos:]
-            self.pos += len(result)
-            return result
-        new_pos = self.pos + n
-        buf = []
-        try:
-            tmp_end_pos = len(self._buf)
-            while new_pos > tmp_end_pos:
-                item = self._gen.next()
-                tmp_end_pos += len(item)
-                buf.append(item)
-        except StopIteration:
-            pass
-        if buf:
-            self._buf += ''.join(buf)
-        new_pos = max(0, new_pos)
-        try:
-            return self._buf[self.pos:new_pos]
-        finally:
-            self.pos = min(new_pos, len(self._buf))
-
-    def readline(self, length=None):
-        if self.closed:
-            raise ValueError('I/O operation on closed file')
-        nl_pos = self._buf.find('\n', self.pos)
-        buf = []
-        try:
-            pos = self.pos
-            while nl_pos < 0:
-                item = self._gen.next()
-                local_pos = item.find('\n')
-                buf.append(item)
-                if local_pos >= 0:
-                    nl_pos = pos + local_pos
-                    break
-                pos += len(item)
-        except StopIteration:
-            pass
-        if buf:
-            self._buf += ''.join(buf)
-        if nl_pos < 0:
-            new_pos = len(self._buf)
-        else:
-            new_pos = nl_pos + 1
-        if length is not None and self.pos + length < new_pos:
-            new_pos = self.pos + length
-        try:
-            return self._buf[self.pos:new_pos]
-        finally:
-            self.pos = min(new_pos, len(self._buf))
-
-    def readlines(self, sizehint=0):
-        total = 0
-        lines = []
-        line = self.readline()
-        while line:
-            lines.append(line)
-            total += len(line)
-            if 0 < sizehint <= total:
-                break
-            line = self.readline()
-        return lines
-
-
 class NetException(ZineException):
     pass
 
@@ -229,7 +126,7 @@ class URLHandler(object):
 
     default_port = 0
 
-    def __init__(self, parsed_url, timeout=DEFAULT_TIMEOUT):
+    def __init__(self, parsed_url, timeout=30):
         self.parsed_url = parsed_url
         self.timeout = timeout
         self.closed = False
@@ -343,8 +240,7 @@ class HTTPHandler(URLHandler):
 
     STATE_IDLE, STATE_SENDING, STATE_SENT = range(3)
 
-    def __init__(self, parsed_url, timeout=DEFAULT_TIMEOUT,
-                 method=None):
+    def __init__(self, parsed_url, timeout=30, method=None):
         URLHandler.__init__(self, parsed_url, timeout)
         self.headers = Headers()
         self._state = self.STATE_IDLE
@@ -405,7 +301,7 @@ class HTTPSHandler(HTTPHandler):
     """Opens HTTPS connections."""
     default_port = 443
 
-    def __init__(self, parsed_url, timeout=DEFAULT_TIMEOUT,
+    def __init__(self, parsed_url, timeout=30,
                  default_method=None, key_file=None,
                  cert_file=None):
         HTTPHandler.__init__(self, parsed_url, timeout, default_method)
@@ -434,7 +330,7 @@ class URLResponse(Response):
 
     @cached_property
     def stream(self):
-        return StreamBuffer(self.data)
+        return IterO(self.response)
 
 
 class HTTPResponse(URLResponse):

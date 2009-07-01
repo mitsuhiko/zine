@@ -188,6 +188,9 @@ class EMailNotificationSystem(NotificationSystem):
         """Textifies the element.  This tries to generate nice looking text
         so that it can be printed in a text/plain mail.
         """
+        # XXX: this function does not support lists or nested markup.
+        # furthermore it should be refactored into a separate function
+        # that is available for other notification systems and other stuff too.
         if not element:
             return u''
 
