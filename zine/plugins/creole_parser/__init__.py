@@ -31,13 +31,15 @@ MACRO_SIGNAL = object()
 
 
 def path_func(page_name):
-    root = get_request().script_root
+    """If one uses wiki-links they are relative to the blog root."""
+    root = get_application().cfg['blog_url']
     if not root.endswith('/'):
         root += '/'
     return urljoin(root, url_quote(page_name))
 
 
 def intro_tag(body):
+    """A simple bodied macro that is used to markup intro sections."""
     contents = creole_parser.generate(body)
     return tag.intro(contents).generate()
 
@@ -52,7 +54,10 @@ def make_macro(extension):
     def macro(body, args, kwargs, is_block, environ):
         if extension.is_void and body:
             return wrap(MarkupErrorElement(
-                _(u'Macro "%s" without body got body') % extension.name))
+                _(u'Macro “%s” was passed a body but does not '
+                  u'support it.') % extension.name))
+        # ensure the body is not None, this could break extensions that
+        # do not expect None as value.
         body = body or u''
         if not extension.is_isolated:
             arg = CreoleParser().parse(body, environ['reason'])
