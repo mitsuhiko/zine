@@ -1099,6 +1099,7 @@ div.help pre {
     border-left: none;
     border-right: none;
     line-height: 110%;
+    background-color: #fafafa;
 }
 
 div.help a.reference {

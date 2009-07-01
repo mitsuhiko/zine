@@ -3,10 +3,11 @@ Zine Help
 
 Welcome to the Zine help.
 
-Tutorials
----------
+Working with Zine
+-----------------
 
 -   `Introduction <introduction>`_
+-   `All About Parsers <parsers>`_
 
 References
 ----------
