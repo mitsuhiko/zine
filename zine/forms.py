@@ -986,19 +986,11 @@ class URLOptionsForm(_ConfigForm):
     profiles_url_prefix = config_field('profiles_url_prefix',
         lazy_gettext(u'Author Profiles URL prefix'))
     post_url_format = config_field('post_url_format',
-        lazy_gettext(u'Post permalink URL format'),
-        help_text=lazy_gettext(u'Use %year%, %month%, %day%, %hour%, '
-                               u'%minute% and %second%. Changes here will '
-                               u'only affect new posts.'))
+        lazy_gettext(u'Post permalink URL format'))
     ascii_slugs = config_field('ascii_slugs',
-                               lazy_gettext(u'Limit slugs to ASCII'),
-                               help_text=lazy_gettext(u'Automatically '
-                               u'generated slugs are limited to ASCII'))
+                               lazy_gettext(u'Limit slugs to ASCII'))
     fixed_url_date_digits = config_field('fixed_url_date_digits',
-                                     lazy_gettext(u'Use zero-padded dates'),
-                                     help_text=lazy_gettext(u'Dates are zero '
-                                     u'padded like 2009/04/22 instead of '
-                                     u'2009/4/22'))
+                                     lazy_gettext(u'Use zero-padded dates'))
 
     def _apply(self, t, skip):
         for key, value in self.data.iteritems():

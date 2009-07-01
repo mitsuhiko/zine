@@ -103,9 +103,16 @@ DEFAULT_VARS = {
     'profiles_url_prefix':      TextField(default=u'/authors',
                                           validators=[is_valid_url_prefix()]),
     'post_url_format':          TextField(default=u'%year%/%month%/%day%/%slug%',
-                                          validators=[is_valid_url_format()]),
-    'ascii_slugs':              BooleanField(default=True),
-    'fixed_url_date_digits':    BooleanField(default=False),
+                                          validators=[is_valid_url_format()],
+                                          help_text=lazy_gettext(
+        u'Use %year%, %month%, %day%, %hour%, %minute% and %second%. '
+        u'Changes here will only affect new posts.')),
+    'ascii_slugs':              BooleanField(default=True, help_text=lazy_gettext(
+        u'Automatically generated slugs are limited to ASCII')),
+    'fixed_url_date_digits':    BooleanField(default=False,
+                                     help_text=lazy_gettext(u'Dates are zero '
+                                     u'padded like 2009/04/22 instead of '
+                                     u'2009/4/22')),
 
     # cache settings
     'enable_eager_caching':     BooleanField(default=False),
