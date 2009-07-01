@@ -155,7 +155,7 @@ DEFAULT_VARS = {
     'smtp_use_tls':             BooleanField(default=False),
 
     # plugin settings
-    'plugin_guard':             BooleanField(default=True),
+    'plugin_guard':             BooleanField(default=not _dev_mode),
     'plugins':                  CommaSeparated(TextField(), default=list),
     'plugin_searchpath':        CommaSeparated(TextField(), default=list,
         help_text=lazy_gettext(u'It\'s possible to one or more comma '

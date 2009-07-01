@@ -205,8 +205,7 @@ class PluginForm(forms.Form):
         if initial is None:
             initial = dict(
                 active_plugins=[x.name for x in app.plugins.itervalues()
-                                if x.active],
-                disable_guard=not app.cfg['plugin_guard']
+                                if x.active]
             )
         forms.Form.__init__(self, initial)
 
@@ -214,7 +213,6 @@ class PluginForm(forms.Form):
         """Apply the changes."""
         t = self.app.cfg.edit()
         t['plugins'] = u', '.join(sorted(self.data['active_plugins']))
-        t['plugin_guard'] = not self.data['disable_guard']
         t.commit()
 
 

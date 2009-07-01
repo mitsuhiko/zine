@@ -42,13 +42,6 @@
       </tr>
     {%- endfor %}
     </table>
-    <h2>{{ _("Plugin Guard") }}</h2>
-    <p>{% trans %}
-      Normally the plugin guard is enabled and catches exceptions during
-      plugin setup.  In some situations however this is not wanted, for
-      example if you want to debug a broken plugin.
-    {% endtrans %}
-    <dl>{{ form.disable_guard.as_dd() }}</dl>
     <h2>{{ _("Add New Plugin") }}</h2>
     <p>{% trans %}
       If you have a plugin as Zine <tt>.plugin</tt> file you can upload it
