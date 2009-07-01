@@ -90,19 +90,25 @@ class EMail(object):
         from_addr = self.from_addr.encode('utf-8')
         to_addrs = [x.encode('utf-8') for x in self.to_addrs]
 
-        msg = MIMEText(self.text)
-        msg['From'] = from_addr
-        msg['To'] = ', '.join(self.to_addrs)
-        msg['Subject'] = self.subject.encode('utf-8')
+
+        msg = MIMEText(self.text.encode('utf-8'))
+
+        #: MIMEText sucks, it does not override the values on
+        #: setitem, it appends them.  We get rid of some that
+        #: are predefined under some versions of python
         del msg['Content-Transfer-Encoding']
+        del msg['Content-Type']
+
+        msg['From'] = from_addr.encode('utf-8')
+        msg['To'] = ', '.join(x.encode('utf-8') for x in self.to_addrs)
+        msg['Subject'] = self.subject.encode('utf-8')
         msg['Content-Transfer-Encoding'] = '8bit'
         msg['Content-Type'] = 'text/plain; charset=utf-8'
         return msg
 
     def format(self, sep='\r\n'):
         """Format the message into a string."""
-        return sep.join(self.as_message().as_string()
-            .encode('utf-8').splitlines())
+        return sep.join(self.as_message().as_string().splitlines())
 
     def log(self):
         """Logs the email"""

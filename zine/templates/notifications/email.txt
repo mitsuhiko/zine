@@ -2,7 +2,11 @@
 {%- if details %}
 ----------------------------------------------------------------------------
 {%- for detail in details %}
-  {{ (detail.text ~ ':').ljust(23) }} {{ detail.link if detail.link }}
+  {%- if detail.is_textual %}
+  {{ detail.text }}
+  {%- else %}
+  {{ (detail.text ~ ':').ljust(23) }} {{ detail.link }}
+  {%- endif %}
 {%- endfor %}
 ----------------------------------------------------------------------------
 {%- endif %}

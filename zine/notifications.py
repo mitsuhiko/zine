@@ -106,6 +106,12 @@ def send_notification(type, message):
     get_application().notification_manager.send(Notification(type, message))
 
 
+def send_notification_template(type, template_name, **context):
+    """Like `send_notification` but renders a template instead."""
+    notification = render_template(template_name, **context)
+    send_notification(type, notification)
+
+
 class NotificationType(object):
     """There are different kinds of notifications. E.g. you want to
     send a special type of notification after a comment is saved.
@@ -125,7 +131,7 @@ class Notification(object):
     """
 
     def __init__(self, id, message):
-        self.message = parse_zeml(message)
+        self.message = parse_zeml(message, 'system')
         self.id = id
         self.sent_date = datetime.utcnow()
 
@@ -171,7 +177,10 @@ class EMailNotificationSystem(NotificationSystem):
     name = lazy_gettext(u'E-Mail')
 
     def send(self, user, notification):
-        title = u'[%s] %s' % (self.app.cfg['blog_title'], notification.title)
+        title = u'[%s] %s' % (
+            self.app.cfg['blog_title'],
+            notification.title.to_text()
+        )
         text = self.mail_from_notification(notification)
         send_email(title, text, [user.email])
 
@@ -227,6 +236,8 @@ class EMailNotificationSystem(NotificationSystem):
                 else:
                     result.append(make_oneliner(child.tail))
 
+        if element.text:
+            result.append(element.text)
         for child in element.children:
             if child.name in ('p', 'blockquote'):
                 sep(' | ', '\n\n')
@@ -251,7 +262,7 @@ class EMailNotificationSystem(NotificationSystem):
         if oneline:
             return u' '.join(u''.join(result).splitlines()).strip()
 
-        return wrap(u''.join(result).lstrip('\n').rstrip(), 74)
+        return wrap(u''.join(result).lstrip('\n').rstrip(), 72)
 
     def unquote_link(self, link):
         """Unquotes some kinds of links.  For example mailto:foo links are
@@ -316,9 +327,9 @@ class NotificationManager(object):
 
         user_id  | notification_system | notification id
         ---------+---------------------+--------------------------
-        1        | jabber              | ON_NEW_COMMENT
-        1        | email               | ON_ZINE_UPGRADE_AVAILABLE
-        1        | sms                 | ON_SERVER_EXPLODED
+        1        | jabber              | NEW_COMMENT
+        1        | email               | ZINE_UPGRADE_AVAILABLE
+        1        | sms                 | SERVER_EXPLODED
 
     The NotificationManager also assures that only users interested in
     a particular type of notifications receive a message.
@@ -348,11 +359,11 @@ def _register(name, description):
     __all__.append(name)
 
 
-_register('ON_NEW_COMMENT',
+_register('NEW_COMMENT',
           lazy_gettext(u'When a new comment is received.'))
 _register('COMMENT_REQUIRES_MODERATION',
           lazy_gettext(u'When a comment requires moderation.'))
-_register('ON_SECURITY_ALERT',
+_register('SECURITY_ALERT',
           lazy_gettext(u'When Zine found an urgent security alarm.'))
 
 

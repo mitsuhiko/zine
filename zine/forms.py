@@ -22,6 +22,8 @@ from zine.models import User, Group, Comment, Post, Category, Tag, \
      COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM, COMMENT_DELETED
 from zine.parsers import render_preview
 from zine.privileges import bind_privileges
+from zine.notifications import send_notification_template, NEW_COMMENT, \
+     COMMENT_REQUIRES_MODERATION
 from zine.utils import forms, log, dump_json
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
@@ -182,6 +184,16 @@ class NewCommentForm(forms.Form):
 
         # Commit so that make_visible_for_request can access the comment id.
         db.commit()
+
+        # send out a notification if the comment is not spam.  Nobody is
+        # interested in notifications on spam...
+        if not comment.is_spam:
+            if comment.blocked:
+                notification_type = COMMENT_REQUIRES_MODERATION
+            else:
+                notification_type = NEW_COMMENT
+            send_notification_template(notification_type,
+                'notifications/on_new_comment.zeml', comment=comment)
 
         # Still allow the user to see his comment if it's blocked
         if comment.blocked:

@@ -23,7 +23,7 @@ def parse(input_data, parser=None, reason='unknown'):
     mode the `process-doc-tree` event is sent so that plugins can modify
     the tree in place. The reason is useful for plugins to find out if they
     want to render it or now. For example a normal blog post would have the
-    reason 'post-body' or 'post-intro', an isolated page from a plugin maybe
+    reason 'post', a comment 'comment', an isolated page from a plugin maybe
     'page' etc.
     """
     input_data = u'\n'.join(input_data.splitlines())
@@ -100,7 +100,7 @@ class MarkupExtension(object):
             to the given attribute.  Note that inline elements may not support
             arguments in all markup languages.
 
-    The `process` method must be overwritten.  Is given two arguments:
+    The `process` method must be overwritten.  Is given three arguments:
 
         `attributes`
             A dictionary of attributes (options) of the markup element.
@@ -109,10 +109,10 @@ class MarkupExtension(object):
             already been parsed with the markup parser and is a ZEML tree,
             otherwise it is raw text.
         `reason`
-            The parsing reason -- either "post", "comment", "post_preview"
-            or "comment_preview".  The element can change behavior depending
-            on the reason, for example disable potentially unsafe features
-            for comments.
+            The parsing reason -- either "post", "comment", "post-preview",
+            "comment-preview", or "system".  The element can change behavior
+            depending on the reason, for example disable potentially unsafe
+            features for comments.
 
     It must return a ZEML tree.
     """

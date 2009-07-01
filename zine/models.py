@@ -1082,6 +1082,22 @@ class Comment(_ZEMLContainer):
     def get_url_values(self):
         return url_for(self.post) + '#comment-%d' % self.id
 
+    def summarize(self, chars=140, ellipsis=u'…'):
+        """Summarizes the comment to the given number of characters."""
+        words = self.body.to_text().split()
+        words.reverse()
+        length = 0
+        result = []
+        while words:
+            word = words.pop()
+            length += len(word) + 1
+            if length >= chars:
+                break
+            result.append(word)
+        if words:
+            result.append(ellipsis)
+        return u' '.join(result)
+
     def __repr__(self):
         return '<%s %r>' % (
             self.__class__.__name__,
