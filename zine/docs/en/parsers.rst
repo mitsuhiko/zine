@@ -103,3 +103,40 @@ Example code::
     .. sourcecode:: python
 
         print "Hello World"
+
+For more information consult the `quick reference`_.
+
+.. _quick reference: http://docutils.sourceforge.net/docs/user/rst/quickref.html
+
+Creole
+------
+
+Example code::
+
+    <<intro>>This is the intro text of the blog.  If your theme supports
+    separate intro blocks this one will appear on the index page
+    and will have a “follow me” link to read the full post.<</intro>>
+
+    This is the rest of the text in a paragraph.  Note that you don't
+    have to close the paragraphs.
+
+    This is another paragraph.  Paragraphs are usually separated by
+    a wider gap in the theme.
+    
+    * This is an unordered list.
+    * Of multiple items.
+
+    ZEML also supports shorter end tags that omit the name.  For example
+    if you want some **strong text** you can close it like I did
+    here.
+
+    And here finally an example for a plugin that extends ZEML for
+    syntax highlighting:
+
+    <<sourcecode syntax=python>>
+    print "Hello World"
+    <</sourcecode>>
+
+For more information have a look at the `cheatsheet`_.
+
+.. _cheatsheet: http://purl.oclc.org/creoleparser/cheatsheet
