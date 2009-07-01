@@ -74,7 +74,7 @@ def macro_func(macro_name, arg_string, body, is_block, environ):
     are looked up the extensions are converted into macros.
     """
     global macros_set_up
-    pos, kw = parse_args(arg_string)
+    args, kwarg = parse_args(arg_string)
     if macro_name == 'intro' and body:
         return intro_tag(body)
     if not macros_set_up:
@@ -83,7 +83,7 @@ def macro_func(macro_name, arg_string, body, is_block, environ):
             macros[extension.name] = make_macro(extension)
         macros_set_up = True
     if macro_name in macros:
-        return macros[macro_name](body, pos, kw, is_block, environ)
+        return macros[macro_name](body, args, kwargs, is_block, environ)
 
 
 zinecreole = create_dialect(creole11_base, wiki_links_base_url=u'',

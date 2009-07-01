@@ -4,19 +4,19 @@ All About Parsers
 Zine supports multiple input formats you can choose from.  Out of the box
 there are three so called parsers available:
 
--   `ZEML`, a HTML inspired extensible markup language
--   `HTML`, standard HTML for backwards compatibility with other blogging
+-   **ZEML**, a HTML inspired extensible markup language
+-   **HTML**, standard HTML for backwards compatibility with other blogging
     systems.
--   `Text`, a very simple parser that tries to render standard text into
+-   **Text**, a very simple parser that tries to render standard text into
     nicely looking HTML.  This is mainly intended for comments not for
     blog posts unless you're importing blog posts you've written for
     email.
 
 There are other parsers shipped as part of Zine in plugins:
 
--   `reStructuredText`, is a lightweight markup format very popular in the
+-   **reStructuredText**, is a lightweight markup format very popular in the
     Python community.
--   `Creole`, is a standardized wiki syntax used on some wiki engines on
+-   **Creole**, is a standardized wiki syntax used on some wiki engines on
     the web.
 
 The plugins will need some additional libraries that have to be installed on
