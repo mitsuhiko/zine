@@ -44,9 +44,9 @@ from zine.utils.exceptions import UserException
 #: the default theme settings
 DEFAULT_THEME_SETTINGS = {
     # pagination defaults
-    'pagination.normal':            '<a href="%(url)s">%(page)d</a>',
-    'pagination.active':            '<strong>%(page)d</strong>',
-    'pagination.commata':           '<span class="commata">,\n</span>',
+    'pagination.normal':            u'<a href="%(url)s">%(page)d</a>',
+    'pagination.active':            u'<strong>%(page)d</strong>',
+    'pagination.commata':           u'<span class="commata">,\n</span>',
     'pagination.ellipsis':          u'<span class="ellipsis"> …\n</span>',
     'pagination.threshold':         3,
     'pagination.left_threshold':    2,
