@@ -51,9 +51,8 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
      DeleteGroupForm, ThemeOptionsForm, DeleteImportForm, ExportForm, \
-     MaintenanceModeForm, MarkCommentForm, make_config_form, \
-     make_import_form, make_notification_form
-
+     MaintenanceModeForm, MarkCommentForm, RemovePluginForm, \
+     make_config_form, make_import_form, make_notification_form
 
 #: how many posts / comments should be displayed per page?
 PER_PAGE = 20
@@ -1097,7 +1096,7 @@ def remove_plugin(request, plugin):
        not plugin.instance_plugin or \
        plugin.active:
         raise NotFound()
-    form = RemovePluginForm()
+    form = RemovePluginForm(plugin)
 
     if request.method == 'POST' and form.validate(request.form):
         if request.form.get('confirm'):

@@ -228,6 +228,14 @@ class PluginForm(forms.Form):
         t.commit()
 
 
+class RemovePluginForm(forms.Form):
+    """Dummy form for plugin removing."""
+
+    def __init__(self, plugin):
+        forms.Form.__init__(self)
+        self.plugin = plugin
+
+
 class PostForm(forms.Form):
     """This is the baseclass for all forms that deal with posts.  There are
     two builtin subclasses for the builtin content types 'entry' and 'page'.
