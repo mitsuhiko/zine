@@ -10,8 +10,7 @@
 """
 from werkzeug import abort
 
-from zine.api import *
-from zine.models import Comment
+from zine.models import Comment, Tag
 from zine.privileges import MODERATE_COMMENTS
 
 
@@ -41,6 +40,14 @@ def do_get_comment(req):
     }
 
 
+def do_get_taglist(req):
+    return {
+        'tags':         sorted([t.name for t in Tag.query.all()],
+                               key=lambda x: x.lower())
+    }
+
+
 all_services = {
-    'get_comment':          do_get_comment
+    'get_comment':          do_get_comment,
+    'get_taglist':          do_get_taglist
 }

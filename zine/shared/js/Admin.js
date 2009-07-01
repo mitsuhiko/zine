@@ -69,12 +69,17 @@ $(function() {
   /**
    * Tag support for the post editor.
    */
-  /// Disabled temporarily.
-  //$("#f_tags").autocomplete([], {
-  //  highlight: false,
-  //  multiple: true,
-  //  multipleSeparator: ", ",
-  //  scroll: true,
-  //  scrollHeight: 300
-  //});
+  (function() {
+    var tag_field = $("#f_tags");
+    if (tag_field.length)
+      Zine.callJSONService('get_taglist', {}, function(rv) {
+        tag_field.autocomplete(rv.tags, {
+          highlight: false,
+          multiple: true,
+          multipleSeparator: ", ",
+          scroll: true,
+          scrollHeight: 300
+        });
+      });
+  })();
 });
