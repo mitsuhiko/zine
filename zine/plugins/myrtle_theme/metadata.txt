@@ -4,7 +4,7 @@ Plugin URL: http://zine.pocoo.org/plugins/myrtle_theme
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: BSD
-Version: 0.1
+Version: %ZINE_VERSION%
 Description: A brownish theme called "myrtle".
 Description[de]: Ein braunes Design namens "myrtle".
 Preview: myrtle_theme::preview.png

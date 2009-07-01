@@ -953,6 +953,11 @@ table.plugins tr.plugin-active td {
     background-color: #DEEEF8;
 }
 
+span.bundlemarker {
+    font-weight: normal;
+    color: #444;
+}
+
 /* :::: CONFIG EDITOR :::: */
 table.config-table {
     border: 1px solid #B4D2E7;

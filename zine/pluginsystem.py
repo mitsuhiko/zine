@@ -98,6 +98,8 @@ from zine.utils import log
 from zine.utils.mail import split_email, is_valid_email, check
 from zine.utils.exceptions import UserException, summarize_exception
 from zine.i18n import ZineTranslations as Translations, lazy_gettext, _
+from zine.environment import BUILTIN_PLUGIN_FOLDER
+from zine import __version__ as zine_version
 
 
 _py_import = __builtin__.__import__
@@ -454,6 +456,13 @@ class Plugin(object):
         return False
 
     @cached_property
+    def is_bundled(self):
+        """This property is True if the plugin is bundled with Zine."""
+        return path.commonprefix([
+            path.realpath(self.path), path.realpath(BUILTIN_PLUGIN_FOLDER)]) == \
+            BUILTIN_PLUGIN_FOLDER
+
+    @cached_property
     def module(self):
         """The module of the plugin. The first access imports it."""
         try:
@@ -564,7 +573,10 @@ class Plugin(object):
     @property
     def version(self):
         """The version of the plugin."""
-        return self.metadata.get('version')
+        rv = self.metadata.get('version')
+        if rv == '%ZINE_VERSION%':
+            return zine_version
+        return rv
 
     @property
     def depends(self):

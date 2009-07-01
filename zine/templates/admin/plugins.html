@@ -20,8 +20,9 @@
       </tr>
     {%- for plugin in plugins %}
       <tr class="plugin-{{ 'active' if plugin.active else 'inactive' }}">
-        <td class="plugin">{{ plugin.html_display_name }}</td>
-        <td class="version">{{ (plugin.version or '?')|e }}</td>
+        <td class="plugin">{{ plugin.html_display_name }}
+          {%- if plugin.is_bundled %} <span class="bundlemarker">*</span>{% endif %}
+        <td class="version">{{ (plugin.version or '?')|e }}
         <td class="description">{{ plugin.description }}
           <span class="author">
           {% trans author=plugin.html_author_info %}
@@ -42,6 +43,10 @@
       </tr>
     {%- endfor %}
     </table>
+    <p>{% trans %}
+      <span class="bundlemarker">*</span> marked plugins are bundled with Zine
+      and upgraded as part of it.
+    {% endtrans %}</p>
     <h2>{{ _("Add New Plugin") }}</h2>
     <p>{% trans %}
       If you have a plugin as Zine <tt>.plugin</tt> file you can upload it
