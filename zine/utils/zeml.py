@@ -14,8 +14,10 @@
 import re
 import struct
 import weakref
+import textwrap
 import cPickle as pickle
 from copy import deepcopy
+from StringIO import StringIO as UniStringIO
 from cStringIO import StringIO
 from operator import itemgetter
 from itertools import imap
@@ -25,6 +27,7 @@ from werkzeug import escape
 
 from zine.i18n import _
 from zine.utils import log
+from zine.utils.text import wrap as wraptext
 from zine.utils.datastructures import OrderedDict
 
 
@@ -610,6 +613,7 @@ class RootElement(_BaseElement):
     __slots__ = ('text', 'children')
     is_root = True
     is_dynamic = True
+    name = '#root'
 
     def __init__(self):
         self.text = u''
@@ -631,7 +635,7 @@ class DynamicElement(_BaseElement):
     element but subclasses have to override `render()` to not break the tail
     rendering.
     """
-
+    name = '#dynamic'
     is_dynamic = True
 
     def render(self):
@@ -660,6 +664,7 @@ class BrokenElement(DynamicElement):
     """Displayed as replacement for a broken dynamic element (an alement
     that can't be unpickled).
     """
+    name = '#broken'
 
     def __init__(self, obj_name, error):
         try:
@@ -678,6 +683,7 @@ class BrokenElement(DynamicElement):
 
 class MarkupErrorElement(DynamicElement):
     """Displayed in the place of erroneous markup."""
+    name = '#error'
 
     def __init__(self, message):
         self.message = message
@@ -689,6 +695,7 @@ class MarkupErrorElement(DynamicElement):
 
 class HTMLElement(DynamicElement):
     """An element that stores HTML data."""
+    name = '#html'
 
     def __init__(self, value):
         self.value = value
@@ -1452,3 +1459,302 @@ class Sanitizer(object):
                 element.children.append(child)
 
         return element
+
+
+class Textifier(object):
+    """Convert ZEML into plain text with rudimentary markup."""
+    INDENT = 4
+    WIDTH = 72
+
+    class Skip(Exception):
+        """Raise this to skip visiting children and departure."""
+
+    def __init__(self, initial_indent=0, max_width=WIDTH, collect_urls=False):
+        self.collect_urls = collect_urls
+        self.links = []
+        self.result = UniStringIO()
+
+        self.max_width = max_width
+        self.indentation = initial_indent
+        self.indentfirstline = 0
+        self.curpar = []
+        self.context = []
+        self.liststack = []
+        self.table = None
+        self.table_ncols = 0
+        self.keep_newlines = False
+
+    def oneline(self, element):
+        return u' '.join(self.multiline(element).splitlines()).strip()
+
+    def multiline(self, element):
+        self.textify(element)
+        self.write_links()
+        return self.result.getvalue()
+
+    def textify(self, element):
+        if not element:
+            return
+        elname = element.name.replace('#', '_')
+        try:
+            getattr(self, 'visit_' + elname, self.visit_unknown)(element)
+        except self.Skip:
+            return
+        if element.text:
+            self.curpar.append(element.text)
+        for child in element.children:
+            self.textify(child)
+            if child.tail:
+                self.curpar.append(child.tail)
+        getattr(self, 'depart_' + elname, self.depart_unknown)(element)
+
+    def write_links(self):
+        for i, link in enumerate(self.links):
+            self.write('[%d] %s' % (i+1, link))
+
+    def write(self, text='', nl=True, first=False):
+        indent = self.indentation * ' '
+        if first:
+            self.result.write(indent[:self.indentfirstline or None] + text)
+            self.indentfirstline = 0
+        elif text: # don't write indentation only
+            self.result.write(indent + text)
+        if nl:
+            self.result.write('\n')
+
+    def get_par(self, wrap, width=None):
+        if not self.curpar:
+            if wrap:
+                return []
+            else:
+                return ''
+        text = ''.join(self.curpar).lstrip()
+        if not self.keep_newlines:
+            text = text.replace('\n', ' ')
+        self.curpar = []
+        if wrap:
+            # must return a list!
+            return wraptext(text, width or
+                            (self.max_width - self.indentation)).splitlines()
+        else:
+            return text
+
+    def flush_par(self, noskip=False, force=False, nowrap=False):
+        if nowrap:
+            par = self.get_par(wrap=False).splitlines()
+        else:
+            par = self.get_par(wrap=True)
+        if par or force:
+            for i, line in enumerate(par):
+                self.write(line, first=(i==0))
+            if not noskip:
+                self.write()
+
+    def simple_decorator(s):
+        def visit_or_depart(self, element):
+            self.curpar.append(s)
+        return visit_or_depart
+
+    visit_b = depart_b = simple_decorator('*')
+    visit_code = depart_code = simple_decorator('`')
+    visit_dfn = depart_dfn = simple_decorator('*')
+    visit_em = depart_em = simple_decorator('*')
+    visit_i = depart_i = simple_decorator('+')
+    visit_kbd = depart_kbd = simple_decorator('`')
+    visit_q = depart_q = simple_decorator('"')
+    visit_samp = depart_samp = simple_decorator('`')
+    visit_strong = depart_strong = simple_decorator('**')
+    visit_sup = depart_sup = simple_decorator('^')
+    visit_s = depart_s = simple_decorator('-')
+    visit_tt = depart_tt = simple_decorator('`')
+    visit_u = depart_u = simple_decorator('_')
+    visit_var = depart_var = simple_decorator('*')
+
+    def visit_a(self, element):
+        pass
+    def depart_a(self, element):
+        if 'href' in element.attributes:
+            if self.collect_urls:
+                self.links.append(element.attributes['href'])
+                self.curpar.append(' [%s]' % len(self.links))
+            else:
+                self.curpar.append(' <%s>' % element.attributes['href'])
+
+    def visit_img(self, element):
+        alt = element.attributes.get('alt', 'image')
+        if alt:
+            self.curpar.append('[%s]' % alt)
+
+    def hx_depart(c):
+        def depart(self, element):
+            par = self.get_par(wrap=False)
+            self.write(par)
+            self.write(c * len(par))
+            self.write()
+        return depart
+
+    depart_h1 = hx_depart('=')
+    depart_h2 = hx_depart('-')
+    depart_h3 = hx_depart('~')
+    depart_h4 = hx_depart('^')
+    depart_h5 = hx_depart('`')
+    depart_h6 = hx_depart('`')
+
+    def visit_p(self, element):
+        pass
+    def depart_p(self, element):
+        self.flush_par()
+
+    def visit_blockquote(self, element):
+        self.indentation += self.INDENT
+    def depart_blockquote(self, element):
+        self.flush_par()
+        self.indentation -= self.INDENT
+
+    def visit_ul(self, element):
+        self.liststack.append(None)
+    def depart_ul(self, element):
+        self.liststack.pop()
+        self.flush_par(force=True)
+    visit_dir = visit_ul
+    depart_dir = depart_ul
+
+    def visit_ol(self, element):
+        self.liststack.append(1)
+    def depart_ol(self, element):
+        self.liststack.pop()
+        self.flush_par(force=True)
+
+    def visit_li(self, element):
+        if self.liststack and self.liststack[-1] is not None:
+            indent = 4
+            self.curpar.append('%-3s ' % (str(self.liststack[-1]) + '.'))
+            self.liststack[-1] += 1
+        else:
+            indent = 2
+            self.curpar.append('* ')
+        self.indentfirstline = -indent
+        self.indentation += indent
+        self.context.append(indent)
+    def depart_li(self, element):
+        self.flush_par(noskip=True)
+        self.indentation -= self.context.pop()
+
+    def visit_dt(self, element):
+        pass
+    def depart_dt(self, element):
+        self.flush_par(noskip=True)
+
+    def visit_dd(self, element):
+        self.indentation += self.INDENT
+    def depart_dd(self, element):
+        self.flush_par()
+        self.indentation -= self.INDENT
+
+    def visit_pre(self, element):
+        self.keep_newlines = True
+    def depart_pre(self, element):
+        self.flush_par(nowrap=True)
+        self.keep_newlines = False
+
+    def visit_table(self, element):
+        if self.table:
+            self.curpar.append('[[table]]')
+            raise Skip
+        self.table = []
+        self.table_ncols = 0
+        for row in element.children:
+            if row.name == 'tbody':
+                element = row
+        for row in element.children:
+            if row.name == 'tr':
+                for entry in row.children:
+                    if entry.name == 'td':
+                        self.table_ncols += 1
+                break
+        if self.table_ncols == 0:
+            # give up trying, but avoid ZeroDivisionErrors
+            self.table_ncols = 1
+    def depart_table(self, element):
+        lines = self.table
+        fmted_rows = []
+        available_width = self.max_width - self.indentation
+        colwidths = [available_width / self.table_ncols] * self.table_ncols
+        realwidths = colwidths[:]
+        separator = 0
+        # don't allow paragraphs in table cells for now
+        for line in lines:
+            if line == 'sep':
+                separator = len(fmted_rows)
+            else:
+                cells = []
+                for i, cell in enumerate(line):
+                    par = textwrap.wrap(cell, width=colwidths[i])
+                    if par:
+                        maxwidth = max(map(len, par))
+                    else:
+                        maxwidth = 0
+                    realwidths[i] = max(realwidths[i], maxwidth)
+                    cells.append(par)
+                fmted_rows.append(cells)
+
+        def writesep(char='-'):
+            out = ['+']
+            for width in realwidths:
+                out.append(char * (width+2))
+                out.append('+')
+            self.write(''.join(out))
+
+        def writerow(row):
+            lines = map(None, *row)
+            for line in lines:
+                out = ['|']
+                for i, cell in enumerate(line):
+                    if cell:
+                        out.append(' ' + cell.ljust(realwidths[i]+1))
+                    else:
+                        out.append(' ' * (realwidths[i] + 2))
+                    out.append('|')
+                self.write(''.join(out))
+
+        for i, row in enumerate(fmted_rows):
+            if separator and i == separator:
+                writesep('=')
+            else:
+                writesep('-')
+            writerow(row)
+        writesep('-')
+        self.table = None
+        self.flush_par(force=True)
+
+    def visit_tbody(self, element):
+        self.table.append('sep')
+    def depart_tbody(self, element):
+        pass
+
+    def visit_tr(self, element):
+        self.table.append([])
+    def depart_tr(self, element):
+        pass
+
+    def visit_td(self, element):
+        pass
+    def depart_td(self, element):
+        text = self.get_par(False)
+        self.table[-1].append(text)
+    visit_th = visit_td
+    depart_th = depart_td
+
+    def visit__html(self, element):
+        self.curpar.append('[[HTML]]')
+
+    def visit__dynamic(self, element):
+        self.curpar.append('[[dynamic content]]')
+
+    def depart__root(self, element):
+        self.flush_par()
+
+    def visit_unknown(self, element):
+        pass
+    def depart_unknown(self, element):
+        pass

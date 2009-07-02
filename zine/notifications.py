@@ -19,9 +19,8 @@ from werkzeug import url_unquote
 
 from zine.models import NotificationSubscription, User
 from zine.application import get_application, render_template
-from zine.utils.zeml import parse_zeml, escape
+from zine.utils.zeml import parse_zeml, escape, Textifier
 from zine.utils.mail import send_email
-from zine.utils.text import wrap
 from zine.i18n import lazy_gettext, _
 
 
@@ -184,89 +183,6 @@ class EMailNotificationSystem(NotificationSystem):
         text = self.mail_from_notification(notification)
         send_email(title, text, [user.email])
 
-    def textify(self, element, collect_urls=False, oneline=False):
-        """Textifies the element.  This tries to generate nice looking text
-        so that it can be printed in a text/plain mail.
-        """
-        # XXX: this function does not support lists or nested markup.
-        # furthermore it should be refactored into a separate function
-        # that is available for other notification systems and other stuff too.
-        if not element:
-            return u''
-
-        result = []
-        links = []
-
-        def make_oneliner(text):
-            before = after = u''
-            if text.lstrip() != text:
-                before = u' '
-            if text.rstrip() != text:
-                after = u' '
-            return before + u' '.join(text.split()) + after
-
-        def sep(a, b):
-            if oneline:
-                result.append(a)
-            else:
-                result.append(b)
-
-        def textify(element, stripped=False):
-            """Textifies inline text information."""
-            if stripped:
-                result.append(make_oneliner(element.text.lstrip()))
-            else:
-                result.append(make_oneliner(element.text))
-
-            for idx, child in enumerate(element.children):
-                child_text = make_oneliner(child.to_text())
-                if child.name == 'a' and 'href' in child.attributes:
-                    result.append(child_text + ' ')
-                    if collect_urls:
-                        links.append(child.attributes['href'])
-                        result.append('[%d]' % len(links))
-                    else:
-                        links.append('<%s>' % child.attributes['href'])
-                elif child.name == 'em':
-                    result.append('*%s*' % child_text)
-                elif child.name == 'strong':
-                    result.append('**%s**' % child_text)
-                else:
-                    result.append(child_text)
-
-                if stripped and idx == len(element.children) - 1:
-                    result.append(make_oneliner(child.tail.rstrip()))
-                else:
-                    result.append(make_oneliner(child.tail))
-
-        if element.text:
-            result.append(element.text)
-        for child in element.children:
-            if child.name in ('p', 'blockquote'):
-                sep(' | ', '\n\n')
-                textify(child, True)
-            elif child.name == 'div':
-                sep(' | ', '\n')
-                textify(child, True)
-            elif child.name == 'pre':
-                lines = child.to_text().strip('\n').rstrip().splitlines()
-                result.append('\n\n' + '\n'.join('  ' + line.rstrip()
-                                                 for line in lines))
-            else:
-                textify(child, True)
-            if child.tail and child.tail.strip():
-                result.append('\n' + child.tail.rstrip('\n'))
-
-        if links:
-            result.append('\n\n\n')
-            result.append('\n'.join('[%d] %s' % (idx + 1, link)
-                          for idx, link in enumerate(links)))
-
-        if oneline:
-            return u' '.join(u''.join(result).splitlines()).strip()
-
-        return wrap(u''.join(result).lstrip('\n').rstrip(), 72)
-
     def unquote_link(self, link):
         """Unquotes some kinds of links.  For example mailto:foo links are
         stripped and properly unquoted because the mails we write are in
@@ -286,7 +202,7 @@ class EMailNotificationSystem(NotificationSystem):
                 yield dict(text=link.to_text(), link=self.unquote_link(href),
                            is_textual=False)
             else:
-                yield dict(text=self.textify(item, oneline=True),
+                yield dict(text=Textifier().oneline(item),
                            link=None, is_textual=True)
 
 
@@ -300,7 +216,7 @@ class EMailNotificationSystem(NotificationSystem):
             if child.name in ('ul', 'ol'):
                 result.extend(self.collect_list_details(child))
             elif child.name == 'p':
-                result.extend(dict(text=self.textify(child),
+                result.extend(dict(text=Textifier().multiline(child),
                                    link=None, is_textual=True))
         return result
 
@@ -315,7 +231,8 @@ class EMailNotificationSystem(NotificationSystem):
     def mail_from_notification(self, message):
         title = message.title.to_text()
         details = self.find_details(message.details)
-        longtext = self.textify(message.longtext, collect_urls=True)
+        longtext = Textifier(collect_urls=True,
+                             initial_indent=2).multiline(message.longtext)
         actions = self.find_actions(message.actions)
         return render_template('notifications/email.txt', title=title,
                                details=details, longtext=longtext,
