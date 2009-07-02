@@ -89,7 +89,7 @@ $(function() {
     var title = document.title.split(/\u200B/, 2)[1];
     input_box.bind('change', function() {
       var arg = input_box.val();
-      document.title = (arg ? arg + ' — ' : '') + title; 
+      document.title = (arg ? arg + ' — ' : '') + title;
     });
   })();
 });

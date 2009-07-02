@@ -1279,6 +1279,13 @@ class Zine(object):
                 response.status_code = 503
                 return response(environ, start_response)
 
+        # if HTTPS enforcement is active, we redirect to HTTPS if
+        # possibile without problems (no playload)
+        if self.cfg['force_https'] and request.method in ('GET', 'HEAD') and \
+           environ['wsgi.url_scheme'] == 'http':
+            response = _redirect('https' + request.url[4:], 301)
+            return response(environ, start_response)
+
         # wrap the real dispatching in a try/except so that we can
         # intercept exceptions that happen in the application.
         try:

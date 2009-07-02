@@ -1011,6 +1011,7 @@ class URLOptionsForm(_ConfigForm):
                                lazy_gettext(u'Limit slugs to ASCII'))
     fixed_url_date_digits = config_field('fixed_url_date_digits',
                                      lazy_gettext(u'Use zero-padded dates'))
+    force_https = config_field('force_https', lazy_gettext(u'Force HTTPS'))
 
     def _apply(self, t, skip):
         for key, value in self.data.iteritems():
@@ -1020,6 +1021,12 @@ class URLOptionsForm(_ConfigForm):
                     if key == 'blog_url_prefix':
                         change_url_prefix(old, value)
                     t[key] = value
+
+        # update the blog_url based on the force_https flag.
+        blog_url = (t['force_https'] and 'https' or 'http') + \
+                   ':' + t['blog_url'].split(':', 1)[1]
+        if blog_url != t['blog_url']:
+            t['blog_url'] = blog_url
 
 
 class ThemeOptionsForm(_ConfigForm):

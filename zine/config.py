@@ -33,6 +33,10 @@ DEFAULT_VARS = {
     'database_uri':             TextField(default=u'', help_text=lazy_gettext(
         u'The database URI.  For more information about database settings '
         u'consult the Zine help.')),
+    'force_https':              BooleanField(default=False, help_text=lazy_gettext(
+        u'If a request to an http URL comes in, Zine will redirect to the same '
+        u'URL on https if this is savely possible.  This requires a working '
+        u'SSL setup or otherwise Zine will become unresponsive.')),
     'database_debug':           BooleanField(default=False, help_text=lazy_gettext(
         u'If enabled the database will collect the SQL statements and add them '
         u'to the bottom of the page for easier debugging')),

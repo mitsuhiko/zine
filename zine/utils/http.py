@@ -78,7 +78,8 @@ def make_external_url(path):
     return urljoin(get_application().cfg['blog_url'], path.lstrip('/'))
 
 
-def redirect(url, code=302, allow_external_redirect=False):
+def redirect(url, code=302, allow_external_redirect=False,
+             force_scheme_change=False):
     """Return a redirect response.  Like Werkzeug's redirect but this
     one checks for external redirects too.  If a redirect to an external
     target was requested `BadRequest` is raised unless
@@ -88,6 +89,10 @@ def redirect(url, code=302, allow_external_redirect=False):
     to URLs returned from `url_for` and others.  Use `redirect_to`
     to redirect to arbitrary endpoints or `_redirect` to redirect to
     unchecked resources outside the URL root.
+
+    By default the redirect will not change the URL scheme of the current
+    request (if there is one).  This behavior can be changed by setting
+    the force_scheme_change to False.
     """
     # leading slashes are ignored, if we redirect to "/foo" or "foo"
     # does not matter, in both cases we want to be below our blog root.
@@ -100,6 +105,15 @@ def redirect(url, code=302, allow_external_redirect=False):
             url = check_external_url(get_application(), url)
         except ValueError:
             raise BadRequest()
+
+    # keep the current URL schema if we have an active request if we
+    # should.  If https enforcement is set we suppose that the blog_url
+    # is already set to an https value.
+    request = get_request() 
+    if request and not force_scheme_change and \
+       not request.app.cfg['force_https']:
+        url = request.environ['wsgi.url_scheme'] + ':' + url.split(':', 1)
+    
     return _redirect(url, code)
 
 
