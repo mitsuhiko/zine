@@ -8,8 +8,8 @@
       <thead>
         <tr>
           <th>&nbsp;
-          {%- for key, name in systems %}
-          <th>{{ name|e }}
+          {%- for system in systems %}
+          <th>{{ system.name|e }}
           {%- endfor %}
         </tr>
       </thead>
@@ -17,8 +17,8 @@
       {%- for type in notification_types %}
         <tr>
           <th>{{ type.description|e }}
-          {%- for key, system in systems %}
-          <td>{{ form.subscriptions[type.name][key]() }}
+          {%- for system in systems %}
+          <td>{{ form.subscriptions[type.name][system.key]() }}
           {%- endfor %}
         </tr>
       {%- endfor %}

@@ -18,6 +18,7 @@ from zine.privileges import ENTER_ADMIN_PANEL
 from zine.utils.account import flash, require_account_privilege
 from zine.utils.http import redirect_back, redirect_to
 
+
 def render_account_response(template_name, _active_menu_item=None, **values):
     """Works pretty much like the normal `render_response` function but
     it emits some events to collect navigation items and injects that
@@ -120,11 +121,13 @@ def logout(request):
     request.logout()
     return redirect_back('account/login')
 
+
 @require_account_privilege()
 def about_zine(request):
     """Just show the zine license and some other legal stuff."""
     return render_account_response('account/about_zine.html',
-                                 'system.about')
+                                   'system.about')
+
 
 @require_account_privilege(ENTER_ADMIN_PANEL)   # XXX: For now.
 def help(req, page=''):
@@ -156,6 +159,7 @@ def index(request):
     return render_account_response('account/index.html', 'dashboard',
                                    your_comments=your_comments.count())
 
+
 @require_account_privilege()
 def profile(request):
     form = EditProfileForm(request.user)
@@ -171,6 +175,7 @@ def profile(request):
             return form.redirect('account/index')
     return render_account_response('account/edit_profile.html', 'profile',
                                    form=form.as_widget())
+
 
 @require_account_privilege()
 def delete_account(request):
@@ -198,7 +203,7 @@ def notification_settings(request):
         flash(_('Notification settings changed.'), 'configure')
         return form.redirect('account/notification_settings')
 
-    return render_account_response('account/notification_settings.html',
+    return render_account_response('account/notification_settings.html', 'notifications',
         form=form.as_widget(),
         systems=sorted(request.app.notification_manager.systems.values(),
                        key=lambda x: x.name.lower()),

@@ -16,7 +16,8 @@
       </div>
       <h2>{{ _('Quickstart') }}</h2>
       <ul>
-        <li><a href="{{ url_for('account/profile')|e }}">{{ _("Update Profile") }}</a></li>
+        <li><a href="{{ url_for('account/profile')|e }}">{{ _("Update Profile") }}</a>
+        <li><a href="{{ url_for('account/notification_settings')|e }}">{{ _("Notifications") }}</a>
       </ul>
     </div>
     <div class="clear"></div>
