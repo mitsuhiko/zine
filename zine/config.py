@@ -98,6 +98,8 @@ DEFAULT_VARS = {
     # url settings
     'blog_url_prefix':          TextField(default=u'',
                                           validators=[is_valid_url_prefix()]),
+    'account_url_prefix':       TextField(default=u'/account',
+                                          validators=[is_valid_url_prefix()]),
     'admin_url_prefix':         TextField(default=u'/admin',
                                           validators=[is_valid_url_prefix()]),
     'category_url_prefix':      TextField(default=u'/categories',

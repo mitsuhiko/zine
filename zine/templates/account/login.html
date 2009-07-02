@@ -2,7 +2,7 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-  <title>{{ _('Login') }} &mdash; {{ cfg.blog_title|e }} {{ _("Administration") }}</title>
+  <title>{{ _('Login') }} &mdash; {{ cfg.blog_title|e }}</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='admin/style.css') }}">
   {{ get_page_metadata() }}
 </head>
@@ -24,7 +24,7 @@
        field and suddenly the page finished loading and the
        focus is back in the username field and the password is
        entered there by accident making it visible to everybody #}
-    {% call form.render(action=url_for('admin/login')) %}
+    {% call form.render(action=url_for('account/login')) %}
       <dl>
         <dt>{{ _("Username") }}
         <dd>{{ form.user.render() }}

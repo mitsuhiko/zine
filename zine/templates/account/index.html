@@ -1,0 +1,24 @@
+{% extends "account/layout.html" %}
+{% block title %}{{ _("Dashboard") }}{% endblock %}
+{% block contents %}
+  <div class="dashboard">
+    <h1>{{ _("Dashboard") }}</h1>
+    <div class="panel">
+      <div class="text">
+        <p>{% trans user=request.user.display_name|e -%}
+          Howdy.  Welcome to your Zine account interface {{ user }}.
+        {%- endtrans %}
+        {% trans -%}
+          You have written <strong>{{ your_comments }}</strong> comment so far.
+        {%- pluralize -%}
+          You have written <strong>{{ your_comments }}</strong> comments so far.
+        {%- endtrans %}
+      </div>
+      <h2>{{ _('Quickstart') }}</h2>
+      <ul>
+        <li><a href="{{ url_for('account/profile')|e }}">{{ _("Update Profile") }}</a></li>
+      </ul>
+    </div>
+    <div class="clear"></div>
+  </div>
+{% endblock %}

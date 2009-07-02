@@ -1237,7 +1237,7 @@ class Zine(object):
                     response = render_response('403.html')
                     response.status_code = 403
                 else:
-                    response = _redirect(url_for('admin/login',
+                    response = _redirect(url_for('account/login',
                                                  next=request.path))
         except HTTPException, e:
             response = e.get_response(request)
@@ -1270,11 +1270,17 @@ class Zine(object):
         # not an administrator. in that case just show a message that
         # the user is not privileged to view the blog right now. Exception:
         # the page is the login page for the blog.
+        # XXX: Remove 'admin_prefix' references for Zine 0.3
+        #      It still exists because some themes might depend on it.
+        js_translations = url_for('blog/serve_translations')
         admin_prefix = self.cfg['admin_url_prefix']
+        account_prefix = self.cfg['account_url_prefix']
         if self.cfg['maintenance_mode'] and \
-           request.path != admin_prefix and not \
-           request.path.startswith(admin_prefix + '/'):
-            if not request.user.is_admin:
+           request.path not in (account_prefix, admin_prefix, js_translations) \
+           and not (request.path.startswith(admin_prefix + '/') or
+                    request.path.startswith(account_prefix + '/')):
+            if not request.user.has_privilege(
+                                        self.privileges['ENTER_ADMIN_PANEL']):
                 response = render_response('maintenance.html')
                 response.status_code = 503
                 return response(environ, start_response)
