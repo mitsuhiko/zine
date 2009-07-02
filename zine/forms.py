@@ -942,7 +942,7 @@ class EditProfileForm(_UserBoundForm):
                           validators=[is_valid_url()])
     password = forms.TextField(lazy_gettext(u'Password'),
                                widget=forms.PasswordInput)
-    password_confirm = forms.TextField(lazy_gettext(u'Confirm Password'),
+    password_confirm = forms.TextField(lazy_gettext(u'Confirm password'),
                                        widget=forms.PasswordInput,
                                        help_text=lazy_gettext(u'Confirm password'))
 

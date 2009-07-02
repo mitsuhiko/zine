@@ -48,7 +48,7 @@ DEFAULT_VARS = {
         u'confusingly.  Remember to change this value if you move your blog '
         u'to a new location.')),
     'blog_email':               TextField(default=u'', help_text=lazy_gettext(
-        u'The email address given here is by the notification system to send '
+        u'The email address given here is used by the notification system to send '
         u'mails from.  Also plugins that send mails will use this address as '
         u'sender address.'), validators=[is_valid_email]),
     'timezone':                 ChoiceField(choices=sorted(list_timezones()),
@@ -69,16 +69,13 @@ DEFAULT_VARS = {
     'theme':                    TextField(default=u'default'),
     'secret_key':               TextField(default=u'', help_text=lazy_gettext(
         u'The secret key is used for vairous security related tasks in the '
-        u'system.  For example the cookie is signed with this value.  By '
-        u'changing this value all uses are logged out automatically, '
-        u'including the administrator.')),
+        u'system.  For example the cookie is signed with this value.')),
     'language':                 ChoiceField(choices=list_languages(False),
                                             default=u'en'),
 
     'iid':                      TextField(default=u'', help_text=lazy_gettext(
         u'The iid uniquely identifies the Zine instance.  Currently this '
-        u'value is unused, but once set you should not modify it.  It will '
-        u'be used for statistics and by plugins to identify your blog.')),
+        u'value is unused, but once set you should not modify it.')),
 
     # log and development settings
     'log_file':                 TextField(default=u'zine.log'),
@@ -156,7 +153,7 @@ DEFAULT_VARS = {
         u'honored by some themes and is probably only used for the index page.')),
     'use_flat_comments':        BooleanField(default=False),
     'index_content_types':      CommaSeparated(TextField(),
-                                               default=lambda: ['entry']),
+                                               default=lambda: [u'entry']),
 
     # pages
     'show_page_title':          BooleanField(default=True),
