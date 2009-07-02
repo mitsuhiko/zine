@@ -1775,6 +1775,9 @@ class Textifier(object):
     def visit_script(self, element):
         raise self.Skip()
 
+    def visit_style(self, element):
+        raise self.Skip()
+
     def visit_unknown(self, element):
         pass
     def depart_unknown(self, element):
