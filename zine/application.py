@@ -1354,6 +1354,8 @@ class Zine(object):
 
         Thread(target=make_request).start()
         event.wait(timeout)
+        if not response:
+            raise NetException('Timeout on internal subrequest')
         if isinstance(response[0], tuple):
             exc_type, exc_value, tb = response[0]
             raise exc_type, exc_value, tb

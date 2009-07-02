@@ -145,7 +145,9 @@ DEFAULT_VARS = {
     'pings_enabled':            BooleanField(default=True),
 
     # post view
-    'posts_per_page':           IntegerField(default=10),
+    'posts_per_page':           IntegerField(default=10, help_text=lazy_gettext(
+        u'The number of posts that are shown on a page.  This value might not be '
+        u'honored by some themes and is probably only used for the index page.')),
     'use_flat_comments':        BooleanField(default=False),
     'index_content_types':      CommaSeparated(TextField(),
                                                default=lambda: ['entry']),
