@@ -112,7 +112,7 @@ def redirect(url, code=302, allow_external_redirect=False,
     request = get_request() 
     if request and not force_scheme_change and \
        not request.app.cfg['force_https']:
-        url = request.environ['wsgi.url_scheme'] + ':' + url.split(':', 1)
+        url = request.environ['wsgi.url_scheme'] + ':' + url.split(':', 1)[1]
     
     return _redirect(url, code)
 

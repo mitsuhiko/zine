@@ -182,6 +182,12 @@ class PlainTextParser(BaseParser):
     def _to_zeml(self, node):
         """Convert a potty-mouth node into a ZEML tree."""
         from zine._ext.pottymouth import Token
+        def add_text(node, text):
+            if node.children:
+                node.children[-1].tail += text
+            else:
+                node.text += text
+
         def convert(node, is_root):
             if is_root:
                 result = RootElement()
@@ -189,15 +195,25 @@ class PlainTextParser(BaseParser):
                 result = Element(node.name)
             if node._attributes:
                 result.attributes.update(node._attributes)
+
             for item in node:
                 if isinstance(item, (str, unicode, Token)):
-                    text = self._to_text(item)
-                    if result.children:
-                        result.children[-1].tail += text
-                    else:
-                        result.text += text
+                    add_text(result, self._to_text(item))
                 else:
-                    result.children.append(convert(item, False))
+                    child = convert(item, False)
+                    # remove the useless empty spans
+                    if child.name == 'span' and not child.attributes:
+                        add_text(result, child.text)
+                        result.children.extend(child.children)
+                        add_text(result, child.tail)
+                    else:
+                        result.children.append(child)
+
+            # fixes an output bug from pottymouth
+            if len(result.children) == 1 and node.name == 'p' and \
+               result.children[0].name == 'blockquote':
+                result = result.children[0]
+
             return result
         return convert(node, True)
 
