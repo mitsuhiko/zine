@@ -496,7 +496,7 @@ class _BaseElement(object):
             return u''.join(buffer)
 
     def to_text(self):
-        """Convers the element to text."""
+        """Converts the element to text."""
         result = [self.text]
         for child in self.children:
             result.append(child.to_text())
