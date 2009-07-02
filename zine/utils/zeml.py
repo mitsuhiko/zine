@@ -38,6 +38,7 @@ _tag_end_re = re.compile(r'\s*>(?u)')
 _entity_re = re.compile(r'&([^;]+);')
 _entity_re = re.compile(r'&([^;]+);')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
+_whitespace_re = re.compile(ur'\s+(?u)')
 _autoparagraphed_elements = set(['div', 'blockquote'])
 
 _entities = {
@@ -1484,7 +1485,7 @@ class Textifier(object):
         self.liststack = []
         self.table = None
         self.table_ncols = 0
-        self.keep_newlines = False
+        self.keep_whitespace = False
 
     def oneline(self, element):
         return u' '.join(self.multiline(element).splitlines()).strip()
@@ -1531,8 +1532,8 @@ class Textifier(object):
             else:
                 return ''
         text = ''.join(self.curpar).lstrip()
-        if not self.keep_newlines:
-            text = text.replace('\n', ' ')
+        if not self.keep_whitespace:
+            text = _whitespace_re.sub(u' ', text)
         self.curpar = []
         if wrap:
             # must return a list!
@@ -1657,10 +1658,10 @@ class Textifier(object):
         self.indentation -= self.INDENT
 
     def visit_pre(self, element):
-        self.keep_newlines = True
+        self.keep_whitespace = True
     def depart_pre(self, element):
         self.flush_par(nowrap=True)
-        self.keep_newlines = False
+        self.keep_whitespace = False
 
     def visit_table(self, element):
         if self.table:
@@ -1671,10 +1672,11 @@ class Textifier(object):
         for row in element.children:
             if row.name == 'tbody':
                 element = row
+                break
         for row in element.children:
             if row.name == 'tr':
                 for entry in row.children:
-                    if entry.name == 'td':
+                    if entry.name in ('td', 'th'):
                         self.table_ncols += 1
                 break
         if self.table_ncols == 0:
@@ -1694,6 +1696,7 @@ class Textifier(object):
             else:
                 cells = []
                 for i, cell in enumerate(line):
+                    print i, colwidths, line
                     par = textwrap.wrap(cell, width=colwidths[i])
                     if par:
                         maxwidth = max(map(len, par))
