@@ -1469,8 +1469,10 @@ class Textifier(object):
     class Skip(Exception):
         """Raise this to skip visiting children and departure."""
 
-    def __init__(self, initial_indent=0, max_width=WIDTH, collect_urls=False):
+    def __init__(self, initial_indent=0, max_width=WIDTH, collect_urls=False,
+                 ignore_relative_urls=True):
         self.collect_urls = collect_urls
+        self.ignore_relative_urls = ignore_relative_urls
         self.links = []
         self.result = UniStringIO()
 
@@ -1574,6 +1576,9 @@ class Textifier(object):
         pass
     def depart_a(self, element):
         if 'href' in element.attributes:
+            if self.ignore_relative_urls and \
+               not urlparse(element.attributes['href']).scheme:
+                return
             if self.collect_urls:
                 self.links.append(element.attributes['href'])
                 self.curpar.append(' [%s]' % len(self.links))
@@ -1753,6 +1758,9 @@ class Textifier(object):
 
     def depart__root(self, element):
         self.flush_par()
+
+    def visit_script(self, element):
+        raise self.Skip()
 
     def visit_unknown(self, element):
         pass
