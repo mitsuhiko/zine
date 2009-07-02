@@ -152,11 +152,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('groups', url_for('admin/manage_groups'), _(u'Groups'))
         ])
 
-    # add the about items to the navigation bar
-    system_items = [
-        ('help', url_for('admin/help'), _(u'Help')),
-        ('about', url_for('admin/about_zine'), _(u'About'))
-    ]
+    # add the help item to the navigation bar
+    system_items = [('help', url_for('admin/help'), _(u'Help'))]
 
     if request.user.has_privilege(BLOG_ADMIN):
         system_items[0:0] = [
@@ -1429,13 +1426,6 @@ def log(request, page):
         return redirect_to('admin/log', page=page.number)
     return render_admin_response('admin/log.html', 'system.log',
                                  page=page, form=form.as_widget())
-
-
-@require_admin_privilege()
-def about_zine(request):
-    """Just show the zine license and some other legal stuff."""
-    return render_admin_response('admin/about_zine.html',
-                                 'system.about')
 
 
 @require_admin_privilege()

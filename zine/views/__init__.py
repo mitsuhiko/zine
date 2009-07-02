@@ -90,7 +90,6 @@ all_views = {
     'admin/export':             admin.export,
     'admin/information':        admin.information,
     'admin/log':                admin.log,
-    'admin/about_zine':         admin.about_zine,
     'admin/help':               admin.help,
 }
 

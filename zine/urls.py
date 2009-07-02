@@ -121,7 +121,6 @@ def make_urls(app):
         Rule('/system/export', endpoint='admin/export'),
         Rule('/system/plugins/', endpoint='admin/plugins'),
         Rule('/system/plugins/<plugin>/remove', endpoint='admin/remove_plugin'),
-        Rule('/system/about', endpoint='admin/about_zine'),
         Rule('/system/help/', endpoint='admin/help'),
         Rule('/system/help/<path:page>', endpoint='admin/help'),
         Rule('/change_password', endpoint='admin/change_password',
