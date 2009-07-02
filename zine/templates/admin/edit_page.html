@@ -1,8 +1,8 @@
 {% extends "admin/layout.html" %}
 {% from "admin/_form_helpers.html" import render_formbox, render_post_actions %}
-{% block title %}{{
-  _("New Page") if form.new else _("Edit Page “%s”") % form.post.title
-}}{% endblock %}
+{% set title_suffix = _("New Page") if form.new else _("Edit Page") %}
+{% block title %}{% if form.post.title %}{{ form.post.title|e }} — {%
+  endif %}&#8203;{{ title_suffix }}{% endblock %}
 {% block contents %}
   {% if form.preview %}
     <h1>{{ _('Preview') }} (<a href="#form_start">{{ _('skip') }}</a>)</h1>
@@ -14,7 +14,7 @@
   {% endif %}
   <h1>{{ self.title() }}</h1>
   <a name="form_start" /></a>
-  {% call form() %}
+  {% call form(id="post_form") %}
     {%- if form.parser_missing %}
       <ul class="errors">
         <li><strong>{{ _("Important:") }}</strong>

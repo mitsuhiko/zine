@@ -1,19 +1,19 @@
 {% extends "admin/layout.html" %}
 {% from "admin/_form_helpers.html" import render_formbox, render_post_actions %}
-{% block title %}{{
-  _("New Entry") if form.new else _("Edit Entry “%s”") % form.post.title
-}}{% endblock %}
+{% set title_suffix = _("New Entry") if form.new else _("Edit Entry") %}
+{% block title %}{% if form.post.title %}{{ form.post.title|e }} — {%
+  endif %}&#8203;{{ title_suffix }}{% endblock %}
 {% block contents %}
   <h1>{{ self.title() }}</h1>
   {% if form.preview %}
     <div class="preview" id="preview">
-      <h2 class="title">{{ _('Preview') }} (<a href="#entry_form">{{ _('skip') }}</a>)</h2>
+      <h2 class="title">{{ _('Preview') }} (<a href="#post_form">{{ _('skip') }}</a>)</h2>
       <div class="text">
         {{ form.render_preview() }}
       </div>
     </div>
   {% endif %}
-  {% call form(id="entry_form") %}
+  {% call form(id="post_form") %}
     {%- if form.parser_missing %}
       <ul class="errors">
         <li><strong>{{ _("Important:") }}</strong>

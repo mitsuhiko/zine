@@ -33,9 +33,7 @@ $(function() {
     });
   });
 
-  /**
-   * Add bookmarklets to pages that want them
-   */
+  // Add bookmarklets to pages that want them
   (function() {
     var container = $('div.post-bookmarklets');
     if (!container.length)
@@ -66,9 +64,7 @@ $(function() {
       })));
   })();
 
-  /**
-   * Tag support for the post editor.
-   */
+  // Tag support for the post editor.
   (function() {
     var tag_field = $("#f_tags");
     if (tag_field.length)
@@ -81,5 +77,19 @@ $(function() {
           scrollHeight: 300
         });
       });
+  })();
+
+  // If we're on a new-post/edit-post page we can update the
+  // page title dynamically based on the text field.
+  (function() {
+    var input_box = $('#post_form #f_title');
+    if (input_box.length == 0)
+      return;
+
+    var title = document.title.split(/\u200B/, 2)[1];
+    input_box.bind('change', function() {
+      var arg = input_box.val();
+      document.title = (arg ? arg + ' — ' : '') + title; 
+    });
   })();
 });
