@@ -1474,7 +1474,6 @@ class Textifier(object):
                  ignore_relative_urls=True):
         self.collect_urls = collect_urls
         self.ignore_relative_urls = ignore_relative_urls
-        self.links = []
         self.result = UniStringIO()
 
         self.max_width = max_width
@@ -1486,6 +1485,13 @@ class Textifier(object):
         self.table = None
         self.table_ncols = 0
         self.keep_whitespace = False
+        self.collected_links = {}
+
+    def collect_link(self, link):
+        rv = self.collected_links.get(link)
+        if rv is None:
+            self.collected_links[link] = rv = len(self.collected_links) + 1
+        return rv
 
     def oneline(self, element):
         return u' '.join(self.multiline(element).splitlines()).strip()
@@ -1512,8 +1518,10 @@ class Textifier(object):
         getattr(self, 'depart_' + elname, self.depart_unknown)(element)
 
     def write_links(self):
-        for i, link in enumerate(self.links):
-            self.write('[%d] %s' % (i+1, link))
+        links = [(v, k) for k, v in self.collected_links.items()]
+        links.sort()
+        for i, link in links:
+            self.write('[%d] %s' % (i, link))
 
     def write(self, text='', nl=True, first=False):
         indent = self.indentation * ' '
@@ -1567,7 +1575,6 @@ class Textifier(object):
     visit_q = depart_q = simple_decorator('"')
     visit_samp = depart_samp = simple_decorator('`')
     visit_strong = depart_strong = simple_decorator('**')
-    visit_sup = depart_sup = simple_decorator('^')
     visit_s = depart_s = simple_decorator('-')
     visit_tt = depart_tt = simple_decorator('`')
     visit_u = depart_u = simple_decorator('_')
@@ -1581,8 +1588,8 @@ class Textifier(object):
                not urlparse(element.attributes['href']).scheme:
                 return
             if self.collect_urls:
-                self.links.append(element.attributes['href'])
-                self.curpar.append(' [%s]' % len(self.links))
+                link_id = self.collect_link(element.attributes['href'])
+                self.curpar.append(' [%s]' % link_id)
             else:
                 self.curpar.append(' <%s>' % element.attributes['href'])
 
@@ -1666,7 +1673,7 @@ class Textifier(object):
     def visit_table(self, element):
         if self.table:
             self.curpar.append('[[table]]')
-            raise Skip
+            raise self.Skip()
         self.table = []
         self.table_ncols = 0
         for row in element.children:
@@ -1677,7 +1684,8 @@ class Textifier(object):
             if row.name == 'tr':
                 for entry in row.children:
                     if entry.name in ('td', 'th'):
-                        self.table_ncols += 1
+                        span = max(entry.attributes.get_int('colspan', 1), 1)
+                        self.table_ncols += span
                 break
         if self.table_ncols == 0:
             # give up trying, but avoid ZeroDivisionErrors
@@ -1696,7 +1704,6 @@ class Textifier(object):
             else:
                 cells = []
                 for i, cell in enumerate(line):
-                    print i, colwidths, line
                     par = textwrap.wrap(cell, width=colwidths[i])
                     if par:
                         maxwidth = max(map(len, par))
@@ -1714,12 +1721,15 @@ class Textifier(object):
             self.write(''.join(out))
 
         def writerow(row):
-            lines = map(None, *row)
+            if len(row) == 1:
+                lines = [(x,) for x in row[0]]
+            else:
+                lines = map(None, *row)
             for line in lines:
                 out = ['|']
                 for i, cell in enumerate(line):
                     if cell:
-                        out.append(' ' + cell.ljust(realwidths[i]+1))
+                        out.append(' ' + cell.ljust(realwidths[i] + 1))
                     else:
                         out.append(' ' * (realwidths[i] + 2))
                     out.append('|')
