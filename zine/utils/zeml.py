@@ -14,7 +14,6 @@
 import re
 import struct
 import weakref
-import textwrap
 import cPickle as pickle
 from copy import deepcopy
 from StringIO import StringIO as UniStringIO
@@ -1470,6 +1469,14 @@ class Textifier(object):
     class Skip(Exception):
         """Raise this to skip visiting children and departure."""
 
+    class Cell(object):
+        """Represents a table cell."""
+        def __init__(self, lines, span):
+            self.lines = lines
+            self.span = span
+        def __iter__(self):
+            return iter(self.lines)
+
     def __init__(self, initial_indent=0, max_width=WIDTH, collect_urls=False,
                  ignore_relative_urls=True):
         self.collect_urls = collect_urls
@@ -1487,12 +1494,6 @@ class Textifier(object):
         self.keep_whitespace = False
         self.collected_links = {}
 
-    def collect_link(self, link):
-        rv = self.collected_links.get(link)
-        if rv is None:
-            self.collected_links[link] = rv = len(self.collected_links) + 1
-        return rv
-
     def oneline(self, element):
         return u' '.join(self.multiline(element).splitlines()).strip()
 
@@ -1502,6 +1503,7 @@ class Textifier(object):
         return self.result.getvalue()
 
     def textify(self, element):
+        """Convert one element and its children."""
         if not element:
             return
         elname = element.name.replace('#', '_')
@@ -1517,23 +1519,36 @@ class Textifier(object):
                 self.curpar.append(child.tail)
         getattr(self, 'depart_' + elname, self.depart_unknown)(element)
 
+    def collect_link(self, link):
+        """Add a link to the collection of links, and return the number
+        to reference it with.
+        """
+        rv = self.collected_links.get(link)
+        if rv is None:
+            self.collected_links[link] = rv = len(self.collected_links) + 1
+        return rv
+
     def write_links(self):
+        """Write all collected links."""
         links = [(v, k) for k, v in self.collected_links.items()]
         links.sort()
         for i, link in links:
             self.write('[%d] %s' % (i, link))
 
-    def write(self, text='', nl=True, first=False):
-        indent = self.indentation * ' '
-        if first:
-            self.result.write(indent[:self.indentfirstline or None] + text)
-            self.indentfirstline = 0
-        elif text: # don't write indentation only
-            self.result.write(indent + text)
-        if nl:
-            self.result.write('\n')
+    def flush_par(self, noskip=False, force=False, nowrap=False):
+        """Format and write the current paragraph."""
+        if nowrap:
+            par = self.get_par(wrap=False).splitlines()
+        else:
+            par = self.get_par(wrap=True)
+        if par or force:
+            for i, line in enumerate(par):
+                self.write(line, first=(i==0))
+            if not noskip:
+                self.write()
 
     def get_par(self, wrap, width=None):
+        """Format and return the current paragraph, and reset it."""
         if not self.curpar:
             if wrap:
                 return []
@@ -1550,16 +1565,224 @@ class Textifier(object):
         else:
             return text
 
-    def flush_par(self, noskip=False, force=False, nowrap=False):
-        if nowrap:
-            par = self.get_par(wrap=False).splitlines()
+    def write(self, text='', nl=True, first=False):
+        """Write a line of text to the output buffer."""
+        indent = self.indentation * ' '
+        if first:
+            self.result.write(indent[:self.indentfirstline or None] + text)
+            self.indentfirstline = 0
+        elif text: # don't write indentation only
+            self.result.write(indent + text)
+        if nl:
+            self.result.write('\n')
+
+    # -- block element visitors
+
+    def hx_depart(c):
+        def depart(self, element):
+            par = self.get_par(wrap=False)
+            self.write(par)
+            self.write(c * len(par))
+            self.write()
+        return depart
+
+    depart_h1 = hx_depart('=')
+    depart_h2 = hx_depart('-')
+    depart_h3 = hx_depart('~')
+    depart_h4 = hx_depart('^')
+    depart_h5 = hx_depart('`')
+    depart_h6 = hx_depart('`')
+
+    def visit_p(self, element):
+        pass
+    def depart_p(self, element):
+        self.flush_par()
+
+    def visit_blockquote(self, element):
+        self.indentation += self.INDENT
+    def depart_blockquote(self, element):
+        self.flush_par()
+        self.indentation -= self.INDENT
+
+    def visit_ul(self, element):
+        self.flush_par()
+        self.liststack.append(None)
+    def depart_ul(self, element):
+        self.liststack.pop()
+        self.flush_par(force=True)
+    visit_dir = visit_ul
+    depart_dir = depart_ul
+
+    def visit_ol(self, element):
+        self.flush_par()
+        self.liststack.append(1)
+    def depart_ol(self, element):
+        self.liststack.pop()
+        self.flush_par(force=True)
+
+    def visit_li(self, element):
+        if self.liststack and self.liststack[-1] is not None:
+            indent = 4
+            self.curpar.append('%-3s ' % (str(self.liststack[-1]) + '.'))
+            self.liststack[-1] += 1
         else:
-            par = self.get_par(wrap=True)
-        if par or force:
-            for i, line in enumerate(par):
-                self.write(line, first=(i==0))
-            if not noskip:
-                self.write()
+            indent = 2
+            self.curpar.append('* ')
+        self.indentfirstline = -indent
+        self.indentation += indent
+        self.context.append(indent)
+    def depart_li(self, element):
+        self.flush_par(noskip=True)
+        self.indentation -= self.context.pop()
+
+    def visit_dt(self, element):
+        pass
+    def depart_dt(self, element):
+        self.flush_par(noskip=True)
+
+    def visit_dd(self, element):
+        self.indentation += self.INDENT
+    def depart_dd(self, element):
+        self.flush_par()
+        self.indentation -= self.INDENT
+
+    def visit_pre(self, element):
+        self.keep_whitespace = True
+    def depart_pre(self, element):
+        self.flush_par(nowrap=True)
+        self.keep_whitespace = False
+
+    # -- table element visitors
+
+    def visit_table(self, element):
+        self.flush_par()
+        if self.table:
+            self.curpar.append('[[table]]')
+            raise self.Skip()
+        self.table = []
+        # find number of table columns
+        firstrow = element.query('/tbody/tr').first or \
+                   element.query('/thead/tr').first or \
+                   element.query('/tfoot/tr').first or \
+                   element.query('/tr').first
+        if firstrow is None:
+            raise self.Skip()
+        self.table_ncols = 0
+        for entry in firstrow.children:
+            if entry.name in ('td', 'th'):
+                span = max(entry.attributes.get_int('colspan', 1), 1)
+                self.table_ncols += span
+        available_width = self.max_width - self.indentation
+        self.table_colwidth = (available_width - 5) / self.table_ncols
+        if self.table_colwidth < 10:
+            self.table_colwidth = 10
+    def depart_table(self, element):
+        rows = []
+        ncols = self.table_ncols
+        realwidths = [0] * ncols
+        separator = 0
+
+        # find out the real columns widths, pass 1: single cells
+        for row_or_sep in self.table:
+            if row_or_sep == 'sep':
+                separator = len(rows)
+            else:
+                for i, cell in enumerate(row_or_sep):
+                    if cell and cell.span == 1 and cell.lines:
+                        maxwidth = max(map(len, cell.lines))
+                        realwidths[i] = max(realwidths[i], maxwidth)
+                rows.append(row_or_sep)
+        # pass 2: colspans
+        for row in rows:
+            for i, cell in enumerate(row):
+                if cell and cell.span > 1:
+                    maxwidth = max(map(len, cell.lines))
+                    if i + cell.span - 1 < ncols:
+                        cumwidth = sum(realwidths[j]
+                                       for j in range(i, i+cell.span))
+                        if cumwidth < maxwidth:
+                            realwidths[i] += (maxwidth - cumwidth)
+
+        def writesep(char='-'):
+            out = ['+']
+            for width in realwidths:
+                out.append(char * (width+2))
+                out.append('+')
+            self.write(''.join(out))
+
+        def writerow(row):
+            if len(row) == 1:
+                lines = [(x,) for x in row[0]]
+            else:
+                lines = map(None, *row)
+            for line in lines:
+                out = []
+                for i, (cellline, cell) in enumerate(zip(line, row)):
+                    if cell:
+                        out.append('|')
+                        if cell.span > 1:
+                            cumwidth = sum(realwidths[j]
+                                           for j in range(i, i+cell.span))
+                            out.append(' ' + (cellline or '').ljust(
+                                cumwidth + 3 * cell.span - 2))
+                        else:
+                            out.append(' ' + (cellline or '').ljust(realwidths[i] + 1))
+                out.append('|')
+                self.write(''.join(out))
+
+        for i, row in enumerate(rows):
+            if separator and i == separator:
+                writesep('=')
+            else:
+                writesep('-')
+            writerow(row)
+        writesep('-')
+        self.table = None
+        self.flush_par(force=True)
+
+    def visit_tbody(self, element):
+        self.table.append('sep')
+
+    def visit_tr(self, element):
+        self.table.append([])
+
+    def visit_caption(self, element):
+        self.table.append([])
+        self.visit_td(element, span=self.table_ncols)
+
+    def visit_td(self, element, span=None):
+        old_result = self.result
+        old_max_width = self.max_width
+        old_indentation = self.indentation
+        old_table = self.table
+        old_table_ncols = self.table_ncols
+        old_table_colwidth = self.table_colwidth
+
+        self.result = UniStringIO()
+        if span is None:
+            span = max(element.attributes.get_int('colspan', 1), 1)
+        self.max_width = self.table_colwidth * span
+        self.indentation = 0
+        self.table = None
+        rootel = RootElement()
+        rootel.text = element.text
+        rootel.children = element.children
+        self.textify(rootel)
+        old_table[-1].append(self.Cell(
+            self.result.getvalue().rstrip().splitlines(), span))
+        old_table[-1].extend([[]] * (span-1))
+
+        self.result = old_result
+        self.max_width = old_max_width
+        self.indentation = old_indentation
+        self.table = old_table
+        self.table_ncols = old_table_ncols
+        self.table_colwidth = old_table_colwidth
+
+        raise self.Skip
+    visit_th = visit_td
+
+    # -- inline element visitors
 
     def simple_decorator(s):
         def visit_or_depart(self, element):
@@ -1598,170 +1821,7 @@ class Textifier(object):
         if alt:
             self.curpar.append('[%s]' % alt)
 
-    def hx_depart(c):
-        def depart(self, element):
-            par = self.get_par(wrap=False)
-            self.write(par)
-            self.write(c * len(par))
-            self.write()
-        return depart
-
-    depart_h1 = hx_depart('=')
-    depart_h2 = hx_depart('-')
-    depart_h3 = hx_depart('~')
-    depart_h4 = hx_depart('^')
-    depart_h5 = hx_depart('`')
-    depart_h6 = hx_depart('`')
-
-    def visit_p(self, element):
-        pass
-    def depart_p(self, element):
-        self.flush_par()
-
-    def visit_blockquote(self, element):
-        self.indentation += self.INDENT
-    def depart_blockquote(self, element):
-        self.flush_par()
-        self.indentation -= self.INDENT
-
-    def visit_ul(self, element):
-        self.liststack.append(None)
-    def depart_ul(self, element):
-        self.liststack.pop()
-        self.flush_par(force=True)
-    visit_dir = visit_ul
-    depart_dir = depart_ul
-
-    def visit_ol(self, element):
-        self.liststack.append(1)
-    def depart_ol(self, element):
-        self.liststack.pop()
-        self.flush_par(force=True)
-
-    def visit_li(self, element):
-        if self.liststack and self.liststack[-1] is not None:
-            indent = 4
-            self.curpar.append('%-3s ' % (str(self.liststack[-1]) + '.'))
-            self.liststack[-1] += 1
-        else:
-            indent = 2
-            self.curpar.append('* ')
-        self.indentfirstline = -indent
-        self.indentation += indent
-        self.context.append(indent)
-    def depart_li(self, element):
-        self.flush_par(noskip=True)
-        self.indentation -= self.context.pop()
-
-    def visit_dt(self, element):
-        pass
-    def depart_dt(self, element):
-        self.flush_par(noskip=True)
-
-    def visit_dd(self, element):
-        self.indentation += self.INDENT
-    def depart_dd(self, element):
-        self.flush_par()
-        self.indentation -= self.INDENT
-
-    def visit_pre(self, element):
-        self.keep_whitespace = True
-    def depart_pre(self, element):
-        self.flush_par(nowrap=True)
-        self.keep_whitespace = False
-
-    def visit_table(self, element):
-        if self.table:
-            self.curpar.append('[[table]]')
-            raise self.Skip()
-        self.table = []
-        self.table_ncols = 0
-        for row in element.children:
-            if row.name == 'tbody':
-                element = row
-                break
-        for row in element.children:
-            if row.name == 'tr':
-                for entry in row.children:
-                    if entry.name in ('td', 'th'):
-                        span = max(entry.attributes.get_int('colspan', 1), 1)
-                        self.table_ncols += span
-                break
-        if self.table_ncols == 0:
-            # give up trying, but avoid ZeroDivisionErrors
-            self.table_ncols = 1
-    def depart_table(self, element):
-        lines = self.table
-        fmted_rows = []
-        available_width = self.max_width - self.indentation
-        colwidths = [available_width / self.table_ncols] * self.table_ncols
-        realwidths = colwidths[:]
-        separator = 0
-        # don't allow paragraphs in table cells for now
-        for line in lines:
-            if line == 'sep':
-                separator = len(fmted_rows)
-            else:
-                cells = []
-                for i, cell in enumerate(line):
-                    par = textwrap.wrap(cell, width=colwidths[i])
-                    if par:
-                        maxwidth = max(map(len, par))
-                    else:
-                        maxwidth = 0
-                    realwidths[i] = max(realwidths[i], maxwidth)
-                    cells.append(par)
-                fmted_rows.append(cells)
-
-        def writesep(char='-'):
-            out = ['+']
-            for width in realwidths:
-                out.append(char * (width+2))
-                out.append('+')
-            self.write(''.join(out))
-
-        def writerow(row):
-            if len(row) == 1:
-                lines = [(x,) for x in row[0]]
-            else:
-                lines = map(None, *row)
-            for line in lines:
-                out = ['|']
-                for i, cell in enumerate(line):
-                    if cell:
-                        out.append(' ' + cell.ljust(realwidths[i] + 1))
-                    else:
-                        out.append(' ' * (realwidths[i] + 2))
-                    out.append('|')
-                self.write(''.join(out))
-
-        for i, row in enumerate(fmted_rows):
-            if separator and i == separator:
-                writesep('=')
-            else:
-                writesep('-')
-            writerow(row)
-        writesep('-')
-        self.table = None
-        self.flush_par(force=True)
-
-    def visit_tbody(self, element):
-        self.table.append('sep')
-    def depart_tbody(self, element):
-        pass
-
-    def visit_tr(self, element):
-        self.table.append([])
-    def depart_tr(self, element):
-        pass
-
-    def visit_td(self, element):
-        pass
-    def depart_td(self, element):
-        text = self.get_par(False)
-        self.table[-1].append(text)
-    visit_th = visit_td
-    depart_th = depart_td
+    # -- special element visitors
 
     def visit__html(self, element):
         self.curpar.append('[[HTML]]')
@@ -1777,6 +1837,9 @@ class Textifier(object):
 
     def visit_style(self, element):
         raise self.Skip()
+
+    def depart_div(self, element):
+        self.flush_par()
 
     def visit_unknown(self, element):
         pass

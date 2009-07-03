@@ -22,6 +22,9 @@ DEFAULT_PRIVILEGES = {}
 
 class _Expr(object):
 
+    def __iter__(self):
+        yield self
+
     def __and__(self, other):
         return _And(self, other)
 
@@ -33,19 +36,31 @@ class _Expr(object):
 
 
 class _Bin(_Expr):
+    joiner = 'BIN'
 
     def __init__(self, a, b):
         self.a = a
         self.b = b
 
+    def __iter__(self):
+        for item in self.a:
+            yield item
+        for item in self.b:
+            yield item
+
+    def __repr__(self):
+        return '(%r %s %r)' % (self.a, self.joiner, self.b)
+
 
 class _And(_Bin):
+    joiner = '&'
 
     def __call__(self, privileges):
         return self.a(privileges) and self.b(privileges)
 
 
 class _Or(_Bin):
+    joiner = '|'
 
     def __call__(self, privileges):
         return self.a(privileges) or self.b(privileges)
@@ -73,10 +88,7 @@ class Privilege(_Expr):
         return self in privileges
 
     def __repr__(self):
-        return u'<%s %r>' % (
-            self.__class__.__name__,
-            self.name
-        )
+        return self.name
 
 
 def add_admin_privilege(privilege):
