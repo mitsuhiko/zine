@@ -1605,6 +1605,7 @@ class Textifier(object):
         self.indentation -= self.INDENT
 
     def visit_ul(self, element):
+        self.flush_par()
         self.liststack.append(None)
     def depart_ul(self, element):
         self.liststack.pop()
@@ -1613,6 +1614,7 @@ class Textifier(object):
     depart_dir = depart_ul
 
     def visit_ol(self, element):
+        self.flush_par()
         self.liststack.append(1)
     def depart_ol(self, element):
         self.liststack.pop()
@@ -1686,7 +1688,7 @@ class Textifier(object):
                 separator = len(rows)
             else:
                 for i, cell in enumerate(row_or_sep):
-                    if cell and cell.span == 1:
+                    if cell and cell.span == 1 and cell.lines:
                         maxwidth = max(map(len, cell.lines))
                         realwidths[i] = max(realwidths[i], maxwidth)
                 rows.append(row_or_sep)
