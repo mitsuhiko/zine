@@ -5,4 +5,3 @@ License: BSD
 Version: %ZINE_VERSION%
 Description: Adds support for various legacy weblog APIs such as\
  MetaWeblog, WordPress or MovableType.
- 
