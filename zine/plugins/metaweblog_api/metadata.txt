@@ -1,8 +1,0 @@
-Name: MetaWeblog API
-Plugin URL: http://zine.pocoo.org/plugins/rst_parser
-Author: Armin Ronacher <armin.ronacher@active-4.com>
-License: BSD
-Version: %ZINE_VERSION%
-Description: Adds support for writing posts using the MetaWeblog API.
-Description[de]: Fügt Unterstützung für das Schreiben von Blogposts mit Hilfe\
- der MetaWeblog API hinzu.

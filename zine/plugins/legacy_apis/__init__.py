@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    zine.plugins.metaweblog_api
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    zine.plugins.legacy_api
+    ~~~~~~~~~~~~~~~~~~~~~~~
 
     This plugin adds support for various legacy APIs.  Currently the
     following APIs are at least partially supported:
