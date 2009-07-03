@@ -1122,7 +1122,7 @@ class Zine(object):
     @setuponly
     def add_notification_type(self, type):
         """Registers a new notification type on the instance."""
-        self.notification_types[type.name] = type
+        self.notification_manager.add_notification_type(type)
 
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""

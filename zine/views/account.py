@@ -80,6 +80,8 @@ def render_account_response(template_name, _active_menu_item=None, **values):
     # event afterwards all flashes messages would appear in the request
     # after the current request.
     values['account'] = {
+        'user_can_enter_admin_panel':
+                        request.user.has_privilege(ENTER_ADMIN_PANEL),
         'navbar': [{
             'id':       id,
             'url':      url,
@@ -207,6 +209,8 @@ def notification_settings(request):
         form=form.as_widget(),
         systems=sorted(request.app.notification_manager.systems.values(),
                        key=lambda x: x.name.lower()),
-        notification_types=sorted(request.app.notification_types.values(),
-                                  key=lambda x: x.description.lower())
+        notification_types=sorted(
+            request.app.notification_manager.types(request.user),
+            key=lambda x: x.description.lower()
+        )
     )

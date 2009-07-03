@@ -40,6 +40,13 @@ def main():
     instance = options.instance or find_instance()
     if instance is None:
         parser.error('instance not found.  Specify path to instance')
+    if options.instance:
+        # Consume -I/--instance
+        for option in ('-I', '--instance'):
+            if option in sys.argv:
+                pop_index = sys.argv.index(option)
+                sys.argv.pop(pop_index) # pop option flag
+                sys.argv.pop(pop_index) # pop option value
 
     make_shell(lambda: init_func(instance), banner='Zine Shell [%s]' %
                abspath(instance))(ipython=not options.no_ipython)

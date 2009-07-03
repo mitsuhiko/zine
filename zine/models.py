@@ -1352,5 +1352,9 @@ db.mapper(SummarizedPost, posts, properties={
 }, order_by=posts.c.pub_date.desc())
 db.mapper(NotificationSubscription, notification_subscriptions, properties={
     'id':               notification_subscriptions.c.subscription_id,
-    'user':             db.relation(User, uselist=False, lazy=False)
+    'user':             db.relation(User, uselist=False, lazy=False,
+                            backref=db.backref('notification_subscriptions',
+                                               lazy='dynamic'
+                            )
+                        )
 })
