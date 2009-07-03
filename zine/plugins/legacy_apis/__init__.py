@@ -15,8 +15,9 @@
 """
 from zine.api import get_request, url_for, db
 from zine.utils.xml import XMLRPC, Fault
-from zine.models import User, Post, STATUS_PUBLISHED, STATUS_DRAFT
-from zine.privileges import CREATE_ENTRIES, CREATE_PAGES, BLOG_ADMIN
+from zine.models import User, Post, Category, STATUS_PUBLISHED, STATUS_DRAFT
+from zine.privileges import CREATE_ENTRIES, CREATE_PAGES, BLOG_ADMIN, \
+     MANAGE_CATEGORIES
 
 from werkzeug import escape
 
@@ -104,13 +105,7 @@ def select_parser(app, struct, default='html'):
     return parser
 
 
-def generic_new_post(request, struct, publish, content_type):
-    """Generic helper to create a new entry or page."""
-    text = extract_text(struct)
-    post = Post(struct['title'], request.user, text,
-                parser=select_parser(request.app, struct),
-                content_type=content_type)
-
+def generic_update(request, post, struct, publish):
     # if we got keywords provided, we put them on the post.
     # if an empty list came by, we remove them too, but if the
     # key is used for something that is not an array, we ignore it.
@@ -123,18 +118,28 @@ def generic_new_post(request, struct, publish, content_type):
     else:
         post.status = STATUS_DRAFT
 
+    if 'mt_allow_pings' in struct:
+        post.pings_enabled = bool(struct['mt_allow_pings'])
+    if 'mt_allow_comments' in struct:
+        post.comments_enabled = bool(struct['mt_allow_comments'])
+
+
+def generic_new_post(request, struct, publish, content_type):
+    """Generic helper to create a new entry or page."""
+    text = extract_text(struct)
+    post = Post(struct['title'], request.user, text,
+                parser=select_parser(request.app, struct),
+                content_type=content_type)
+    generic_update(request, post, struct, publish)
     return post
 
 
-def generic_edit_post(request, struct, publish):
+def generic_edit_post(request, post, struct, publish):
     """Generic helper to edit an entry or page."""
     post.parser = select_parser(request.app, struct)
     post.title = struct['title']
     post.text = extract_text(struct)
-    if publish:
-        post.status = STATUS_PUBLISHED
-    else:
-        post.status = STATUS_DRAFT
+    generic_update(request, post, struct, publish)
 
 
 def metaweblog_new_post(blog_id, username, password, struct, publish):
@@ -154,7 +159,7 @@ def metaweblog_edit_post(post_id, username, password, struct, publish):
         raise Fault(404, 'No such post')
     if not post.can_edit():
         raise Failt(403, 'missing privileges')
-    generic_edit_post(request, post, struct)
+    generic_edit_post(request, post, struct, publish)
     db.commit()
     return dump_post(post)
 
@@ -233,7 +238,7 @@ def wp_edit_page(blog_id, page_id, username, password, content, publish):
         raise Fault(404, 'no such page')
     if not page.can_edit():
         raise Fault(403, 'you don\'t have access to this page')
-    generic_edit_post(request, page, struct)
+    generic_edit_post(request, page, struct, publish)
     db.commit()
     return dump_post(post)
 
@@ -243,6 +248,8 @@ def wp_delete_page(blog_id, username, password, page_id):
     page = Page.query.get(page_id)
     if page is None or page.content_type != 'page':
         raise Fault(404, 'no such page')
+    if not page.can_edit():
+        raise Fault(403, 'you don\'t have privilegs to this post')
     db.delete(page)
     db.commit()
     return True
@@ -253,7 +260,61 @@ def wp_get_page_list(blog_id, username, password):
     return map(dump_page, Page.query.filter_by(content_type='page').all())
 
 
-service = XMLRPC()
+def wp_new_category(blog_id, username, password, struct):
+    request = login(username, password)
+    if not request.user.has_privilege(MANAGE_CATEGORIES):
+        raise Fault(403, 'you are not allowed to manage categories')
+    category = Category(struct['name'], struct.get('description', u''),
+                        slug=struct.get('slug') or None)
+    db.commit()
+    return category.id
+
+
+def wp_delete_category(blog_id, username, password, category_id):
+    request = login(username, password)
+    if not request.user.has_privilege(MANAGE_CATEGORIES):
+        raise Fault(403, 'you are not allowed to manage categories')
+    category = Category.query.get(category_id)
+    if category is None:
+        raise Fault(404, 'no such category')
+    db.delete(category)
+    db.commit()
+    return category.id
+
+
+def mt_get_post_categories(post_id, username, password):
+    request = login(username, password)
+    post = Post.query.get(post_id)
+    if post is None or post.content_type != 'entry':
+        raise Fault(404, 'no such post')
+    if not post.can_read():
+        raise Fault(403, 'you don\'t have privilegs to this post')
+    return map(dump_category, post.categories)
+
+
+def mt_set_post_categories(post_id, username, password, categories):
+    request = login(username, password)
+    post = Post.query.get(post_id)
+    if post is None or post.content_type != 'entry':
+        raise Fault(404, 'no such post')
+    if not post.can_edit():
+        raise Fault(403, 'you don\'t have privilegs to this post')
+    ids = []
+    names = []
+    for category in categories:
+        if 'categoryId' in category:
+            ids.append(category['categoryId'])
+        elif 'categoryName' in category:
+            names.append(category['categoryName'])
+    post.bind_categories(Category.query.filter(
+        Category.id.in_(ids) |
+        Category.name.in_(names)
+    ).all())
+    db.commit()
+    return True
+
+
+service = XMLRPC('legacy_apis')
 
 # MetaWeblog
 service.register_functions([
@@ -283,17 +344,16 @@ service.register_functions([
     (wp_new_page, 'wp.newPage'),
     (wp_edit_page, 'wp.editPage'),
     (wp_delete_page, 'wp.deletePage'),
-    (wp_get_page_list, 'wp.getPageList')
+    (wp_get_page_list, 'wp.getPageList'),
+    (wp_new_category, 'wp.newCategory'),
+    (wp_delete_category, 'wp.deleteCategory')
 ])
 
-
-# Missing functions from WordPress API:
-#
-#'wp.getAuthors', 'wp.getCategories', 'wp.getTags', 'wp.newCategory', 'wp.deleteCategory'
-#'wp.suggestCategories', 'wp.uploadFile', 'wp.getCommentCount', 'wp.getPostStatusList'
-#'wp.getPageStatusList', 'wp.getPageTemplates', 'wp.getOptions', 'wp.setOptions'
-#'wp.getComment', 'wp.getComments', 'wp.deleteComment', 'wp.editComment'
-#'wp.newComment', 'wp.getCommentStatusList'
+# MovableType
+service.register_functions([
+    (mt_get_post_categories, 'mt.getPostCategories'),
+    (mt_set_post_categories, 'mt.setPostCategories')
+])
 
 
 def setup(app, plugin):

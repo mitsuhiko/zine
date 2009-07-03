@@ -278,7 +278,7 @@ def pingback_post(response, target_uri, slug):
 
 
 # the pingback service the application registers on creation
-service = XMLRPC()
+service = XMLRPC('pingback')
 service.register_function(handle_pingback_request, 'pingback.ping')
 
 # a dict of default pingback endpoints (non plugin endpoints)

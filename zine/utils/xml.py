@@ -158,7 +158,9 @@ class XMLRPC(object):
     """
     charset = 'utf-8'
 
-    def __init__(self, no_introspection=False, allow_none=True):
+    def __init__(self, name='unamed', no_introspection=False,
+                 allow_none=True):
+        self.name = name
         self.no_introspection = no_introspection
         self.allow_none = allow_none
         self.funcs = {}
@@ -215,6 +217,8 @@ class XMLRPC(object):
         """
         func = self.funcs.get(method)
         if func is None:
+            log.info('Client tried to access missing XMLRPC method %r on '
+                     'XMLRPC dispatcher "%s"' % (method, self.name), 'xmlrpc')
             raise xmlrpclib.Fault(1, 'method "%s" is not supported' % method)
         return func(*args)
 
