@@ -14,7 +14,7 @@ from zine.models import User, Post
 
 
 def authenticated(f):
-    def proxy(blog_id, username, password, *args):
+    def proxy(some_id, username, password, *args):
         user = User.query.filter_by(username=username).first()
         if user is None or not user.check_password(password):
             raise Fault(403, 'Bad login/pass combination.')
@@ -23,7 +23,7 @@ def authenticated(f):
         # inside Zine work on the request of this user.
         request = get_request()
         request.user = user
-        return f(request, *args)
+        return f(request, some_id, *args)
     proxy.__name__ = f.__name__
     return proxy
 
@@ -42,13 +42,14 @@ def dump_post(post):
         author=post.author.email,
         categories=sorted(set([x.name for x in post.tags] +
                               [x.name for x in post.categories]),
-                          key=lambda x: x.lower())
+                          key=lambda x: x.lower()),
+        postid=post.id
     )
 
 
 @authenticated
-def metaweblog_new_post(request, struct, publish):
-    text = struct.get('text', '')
+def metaweblog_new_post(request, blog_id, struct, publish):
+    text = struct.get('description', '')
     excerpt = struct.get('post_excerpt')
     if excerpt:
         text = u'<intro>%s</intro>\n%s' % (excerpt, text)
@@ -60,13 +61,19 @@ def metaweblog_new_post(request, struct, publish):
 
 
 @authenticated
-def metaweblog_edit_post(request, struct, publish):
+def metaweblog_edit_post(request, post_id, struct, publish):
+    #print struct
     pass
 
 
 @authenticated
-def metaweblog_get_post(request, struct, publish):
-    pass
+def metaweblog_get_post(request, post_id):
+    post = Post.query.get(post_id)
+    if post is None:
+        raise Fault(404, "No such post")
+    if not post.can_read():
+        raise Fault(403, "You don't have access to this post")
+    return dump_post(post)
 
 
 @authenticated
