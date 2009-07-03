@@ -8,7 +8,11 @@
 
     - WordPress
     - MetaWeblog
-    - Blogger
+    - Blogger *
+    - MovableType *
+
+    APIs marked with a star are not really supported.  For those only the
+    subset required by MarsEdit for the wordpress support is implemented.
 
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
@@ -371,3 +375,4 @@ def setup(app, plugin):
     app.add_api('MetaWeblog', False, service)
     app.add_api('WordPress', True, service)
     app.add_api('Blogger', False, service)
+    app.add_api('MovableType', False, service)
