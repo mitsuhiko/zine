@@ -22,8 +22,8 @@ DEFAULT_PRIVILEGES = {}
 
 class _Expr(object):
 
-    def __iter__(self):
-        yield self
+    def iter_privileges(self, cache=None):
+        raise NotImplementedError()
 
     def __and__(self, other):
         return _And(self, other)
@@ -42,11 +42,12 @@ class _Bin(_Expr):
         self.a = a
         self.b = b
 
-    def __iter__(self):
-        for item in self.a:
-            yield item
-        for item in self.b:
-            yield item
+    def iter_privileges(self, cache=None):
+        if cache is None:
+            cache = set()
+        for op in self.a, self.b:
+            for item in op.iter_privileges(cache):
+                yield item
 
     def __repr__(self):
         return '(%r %s %r)' % (self.a, self.joiner, self.b)
@@ -83,6 +84,14 @@ class Privilege(_Expr):
         self.name = name
         self.explanation = explanation
         self.dependencies = privilege_dependencies
+
+    def iter_privileges(self, cache=None):
+        if cache is None:
+            cache = set([self])
+            yield self
+        elif self not in cache:
+            cache.add(self)
+            yield self
 
     def __call__(self, privileges):
         return self in privileges
