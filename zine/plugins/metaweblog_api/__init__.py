@@ -47,23 +47,43 @@ def dump_post(post):
     )
 
 
-@authenticated
-def metaweblog_new_post(request, blog_id, struct, publish):
+def extract_text(struct):
     text = struct.get('description', '')
     excerpt = struct.get('post_excerpt')
     if excerpt:
         text = u'<intro>%s</intro>\n%s' % (excerpt, text)
-    post = Post(struct['title'], request.user, text, parser='zeml')
+    return text
+
+
+def select_parser(app, struct):
+    parser = struct.get('parser')
+    if parser is None:
+        return 'html'
+    if parser not in app.parsers:
+        raise Fault(500, 'unknown parser')
+    return parser
+
+
+@authenticated
+def metaweblog_new_post(request, blog_id, struct, publish):
+    text = extract_text(struct)
+    post = Post(struct['title'], request.user, text,
+                parser=select_parser(request.app, struct))
     link = url_for(post, _external=True)
     db.commit()
-
     return dump_post(post)
 
 
 @authenticated
 def metaweblog_edit_post(request, post_id, struct, publish):
-    #print struct
-    pass
+    post = Post.query.get(post_id)
+    if post is None:
+        raise Fault(404, "No such post")
+    post.parser = select_parser(request.app, struct)
+    post.title = struct['title']
+    post.text = extract_text(struct)
+    db.commit()
+    return dump_post(post)
 
 
 @authenticated
@@ -77,12 +97,15 @@ def metaweblog_get_post(request, post_id):
 
 
 @authenticated
-def metaweblog_get_recent_posts(request, number_of_posts):
+def metaweblog_get_recent_posts(request, blog_id, number_of_posts):
     number_of_posts = min(50, number_of_posts)
+    # XXX: filter the ones you can't read (could this be the case?)
     return map(dump_post, Post.query.limit(number_of_posts).all())
 
 
 service = XMLRPC()
+
+# MetaWeblog
 service.register_function(metaweblog_new_post, 'metaWeblog.newPost')
 service.register_function(metaweblog_edit_post, 'metaWeblog.editPost')
 service.register_function(metaweblog_get_post, 'metaWeblog.getPost')
