@@ -24,6 +24,7 @@ def _login(username, password):
     request.user = user
     return request
 
+
 def authenticated(f):
     def proxy(some_id, username, password, *args):
         request = _login(username, password)
@@ -98,7 +99,9 @@ def metaweblog_new_post(request, blog_id, struct, publish):
 def metaweblog_edit_post(request, post_id, struct, publish):
     post = Post.query.get(post_id)
     if post is None:
-        raise Fault(404, "No such post")
+        raise Fault(404, 'No such post')
+    if not post.can_edit():
+        raise Failt(403, 'missing privileges')
     post.parser = select_parser(request.app, struct)
     post.title = struct['title']
     post.text = extract_text(struct)
@@ -110,9 +113,9 @@ def metaweblog_edit_post(request, post_id, struct, publish):
 def metaweblog_get_post(request, post_id):
     post = Post.query.get(post_id)
     if post is None:
-        raise Fault(404, "No such post")
+        raise Fault(404, 'No such post')
     if not post.can_read():
-        raise Fault(403, "You don't have access to this post")
+        raise Fault(403, 'You don\'t have access to this post')
     return dump_post(post)
 
 
@@ -126,9 +129,9 @@ def metaweblog_get_recent_posts(request, blog_id, number_of_posts):
 def wp_get_users_blogs(username, password): # XXX security check missing
     request = _login(username, password)
     return [{'isAdmin': request.user.is_manager,
-             'url': request.app.cfg["blog_url"],
+             'url': request.app.cfg['blog_url'],
              'blogid': 1,
-             'blogName': request.app.cfg["blog_title"],
+             'blogName': request.app.cfg['blog_title'],
              'xmlrpc': url_for("services/WordPress", _external=True)}]
 
 
@@ -136,29 +139,28 @@ def wp_get_page(blog_id, page_id, username, password):
     request = _login(username, password)
     post = Post.query.get(page_id)
     if post is None:
-        raise Fault(404, "No such post")
+        raise Fault(404, 'No such post')
     if not post.can_read():
-        raise Fault(403, "You don't have access to this post")
+        raise Fault(403, 'You don\'t have access to this post')
     return dump_post(post)
 
 
+service = XMLRPC()
 
 # MetaWeblog
-service_metaweblog = XMLRPC()
-service_metaweblog.register_functions([
+service.register_functions([
     (metaweblog_new_post, 'metaWeblog.newPost'),
     (metaweblog_edit_post, 'metaWeblog.editPost'),
     (metaweblog_get_post, 'metaWeblog.getPost'),
     (metaweblog_get_recent_posts, 'metaWeblog.getRecentPosts'),
 ])
 
-
 # WordPress
-service_wp = XMLRPC()
-service_wp.register_functions([
+service.register_functions([
     (wp_get_users_blogs, 'wp.getUsersBlogs'),
     (wp_get_page, 'wp.getPage'),
 ])
+
 
 # Missing functions from WordPress API:
 #
@@ -169,6 +171,12 @@ service_wp.register_functions([
 #'wp.getComment', 'wp.getComments', 'wp.deleteComment', 'wp.editComment'
 #'wp.newComment', 'wp.getCommentStatusList'
 
+
 def setup(app, plugin):
-    app.add_api('MetaWeblog', False, service_metaweblog)
-    app.add_api('WordPress', True, service_wp)
+    # All the services are available on one service.  For applications
+    # that follow our RSD definition that's okay, they will go to the
+    # correct endpoint, but some crappy software will try to call meta-
+    # weblog functions on the wordpress endpoint and vice versa which
+    # is why they internally point to the same service.
+    app.add_api('MetaWeblog', False, service)
+    app.add_api('WordPress', True, service)
