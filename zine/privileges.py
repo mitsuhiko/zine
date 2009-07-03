@@ -129,18 +129,18 @@ def bind_privileges(container, privileges, user=None):
         container.remove(current_map[name])
         # remove any privilege dependencies that are not attached to other
         # privileges
-        for privilege in current_map[name].dependencies:
+        for privilege in current_map[name].dependencies.iter_privileges():
             container.remove(privilege)
 
         # remove notification subscriptions that required the privilege
         # being deleted.
         for notification in user.notification_subscriptions:
             privs = notification_types[notification.notification_id].privileges
-            if current_map[name] in privs:
+            if current_map[name] in privs.iter_privileges():
                 db.session.delete(notification)
                 break
             for privilege in current_map[name].dependencies:
-                if privilege in privs:
+                if privilege in privs.iter_privileges():
                     db.session.delete(notification)
 
     # add new privileges
@@ -148,7 +148,7 @@ def bind_privileges(container, privileges, user=None):
         privilege = app.privileges[name]
         container.add(privilege)
         # add dependable privileges
-        for privilege in privilege.dependencies:
+        for privilege in privilege.dependencies.iter_privileges():
             container.add(privilege)
 
 
