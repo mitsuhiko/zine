@@ -42,7 +42,7 @@ def dump_post(post):
     return dict(
         pubDate=post.pub_date,
         dateCreated=post.pub_date,
-        userid=post.user.id,
+        userid=post.author.id,
         page_id=post.id,
 
         title=post.title,
@@ -60,9 +60,9 @@ def dump_post(post):
         mt_allow_pings=post.pings_enabled,
         wp_slug=post.slug,
         wp_password="",
-        wp_author=post.body.display_name,
-        wp_author_id=post.user.id,
-        wp_author_display_name=post.body.display_name,
+        wp_author=post.author.display_name,
+        wp_author_id=post.author.id,
+        wp_author_display_name=post.author.display_name,
         date_created_gmt=post.pub_date,
         wp_page_template=post.extra.get('page_template'),
     )
