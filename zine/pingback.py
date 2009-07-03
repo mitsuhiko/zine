@@ -27,7 +27,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
-from xmlrpclib import ServerProxy, Fault
+from xmlrpclib import ServerProxy
 
 from werkzeug.routing import RequestRedirect, NotFound
 from werkzeug import escape, unescape
@@ -35,7 +35,7 @@ from werkzeug import escape, unescape
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment
 from zine.utils.exceptions import UserException
-from zine.utils.xml import XMLRPC, strip_tags
+from zine.utils.xml import XMLRPC, Fault, strip_tags
 from zine.utils.net import open_url, NetException
 
 

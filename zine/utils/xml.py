@@ -10,6 +10,7 @@
 import re
 import sys
 import xmlrpclib
+from datetime import datetime
 from htmlentitydefs import name2codepoint
 
 from werkzeug import escape, import_string, BaseResponse
@@ -31,6 +32,10 @@ XML_NS = 'http://www.w3.org/XML/1998/namespace'
 html_entities = name2codepoint.copy()
 html_entities['apos'] = 39
 del name2codepoint
+
+
+#: export the fault name
+Fault = xmlrpclib.Fault
 
 
 def replace_entities(string):
@@ -209,6 +214,16 @@ class XMLRPC(object):
             raise xmlrpclib.Fault(1, 'method "%s" is not supported' % method)
         return func(*args)
 
+    def _wrap_obj(self, obj):
+        """Wraps some values in something older XMLRPC versions can handle."""
+        if isinstance(obj, (tuple, list)):
+            return map(self._wrap_obj, obj)
+        if isinstance(obj, dict):
+            return dict((k, self._wrap_obj(v)) for k, v in obj.iteritems())
+        if isinstance(obj, datetime):
+            return xmlrpclib.DateTime(obj.timetuple())
+        return obj
+
     def _marshaled_dispatch(self, data):
         """Dispatches an XML-RPC method from marshalled (XML) data.
 
@@ -218,7 +233,7 @@ class XMLRPC(object):
         """
         try:
             params, method = xmlrpclib.loads(data)
-            response = xmlrpclib.dumps((self._dispatch(method, params),),
+            response = xmlrpclib.dumps((self._wrap_obj(self._dispatch(method, params)),),
                                        methodresponse=True, allow_none=True,
                                        encoding=self.charset)
         except xmlrpclib.Fault, fault:
