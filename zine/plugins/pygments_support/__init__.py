@@ -36,7 +36,10 @@ from zine.utils.http import redirect_to
 _formatters = {}
 
 #: dict of styles
-STYLES = dict((x, None) for x in get_all_styles())
+STYLES = {}
+
+if have_pygments:
+    STYLES.update((x, None) for x in get_all_styles())
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
