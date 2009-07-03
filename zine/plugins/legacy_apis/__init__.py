@@ -19,6 +19,7 @@
 """
 from zine.api import get_request, url_for, db
 from zine.utils.xml import XMLRPC, Fault
+from zine.utils import log
 from zine.models import User, Post, Category, STATUS_PUBLISHED, STATUS_DRAFT
 from zine.privileges import CREATE_ENTRIES, CREATE_PAGES, BLOG_ADMIN, \
      MANAGE_CATEGORIES
@@ -43,10 +44,9 @@ def login(username, password):
 
 def dump_post(post):
     """Dumps a post into a structure for the MetaWeblog API."""
-    text = post.body.to_html()
-    if post.intro:
-        text = u'<div class="intro">%s</div>%s' % (post.intro.to_html(), text)
     link = url_for(post, _external=True)
+    tags = ','.join([x.name for x in post.tags])
+
     return dict(
         pubDate=post.pub_date,
         dateCreated=post.pub_date,
@@ -55,14 +55,14 @@ def dump_post(post):
         title=post.title,
         link=link,
         permaLink=link,
-        description=text,
+        description=post.text,
+        zeml_parser=post.parser,
         author=post.author.email,
         categories=[x.name for x in post.categories],
         postid=post.id,
         page_status=post.status == STATUS_PUBLISHED and "published" or "draft",
-        excerpt=post.intro.to_html(),
-        text_more=post.body.to_html(),
-        mt_keywords=[x.name for x in post.tags],
+        mt_keywords=tags,
+        mt_tags=tags,
         mt_allow_comments=post.comments_enabled,
         mt_allow_pings=post.pings_enabled,
         wp_slug=post.slug,
@@ -101,7 +101,7 @@ def select_parser(app, struct, default='html'):
     on the system, an XMLRPC fault is raised with an appropriate error
     message and code.
     """
-    parser = struct.get('parser')
+    parser = struct.get('zine_parser')
     if parser is None:
         return default
     if parser not in app.parsers:
@@ -110,17 +110,21 @@ def select_parser(app, struct, default='html'):
 
 
 def generic_update(request, post, struct, publish):
-    # if we got keywords provided, we put them on the post.
-    # if an empty list came by, we remove them too, but if the
-    # key is used for something that is not an array, we ignore it.
-    keywords = struct.get('mt_keywords')
+    keywords = struct.get('mt_tags') or struct.get('mt_keywords')
     if isinstance(keywords, list):
         post.bind_tags(keywords)
+    elif isinstance(keywords, basestring):
+        keywords = list(x.strip() for x in keywords.split(','))
+        post.bind_tags(filter(None, keywords))
 
     if publish:
         post.status = STATUS_PUBLISHED
     else:
         post.status = STATUS_DRAFT
+
+    slug = struct.get('wp_slug') or struct.get('mt_basename')
+    if slug:
+        post.slug = slug
 
     if 'mt_allow_pings' in struct:
         post.pings_enabled = bool(struct['mt_allow_pings'])
@@ -144,6 +148,7 @@ def generic_edit_post(request, post, struct, publish):
     post.title = struct['title']
     post.text = extract_text(struct)
     generic_update(request, post, struct, publish)
+    db.commit()
 
 
 def metaweblog_new_post(blog_id, username, password, struct, publish):
@@ -318,6 +323,12 @@ def mt_set_post_categories(post_id, username, password, categories):
     return True
 
 
+def mt_supported_text_filters():
+    # return an empty list to indicate that we currently do not
+    # support text filters.
+    return []
+
+
 service = XMLRPC('legacy_apis')
 
 # MetaWeblog
@@ -350,13 +361,15 @@ service.register_functions([
     (wp_delete_page, 'wp.deletePage'),
     (wp_get_page_list, 'wp.getPageList'),
     (wp_new_category, 'wp.newCategory'),
-    (wp_delete_category, 'wp.deleteCategory')
+    (wp_delete_category, 'wp.deleteCategory'),
+    (metaweblog_get_categories, 'wp.getCategories')
 ])
 
 # MovableType
 service.register_functions([
     (mt_get_post_categories, 'mt.getPostCategories'),
-    (mt_set_post_categories, 'mt.setPostCategories')
+    (mt_set_post_categories, 'mt.setPostCategories'),
+    (mt_supported_text_filters, 'mt.supportedTextFilters')
 ])
 
 
