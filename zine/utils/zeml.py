@@ -509,6 +509,28 @@ class _BaseElement(object):
         t = Textifier(**options)
         return (multiline and t.multiline or t.oneline)(self)
 
+    def to_pseudoxml(self, level=0, nostrip=False, _result=None):
+        """Converts the element to a pseudo-XML representation for debugging."""
+        def appendtext(text):
+            if nostrip:
+                _result.extend(level * '  ' + x for x in self.text.splitlines())
+            elif text.strip():
+                _result.extend(level * '  ' + x
+                               for x in self.text.strip().splitlines())
+        return_something = False
+        if _result is None:
+            return_something = True
+            _result = []
+        _result.append('%s<%s%s%s>' % (
+            level * '  ', self.name, self.attributes and ' ' or '',
+            ', '.join("%s=%r" % item for item in self.attributes.items())))
+        appendtext(self.text)
+        for child in self.children:
+            child.to_pseudoxml(level+1, nostrip, _result)
+            appendtext(self.tail)
+        if return_something:
+            return '\n'.join(_result)
+
     children = property(lambda x: [])
     attributes = property(lambda x: Attributes())
     parent = None
