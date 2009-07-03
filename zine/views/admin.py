@@ -569,6 +569,7 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
                         emit_event('before-comment-deleted', comment)
                         db.delete(comment)
                     db.commit()
+                    # XXX: untranslatable
                     flash(_(u'Deleted %d %s comments.') % (count, identifier))
                     return redirect_to(endpoint, page=page, per_page=per_page)
                 return render_admin_response('admin/delete_comments_all.html',

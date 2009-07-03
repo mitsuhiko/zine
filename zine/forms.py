@@ -942,7 +942,7 @@ class EditProfileForm(_UserBoundForm):
                           validators=[is_valid_url()])
     password = forms.TextField(lazy_gettext(u'Password'),
                                widget=forms.PasswordInput)
-    password_confirm = forms.TextField(lazy_gettext(u'Confirm Password'),
+    password_confirm = forms.TextField(lazy_gettext(u'Confirm password'),
                                        widget=forms.PasswordInput,
                                        help_text=lazy_gettext(u'Confirm password'))
 
@@ -1000,6 +1000,11 @@ class DeleteAccountForm(_UserBoundForm):
 
     def delete_user(self):
         """Deletes the user's account."""
+        # find all the comments by this author and make them comments that
+        # are no longer linked to the author.
+        for comment in self.user.comments.all():
+            comment.unbind_user()
+
         #! plugins can use this to react to user deletes.  They can't stop
         #! the deleting of the user but they can delete information in
         #! their own tables so that the database is consistent afterwards.
