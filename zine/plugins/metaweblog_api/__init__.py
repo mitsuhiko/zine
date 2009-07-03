@@ -17,6 +17,9 @@ def _login(username, password):
     user = User.query.filter_by(username=username).first()
     if user is None or not user.check_password(password):
         raise Fault(403, 'Bad login/pass combination.')
+    if not user.is_manager:
+        raise Fault(403, 'You need to be a manager in order to '
+                    'use the blog RPC API')
 
     # store the user on the request object so that the functions
     # inside Zine work on the request of this user.
@@ -51,6 +54,7 @@ def dump_post(post):
         description=text,
         author=post.author.email,
         categories=[x.name for x in post.categories],
+        mt_keywords=[x.name for x in post.tags],
 
         postid=post.id,
         page_status=post.status == STATUS_PUBLISHED and "published" or "draft",
@@ -64,7 +68,7 @@ def dump_post(post):
         wp_author_id=post.author.id,
         wp_author_display_name=post.author.display_name,
         date_created_gmt=post.pub_date,
-        wp_page_template=post.extra.get('page_template'),
+        wp_page_template=post.extra.get('page_template')
     )
 
 
@@ -90,7 +94,14 @@ def metaweblog_new_post(request, blog_id, struct, publish):
     text = extract_text(struct)
     post = Post(struct['title'], request.user, text,
                 parser=select_parser(request.app, struct))
-    link = url_for(post, _external=True)
+
+    # if we got keywords provided, we put them on the post.
+    # if an empty list came by, we remove them too, but if the
+    # key is used for something that is not an array, we ignore it.
+    keywords = struct.get('mt_keywords')
+    if isinstance(keywords, list):
+        post.bind_tags(keywords)
+
     db.commit()
     return dump_post(post)
 
@@ -112,7 +123,7 @@ def metaweblog_edit_post(request, post_id, struct, publish):
 @authenticated
 def metaweblog_get_post(request, post_id):
     post = Post.query.get(post_id)
-    if post is None:
+    if post is None or post.content_type != 'entry':
         raise Fault(404, 'No such post')
     if not post.can_read():
         raise Fault(403, 'You don\'t have access to this post')
@@ -122,11 +133,12 @@ def metaweblog_get_post(request, post_id):
 @authenticated
 def metaweblog_get_recent_posts(request, blog_id, number_of_posts):
     number_of_posts = min(50, number_of_posts)
-    # XXX: filter the ones you can't read (could this be the case?)
-    return map(dump_post, Post.query.limit(number_of_posts).all())
+
+    return map(dump_post, Post.query.filter_by(content_type='entry')
+               .limit(number_of_posts).all())
 
 
-def wp_get_users_blogs(username, password): # XXX security check missing
+def wp_get_users_blogs(username, password):
     request = _login(username, password)
     return [{'isAdmin': request.user.is_manager,
              'url': request.app.cfg['blog_url'],
@@ -138,11 +150,18 @@ def wp_get_users_blogs(username, password): # XXX security check missing
 def wp_get_page(blog_id, page_id, username, password):
     request = _login(username, password)
     post = Post.query.get(page_id)
-    if post is None:
-        raise Fault(404, 'No such post')
+    if post is None or post.content_type != 'page':
+        raise Fault(404, 'No such page')
     if not post.can_read():
         raise Fault(403, 'You don\'t have access to this post')
     return dump_post(post)
+
+
+def wp_get_pages(blog_id, username, password, number_of_pages):
+    request = _login(username, password)
+
+    return map(dump_post, Post.query.filter_by(content_type='page')
+               .limit(numer_of_pages).all())
 
 
 service = XMLRPC()
@@ -159,6 +178,7 @@ service.register_functions([
 service.register_functions([
     (wp_get_users_blogs, 'wp.getUsersBlogs'),
     (wp_get_page, 'wp.getPage'),
+    (wp_get_pages, 'wp.getPages')
 ])
 
 
