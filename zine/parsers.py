@@ -130,7 +130,7 @@ class MarkupExtension(object):
 
     def process(self, attributes, content, reason):
         """Called each time the element is encountered."""
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class BaseParser(object):
@@ -144,6 +144,7 @@ class BaseParser(object):
 
     def parse(self, input_data, reason):
         """Return a ZEML tree."""
+        raise NotImplementedError()
 
 
 class ZEMLParser(BaseParser):
