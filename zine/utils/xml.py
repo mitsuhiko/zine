@@ -172,6 +172,10 @@ class XMLRPC(object):
         self.funcs[name] = function
         return function
 
+    def register_functions(self, tuples):
+        for func, name in tuples:
+            self.register_function(func, name)
+
     def register_introspection_functions(self):
         """Register all introspection functions."""
         self.funcs.update({
