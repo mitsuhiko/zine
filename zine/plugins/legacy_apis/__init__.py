@@ -19,6 +19,7 @@
 """
 from zine.api import get_request, url_for, db
 from zine.utils.xml import XMLRPC, Fault
+from zine.utils.forms import BooleanField
 from zine.utils import log
 from zine.models import User, Post, Category, STATUS_PUBLISHED, STATUS_DRAFT
 from zine.privileges import CREATE_ENTRIES, CREATE_PAGES, BLOG_ADMIN, \
@@ -373,6 +374,13 @@ service.register_functions([
 ])
 
 
+all_apis = [
+    ('MetaWeblog', False),
+    ('WordPress', True),
+    ('Blogger', False),
+    ('MovableType', False)
+]
+
 def setup(app, plugin):
     # The WordPress API is marked as preferred even though we do not
     # preferr the API at all.  However if it's marked as preferred, so
@@ -385,7 +393,8 @@ def setup(app, plugin):
     # correct endpoint, but some crappy software will try to call meta-
     # weblog functions on the wordpress endpoint and vice versa which
     # is why they internally point to the same service.
-    app.add_api('MetaWeblog', False, service)
-    app.add_api('WordPress', True, service)
-    app.add_api('Blogger', False, service)
-    app.add_api('MovableType', False, service)
+    
+    for api, default in all_apis:
+        config_key = 'legacy_apis/prefer_' + api.lower()
+        app.add_config_var(config_key, BooleanField(default=default))
+        app.add_api(config_key, app.cfg[config_key], service)
