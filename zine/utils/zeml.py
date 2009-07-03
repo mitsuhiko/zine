@@ -498,13 +498,16 @@ class _BaseElement(object):
         if stream is None:
             return u''.join(buffer)
 
-    def to_text(self):
+    def to_text(self, simple=False, multiline=True, **options):
         """Converts the element to text."""
-        result = [self.text]
-        for child in self.children:
-            result.append(child.to_text())
-            result.append(child.tail)
-        return u''.join(result)
+        if simple:
+            result = [self.text]
+            for child in self.children:
+                result.append(child.to_text())
+                result.append(child.tail)
+            return u''.join(result)
+        t = Textifier(**options)
+        return (multiline and t.multiline or t.oneline)(self)
 
     children = property(lambda x: [])
     attributes = property(lambda x: Attributes())

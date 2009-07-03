@@ -19,7 +19,7 @@ from werkzeug import url_unquote
 
 from zine.models import NotificationSubscription, User
 from zine.application import get_application, render_template
-from zine.utils.zeml import parse_zeml, escape, Textifier
+from zine.utils.zeml import parse_zeml, escape
 from zine.utils.mail import send_email
 from zine.i18n import lazy_gettext, _
 
@@ -199,10 +199,10 @@ class EMailNotificationSystem(NotificationSystem):
             if len(item.children) == 1 and item.children[0].name == 'a':
                 link = item.children[0]
                 href = link.attributes.get('href')
-                yield dict(text=link.to_text(), link=self.unquote_link(href),
-                           is_textual=False)
+                yield dict(text=link.to_text(simple=True),
+                           link=self.unquote_link(href), is_textual=False)
             else:
-                yield dict(text=Textifier().oneline(item),
+                yield dict(text=item.to_text(multiline=False),
                            link=None, is_textual=True)
 
 
@@ -216,7 +216,7 @@ class EMailNotificationSystem(NotificationSystem):
             if child.name in ('ul', 'ol'):
                 result.extend(self.collect_list_details(child))
             elif child.name == 'p':
-                result.extend(dict(text=Textifier().multiline(child),
+                result.extend(dict(text=child.to_text(),
                                    link=None, is_textual=True))
         return result
 
@@ -231,8 +231,8 @@ class EMailNotificationSystem(NotificationSystem):
     def mail_from_notification(self, message):
         title = message.title.to_text()
         details = self.find_details(message.details)
-        longtext = Textifier(collect_urls=True,
-                             initial_indent=2).multiline(message.longtext)
+        longtext = message.longtext.to_text(collect_urls=True,
+                                            initial_indent=2)
         actions = self.find_actions(message.actions)
         return render_template('notifications/email.txt', title=title,
                                details=details, longtext=longtext,

@@ -1125,7 +1125,7 @@ class Comment(_ZEMLContainer):
 
     def summarize(self, chars=140, ellipsis=u'…'):
         """Summarizes the comment to the given number of characters."""
-        words = self.body.to_text().split()
+        words = self.body.to_text(simple=True).split()
         words.reverse()
         length = 0
         result = []
