@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
 "POT-Creation-Date: 2009-01-10 22:36+0100\n"
-"PO-Revision-Date: 2009-07-02 18:33+0100\n"
+"PO-Revision-Date: 2009-07-03 00:48+0100\n"
 "Last-Translator: Narayana Sarma <samanarayan@gmail.com>\n"
 "Language-Team: Telugu <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -75,8 +75,9 @@ msgstr ""
 
 #: zine/config.py:50
 msgid ""
-"The email address given here is by the notification system to send mails "
-"from.  Also plugins that send mails will use this address as sender address."
+"The email address given here is used by the notification system to send "
+"mails from.  Also plugins that send mails will use this address as sender "
+"address."
 msgstr ""
 
 #: zine/config.py:55
@@ -106,99 +107,97 @@ msgstr ""
 #: zine/config.py:70
 msgid ""
 "The secret key is used for vairous security related tasks in the system.  "
-"For example the cookie is signed with this value.  By changing this value "
-"all uses are logged out automatically, including the administrator."
+"For example the cookie is signed with this value."
 msgstr ""
 
-#: zine/config.py:78
+#: zine/config.py:76
 msgid ""
 "The iid uniquely identifies the Zine instance.  Currently this value is "
-"unused, but once set you should not modify it.  It will be used for "
-"statistics and by plugins to identify your blog."
+"unused, but once set you should not modify it."
 msgstr ""
 
-#: zine/config.py:90
+#: zine/config.py:87
 msgid ""
 "During development this is helpful to log emails into a mail.log file in "
 "your instance folder instead of delivering them to your MTA."
 msgstr ""
 
-#: zine/config.py:94
+#: zine/config.py:91
 msgid ""
 "If this is set to true, errors in Zine are not catched so that debuggers can"
 " catch it instead.  This is useful for plugin and core development."
 msgstr ""
 
-#: zine/config.py:113
+#: zine/config.py:110
 #, python-format
 msgid ""
 "Use %year%, %month%, %day%, %hour%, %minute% and %second%. Changes here will"
 " only affect new posts."
 msgstr ""
 
-#: zine/config.py:116
+#: zine/config.py:113
 msgid "Automatically generated slugs are limited to ASCII"
 msgstr "ఆటోమాటిగ్గా తయారయ్యే స్లగ్గులు ఆస్కీకి పరిమితం చేయబడ్డాయి"
 
-#: zine/config.py:119
+#: zine/config.py:116
 msgid "Dates are zero padded like 2009/04/22 instead of 2009/4/22"
 msgstr ""
 
-#: zine/config.py:127
+#: zine/config.py:124
 msgid "No Cache"
 msgstr "సేకరించి పెట్టుకున్నది ఏదీ లేదు"
 
-#: zine/config.py:128
+#: zine/config.py:125
 msgid "Simple Cache"
 msgstr "సాధారణ  సేకరణ"
 
-#: zine/config.py:129
+#: zine/config.py:126
 msgid "memcached"
 msgstr "జ్ఞప్తి లోనికి స్వీకరించాను "
 
-#: zine/config.py:130
+#: zine/config.py:127
 msgid "Filesystem"
 msgstr "ఫైలింగు వ్యవస్థ"
 
-#: zine/config.py:147
+#: zine/config.py:144
 msgid "Automatically approve all comments"
 msgstr "అన్ని వ్యాఖ్యల్నీ  ఆటోమాటిగ్గా అనుమతించు"
 
-#: zine/config.py:148
+#: zine/config.py:145
 msgid "An administrator must always approve the comment"
 msgstr "ప్రతి వ్యాఖ్యనీ కార్య నిర్వాహకులొకరు అనుమతించవలసి ఉంటుంది"
 
-#: zine/config.py:149
+#: zine/config.py:146
 msgid "Automatically approve comments by known comment authors"
 msgstr "పరిచయం ఉన్న వ్యాఖ్యాకారులు  వెలిబుచ్చే అభిప్రాయాల్ని ఆటోమాటిగ్గా అనుమతించు"
 
-#: zine/config.py:154
+#: zine/config.py:151
 msgid ""
 "The number of posts that are shown on a page.  This value might not be "
 "honored by some themes and is probably only used for the index page."
 msgstr ""
 
-#: zine/config.py:173
+#: zine/config.py:170
 msgid ""
 "This timeout is used by default for all network related operations. The "
 "default should be fine for most environments but if you have a very bad "
 "network connection during development you should increase it."
 msgstr ""
 
-#: zine/config.py:182
+#: zine/config.py:179
 msgid ""
 "It's possible to one or more comma separated paths here that are searched "
 "for plugins.  If the is not absolute, it's considered relative to the "
 "instance folder."
 msgstr ""
 
-#: zine/config.py:189
+#: zine/config.py:186
 msgid ""
 "Set this to true if you want to see the most recent entries on the Zine "
 "reddit on your dashbaord."
 msgstr ""
 
-#: zine/config.py:244
+#: zine/config.py:241
 msgid ""
 "\n"
 "    <p>\n"
@@ -214,7 +213,7 @@ msgstr ""
 "\"\n"
 "\"\t\t\t\tరైటబుల్ అయ్యేట్లు చూడండి."
 
-#: zine/config.py:256
+#: zine/config.py:253
 #, python-format
 msgid "Could not save configuration file: %s"
 msgstr "కాన్ఫిగరేషన్ ఫైలును  కాపాడలేకపోయాను: %s"
@@ -569,12 +568,7 @@ msgstr "టపాలను వీరికి ఆపాదించు"
 msgid "You have to select the user that gets the posts assigned."
 msgstr "టపాలను ఆపాదించుకొనగలిగే యూజర్ ను మీరు ఎంపిక చేసుకోవాలి"
 
-#: zine/forms.py:945
-#, fuzzy
-msgid "Confirm Password"
-msgstr "సంకేతపదం తప్పు"
-
-#: zine/forms.py:947
+#: zine/forms.py:945 zine/forms.py:947
 #, fuzzy
 msgid "Confirm password"
 msgstr "సంకేతపదం తప్పు"
@@ -1681,14 +1675,15 @@ msgid "Delete Account"
 msgstr "వ్యాఖ్యను తొలగించు"
 
 #: zine/templates/account/delete_account.html:6
-msgid ""
-"\n"
-"      Do you really want to delete your account?<br/>\n"
-"      All your comments will also be deleted!\n"
-"    "
+#, fuzzy
+msgid "Do you really want to delete your account?"
+msgstr "ఎంపికైన వ్యాఖ్యలను మీరు నిజంగా తొలగించ దలచారా?"
+
+#: zine/templates/account/delete_account.html:7
+msgid "All your comments will also be deleted!"
 msgstr ""
 
-#: zine/templates/account/delete_account.html:11
+#: zine/templates/account/delete_account.html:9
 #: zine/templates/admin/approve_comment.html:12
 #: zine/templates/admin/block_comment.html:11
 #: zine/templates/admin/block_comments.html:10
@@ -1709,7 +1704,7 @@ msgstr ""
 msgid "No"
 msgstr "కాదు"
 
-#: zine/templates/account/delete_account.html:12
+#: zine/templates/account/delete_account.html:10
 #: zine/templates/admin/approve_comment.html:11
 #: zine/templates/admin/block_comment.html:12
 #: zine/templates/admin/block_comments.html:11
@@ -2484,7 +2479,7 @@ msgid "New Entry"
 msgstr "కొత్త అంశం"
 
 #: zine/templates/admin/edit_entry.html:3
-#, fuzzy, python-format
+#, fuzzy
 msgid "Edit Entry"
 msgstr "ఈ అంశాన్ని సరిదిద్దు"
 
@@ -2535,7 +2530,7 @@ msgid "New Page"
 msgstr "కొత్త పేజీ"
 
 #: zine/templates/admin/edit_page.html:3
-#, fuzzy, python-format
+#, fuzzy
 msgid "Edit Page"
 msgstr "“%s” అనే పేజీని సరిదిద్దు"
 
@@ -3977,7 +3972,7 @@ msgid "System"
 msgstr "వ్యవస్థ"
 
 #: zine/views/account.py:174
-#, fuzzy, python-format
+#, fuzzy
 msgid "Your profile was updated successfully."
 msgstr "%s పేజీని విజయవంతంగా ముందుకు సవరించాను."
 
@@ -4141,160 +4136,160 @@ msgstr "%s పేజీని  తొలగించటం విజయవంత
 msgid "“Delete All” can only be issued for “Spam” and “Blocked” comment types."
 msgstr ""
 
-#: zine/views/admin.py:572
+#: zine/views/admin.py:573
 #, fuzzy, python-format
 msgid "Deleted %d %s comments."
 msgstr "వ్యాఖ్యలను తొలగించు"
 
-#: zine/views/admin.py:583
+#: zine/views/admin.py:584
 msgid "Approved all the selected comments."
 msgstr "ఎంపిక చేసిన వ్యాఖ్యలన్నిటినీ అనుమతించాను"
 
-#: zine/views/admin.py:591
+#: zine/views/admin.py:592
 #, fuzzy
 msgid "Blocked all the selected comments."
 msgstr "ఎంపిక చేసిన వ్యాఖ్యలన్నిటినీ అనుమతించాను"
 
-#: zine/views/admin.py:601
+#: zine/views/admin.py:602
 #, fuzzy
 msgid "Reported all the selected comments as SPAM."
 msgstr "ఎంపిక చేసిన వ్యాఖ్యలన్నిటినీ అనుమతించాను"
 
-#: zine/views/admin.py:610
+#: zine/views/admin.py:611
 #, fuzzy
 msgid "Reported all the selected comments as NOT SPAM."
 msgstr "ఎంపిక చేసిన వ్యాఖ్యలన్నిటినీ అనుమతించాను"
 
-#: zine/views/admin.py:624
+#: zine/views/admin.py:625
 msgid "All Comments"
 msgstr "అన్ని వ్యాఖ్యలూ"
 
-#: zine/views/admin.py:631
+#: zine/views/admin.py:632
 msgid "Comments Awaiting Moderation"
 msgstr "మితీకరణ కోసం వేచిఉన్న వ్యాఖ్యలు"
 
-#: zine/views/admin.py:639
+#: zine/views/admin.py:640
 #, fuzzy
 msgid "Approved Commments"
 msgstr "వ్యాఖ్యను ఆమోదించు"
 
-#: zine/views/admin.py:647
+#: zine/views/admin.py:648
 #, fuzzy
 msgid "Blocked"
 msgstr "నిరోధించు"
 
-#: zine/views/admin.py:655 zine/views/admin.py:802
+#: zine/views/admin.py:656 zine/views/admin.py:803
 msgid "Spam"
 msgstr "స్పాము"
 
-#: zine/views/admin.py:670
+#: zine/views/admin.py:671
 #, python-format
 msgid "Comments for “%s”"
 msgstr "'%s' కోసం వ్యాఖ్యలు"
 
-#: zine/views/admin.py:686 zine/views/admin.py:718 zine/views/admin.py:744
-#: zine/views/admin.py:767 zine/views/admin.py:789 zine/views/admin.py:812
+#: zine/views/admin.py:687 zine/views/admin.py:719 zine/views/admin.py:745
+#: zine/views/admin.py:768 zine/views/admin.py:790 zine/views/admin.py:813
 #, fuzzy
 msgid "You're not allowed to manage this comment"
 msgstr "ఈ వ్యాఖ్యకు బదులివ్వు"
 
-#: zine/views/admin.py:696
+#: zine/views/admin.py:697
 #, python-format
 msgid "Comment by %s moderated successfully."
 msgstr "%s చేసిన వ్యాఖ్యను  చక్కగా మితీకరించాను."
 
-#: zine/views/admin.py:751
+#: zine/views/admin.py:752
 #, python-format
 msgid "Comment by %s approved successfully."
 msgstr "%s చేసిన వ్యాఖ్యను చక్కగా అనుమతించాను."
 
-#: zine/views/admin.py:774
+#: zine/views/admin.py:775
 #, python-format
 msgid "Comment by %s blocked successfully."
 msgstr "%s చేసిన వ్యాఖ్యను విజయవంతంగా నిరోధించాను."
 
-#: zine/views/admin.py:796
+#: zine/views/admin.py:797
 #, fuzzy, python-format
 msgid "Comment by %s reported as Spam successfully."
 msgstr "%s చేసిన వ్యాఖ్యను  చక్కగా మితీకరించాను."
 
-#: zine/views/admin.py:819
+#: zine/views/admin.py:820
 #, fuzzy, python-format
 msgid "Comment by %s reported as NOT Spam successfully."
 msgstr "%s చేసిన వ్యాఖ్యను  చక్కగా మితీకరించాను."
 
-#: zine/views/admin.py:825
+#: zine/views/admin.py:826
 #, fuzzy
 msgid "NOT Spam"
 msgstr "స్పాం కాదు"
 
-#: zine/views/admin.py:859
+#: zine/views/admin.py:860
 #, python-format
 msgid "Category %s created successfully."
 msgstr "%s అనే విభాగపు  సృజన విజయవంతమైంది."
 
-#: zine/views/admin.py:863
+#: zine/views/admin.py:864
 #, python-format
 msgid "Category %s updated successfully."
 msgstr "%s అనే విభాగాన్ని విజయవంతంగా ముందుకు సవరించాను."
 
-#: zine/views/admin.py:892
+#: zine/views/admin.py:893
 #, python-format
 msgid "Category %s deleted successfully."
 msgstr "%s అనే విభాగాన్ని  విజయవంతంగా తొలగించాను."
 
-#: zine/views/admin.py:932
+#: zine/views/admin.py:933
 #, python-format
 msgid "User %s created successfully."
 msgstr "%s అనే యూజర్ ను చక్కగా సృజించాను."
 
-#: zine/views/admin.py:936
+#: zine/views/admin.py:937
 #, python-format
 msgid "User %s edited successfully."
 msgstr "%s అనే యూజర్ వివరాలను మార్చటం విజయవంతమైంది."
 
-#: zine/views/admin.py:960
+#: zine/views/admin.py:961
 msgid "You cannot delete yourself."
 msgstr "మిమ్మల్ని మీరు తొలగించుకోలేరు."
 
-#: zine/views/admin.py:1000
+#: zine/views/admin.py:1001
 #, python-format
 msgid "Group %s created successfully."
 msgstr "%sఅనే సమూహాన్ని సృజించటం పూర్తైంది."
 
-#: zine/views/admin.py:1004
+#: zine/views/admin.py:1005
 #, python-format
 msgid "Group %s edited successfully."
 msgstr "%s అనే సమూహపు వివరాలను మార్చటం పూర్తైంది."
 
-#: zine/views/admin.py:1056
+#: zine/views/admin.py:1057
 msgid "Configuration altered successfully."
 msgstr "కాన్ఫిగరేషన్ ను మార్చటం విజయవంతమైంది."
 
-#: zine/views/admin.py:1083
+#: zine/views/admin.py:1084
 msgid "URL configuration changed."
 msgstr "యూఆరెల్ కాన్ఫిగరేషన్ మార్చబడింది."
 
-#: zine/views/admin.py:1104
+#: zine/views/admin.py:1105
 msgid "Theme changed successfully."
 msgstr "నేపథ్యం మార్పు విజయవంతమైంది."
 
-#: zine/views/admin.py:1120
+#: zine/views/admin.py:1121
 msgid "This theme is not configurable"
 msgstr "ఈ నేపథ్యాన్ని కాన్పిగర్ చేయటం సాధ్యం కాదు."
 
-#: zine/views/admin.py:1132
+#: zine/views/admin.py:1133
 msgid "Plugin configuration changed"
 msgstr "ప్లగిన్ కాన్ఫిగరేషన్ మార్చబడింది."
 
-#: zine/views/admin.py:1141
+#: zine/views/admin.py:1142
 #, python-format
 msgid "Plugin “%s” added successfully. You can now enable it in the plugin list."
 msgstr ""
 "'%s' అనే ప్లగిన్ ని విజయవంతంగా కలిపాను.  మీరిప్పుడు ప్లగిన్ల  జాబితాలోంచి  "
 "దాన్ని  ఎనేబుల్ చేసుకోవచ్చు."
 
-#: zine/views/admin.py:1168
+#: zine/views/admin.py:1169
 #, python-format
 msgid ""
 "Could not remove the plugin “%s” because an IO error occurred. Wrong "
@@ -4303,45 +4298,45 @@ msgstr ""
 "ఐఓ సమస్య ఎదురవ్వటం కారణంగా  %s అనే ప్లగిన్ ను తొలగించలేకపోయాను.  సరైన "
 "అనుమతులు లేవా? "
 
-#: zine/views/admin.py:1171
+#: zine/views/admin.py:1172
 #, python-format
 msgid "The plugin “%s” was removed from the instance successfully."
 msgstr "%s ప్లగిన్ ను ఇంస్టెన్సు నుండి  విజయవంతంగా తొలగించాను."
 
-#: zine/views/admin.py:1189
+#: zine/views/admin.py:1190
 msgid "The cache was cleared successfully."
 msgstr "క్యాష్ ను ఖాళీ చేయటం విజయవంతమైంది."
 
-#: zine/views/admin.py:1193
+#: zine/views/admin.py:1194
 msgid "Cache settings were changed successfully."
 msgstr "క్యాష్ సెటింగులను మార్చటం విజయవంతమైంది."
 
-#: zine/views/admin.py:1217
+#: zine/views/admin.py:1218
 #, fuzzy
 msgid "Configuration updated successfully."
 msgstr "కాన్ఫిగరేషన్ ను మార్చటం విజయవంతమైంది."
 
-#: zine/views/admin.py:1220
+#: zine/views/admin.py:1221
 #, fuzzy
 msgid "Could not save the configuration because the configuration is invalid."
 msgstr ""
 "ప్లగిన్ ని స్థిరపరచటం  వీలవ్వలేదు. ఎందుకంటే  దిగుమతైన ఫైలు చెల్లుబాటయ్యే  "
 "ప్లగిన్ ఫైలు కాదు."
 
-#: zine/views/admin.py:1237
+#: zine/views/admin.py:1238
 msgid "Maintenance mode disabled.  The blog is now publicly available."
 msgstr "సవరణ స్థితి పోయింది. బ్లాగు ఇప్పుడు అందరికీ అందుబాటులోకి వచ్చింది."
 
-#: zine/views/admin.py:1298
+#: zine/views/admin.py:1299
 #, python-format
 msgid "The imported dump “%s” was deleted successfully."
 msgstr "దిగుమతి చేసుకున్న డంప్  “%s”ని విజయవంతంగా తొలగించాను. "
 
-#: zine/views/admin.py:1425
+#: zine/views/admin.py:1426
 msgid "Log changes saved."
 msgstr "లాగ్ లో చేయబడ్డ  మార్పుల్ని  భద్రం చేశాను."
 
-#: zine/views/admin.py:1442
+#: zine/views/admin.py:1443
 msgid "Password changed successfully."
 msgstr "సంకేత పదాన్ని  మార్చటం విజయవంతమైంది."
 

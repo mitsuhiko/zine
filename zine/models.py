@@ -1001,6 +1001,22 @@ class Comment(_ZEMLContainer):
     author = _union_property('author', 'display_name')
     del _union_property
 
+    def unbind_user(self):
+        """If a user is deleted, the cascading rules would also delete all
+        the comments created by this user, or cause a transaction error
+        because the relation is set to restrict, depending on the current
+        phase of the moon (this changed a lot in the past, i expect it to
+        continue to change).
+
+        This method unsets the user and updates the comment builtin columns
+        to the values from the user object.
+        """
+        assert self.user is not None
+        self._email= self.user.email
+        self._www = self.user.www
+        self._author = self.user.display_name
+        self.user = None
+
     def _get_status(self):
         return self._status
 
