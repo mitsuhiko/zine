@@ -18,6 +18,9 @@ _setup_lock = allocate_lock()
 #: the initialized application
 _application = None
 
+#: true if the setup failed last time
+_setup_failed = False
+
 
 class InstanceNotInitialized(RuntimeError):
     """Raised if an application was created for a not yet initialized
@@ -31,6 +34,7 @@ def _create_zine(instance_folder, timeout=5, in_reloader=True):
     after `timeout` seconds a `RuntimeError` is raised.
     """
     global _application
+    _setup_failed = False
     _setup_lock.acquire()
     try:
         if _application is not None:
@@ -55,8 +59,12 @@ def _create_zine(instance_folder, timeout=5, in_reloader=True):
         _application = app = object.__new__(cls)
         try:
             app.__init__(instance_folder)
-        except InstanceNotInitialized:
+        except:
+            # if an exception happened, tear down the application
+            # again so that we don't have a semi-initialized object
+            # registered.
             _application = None
+            _setup_failed = True
             raise
         return app
     finally:
@@ -71,6 +79,7 @@ def _unload_zine():
     _setup_lock.acquire()
     try:
         _application = None
+        _setup_failed = False
 
         for name, module in sys.modules.items():
             # in the main module delete everything but the stuff
@@ -128,7 +137,8 @@ def get_wsgi_app(instance_folder):
         _dispatch_lock.acquire()
         try:
             app = _application
-            if app is not None and app.wants_reload:
+            if app is not None and app.wants_reload or \
+               _setup_failed:
                 _unload_zine()
                 app = None
             if app is None:
