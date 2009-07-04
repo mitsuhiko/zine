@@ -1176,6 +1176,7 @@ class TagQuery(db.Query):
         q = db.select([s.slug, s.name, s.s_count.label('s_count')], **options)
 
         items = [{
+            'id':       row.tag_id,
             'slug':     row.slug,
             'name':     row.name,
             'count':    row.s_count,

@@ -100,12 +100,12 @@ class MarkupExtension(object):
             to the given attribute.  Note that inline elements may not support
             arguments in all markup languages.
 
-    The `process` method must be overwritten.  Is given three arguments:
+    The `process` method must be overwritten.  It is given three arguments:
 
         `attributes`
             A dictionary of attributes (options) of the markup element.
         `content`
-            The content of the element; if `is_isolated` is True, this has
+            The content of the element; if `is_isolated` is False, this has
             already been parsed with the markup parser and is a ZEML tree,
             otherwise it is raw text.
         `reason`

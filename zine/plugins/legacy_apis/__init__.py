@@ -21,7 +21,8 @@ from zine.api import get_request, url_for, db
 from zine.utils.xml import XMLRPC, Fault
 from zine.utils.forms import BooleanField
 from zine.utils import log
-from zine.models import User, Post, Category, STATUS_PUBLISHED, STATUS_DRAFT
+from zine.models import User, Post, Category, Tag, STATUS_PUBLISHED, \
+     STATUS_DRAFT
 from zine.privileges import CREATE_ENTRIES, CREATE_PAGES, BLOG_ADMIN, \
      MANAGE_CATEGORIES
 
@@ -86,6 +87,13 @@ def dump_category(category):
         htmlUrl=escape(url_for(category)),
         rssUrl=escape(url_for('blog/atom_feed', category=category.slug))
     )
+
+
+def dump_options(cfg, keys=None):
+    result = cfg.items()
+    if keys:
+        result = [(k, v) for k, v in result if k in keys]
+    return dict(result)
 
 
 def extract_text(struct):
@@ -292,6 +300,48 @@ def wp_delete_category(blog_id, username, password, category_id):
     return category.id
 
 
+def wp_get_authors(blog_id, username, password):
+    request = login(username, password)
+    return [{
+        'user_id':      user.id,
+        'user_login':   user.username,
+        'display_name': user.display_name
+    } for user in User.query.authors().all()]
+
+
+def wp_get_tags(blog_id, username, password):
+    request = login(username, password)
+    return [{
+        'tag_id':       tag['id'],
+        'name':         tag['name'],
+        'count':        tag['count'],
+        'slug':         tag['slug'],
+        'html_url':     escape(url_for('blog/show_tag', slug=tag['slug'])),
+        'rss_url':      escape(url_for('blog/atom_feed', tag=tag['slug']))
+    } for tag in Tag.query.get_cloud()]
+
+
+def wp_get_options(blog_id, username, password, options=None):
+    # XXX: this does not use the wordpress format for the return value
+    request = login(username, password)
+    if not request.user.has_privilege(BLOG_ADMIN):
+        raise Fault(403, 'not enough privileges')
+    return dump_options(request.app.cfg, options)
+
+
+def wp_set_options(blog_id, username, password, options):
+    # XXX: this does not use the wordpress format for the options
+    request = login(username, password)
+    if not request.user.has_privilege(BLOG_ADMIN):
+        raise Fault(403, 'not enough privileges')
+    t = request.app.cfg.edit()
+    for key, value in options.iteritems():
+        if key in t:
+            t[key] = value
+    t.commit()
+    return dump_options(request.app.cfg)
+
+
 def mt_get_post_categories(post_id, username, password):
     request = login(username, password)
     post = Post.query.get(post_id)
@@ -363,7 +413,11 @@ service.register_functions([
     (wp_get_page_list, 'wp.getPageList'),
     (wp_new_category, 'wp.newCategory'),
     (wp_delete_category, 'wp.deleteCategory'),
-    (metaweblog_get_categories, 'wp.getCategories')
+    (metaweblog_get_categories, 'wp.getCategories'),
+    (wp_get_authors, 'wp.getAuthors'),
+    (wp_get_tags, 'wp.getTags'),
+    (wp_get_options, 'wp.getOptions'),
+    (wp_set_options, 'wp.setOptions')
 ])
 
 # MovableType
@@ -393,8 +447,8 @@ def setup(app, plugin):
     # correct endpoint, but some crappy software will try to call meta-
     # weblog functions on the wordpress endpoint and vice versa which
     # is why they internally point to the same service.
-    
+
     for api, default in all_apis:
         config_key = 'legacy_apis/prefer_' + api.lower()
         app.add_config_var(config_key, BooleanField(default=default))
-        app.add_api(config_key, app.cfg[config_key], service)
+        app.add_api(api, app.cfg[config_key], service)

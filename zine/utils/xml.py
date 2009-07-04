@@ -17,6 +17,7 @@ from werkzeug import escape, import_string, BaseResponse
 from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
 
 from zine.utils import log
+from zine.i18n import _TranslationProxy
 
 
 _entity_re = re.compile(r'&([^;]+);')
@@ -230,6 +231,9 @@ class XMLRPC(object):
             return dict((k, self._wrap_obj(v)) for k, v in obj.iteritems())
         if isinstance(obj, datetime):
             return xmlrpclib.DateTime(obj.timetuple())
+        # make sure we can send translated strings over the wire.
+        if isinstance(obj, _TranslationProxy):
+            return unicode(obj)
         return obj
 
     def _marshaled_dispatch(self, data):
