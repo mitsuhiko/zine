@@ -1474,11 +1474,12 @@ class ChoiceField(Field):
     def convert(self, value):
         if not value and not self.required:
             return
-        for choice in self.choices:
-            if isinstance(choice, tuple):
-                choice = choice[0]
-            if _value_matches_choice(value, choice):
-                return choice
+        if self.choices:
+            for choice in self.choices:
+                if isinstance(choice, tuple):
+                    choice = choice[0]
+                if _value_matches_choice(value, choice):
+                    return choice
         raise ValidationError(self.messages['invalid_choice'])
 
     def _bind(self, form, memo):
