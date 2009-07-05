@@ -1164,7 +1164,8 @@ class TagQuery(db.Query):
              (p.status == STATUS_PUBLISHED) &
              (p.pub_date <= datetime.utcnow()))
 
-        s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
+        s = db.select([t.tag_id, t.slug, t.name,
+                       db.func.count(p.post_id).label('s_count')],
                       q, group_by=[t.slug, t.name]).alias('post_count_query').c
 
         options = {'order_by': [db.asc(s.s_count)]}
@@ -1173,7 +1174,8 @@ class TagQuery(db.Query):
 
         # the label statement circumvents a bug for sqlite3 on windows
         # see #65
-        q = db.select([s.slug, s.name, s.s_count.label('s_count')], **options)
+        q = db.select([s.tag_id, s.slug, s.name, s.s_count.label('s_count')],
+                      **options)
 
         items = [{
             'id':       row.tag_id,
