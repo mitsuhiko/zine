@@ -16,6 +16,9 @@ Zine 0.2
 - Custom markup systems such as RST and creole are fully supported now.
 - Slightly improved admin panel.
 - Improved performance and memory usage.
+- Implemented notifications
+- Improved comment moderation system and antispam.
+- Added importer for blogger feeds.
 
 
 Zine 0.1.3
