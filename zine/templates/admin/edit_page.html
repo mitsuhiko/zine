@@ -29,9 +29,9 @@
     </div>
     <div class="formbox">
       <h3>{{ form.text.label() }}</h3>
-      {{ form.text(rows=12) }}
+      {{ form.text(rows=12, class='resizable') }}
     </div>
-    {{ render_post_actions(form) }}
+    <div class="secondary">{{ render_post_actions(form) }}</div>
     {{ render_formbox(form.slug, collapsed=false) }}
     <div class="formbox toggleable">
       <h3>{{ form.status.label() }}</h3>

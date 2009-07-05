@@ -92,4 +92,9 @@ $(function() {
       document.title = (arg ? arg + ' — ' : '') + title;
     });
   })();
+
+  // Make some textareas resizable
+  (function() {
+    $('textarea.resizable').TextAreaResizer();
+  })();
 });

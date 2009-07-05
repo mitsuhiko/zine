@@ -28,7 +28,7 @@
     </div>
     <div class="formbox">
       <h3>{{ form.text.label() }}</h3>
-      {{ form.text(rows=12) }}
+      {{ form.text(rows=12, class='resizable') }}
     </div>
     <div class="secondary">{{ render_post_actions(form) }}</div>
     {{ render_formbox(form.status, collapsed=false) }}
