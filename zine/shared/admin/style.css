@@ -413,6 +413,7 @@ div.contents dl dt {
     margin: 0;
     padding: 0.5em 0 0.2em 0;
     color: #555;
+    text-shadow: 0 1px 1px #ddd;
 }
 
 div.contents dl dd {
