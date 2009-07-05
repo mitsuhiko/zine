@@ -95,6 +95,29 @@ $(function() {
 
   // Make some textareas resizable
   (function() {
-    $('textarea.resizable').TextAreaResizer();
+    var ta = $('textarea.resizable');
+    if (ta.length == 0)
+      return;
+
+    ta.TextAreaResizer();
+
+    // make all forms remember the height of the textarea.  This
+    // code does funny things if multiple textareas are resizable
+    // but it should work for most situations.
+    var cookie_set = false;
+    $('form').submit(function() {
+      if (cookie_set)
+        return;
+      var height = parseInt($('form textarea.resizable').css('height'));
+      if (height > 0)
+        document.cookie = 'ta_height=' + height;
+      cookie_set = true;
+    });
+
+    // if we have the textarea height in the cookie, update the
+    // height for the textareas.
+    var height = document.cookie.match(/ta_height=(\d+)/)[1];
+    if (height != null)
+      ta.css('height', height + 'px');
   })();
 });

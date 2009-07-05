@@ -932,6 +932,7 @@ class DeleteUserForm(_UserBoundForm):
         emit_event('before-user-deleted', self.user, self.data)
         db.delete(self.user)
 
+
 class EditProfileForm(_UserBoundForm):
     """Edit or create a user's profile."""
 

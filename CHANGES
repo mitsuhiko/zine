@@ -14,6 +14,8 @@ Zine 0.2
   They can defer the loading of columns and lazily load relations
   to disable loading of unnecessary data.
 - Custom markup systems such as RST and creole are fully supported now.
+- Slightly improved admin panel.
+- Improved performance and memory usage.
 
 
 Zine 0.1.3
