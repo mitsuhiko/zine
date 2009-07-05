@@ -872,7 +872,7 @@ class Zine(object):
         self._template_searchpath.append(path)
 
     @setuponly
-    def add_api(self, name, preferred, callback, blog_id=1):
+    def add_api(self, name, preferred, callback, blog_id=1, url_key=None):
         """Add a new API to the blog.  The newly added API is available at
         ``/_services/<name>`` and automatically exported in the RSD file.
         The `blog_id` is an unused oddity of the RSD file, preferred an
@@ -881,8 +881,12 @@ class Zine(object):
         """
         endpoint = 'services/' + name
         self.apis[name] = (blog_id, preferred, endpoint)
-        self.add_url_rule('/_services/' + name, endpoint=endpoint)
+        if url_key is None:
+            url_key = name.lower()
+        url = '/_services/' + url_key
+        self.add_url_rule(url, endpoint=endpoint)
         self.add_view(endpoint, callback)
+        return url
 
     @setuponly
     def add_importer(self, importer):

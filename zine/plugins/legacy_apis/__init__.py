@@ -17,6 +17,8 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+from datetime import datetime
+
 from zine.api import get_request, url_for, db
 from zine.utils.xml import XMLRPC, Fault
 from zine.utils.forms import BooleanField
@@ -139,6 +141,7 @@ def generic_update(request, post, struct, publish):
         post.pings_enabled = bool(struct['mt_allow_pings'])
     if 'mt_allow_comments' in struct:
         post.comments_enabled = bool(struct['mt_allow_comments'])
+    post.last_update = datetime.utcnow()
 
 
 def generic_new_post(request, struct, publish, content_type):
