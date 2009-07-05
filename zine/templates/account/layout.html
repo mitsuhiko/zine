@@ -16,7 +16,7 @@
     <div class="title">{% trans blog_title=cfg.blog_title|e %}{{ blog_title }} &mdash; My Account{% endtrans %}</div>
     <div class="metanav">
       <a href="{{ url_for('blog/index')|e }}">{{ _("View Blog") }}</a> |
-      {% if request.user.is_admin -%}
+      {% if account.user_can_enter_admin_panel -%}
       <a href="{{ url_for('admin/index')|e }}">{{ _("Administration") }}</a> |
       {%- endif %}
       <a href="{{ url_for('account/logout') }}">{{ _("Logout") }}</a>

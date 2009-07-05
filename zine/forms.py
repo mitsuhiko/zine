@@ -858,7 +858,7 @@ class EditUserForm(_UserBoundForm):
     def _set_common_attributes(self, user):
         forms.set_fields(user, self.data, 'www', 'real_name', 'description',
                          'display_name', 'is_author')
-        bind_privileges(user.own_privileges, self.data['privileges'])
+        bind_privileges(user.own_privileges, self.data['privileges'], user)
         bound_groups = set(g.name for g in user.groups)
         choosen_groups = set(self.data['groups'])
         group_mapping = dict((g.name, g) for g in Group.query.all())
@@ -1256,12 +1256,12 @@ def make_notification_form(user):
                sorted(app.notification_manager.systems.values(),
                       key=lambda x: x.name.lower())]
 
-    for obj in app.notification_types.itervalues():
+    for obj in app.notification_manager.types(user):
         fields[obj.name] = forms.MultiChoiceField(choices=systems,
                                                   label=obj.description,
                                                   widget=forms.CheckboxGroup)
 
-    for ns in NotificationSubscription.query.filter_by(user=user).all():
+    for ns in user.notification_subscriptions:
         subscriptions.setdefault(ns.notification_id, []) \
             .append(ns.notification_system)
 
@@ -1271,28 +1271,26 @@ def make_notification_form(user):
 
         def apply(self):
             user_subscriptions = {}
-            for subscription in NotificationSubscription \
-                    .query.filter_by(user=user).all():
+            for subscription in user.notification_subscriptions:
                 user_subscriptions.setdefault(subscription.notification_id,
                     set()).add(subscription.notification_system)
 
-            all_systems = set(app.notification_manager.systems)
             for key, active in self['subscriptions'].iteritems():
                 currently_set = user_subscriptions.get(key, set())
                 active = set(active)
 
                 # remove outdated
                 for system in currently_set.difference(active):
-                    NotificationSubscription.query.filter_by(
-                        user=user,
-                        notification_id=key,
-                        notification_system=system
-                    ).delete()
+                    for subscription in user.notification_subscriptions \
+                        .filter_by(notification_id=key,
+                                   notification_system=system):
+                        db.session.delete(subscription)
 
                 # add new
                 for system in active.difference(currently_set):
-                    NotificationSubscription(user=user, notification_id=key,
-                                             notification_system=system)
+                    user.notification_subscriptions.append(
+                        NotificationSubscription(user=user, notification_id=key,
+                                                 notification_system=system))
 
     return _NotificationForm({'subscriptions': subscriptions})
 

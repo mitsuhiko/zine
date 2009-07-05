@@ -80,7 +80,7 @@ class _Privilege(object):
 
 class Privilege(_Expr):
 
-    def __init__(self, name, explanation, privilege_dependencies=()):
+    def __init__(self, name, explanation, privilege_dependencies):
         self.name = name
         self.explanation = explanation
         self.dependencies = privilege_dependencies
@@ -111,12 +111,15 @@ def add_admin_privilege(privilege):
     return privilege
 
 
-def bind_privileges(container, privileges):
+def bind_privileges(container, privileges, user=None):
     """Binds the privileges to the container.  The privileges can be a list
     of privilege names, the container must be a set.  This is called for
     the HTTP round-trip in the form validation.
     """
+    if not user:
+        user = get_request().user
     app = get_application()
+    notification_types = app.notification_manager.notification_types
     current_map = dict((x.name, x) for x in container)
     currently_attached = set(x.name for x in container)
     new_privileges = set(privileges)
@@ -124,11 +127,28 @@ def bind_privileges(container, privileges):
     # remove out-dated privileges
     for name in currently_attached.difference(new_privileges):
         container.remove(current_map[name])
+        # remove any privilege dependencies that are not attached to other
+        # privileges
+        for privilege in current_map[name].dependencies.iter_privileges():
+            container.remove(privilege)
+
+        # remove notification subscriptions that required the privilege
+        # being deleted.
+        for notification in user.notification_subscriptions:
+            privs = notification_types[notification.notification_id].privileges
+            if current_map[name] in privs.iter_privileges():
+                db.session.delete(notification)
+                break
+            for privilege in current_map[name].dependencies:
+                if privilege in privs.iter_privileges():
+                    db.session.delete(notification)
 
     # add new privileges
     for name in new_privileges.difference(currently_attached):
-        container.add(app.privileges[name])
-        for privilege in app.privileges[name].dependencies:
+        privilege = app.privileges[name]
+        container.add(privilege)
+        # add dependable privileges
+        for privilege in privilege.dependencies.iter_privileges():
             container.add(privilege)
 
 
@@ -177,34 +197,34 @@ def _register(name, description, privilege_dependencies=()):
 _register('ENTER_ADMIN_PANEL', lazy_gettext(u'can enter admin panel'))
 _register('BLOG_ADMIN', lazy_gettext(u'can administer the blog'))
 _register('CREATE_ENTRIES', lazy_gettext(u'can create new entries'),
-          (ENTER_ADMIN_PANEL,))
+          ENTER_ADMIN_PANEL)
 _register('EDIT_OWN_ENTRIES', lazy_gettext(u'can edit their own entries'),
-          (ENTER_ADMIN_PANEL, CREATE_ENTRIES))
+          (ENTER_ADMIN_PANEL | CREATE_ENTRIES))
 _register('EDIT_OTHER_ENTRIES', lazy_gettext(u'can edit another person\'s entries'),
-          (ENTER_ADMIN_PANEL,))
+          ENTER_ADMIN_PANEL)
 _register('CREATE_PAGES', lazy_gettext(u'can create new pages'),
-          (ENTER_ADMIN_PANEL,))
+          ENTER_ADMIN_PANEL)
 _register('EDIT_OWN_PAGES', lazy_gettext(u'can edit their own pages'),
-          (ENTER_ADMIN_PANEL, CREATE_PAGES))
+          (ENTER_ADMIN_PANEL | CREATE_PAGES))
 _register('EDIT_OTHER_PAGES', lazy_gettext(u'can edit another person\'s pages'),
-          (ENTER_ADMIN_PANEL,))
+          ENTER_ADMIN_PANEL)
 _register('VIEW_DRAFTS', lazy_gettext(u'can view drafts'))
 _register('MANAGE_CATEGORIES', lazy_gettext(u'can manage categories'),
-          (ENTER_ADMIN_PANEL,))
+          ENTER_ADMIN_PANEL)
 _register('MODERATE_COMMENTS', lazy_gettext(u'can moderate comments'),
-          (ENTER_ADMIN_PANEL,))
+          ENTER_ADMIN_PANEL)
 _register('MODERATE_OWN_ENTRIES', lazy_gettext(u'can moderate comments on it\'s own entries'),
-          (ENTER_ADMIN_PANEL, CREATE_ENTRIES))
+          (ENTER_ADMIN_PANEL | CREATE_ENTRIES))
 _register('MODERATE_OWN_PAGES', lazy_gettext(u'can moderate comments on it\'s own pages'),
-          (ENTER_ADMIN_PANEL, CREATE_PAGES))
+          (ENTER_ADMIN_PANEL | CREATE_PAGES))
 _register('VIEW_PROTECTED', lazy_gettext(u'can view protected entries'))
 
 # Regular users permissions
 _register('ENTER_ACCOUNT_PANEL', lazy_gettext(u'can enter his account panel'))
 _register('EDIT_OWN_COMMENTS', lazy_gettext(u'can edit own comments'),
-          (ENTER_ACCOUNT_PANEL,))
+          ENTER_ACCOUNT_PANEL)
 _register('DELETE_OWN_COMMENTS', lazy_gettext(u'can delete own comments'),
-          (ENTER_ACCOUNT_PANEL,))
+          ENTER_ACCOUNT_PANEL)
 
 
 CONTENT_TYPE_PRIVILEGES = {

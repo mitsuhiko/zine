@@ -18,7 +18,9 @@ from urlparse import urlsplit
 from werkzeug import url_unquote
 
 from zine.models import NotificationSubscription, User
-from zine.application import get_application, render_template
+from zine.application import get_application, get_request, render_template
+from zine.privileges import BLOG_ADMIN, ENTER_ACCOUNT_PANEL, MODERATE_COMMENTS,\
+     MODERATE_OWN_PAGES, MODERATE_OWN_ENTRIES
 from zine.utils.zeml import parse_zeml, escape
 from zine.utils.mail import send_email
 from zine.i18n import lazy_gettext, _
@@ -116,9 +118,10 @@ class NotificationType(object):
     send a special type of notification after a comment is saved.
     """
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, privileges):
         self.name = name
         self.description = description
+        self.privileges = privileges
 
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.name)
@@ -155,7 +158,7 @@ class NotificationSystem(object):
     object and a user object as parameter and then sends the message via
     the specific system.  The plugin is itself responsible for extracting the
     information necessary to send the message from the user object.  (Like
-    extracting the email adress).
+    extracting the email address).
     """
 
     def __init__(self, app):
@@ -257,6 +260,7 @@ class NotificationManager(object):
 
     def __init__(self):
         self.systems = {}
+        self.notification_types = DEFAULT_NOTIFICATION_TYPES.copy()
 
     def send(self, notification):
         # given the type of the notification, check what users want that
@@ -270,10 +274,20 @@ class NotificationManager(object):
             if system is not None:
                 system.send(subscription.user, notification)
 
+    def types(self, user=None):
+        if not user:
+            user = get_request().user
+        for notification in self.notification_types.itervalues():
+            if user.has_privilege(notification.privileges):
+                yield notification
 
-def _register(name, description):
+    def add_notification_type(self, notification):
+        self.notification_types[type.name] = type
+
+
+def _register(name, description, privileges=ENTER_ACCOUNT_PANEL):
     """Register a new builtin type of notifications."""
-    nottype = NotificationType(name, description)
+    nottype = NotificationType(name, description, privileges)
     DEFAULT_NOTIFICATION_TYPES[name] = nottype
     globals()[name] = nottype
     __all__.append(name)
@@ -282,9 +296,11 @@ def _register(name, description):
 _register('NEW_COMMENT',
           lazy_gettext(u'When a new comment is received.'))
 _register('COMMENT_REQUIRES_MODERATION',
-          lazy_gettext(u'When a comment requires moderation.'))
+          lazy_gettext(u'When a comment requires moderation.'),
+          (MODERATE_OWN_PAGES | MODERATE_OWN_ENTRIES | MODERATE_COMMENTS))
 _register('SECURITY_ALERT',
-          lazy_gettext(u'When Zine found an urgent security alarm.'))
+          lazy_gettext(u'When Zine found an urgent security alarm.'),
+          BLOG_ADMIN)
 
 
 DEFAULT_NOTIFICATION_SYSTEMS = [EMailNotificationSystem]
