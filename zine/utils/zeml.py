@@ -1042,8 +1042,9 @@ class Parser(object):
     breaking_rules = [
         (['p'], set(['#block'])),
         (['li'], set(['li'])),
-        (['td', 'tr'], set(['td', 'th', 'tr', 'tbody', 'thead', 'tfoot'])),
+        (['td', 'th'], set(['td', 'th', 'tr', 'tbody', 'thead', 'tfoot'])),
         (['tr'], set(['tr', 'tbody', 'thead', 'tfoot'])),
+        (['thead', 'tbody', 'tfoot'], set(['thead', 'tbody', 'tfoot'])),
         (['dd', 'dt'], set(['dl', 'dt', 'dd']))
     ]
 
@@ -1151,7 +1152,7 @@ class Parser(object):
         """
         # if the tag is not nestable and we are directly inside a tag with
         # the same name we pop.
-        if self.is_breaking(tag, self.current):
+        while self.is_breaking(tag, self.current):
             self.leave(None)
         element = Element(tag)
         self.current.children.append(element)
