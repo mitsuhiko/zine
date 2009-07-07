@@ -1045,7 +1045,8 @@ class Parser(object):
         (['td', 'th'], set(['td', 'th', 'tr', 'tbody', 'thead', 'tfoot'])),
         (['tr'], set(['tr', 'tbody', 'thead', 'tfoot'])),
         (['thead', 'tbody', 'tfoot'], set(['thead', 'tbody', 'tfoot'])),
-        (['dd', 'dt'], set(['dl', 'dt', 'dd']))
+        (['dd', 'dt'], set(['dl', 'dt', 'dd'])),
+        (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], set(['#block']))
     ]
 
     def __init__(self, string, parsing_reason, extensions=None):
