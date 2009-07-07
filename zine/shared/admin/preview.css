@@ -6,9 +6,9 @@ div.preview div.text {
     outline: 0;
     background: transparent;
     color: black;
-    font-family: sans-serif;
+    font-family: 'Trebuchet MS', sans-serif;
     font-style: normal;
-    font-size: 16px;
+    font-size: 14px;
     vertical-align: baseline;
     text-decoration: none;
     line-height: normal;
@@ -52,7 +52,7 @@ div.preview div.text center {
 
 div.preview div.text h1, div.preview div.text h2, div.preview div.text h3,
 div.preview div.text h4, div.preview div.text h5, div.preview div.text h6 {
-    font-family: sans-serif;
+    font-family: 'Trebuchet MS', sans-serif;
 }
 
 div.preview div.text h1 {

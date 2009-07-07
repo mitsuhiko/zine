@@ -946,6 +946,7 @@ table.plugins td.description span.author {
 
 table.plugins td.plugin {
     font-weight: bold;
+    min-width: 200px;
 }
 
 table.plugins td.version {

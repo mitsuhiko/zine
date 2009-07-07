@@ -4,7 +4,7 @@ Plugin URL: http://zine.pocoo.org/plugins/pygments_support
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 Author URL: http://lucumr.pocoo.org/
 License: BSD
-Version: %ZINE_VERSION%
+Version: 0.2
 Description: Adds support for <a href="http://pygments.org/">pygments</a>\
  highlighted code blocks. Blocks marked with <code>&lt;sourcecode\
  syntax="language"&gt;</code> are highlighted using the Pygments\

@@ -2,7 +2,7 @@ Name: Legacy APIs
 Plugin URL: http://zine.pocoo.org/plugins/legacy_apis
 Author: Armin Ronacher <armin.ronacher@active-4.com>
 License: BSD
-Version: %ZINE_VERSION%
+Version: 0.2
 Description: Adds support for various legacy weblog APIs such as\
  MetaWeblog, WordPress or MovableType.
 Description[de]: Fügt Unterstützung für existierende Weblog APIs\
