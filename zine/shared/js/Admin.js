@@ -86,11 +86,15 @@ $(function() {
     if (input_box.length == 0)
       return;
 
+    // windows browser put the invisible space directly into the
+    // window manager title which causes a question mark to show
+    // up.  Because of that we fire the change() event right away
+    // to force an updated title without the invisble space.
     var title = document.title.split(/\u200B/, 2)[1];
     input_box.bind('change', function() {
       var arg = input_box.val();
       document.title = (arg ? arg + ' — ' : '') + title;
-    });
+    }).change();
   })();
 
   // Make some textareas resizable
