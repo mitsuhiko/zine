@@ -690,16 +690,17 @@ def edit_comment(request, comment_id):
         raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = EditCommentForm(comment)
 
-    if request.method == 'POST' and form.validate(request.form):
+    if request.method == 'POST':
         if request.form.get('cancel'):
             return form.redirect('admin/manage_comments')
         elif request.form.get('delete'):
             return redirect_to('admin/delete_comment', comment_id=comment_id)
-        form.save_changes()
-        db.commit()
-        flash(_(u'Comment by %s moderated successfully.') %
-              escape(comment.author))
-        return form.redirect('admin/manage_comments')
+        elif form.validate(request.form):
+            form.save_changes()
+            db.commit()
+            flash(_(u'Comment by %s moderated successfully.') %
+                  escape(comment.author))
+            return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/edit_comment.html',
                                  'comments.overview', form=form.as_widget())
