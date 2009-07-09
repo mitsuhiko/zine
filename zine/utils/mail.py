@@ -146,7 +146,7 @@ class EMail(object):
         msgtext = self.format()
         try:
             try:
-                return smtp.sendmail(from_addr, to_addrs, msgtext)
+                return smtp.sendmail(self.from_addr, self.to_addrs, msgtext)
             except SMTPException, e:
                 raise RuntimeError(str(e))
         finally:
