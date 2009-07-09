@@ -50,7 +50,7 @@ DEFAULT_VARS = {
     'blog_email':               TextField(default=u'', help_text=lazy_gettext(
         u'The email address given here is used by the notification system to send '
         u'mails from.  Also plugins that send mails will use this address as '
-        u'sender address.'), validators=[is_valid_email]),
+        u'sender address.'), validators=[is_valid_email()]),
     'timezone':                 ChoiceField(choices=sorted(list_timezones()),
         default=u'UTC', help_text=lazy_gettext(
         u'The timezone of the blog.  All times and dates in the user interface '
