@@ -1526,6 +1526,7 @@ class Textifier(object):
 
     def multiline(self, element):
         self.textify(element)
+        self.flush_par()
         self.write_links()
         return self.result.getvalue()
 
