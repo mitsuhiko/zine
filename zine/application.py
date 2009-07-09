@@ -18,10 +18,15 @@ from datetime import datetime, timedelta
 from urlparse import urlparse, urljoin
 from collections import deque
 from inspect import getdoc
+from traceback import format_exception
+from pprint import pprint
+from StringIO import StringIO
 
 from babel import Locale
 
 from jinja2 import Environment, BaseLoader, TemplateNotFound
+
+from sqlalchemy.exceptions import SQLAlchemyError
 
 from werkzeug import Request as RequestBase, Response as ResponseBase, \
      SharedDataMiddleware, url_quote, routing, redirect as _redirect, \
@@ -705,6 +710,7 @@ class Zine(object):
         # the notification manager
         from zine.notifications import NotificationManager, \
              DEFAULT_NOTIFICATION_SYSTEMS, DEFAULT_NOTIFICATION_TYPES
+
         self.notification_manager = NotificationManager()
         for system in DEFAULT_NOTIFICATION_SYSTEMS:
             self.add_notification_system(system)
@@ -1201,6 +1207,18 @@ class Zine(object):
         response.status_code = 404
         return response
 
+    def send_error_notification(self, request, error):
+        from zine.notifications import send_notification_template, ZINE_ERROR
+        request_buffer = StringIO()
+        pprint(request.__dict__, request_buffer)
+        request_buffer.seek(0)
+        send_notification_template(
+            ZINE_ERROR, 'notifications/on_server_error.zeml',
+            user=request.user, summary=error.message,
+            request_details=request_buffer.read(),
+            longtext=''.join(format_exception(*sys.exc_info()))
+        )
+
     def handle_server_error(self, request, exc_info=None, suppress_log=False):
         """Called if a server error happens.  Logs the error and returns a
         response with an error message.
@@ -1212,13 +1230,15 @@ class Zine(object):
         response.status_code = 500
         return response
 
-    def handle_internal_error(self, request, error):
+    def handle_internal_error(self, request, error, suppress_log=True):
         """Called if internal errors are caught."""
         if request.user.is_admin:
             response = render_response('internal_error.html', error=error)
             response.status_code = 500
             return response
-        return self.handle_server_error(request, suppress_log=True)
+        # We got here, meaning no admin has seen this error yet. Notify Them!
+        self.send_error_notification(request, error)
+        return self.handle_server_error(request, suppress_log=suppress_log)
 
     def dispatch_request(self, request):
         #! the after-request-setup event can return a response
@@ -1245,6 +1265,11 @@ class Zine(object):
                                                  next=request.path))
         except HTTPException, e:
             response = e.get_response(request)
+        except SQLAlchemyError, e:
+            # Some database screwup?! Don't let Zine stay dispatching 500's
+            db.session.rollback()
+            response = self.handle_internal_error(request, e,
+                                                  suppress_log=False)
 
         # in debug mode on HTML responses we inject the collected queries.
         if self.cfg['database_debug'] and \

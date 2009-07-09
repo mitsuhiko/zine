@@ -31,7 +31,7 @@ __all__ = ['DEFAULT_NOTIFICATION_TYPES', 'NotificationType']
 DEFAULT_NOTIFICATION_TYPES = {}
 
 
-def send_notification(type, message):
+def send_notification(type, message, user=Ellipsis):
     """Convenience function.  Get the application object and deliver the
     notification to it's NotificationManager.
 
@@ -104,13 +104,15 @@ def send_notification(type, message):
         New comment on "Foo bar baz."  Mr. Miracle wrote anew comment:
         "This is awesome".  http://.../link
     """
-    get_application().notification_manager.send(Notification(type, message))
+    get_application().notification_manager.send(
+        Notification(type, message, user)
+    )
 
 
-def send_notification_template(type, template_name, **context):
+def send_notification_template(type, template_name, user=Ellipsis, **context):
     """Like `send_notification` but renders a template instead."""
     notification = render_template(template_name, **context)
-    send_notification(type, notification)
+    send_notification(type, notification, user)
 
 
 class NotificationType(object):
@@ -132,10 +134,14 @@ class Notification(object):
     The message is a zeml construct.
     """
 
-    def __init__(self, id, message):
+    def __init__(self, id, message, user=Ellipsis):
         self.message = parse_zeml(message, 'system')
         self.id = id
         self.sent_date = datetime.utcnow()
+        if user is Ellipsis:
+            self.user = get_request().user
+        else:
+            self.user = user
 
     @property
     def self_link(self):
@@ -266,10 +272,15 @@ class NotificationManager(object):
         # given the type of the notification, check what users want that
         # notification; via what system and call the according
         # notification system in order to finally deliver the message
-        subscriptions = NotificationSubscription.query \
-            .filter_by(notification_id=notification.id.name).all()
+        subscriptions = NotificationSubscription.query.filter_by(
+            notification_id=notification.id.name
+        )
+        if notification.user:
+            subscriptions = subscriptions.filter(
+                NotificationSubscription.user!=notification.user
+            )
 
-        for subscription in subscriptions:
+        for subscription in subscriptions.all():
             system = self.systems.get(subscription.notification_system)
             if system is not None:
                 system.send(subscription.user, notification)
@@ -301,6 +312,7 @@ _register('COMMENT_REQUIRES_MODERATION',
 _register('SECURITY_ALERT',
           lazy_gettext(u'When Zine found an urgent security alarm.'),
           BLOG_ADMIN)
+_register('ZINE_ERROR', lazy_gettext(u'When Zine throws errors.'), BLOG_ADMIN)
 
 
 DEFAULT_NOTIFICATION_SYSTEMS = [EMailNotificationSystem]
