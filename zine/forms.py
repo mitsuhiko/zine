@@ -193,7 +193,8 @@ class NewCommentForm(forms.Form):
             else:
                 notification_type = NEW_COMMENT
             send_notification_template(notification_type,
-                'notifications/on_new_comment.zeml', comment=comment)
+                'notifications/on_new_comment.zeml',
+                user=req.user, comment=comment)
 
         # Still allow the user to see his comment if it's blocked
         if comment.blocked:

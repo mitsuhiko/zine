@@ -129,8 +129,13 @@ def bind_privileges(container, privileges, user=None):
         container.remove(current_map[name])
         # remove any privilege dependencies that are not attached to other
         # privileges
-        for privilege in current_map[name].dependencies.iter_privileges():
-            container.remove(privilege)
+        if current_map[name].dependencies:
+            for privilege in current_map[name].dependencies.iter_privileges():
+                try:
+                    container.remove(privilege)
+                except KeyError:
+                    # privilege probably already removed
+                    pass
 
         # remove notification subscriptions that required the privilege
         # being deleted.
@@ -148,8 +153,9 @@ def bind_privileges(container, privileges, user=None):
         privilege = app.privileges[name]
         container.add(privilege)
         # add dependable privileges
-        for privilege in privilege.dependencies.iter_privileges():
-            container.add(privilege)
+        if privilege.dependencies:
+            for privilege in privilege.dependencies.iter_privileges():
+                container.add(privilege)
 
 
 def require_privilege(expr):
@@ -186,7 +192,7 @@ def privilege_attribute(lowlevel_attribute):
                                 creator=creator_func)
 
 
-def _register(name, description, privilege_dependencies=()):
+def _register(name, description, privilege_dependencies=None):
     """Register a new builtin privilege."""
     priv = Privilege(name, description, privilege_dependencies)
     DEFAULT_PRIVILEGES[name] = priv

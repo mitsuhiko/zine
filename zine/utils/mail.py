@@ -129,7 +129,7 @@ class EMail(object):
             #smtp.set_debuglevel(1)
             smtp.ehlo()
             if not smtp.esmtp_features.has_key('starttls'):
-                # XXX: untranlated because python exceptions do not support
+                # XXX: untranslated because python exceptions do not support
                 # unicode messages.
                 raise RuntimeError('TLS enabled but server does not '
                                    'support TLS')
