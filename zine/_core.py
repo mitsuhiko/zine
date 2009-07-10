@@ -129,7 +129,7 @@ def get_wsgi_app(instance_folder):
     core module.  You have been warned.
     """
     # the reloader eats import errors, so make sure that the application
-    # properly before we create our proxy application.
+    # imports properly before we create our proxy application.
     import zine.application
 
     _dispatch_lock = allocate_lock()

@@ -1171,11 +1171,13 @@ class Zine(object):
         request = get_request()
         javascript = [
             'Zine.ROOT_URL = %s' % dump_json(base_url),
-            'Zine.BLOG_URL = %s' % dump_json(base_url + self.cfg['blog_url_prefix'])
+            'Zine.BLOG_URL = %s' % dump_json(base_url +
+                                             self.cfg['blog_url_prefix'])
         ]
         if request is None or request.user.is_manager:
             javascript.append('Zine.ADMIN_URL = %s' %
-                              dump_json(base_url + self.cfg['admin_url_prefix']))
+                              dump_json(base_url +
+                                        self.cfg['admin_url_prefix']))
         result.append(u'<script type="text/javascript">%s;</script>' %
                       '; '.join(javascript))
 
@@ -1367,7 +1369,7 @@ class Zine(object):
         returned.
 
         A separate thread is spawned so that the internal request does not
-        caused troubles for the current one in terms of persistent database
+        cause troubles for the current one in terms of persistent database
         objects.
 
         This is for example used in the `open_url` method to allow access to
