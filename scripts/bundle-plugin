@@ -61,7 +61,7 @@ def main():
     if not options.dont_compile:
         from subprocess import call
         compile_script = join(dirname(__file__), 'compile-translations')
-        call([compile_script, plugin.path, '-s'])
+        call([sys.executable, compile_script, plugin.path, '-s'])
 
     plugin.dump(output_filename)
     print 'Plugin written to %s' % output_filename

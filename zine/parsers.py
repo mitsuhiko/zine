@@ -180,7 +180,7 @@ class PlainTextParser(BaseParser):
         """Convert a token to normal text."""
         return replace_entities(unicode(token))
 
-    def _to_zeml(self, node):
+    def _to_zeml(self, node, untrusted=False):
         """Convert a potty-mouth node into a ZEML tree."""
         from zine._ext.pottymouth import Token
         def add_text(node, text):
@@ -215,15 +215,20 @@ class PlainTextParser(BaseParser):
                result.children[0].name == 'blockquote':
                 result = result.children[0]
 
+            # untrusted posts get nofollow on links
+            if untrusted and result.name == 'a':
+                result.attributes['rel'] = 'nofollow'
+
             return result
         return convert(node, True)
 
     def parse(self, input_data, reason):
         from zine._ext.pottymouth import PottyMouth
         parser = PottyMouth(emdash=False, ellipsis=False, smart_quotes=False,
-                            youtube=False, image=False, italic=False)
+                            youtube=False, image=False, italic=False,
+                            all_links=not self.app.cfg['plaintext_parser_nolinks'])
         node = parser.parse(input_data)
-        return self._to_zeml(node)
+        return self._to_zeml(node, reason == 'comment')
 
 
 all_parsers = {
