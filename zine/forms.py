@@ -1001,10 +1001,20 @@ class EditProfileForm(_UserBoundForm):
 class DeleteAccountForm(_UserBoundForm):
     """Used for a user to delete a his own account."""
 
+    password = forms.TextField(
+        lazy_gettext(u"Your password is required to delete your account:"),
+        required=True, widget=forms.PasswordInput,
+        messages = dict(required=lazy_gettext(u'Your password is required!'))
+    )
+
     def __init__(self, user, initial=None):
         _UserBoundForm.__init__(self, user, forms.fill_dict(initial,
             action='delete'
         ))
+
+    def validate_password(self, value):
+        if not self.user.check_password(value):
+            raise ValidationError(_(u'Invalid password'))
 
     def delete_user(self):
         """Deletes the user's account."""
