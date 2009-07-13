@@ -56,6 +56,9 @@ TEMPLATES = join(dirname(__file__), 'templates')
 # here we do the same for the shared files (css, fish images and javascript)
 SHARED_FILES = join(dirname(__file__), 'shared')
 
+# here we do the same for our database upgrade's repository
+UPGRADES_REPO = dirname(__file__)
+
 # and that's just the list of skins we have.
 SKINS = 'blue green pink red yellow'.split()
 
@@ -118,12 +121,19 @@ def get_fortune(req):
     """The servicepoint function. Just return one fortune from the list."""
     return {'fortune': choice(FORTUNES)}
 
+def register_repository():
+    print 'registering eric repo'
+    get_application().register_upgrade_repository('eric_the_fish', UPGRADES_REPO)
 
 def setup(app, plugin):
-    """This function is called by Zine in the application initialization
+    """This function is called by Zine in the application initialisation
     phase. Here we connect to the events and register our template paths,
     url rules, views etc.
     """
+
+    # we need to register eric's database upgrades repository
+#    app.connect_event('register-upgrade-repository', register_repository)
+    app.register_upgrade_repository(plugin, UPGRADES_REPO)
 
     # we want our fish to appear in the admin panel, so hook into the
     # correct event.
