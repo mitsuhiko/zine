@@ -12,7 +12,7 @@ import copy
 import re
 
 from zine.parsers import parse_html
-from zine.utils.zeml import RootElement, Element
+from zine.utils.zeml import RootElement, Element, MarkupErrorElement
 
 from docutils import nodes
 from docutils.nodes import NodeVisitor, SkipNode
@@ -563,5 +563,19 @@ class ZemlTranslator(NodeVisitor):
         self.end_node()
         if self.context.pop():
             self.end_node()
+
+    def visit_system_message(self, node):
+        if node.hasattr('line'):
+            line = ', line %s' % node['line']
+        else:
+            line = ''
+        message = 'System Message: %s/%s %s%s\n' % (node['type'], node['level'], node['source'], line)
+        zeml_node = MarkupErrorElement(message)
+        zeml_node.parent = self.curnode
+        self.curnode.children.append(zeml_node)
+        self.curnode = zeml_node
+
+    def depart_system_message(self, node):
+        pass
 
 
