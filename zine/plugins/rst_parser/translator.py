@@ -568,13 +568,17 @@ class ZemlTranslator(NodeVisitor):
         line = ''
         if node.hasattr('line'):
             line = ', line %s' % node['line']
-        message = 'System Message: %s/%s %s, %s\n' % (node['type'], node['level'], line, str(node[0][0]))
+        
+        #  The text should be handled as a paragraph but we handle it here using MarkupErrorElement
+        text = node[0][0].astext()
+        message = 'System Message: %s/%s %s, %s\n' % (node['type'], node['level'], line, text)
+        
         zeml_node = MarkupErrorElement(message)
         zeml_node.parent = self.curnode
         self.curnode.children.append(zeml_node)
         self.curnode = zeml_node
-
-    def depart_system_message(self, node):
+        
         self.end_node()
+        raise nodes.SkipNode
 
 
