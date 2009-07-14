@@ -38,13 +38,13 @@ def upgrade(migrate_engine):
 
     from zine.plugins.eric_the_fish.fortunes import FORTUNES
 
-    yield '<p>Adding fortunes to the database:</p>\n'
-    yield '<ul>'
+    log.info('<p>Adding fortunes to the database:</p>\n')
+    log.info('<ul>')
     for fortune in FORTUNES:
-        yield '  <li>%s</li>\n' % fortune
+        log.info('  <li>%s</li>\n' % fortune)
         session.add(Fortune(fortune))
     session.commit()
-    yield '</ul>\n'
+    log.info('</ul>\n')
 
 
 def downgrade(migrate_engine):

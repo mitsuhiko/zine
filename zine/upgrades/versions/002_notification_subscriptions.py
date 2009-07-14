@@ -29,15 +29,15 @@ notification_subscriptions = db.Table('notification_subscriptions', metadata,
 def upgrade(migrate_engine):
     # Upgrade operations go here. Don't create your own engine; use the engine
     # named 'migrate_engine' imported from migrate.
-    yield '<ul>'
-    yield ' <li>Create the notification subscriptions table</li>\n'
-    yield '</ul>'
+    log.info('<ul>')
+    log.info(' <li>Create the notification subscriptions table</li>\n')
+    log.info('</ul>')
     notification_subscriptions.create(migrate_engine)
 
 
 def downgrade(migrate_engine):
     # Operations to reverse the above upgrade go here.
-    yield '<ul>'
-    yield ' <li>Drop the notification subscriptions table</li>\n'
-    yield '</ul>'
+    log.info('<ul>')
+    log.info(' <li>Drop the notification subscriptions table</li>\n')
+    log.info('</ul>')
     notification_subscriptions.drop(migrate_engine)

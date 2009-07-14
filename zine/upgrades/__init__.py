@@ -11,6 +11,8 @@
 
 import re
 import sys
+import types
+import logging
 from os.path import dirname, expanduser, join
 from optparse import OptionParser
 
@@ -20,6 +22,70 @@ from zine import __version__ as VERSION, setup
 from zine.upgrades import customisation
 
 REPOSITORY_PATH = dirname(__file__)
+
+
+class LogFormatter(logging.Formatter):
+    def format(self, record):
+        """
+        Format the specified record as text.
+
+        The record's attribute dictionary is used as the operand to a
+        string formatting operation which yields the returned string.
+        Before formatting the dictionary, a couple of preparatory steps
+        are carried out. The message attribute of the record is computed
+        using LogRecord.getMessage(). If the formatting string contains
+        "%(asctime)", formatTime() is called to format the event time.
+        If there is exception information, it is formatted using
+        formatException() and appended to the message.
+        """
+        record.message = record.getMessage()
+#        if string.find(self._fmt,"%(asctime)") >= 0:
+#            record.asctime = self.formatTime(record, self.datefmt)
+        s = self._fmt % record.__dict__
+        if record.exc_info:
+            # Cache the traceback text to avoid converting it multiple times
+            # (it's constant anyway)
+            if not record.exc_text:
+                record.exc_text = self.formatException(record.exc_info)
+        if record.exc_text:
+#            if s[-1:] != "\n":
+#                s = s + "\n"
+            s = s + record.exc_text
+        from zine.utils.zeml import parse_html
+        trailing_new_line = s and s.endswith('\n') or False
+        s = parse_html(s).to_text(simple=True)
+        if s and s.endswith('\n') and not trailing_new_line:
+            s = s.rstrip('\n')
+        return s
+
+class LogHandler(logging.StreamHandler):
+    def emit(self, record):
+        """
+        Emit a record.
+
+        If a formatter is specified, it is used to format the record.
+        The record is then written to the stream with a trailing newline
+        [N.B. this may be removed depending on feedback]. If exception
+        information is present, it is formatted using
+        traceback.print_exception and appended to the stream.
+        """
+        try:
+            msg = self.format(record)
+#            fs = "%s\n"
+            fs = '%s'
+            if not hasattr(types, "UnicodeType"): #if no unicode support...
+                self.stream.write(fs % msg)
+            else:
+                try:
+                    self.stream.write(fs % msg)
+                except UnicodeError:
+                    self.stream.write(fs % msg.encode("UTF-8"))
+            self.flush()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+
 
 class CommandLineInterface(object):
 
@@ -51,6 +117,13 @@ class CommandLineInterface(object):
         if not args:
             self.parser.error('no valid command or option passed. '
                               'Try the -h/--help option for more information.')
+
+        # Setup logging
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.DEBUG)
+        handler = LogHandler(sys.stdout)
+        handler.setFormatter(LogFormatter("%(message)s"))
+        root_logger.addHandler(handler)
 
         cmdname = args[0]
         if cmdname not in self.commands:
@@ -98,8 +171,9 @@ class CommandLineInterface(object):
         options, args = parser.parse_args(argv)
         description = ' '.join(args)
         manage = ManageDatabase(self.get_zine_instance())
-        self.cmdlogger(manage.cmd_script(options.repo_id, description,
-                                         options.filename))
+        manage.cmd_script(options.repo_id, description, options.filename)
+#        self.cmdlogger(manage.cmd_script(options.repo_id, description,
+#                                         options.filename))
 
     def upgrade(self, argv):
         parser = OptionParser(usage=self.usage % ('upgrade', '[VERSION]'),
@@ -109,7 +183,8 @@ class CommandLineInterface(object):
         options, args = parser.parse_args(argv)
         version = args and args.pop(0) or None
         manage = ManageDatabase(self.get_zine_instance())
-        self.cmdlogger(manage.cmd_upgrade(version, echo=options.echo))
+        manage.cmd_upgrade(version, echo=options.echo)
+#        self.cmdlogger(manage.cmd_upgrade(version, echo=options.echo))
 
     def downgrade(self, argv):
         parser = OptionParser(usage=self.usage % ('downgrade', 'VERSION'),
@@ -144,15 +219,13 @@ class ManageDatabase(object):
         if not sv:
             print 'Repository by the id %s not known' % repo_id
             sys.exit(1)
-        print sv.__dict__
         repos = api.Repository(sv.repository_path, sv.repository_id)
-        print 111, repos.__dict__, repos.versions.__dict__
         new_script_version = repos.versions.latest + 1
         filename = '%%03d_%s' % (filename and filename or description) % \
                                                             new_script_version
         filename = re.sub(r'[^a-zA-Z0-9_-]+', '_', filename) + '.py'
         new_script_path = join(repos.path, 'versions', filename)
-        yield 'Creating script %s\n' % new_script_path
+        log.info('Creating script %s\n', new_script_path)
         api.PythonScript.create(new_script_path, description=description)
 
 
@@ -168,11 +241,9 @@ class ManageDatabase(object):
         actually executing it, using the appropriate 'preview' option.
         """
         from zine.models import SchemaVersion
-        yield 'foo', SchemaVersion.query.all()
         for sv in SchemaVersion.query.all():
-            yield sv
             repository = api.Repository(sv.repository_path, sv.repository_id)
-            yield self._migrate(repository, version, upgrade=True, **opts)
+            self._migrate(repository, version, upgrade=True, **opts)
 
 
     def cmd_downgrade(self, version=None, **opts):
@@ -193,21 +264,22 @@ class ManageDatabase(object):
 
 
     def _migrate(self, repository, version, upgrade, **opts):
+
+        log = logging.getLogger(__name__)
         engine = construct_engine(self.url, **opts)
         schema = api.ControlledSchema(engine, repository)
         version = self._migrate_version(schema, version, upgrade)
 
         changeset = schema.changeset(version)
         if changeset:
-            yield '<h3>Upgrading %s</h3>\n' % repository.id
+            log.info('<h3>Upgrading %s</h3>\n', repository.id)
         for ver, change in changeset:
             nextver = ver + changeset.step
             doc = schema.repository.version(max(ver, nextver)). \
                                                         script().module.__doc__
-            yield '<h2>%s -> %s - %s</h2>\n' % (ver, nextver, doc)
-            for message in schema.runchange(ver, change, changeset.step):
-                yield message
-            yield 'done\n\n'
+            log.info('<h2>%s -> %s - %s</h2>\n', ver, nextver, doc)
+            schema.runchange(ver, change, changeset.step)
+            log.info('done\n\n')
 
 
     def _migrate_version(self, schema, version, upgrade):
