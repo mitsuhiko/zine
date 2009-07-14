@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-# vim: sw=4 ts=4 fenc=utf-8 et
-# ==============================================================================
-# Copyright © 2009 UfSoft.org - Pedro Algarvio <ufs@ufsoft.org>
-#
-# License: BSD - Please view the LICENSE file for additional information.
-# ==============================================================================
+"""
+    zine.plugins.eric_the_fish.databse
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Database tables and objects for the "Annoying fish for the admin panel".
+
+    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :license: BSD, see LICENSE for more details.
+"""
 
 from zine.database import db, metadata
 

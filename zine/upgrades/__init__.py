@@ -11,7 +11,6 @@
 
 import re
 import sys
-import types
 import logging
 from os.path import dirname, expanduser, join
 from optparse import OptionParser
@@ -19,73 +18,10 @@ from optparse import OptionParser
 from migrate.versioning import api, exceptions
 from migrate.versioning.util import construct_engine
 from zine import __version__ as VERSION, setup
-from zine.upgrades import customisation
+from zine.upgrades import customisation, loggers
 
 REPOSITORY_PATH = dirname(__file__)
-
-
-class LogFormatter(logging.Formatter):
-    def format(self, record):
-        """
-        Format the specified record as text.
-
-        The record's attribute dictionary is used as the operand to a
-        string formatting operation which yields the returned string.
-        Before formatting the dictionary, a couple of preparatory steps
-        are carried out. The message attribute of the record is computed
-        using LogRecord.getMessage(). If the formatting string contains
-        "%(asctime)", formatTime() is called to format the event time.
-        If there is exception information, it is formatted using
-        formatException() and appended to the message.
-        """
-        record.message = record.getMessage()
-#        if string.find(self._fmt,"%(asctime)") >= 0:
-#            record.asctime = self.formatTime(record, self.datefmt)
-        s = self._fmt % record.__dict__
-        if record.exc_info:
-            # Cache the traceback text to avoid converting it multiple times
-            # (it's constant anyway)
-            if not record.exc_text:
-                record.exc_text = self.formatException(record.exc_info)
-        if record.exc_text:
-#            if s[-1:] != "\n":
-#                s = s + "\n"
-            s = s + record.exc_text
-        from zine.utils.zeml import parse_html
-        trailing_new_line = s and s.endswith('\n') or False
-        s = parse_html(s).to_text(simple=True)
-        if s and s.endswith('\n') and not trailing_new_line:
-            s = s.rstrip('\n')
-        return s
-
-class LogHandler(logging.StreamHandler):
-    def emit(self, record):
-        """
-        Emit a record.
-
-        If a formatter is specified, it is used to format the record.
-        The record is then written to the stream with a trailing newline
-        [N.B. this may be removed depending on feedback]. If exception
-        information is present, it is formatted using
-        traceback.print_exception and appended to the stream.
-        """
-        try:
-            msg = self.format(record)
-#            fs = "%s\n"
-            fs = '%s'
-            if not hasattr(types, "UnicodeType"): #if no unicode support...
-                self.stream.write(fs % msg)
-            else:
-                try:
-                    self.stream.write(fs % msg)
-                except UnicodeError:
-                    self.stream.write(fs % msg.encode("UTF-8"))
-            self.flush()
-        except (KeyboardInterrupt, SystemExit):
-            raise
-        except:
-            self.handleError(record)
-
+log = logging.getLogger(__name__)
 
 class CommandLineInterface(object):
 
@@ -121,8 +57,8 @@ class CommandLineInterface(object):
         # Setup logging
         root_logger = logging.getLogger()
         root_logger.setLevel(logging.DEBUG)
-        handler = LogHandler(sys.stdout)
-        handler.setFormatter(LogFormatter("%(message)s"))
+        handler = loggers.LogHandler(sys.stdout)
+        handler.setFormatter(loggers.LogFormatter("%(message)s"))
         root_logger.addHandler(handler)
 
         cmdname = args[0]
