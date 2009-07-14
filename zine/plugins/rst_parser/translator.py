@@ -576,6 +576,6 @@ class ZemlTranslator(NodeVisitor):
         self.curnode = zeml_node
 
     def depart_system_message(self, node):
-        pass
+        self.end_node()
 
 
