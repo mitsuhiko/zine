@@ -71,8 +71,8 @@
       font-size: 80%;
       font-family: 'Consolas', 'Bitstream Vera Sans Mono', 'Monaco', monospace;
     }
-
   </style>
+  <script type="text/javascript" src="{{ jquery_url }}"></script>
 </head>
 
 <body>
@@ -81,26 +81,44 @@
       <h1>{{ _("Upgrade In Progress") }}</h1>
       <p>{% trans %}<b>Database upgrade in progress!</b>{% endtrans %}</p>
     {% elif live_log is defined %}
+
       <h1>{{ _("Upgrading...") }}</h1>
       <p>{% trans %}Upgrade in process.
         <strong>Don't hit cancel!</strong>{% endtrans %}</p>
-      {%- for event in live_log %}{{ event }}{%- endfor %}
-      <p>{% trans %}Database upgraded successfully.{% endtrans %}</p>
-      <br/>
-      <div class="message">{% trans %}Zine is in maintenance mode.
+      <div id="livelog"><div/>
+      <div class="message" style="display: none;">{% trans %}Zine is in maintenance mode.
           Please <a href="{{ blog_url }}">check your blog</a> to see if the
           upgrade was perfect.
           Don't forget to <a href="{{ maintenance_url }}">turn it off again</a>
           once you finish.
       {% endtrans %}</div>
-      {{ finish() }}
+      <script type="text/javascript">
+        jQuery(document).ready( function() {
+          function appendData(data) {
+            jQuery("#livelog").append(data)
+          }
+          jQuery.post('/', {}, appendData, 'html');
+        });
+      </script>
     {% else %}
       <h1>{{ _("Upgrade") }}</h1>
       <p>{% trans %}<b>Zine requires a database upgrade!</b>{% endtrans %}</p>
       <br/>
       <form action="" method="POST">
         <input type="submit" name="upgrade" value="Upgrade!">
+        <input type="button" id="upgrade" name="upgrade_" value="Upgrade!!">
       </form>
+      <div id="livelog"><div/>
+      <script type="text/javascript">
+        jQuery(document).ready( function() {
+          function appendData(data) {
+            jQuery("#livelog").append(data)
+          }
+          jQuery("#upgrade").click( function() {
+            jQuery.post('{{ upgrade_url }}', {}, appendData, 'html');
+          });
+        });
+      </script>
     {%- endif %}
   </div>
 </body>

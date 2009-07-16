@@ -9,15 +9,24 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+# http://github.com/darwin/firelogger
+# http://github.com/darwin/firepython
 
+import logging
+import simplejson
 from os import remove
 from os.path import isfile
 from time import time
+from threading import Thread
+from uuid import uuid4
 from sqlalchemy.sql import and_
 from zine.database import db, privileges, users, user_privileges
+from zine.environment import SHARED_DATA
 from zine.i18n import load_core_translations
-from zine.upgrades import ManageDatabase
+from zine.upgrades import ManageDatabase, loggers
 from zine.utils.crypto import check_pwhash
+
+from werkzeug import SharedDataMiddleware
 from werkzeug.utils import redirect
 from werkzeug.contrib.securecookie import SecureCookie
 from werkzeug.wrappers import Response, Request
@@ -40,9 +49,30 @@ class WebUpgrades(object):
         self.app = app
         self.database_engine = app.database_engine
         self.lockfile = app.upgrade_lockfile
+#        self.jquery_url = app.url_adapter.build('core/shared',
+#                                                {'filename': 'js/jQuery.js'})
         self.blog_url = app.url_adapter.build('blog/index')
         self.login_url = app.url_adapter.build('account/login')
         self.maintenance_url = app.url_adapter.build('admin/maintenance')
+
+        self.jquery_url = '/shared/js/jQuery.js'
+        self.logging_url = '/livelog'
+        self.upgrade_url = '/upgrade/%s' % uuid4().hex
+        self.who_is_upgrading = None
+
+        # Setup logging
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.DEBUG)
+        handler = loggers.WebLogHandler()
+        handler.setFormatter(loggers.LogFormatter("%(message)s"))
+        root_logger.addHandler(handler)
+        self.log_handler = handler
+        import sys
+        handler = loggers.CliLogHandler(sys.stdout)
+        handler.setFormatter(loggers.LogFormatter("%(message)s"))
+        root_logger.addHandler(handler)
+#        self.__call__ = SharedDataMiddleware(self.__call__, {'/shared': SHARED_DATA})
+
 
     def __getattr__(self, name):
         if not hasattr(self, name):
@@ -78,7 +108,9 @@ class WebUpgrades(object):
         return request
 
     def dispatch(self, request):
-        if request.path not in ('/', self.login_url):
+        print request.path, self.jquery_url, self.jquery_url == request.path, SHARED_DATA
+        if request.path not in ('/', self.logging_url, self.login_url,
+                                self.jquery_url, self.upgrade_url):
             return redirect('')
 
         if request.path == self.login_url:
@@ -96,7 +128,6 @@ class WebUpgrades(object):
                         request.session['lt'] = time()
                         request.is_somebody = True
                         return redirect('')
-
             response = Response()
             response.www_authenticate.set_basic()
             response.status_code = 401
@@ -109,27 +140,46 @@ class WebUpgrades(object):
             return response
 
         if request.method == 'POST':
-            open(self.lockfile, 'w').write('locked on database upgrade\n')
-            mdb = ManageDatabase(request.app)
-            db.session.close()  # Close open sessions
-            def finish():
-                # this runs after the upgrade finishes
-                remove(self.lockfile)
+            if request.path == self.upgrade_url:
+                mdb = ManageDatabase(request.app)
+                Thread(target=mdb.cmd_upgrade, args=(), kwargs={}).start()
+                while 1:
+                    response = Response('1' + ''.join(self.log_handler.buffer)
+#                                        , _stream=True
+                                        )
+                    self.log_handler.flush()
+            else:
+                open(self.lockfile, 'w').write('locked on database upgrade\n')
+                mdb = ManageDatabase(request.app)
                 db.session.close()  # Close open sessions
-                self.wants_reload = True    # Force application reload
-                return ''   # just because I need to return something to jinja
+                def finish():
+                    # this runs after the upgrade finishes
+                    remove(self.lockfile)
+                    db.session.close()  # Close open sessions
+                    self.wants_reload = True    # Force application reload
+                    return ''   # just because I need to return something to jinja
 
-            return render_response(request, 'admin/perform_upgrade.html',
-                                   live_log=mdb.cmd_upgrade(), _stream=True,
-                                   finish=finish, blog_url=self.blog_url,
-                                   maintenance_url=self.maintenance_url,
-                                   in_progress=False)
+                def start_upgrade():
+                    mdb.cmd_upgrade()
+                    return True
+
+                response = render_response(request,
+                    'admin/perform_upgrade.html', live_log=start_upgrade() and True or False,
+                    finish=finish, blog_url=self.blog_url,
+                    maintenance_url=self.maintenance_url,
+                    logging_url=self.logging_url, in_progress=False,
+                    jquery_url=self.jquery_url)
+            return response
 
         return render_response(request, 'admin/perform_upgrade.html',
-                               in_progress=isfile(self.lockfile))
+                               in_progress=isfile(self.lockfile),
+                               jquery_url=self.jquery_url,
+                               upgrade_url=self.upgrade_url)
 
     def __call__(self, environ, start_response):
         request = self.get_request(environ)
+        if request.path == self.jquery_url:
+            return SharedDataMiddleware(self, {'/shared': SHARED_DATA})(environ, start_response)
         response = self.dispatch(request)
         if request.session.should_save:
             cookie_name = self.app.cfg['session_cookie_name']

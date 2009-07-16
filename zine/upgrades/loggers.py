@@ -11,6 +11,7 @@
 import os
 import types
 import logging
+from logging.handlers import BufferingHandler
 
 def getTerminalSize():
     # From http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
@@ -72,7 +73,7 @@ class LogFormatter(logging.Formatter):
             s = s.rstrip('\n')
         return s
 
-class LogHandler(logging.StreamHandler):
+class CliLogHandler(logging.StreamHandler):
     def emit(self, record):
         """
         Emit a record.
@@ -100,3 +101,10 @@ class LogHandler(logging.StreamHandler):
         except:
             self.handleError(record)
 
+class WebLogHandler(BufferingHandler):
+    def __init__(self):
+        BufferingHandler.__init__(self, -1)
+
+    def shouldFlush(self, record):
+        # We force it to never flush. We'll explicitly do the flushing
+        return (len(self.buffer) < self.capacity)

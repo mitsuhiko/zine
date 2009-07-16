@@ -57,7 +57,7 @@ class CommandLineInterface(object):
         # Setup logging
         root_logger = logging.getLogger()
         root_logger.setLevel(logging.DEBUG)
-        handler = loggers.LogHandler(sys.stdout)
+        handler = loggers.CliLogHandler(sys.stdout)
         handler.setFormatter(loggers.LogFormatter("%(message)s"))
         root_logger.addHandler(handler)
 
