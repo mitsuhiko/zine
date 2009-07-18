@@ -1,5 +1,4 @@
 """Move fortunes to the database"""
-# Keep __doc__ to a single line
 from zine.upgrades.versions import *
 
 metadata = db.MetaData()
@@ -12,7 +11,6 @@ fortunes = db.Table('eric_the_fish_fortunes', metadata,
 
 
 # Define the objects here
-
 class Fortune(object):
     query = db.query_property(db.Query)
     def __init__(self, text):
@@ -38,13 +36,13 @@ def upgrade(migrate_engine):
 
     from zine.plugins.eric_the_fish.fortunes import FORTUNES
 
-    log.info('<p>Adding fortunes to the database:</p>\n')
-    log.info('<ul>')
+    yield '<p>Adding fortunes to the database:</p>\n'
+    yield '<ul>'
     for fortune in FORTUNES:
-        log.info('  <li>%s</li>\n' % fortune)
+        yield '  <li>%s</li>\n' % fortune
         session.add(Fortune(fortune))
     session.commit()
-    log.info('</ul>\n')
+    yield '</ul>\n'
 
 
 def downgrade(migrate_engine):

@@ -855,7 +855,6 @@ class Zine(object):
         from zine.upgrades.customisation import Repository
         if isinstance(repo_id, Plugin):
             repo_id = repo_id.metadata.get('name')
-        Repository(repo_path, repo_id)
         repo_path = path.abspath(repo_path)
         try:
             sv = SchemaVersion.query.filter_by(repository_id=repo_id).first()

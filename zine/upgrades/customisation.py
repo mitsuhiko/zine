@@ -9,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 
-import logging
 import warnings
 from os import listdir
 from os.path import dirname, join
@@ -24,8 +23,6 @@ from migrate.versioning.version import Collection as MigrateCollection
 
 
 MIGRATE_SCRIPTS_PATH = join(dirname(__file__), 'versions')
-
-log = logging.getLogger(__name__)
 
 class PythonScript(MigratePythonScript):
 
@@ -89,7 +86,10 @@ def downgrade(migrate_engine):
         funcname = base.operations[op]
         script_func = self._func(funcname)
         try:
-            script_func(engine)
+            #script_func(engine)
+            # Yield messages out
+            for message in script_func(engine):
+                yield message
         except TypeError:
             warnings.warn("upgrade/downgrade functions must accept engine"
                           " parameter (since version > 0.5.4)")
@@ -141,10 +141,10 @@ class ControlledSchema(MigrateControlledSchema):
                 "%s is not %s" % (self.version, startver)
             )
         # Run the change
-        change.run(self.engine, step)
+        #change.run(self.engine, step)
         # Yield messages out
-#        for message in change.run(self.engine, step):
-#            yield message
+        for message in change.run(self.engine, step):
+            yield message
 
         # Update/refresh database version
         try:

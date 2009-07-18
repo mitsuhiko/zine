@@ -11,17 +11,15 @@
 
 import re
 import sys
-import logging
 from os.path import dirname, expanduser, join
 from optparse import OptionParser
 
 from migrate.versioning import api, exceptions
 from migrate.versioning.util import construct_engine
 from zine import __version__ as VERSION, setup
-from zine.upgrades import customisation, loggers
+from zine.upgrades import customisation
 
 REPOSITORY_PATH = dirname(__file__)
-log = logging.getLogger(__name__)
 
 class CommandLineInterface(object):
 
@@ -54,13 +52,6 @@ class CommandLineInterface(object):
             self.parser.error('no valid command or option passed. '
                               'Try the -h/--help option for more information.')
 
-        # Setup logging
-        root_logger = logging.getLogger()
-        root_logger.setLevel(logging.DEBUG)
-        handler = loggers.CliLogHandler(sys.stdout)
-        handler.setFormatter(loggers.LogFormatter("%(message)s"))
-        root_logger.addHandler(handler)
-
         cmdname = args[0]
         if cmdname not in self.commands:
             self.parser.error('unknown command "%s"' % cmdname)
@@ -91,7 +82,9 @@ class CommandLineInterface(object):
                 trailing_new_line = message and message.endswith('\n') or False
                 message = parse_html(message).to_text(simple=True)
                 if message:
-                    if message.endswith('\n') and not trailing_new_line:
+                    if message.endswith('\n\n') and trailing_new_line:
+                        message = message[:-1]
+                    elif message.endswith('\n') and not trailing_new_line:
                         message = message.rstrip('\n')
                     sys.stdout.write(message.encode('utf-8'))
                     sys.stdout.flush()
@@ -107,9 +100,8 @@ class CommandLineInterface(object):
         options, args = parser.parse_args(argv)
         description = ' '.join(args)
         manage = ManageDatabase(self.get_zine_instance())
-        manage.cmd_script(options.repo_id, description, options.filename)
-#        self.cmdlogger(manage.cmd_script(options.repo_id, description,
-#                                         options.filename))
+        self.cmdlogger(manage.cmd_script(options.repo_id, description,
+                                         options.filename))
 
     def upgrade(self, argv):
         parser = OptionParser(usage=self.usage % ('upgrade', '[VERSION]'),
@@ -119,8 +111,7 @@ class CommandLineInterface(object):
         options, args = parser.parse_args(argv)
         version = args and args.pop(0) or None
         manage = ManageDatabase(self.get_zine_instance())
-        manage.cmd_upgrade(version, echo=options.echo)
-#        self.cmdlogger(manage.cmd_upgrade(version, echo=options.echo))
+        self.cmdlogger(manage.cmd_upgrade(version, echo=options.echo))
 
     def downgrade(self, argv):
         parser = OptionParser(usage=self.usage % ('downgrade', 'VERSION'),
@@ -161,7 +152,7 @@ class ManageDatabase(object):
                                                             new_script_version
         filename = re.sub(r'[^a-zA-Z0-9_-]+', '_', filename) + '.py'
         new_script_path = join(repos.path, 'versions', filename)
-        log.info('Creating script %s\n', new_script_path)
+        yield 'Creating script %s\n' % new_script_path
         api.PythonScript.create(new_script_path, description=description)
 
 
@@ -177,9 +168,16 @@ class ManageDatabase(object):
         actually executing it, using the appropriate 'preview' option.
         """
         from zine.models import SchemaVersion
-        for sv in SchemaVersion.query.all():
+        available_svs = SchemaVersion.query.all()
+        # Zine upgrade's come first
+        for sv in available_svs[:]:
+            available_svs.insert(0, available_svs.pop(available_svs.index(sv)))
+        # Now, run the available schema version upgrades
+        for sv in available_svs:
             repository = api.Repository(sv.repository_path, sv.repository_id)
-            self._migrate(repository, version, upgrade=True, **opts)
+            for message in self._migrate(repository, version, upgrade=True,
+                                         **opts):
+                yield message
 
 
     def cmd_downgrade(self, version=None, **opts):
@@ -196,26 +194,27 @@ class ManageDatabase(object):
             repository = api.Repository(sv.repository_path, sv.repository_id)
             if version is None:
                 version = repository.version -1
-            yield self._migrate(repository, version, upgrade=False, **opts)
+            for message in self._migrate(repository, version, upgrade=False,
+                                         **opts):
+                yield message
 
 
     def _migrate(self, repository, version, upgrade, **opts):
-
-        log = logging.getLogger(__name__)
         engine = construct_engine(self.url, **opts)
         schema = api.ControlledSchema(engine, repository)
         version = self._migrate_version(schema, version, upgrade)
 
         changeset = schema.changeset(version)
         if changeset:
-            log.info('<h3>Upgrading %s</h3>\n', repository.id)
+            yield '<h2>Upgrading %s</h2>\n' % repository.id
         for ver, change in changeset:
             nextver = ver + changeset.step
             doc = schema.repository.version(max(ver, nextver)). \
                                                         script().module.__doc__
-            log.info('<h2>%s -> %s - %s</h2>\n', ver, nextver, doc)
-            schema.runchange(ver, change, changeset.step)
-            log.info('done\n\n')
+            yield '<h3>%s -> %s - %s</h3>\n' % (ver, nextver, doc)
+            for message in schema.runchange(ver, change, changeset.step):
+                yield message
+            yield 'done\n\n\n'
 
 
     def _migrate_version(self, schema, version, upgrade):

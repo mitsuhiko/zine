@@ -1,5 +1,4 @@
 """Switch to split tables for comments, posts and texts"""
-# Keep __doc__ to a single line
 from zine.upgrades.versions import *
 
 from sqlalchemy.exceptions import ProgrammingError, OperationalError
@@ -272,8 +271,8 @@ def map_tables(mapper):
 
 
 def upgrade(migrate_engine):
-    # Upgrade operations go here. Don't create your own engine; use the engine
-    # named 'migrate_engine' imported from migrate.
+    # Upgrade operations go here. Don't create your own engine
+    # bind migrate_engine to your metadata
 
     session = scoped_session(lambda: create_session(migrate_engine,
                                                     autoflush=True,
@@ -284,63 +283,63 @@ def upgrade(migrate_engine):
     metadata1.bind = migrate_engine
     metadata2.bind = migrate_engine
 
-    log.info('<div class="message info"><dl>')
-    log.info('<dt>.</dt><dd> comment</dd>\n')
-    log.info('<dt>+</dt><dd> comment with <tt>parent_id</tt></dd>\n')
-    log.info('<dt>E</dt><dd> Error handling comment</dd>\n')
-    log.info('</dl></div>\n')
+    yield '<div class="message info"><dl>'
+    yield '<dt>.</dt><dd> comment</dd>\n'
+    yield '<dt>+</dt><dd> comment with <tt>parent_id</tt></dd>\n'
+    yield '<dt>E</dt><dd> Error handling comment</dd>\n'
+    yield '</dl></div>\n'
 
-    log.info('<ul>')
-    log.info('  <li>Auto-loading needed extra tables</li>\n')
+    yield '<ul>'
+    yield '  <li>Auto-loading needed extra tables</li>\n'
     post_links = db.Table('post_links', metadata2, autoload=True)
     post_categories = db.Table('post_categories', metadata2, autoload=True)
     post_tags = db.Table('post_tags', metadata2, autoload=True)
 
-    log.info('  <li>Dropping old posts table indexes</li>\n')
+    yield '  <li>Dropping old posts table indexes</li>\n'
     for index in posts_old.indexes:
         try:
             index.drop(migrate_engine)
         except (ProgrammingError, OperationalError):
             # Index is on table definition but not on the database!? Weird
             pass
-    log.info('  <li>Dropping existing posts sequence if it exists</li>\n')
+    yield '  <li>Dropping existing posts sequence if it exists</li>\n'
     try:
         posts_new_seq.drop(migrate_engine)
     except Exception, err:
         pass
 
 
-    log.info('  <li>Dropping existing comments sequence if it exists</li>\n')
+    yield '  <li>Dropping existing comments sequence if it exists</li>\n'
     try:
         new_comments_seq.drop(migrate_engine)
     except Exception, err:
         pass
 
-    log.info('  <li>Querying for old posts from database</li>\n')
-    log.info('  <li>Got %d posts</li>\n', session.query(PostOld).count())
+    yield '  <li>Querying for old posts from database</li>\n'
+    yield '  <li>Got %d posts</li>\n' % session.query(PostOld).count()
     session.close()
 
-    log.info('  <li>Create texts table</li>\n')
+    yield '  <li>Create texts table</li>\n'
     texts.create(migrate_engine)
 
-    log.info('  <li>Renaming old posts table</li>\n')
+    yield '  <li>Renaming old posts table</li>\n'
     posts_old.rename('posts_upgrade')
 
-    log.info('  <li>Create new posts table</li>\n')
+    yield '  <li>Create new posts table</li>\n'
     posts_new.create(migrate_engine)
 
-    log.info('  <li>Renaming old comments table</li>\n')
+    yield '  <li>Renaming old comments table</li>\n'
     comments_old.rename('comments_upgrade')
 
-    log.info('  <li>Create new comments table</li>\n')
+    yield '  <li>Create new comments table</li>\n'
     comments_new.create(migrate_engine)
 
 
-    log.info('  <li>Migrate old posts into new table:</li>\n')
-    log.info('<ul>')
+    yield '  <li>Migrate old posts into new table:</li>\n'
+    yield '<ul>'
     for post in session.query(PostOld).all():
-        log.info('    <li>%s</li>\n', post.title)
-        log.info('<ul>')
+        yield '    <li>%s</li>\n' % post.title
+        yield '<ul>'
         new_post = PostNew(post.pub_date,
                            post.last_update,
                            post.slug,
@@ -352,18 +351,18 @@ def upgrade(migrate_engine):
                            post.pings_enabled,
                            post.content_type,
                            post.status)
-        log.info('      <li>Create new text entry</li>\n')
+        yield '      <li>Create new text entry</li>\n'
         new_post.t = Text(post.text, post.parser_data, post.extra)
         session.add(new_post)
         session.commit()
         comments_count = len(post.comments)
         n = (comments_count >= 100 and comments_count or 0)
-        log.info('      <li>Migrating %d comments <span class="progress">',
-                 comments_count)
+        yield '      <li>Migrating %d comments <span class="progress">' % \
+                                                                comments_count
         for comment in post.comments:
             if n >= 100:
                 n = 0
-                log.info('<br/>\n      ')
+                yield '<br/>\n      '
             parent_comment_new = None
             if comment.parent_id:
                 parent_comment_old = session.query(CommentOld) \
@@ -377,11 +376,11 @@ def upgrade(migrate_engine):
                     CommentNew.www==parent_comment_old.www
                 )).first()
                 if not parent_comment_new:
-                    log.info('E')
+                    yield 'E'
                 else:
-                    log.info('+')
+                    yield '+'
             else:
-                log.info('.')
+                yield '.'
             new_comment = CommentNew(
                 comment.user_id, comment.author, comment.email, comment.www,
                 comment.is_pingback,
@@ -394,10 +393,10 @@ def upgrade(migrate_engine):
             session.commit()    # Need to commit every comment in order to
                                 # later retrieve accurate parent_id's
             n += 1
-        log.info('</span></li>\n')
-        log.info('      <li>Update linked tables <tt>post_categories</tt>, '
-                 '<tt>post_links</tt> and <tt>post_tags</tt> for new '
-                 '<tt>post_id</tt></li>\n')
+        yield '</span></li>\n'
+        yield ('      <li>Update linked tables <tt>post_categories</tt>, '
+               '<tt>post_links</tt> and <tt>post_tags</tt> for new '
+               '<tt>post_id</tt></li>\n')
         migrate_engine.execute(post_categories.update(
             whereclause=post_categories.c.post_id==post.post_id,
             values={'post_id': new_post.post_id}))
@@ -407,17 +406,17 @@ def upgrade(migrate_engine):
         migrate_engine.execute(post_tags.update(
             whereclause=post_tags.c.post_id==post.post_id,
             values={'post_id': new_post.post_id}))
-        log.info('</ul>')
+        yield '</ul>'
     session.close()
-    log.info('</ul>')
+    yield '</ul>'
 
-    log.info('  <li>Drop old comments table</li>\n')
+    yield '  <li>Drop old comments table</li>\n'
     drop_table(comments_old, migrate_engine)
 
-    log.info('  <li>Drop old posts table</li>\n')
+    yield '  <li>Drop old posts table</li>\n'
     drop_table(posts_old, migrate_engine)
 
-    log.info('</ul>')
+    yield '</ul>'
 
 
 def downgrade(migrate_engine):
@@ -431,19 +430,19 @@ def downgrade(migrate_engine):
     metadata1.bind = migrate_engine
     metadata2.bind = migrate_engine
 
-    log.info('<div class="message info"><dl>')
-    log.info('<dt>.</dt><dd> comment</dd>\n')
-    log.info('<dt>+</dt><dd> comment with <tt>parent_id</tt></dd>\n')
-    log.info('<dt>E</dt><dd> Error handling comment</dd>\n')
-    log.info('</dl></div>\n')
+    yield '<div class="message info"><dl>'
+    yield '<dt>.</dt><dd> comment</dd>\n'
+    yield '<dt>+</dt><dd> comment with <tt>parent_id</tt></dd>\n'
+    yield '<dt>E</dt><dd> Error handling comment</dd>\n'
+    yield '</dl></div>\n'
 
-    log.info('<ul>')
-    log.info('  <li>Auto-loading needed extra tables</li>\n')
+    yield '<ul>'
+    yield '  <li>Auto-loading needed extra tables</li>\n'
     post_links = db.Table('post_links', metadata2, autoload=True)
     post_categories = db.Table('post_categories', metadata2, autoload=True)
     post_tags = db.Table('post_tags', metadata2, autoload=True)
 
-    log.info('  <li>Dropping new posts table indexes</li>\n')
+    yield '  <li>Dropping new posts table indexes</li>\n'
     for index in posts_new.indexes:
         try:
             index.drop(migrate_engine)
@@ -451,27 +450,27 @@ def downgrade(migrate_engine):
             # Index is on table definition but not on the database!? Weird
             pass
 
-    log.info('  <li>Querying new posts from database</li>\n')
-    log.info('  <li>Got %d posts</li>\n', session.query(PostNew).count())
+    yield '  <li>Querying new posts from database</li>\n'
+    yield '  <li>Got %d posts</li>\n' % session.query(PostNew).count()
     session.close()
 
-    log.info('  <li>Renaming new posts table</li>\n')
+    yield '  <li>Renaming new posts table</li>\n'
     posts_new.rename('posts_downgrade')
 
-    log.info('  <li>Create old posts table</li>\n')
+    yield '  <li>Create old posts table</li>\n'
     posts_old.create(migrate_engine)
 
-    log.info('  <li>Renaming new comments table</li>\n')
+    yield '  <li>Renaming new comments table</li>\n'
     comments_new.rename('comments_downgrade')
 
-    log.info('  <li>Create old comments table</li>\n')
+    yield '  <li>Create old comments table</li>\n'
     comments_old.create(migrate_engine)
 
-    log.info('  <li>Migrate new posts into old table:</li>\n')
-    log.info('<ul>')
+    yield '  <li>Migrate new posts into old table:</li>\n'
+    yield '<ul>'
     for post in session.query(PostNew).all():
-        log.info('    <li>%s</li>\n') % post.title
-        log.info('<ul>')
+        yield '    <li>%s</li>\n' % post.title
+        yield '<ul>'
         old_post = PostOld(post.pub_date,
                            post.last_update,
                            post.slug,
@@ -489,12 +488,12 @@ def downgrade(migrate_engine):
         session.commit()
         comments_count = len(post.comments)
         n = comments_count >= 100 and comments_count or 0
-        log.info('      <li>Migrating %d comments <span class="progress">',
-                 comments_count)
+        yield '      <li>Migrating %d comments <span class="progress">' % \
+                                                                comments_count
         for comment in post.comments:
             if n >= 100:
                 n = 0
-                log.info('<br/>\n      ')
+                yield '<br/>\n      '
             parent_comment_old = None
             if comment.parent_id:
                 parent_comment_new = session.query(CommentNew) \
@@ -508,11 +507,11 @@ def downgrade(migrate_engine):
                     CommentOld.www==parent_comment_new.www
                 )).first()
                 if not parent_comment_old:
-                    log.info('E')
+                    yield 'E'
                 else:
-                    log.info('+')
+                    yield '+'
             else:
-                log.info('.')
+                yield '.'
             old_comment = CommentOld(
                 comment.user_id, comment.author, comment.email, comment.www,
                 comment.t.text, comment.is_pingback, comment.t.parser_data,
@@ -524,11 +523,11 @@ def downgrade(migrate_engine):
             session.commit()    # Need to commit every comment in order to
                                 # later retrieve accurate parent_id's
             n +=1
-        log.info('</span></li>\n')
+        yield '</span></li>\n'
 
-        log.info('      <li>Update linked tables <tt>post_categories</tt>, '
-                 '<tt>post_links</tt> and <tt>post_tags</tt> for old '
-                 '<tt>post_id</tt></li>\n')
+        yield ('      <li>Update linked tables <tt>post_categories</tt>, '
+               '<tt>post_links</tt> and <tt>post_tags</tt> for old '
+               '<tt>post_id</tt></li>\n')
         migrate_engine.execute(post_categories.update(
             whereclause=post_categories.c.post_id==post.post_id,
             values={'post_id': old_post.post_id}))
@@ -539,15 +538,15 @@ def downgrade(migrate_engine):
             whereclause=post_tags.c.post_id==post.post_id,
             values={'post_id': old_post.post_id}))
         session.close()
-        log.info('</ul>')
-    log.info('</ul>')
-    log.info('  <li>Drop new posts table</li>\n')
+        yield '</ul>'
+    yield '</ul>'
+    yield '  <li>Drop new posts table</li>\n'
     drop_table(posts_new, migrate_engine)
 
-    log.info('  <li>Drop new comments table</li>\n')
+    yield '  <li>Drop new comments table</li>\n'
     drop_table(comments_new, migrate_engine)
 
-    log.info('  <li>Drop texts table</li>\n')
+    yield '  <li>Drop texts table</li>\n'
     drop_table(texts, migrate_engine)
 
-    log.info('</ul>')
+    yield '</ul>'

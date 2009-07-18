@@ -8,7 +8,6 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-import logging
 from zine.database import db
 from migrate import changeset, versioning
 from sqlalchemy.exceptions import InternalError
@@ -17,7 +16,6 @@ from sqlalchemy.sql import text, and_, or_
 import migrate
 from migrate import *
 
-log = logging.getLogger(__name__)
 
 key = value = mod = None
 for mod in versioning, changeset:

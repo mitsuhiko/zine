@@ -1,5 +1,4 @@
 """Notifications subscription support"""
-# Keep __doc__ to a single line
 from zine.upgrades.versions import *
 
 metadata = db.MetaData()
@@ -27,17 +26,17 @@ notification_subscriptions = db.Table('notification_subscriptions', metadata,
 )
 
 def upgrade(migrate_engine):
-    # Upgrade operations go here. Don't create your own engine; use the engine
-    # named 'migrate_engine' imported from migrate.
-    log.info('<ul>')
-    log.info('  <li>Create the notification subscriptions table</li>\n')
-    log.info('</ul>')
+    # Upgrade operations go here. Don't create your own engine
+    # bind migrate_engine to your metadata
+    yield '<ul>'
+    yield '  <li>Create the notification subscriptions table</li>\n'
+    yield '</ul>'
     notification_subscriptions.create(migrate_engine)
 
 
 def downgrade(migrate_engine):
     # Operations to reverse the above upgrade go here.
-    log.info('<ul>')
-    log.info('  <li>Drop the notification subscriptions table</li>\n')
-    log.info('</ul>')
+    yield '<ul>'
+    yield '  <li>Drop the notification subscriptions table</li>\n'
+    yield '</ul>'
     notification_subscriptions.drop(migrate_engine)
