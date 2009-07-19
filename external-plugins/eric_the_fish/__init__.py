@@ -44,9 +44,11 @@ from zine.config import ConfigurationTransactionError
 # BLOG_ADMIN privilege
 from zine.privileges import BLOG_ADMIN
 
-# the last thing is importing the FORTUNES list from the fortunes.py file
-# from the same folder. It's just a long list with quotes.
-from zine.plugins.eric_the_fish.fortunes import FORTUNES
+# import Zine's database related stuff
+from zine.database import db
+
+# the last thing is importing the Fortunes database mapped object.
+from zine.plugins.eric_the_fish.database import Fortune
 
 # because we have an admin panel page we need to store the templates
 # somewhere. So here we calculate the path to the templates and save them
@@ -55,9 +57,6 @@ TEMPLATES = join(dirname(__file__), 'templates')
 
 # here we do the same for the shared files (css, fish images and javascript)
 SHARED_FILES = join(dirname(__file__), 'shared')
-
-# here we do the same for our database upgrade's repository
-UPGRADES_REPO = dirname(__file__)
 
 # and that's just the list of skins we have.
 SKINS = 'blue green pink red yellow'.split()
@@ -91,7 +90,8 @@ def add_eric_link(req, navigation_bar):
         return
     for link_id, url, title, children in navigation_bar:
         if link_id == 'options':
-            children.insert(-3, ('eric_the_fish', url_for('eric_the_fish/config'),
+            children.insert(-3, ('eric_the_fish',
+                                 url_for('eric_the_fish/config'),
                                  _('Eric The Fish')))
 
 
@@ -118,12 +118,10 @@ def show_eric_options(req):
 
 
 def get_fortune(req):
-    """The servicepoint function. Just return one fortune from the list."""
-    return {'fortune': choice(FORTUNES)}
+    """The servicepoint function. Just return one fortune from the database."""
+    fortune_ids = db.session.query(Fortune.id).all()
+    return {'fortune': db.session.query(Fortune).get(choice(fortune_ids)).text}
 
-def register_repository():
-    print 'registering eric repo'
-    get_application().register_upgrade_repository('eric_the_fish', UPGRADES_REPO)
 
 def setup(app, plugin):
     """This function is called by Zine in the application initialisation
@@ -131,9 +129,12 @@ def setup(app, plugin):
     url rules, views etc.
     """
 
-    # we need to register eric's database upgrades repository
-#    app.connect_event('register-upgrade-repository', register_repository)
-    app.register_upgrade_repository(plugin, UPGRADES_REPO)
+    # we need to register eric's database upgrades repository;
+    # Basically it should be a folder which itself has another child folder
+    # named "versions" where the upgrade script(s) should reside.
+    # In "Eric the fish" case we pass the plugin's folder which has that child
+    # folder called "versions"
+    app.register_upgrade_repository(plugin, dirname(__file__))
 
     # we want our fish to appear in the admin panel, so hook into the
     # correct event.
