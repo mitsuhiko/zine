@@ -6,7 +6,7 @@
     <div class="panel">
       <div class="text">
         <p>{% trans user=request.user.display_name|e -%}
-          Howdy.  Welcome to the Zine administration interface {{ user }}.
+          Howdy.  Welcome to the Zine administration interface, {{ user }}.
         {%- endtrans %}
         {% trans -%}
           You have written <strong>{{ your_posts }}</strong> post so far.
