@@ -4,7 +4,7 @@
       <div class="text">{{ comment.body }}</div>
       <p class="meta">{% if comment.is_pingback %}{{ _("Pingback by") }}
         {%- else %}{{ _("Comment by") }}{% endif %} {% if comment.www
-        %}<a href="{{ comment.www|e }}">{{ comment.author|e }}</a>{%
+        %}<a rel="nofollow" href="{{ comment.www|e }}">{{ comment.author|e }}</a>{%
         elif not comment.author %}<span class="anonymous">{%
         trans %}Anonymous{% endtrans %}</span>{%
         else %}{{ comment.author|e }}{% endif %} &mdash; {{
