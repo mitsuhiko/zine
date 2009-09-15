@@ -1,0 +1,4813 @@
+# Japanese translations for PROJECT.
+# Copyright (C) 2009 The Pocoo Team
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
+"POT-Creation-Date: 2009-07-03 00:48+0100\n"
+"PO-Revision-Date: 2009-09-01 21:48+0900\n"
+"Last-Translator: Takashi Doi <takashi.doi@triax.jp>\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.4\n"
+
+#: zine/application.py:693
+msgid "Default Theme"
+msgstr "デフォルトテーマ"
+
+#: zine/application.py:694
+msgid "Simple default theme that doesn't contain any style information."
+msgstr "スタイル情報を含まない単純なデフォルトテーマです。"
+
+#: zine/application.py:761
+#, python-format
+msgid "Theme “%s” is no longer available, falling back to default theme."
+msgstr "テーマ “%s” は利用できません。デフォルトテーマを使用します。"
+
+#: zine/application.py:784
+#, python-format
+msgid "Copyright %(years)s by the Zine Team"
+msgstr "Copyright %(years)s by the Zine Team"
+
+#: zine/config.py:33
+msgid "The database URI.  For more information about database settings consult the Zine help."
+msgstr "データベースのURIを設定します。データベースの設定に関する詳細はZineヘルプを参照してください。"
+
+#: zine/config.py:36
+msgid "If a request to an http URL comes in, Zine will redirect to the same URL on https if this is savely possible.  This requires a working SSL setup or otherwise Zine will become unresponsive."
+msgstr "HTTP URLに対するリクエストが行われた場合、可能であれば同じURLに対してHTTPSでリダイレクトするようになります。これにはSSLの設定が必要です。設定されていない場合Zineが応答しなくなる可能性があります。"
+
+#: zine/config.py:40
+msgid "If enabled the database will collect the SQL statements and add them to the bottom of the page for easier debugging"
+msgstr "有効にすると、デバッグを簡単にするためにSQL文がページ下部にまとめて表示されるようになります"
+
+
+#: zine/config.py:43
+msgid "My Zine Blog"
+msgstr "My Zine Blog"
+
+
+#: zine/config.py:44
+msgid "just another Zine blog"
+msgstr "just another Zine blog"
+
+#: zine/config.py:45
+msgid "The base URL of the blog.  This has to be set to a full canonical URL (including http or https).  If not set the application will behave confusingly.  Remember to change this value if you move your blog to a new location."
+msgstr "このブログのベースURLを設定します。これは、完全な（httpまたはhttpsが含まれる）URLでなければなりません。この値が正しく設定されていないと、誤動作が発生します。ブログを別の場所に移動させる場合には、この値を変更するのを忘れないでください。"
+
+
+
+#: zine/config.py:50
+msgid "The email address given here is used by the notification system to send mails from.  Also plugins that send mails will use this address as sender address."
+msgstr "ここで指定したメールアドレスは、メール通知システムの送信元に用いられます。また、メールを送るプラグインも、送信元アドレスとしてこのアドレスを使用します。"
+
+#: zine/config.py:55
+msgid "The timezone of the blog.  All times and dates in the user interface and on the website will be shown in this timezone.  It's save to change the timezone after posts were created because the information in the database is stored as UTC."
+msgstr "このブログのタイムゾーンを設定します。ユーザーインターフェイスやウェブサイトの日付と時間は、このタイムゾーンで表示されます。データベース上の日付と時間はUTCで格納されるので、投稿が作成された後でタイムゾーンを変更するとこができます。"
+
+#: zine/config.py:60
+msgid "If this blog is written primarily by one author, some themes can skip the author's name on posts unless written by a guest."
+msgstr "このブログに主に一人のユーザだけが書き込む場合、テーマによっては、他のユーザによる書き込みがない限り、投稿時に作成者の名前を省略することができます。"
+
+#: zine/config.py:63
+msgid "If set to true the blog enables the maintainance mode."
+msgstr "チェックするとブログのメンテナンスモードが有効になります。"
+
+#: zine/config.py:66
+msgid "If there are multiple zine installations on the same host the cookie name should be set to something different for each blog."
+msgstr "複数のZineが同じホストにインストールされている場合、クッキー名はブログごとに異なるものに設定しなければなりません。"
+
+#: zine/config.py:70
+msgid "The secret key is used for vairous security related tasks in the system.  For example the cookie is signed with this value."
+msgstr "秘密鍵は、システムの様々なセキュリティ関連のタスクで使用されます。たとえば、クッキーはこの値で署名されます。"
+
+
+#: zine/config.py:76
+msgid "The iid uniquely identifies the Zine instance.  Currently this value is unused, but once set you should not modify it."
+msgstr "iidはZineインスタンスを一意に識別するためのものです。現在この値は使われていませんが、一度設定された値を変更するべきではありません。"
+
+#: zine/config.py:87
+msgid "During development this is helpful to log emails into a mail.log file in your instance folder instead of delivering them to your MTA."
+msgstr "MTAにメールを配信するかわりにインスタンスフォルダのmail.logファイルにメールを記録するようになるので、開発中に便利です。"
+
+#: zine/config.py:91
+msgid "If this is set to true, errors in Zine are not catched so that debuggers can catch it instead.  This is useful for plugin and core development."
+msgstr "このチェックボックスをオンにすると、デバッガがZineで起きたエラーを捕捉するようになります。これはプラグインとコア開発に役立ちます。"
+
+
+#: zine/config.py:110
+#, python-format
+msgid "Use %year%, %month%, %day%, %hour%, %minute% and %second%. Changes here will only affect new posts."
+msgstr "%year%, %month%, %day%, %hour%, %minute% および %second% が使用できます。ここでの変更は新しい投稿から反映されます。"
+
+#: zine/config.py:113
+msgid "Automatically generated slugs are limited to ASCII"
+msgstr "自動生成されるスラッグをASCIIに制限します。"
+
+#: zine/config.py:116
+msgid "Dates are zero padded like 2009/04/22 instead of 2009/4/22"
+msgstr "日付の表記において0を補います。たとえば2009/4/22ではなく2009/04/22のように表示します。"
+
+#: zine/config.py:124
+msgid "No Cache"
+msgstr "キャッシュなし"
+
+
+#: zine/config.py:125
+msgid "Simple Cache"
+msgstr "シンプルキャッシュ"
+
+
+#: zine/config.py:126
+msgid "memcached"
+msgstr "memcached"
+
+#: zine/config.py:127
+msgid "Filesystem"
+msgstr "ファイルシステム"
+
+#: zine/config.py:144
+msgid "Automatically approve all comments"
+msgstr "すべてのコメントを自動的に承認する"
+
+#: zine/config.py:145
+msgid "An administrator must always approve the comment"
+msgstr "コメントは管理者が常に承認する"
+
+
+#: zine/config.py:146
+msgid "Automatically approve comments by known comment authors"
+msgstr "コメント投稿者が既知の場合、自動的にコメントを承認する"
+
+#: zine/config.py:151
+msgid "The number of posts that are shown on a page.  This value might not be honored by some themes and is probably only used for the index page."
+msgstr "1ページに表示する投稿の数を設定します。この値はテーマによってはインデックスページにのみ適用されます。"
+
+
+
+#: zine/config.py:170
+msgid "This timeout is used by default for all network related operations. The default should be fine for most environments but if you have a very bad network connection during development you should increase it."
+msgstr "このタイムアウトの値は、ネットワーク関連のすべての動作に対してデフォルト値として使用されます。ほとんどの環境において初期値のままで問題ありませんが、開発中にネットワーク接続が悪い場合はより大きな値を設定してください。"
+
+
+
+#: zine/config.py:179
+msgid "It's possible to one or more comma separated paths here that are searched for plugins.  If the is not absolute, it's considered relative to the instance folder."
+msgstr "プラグインを検索するパスをカンマ区切で指定します。絶対パスでない場合は、インスタンスフォルダからの相対パスとみなされます。"
+
+#: zine/config.py:186
+msgid "Set this to true if you want to see the most recent entries on the Zine reddit on your dashbaord."
+msgstr "Zine redditの最新エントリーをダッシュボード上に表示したい場合、チェックボックスをオンにしてください。"
+
+
+
+#: zine/config.py:241
+msgid ""
+"\n"
+"    <p>\n"
+"      This error can happen if the configuration file is not writeable.\n"
+"      Make sure the folder of the configuration file is writeable and\n"
+"      that the file itself is writeable as well.\n"
+"    "
+msgstr ""
+"\n"
+"    <p>\n"
+"      設定ファイルが書き込み可能でない場合にこのエラーが発生します。\n"
+"      設定ファイルとそれらを格納するフォルダが書き込み可能か確認してください。\n"
+"    "
+
+#: zine/config.py:253
+#, python-format
+msgid "Could not save configuration file: %s"
+msgstr "設定ファイルを保存できませんでした: %s"
+
+#: zine/database.py:171
+msgid "Error when loading parsed data from database. Maybe the database was manually edited and got corrupted? The system returned an empty value."
+msgstr "データベースから解析済みデータをロードしている最中にエラーが発生しました。データベースが手動で編集され、破壊された可能性があります。システムは空の値を返しました。"
+
+#: zine/forms.py:51
+#, python-format
+msgid "User “%(value)s” does not exist."
+msgstr "ユーザー “%(value)s” が存在しません。"
+
+#: zine/forms.py:52
+msgid "You have to enter a username."
+msgstr "ユーザー名を入力してください。"
+
+#: zine/forms.py:54
+#, python-format
+msgid "Failed login attempt, user “%s” does not exist"
+msgstr "ログインに失敗しました。ユーザー “%s” は存在しません。"
+
+#: zine/forms.py:62
+#, python-format
+msgid "Failed login attempt from “%s”, invalid password"
+msgstr "ログインに失敗しました。“%s”さんのパスワードが一致しません。"
+
+#: zine/forms.py:64
+msgid "Incorrect password."
+msgstr "パスワードが間違っています。"
+
+#: zine/forms.py:69
+msgid "Old password"
+msgstr "現在のパスワード"
+
+#: zine/forms.py:71
+msgid "New password"
+msgstr "新しいパスワード"
+
+#: zine/forms.py:73
+msgid "Repeat password"
+msgstr "新しいパスワードの再入力"
+
+#: zine/forms.py:83
+msgid "The old password you've entered is wrong."
+msgstr "現在のパスワードが間違っています。"
+
+#: zine/forms.py:88
+msgid "The two passwords don't match."
+msgstr "2つのパスワードが一致しません。"
+
+#: zine/forms.py:97
+msgid "Name*"
+msgstr "名前*"
+
+#: zine/forms.py:99
+msgid "Your name is too long."
+msgstr "名前が長すぎます。"
+
+#: zine/forms.py:100
+msgid "You have to enter your name."
+msgstr "名前を入力してください。"
+
+#: zine/forms.py:102
+msgid "Mail* (not published)"
+msgstr "メールアドレス* (公開されません)"
+
+#: zine/forms.py:105
+#: zine/utils/validators.py:78
+msgid "You have to enter a valid e-mail address."
+msgstr "有効なメールアドレスを入力してください。"
+
+#: zine/forms.py:107
+#: zine/forms.py:460
+#: zine/forms.py:818
+#: zine/forms.py:941
+msgid "Website"
+msgstr "ウェブサイト"
+
+#: zine/forms.py:108
+msgid "You have to enter a valid URL or omit the field."
+msgstr "有効なURLを入力するか、項目を省略してください。"
+
+#: zine/forms.py:110
+#: zine/forms.py:246
+#: zine/forms.py:462
+#: zine/parsers.py:176
+msgid "Text"
+msgstr "テキスト"
+
+#: zine/forms.py:112
+msgid "Your comment is too short."
+msgstr "コメントが短すぎます。"
+
+#: zine/forms.py:113
+msgid "Your comment is too long."
+msgstr "コメントが長すぎます。"
+
+#: zine/forms.py:114
+msgid "You have to enter a comment."
+msgstr "コメントを入力してください。"
+
+#. this message is only displayed if the user tempered with
+#. the form data
+#: zine/forms.py:137
+msgid "Invalid object referenced."
+msgstr "無効なオブジェクトが参照されました。"
+
+#: zine/forms.py:141
+msgid "Post is closed for commenting."
+msgstr "この投稿にはコメントできません。"
+
+#: zine/forms.py:179
+msgid "Comment waiting for approval"
+msgstr "承認待ちのコメント"
+
+#: zine/forms.py:208
+msgid "Disable plugin guard"
+msgstr "プラグインガードを無効にする"
+
+#: zine/forms.py:209
+msgid "If the plugin guard is disabled errors on plugin setup are not caught."
+msgstr "プラグインガードが無効の場合、プラグインセットアップに関するエラーは捕捉されません。"
+
+#: zine/forms.py:243
+#: zine/templates/admin/_post_helpers.html:4
+#: zine/templates/admin/import.html:25
+#: zine/templates/admin/inspect_import.html:49
+#: zine/templates/admin/write_page.html:7
+msgid "Title"
+msgstr "タイトル"
+
+#: zine/forms.py:248
+msgid "Publication status"
+msgstr "公開状態"
+
+#: zine/forms.py:249
+msgid "Draft"
+msgstr "下書き"
+
+
+#: zine/forms.py:250
+msgid "Published"
+msgstr "公開"
+
+
+#: zine/forms.py:251
+msgid "Protected"
+msgstr "保護"
+
+
+#: zine/forms.py:252
+msgid "Private"
+msgstr "非公開"
+
+#: zine/forms.py:253
+msgid "Publication date"
+msgstr "公開日時"
+
+
+#: zine/forms.py:254
+msgid "Clear this field to update to current time"
+msgstr "現在の時刻に更新する場合はこの項目をクリアしてください"
+
+
+#: zine/forms.py:255
+#: zine/forms.py:579
+#: zine/templates/admin/manage_categories.html:8
+msgid "Slug"
+msgstr "スラッグ"
+
+
+#: zine/forms.py:256
+msgid "Clear this field to autogenerate a new slug"
+msgstr "新しいスラッグを自動生成する場合はこの項目をクリアしてください"
+
+#: zine/forms.py:257
+#: zine/forms.py:457
+#: zine/templates/admin/_post_helpers.html:5
+#: zine/templates/admin/information.html:163
+#: zine/templates/admin/inspect_import.html:50
+msgid "Author"
+msgstr "投稿者"
+
+#: zine/forms.py:259
+#: zine/templates/widgets/tag_cloud.html:2
+msgid "Tags"
+msgstr "タグ"
+
+#: zine/forms.py:261
+#: zine/templates/_entry.html:4
+#: zine/templates/admin/_post_helpers.html:6
+#: zine/templates/widgets/category_list.html:2
+#: zine/views/admin.py:102
+msgid "Categories"
+msgstr "カテゴリー"
+
+#: zine/forms.py:263
+#: zine/forms.py:464
+#: zine/templates/admin/write_page.html:22
+msgid "Parser"
+msgstr "パーサー"
+
+#: zine/forms.py:264
+msgid "Enable comments"
+msgstr "コメントを有効にする"
+
+
+#: zine/forms.py:265
+msgid "Enable pingbacks"
+msgstr "ピンバックを有効にする"
+
+
+#: zine/forms.py:266
+msgid "Ping links"
+msgstr "Ping リンク"
+
+
+
+#: zine/forms.py:305
+#: zine/forms.py:482
+#, python-format
+msgid "%s (missing)"
+msgstr "%sが存在しません"
+
+#: zine/forms.py:339
+msgid "This slug is already in use."
+msgstr "このスラッグはすでに使用されています。"
+
+
+#: zine/forms.py:344
+msgid "Selected parser is no longer available on the system."
+msgstr "選択されたパーサーは使用できません。"
+
+#: zine/forms.py:458
+#: zine/forms.py:816
+#: zine/forms.py:939
+msgid "Email"
+msgstr "メールアドレス"
+
+#: zine/forms.py:463
+#: zine/templates/admin/_post_helpers.html:8
+#: zine/templates/admin/import.html:24
+#: zine/templates/admin/inspect_import.html:48
+msgid "Date"
+msgstr "日付"
+
+#: zine/forms.py:465
+#: zine/templates/admin/block_comment.html:2
+#: zine/templates/admin/block_comment.html:4
+msgid "Block Comment"
+msgstr "コメントをブロック"
+
+#: zine/forms.py:466
+#: zine/forms.py:529
+msgid "Reason"
+msgstr "理由"
+
+#: zine/forms.py:538
+#, python-format
+msgid "blocked by %s"
+msgstr "%sさんによってブロックされました"
+
+#: zine/forms.py:553
+#, python-format
+msgid "Comment reported as spam by %s"
+msgstr "%sさんによってスパムとして報告されたコメント"
+
+#: zine/forms.py:580
+#: zine/templates/admin/manage_categories.html:9
+msgid "Name"
+msgstr "名前"
+
+#: zine/forms.py:582
+#: zine/forms.py:814
+#: zine/forms.py:937
+#: zine/templates/admin/plugins.html:18
+msgid "Description"
+msgstr "説明"
+
+#: zine/forms.py:601
+msgid "This slug is already in use"
+msgstr "このスラッグはすでに使用されています"
+
+
+#: zine/forms.py:640
+msgid "Comments Per Page:"
+msgstr "1ページに表示するコメント数:"
+
+#: zine/forms.py:678
+#, python-format
+msgid "Comment blocked by %s"
+msgstr "%sさんによってブロックされたコメント"
+
+#: zine/forms.py:685
+#, python-format
+msgid "Comment marked as spam by %s"
+msgstr "%sさんによってスパムとしてマークされたコメント"
+
+#: zine/forms.py:710
+#: zine/templates/admin/manage_groups.html:8
+msgid "Groupname"
+msgstr "グループ名"
+
+
+#: zine/forms.py:713
+#: zine/forms.py:822
+#: zine/templates/admin/information.html:102
+msgid "Privileges"
+msgstr "権限"
+
+#: zine/forms.py:730
+msgid "This groupname is already in use"
+msgstr "このグループ名はすでに使用されています"
+
+#: zine/forms.py:752
+msgid "What should Zine do with users assigned to this group?"
+msgstr "このグループに割り当てられていたユーザーをどのように処理しますか？"
+
+#: zine/forms.py:755
+msgid "Do nothing, just detach the membership"
+msgstr "グループへの所属を取り消す以外には、何も行いません"
+
+#: zine/forms.py:756
+msgid "Move the users to another group"
+msgstr "ユーザーを別のグループへ移動します"
+
+#: zine/forms.py:758
+msgid "Relocate users to"
+msgstr "このグループにユーザーを移動"
+
+#: zine/forms.py:771
+msgid "You have to select a group that gets the users assigned."
+msgstr "ユーザーを割り当てるグループを選んでください。"
+
+#: zine/forms.py:809
+#: zine/forms.py:844
+#: zine/forms.py:932
+#: zine/forms.py:961
+#: zine/templates/account/login.html:29
+#: zine/templates/admin/manage_users.html:8
+#: zine/websetup/templates/admin_account.html:10
+msgid "Username"
+msgstr "ユーザー名"
+
+#: zine/forms.py:812
+#: zine/forms.py:845
+#: zine/forms.py:935
+#: zine/forms.py:962
+#: zine/templates/admin/manage_users.html:9
+msgid "Realname"
+msgstr "名前"
+
+#: zine/forms.py:813
+#: zine/forms.py:936
+msgid "Display name"
+msgstr "表示名"
+
+#: zine/forms.py:820
+#: zine/forms.py:943
+#: zine/templates/account/login.html:32
+#: zine/websetup/templates/admin_account.html:12
+msgid "Password"
+msgstr "パスワード"
+
+#: zine/forms.py:824
+#: zine/views/admin.py:152
+msgid "Groups"
+msgstr "グループ"
+
+#: zine/forms.py:826
+msgid "List as author"
+msgstr "投稿者のリスト"
+
+
+#: zine/forms.py:827
+msgid "This user is listed as author"
+msgstr "このユーザーは投稿者としてリストされています"
+
+#: zine/forms.py:856
+msgid "This username is already in use"
+msgstr "このユーザー名はすでに使用されています"
+
+#: zine/forms.py:892
+msgid "What should Zine do with posts written by this user?"
+msgstr "このユーザーによって書かれた投稿をどのように処理しますか？"
+
+#: zine/forms.py:894
+msgid "Delete them permanently"
+msgstr "完全に削除する"
+
+
+#: zine/forms.py:895
+msgid "Reassign posts"
+msgstr "投稿者を再設定する"
+
+
+#: zine/forms.py:898
+msgid "Reassign posts to"
+msgstr "投稿者として割り当てるユーザー"
+
+#: zine/forms.py:913
+msgid "You have to select the user that gets the posts assigned."
+msgstr "投稿を割り当てるユーザーを選択してください。"
+
+#: zine/forms.py:945
+#: zine/forms.py:947
+msgid "Confirm password"
+msgstr "確認用パスワード"
+
+#: zine/forms.py:970
+msgid "This email address is already in use"
+msgstr "このメールアドレスはすでに使用されています"
+
+#: zine/forms.py:979
+msgid "Passwords do not match"
+msgstr "パスワードが一致しません"
+
+#: zine/forms.py:1035
+msgid "Filename"
+msgstr "ファイル名"
+
+#: zine/forms.py:1036
+msgid "Log Level"
+msgstr "ログレベル"
+
+#: zine/forms.py:1041
+#: zine/forms.py:1303
+msgid "Blog title"
+msgstr "ブログタイトル"
+
+#: zine/forms.py:1042
+msgid "Blog tagline"
+msgstr "ブログの見出し"
+
+#: zine/forms.py:1043
+msgid "Blog email"
+msgstr "ブログのメールアドレス"
+
+#: zine/forms.py:1044
+msgid "Language"
+msgstr "言語"
+
+#: zine/forms.py:1045
+msgid "Timezone"
+msgstr "タイムゾーン"
+
+#: zine/forms.py:1047
+msgid "Cookie Name"
+msgstr "クッキー名"
+
+
+#: zine/forms.py:1049
+msgid "Comments enabled"
+msgstr "コメント有効"
+
+#: zine/forms.py:1050
+msgid "enable comments per default"
+msgstr "コメントをデフォルトで有効にする"
+
+
+
+#: zine/forms.py:1052
+msgid "Comment Moderation"
+msgstr "コメントのモデレーション"
+
+
+#: zine/forms.py:1055
+msgid "Pingbacks enabled"
+msgstr "ピンバック有効"
+
+
+#: zine/forms.py:1056
+msgid "enable pingbacks per default"
+msgstr "ピンバックをデフォルトで有効にする"
+
+
+
+#: zine/forms.py:1058
+msgid "Use flat comments"
+msgstr "フラットコメントを使用する"
+
+#: zine/forms.py:1059
+msgid "All comments are posted top-level"
+msgstr "すべてのコメントをトップレベルで投稿する"
+
+#: zine/forms.py:1061
+msgid "Default parser"
+msgstr "デフォルトパーサー"
+
+#: zine/forms.py:1063
+msgid "Comment parser"
+msgstr "コメントパーサー"
+
+#: zine/forms.py:1065
+msgid "Posts per page"
+msgstr "1ページあたりの投稿数"
+
+
+#: zine/forms.py:1080
+msgid "Blog URL prefix"
+msgstr "ブログURLのプレフィックス"
+
+
+#: zine/forms.py:1082
+msgid "Admin URL prefix"
+msgstr "管理画面URLのプレフィックス"
+
+
+#: zine/forms.py:1084
+msgid "Category URL prefix"
+msgstr "カテゴリーURLのプレフィックス"
+
+
+#: zine/forms.py:1086
+msgid "Tag URL prefix"
+msgstr "タグURLのプレフィックス"
+
+
+#: zine/forms.py:1088
+msgid "Author Profiles URL prefix"
+msgstr "投稿者プロフィールURLのプレフィックス"
+
+
+#: zine/forms.py:1090
+msgid "Post permalink URL format"
+msgstr "投稿パーマリンクURLのフォーマット"
+
+#: zine/forms.py:1092
+msgid "Limit slugs to ASCII"
+msgstr "スラッグをASCIIに制限する"
+
+
+#: zine/forms.py:1094
+msgid "Use zero-padded dates"
+msgstr "日付を0詰めする"
+
+
+#: zine/forms.py:1095
+msgid "Force HTTPS"
+msgstr "強制的にHTTPSにする"
+
+#: zine/forms.py:1121
+msgid "Cache system"
+msgstr "キャッシュシステム"
+
+#: zine/forms.py:1123
+msgid "Default cache timeout"
+msgstr "デフォルトのキャッシュタイムアウト"
+
+
+#: zine/forms.py:1125
+msgid "Enable eager caching"
+msgstr "積極的キャッシュを有効にする"
+
+#: zine/forms.py:1126
+msgid "Enable"
+msgstr "有効"
+
+
+
+
+#: zine/forms.py:1133
+msgid "You have to provide at least one server to use memcached."
+msgstr "memcachedを使用するには、少なくとも1台のサーバを指定する必要があります。"
+
+#: zine/forms.py:1137
+msgid "You have to provide cache folder to use filesystem cache."
+msgstr "ファイルキャッシュシステムを使用する場合は、キャッシュフォルダを指定する必要があります。"
+
+
+#: zine/forms.py:1147
+msgid "Dump Download URL"
+msgstr "ダンプダウンロード用URL"
+
+
+#: zine/forms.py:1153
+msgid "Feed Download URL"
+msgstr "フィードダウンロード用URL"
+
+#: zine/forms.py:1202
+msgid "Use default value"
+msgstr "デフォルト値を使用する"
+
+#: zine/forms.py:1289
+msgid "Create new user"
+msgstr "新しいユーザーを作成する"
+
+#: zine/forms.py:1305
+msgid "Blog description"
+msgstr "ブログの説明"
+
+
+
+#: zine/forms.py:1310
+msgid "Load config values"
+msgstr "設定値を読み込む"
+
+
+#: zine/forms.py:1311
+msgid "Load the configuration values from the import."
+msgstr "インポートから設定値を読み込む。"
+
+#: zine/notifications.py:176
+#: zine/websetup/templates/admin_account.html:16
+msgid "E-Mail"
+msgstr "電子メール"
+
+
+#: zine/notifications.py:283
+msgid "When a new comment is received."
+msgstr "新しいコメントを受け取ったとき。"
+
+
+
+#: zine/notifications.py:285
+msgid "When a comment requires moderation."
+msgstr "コメントのモデレーションが必要な場合。"
+
+
+
+#: zine/notifications.py:287
+msgid "When Zine found an urgent security alarm."
+msgstr "Zineが緊急のセキュリティ警告を見つけた場合。"
+
+
+#: zine/parsers.py:152
+msgid "Zine-Markup"
+msgstr "Zineマークアップ"
+
+#: zine/parsers.py:164
+msgid "HTML"
+msgstr "HTML"
+
+#: zine/pingback.py:55
+msgid "source URL does not exist"
+msgstr "ソースURLが存在しません"
+
+
+#: zine/pingback.py:56
+msgid "The source URL does not contain a link to the target URL"
+msgstr "ソースURLにターゲットURLへのリンクが含まれていません"
+
+#: zine/pingback.py:57
+msgid "The specified target URL does not exist"
+msgstr "指定されたターゲットURLが存在しません"
+
+#: zine/pingback.py:58
+msgid "The specified target URL cannot be used as a target"
+msgstr "指定されたターゲットURLは使用できません"
+
+
+#: zine/pingback.py:59
+msgid "The pingback has already been registered"
+msgstr "ピンバックはすでに登録されています"
+
+
+#: zine/pingback.py:60
+#: zine/templates/403.html:2
+#: zine/templates/403.html:4
+msgid "Access Denied"
+msgstr "アクセスが拒否されました"
+
+#: zine/pingback.py:97
+#, python-format
+msgid "An unknown server error (%s) occurred"
+msgstr "不明なサーバーエラー(%s)が発生しました"
+
+#: zine/pluginsystem.py:334
+msgid "Could not install the plugin because the uploaded file is not a valid plugin file."
+msgstr "アップロードされたファイルは有効なプラグインファイルではないため、プラグインをインストールできませんでした。"
+
+
+
+#: zine/pluginsystem.py:336
+msgid "The plugin uploaded has a newer package version than this Zine installation can handle."
+msgstr "アップロードされたプラグインは、現在インストールされているZineで扱えるパッケージバージョンより新しいものです。"
+
+#: zine/pluginsystem.py:339
+msgid "A plugin with the same UID is already installed. Aborted."
+msgstr "同じUIDのプラグインがインストールされています。インストールを中止します。"
+
+
+#: zine/pluginsystem.py:341
+msgid "Could not install the package because the installer wasn't able to write the package information. Wrong permissions?"
+msgstr "インストーラーがパッケージ情報を書き込めなかったため、パッケージをインストールできませんでした。パーミッションが正しく設定されていない可能性があります。"
+
+#: zine/pluginsystem.py:363
+msgid "Plugin setup error"
+msgstr "プラグインセットアップエラー"
+
+
+#: zine/pluginsystem.py:374
+#, python-format
+msgid "Exception happend on setup: %(error)s (%(file)s, line %(line)d)"
+msgstr "セットアップ中に発生した例外: %(error)s (%(file)s, line %(line)d)"
+
+#: zine/privileges.py:156
+msgid "can enter admin panel"
+msgstr "管理パネルにログイン"
+
+#: zine/privileges.py:157
+msgid "can administer the blog"
+msgstr "ブログの管理"
+
+#: zine/privileges.py:158
+msgid "can create new entries"
+msgstr "新しい投稿を作成"
+
+#: zine/privileges.py:160
+msgid "can edit their own entries"
+msgstr "自分の作成した投稿を編集"
+
+#: zine/privileges.py:162
+msgid "can edit another person's entries"
+msgstr "他人の作成した投稿を編集"
+
+#: zine/privileges.py:164
+msgid "can create new pages"
+msgstr "新しいページを作成"
+
+#: zine/privileges.py:166
+msgid "can edit their own pages"
+msgstr "自分の作成したページを編集"
+
+#: zine/privileges.py:168
+msgid "can edit another person's pages"
+msgstr "他人の作成したページを編集"
+
+
+#: zine/privileges.py:170
+msgid "can view drafts"
+msgstr "下書きを閲覧"
+
+#: zine/privileges.py:171
+msgid "can manage categories"
+msgstr "カテゴリーの管理"
+
+
+#: zine/privileges.py:173
+msgid "can moderate comments"
+msgstr "コメントをモデレート"
+
+
+#: zine/privileges.py:175
+msgid "can moderate comments on it's own entries"
+msgstr "自分の作成した投稿に対するコメントをモデレート"
+
+
+#: zine/privileges.py:177
+msgid "can moderate comments on it's own pages"
+msgstr "自分の作成したページに対するコメントをモデレート"
+
+
+#: zine/privileges.py:179
+msgid "can view protected entries"
+msgstr "保護された投稿を閲覧"
+
+#: zine/privileges.py:182
+msgid "can enter his account panel"
+msgstr "アカウントパネルにログイン"
+
+#: zine/privileges.py:183
+msgid "can edit own comments"
+msgstr "自分のコメントを編集"
+
+#: zine/privileges.py:185
+msgid "can delete own comments"
+msgstr "自分のコメントを削除"
+
+#: zine/docs/__init__.py:67
+msgid "no documented plugins installed."
+msgstr "ドキュメントを含むプラグインはインストールされていません。"
+
+#: zine/i18n/__init__.py:478
+msgid "now"
+msgstr "今すぐ"
+
+
+#: zine/importers/__init__.py:156
+msgid "set blog title from dump"
+msgstr "ブログのタイトルをダンプから設定"
+
+
+#: zine/importers/__init__.py:159
+msgid "set blog tagline from dump"
+msgstr "ブログの見出しをダンプから設定"
+
+#: zine/importers/__init__.py:224
+#: zine/importers/__init__.py:239
+msgid "done"
+msgstr "完了"
+
+#: zine/importers/__init__.py:227
+msgid "Committing transaction..."
+msgstr "トランザクションをコミットしています..."
+
+#: zine/importers/__init__.py:232
+msgid "Updating configuration..."
+msgstr "設定をアップデートしています..."
+
+
+#: zine/importers/feed.py:99
+msgid "Unknown feed uploaded."
+msgstr "不明な形式のフィードがアップロードされました。"
+
+
+#: zine/importers/feed.py:145
+msgid "Importing of RSS feeds is currently not possible."
+msgstr "RSSフィードは現在インポートできません。"
+
+
+#: zine/importers/feed.py:323
+msgid "Feed Importer"
+msgstr "フィードインポーター"
+
+
+
+#: zine/importers/feed.py:334
+#: zine/importers/wordpress.py:239
+#, python-format
+msgid "Error downloading from URL: %s"
+msgstr "以下のURLからダウンロード中にエラーが発生しました: %s"
+
+#: zine/importers/feed.py:341
+#: zine/importers/wordpress.py:247
+msgid "Error parsing uploaded file"
+msgstr "アップロードされたファイルの解析中にエラーが発生しました"
+
+
+
+
+#: zine/importers/feed.py:342
+#, python-format
+msgid "Error parsing feed: %s"
+msgstr "以下のフィードの解析中にエラーが発生しました: %s"
+
+#: zine/importers/feed.py:345
+#: zine/importers/wordpress.py:251
+msgid "Added imported items to queue."
+msgstr "インポートされたアイテムはキューに追加されました。"
+
+
+
+#: zine/importers/wordpress.py:248
+#, python-format
+msgid "Error parsing uploaded file: %s"
+msgstr "以下のアップロードされたファイルの解析中にエラーが発生しました: %s"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:32
+msgid "blocked by akismet"
+msgstr "Akismetによってブロックされました"
+
+
+#: zine/plugins/akismet_spam_filter/__init__.py:69
+msgid "The key is invalid."
+msgstr "APIキーが無効です。"
+
+
+
+#: zine/plugins/akismet_spam_filter/__init__.py:80
+msgid "Could not verify key because of a server to server connection error."
+msgstr "サーバー間接続エラーのためキーを検証できませんでした。"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:160
+#: zine/plugins/akismet_spam_filter/__init__.py:174
+#, python-format
+msgid "Comment by %s reported to Akismet"
+msgstr "%sさんからのコメントをAkismetに報告しました"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:186
+msgid "Akismet"
+msgstr "Akismet"
+
+
+#: zine/plugins/akismet_spam_filter/__init__.py:191
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter_stats.html:2
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter_stats.html:20
+msgid "Akismet Statistics"
+msgstr "Akismet統計"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:206
+msgid "Akismet has been successfully enabled."
+msgstr "Akismetを有効にしました。"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:208
+msgid "Akismet disabled."
+msgstr "Akismetを無効にしました。"
+
+
+#: zine/plugins/akismet_spam_filter/__init__.py:235
+msgid "Akismet Blocked Comments"
+msgstr "Akismetがコメントをブロックしました"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:243
+msgid "Comments Blocked by Akismet"
+msgstr "Akismetによってブロックされたコメント"
+
+
+
+#: zine/plugins/akismet_spam_filter/templates/akismet_widget.html:4
+#, python-format
+msgid "Akismet has blocked <b>%(spam_comments)s</b> comments."
+msgstr "Akismet は<b>%(spam_comments)s</b>件のコメントをブロックしました。"
+
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:2
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:4
+msgid "Akismet Configuration"
+msgstr "Akismetの設定"
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:5
+#, python-format
+msgid ""
+"\n"
+"    Akismet will help you to reduce or even completely eliminate the comment spam\n"
+"    you get on your site. If you don't have a WordPress.com account yet, you can\n"
+"    get one at <a href=\"%(api_link)s\">WordPress.com</a>.\n"
+"  "
+msgstr ""
+"\n"
+"    Akismetはサイトのコメントスパムを減少させる、または完全に排除するための手助けをします。\n"
+"    まだWordPress.comアカウントを持っていない場合は、<a href=\"%(api_link)s\">WordPress.com</a>で取得することができます。\n"
+"  "
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:14
+msgid "Update Key"
+msgstr "APIキーを更新"
+
+
+
+#: zine/plugins/creole_parser/__init__.py:57
+#, python-format
+msgid "Macro “%s” was passed a body but does not support it."
+msgstr "マクロ “%s” にbodyが渡されましたが、これはサポートされていません。"
+
+
+#: zine/plugins/creole_parser/__init__.py:109
+msgid "Creole"
+msgstr "Creole"
+
+#: zine/plugins/dark_vessel_colorscheme/__init__.py:21
+msgid "Dark"
+msgstr "ダーク"
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:5
+#: zine/plugins/vessel_theme/templates/_widgets.html:4
+#: zine/templates/account/layout.html:20
+#: zine/templates/admin/layout.html:6
+msgid "Administration"
+msgstr "管理"
+
+
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:7
+#: zine/plugins/vessel_theme/templates/_widgets.html:6
+#, python-format
+msgid "logged in as %(username)s."
+msgstr "%(username)sさんとしてログインしました。"
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:8
+#: zine/plugins/vessel_theme/templates/_widgets.html:7
+msgid "go to admin panel"
+msgstr "管理パネルへ移動"
+
+#: zine/plugins/miniblog_theme/templates/layout.html:27
+#: zine/plugins/vessel_theme/templates/layout.html:28
+#: zine/templates/layout.html:20
+#, python-format
+msgid "Proudly powered by %(zine)s."
+msgstr "Proudly powered by %(zine)s."
+
+#: zine/plugins/myrtle_theme/templates/layout.html:28
+#, python-format
+msgid "Proudly powered by %(zine)s, %(theme)s designed by %(author)s."
+msgstr "Proudly powered by %(zine)s, %(theme)s designed by %(author)s."
+
+#: zine/plugins/myrtle_theme/templates/layout.html:33
+#: zine/websetup/templates/finished.html:10
+msgid "Admin Panel"
+msgstr "管理パネル"
+
+#: zine/plugins/myrtle_theme/templates/layout.html:34
+#: zine/templates/account/layout.html:22
+#: zine/templates/admin/layout.html:20
+msgid "Logout"
+msgstr "ログアウト"
+
+#: zine/plugins/pygments_support/__init__.py:166
+msgid "Pygments theme changed successfully."
+msgstr "Pygmentsテーマを変更しました。"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:2
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:4
+msgid "Pygments"
+msgstr "Pygments"
+
+
+
+
+
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:5
+msgid ""
+"\n"
+"    Pygments allows you to select one of many themes for your code tags.\n"
+"    You can preview and select one below.\n"
+"  "
+msgstr ""
+"\n"
+"    Pygmentsは多数のコードタグ用のテーマを提供します。\n"
+"    以下からテーマのプレビューと選択を行うことができます。\n"
+"  "
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:13
+#: zine/views/admin.py:144
+msgid "Theme"
+msgstr "テーマ"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:15
+#: zine/templates/admin/_form_helpers.html:18
+#: zine/templates/admin/edit_entry.html:10
+#: zine/templates/admin/edit_page.html:8
+msgid "Preview"
+msgstr "プレビュー"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:16
+msgid "Select"
+msgstr "選択"
+
+#: zine/plugins/rst_parser/__init__.py:100
+msgid "reStructuredText"
+msgstr "reStructuredText"
+
+
+#: zine/plugins/typography/__init__.py:129
+#: zine/plugins/typography/templates/admin/typography.html:2
+#: zine/plugins/typography/templates/admin/typography.html:33
+msgid "Typography"
+msgstr "文字体裁"
+
+
+#: zine/plugins/typography/__init__.py:146
+msgid "Typography settings could not be changed."
+msgstr "文字体裁の設定を変更できませんでした。"
+
+
+#: zine/plugins/typography/__init__.py:148
+msgid "Typography settings changed."
+msgstr "文字体裁の設定を変更しました。"
+
+
+#: zine/plugins/typography/templates/admin/typography.html:34
+msgid ""
+"\n"
+"    From here you can configure the typography settings. Note that the\n"
+"    typography plugin has hardcoded semantics at the moment, so there is\n"
+"    no way to change the algorithm from this config panel.\n"
+"  "
+msgstr ""
+"\n"
+"    ここから文字体裁の設定を行うことができます。\n"
+"    ここでの文字体裁プラグインは現在のところハードコーディングされたセマンティクスを\n"
+"    持っていることに注意してください。この設定パネルからアルゴリズムを変更することはできません。\n"
+"  "
+
+#: zine/plugins/typography/templates/admin/typography.html:41
+msgid "Double Quote Pairs"
+msgstr "ダブルクォートのペア"
+
+#: zine/plugins/typography/templates/admin/typography.html:46
+msgid "Single Quote Pairs"
+msgstr "シングルクォートのペア"
+
+
+
+
+#: zine/plugins/typography/templates/admin/typography.html:53
+msgid "Use Common Character"
+msgstr "記号を選択してください"
+
+#: zine/plugins/typography/templates/admin/typography.html:59
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:11
+#: zine/templates/account/notification_settings.html:28
+#: zine/templates/admin/_form_helpers.html:12
+#: zine/templates/admin/basic_options.html:12
+#: zine/templates/admin/cache.html:100
+#: zine/templates/admin/configuration.html:47
+#: zine/templates/admin/edit_category.html:14
+#: zine/templates/admin/edit_comment.html:38
+#: zine/templates/admin/edit_group.html:13
+#: zine/templates/admin/edit_user.html:27
+#: zine/templates/admin/pages_config.html:23
+#: zine/templates/admin/url_options.html:23
+#: zine/templates/admin/write_page.html:51
+msgid "Save"
+msgstr "保存"
+
+#: zine/plugins/vessel_theme/__init__.py:25
+msgid "Blue"
+msgstr "青"
+
+#: zine/plugins/vessel_theme/__init__.py:26
+msgid "Gray"
+msgstr "灰色"
+
+#: zine/plugins/vessel_theme/__init__.py:27
+msgid "Green"
+msgstr "緑"
+
+#: zine/plugins/vessel_theme/__init__.py:33
+msgid "Color variation"
+msgstr "カラーバリエーション"
+
+#: zine/plugins/vessel_theme/__init__.py:62
+msgid "Color variation changed successfully."
+msgstr "カラーバリエーションを変更しました。"
+
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:2
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:4
+msgid "Configure Vessel Theme"
+msgstr "Vesselテーマの設定"
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:5
+msgid ""
+"\n"
+"    This theme comes with various color variations you can choose from.\n"
+"  "
+msgstr ""
+"\n"
+"    このテーマではカラーバリエーションを選ぶことができます。\n"
+"  "
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:12
+#: zine/templates/account/edit_profile.html:24
+#: zine/templates/admin/_form_helpers.html:17
+#: zine/templates/admin/change_password.html:9
+#: zine/templates/admin/edit_category.html:16
+#: zine/templates/admin/edit_comment.html:40
+#: zine/templates/admin/edit_group.html:18
+#: zine/templates/admin/edit_user.html:32
+#: zine/templates/admin/inspect_import.html:75
+#: zine/templates/admin/write_page.html:55
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: zine/shared/js/Admin.js:48
+msgid "Bookmarklet"
+msgstr "ブックマークレット"
+
+
+#: zine/shared/js/Admin.js:50
+msgid "Right click on the following link and choose “Add to favorites” or “Bookmark link” to create a posting shortcut."
+msgstr "以下のリンクを右クリックして、「お気に入りに追加」または「このリンクをブックマーク」を選択し、投稿ショートカットを作成してください。"
+
+
+
+#: zine/shared/js/Admin.js:54
+msgid "Next time you visit an interesting page, just select some text and click on the bookmark."
+msgstr "ブログに載せたいページを見つけた場合には、テキストを選択して、登録したブックマークをクリックしてください。"
+
+#: zine/shared/js/Admin.js:58
+msgid "Blog It!"
+msgstr "Blog It!"
+
+
+
+#: zine/shared/js/Admin.js:60
+msgid "Right click on this link and choose “Add to favorites” or “Bookmark link” to create a posting shortcut."
+msgstr "以下のリンクを右クリックして、「お気に入りに追加」または「このリンクをブックマーク」を選択し、投稿ショートカットを作成してください。"
+
+
+#: zine/shared/js/Zine.js:31
+#, python-format
+msgid "Replying to comment by %s."
+msgstr "%sさんのコメントに返信"
+
+#: zine/shared/js/Zine.js:33
+msgid "(Create as top level comment)"
+msgstr "（トップレベルコメントとして作成する）"
+
+#: zine/templates/403.html:5
+msgid ""
+"\n"
+"    The access to the requested resource was restricted.\n"
+"  "
+msgstr ""
+"\n"
+"    リクエストされたリソースへのアクセスは制限されています。\n"
+"  "
+
+#: zine/templates/404.html:2
+#: zine/templates/404.html:4
+msgid "Page Not Found"
+msgstr "ページが見つかりません"
+
+
+
+#: zine/templates/404.html:5
+msgid "Sorry, the page you requested does not exist."
+msgstr "申し訳ありません。リクエストされたページは存在しません。"
+
+#: zine/templates/404.html:6
+msgid ""
+"You may have followed a bad link or mis-typed a URL.\n"
+"    That’s most likely what went wrong."
+msgstr "誤ったリンクをたどってきたか、URLをタイプミスしている可能性があります。"
+
+
+
+
+
+#: zine/templates/404.html:8
+#, python-format
+msgid ""
+"You may want to\n"
+"    have a look at the <a href=\"%(index_link)s\">blog index</a>."
+msgstr ""
+"下記のリンクよりページをご覧ください。\n"
+"\n"
+"<a href=\"%(index_link)s\">トップページ</a>"
+
+
+#: zine/templates/500.html:2
+msgid "Zine Internal Server Error"
+msgstr "Zine Internal Server Error"
+
+
+#: zine/templates/500.html:4
+msgid "Internal Server Error"
+msgstr "Internal Server Error"
+
+
+#: zine/templates/500.html:5
+msgid ""
+"\n"
+"    An internal error happened in the application. The blog administrator\n"
+"    has been informed about the problem.\n"
+"  "
+msgstr ""
+"\n"
+"    アプリケーションで内部エラーが発生しました。\n"
+"    この問題はブログ管理者に通知されました。\n"
+"  "
+
+#: zine/templates/_about_zine.html:2
+#: zine/templates/_about_zine.html:6
+msgid "About Zine"
+msgstr "Zineについて"
+
+
+
+
+#: zine/templates/_about_zine.html:9
+msgid ""
+"\n"
+"      Zine is an open source content publishing platform emphasizing ease\n"
+"      of use and extensibility. It provides powerful internal infrastructure,\n"
+"      a simple and intuitive user interface.\n"
+"    "
+msgstr ""
+"\n"
+"      Zineは使いやすさと拡張性を重視した、オープンソースの\n"
+"      コンテンツ公開用プラットフォームです。強力なシステム基盤と、シンプルで\n"
+"      直感的なユーザーインターフェイスを提供します。\n"
+"    "
+
+#: zine/templates/_about_zine.html:14
+#, python-format
+msgid "© Copyright %(years)s by the Zine Team. Some rights reserved."
+msgstr "© Copyright %(years)s by the Zine Team. Some rights reserved."
+
+
+
+
+
+#: zine/templates/_about_zine.html:17
+msgid ""
+"\n"
+"      Redistribution and use in source and binary forms, with or without\n"
+"      modification, are permitted provided that the following conditions\n"
+"      are met:"
+msgstr ""
+"\n"
+"      Redistribution and use in source and binary forms, with or without\n"
+"      modification, are permitted provided that the following conditions\n"
+"      are met:"
+
+
+
+
+#: zine/templates/_about_zine.html:22
+msgid ""
+"Redistributions of source code must retain the above\n"
+"        copyright notice, this list of conditions and the following\n"
+"        disclaimer."
+msgstr ""
+"Redistributions of source code must retain the above\n"
+"        copyright notice, this list of conditions and the following\n"
+"        disclaimer."
+
+
+#: zine/templates/_about_zine.html:25
+msgid ""
+"Redistributions in binary form must reproduce the above\n"
+"        copyright notice, this list of conditions and the following\n"
+"        disclaimer in the documentation and/or other materials provided\n"
+"        with the distribution."
+msgstr ""
+"Redistributions in binary form must reproduce the above\n"
+"        copyright notice, this list of conditions and the following\n"
+"        disclaimer in the documentation and/or other materials provided\n"
+"        with the distribution."
+
+
+#: zine/templates/_about_zine.html:29
+msgid ""
+"The names of the contributors may not be used to endorse\n"
+"        or promote products derived from this software without specific\n"
+"        prior written permission."
+msgstr ""
+"The names of the contributors may not be used to endorse\n"
+"        or promote products derived from this software without specific\n"
+"        prior written permission."
+
+
+#: zine/templates/_about_zine.html:34
+msgid ""
+"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n"
+"      “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n"
+"      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n"
+"      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n"
+"      OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n"
+"      SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n"
+"      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n"
+"      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
+"      THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
+"      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
+"      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+msgstr ""
+"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n"
+"      “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n"
+"      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n"
+"      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n"
+"      OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n"
+"      SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n"
+"      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n"
+"      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
+"      THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
+"      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
+"      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+
+
+#: zine/templates/_comment.html:5
+msgid "Pingback by"
+msgstr "Pingback by"
+
+
+#: zine/templates/_comment.html:6
+msgid "Comment by"
+msgstr "Comment by"
+
+#: zine/templates/_comment.html:9
+msgid "Anonymous"
+msgstr "匿名"
+
+
+#: zine/templates/_comment.html:15
+msgid "reply to this comment"
+msgstr "このコメントに返信"
+
+#: zine/templates/_comment.html:64
+msgid "Submit Comment"
+msgstr "コメントを送信"
+
+#: zine/templates/_comment.html:65
+msgid "Reset Form"
+msgstr "フォームをリセット"
+
+#: zine/templates/_entry.html:11
+msgid "Tagged as"
+msgstr "タグ"
+
+#: zine/templates/_entry.html:18
+#, python-format
+msgid "%(comments)s comment"
+msgid_plural "%(comments)s comments"
+msgstr[0] "%(comments)s件のコメント"
+
+#: zine/templates/_entry.html:22
+#: zine/templates/admin/_comment.html:12
+#: zine/templates/admin/index.html:56
+msgid "Edit"
+msgstr "編集"
+
+
+#: zine/templates/_entry.html:31
+#: zine/templates/show_entry.html:8
+#, python-format
+msgid "written by %(author)s, on %(pub_date)s."
+msgstr "%(pub_date)sに%(author)sさんによって書かれました。"
+
+
+
+#: zine/templates/_entry.html:36
+#, python-format
+msgid "<strong>Scheduled Post:</strong> This entry will appear in %(time_span)s."
+msgstr "<strong>スケジュールされた投稿:</strong> この投稿はあと%(time_span)sで表示されます。"
+
+#: zine/templates/_entry.html:45
+msgid "Read on"
+msgstr "続きを読む"
+
+#: zine/templates/_help.html:8
+msgid "Table Of Contents"
+msgstr "目次"
+
+#: zine/templates/archive.html:2
+#: zine/templates/archive.html:6
+#: zine/templates/widgets/post_archive_summary.html:2
+msgid "Archive"
+msgstr "アーカイブ"
+
+
+#: zine/templates/archive.html:12
+msgid "empty archive"
+msgstr "空のアーカイブ"
+
+#: zine/templates/archive.html:17
+#, python-format
+msgid "Archive for %(year)s"
+msgstr "%(year)sのアーカイブ"
+
+#: zine/templates/archive.html:19
+#, python-format
+msgid "Archive for %(month)s"
+msgstr "%(month)sのアーカイブ"
+
+#: zine/templates/archive.html:21
+#, python-format
+msgid "Archive for %(day)s"
+msgstr "%(day)sのアーカイブ"
+
+#: zine/templates/authors.html:2
+#: zine/templates/authors.html:4
+#: zine/templates/admin/inspect_import.html:23
+msgid "Authors"
+msgstr "投稿者"
+
+#: zine/templates/error_layout.html:5
+msgid "Zine Error"
+msgstr "Zineエラー"
+
+
+#: zine/templates/index.html:2
+msgid "Index"
+msgstr "インデックス"
+
+#: zine/templates/index.html:8
+msgid "Welcome"
+msgstr "ようこそ"
+
+#: zine/templates/index.html:10
+msgid "So far there are no entries in this blog."
+msgstr "このブログにはまだ投稿がありません。"
+
+
+#: zine/templates/internal_error.html:2
+msgid "Zine Internal Error"
+msgstr "Zine Internal Error"
+
+
+#: zine/templates/internal_error.html:4
+msgid "Internal Error"
+msgstr "Internal Error"
+
+
+#: zine/templates/internal_error.html:6
+msgid "Zine encountered an internal error during processing:"
+msgstr "処理中にZineの内部エラーが発生しました:"
+
+
+
+
+
+#: zine/templates/internal_error.html:13
+msgid ""
+"\n"
+"    If you have troubles fixing the problem have a look at the Zine\n"
+"    documentation.\n"
+"  "
+msgstr ""
+"\n"
+"    問題を解決するには、Zineのドキュメントを参照してください。\n"
+"  "
+
+
+#: zine/templates/internal_error.html:17
+msgid ""
+"\n"
+"    This error is only visible to blog administrators.  If a regular user\n"
+"    triggered the error an entry to the log is added and a generic error\n"
+"    message is displayed.\n"
+"  "
+msgstr ""
+"\n"
+"    このエラーはブログ管理者にだけ表示されます。\n"
+"    一般ユーザーがこのエラーに遭遇した場合は、エントリーがログへ追加され、一般的なエラーメッセージが表示されます。\n"
+"  "
+
+#: zine/templates/maintenance.html:40
+msgid "Maintenance Mode"
+msgstr "メンテナンスモード"
+
+#: zine/templates/maintenance.html:41
+msgid ""
+"\n"
+"      This Zine instance is currently in maintenance mode.\n"
+"      Please wait until the administrator reopens the blog."
+msgstr ""
+"\n"
+"    このZineインスタンスは、現在メンテナンスモードです。\n"
+"    管理者がブログを再開するまでお待ちください。"
+
+#: zine/templates/page.html:10
+#: zine/templates/show_entry.html:22
+#: zine/templates/admin/_post_helpers.html:7
+#: zine/templates/admin/inspect_import.html:51
+#: zine/views/admin.py:125
+msgid "Comments"
+msgstr "コメント"
+
+
+#: zine/templates/page.html:14
+#: zine/templates/show_entry.html:26
+msgid "Leave a Reply"
+msgstr "コメントを残す"
+
+#: zine/templates/server_error.html:2
+msgid "Zine Maintenance Mode"
+msgstr "Zineメンテナンスモード"
+
+
+#: zine/templates/show_author.html:12
+msgid "Posts written by user"
+msgstr "このユーザーによって書かれた投稿"
+
+
+
+#: zine/templates/show_author.html:15
+#, python-format
+msgid "%(post)s, on %(date)s"
+msgstr "%(post)s - %(date)s"
+
+#: zine/templates/show_category.html:2
+#, python-format
+msgid "Show “%(category)s”"
+msgstr "“%(category)s” を見る"
+
+
+#: zine/templates/show_category.html:5
+#, python-format
+msgid "Entries in the Category “%(category)s”"
+msgstr "カテゴリー “%(category)s” のエントリー"
+
+
+#: zine/templates/show_category.html:10
+#: zine/templates/show_tag.html:10
+msgid "No public posts found"
+msgstr "公開されている投稿はありません"
+
+#: zine/templates/show_tag.html:2
+#, python-format
+msgid "Show “%(tag)s”"
+msgstr "“%(tag)s” を見る"
+
+
+#: zine/templates/show_tag.html:5
+#, python-format
+msgid "Entries tagged “%(tag)s”"
+msgstr "タグ “%(tag)s” が付けられたエントリー"
+
+#: zine/templates/tags.html:2
+#: zine/templates/tags.html:4
+msgid "Tag Cloud"
+msgstr "タグクラウド"
+
+#: zine/templates/tags.html:8
+#: zine/templates/widgets/tag_cloud.html:7
+#, python-format
+msgid "%(count)s post tagged %(tag)s"
+msgid_plural "%(count)s posts tagged %(tag)s"
+msgstr[0] "%(count)s件の%(tag)sタグがつけれらた投稿"
+
+#: zine/templates/account/delete_account.html:2
+#: zine/templates/account/delete_account.html:4
+#: zine/templates/account/edit_profile.html:23
+msgid "Delete Account"
+msgstr "アカウントを削除"
+
+#: zine/templates/account/delete_account.html:6
+msgid "Do you really want to delete your account?"
+msgstr "本当にアカウントを削除してもよろしいですか？"
+
+
+#: zine/templates/account/delete_account.html:7
+msgid "All your comments will also be deleted!"
+msgstr "あなたのコメントもすべて削除されます！"
+
+#: zine/templates/account/delete_account.html:9
+#: zine/templates/admin/approve_comment.html:12
+#: zine/templates/admin/block_comment.html:11
+#: zine/templates/admin/block_comments.html:10
+#: zine/templates/admin/delete_category.html:10
+#: zine/templates/admin/delete_comment.html:10
+#: zine/templates/admin/delete_comments.html:10
+#: zine/templates/admin/delete_comments_all.html:10
+#: zine/templates/admin/delete_entry.html:17
+#: zine/templates/admin/delete_group.html:16
+#: zine/templates/admin/delete_import.html:11
+#: zine/templates/admin/delete_page.html:17
+#: zine/templates/admin/delete_user.html:17
+#: zine/templates/admin/mark_comment.html:10
+#: zine/templates/admin/mark_ham_comments.html:10
+#: zine/templates/admin/mark_spam_comments.html:10
+#: zine/templates/admin/remove_plugin.html:12
+#: zine/templates/admin/unblock_comment.html:12
+msgid "No"
+msgstr "いいえ"
+
+#: zine/templates/account/delete_account.html:10
+#: zine/templates/admin/approve_comment.html:11
+#: zine/templates/admin/block_comment.html:12
+#: zine/templates/admin/block_comments.html:11
+#: zine/templates/admin/delete_category.html:11
+#: zine/templates/admin/delete_comment.html:11
+#: zine/templates/admin/delete_comments.html:11
+#: zine/templates/admin/delete_comments_all.html:11
+#: zine/templates/admin/delete_entry.html:18
+#: zine/templates/admin/delete_group.html:17
+#: zine/templates/admin/delete_import.html:12
+#: zine/templates/admin/delete_page.html:18
+#: zine/templates/admin/delete_user.html:18
+#: zine/templates/admin/mark_comment.html:11
+#: zine/templates/admin/mark_ham_comments.html:11
+#: zine/templates/admin/mark_spam_comments.html:11
+#: zine/templates/admin/remove_plugin.html:13
+#: zine/templates/admin/unblock_comment.html:13
+msgid "Yes"
+msgstr "はい"
+
+#: zine/templates/account/edit_profile.html:3
+msgid "Edit Profile"
+msgstr "プロフィールを編集"
+
+#: zine/templates/account/edit_profile.html:22
+#: zine/templates/account/index.html:19
+msgid "Update Profile"
+msgstr "プロフィールを更新"
+
+#: zine/templates/account/help.html:6
+#: zine/templates/admin/help_404.html:4
+msgid "Documentation Not Found"
+msgstr "ドキュメントが見つかりません"
+
+#: zine/templates/account/help.html:7
+#: zine/templates/admin/help_404.html:5
+msgid "The online documentation could not be found."
+msgstr "オンラインドキュメントは見つかりませんでした。"
+
+#: zine/templates/account/index.html:2
+#: zine/templates/account/index.html:5
+#: zine/templates/admin/index.html:2
+#: zine/templates/admin/index.html:5
+#: zine/views/account.py:39
+#: zine/views/admin.py:78
+msgid "Dashboard"
+msgstr "ダッシュボード"
+
+
+
+#: zine/templates/account/index.html:8
+#, python-format
+msgid "Howdy.  Welcome to your Zine account interface %(user)s."
+msgstr "%(user)sさん、ようこそZineアカウントインターフェイスへ。"
+
+
+#: zine/templates/account/index.html:11
+#, python-format
+msgid "You have written <strong>%(your_comments)s</strong> comment so far."
+msgid_plural "You have written <strong>%(your_comments)s</strong> comments so far."
+msgstr[0] "あなたはこれまでに <strong>%(your_comments)s</strong> 件のコメントを書いています。"
+
+#: zine/templates/account/index.html:17
+#: zine/templates/admin/index.html:17
+msgid "Quickstart"
+msgstr "クイックスタート"
+
+#: zine/templates/account/index.html:20
+#: zine/views/account.py:42
+msgid "Notifications"
+msgstr "通知"
+
+#: zine/templates/account/layout.html:6
+#: zine/templates/admin/layout.html:19
+msgid "My Account"
+msgstr "マイ アカウント"
+
+#: zine/templates/account/layout.html:16
+#, python-format
+msgid "%(blog_title)s &mdash; My Account"
+msgstr "%(blog_title)s &mdash; マイ アカウント"
+
+#: zine/templates/account/layout.html:18
+#: zine/templates/admin/layout.html:18
+msgid "View Blog"
+msgstr "ブログを表示"
+
+#: zine/templates/account/layout.html:53
+#: zine/templates/admin/layout.html:49
+#, python-format
+msgid "Powered by %(zine)s %(version)s."
+msgstr "Powered by %(zine)s %(version)s."
+
+#: zine/templates/account/login.html:5
+#: zine/templates/account/login.html:15
+#: zine/templates/account/login.html:45
+msgid "Login"
+msgstr "ログイン"
+
+#: zine/templates/account/login.html:11
+#: zine/templates/account/sorry_to_see_you_go.html:11
+msgid "&laquo; back to the blog index"
+msgstr "&laquo; ブログのインデックスへ戻る"
+
+#: zine/templates/account/login.html:42
+msgid "Remember me"
+msgstr "ログイン情報を記憶する"
+
+#: zine/templates/account/notification_settings.html:2
+#: zine/templates/account/notification_settings.html:4
+msgid "Notification Settings"
+msgstr "通知設定"
+
+#: zine/templates/account/notification_settings.html:6
+msgid "You can configure your notification subscriptions from here."
+msgstr "ここから、受け取りたい通知を設定できます。"
+
+#: zine/templates/account/sorry_to_see_you_go.html:5
+msgid "Bye"
+msgstr "Bye"
+
+
+
+
+#: zine/templates/account/sorry_to_see_you_go.html:16
+msgid "We're sorry to see you go!"
+msgstr "ご利用ありがとうございました。"
+
+#: zine/templates/admin/_comment.html:14
+#: zine/templates/admin/_form_helpers.html:15
+#: zine/templates/admin/edit_category.html:15
+#: zine/templates/admin/edit_comment.html:39
+#: zine/templates/admin/edit_group.html:16
+#: zine/templates/admin/edit_user.html:30
+#: zine/templates/admin/index.html:58
+#: zine/templates/admin/inspect_import.html:74
+#: zine/templates/admin/manage_comments.html:28
+#: zine/templates/admin/manage_comments.html:33
+#: zine/templates/admin/manage_comments.html:38
+#: zine/templates/admin/manage_comments.html:45
+#: zine/templates/admin/manage_comments.html:50
+#: zine/templates/admin/write_page.html:53
+msgid "Delete"
+msgstr "削除"
+
+#: zine/templates/admin/_comment.html:16
+#: zine/templates/admin/manage_comments.html:54
+msgid "Mark and Report as Not Spam"
+msgstr "スパムを解除する"
+
+#: zine/templates/admin/_comment.html:17
+#: zine/templates/admin/manage_comments.html:44
+#: zine/templates/admin/manage_comments.html:54
+msgid "Mark as Not Spam"
+msgstr "スパムを解除"
+
+#: zine/templates/admin/_comment.html:20
+#: zine/templates/admin/index.html:60
+#: zine/templates/admin/manage_comments.html:26
+#: zine/templates/admin/manage_comments.html:37
+#: zine/templates/admin/manage_comments.html:48
+msgid "Approve"
+msgstr "承認"
+
+#: zine/templates/admin/_comment.html:23
+#: zine/templates/admin/_comment.html:30
+#: zine/templates/admin/manage_comments.html:27
+#: zine/templates/admin/manage_comments.html:32
+#: zine/templates/admin/manage_comments.html:49
+msgid "Block"
+msgstr "ブロック"
+
+#: zine/templates/admin/_comment.html:26
+#: zine/templates/admin/_comment.html:32
+#: zine/templates/admin/manage_comments.html:30
+#: zine/templates/admin/manage_comments.html:35
+#: zine/templates/admin/manage_comments.html:41
+#: zine/templates/admin/manage_comments.html:52
+msgid "Mark and Report as Spam"
+msgstr "スパムとして報告する"
+
+#: zine/templates/admin/_comment.html:27
+#: zine/templates/admin/_comment.html:33
+#: zine/templates/admin/manage_comments.html:30
+#: zine/templates/admin/manage_comments.html:35
+#: zine/templates/admin/manage_comments.html:41
+#: zine/templates/admin/manage_comments.html:52
+msgid "Mark as Spam"
+msgstr "スパム"
+
+#: zine/templates/admin/_form_helpers.html:13
+#: zine/templates/admin/edit_group.html:14
+#: zine/templates/admin/edit_user.html:28
+msgid "Save and continue editing"
+msgstr "保存して編集を続ける"
+
+#: zine/templates/admin/_post_helpers.html:18
+msgid "no categories"
+msgstr "カテゴリーなし"
+
+#: zine/templates/admin/_post_helpers.html:24
+msgid "No pages."
+msgstr "ページがありません。"
+
+#: zine/templates/admin/_post_helpers.html:32
+msgid "Your draft:"
+msgid_plural "Your drafts:"
+msgstr[0] "下書き:"
+
+#: zine/templates/admin/approve_comment.html:2
+#: zine/templates/admin/approve_comment.html:4
+msgid "Approve Comment"
+msgstr "コメントを承認"
+
+
+#: zine/templates/admin/approve_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to approve the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"        本当に %(comment_author)s さんのコメントを承認しますか？\n"
+"      "
+
+#: zine/templates/admin/basic_options.html:2
+#: zine/templates/admin/basic_options.html:4
+msgid "Basic Options"
+msgstr "基本設定"
+
+#: zine/templates/admin/basic_options.html:5
+msgid ""
+"\n"
+"    From here you can configure the basic blog settings like the blog\n"
+"    title and tagline.\n"
+"  "
+msgstr ""
+"\n"
+"    ここでは、ブログのタイトルや見出しなどの基本設定を行うことができます。\n"
+"  "
+
+
+#: zine/templates/admin/block_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to block the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"        本当に %(comment_author)s さんのコメントをブロックしますか？\n"
+"      "
+
+#: zine/templates/admin/block_comments.html:2
+#: zine/templates/admin/block_comments.html:4
+msgid "Block Comments"
+msgstr "コメントをブロック"
+
+#: zine/templates/admin/block_comments.html:7
+msgid "Do you really want to block the selected comments?"
+msgstr "本当に選択したコメントをブロックしますか？"
+
+#: zine/templates/admin/blogger_perform_import.html:2
+#: zine/templates/admin/blogger_perform_import.html:4
+#: zine/templates/admin/perform_import.html:2
+#: zine/templates/admin/perform_import.html:4
+msgid "Importing..."
+msgstr "インポート中..."
+
+
+
+#: zine/templates/admin/blogger_perform_import.html:5
+msgid ""
+"\n"
+"    The importer will download your data from Blogger.com\n"
+"    This can take some time.\n"
+"    <strong>Don't hit cancel!</strong>\n"
+"  "
+msgstr ""
+"\n"
+"    Blogger.comからデータをダウンロードします。\n"
+"    この処理には時間がかかる場合があります\n"
+"    <strong>ダウンロード中にキャンセルしないでください！</strong>\n"
+"  "
+
+
+#: zine/templates/admin/blogger_perform_import.html:11
+msgid ""
+"\n"
+"    Data import completed successfully. You can review your import here:\n"
+"  "
+msgstr ""
+"\n"
+"    データのインポートが正常に完了しました。ここからインポート結果を確認できます:\n"
+"  "
+
+#: zine/templates/admin/blogger_perform_import.html:15
+msgid "Import review page"
+msgstr "インポート確認ページ"
+
+#: zine/templates/admin/cache.html:2
+#: zine/templates/admin/cache.html:4
+msgid "Cache Options"
+msgstr "キャッシュオプション"
+
+
+
+
+
+
+#: zine/templates/admin/cache.html:6
+msgid ""
+"\n"
+"      Zine comes with a cache system that allows you to survive a sudden\n"
+"      storm of visitors. The caching system has different backends you can\n"
+"      choose from and also different settings that you should set depending on\n"
+"      the type of server you have and the number of visitors.\n"
+"    "
+msgstr ""
+"\n"
+"      Zineは、瞬間的に多数の閲覧が発生した場合に備えて、キャッシュシステムを搭載しています。\n"
+"      サーバーの種類や訪問者数に応じて、キャッシュシステムの処理系を選択したり、\n"
+"      設定を変更することが出来ます。\n"
+"   "
+
+
+
+
+
+#: zine/templates/admin/cache.html:12
+msgid ""
+"\n"
+"      Keep in mind that if caching is enabled templates will be cached too and\n"
+"      as a result of that, they are not reloaded. If you are trying to develop \n"
+"      plugins it might be a good idea to disable all caching.\n"
+"    "
+msgstr ""
+"\n"
+"      キャッシュが有効になっている場合、テンプレートもキャッシュされるため、\n"
+"      テンプレートへの変更はすぐには反映されないことに注意してください。\n"
+"      プラグイン開発の際にはすべてのキャッシュを無効にすることが推奨されます。\n"
+"    "
+
+#: zine/templates/admin/cache.html:28
+msgid "Cache System"
+msgstr "キャッシュシステム"
+
+
+
+#: zine/templates/admin/cache.html:29
+msgid "Currently Zine supports three caching systems:"
+msgstr "現在、Zineは3種類のキャッシュシステムをサポートしています:"
+
+
+
+
+#: zine/templates/admin/cache.html:31
+msgid ""
+"<strong>Simple Cache</strong>: The simple cache is a very\n"
+"          basic memory cache inside the server process. This cache works only\n"
+"          if you have a persistent environment. Roughly speaking this cache\n"
+"          works better the higher the number of threads in a process and the\n"
+"          lower the number or processes. If you have the chance to use a\n"
+"          memcached you should not use the simple cache."
+msgstr ""
+"<strong>シンプルキャッシュ</strong>: シンプルキャッシュは、\n"
+"          基本的なサーバープロセス内のメモリキャッシュです。\n"
+"          このキャッシュは連続稼働環境でのみ機能します。\n"
+"          大まかには、プロセス内のスレッドの数が多いほど、そしてプロセス数が\n"
+"          少ないほどキャッシュが効率的に機能します。\n"
+"          memcachedが利用できるなら、シンプルキャッシュを使用するべきではありません。\n"
+"    "
+
+
+
+
+
+
+#: zine/templates/admin/cache.html:37
+msgid ""
+"<strong>memcached</strong>: This cache system uses one\n"
+"          or multiple remote memcached servers for storing the cache\n"
+"          information. It requires at least one running memcached daemon. This\n"
+"          is useful for high traffic sites."
+msgstr ""
+"<strong>memcached</strong>: このキャッシュシステムは、\n"
+"          キャッシュ情報を格納するために、リモートの1台または複数台のmemcachedサーバを利用します。\n"
+"          memcachedデーモンが最低1つは稼働している必要があります。\n"
+"          この方式は通信量の多いサイトで有効です。\n"
+"    "
+
+
+
+
+#: zine/templates/admin/cache.html:41
+msgid ""
+"<strong>Filesystem</strong>: This cache system stores the\n"
+"          cache information on the filesystem. If IO is a problem for you,\n"
+"          you should not use this cache. However for most of the cases the \n"
+"          filesystem it should be fast enough."
+msgstr ""
+"<strong>ファイルシステム</strong>: このキャッシュシステムは、\n"
+"          キャッシュ情報をファイルシステム上に保存します。\n"
+"          I/Oに問題がある場合は、このキャッシュシステムを使うべきではありません。\n"
+"          実際にはほとんどのファイルシステムは十分に高速です。\n"
+"  "
+
+#: zine/templates/admin/cache.html:46
+msgid "Per default no cache system is active."
+msgstr "キャッシュシステムはデフォルトでは有効になっていません。"
+
+#: zine/templates/admin/cache.html:49
+msgid "Memcached Options"
+msgstr "Memcached オプション"
+
+
+
+
+
+
+#: zine/templates/admin/cache.html:50
+msgid ""
+"\n"
+"        In order to use the memcached system you have to provide the address\n"
+"        of at least one machine running memcached.  For further details have\n"
+"        a look at <a href=\"http://www.danga.com/memcached/\">the memcached\n"
+"        webpage</a>.  Separate multiple addresses with commas.  This also\n"
+"        requires either the <a href=\"http://gijsbert.org/cmemcache/\"\n"
+"        >cmemcache</a> or <a href=\"ftp://ftp.tummy.com/pub/python-memcached/\"\n"
+"        >python-memcached</a> module.\n"
+"      "
+msgstr ""
+"\n"
+"        memcachedシステムを使用するためには、少なくとも1台のmemcachedが稼働しているマシンのアドレスを設定しなければなりません。\n"
+"        詳細は、<a href=\"http://www.danga.com/memcached/\">memcachedのウェブページ</a>を参照してください。\n"
+"        複数のアドレスを指定する場合は、コンマで区切ってください。\n"
+"        さらに<a href=\"http://gijsbert.org/cmemcache/\">cmemcache</a>または<a href=\"ftp://ftp.tummy.com/pub/python-memcached/\">python-memcached</a>いずれかのモジュールが必要です。\n"
+"  "
+
+
+
+
+#: zine/templates/admin/cache.html:59
+msgid ""
+"\n"
+"        If you for example have a memcached running on localhost (127.0.0.1)\n"
+"        port 11211 you would have to enter <code>127.0.0.1:11211</code> into\n"
+"        the following text field.\n"
+"      "
+msgstr ""
+"\n"
+"        たとえば、localhost(127.0.0.1)のポート11211でmemcachedが稼働している場合には、\n"
+"        以下のテキストフィールドに <code>127.0.0.1:11211</code> と入力してください。\n"
+"    "
+
+#: zine/templates/admin/cache.html:67
+msgid "Filesystem Options"
+msgstr "ファイルシステム オプション"
+
+
+
+#: zine/templates/admin/cache.html:68
+msgid ""
+"\n"
+"        When using the filesystem cache you can control where Zine puts\n"
+"        all the cache data.  This path is relative to your Zine instance\n"
+"        folder and will be created automatically by Zine.  Keep in mind\n"
+"        that if you change that path and old cache data is left in the old\n"
+"        folder, Zine won't clean up the data left for you.\n"
+"      "
+msgstr ""
+"\n"
+"        ファイルキャッシュシステムを使用する場合は、Zineがキャッシュに使用すフォルダを設定できます。\n"
+"        このパスはZineインスタンスフォルダからの相対パスで指定され、自動的に作成されます。\n"
+"        パスを変更した場合に、変更前のフォルダには古いキャッシュデータが残ります。\n"
+"        古いデータはZineによって削除されません。\n"
+"  "
+
+
+
+
+
+
+
+
+#: zine/templates/admin/cache.html:75
+msgid ""
+"\n"
+"        One thing you have to keep in mind is that the cache path <em>must</em>\n"
+"        be a directory that only Zine uses for file management. The\n"
+"        Zine code cleans up there from time to time and it could delete\n"
+"        files that are otherwise not tracked by Zine. This is especially\n"
+"        the case if you try to cache into <code>/tmp</code> or a similar\n"
+"        folder that all kinds of applications use for storing temporary files.\n"
+"      "
+msgstr ""
+"\n"
+"        キャッシュパスは<em>必ずZine専用のディレクトリでなければなりません</em>。\n"
+"        Zineコードは適宜ディレクトリ内のファイルを削除しているため、\n"
+"        Zineで使用されていないファイルも削除してしまう可能性があります。\n"
+"        他のアプリケーションでも使用される <code>/tmp</code> などのディレクトリは\n"
+"        <em>使用しないでください</em>。\n"
+"  "
+
+
+#: zine/templates/admin/cache.html:85
+msgid "General Cache Settings"
+msgstr "キャッシュ共通設定"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#: zine/templates/admin/cache.html:86
+msgid ""
+"\n"
+"      The following configuration values are cache system-independent. You\n"
+"      can use them to fine-tune the caching. The timeout is the number of\n"
+"      seconds an item is cached per default. Some items have different cache\n"
+"      timeouts though. If “eager caching” is enabled the cache system will\n"
+"      cache a lot more but it will have visible side-effects. For example\n"
+"      new blog posts won't appear on the index or in the feed for up to the\n"
+"      default timeout.\n"
+"    "
+msgstr ""
+"\n"
+"      以下の設定値は、キャッシュシステムの種類に依存しません。\n"
+"      これらの設定値により、キャッシュを微調整することができます。\n"
+"      タイムアウト値はアイテムがキャッシュされるデフォルトの秒数です。\n"
+"      デフォルト以外のキャッシュタイムアウト値を持つアイテムも存在します。\n"
+"      “積極的キャッシュ”を有効にすると、キャッシュシステムによってより多くのアイテムが\n"
+"      キャッシュされますが、これにより明らかな副作用が生じます。\n"
+"      たとえば、新しい投稿は最大でデフォルトのタイムアウト値を過ぎるまでインデックスやフィードに表示されません。\n"
+"  "
+
+#: zine/templates/admin/cache.html:101
+msgid "Clear Cache"
+msgstr "キャッシュの削除"
+
+#: zine/templates/admin/change_password.html:2
+#: zine/templates/admin/change_password.html:4
+#: zine/templates/admin/change_password.html:8
+msgid "Change Password"
+msgstr "パスワードの変更"
+
+
+#: zine/templates/admin/configuration.html:2
+#: zine/templates/admin/configuration.html:4
+#: zine/views/admin.py:147
+msgid "Configuration Editor"
+msgstr "設定エディタ"
+
+
+
+
+
+
+
+
+#: zine/templates/admin/configuration.html:5
+msgid ""
+"\n"
+"    Here you can tune all registered configuration values. Note that some of\n"
+"    them (especially the core configuration values) can easily break your\n"
+"    installation if set to an illegal value. Don't alter any of those values\n"
+"    if you don't know what effect they have. This editor is especially\n"
+"    useful if you want to configure plugins that don't provide a configuration\n"
+"    page (yet).\n"
+"  "
+msgstr ""
+"\n"
+"    ここでは、登録されているすべての設定値を変更できます。\n"
+"    不正な値を設定すると（特にコア部分の設定で）システムを破壊してしまう可能性があることに注意してください。\n"
+"    値を変更することでどのような影響がでるか不明な場合には、変更を行わないでください。\n"
+"    このエディタは設定ページが（まだ）存在しないプラグインを設定したい場合に役立ちます。\n"
+"  "
+
+#: zine/templates/admin/configuration.html:48
+msgid "Disable Editor"
+msgstr "エディタを無効にする"
+
+
+#: zine/templates/admin/configuration.html:51
+msgid ""
+"\n"
+"        The configuration editor is disabled because of this. If you really want\n"
+"        to use it, click the button to proceed.\n"
+"      "
+msgstr ""
+"\n"
+"        設定エディタは無効になっています。\n"
+"        本当に使いたい場合は、ボタンをクリックして有効にしてください。\n"
+"      "
+
+#: zine/templates/admin/configuration.html:56
+msgid "Enable Editor"
+msgstr "エディタを有効にする"
+
+#: zine/templates/admin/delete_category.html:2
+#: zine/templates/admin/delete_category.html:4
+msgid "Delete Category"
+msgstr "カテゴリーを削除"
+
+#: zine/templates/admin/delete_category.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete category “%(category_name)s”?\n"
+"      "
+msgstr ""
+"\n"
+"        本当にカテゴリー “%(category_name)s” を削除しますか？\n"
+"      "
+
+#: zine/templates/admin/delete_comment.html:2
+#: zine/templates/admin/delete_comment.html:4
+msgid "Delete Comment"
+msgstr "コメントを削除"
+
+
+#: zine/templates/admin/delete_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"        本当に %(comment_author)s さんのコメントを削除しますか？\n"
+"      "
+
+#: zine/templates/admin/delete_comments.html:2
+#: zine/templates/admin/delete_comments.html:4
+msgid "Delete Comments"
+msgstr "コメントを削除"
+
+#: zine/templates/admin/delete_comments.html:7
+msgid "Do you really want to delete the selected comments?"
+msgstr "本当に選択されたコメントを削除しますか？"
+
+#: zine/templates/admin/delete_comments_all.html:2
+#: zine/templates/admin/delete_comments_all.html:4
+msgid "Delete All Comments"
+msgstr "すべてのコメントを削除"
+
+
+#: zine/templates/admin/delete_comments_all.html:7
+#, python-format
+msgid "Do you really want to delete ALL(%d) %s comments; not just the ones shown on the page you were in?"
+msgstr "本当に%d件すべての%sコメントを削除しますか？ （現在のページに表示されていないコメントもすべて削除されます）"
+
+
+#: zine/templates/admin/delete_entry.html:2
+#: zine/templates/admin/delete_entry.html:4
+msgid "Delete Entry"
+msgstr "エントリーを削除"
+
+
+#: zine/templates/admin/delete_entry.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete entry “%(entry_title)s”?\n"
+"    "
+msgstr ""
+"\n"
+"      本当にエントリー “%(entry_title)s” を削除しますか？\n"
+"    "
+
+
+
+#: zine/templates/admin/delete_entry.html:10
+#: zine/templates/admin/delete_page.html:10
+#, python-format
+msgid ""
+"\n"
+"      This will also delete %(comment_count)s comment.\n"
+"    "
+msgid_plural ""
+"\n"
+"      This will also delete %(comment_count)s comments.\n"
+"    "
+msgstr[0] ""
+"\n"
+"      この操作によって%(comment_count)s件のコメントの削除も行われます。\n"
+"    "
+
+#: zine/templates/admin/delete_group.html:2
+#: zine/templates/admin/delete_group.html:4
+msgid "Delete Group"
+msgstr "グループを削除"
+
+#: zine/templates/admin/delete_group.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete the group “%(name)s”?\n"
+"    "
+msgstr ""
+"\n"
+"      本当にグループ “%(name)s” を削除しますか？\n"
+"    "
+
+#: zine/templates/admin/delete_group.html:9
+msgid ""
+"\n"
+"      What should happen to the users assigned with this group?\n"
+"    "
+msgstr ""
+"\n"
+"      このグループに割り当てられていたユーザーをどのように処理しますか？\n"
+"    "
+
+#: zine/templates/admin/delete_import.html:2
+#: zine/templates/admin/delete_import.html:4
+msgid "Delete Import Dump"
+msgstr "インポートダンプを削除"
+
+#: zine/templates/admin/delete_import.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete the imported dump “%(dump_title)s”?\n"
+"      "
+msgstr ""
+"\n"
+"        本当にインポートされたダンプ “%(dump_title)s” を削除しますか？\n"
+"      "
+
+#: zine/templates/admin/delete_page.html:2
+#: zine/templates/admin/delete_page.html:4
+msgid "Delete Page"
+msgstr "ページを削除"
+
+#: zine/templates/admin/delete_page.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete page “%(page_title)s”?\n"
+"    "
+msgstr ""
+"\n"
+"      本当にページ “%(page_title)s” を削除しますか？\n"
+"    "
+
+#: zine/templates/admin/delete_user.html:2
+#: zine/templates/admin/delete_user.html:4
+msgid "Delete User"
+msgstr "ユーザーを削除"
+
+
+#: zine/templates/admin/delete_user.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete the user “%(username)s”?\n"
+"    "
+msgstr ""
+"\n"
+"      本当にユーザー “%(username)s”を削除しますか？\n"
+"    "
+
+#: zine/templates/admin/delete_user.html:9
+#, python-format
+msgid ""
+"\n"
+"      What should happen to the %(post_count)s post this user wrote?\n"
+"    "
+msgid_plural ""
+"\n"
+"      What should happen to the %(post_count)s posts this user wrote?\n"
+"    "
+msgstr[0] ""
+"\n"
+"      このユーザーが書いた%(post_count)s件の投稿をどのように処理しますか？\n"
+"    "
+
+#: zine/templates/admin/edit_category.html:3
+#: zine/templates/admin/edit_category.html:5
+msgid "Edit Category"
+msgstr "カテゴリーを編集"
+
+#: zine/templates/admin/edit_comment.html:3
+#: zine/templates/admin/edit_comment.html:5
+msgid "Edit Comment"
+msgstr "コメントを編集"
+
+#: zine/templates/admin/edit_entry.html:3
+#: zine/templates/admin/index.html:19
+#: zine/templates/admin/manage_entries.html:10
+msgid "New Entry"
+msgstr "新規投稿"
+
+#: zine/templates/admin/edit_entry.html:3
+msgid "Edit Entry"
+msgstr "エントリーを編集"
+
+#: zine/templates/admin/edit_entry.html:10
+#: zine/templates/admin/edit_page.html:8
+msgid "skip"
+msgstr "スキップ"
+
+#: zine/templates/admin/edit_entry.html:19
+#: zine/templates/admin/edit_page.html:20
+msgid "Important:"
+msgstr "重要:"
+
+
+#: zine/templates/admin/edit_entry.html:20
+#: zine/templates/admin/edit_page.html:21
+msgid ""
+"This post was created with a parser that is no longer\n"
+"        available.  You won't be able to save the post with the same parser\n"
+"        unless you re-activate the plugin that provided it."
+msgstr ""
+"この投稿は現在利用できないパーサーで作成されました。\n"
+"        パーサーを提供していたプラグインを再び利用可能にしない限り、\n"
+"        同じパーサーで投稿を保存することはできません。"
+
+#: zine/templates/admin/edit_entry.html:38
+#: zine/templates/admin/manage_categories.html:21
+msgid "No categories."
+msgstr "カテゴリーはありません。"
+
+
+#: zine/templates/admin/edit_entry.html:42
+#: zine/templates/admin/edit_page.html:48
+msgid "Discussion"
+msgstr "ディスカッション"
+
+#: zine/templates/admin/edit_entry.html:54
+msgid "View Entry"
+msgstr "エントリーを表示"
+
+#: zine/templates/admin/edit_group.html:3
+#: zine/templates/admin/manage_groups.html:22
+msgid "New Group"
+msgstr "新規グループ"
+
+#: zine/templates/admin/edit_group.html:3
+msgid "Edit Group"
+msgstr "グループを編集"
+
+#: zine/templates/admin/edit_page.html:3
+#: zine/templates/admin/manage_pages.html:10
+#: zine/templates/admin/write_page.html:2
+#: zine/templates/admin/write_page.html:4
+msgid "New Page"
+msgstr "新規ページ"
+
+#: zine/templates/admin/edit_page.html:3
+msgid "Edit Page"
+msgstr "ページを編集"
+
+#: zine/templates/admin/edit_page.html:58
+#: zine/templates/admin/write_page.html:46
+msgid "View Page"
+msgstr "ページを表示"
+
+#: zine/templates/admin/edit_user.html:3
+#: zine/templates/admin/manage_users.html:24
+msgid "New User"
+msgstr "新規ユーザー"
+
+#: zine/templates/admin/edit_user.html:3
+msgid "Edit User"
+msgstr "ユーザーを編集"
+
+#: zine/templates/admin/export.html:2
+#: zine/templates/admin/export.html:4
+#: zine/templates/admin/export.html:21
+#: zine/templates/admin/information.html:206
+#: zine/views/admin.py:166
+msgid "Export"
+msgstr "エクスポート"
+
+
+#: zine/templates/admin/export.html:5
+msgid ""
+"\n"
+"    Here you can dump your Zine database information into an standardized\n"
+"    format (Atom) with Zine extensions which we call “Zine eXtended\n"
+"    Atom” (ZineXA).  You can use this file to import your posts into another\n"
+"    weblog software that supports Atom.  You should not use this file for\n"
+"    Zine migrations as this file will not include attachments, the blog\n"
+"    configuration and probably data stored by plugins.\n"
+"  "
+msgstr ""
+"\n"
+"    ここでは、Zineのデータベース情報を標準フォーマット(Atom)の拡張である\n"
+"    “Zine eXtended Atom”(ZineXA)でダンプすることができます。\n"
+"    このファイルを使用して、Atomをサポートする別のブログソフトウェアに投稿を\n"
+"    インポートできます。\n"
+"    このファイルには添付ファイル、ブログの設定、プラグインによって格納されるデータは含まれていないので、\n"
+"    Zineブログの移動のために使用しないでください。\n"
+"  "
+
+
+#: zine/templates/admin/export.html:13
+msgid ""
+"\n"
+"    Please keep in mind that the exported file will contain confidential\n"
+"    information such as password hashes and database passwords from the\n"
+"    configuration.\n"
+"  "
+msgstr ""
+"\n"
+"    エクスポートされたファイルが機密情報（たとえば設定ファイルに含まれるパスワードハッシュや\n"
+"    データベースのパスワード）を含んでいることに注意してください。\n"
+"  "
+
+#: zine/templates/admin/help_404.html:6
+msgid ""
+"Possibly you have to generate the docs first by running the\n"
+"\t  <tt>build-documentation</tt> script from zine's scripts\n"
+"\t  folder."
+msgstr ""
+"おそらく、まず始めにZineのスクリプトフォルダから\n"
+"\t <tt>build-documentation</tt> スクリプトを実行して、\n"
+"\t ドキュメントを生成しなければなりません。\n"
+"  "
+
+#: zine/templates/admin/import.html:2
+#: zine/templates/admin/import.html:4
+#: zine/templates/admin/import_blogger.html:41
+#: zine/templates/admin/import_feed.html:17
+#: zine/templates/admin/import_wordpress.html:19
+#: zine/views/admin.py:165
+msgid "Import"
+msgstr "インポート"
+
+
+
+
+#: zine/templates/admin/import.html:5
+msgid ""
+"\n"
+"    If you have posts or comments in another system, Zine can import those\n"
+"    into this blog.  The data imported doesn't directly end up in the blog but a\n"
+"    queue so that you can pick which data you want to import.  To get started,\n"
+"    choose a system to import from below:\n"
+"  "
+msgstr ""
+"\n"
+"    Zineはこのブログに別のシステムの投稿やコメントをインポートすることができます。\n"
+"    インポートされたデータは直接ブログには反映されずにキューに格納されるので、\n"
+"    どのデータをインポートするかを選択してください。\n"
+"    インポートを開始するには、以下からインポートを実行するシステムを選んでください。:\n"
+"  "
+
+
+
+#: zine/templates/admin/import.html:17
+msgid ""
+"\n"
+"      The following list lists all the imports that are not yet in the database\n"
+"      or deleted.  Click on one of the links to inspect the imported data and\n"
+"      select what you want to have in the database.\n"
+"    "
+msgstr ""
+"\n"
+"     以下は、まだデータベースに反映されてない、または、削除されたインポートの一覧です。\n"
+"     リンクをクリックしてインポートされたデータをチェックし、データーベースに格納するものを選択してください。\n"
+"  "
+
+#: zine/templates/admin/import.html:26
+msgid "Importer Used"
+msgstr "使用されたインポーター"
+
+#: zine/templates/admin/import_blogger.html:14
+#: zine/templates/admin/import_blogger.html:16
+msgid "Import from Blogger.com"
+msgstr "Blogger.com からインポート"
+
+#: zine/templates/admin/import_blogger.html:17
+msgid ""
+"\n"
+"  This importer allows you to import a blog from Blogger.com.\n"
+"  "
+msgstr ""
+"\n"
+"  このインポーターは Blogger.com からブログをインポートできます。\n"
+"  "
+
+
+#: zine/templates/admin/import_blogger.html:24
+#, python-format
+msgid ""
+"\n"
+"  You are authenticated with %(google)s.\n"
+"  "
+msgstr ""
+"\n"
+"   あなたは、%(google)sにより認証されています。\n"
+"  "
+
+
+#: zine/templates/admin/import_blogger.html:30
+msgid "Select Blog To Import"
+msgstr "インポートするブログを選択"
+
+
+
+#: zine/templates/admin/import_blogger.html:42
+msgid "Log out of Google"
+msgstr "Googleからログアウト"
+
+
+
+
+
+#: zine/templates/admin/import_blogger.html:50
+#, python-format
+msgid ""
+"\n"
+"  You are not authenticated with %(google)s. You need to authenticate to continue\n"
+"  the import. This link will take you to %(google)s, and once you are\n"
+"  authenticated you will be redirected back to this importer. This is the\n"
+"  preferred way to authenticate, and although it's a bit clumsy, it is safe.\n"
+"  "
+msgstr ""
+"\n"
+"  %(google)sにより認証されていません。インポートを続けるには認証を行う必要があります。\n"
+"  このリンクをクリックすると%(google)sに移動し、認証後にこのインポーターにリダイレクトされます。\n"
+"  この方法は、推奨される安全な認証方法です。\n"
+"  "
+
+
+#: zine/templates/admin/import_blogger.html:57
+#, python-format
+msgid ""
+"\n"
+"    <a href=\"%(url)s\">Log into your %(google)s account</a>\n"
+"  "
+msgstr ""
+"\n"
+"    <a href=\"%(url)s\">%(google)s アカウントへログイン</a>\n"
+"  "
+
+
+#: zine/templates/admin/import_feed.html:2
+#: zine/templates/admin/import_feed.html:4
+msgid "Import from Feed"
+msgstr "フィードからインポート"
+
+
+
+
+
+
+
+#: zine/templates/admin/import_feed.html:5
+msgid ""
+"\n"
+"    This importer can be used to import standard compliant feeds with optional\n"
+"    proprietary extensions.  Because of different incompatible RSS standards\n"
+"    this importer can currently only handle Atom feeds.\n"
+"  "
+msgstr ""
+"\n"
+"    このインポーターは、標準規格に準拠しているフィードであれば、独自拡張されていてもインポートできます。\n"
+"    RSSの標準規格には互換性がないため、このインポーターは今のところAtomフィードのみ対応しています。\n"
+"  "
+
+#: zine/templates/admin/import_feed.html:13
+msgid "Upload Feed"
+msgstr "フィードをアップロード"
+
+#: zine/templates/admin/import_wordpress.html:2
+#: zine/templates/admin/import_wordpress.html:4
+msgid "Import from WordPress"
+msgstr "WordPressからインポート"
+
+
+
+
+
+#: zine/templates/admin/import_wordpress.html:5
+msgid ""
+"\n"
+"    This importer allows you to import posts and comments from your WordPress\n"
+"    blog into your new Zine blog.  Either upload your WordPress eXtended\n"
+"    RSS (WXR) file created in the WordPress admin panel or give the importer\n"
+"    the location of such a file on an external URL and it will import the posts,\n"
+"    comments, custom fields, and categories into this blog.\n"
+"  "
+msgstr ""
+"\n"
+"    このインポーターは、投稿とコメントをWordPressブログからZineブログへインポートします。\n"
+"    WordPressの管理パネルで作成されたWordPress eXtended RSS (WXR) をアップロードするか、\n"
+"    ファイルの場所を外部URLでインポーターに指定すると、投稿、コメント、カスタムフィード、カテゴリーが\n"
+"    このブログにインポートされます。\n"
+"  "
+
+#: zine/templates/admin/import_wordpress.html:15
+msgid "Upload Dump"
+msgstr "ダンプをアップロード"
+
+
+
+#: zine/templates/admin/index.html:8
+#, python-format
+msgid "Howdy.  Welcome to the Zine administration interface %(user)s."
+msgstr "%(user)sさん、ようこそZine管理インターフェイスへ。"
+
+
+
+#: zine/templates/admin/index.html:11
+#, python-format
+msgid "You have written <strong>%(your_posts)s</strong> post so far."
+msgid_plural "You have written <strong>%(your_posts)s</strong> posts so far."
+msgstr[0] "あなたは <strong>%(your_posts)s</strong> 件の投稿を書いています。"
+
+#: zine/templates/admin/index.html:20
+msgid "Moderate Comments"
+msgstr "コメントをモデレート"
+
+#: zine/templates/admin/index.html:21
+#: zine/templates/admin/manage_entries.html:3
+#: zine/templates/admin/manage_entries.html:5
+msgid "Manage Entries"
+msgstr "投稿を管理"
+
+
+#: zine/templates/admin/index.html:22
+msgid "Configure Zine"
+msgstr "Zine の設定"
+
+#: zine/templates/admin/index.html:23
+msgid "Manage Plugins"
+msgstr "プラグインを管理"
+
+#: zine/templates/admin/index.html:24
+#: zine/templates/admin/manage_users.html:2
+#: zine/templates/admin/manage_users.html:4
+msgid "Manage Users"
+msgstr "ユーザーを管理"
+
+#: zine/templates/admin/index.html:25
+msgid "Get Help"
+msgstr "ヘルプを見る"
+
+
+#: zine/templates/admin/index.html:27
+#, python-format
+msgid ""
+"\n"
+"        If you need help, have a look at the <a href=\"%(help)s\">documentation</a>.  If that doesn't solve your problems you might\n"
+"        find answers in the <a href=\"%(support)s\">support section</a> of the\n"
+"        <a href=\"%(website)s\">Zine website</a>.\n"
+"      "
+msgstr ""
+"\n"
+"        お困りの場合は<a href=\"%(help)s\">ドキュメント</a>を参照してください。\n"
+"        それでも問題が解決できない場合は、<a href=\"%(website)s\">Zineウェブサイト</a>の\n"
+"        <a href=\"%(support)s\">サポートセクション</a>で解決策が見つかるかもしれません。\n"
+"  "
+
+#: zine/templates/admin/index.html:37
+msgid "Drafts"
+msgstr "下書き"
+
+#: zine/templates/admin/index.html:46
+msgid "Comments Awaiting Approval"
+msgstr "承認待ちのコメント"
+
+#: zine/templates/admin/index.html:65
+msgid "Last Posts"
+msgstr "最新の投稿"
+
+
+#: zine/templates/admin/index.html:76
+msgid "Zine at Reddit"
+msgstr "Zine at Reddit"
+
+
+
+#: zine/templates/admin/index.html:77
+#, python-format
+msgid ""
+"\n"
+"        Zine is present at %(reddit)s.  The latest popular items in the Zine\n"
+"        subreddit are listed below:\n"
+"        "
+msgstr ""
+"\n"
+"        %(reddit)s上のZineの情報。Zine subredditの最新人気アイテムが以下に表示されます:\n"
+"  "
+
+#: zine/templates/admin/information.html:4
+#: zine/templates/admin/information.html:20
+msgid "About The System"
+msgstr "このシステムについて"
+
+#: zine/templates/admin/information.html:21
+msgid "Zine Environment"
+msgstr "Zineの環境"
+
+#: zine/templates/admin/information.html:23
+msgid "Zine Version"
+msgstr "Zienのバージョン"
+
+#: zine/templates/admin/information.html:25
+msgid "Distribution Mode"
+msgstr "配布モード"
+
+#: zine/templates/admin/information.html:27
+msgid "Package Location"
+msgstr "パッケージの場所"
+
+#: zine/templates/admin/information.html:29
+msgid "Shared Data"
+msgstr "共有データ"
+
+
+#: zine/templates/admin/information.html:31
+msgid "Builtin Templates"
+msgstr "組み込みテンプレート"
+
+
+#: zine/templates/admin/information.html:33
+msgid "Builtin Plugins"
+msgstr "組み込みプラグイン"
+
+
+#: zine/templates/admin/information.html:35
+msgid "Builtin Translations"
+msgstr "組み込み翻訳"
+
+
+#: zine/templates/admin/information.html:37
+msgid "Path to Instance"
+msgstr "インスタンスへのパス"
+
+#: zine/templates/admin/information.html:39
+msgid "Database URI"
+msgstr "データベースURI"
+
+#: zine/templates/admin/information.html:42
+msgid "Hosting Environment"
+msgstr "ホストの環境"
+
+#: zine/templates/admin/information.html:44
+msgid "Python Version"
+msgstr "Pythonのバージョン"
+
+#: zine/templates/admin/information.html:46
+msgid "Platform"
+msgstr "プラットフォーム"
+
+
+#: zine/templates/admin/information.html:48
+msgid "Persistent Environment"
+msgstr "連続稼働環境"
+
+#: zine/templates/admin/information.html:49
+#: zine/templates/admin/information.html:59
+msgid "yes"
+msgstr "はい"
+
+#: zine/templates/admin/information.html:49
+#: zine/templates/admin/information.html:55
+#: zine/templates/admin/information.html:59
+msgid "no"
+msgstr "いいえ"
+
+#: zine/templates/admin/information.html:50
+msgid "Multithreaded"
+msgstr "マルチスレッド"
+
+#: zine/templates/admin/information.html:53
+#, python-format
+msgid "yes (%(count)s active threads)"
+msgstr "はい (%(count)s個のアクティブなスレッド)"
+
+#: zine/templates/admin/information.html:58
+msgid "Multiprocess"
+msgstr "マルチプロセス"
+
+#: zine/templates/admin/information.html:60
+msgid "WSGI Version"
+msgstr "WSGI バージョン"
+
+
+#: zine/templates/admin/information.html:63
+msgid "URL Endpoints"
+msgstr "URLエンドポイント"
+
+
+
+#: zine/templates/admin/information.html:64
+msgid ""
+"\n"
+"    The following endpoints are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    以下のエンドポイントがこのインスタンスに登録されています:\n"
+"  "
+
+
+#: zine/templates/admin/information.html:72
+msgid "Absolute URL Handlers"
+msgstr "絶対URLハンドラー"
+
+
+
+#: zine/templates/admin/information.html:73
+msgid ""
+"\n"
+"    The following absolute URL handlers are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    以下の絶対URLハンドラーがこのインスタンスに登録されています:\n"
+"  "
+
+
+#: zine/templates/admin/information.html:81
+msgid "View Handlers"
+msgstr "表示ハンドラー"
+
+
+
+#: zine/templates/admin/information.html:82
+msgid ""
+"\n"
+"    The following view handlers for endpoints are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    以下のエンドポイント表示用ハンドラーがこのインスタンスに登録されています:\n"
+"  "
+
+#: zine/templates/admin/information.html:90
+msgid "Content Types"
+msgstr "コンテンツタイプ"
+
+
+
+#: zine/templates/admin/information.html:91
+msgid ""
+"\n"
+"    The following content types are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    以下のコンテンツタイプがこのインスタンスに登録されています:\n"
+"  "
+
+
+#: zine/templates/admin/information.html:103
+msgid ""
+"\n"
+"    The following privileges are known to the system:\n"
+"  "
+msgstr ""
+"\n"
+"    以下の権限がシステムに登録されています:\n"
+"  "
+
+#: zine/templates/admin/information.html:111
+msgid "Services"
+msgstr "サービス"
+
+
+
+
+#: zine/templates/admin/information.html:112
+msgid ""
+"\n"
+"    The following servicepoints are registered on this instance to be callable\n"
+"    via one of the available services.\n"
+"    "
+msgstr ""
+"\n"
+"    利用可能なサービスから呼び出せる、以下のサービスポイントがこのインスタンスに登録されています\n"
+"    "
+
+
+#: zine/templates/admin/information.html:121
+msgid "Installed APIs"
+msgstr "インストールされているAPI"
+
+
+
+
+
+#: zine/templates/admin/information.html:122
+msgid ""
+"\n"
+"    The following APIs are installed on this blog instance. APIs marked with\n"
+"    a star (*) are preferred.\n"
+"  "
+msgstr ""
+"\n"
+"    以下のAPIがこのブログインスタンスにインストールされています。\n"
+"    マーク（*）されているAPIは推奨されているものです。"
+
+
+#: zine/templates/admin/information.html:135
+msgid "Markup Extensions"
+msgstr "マークアップ拡張"
+
+
+
+#: zine/templates/admin/information.html:136
+msgid ""
+"\n"
+"    The following markup extensions are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    以下のマークアップ拡張がこのインスタンスに登録されています:\n"
+"  "
+
+
+#: zine/templates/admin/information.html:143
+msgid "no markup extensions installed."
+msgstr "マークアップ拡張はインストールされていません。"
+
+#: zine/templates/admin/information.html:146
+msgid "Parsers"
+msgstr "パーサー"
+
+
+
+#: zine/templates/admin/information.html:147
+msgid ""
+"\n"
+"    The following parsers are currently installed:\n"
+"  "
+msgstr ""
+"\n"
+"    以下のパーサーが現在インストールされています:\n"
+"  "
+
+#: zine/templates/admin/information.html:156
+#: zine/views/admin.py:164
+msgid "Plugins"
+msgstr "プラグイン"
+
+#: zine/templates/admin/information.html:160
+msgid "active"
+msgstr "アクティブ"
+
+#: zine/templates/admin/information.html:161
+msgid "UID"
+msgstr "UID"
+
+#: zine/templates/admin/information.html:165
+msgid "Location"
+msgstr "場所"
+
+
+#: zine/templates/admin/information.html:170
+msgid "Configuration Variables"
+msgstr "設定変数"
+
+#: zine/templates/admin/information.html:173
+#: zine/templates/admin/write_page.html:11
+msgid "Key"
+msgstr "キー"
+
+#: zine/templates/admin/information.html:174
+msgid "Value"
+msgstr "値"
+
+#: zine/templates/admin/information.html:175
+msgid "Default"
+msgstr "デフォルト"
+
+#: zine/templates/admin/information.html:185
+msgid "Template Globals"
+msgstr "テンプレートグローバル"
+
+#: zine/templates/admin/information.html:191
+msgid "Template Filters"
+msgstr "テンプレートフィルター"
+
+
+
+
+
+#: zine/templates/admin/information.html:198
+msgid ""
+"\n"
+"    You can export this list and share it for troubleshooting by clicking\n"
+"    on the button below.  The resulting file is stripped of confidential\n"
+"    information such as passwords.\n"
+"  "
+msgstr ""
+"\n"
+"    以下のボタンをクリックすると、この一覧をエクスポートし、トラブルシューティングのために共有できます。\n"
+"    エクスポートされるファイルには、パスワードのような機密情報は含まれません。\n"
+"  "
+
+
+#: zine/templates/admin/inspect_import.html:2
+#: zine/templates/admin/inspect_import.html:4
+msgid "Inspect Import"
+msgstr "インポートの検査"
+
+
+
+#: zine/templates/admin/inspect_import.html:5
+msgid ""
+"\n"
+"    Here you can now inspect the imported data and select the data you want\n"
+"    to import into the database.\n"
+"  "
+msgstr ""
+"\n"
+"    インポートされたデータをチェックして、データベースに格納するものを選択してください。\n"
+"  "
+
+#: zine/templates/admin/inspect_import.html:10
+msgid "Blog Details"
+msgstr "ブログの詳細"
+
+#: zine/templates/admin/inspect_import.html:17
+msgid "Dump ID"
+msgstr "ダンプID"
+
+
+
+#: zine/templates/admin/inspect_import.html:19
+msgid "If you have a special installation and want to rewrite the import programmatically you need this identifier."
+msgstr "特殊なインストールを行っていて、インポートデータをプログラムで書き換えたい場合はこのIDが必要です。"
+
+
+
+
+#: zine/templates/admin/inspect_import.html:24
+msgid ""
+"\n"
+"      Choose the authors whose posts you want to import.  In the dropdown you\n"
+"      can select one of the already existing users if you want to change the\n"
+"      author during importing.  In the default settings a new and inactive user\n"
+"      without a password is created.\n"
+"    "
+msgstr ""
+"\n"
+"    投稿をインポートしたい投稿者を選択してください。インポート中に投稿者を変更したい場合は、\n"
+"    ドロップダウンメニューで登録されているユーザーを選択できます。\n"
+"    デフォルトの設定では、パスワードの設定されていない非アクティブな新規ユーザーが作成されます。\n"
+"  "
+
+#: zine/templates/admin/inspect_import.html:34
+msgid "no author information"
+msgstr "投稿者情報なし"
+
+
+
+
+
+#: zine/templates/admin/inspect_import.html:37
+msgid ""
+"\n"
+"      Authors are only converted if at least one of their posts is coverted.\n"
+"      So if you unselect all the posts by a user in the list below it doesn't\n"
+"      matter what you select here.\n"
+"    "
+msgstr ""
+"\n"
+"      少なくとも1つの投稿が変換されない限り、投稿者は変換されません。\n"
+"      したがって、以下のリスト内のユーザーによる投稿を1つも選択しない場合、\n"
+"      ここで何を選択しても意味がありません。\n"
+"  "
+
+
+
+#: zine/templates/admin/inspect_import.html:42
+msgid "Posts"
+msgstr "投稿"
+
+#: zine/templates/admin/inspect_import.html:43
+msgid ""
+"\n"
+"      Posts marked with a blue background are already imported.\n"
+"    "
+msgstr ""
+"\n"
+"      青い背景でマークされた投稿はすでにインポートされています。\n"
+"  "
+
+#: zine/templates/admin/inspect_import.html:63
+msgid "unpublished"
+msgstr "未公開"
+
+#: zine/templates/admin/inspect_import.html:73
+msgid "Import into Blog"
+msgstr "ブログへインポート"
+
+#: zine/templates/admin/layout.html:16
+#, python-format
+msgid "%(blog_title)s Administration"
+msgstr "%(blog_title)s の管理"
+
+#: zine/templates/admin/log.html:2
+#: zine/templates/admin/log.html:4
+#: zine/views/admin.py:167
+msgid "Log"
+msgstr "ログ"
+
+
+
+
+#: zine/templates/admin/log.html:5
+msgid ""
+"\n"
+"    The log shows you important information about your system.  Whenever\n"
+"    problems happen, you can see it here.\n"
+"  "
+msgstr ""
+"\n"
+"    ログはシステムに関する重要な情報を含んでいます。\n"
+"    問題が発生した場合は、いつでもここで確認できます。\n"
+"  "
+
+#: zine/templates/admin/log.html:9
+msgid "Recorded Events"
+msgstr "記録されたイベント"
+
+#: zine/templates/admin/log.html:20
+msgid "The logfile is empty"
+msgstr "ログファイルは空です"
+
+#: zine/templates/admin/log.html:27
+msgid "▼ Down"
+msgstr "▼ 下へ"
+
+#: zine/templates/admin/log.html:32
+msgid "Up ▲"
+msgstr "上へ ▲"
+
+#: zine/templates/admin/log.html:36
+msgid "Log Settings"
+msgstr "ログ設定"
+
+#: zine/templates/admin/log.html:40
+#: zine/templates/admin/plugins.html:58
+msgid "Apply"
+msgstr "適用"
+
+#: zine/templates/admin/maintenance.html:2
+#: zine/templates/admin/maintenance.html:4
+#: zine/views/admin.py:163
+msgid "Maintenance"
+msgstr "メンテナンス"
+
+
+
+#: zine/templates/admin/maintenance.html:5
+msgid ""
+"\n"
+"    From here you can set your blog into maintenance mode and do administrative\n"
+"    tasks.  It's recommend to enable maintenance mode before doing software\n"
+"    upgrades, imports, exports or plugin installations.  While it's not stricly\n"
+"    necessary for the latter it's good idea to test the changes before going\n"
+"    live with them.  As long as maintenance mode is enabled users will see a\n"
+"    message that says that the blog is in maintenance mode.\n"
+"  "
+msgstr ""
+"\n"
+"    このブログをメンテナンスモードに設定し、管理作業を行うことができます。\n"
+"    ソフトウェアのアップグレードや、インポート、エクスポート、プラグインのインストールを行う前に\n"
+"    メンテナンスモードにすることを推奨します。これは必須ではありませんが、\n"
+"    公開前に変更をテストしておいた方がよいでしょう。\n"
+"    メンテナンスモードが有効になっている間、ユーザーにはブログがメンテナンス中であることを示す\n"
+"    メッセージが表示されます。\n"
+"  "
+
+#: zine/templates/admin/maintenance.html:16
+msgid "Disable maintenance mode"
+msgstr "メンテナンスモードを無効にする"
+
+#: zine/templates/admin/maintenance.html:17
+msgid "Enable maintenance mode"
+msgstr "メンテナンスモードを有効にする"
+
+#: zine/templates/admin/manage_categories.html:2
+#: zine/templates/admin/manage_categories.html:4
+msgid "Manage Categories"
+msgstr "カテゴリーを管理"
+
+#: zine/templates/admin/manage_categories.html:7
+#: zine/templates/admin/manage_groups.html:7
+#: zine/templates/admin/manage_users.html:7
+msgid "ID"
+msgstr "ID"
+
+#: zine/templates/admin/manage_categories.html:10
+msgid "Number of Posts"
+msgstr "投稿数"
+
+#: zine/templates/admin/manage_categories.html:26
+msgid "New Category"
+msgstr "新規カテゴリー"
+
+#: zine/templates/admin/manage_comments.html:15
+msgid "No comments."
+msgstr "コメントはありません。"
+
+#: zine/templates/admin/manage_comments.html:23
+msgid "Update"
+msgstr "更新"
+
+#: zine/templates/admin/manage_comments.html:39
+#: zine/templates/admin/manage_comments.html:46
+msgid "Delete All"
+msgstr "すべて削除"
+
+#: zine/templates/admin/manage_comments.html:44
+msgid "Mark and Report as not Spam"
+msgstr "スパムでないと報告する"
+
+#: zine/templates/admin/manage_comments.html:59
+msgid "Toggle selection"
+msgstr "選択の切り替え"
+
+#: zine/templates/admin/manage_groups.html:2
+#: zine/templates/admin/manage_groups.html:4
+msgid "Manage Groups"
+msgstr "グループを管理"
+
+#: zine/templates/admin/manage_groups.html:17
+msgid "No groups."
+msgstr "グループはありません。"
+
+#: zine/templates/admin/manage_pages.html:3
+#: zine/templates/admin/manage_pages.html:5
+msgid "Manage Pages"
+msgstr "ページを管理"
+
+#: zine/templates/admin/manage_users.html:10
+msgid "Mail"
+msgstr "メールアドレス"
+
+#: zine/templates/admin/mark_comment.html:2
+#: zine/templates/admin/mark_comment.html:4
+#, python-format
+msgid "Report Comment As %s"
+msgstr "コメントを%sとして報告"
+
+
+#: zine/templates/admin/mark_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to report the comment by %(comment_author)s as %(form_action)s ?\n"
+"      "
+msgstr ""
+"\n"
+"        本当に%(comment_author)sさんのコメントを%(form_action)sとして報告しますか？\n"
+"      "
+
+#: zine/templates/admin/mark_ham_comments.html:2
+#: zine/templates/admin/mark_ham_comments.html:4
+msgid "Report Comments As Not Spam"
+msgstr "スパムでないコメントとして報告"
+
+#: zine/templates/admin/mark_ham_comments.html:7
+msgid "Do you really want to report the selected comments as NOT Spam?"
+msgstr "本当に選択されたコメントをスパムでないと報告しますか？"
+
+#: zine/templates/admin/mark_spam_comments.html:2
+#: zine/templates/admin/mark_spam_comments.html:4
+msgid "Report Comments As Spam"
+msgstr "スパムコメントとして報告"
+
+#: zine/templates/admin/mark_spam_comments.html:7
+msgid "Do you really want to report the selected comments as Spam?"
+msgstr "本当に選択されたコメントをスパムであると報告しますか？"
+
+
+#: zine/templates/admin/pages_config.html:2
+#: zine/templates/admin/pages_config.html:4
+msgid "Pages Configuration"
+msgstr "ページ設定"
+
+
+#: zine/templates/admin/pages_config.html:5
+msgid ""
+"\n"
+"    Configure your pages settings.\n"
+"  "
+msgstr ""
+"\n"
+"    ページ設定をしてください。\n"
+"  "
+
+
+#: zine/templates/admin/pages_config.html:10
+msgid "Show page title"
+msgstr "ページタイトルを表示"
+
+
+#: zine/templates/admin/pages_config.html:13
+msgid "Show the title of the page on top of the page body"
+msgstr "本文の上にページタイトルを表示"
+
+#: zine/templates/admin/pages_config.html:16
+msgid "Show children"
+msgstr "子ページを表示"
+
+
+
+#: zine/templates/admin/pages_config.html:19
+msgid "Show the child-pages on the bottom of the page body"
+msgstr "ページ本文の下に子ページを表示"
+
+
+
+#: zine/templates/admin/perform_import.html:5
+msgid ""
+"\n"
+"    The importer converts now all the collected and selected data for\n"
+"    Zine and inserts it into the database.  This can take some time.\n"
+"    <strong>Don't hit cancel!</strong>\n"
+"  "
+msgstr ""
+"\n"
+"    選択されたすべてのデータをインポーターが変換してデータベースに格納します。\n"
+"    これには時間がかかる場合があります。<strong>インポート中にキャンセルしないでください！</strong>\n"
+"  "
+
+#: zine/templates/admin/perform_import.html:11
+msgid ""
+"\n"
+"    Imported data successfully.\n"
+"  "
+msgstr ""
+"\n"
+"    正常にデータをインポートしました。\n"
+"  "
+
+
+#: zine/templates/admin/plugins.html:2
+#: zine/templates/admin/plugins.html:4
+msgid "Plugin Management"
+msgstr "プラグイン管理"
+
+#: zine/templates/admin/plugins.html:7
+msgid ""
+"\n"
+"      Plugins extend the functionality of the Zine system. Because of\n"
+"      security and convenience reasons you have to enable plugins by hand.\n"
+"      Some plugins could conflict with each other so it's up to you to\n"
+"      decide which plugins you want to enable. In case of doubt have a look\n"
+"      at the installation instructions of the plugin you've added.\n"
+"    "
+msgstr ""
+"\n"
+"      プラグインはZineシステムの機能を拡張します。セキュリティと利便上、\n"
+"      手動でプラグインを有効にしなければなりません。\n"
+"      プラグインの中には他のプラグインと衝突するものがあるかもしれません。\n"
+"      その場合は、どちらか一つだけをを有効にしてください。\n"
+"      動作がおかしいと感じた場合には、追加したプラグインのインストールマニュアルを参照してください。\n"
+"  "
+
+#: zine/templates/admin/plugins.html:16
+msgid "Plugin"
+msgstr "プラグイン"
+
+#: zine/templates/admin/plugins.html:17
+msgid "Version"
+msgstr "バージョン"
+
+#: zine/templates/admin/plugins.html:19
+msgid "Activate"
+msgstr "有効"
+
+#: zine/templates/admin/plugins.html:28
+#, python-format
+msgid ""
+"\n"
+"          By %(author)s\n"
+"          "
+msgstr ""
+"\n"
+"          By %(author)s\n"
+"          "
+
+#: zine/templates/admin/plugins.html:32
+#, python-format
+msgid ""
+"\n"
+"            and %(contributors)s\n"
+"          "
+msgstr ""
+"\n"
+"            and %(contributors)s\n"
+"          "
+
+#: zine/templates/admin/plugins.html:39
+msgid "Remove plugin"
+msgstr "プラグインを削除"
+
+
+#: zine/templates/admin/plugins.html:46
+msgid ""
+"\n"
+"      <span class=\"bundlemarker\">*</span> marked plugins are bundled with Zine\n"
+"      and upgraded as part of it.\n"
+"    "
+msgstr ""
+"\n"
+"      <span class=\"bundlemarker\">*</span> マークの付いたプラグインはZineにバンドルされており、Zineの一部として\n"
+"      アップグレードされます。\n"
+"  "
+
+#: zine/templates/admin/plugins.html:50
+msgid "Add New Plugin"
+msgstr "新しいプラグインを追加"
+
+
+
+#: zine/templates/admin/plugins.html:51
+msgid ""
+"\n"
+"      If you have a plugin as Zine <tt>.plugin</tt> file you can upload it\n"
+"      to your Zine instance using the following form. Plugins added this way\n"
+"      can also be completely removed.\n"
+"    "
+msgstr ""
+"\n"
+"      Zineプラグインをお持ちの場合、 以下のフォームを使って<tt>.plugin</tt> ファイルを\n"
+"      Zineインスタンスにアップロードできます。\n"
+"      この方法で追加されたプラグインは完全に削除することもできます。\n"
+"    "
+
+#: zine/templates/admin/reddit.html:7
+#, python-format
+msgid "from <em>%(domain)s</em>, submitted by %(author)s @ %(submitted)s, %(comments)s"
+msgstr "from <em>%(domain)s</em>, submitted by %(author)s @ %(submitted)s, %(comments)s"
+
+#: zine/templates/admin/reddit.html:12
+#, python-format
+msgid "%d comment"
+msgid_plural "%d comments"
+msgstr[0] "%d件のコメント"
+
+#: zine/templates/admin/reddit.html:20
+msgid "No items on the frontpage"
+msgstr "フロントページにアイテムがありません"
+
+#: zine/templates/admin/remove_plugin.html:2
+#: zine/templates/admin/remove_plugin.html:4
+msgid "Remove Plugin"
+msgstr "プラグインを削除"
+
+#: zine/templates/admin/remove_plugin.html:7
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to remove the plugin “%(plugin_name)s” permanently\n"
+"      from the instance folder? If you do so you have to reinstall the plugin\n"
+"      if you want to use it again.\n"
+"    "
+msgstr ""
+"\n"
+"      本当に、プラグイン “%(plugin_name)s” をインスタンスフォルダから完全に削除しますか？\n"
+"      再度使用したい場合は、このプラグインを再インストールしなければなりません。\n"
+"  "
+
+
+#: zine/templates/admin/theme.html:2
+#: zine/templates/admin/theme.html:4
+msgid "Theme Manager"
+msgstr "テーマ管理"
+
+#: zine/templates/admin/theme.html:12
+msgid "Select this theme"
+msgstr "このテーマを選択"
+
+
+#: zine/templates/admin/theme.html:20
+#, python-format
+msgid "by %(author)s"
+msgstr "投稿者: %(author)sさん"
+
+
+#: zine/templates/admin/theme.html:31
+msgid "Configure Theme"
+msgstr "テーマを設定"
+
+#: zine/templates/admin/unblock_comment.html:2
+#: zine/templates/admin/unblock_comment.html:4
+msgid "Unblock Comment"
+msgstr "コメントのブロックを解除"
+
+
+#: zine/templates/admin/unblock_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to unblock the comment by %(comment_author)s\n"
+"      which was blocked with the following reason: %(reason)s?\n"
+"    "
+msgstr ""
+"\n"
+"      本当に、以下の理由でブロックされた%(comment_author)sさんのコメントを\n"
+"      ブロック解除しますか？: %(reason)s?\n"
+"  "
+
+#: zine/templates/admin/url_options.html:2
+#: zine/templates/admin/url_options.html:4
+msgid "URL Options"
+msgstr "URL オプション"
+
+
+
+#: zine/templates/admin/url_options.html:5
+msgid ""
+"\n"
+"    Here you can change some basic URL configuration settings.  This is especially\n"
+"    useful if you have plugins installed that that add a new index page or if you\n"
+"    want to move the administration to a different location.\n"
+"  "
+msgstr ""
+"\n"
+"    ここで基本的なURL設定を変更できます。\n"
+"    これは特に、インストールされるプラグインが新しいインデックスページを加えたり、\n"
+"    ブログを別の場所に移動させたい場合に役立ちます。\n"
+"  "
+
+
+
+
+
+#: zine/templates/admin/write_page.html:13
+msgid ""
+"\n"
+"        The key is used to build the url. If no key is given it's just the title-slug.\n"
+"      "
+msgstr ""
+"\n"
+"        キーはURLの生成に用いられます。キーが設定されていない場合はタイトルスラッグが使用されます。\n"
+"      "
+
+#: zine/templates/admin/write_page.html:18
+msgid "Content"
+msgstr "コンテンツ"
+
+#: zine/templates/admin/write_page.html:29
+msgid "Parent Page"
+msgstr "親ページ"
+
+#: zine/templates/admin/write_page.html:40
+msgid "Position"
+msgstr "場所"
+
+
+#: zine/templates/widgets/latest_comments.html:2
+msgid "Latest Comments"
+msgstr "最新のコメント"
+
+#: zine/templates/widgets/latest_comments.html:7
+msgid "by"
+msgstr "by"
+
+
+#: zine/templates/widgets/latest_posts.html:2
+msgid "Latest Posts"
+msgstr "最新の投稿"
+
+#: zine/templates/widgets/pages_navigation.html:2
+msgid "Navigation"
+msgstr "ナビゲーション"
+
+#: zine/templates/widgets/post_archive_summary.html:11
+msgid "Complete archive"
+msgstr "すべてのアーカイブ"
+
+#: zine/utils/account.py:29
+#: zine/utils/admin.py:36
+msgid "Error"
+msgstr "エラー"
+
+#: zine/utils/account.py:31
+#: zine/utils/admin.py:38
+msgid "Warning"
+msgstr "警告"
+
+#: zine/utils/exceptions.py:59
+msgid "unkown file"
+msgstr "不明なファイル"
+
+
+
+#: zine/utils/forms.py:679
+msgid "No choices."
+msgstr "選択肢がありません。"
+
+#: zine/utils/forms.py:779
+msgid "Submit"
+msgstr "送信"
+
+#: zine/utils/forms.py:923
+msgid "This field is required."
+msgstr "このフィールドは必須項目です。"
+
+#: zine/utils/forms.py:1091
+msgid "Invalid security token submitted."
+msgstr "無効なセキュリティトークンが送信されました。"
+
+
+#: zine/utils/forms.py:1144
+#: zine/utils/forms.py:1528
+#, python-format
+msgid "Please provide at least %d item."
+msgid_plural "Please provide at least %d items."
+msgstr[0] "少なくとも%d個のアイテムを入力してください。"
+
+
+#: zine/utils/forms.py:1151
+#: zine/utils/forms.py:1535
+#, python-format
+msgid "Please provide no more than %d item."
+msgid_plural "Please provide no more than %d items."
+msgstr[0] "%d個以下のアイテムしか入力できません。"
+
+#: zine/utils/forms.py:1266
+#, python-format
+msgid "Please enter at least %d character."
+msgid_plural "Please enter at least %d characters."
+msgstr[0] "少なくとも%d文字を入力してください。"
+
+
+
+#: zine/utils/forms.py:1273
+#, python-format
+msgid "Please enter no more than %d character."
+msgid_plural "Please enter no more than %d characters."
+msgstr[0] "%d文字以下しか入力できません。"
+
+#: zine/utils/forms.py:1297
+msgid "Please enter a valid date."
+msgstr "有効な日付を入力してください。"
+
+#: zine/utils/forms.py:1333
+#, python-format
+msgid "“%(value)s” does not exist"
+msgstr "“%(value)s” は存在しません"
+
+#: zine/utils/forms.py:1392
+msgid "Invalid value."
+msgstr "無効な値です。"
+
+#: zine/utils/forms.py:1393
+msgid "Key does not exist."
+msgstr "キーが存在しません。"
+
+#: zine/utils/forms.py:1463
+msgid "Please enter a valid choice."
+msgstr "有効な選択肢を選んでください。"
+
+#: zine/utils/forms.py:1522
+#, python-format
+msgid "“%s” is not a valid choice"
+msgstr "“%s” は有効な選択肢ではありません"
+
+#: zine/utils/forms.py:1567
+msgid "Please enter a whole number."
+msgstr "整数を入力してください。"
+
+#: zine/utils/forms.py:1593
+#, python-format
+msgid "Ensure this value is greater than or equal to %s."
+msgstr "この値は%s以上でなければなりません。"
+
+#: zine/utils/forms.py:1599
+#, python-format
+msgid "Ensure this value is less than or equal to %s."
+msgstr "この値は%s以下でなければなりません。"
+
+#: zine/utils/forms.py:1621
+msgid "True"
+msgstr "はい"
+
+#: zine/utils/forms.py:1622
+msgid "False"
+msgstr "いいえ"
+
+#: zine/utils/log.py:35
+msgid "critical"
+msgstr "重要"
+
+#: zine/utils/log.py:36
+msgid "error"
+msgstr "エラー"
+
+#: zine/utils/log.py:37
+msgid "warning"
+msgstr "警告"
+
+#: zine/utils/log.py:38
+msgid "notice"
+msgstr "注意"
+
+#: zine/utils/log.py:39
+msgid "info"
+msgstr "情報"
+
+#: zine/utils/log.py:40
+msgid "debug"
+msgstr "デバッグ"
+
+#: zine/utils/pagination.py:113
+#: zine/utils/pagination.py:116
+msgid "Next »"
+msgstr "次へ »"
+
+#: zine/utils/pagination.py:120
+#: zine/utils/pagination.py:123
+msgid "« Previous"
+msgstr "« 前へ"
+
+#: zine/utils/validators.py:99
+msgid "You have to enter a valid URL."
+msgstr "有効なURLを入力してください。"
+
+#: zine/utils/validators.py:117
+msgid "The slug is too long"
+msgstr "このスラッグは長すぎます"
+
+#: zine/utils/validators.py:119
+msgid "The slug must not start with a slash"
+msgstr "スラッシュから始まるスラッグは許可されていません"
+
+#: zine/utils/validators.py:137
+#: zine/utils/validators.py:140
+msgid "You have to enter a valid net address."
+msgstr "有効なネットワークアドレスを入力してください。"
+
+#: zine/utils/validators.py:142
+msgid "The port has to be numeric"
+msgstr "ポートは数値でなければなりません"
+
+
+#: zine/utils/validators.py:150
+msgid "Invalid character, < or > are not allowed."
+msgstr "不正な文字です。「<」 や「 >」 のような文字は許可されていません。"
+
+#: zine/utils/validators.py:152
+msgid "URL prefix must not be a sole slash."
+msgstr "スラッシュのみのURLプレフィックスは許可されていません。"
+
+#: zine/utils/validators.py:155
+msgid "URL prefix must start with a slash."
+msgstr "URLプレフィックスは、スラッシュから始まっている必要があります。"
+
+#: zine/utils/validators.py:157
+msgid "URL prefix must not end with a slash."
+msgstr "スラッシュで終わるURLプレフィックスは許可されていません。"
+
+
+#: zine/utils/validators.py:179
+msgid "Invalid character, <, > or \\ are not allowed."
+msgstr "不正な文字です。「<」、「 >」 または、「\\」は許可されていません。"
+
+#: zine/utils/validators.py:183
+msgid "URL format cannot start with a slash."
+msgstr "スラッシュから始まるURLフォーマットは許可されていません。"
+
+
+
+#: zine/utils/validators.py:185
+msgid "URL cannot contain //."
+msgstr "URLに「//」を含んではいけません。"
+
+
+
+#: zine/utils/validators.py:187
+msgid "URL cannot contain a reference toparent path."
+msgstr "URLは親への参照パスを含んではいけません。"
+
+#: zine/utils/validators.py:191
+#, python-format
+msgid "Unknown format code %s."
+msgstr "%s は未知のフォーマットコードです。"
+
+#: zine/utils/validators.py:201
+msgid "The text must not be empty."
+msgstr "テキストを入力してください。"
+
+
+
+
+
+#: zine/utils/zeml.py:304
+msgid "Error when loading dynamic ZEML element. The system ignored the element.  Maybe a disabled plugin caused the problem."
+msgstr "ダイナミックZEML要素をロード中にエラーが発生しました。システムはこの要素を無視しました。無効にしたプラグインの影響かもしれません。"
+
+
+
+#: zine/utils/zeml.py:680
+#, python-format
+msgid "Error loading dynamic element %s"
+msgstr "ダイナミック要素 %s をロード中に発生したエラー"
+
+
+
+#: zine/utils/zeml.py:694
+msgid "Error in markup"
+msgstr "マークアップのエラー"
+
+
+#: zine/utils/zeml.py:1118
+#, python-format
+msgid "Invalid attribute given to %s tag: %s"
+msgstr "タグ %s に無効な属性が指定されました。: %s"
+
+#: zine/views/account.py:40
+msgid "Profile"
+msgstr "プロフィール"
+
+
+#: zine/views/account.py:47
+msgid "About"
+msgstr "About"
+
+#: zine/views/account.py:51
+#: zine/views/admin.py:156
+msgid "Help"
+msgstr "ヘルプ"
+
+#: zine/views/account.py:53
+#: zine/views/admin.py:170
+msgid "System"
+msgstr "システム"
+
+#: zine/views/account.py:174
+msgid "Your profile was updated successfully."
+msgstr "正常にプロフィールが更新されました。"
+
+#: zine/views/account.py:203
+msgid "Notification settings changed."
+msgstr "通知設定が変更されました。"
+
+#: zine/views/admin.py:83
+msgid "Entry"
+msgstr "エントリー"
+
+#: zine/views/admin.py:85
+msgid "Page"
+msgstr "ページ"
+
+#: zine/views/admin.py:88
+msgid "Write"
+msgstr "新規作成"
+
+#: zine/views/admin.py:94
+msgid "Entries"
+msgstr "エントリー"
+
+#: zine/views/admin.py:98
+msgid "Pages"
+msgstr "ページ"
+
+#: zine/views/admin.py:107
+msgid "Manage"
+msgstr "管理"
+
+#: zine/views/admin.py:126
+msgid "Overview"
+msgstr "概要"
+
+#: zine/views/admin.py:128
+#, python-format
+msgid "Awaiting Moderation (%d)"
+msgstr "承認待ち (%d)"
+
+#: zine/views/admin.py:130
+#, python-format
+msgid "Approved (%d)"
+msgstr "承認済み (%d)"
+
+#: zine/views/admin.py:132
+#, python-format
+msgid "Blocked (%d)"
+msgstr "ブロック (%d)"
+
+#: zine/views/admin.py:134
+#, python-format
+msgid "Spam (%d)"
+msgstr "スパム (%d)"
+
+#: zine/views/admin.py:141
+msgid "Options"
+msgstr "オプション"
+
+#: zine/views/admin.py:142
+msgid "Basic"
+msgstr "基本"
+
+#: zine/views/admin.py:143
+msgid "URLs"
+msgstr "URL"
+
+#: zine/views/admin.py:145
+msgid "Cache"
+msgstr "キャッシュ"
+
+#: zine/views/admin.py:151
+msgid "Users"
+msgstr "ユーザー"
+
+#: zine/views/admin.py:161
+msgid "Information"
+msgstr "情報"
+
+
+
+#: zine/views/admin.py:194
+#, python-format
+msgid "Zine is in maintenance mode. Don't forget to <a href=\"%s\">turn it off again</a> once you finish your changes."
+msgstr "Zineはメンテナンスモードです。変更を完了したら、メンテナンスモードを<a href=\"%s\">無効にする</a>のを忘れないでください。"
+
+#: zine/views/admin.py:203
+#, python-format
+msgid "Could not activate plugin “%(name)s”: %(error)s"
+msgstr "プラグイン “%(name)s” を有効化できませんでした: %(error)s"
+
+
+
+#: zine/views/admin.py:256
+msgid "No URLs pinged so far because the post is not publicly available"
+msgstr "投稿が一般公開されていないので、URLからの応答はありませんでした"
+
+
+
+#: zine/views/admin.py:259
+msgid "Could not ping URLs because the parser for the post is not available any longer."
+msgstr "投稿のためのパーサーが利用不能になっているため、URLの応答を確認できませんでした。"
+
+
+
+#: zine/views/admin.py:273
+#, python-format
+msgid "Could not ping %(url)s: %(error)s"
+msgstr "%(url)s からの応答を確認できませんでした。: %(error)s"
+
+#: zine/views/admin.py:282
+#, python-format
+msgid "The following link was pinged successfully: %s"
+msgid_plural "The following links where pinged successfully: %s"
+msgstr[0] "以下のリンクとの正常な接続を確認しました: %s"
+
+
+#: zine/views/admin.py:319
+msgid "Text here..."
+msgstr "ここにテキストを入力..."
+
+#: zine/views/admin.py:321
+msgid "Untitled Page"
+msgstr "無題のページ"
+
+#: zine/views/admin.py:391
+#, python-format
+msgid "The entry %s was created successfully."
+msgstr "エントリー %s は正常に作成されました。"
+
+#: zine/views/admin.py:394
+#, python-format
+msgid "The entry %s was updated successfully."
+msgstr "エントリー %s は正常に更新されました。"
+
+#: zine/views/admin.py:427
+#, python-format
+msgid "The entry %s was deleted successfully."
+msgstr "エントリー %s は正常に削除されました。"
+
+#: zine/views/admin.py:470
+#, python-format
+msgid "The page %s was created successfully."
+msgstr "ページ %s は正常に作成されました。"
+
+#: zine/views/admin.py:473
+#, python-format
+msgid "The page %s was updated successfully."
+msgstr "ページ %s は正常に更新されました。"
+
+#: zine/views/admin.py:506
+#, python-format
+msgid "The page %s was deleted successfully."
+msgstr "ページ %s は正常に削除されました。"
+
+
+
+#: zine/views/admin.py:559
+msgid "“Delete All” can only be issued for “Spam” and “Blocked” comment types."
+msgstr "“すべて削除”は“スパム”および“ブロック”されたコメントにのみ使用できます。"
+
+#: zine/views/admin.py:573
+#, python-format
+msgid "Deleted %d %s comments."
+msgstr "%d 件の %s コメントを削除しました。"
+
+#: zine/views/admin.py:584
+msgid "Approved all the selected comments."
+msgstr "選択されたすべてのコメントを承認しました。"
+
+#: zine/views/admin.py:592
+msgid "Blocked all the selected comments."
+msgstr "選択されたすべてのコメントをブロックしました。"
+
+#: zine/views/admin.py:602
+msgid "Reported all the selected comments as SPAM."
+msgstr "選択されたすべてのコメントをスパムとして報告しました。"
+
+#: zine/views/admin.py:611
+msgid "Reported all the selected comments as NOT SPAM."
+msgstr "選択されたすべてのコメントをスパムでないと報告しました。"
+
+#: zine/views/admin.py:625
+msgid "All Comments"
+msgstr "すべてのコメント"
+
+
+#: zine/views/admin.py:632
+msgid "Comments Awaiting Moderation"
+msgstr "承認待ちコメント"
+
+
+#: zine/views/admin.py:640
+msgid "Approved Commments"
+msgstr "承認済みコメント"
+
+#: zine/views/admin.py:648
+msgid "Blocked"
+msgstr "ブロックされたコメント"
+
+#: zine/views/admin.py:656
+#: zine/views/admin.py:803
+msgid "Spam"
+msgstr "スパム"
+
+#: zine/views/admin.py:671
+#, python-format
+msgid "Comments for “%s”"
+msgstr "“%s” に対するコメント"
+
+
+
+#: zine/views/admin.py:687
+#: zine/views/admin.py:719
+#: zine/views/admin.py:745
+#: zine/views/admin.py:768
+#: zine/views/admin.py:790
+#: zine/views/admin.py:813
+msgid "You're not allowed to manage this comment"
+msgstr "このコメントを管理する権限がありません"
+
+
+
+#: zine/views/admin.py:697
+#, python-format
+msgid "Comment by %s moderated successfully."
+msgstr "%s さんのコメントは正常にモデレートされました。"
+
+
+
+#: zine/views/admin.py:752
+#, python-format
+msgid "Comment by %s approved successfully."
+msgstr "%s さんのコメントは承認されました。"
+
+
+
+#: zine/views/admin.py:775
+#, python-format
+msgid "Comment by %s blocked successfully."
+msgstr "%s さんのコメントはブロックされました。"
+
+
+
+#: zine/views/admin.py:797
+#, python-format
+msgid "Comment by %s reported as Spam successfully."
+msgstr "%s さんのコメントはスパムとして報告されました。"
+
+
+
+#: zine/views/admin.py:820
+#, python-format
+msgid "Comment by %s reported as NOT Spam successfully."
+msgstr "%s さんのコメントはスパムでないと報告されました。"
+
+#: zine/views/admin.py:826
+msgid "NOT Spam"
+msgstr "スパムでない"
+
+#: zine/views/admin.py:860
+#, python-format
+msgid "Category %s created successfully."
+msgstr "カテゴリー %s は正常に作成されました。"
+
+#: zine/views/admin.py:864
+#, python-format
+msgid "Category %s updated successfully."
+msgstr "カテゴリー %s は正常に更新されました。"
+
+#: zine/views/admin.py:893
+#, python-format
+msgid "Category %s deleted successfully."
+msgstr "カテゴリー %s は正常に削除されました。"
+
+
+#: zine/views/admin.py:933
+#, python-format
+msgid "User %s created successfully."
+msgstr "ユーザー %s は正常に作成されました。"
+
+
+#: zine/views/admin.py:937
+#, python-format
+msgid "User %s edited successfully."
+msgstr "ユーザー %s は正常に編集されました。"
+
+
+
+#: zine/views/admin.py:961
+msgid "You cannot delete yourself."
+msgstr "自分自身を削除することはできません。"
+
+#: zine/views/admin.py:1001
+#, python-format
+msgid "Group %s created successfully."
+msgstr "グループ %s は正常に作成されました。"
+
+#: zine/views/admin.py:1005
+#, python-format
+msgid "Group %s edited successfully."
+msgstr "グループ %s は正常に編集されました。"
+
+
+
+#: zine/views/admin.py:1057
+msgid "Configuration altered successfully."
+msgstr "設定は正常に変更されました。"
+
+
+#: zine/views/admin.py:1084
+msgid "URL configuration changed."
+msgstr "URL設定が変更されました。"
+
+#: zine/views/admin.py:1105
+msgid "Theme changed successfully."
+msgstr "テーマは正常に変更されました。"
+
+
+#: zine/views/admin.py:1121
+msgid "This theme is not configurable"
+msgstr "このテーマの設定はありません"
+
+
+#: zine/views/admin.py:1133
+msgid "Plugin configuration changed"
+msgstr "プラグイン設定が変更されました"
+
+
+#: zine/views/admin.py:1142
+#, python-format
+msgid "Plugin “%s” added successfully. You can now enable it in the plugin list."
+msgstr "プラグイン “%s” は正常に追加されました。プラグインリストから有効にすることができます。"
+
+#: zine/views/admin.py:1169
+#, python-format
+msgid "Could not remove the plugin “%s” because an IO error occurred. Wrong permissions?"
+msgstr "I/Oエラーのため、プラグイン “%s” を削除できませんでした。パーミッションの設定が間違っているかもしれません。"
+
+#: zine/views/admin.py:1172
+#, python-format
+msgid "The plugin “%s” was removed from the instance successfully."
+msgstr "プラグイン “%s” をインスタンスから正常に削除しました。"
+
+#: zine/views/admin.py:1190
+msgid "The cache was cleared successfully."
+msgstr "キャッシュは正常にクリアされました。"
+
+#: zine/views/admin.py:1194
+msgid "Cache settings were changed successfully."
+msgstr "キャッシュ設定は正常に変更されました。"
+
+
+#: zine/views/admin.py:1218
+msgid "Configuration updated successfully."
+msgstr "設定は正常に更新されました。"
+
+
+
+#: zine/views/admin.py:1221
+msgid "Could not save the configuration because the configuration is invalid."
+msgstr "設定が無効であるため、設定を保存することができませんでした。"
+
+#: zine/views/admin.py:1238
+msgid "Maintenance mode disabled.  The blog is now publicly available."
+msgstr "メンテナンスモードを無効にしました。ブログは公開されています。"
+
+#: zine/views/admin.py:1299
+#, python-format
+msgid "The imported dump “%s” was deleted successfully."
+msgstr "インポートされたダンプ “%s” は正常に削除されました。"
+
+#: zine/views/admin.py:1426
+msgid "Log changes saved."
+msgstr "ログの変更を保存しました。"
+
+#: zine/views/admin.py:1443
+msgid "Password changed successfully."
+msgstr "正常にパスワードを変更しました。"
+
+
+
+#: zine/views/blog.py:52
+#: zine/views/blog.py:86
+msgid "Recent Posts Feed"
+msgstr "最近の投稿のフィード"
+
+#: zine/views/blog.py:118
+#, python-format
+msgid "All posts in category %s"
+msgstr "カテゴリー %s のすべての投稿"
+
+#: zine/views/blog.py:147
+#, python-format
+msgid "All posts tagged %s"
+msgstr "タグ %s が付けられたすべての投稿"
+
+
+
+#: zine/views/blog.py:197
+#, python-format
+msgid "All posts written by %s"
+msgstr "%s さんのすべての投稿"
+
+#: zine/views/blog.py:394
+#, python-format
+msgid "Comment %(num)d on %(post)s"
+msgstr "%(post)s に%(num)d件のコメント"
+
+
+#: zine/views/blog.py:451
+msgid "Comments Feed"
+msgstr "コメントのフィード"
+
+#: zine/websetup/__init__.py:105
+#, python-format
+msgid "Instance folder does not exist.  You have to create the folder “%s” before proceeding."
+msgstr "インスタンスフォルダが存在しません。 実行する前にフォルダ “%s” を作成しなければなりません。"
+
+#: zine/websetup/__init__.py:127
+msgid "You have to provide a username."
+msgstr "ユーザー名を入力してください。"
+
+#: zine/websetup/__init__.py:130
+msgid "You have to enter a mail address."
+msgstr "メールアドレスを入力してください。"
+
+
+
+#: zine/websetup/__init__.py:132
+msgid "The mail address is not valid."
+msgstr "有効なメールアドレスではありません。"
+
+#: zine/websetup/__init__.py:135
+msgid "You have to enter a password."
+msgstr "パスワードを入力してください。"
+
+
+
+#: zine/websetup/__init__.py:137
+msgid "The two passwords do not match."
+msgstr "パスワードが一致しません。"
+
+
+#: zine/websetup/__init__.py:206
+#, python-format
+msgid "The configuration file (%s) could not be opened for writing. Please adjust your permissions and try again."
+msgstr "設定ファイル (%s) を書き込みのために開けませんでした。パーミッションを変更して、再度試してください。"
+
+#: zine/websetup/templates/admin_account.html:3
+msgid "Administrator Account"
+msgstr "管理者アカウント"
+
+#: zine/websetup/templates/admin_account.html:4
+msgid ""
+"\n"
+"    In order to log into your Zine installation you have to provide a\n"
+"    login name for the administration user. You can later rename or delete\n"
+"    that user if you want.\n"
+"  "
+msgstr ""
+"\n"
+"    インストールしたZineにログインするために、管理者ユーザーを作成してください。\n"
+"    ここで作成したユーザーは、後で名前を変更、または削除することができます。\n"
+"  "
+
+#: zine/websetup/templates/admin_account.html:14
+msgid "Password (repeat)"
+msgstr "パスワード(確認)"
+
+#: zine/websetup/templates/database.html:3
+msgid "Database"
+msgstr "データベース"
+
+
+
+
+#: zine/websetup/templates/database.html:4
+msgid ""
+"\n"
+"    Zine uses a database to store blog posts and other information. The\n"
+"    only information it requires therefore is a database URI. Depending on your\n"
+"    database this URI looks different. Have a look at the following table for\n"
+"    examples of database URIs.\n"
+"  "
+msgstr ""
+"\n"
+"    Zineはブログの投稿やその他の情報を格納するためにデータベースを使用します。\n"
+"    そのため、必要な情報はデータベースURIのみです。データベースによってURIの書式は異なります。\n"
+"    データベースURIの例は以下の一覧を参考にしてください。\n"
+"  "
+
+#: zine/websetup/templates/database.html:11
+msgid "SQLite"
+msgstr "SQLite"
+
+#: zine/websetup/templates/database.html:12
+msgid "sqlite://database.db"
+msgstr "sqlite://database.db"
+
+
+
+
+#: zine/websetup/templates/database.html:13
+msgid ""
+"\n"
+"        The SQLite database path is either absolute (if it starts with three\n"
+"        slashes on OS X / Linux or two slashes and a drive letter on a\n"
+"        Windows system) or otherwise relative to the instance folder.\n"
+"      "
+msgstr ""
+"\n"
+"        SQLiteデータベースのパスは、絶対パス（OS X / Linux の場合は3つのスラッシュ、\n"
+"        Windowsの場合は2つのスラッシュとドライブ記号から始まります）、または\n"
+"        インスタンスフォルダからの相対パスのどちらかです。\n"
+"    "
+
+#: zine/websetup/templates/database.html:18
+msgid "MySQL"
+msgstr "MySQL"
+
+#: zine/websetup/templates/database.html:19
+msgid "mysql://username:password@host/database_name"
+msgstr "mysql://username:password@host/database_name"
+
+#: zine/websetup/templates/database.html:20
+msgid "Postgres"
+msgstr "Postgres"
+
+#: zine/websetup/templates/database.html:21
+msgid "postgres://username:password@host/database_name"
+msgstr "postgres://username:password@host/database_name"
+
+#: zine/websetup/templates/error.html:3
+msgid "Setup Failed"
+msgstr "セットアップは失敗しました"
+
+#: zine/websetup/templates/error.html:4
+msgid "The websetup was not able to finish the Zine installation successfully."
+msgstr "ウェブセットアップはZineを正常にインストールできませんでした。"
+
+
+
+#: zine/websetup/templates/error.html:5
+msgid ""
+"\n"
+"    If you need help for setting up Zine have a look at the support\n"
+"    wepage that will be there once a beta is available :-)\n"
+"  "
+msgstr ""
+"\n"
+"    Zineのセットアップ中にお困りの場合には、サポートページを参照してください。\n"
+"    また、サポートページではベータ版が公開されていることもあります。\n"
+"  "
+
+
+#: zine/websetup/templates/finished.html:3
+msgid "Setup Finished"
+msgstr "セットアップが完了しました"
+
+
+#: zine/websetup/templates/finished.html:4
+msgid ""
+"\n"
+"    The setup was finished successfully. You can now go to the\n"
+"    admin panel and start configuring your blog. Don't forget\n"
+"    to disable the maintenance mode after you finish your configuration.\n"
+"  "
+msgstr ""
+"\n"
+"    セットアップが正常に終了しました。管理パネルにログインして\n"
+"    ブログを設定することができます。\n"
+"    設定完了後にメンテナンスモードを無効にするのを忘れないでください。\n"
+"  "
+
+#: zine/websetup/templates/layout.html:5
+#: zine/websetup/templates/layout.html:166
+msgid "Zine Setup"
+msgstr "Zineセットアップ"
+
+#: zine/websetup/templates/layout.html:175
+msgid "An Error Occurred"
+msgstr "エラーが発生しました"
+
+#: zine/websetup/templates/layout.html:181
+msgid "Next"
+msgstr "次へ"
+
+#: zine/websetup/templates/layout.html:181
+msgid "Install"
+msgstr "インストール"
+
+#: zine/websetup/templates/layout.html:182
+msgid "Back"
+msgstr "戻る"
+
+#: zine/websetup/templates/start.html:3
+msgid "Welcome To The Zine Setup"
+msgstr "ようこそZineのセットアップへ"
+
+
+
+#: zine/websetup/templates/start.html:4
+msgid ""
+"\n"
+"    Welcome to the Zine Setup. This Wizard will ask you some\n"
+"    basic questions and setup Zine for you.\n"
+"  "
+msgstr ""
+"\n"
+"    ようこそZineのセットアップへ。 このウィザードでは、\n"
+"    いくつかの基本的な質問に回答してZineのセットアップを行います。\n"
+"  "
+
+
+#: zine/websetup/templates/start.html:8
+msgid ""
+"\n"
+"    The setup tried to determine the language from your browser\n"
+"    settings.  If you want to step through the wizard in another\n"
+"    language select it from the dropdown menu below and press next.\n"
+"  "
+msgstr ""
+"\n"
+"    あなたのブラウザ設定から自動的に言語が選択されました。\n"
+"    別の言語でセットアップを続けたい場合は、下のドロップダウンメニューから\n"
+"    言語を選んで、次へをクリックしてください。\n"
+"  "
+
+#: zine/websetup/templates/summary.html:3
+msgid "Setup Starting"
+msgstr "セットアップを開始します"
+
+
+#: zine/websetup/templates/summary.html:4
+msgid ""
+"\n"
+"    Zine knows now about all the information it needs to setup your\n"
+"    instance. After you click on the install button Zine will create\n"
+"    the database tables and insert the default information. Right after that\n"
+"    Zine will be online in maintenance mode which means that it's only\n"
+"    visible to the administrator, all other users will get a message that\n"
+"    shows that the blog is in maintenance mode right now.\n"
+"  "
+msgstr ""
+"\n"
+"    Zineはセットアップに必要な情報をすべて収集しました。\n"
+"    インストールボタンをクリックすると、Zineはデータベーステーブルを作成し、\n"
+"    デフォルトの情報を格納します。インストール完了の直後は、Zineは管理者だけが閲覧することのできる\n"
+"    メンテナンスモードになっています。訪問者にはメンテナンス中であることを示すメッセージが表示されます。\n"
+"  "
+
