@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
 "POT-Creation-Date: 2009-07-03 00:48+0100\n"
-"PO-Revision-Date: 2009-09-01 21:48+0900\n"
-"Last-Translator: Takashi Doi <takashi.doi@triax.jp>\n"
+"PO-Revision-Date: 2009-09-16 13:33+0900\n"
+"Last-Translator: Junichi Kakisako <kilo.sw@gmail.com>\n"
 "Language-Team: ja <LL@li.org>\n"
 "Plural-Forms: nplurals=1; plural=0\n"
 "MIME-Version: 1.0\n"
@@ -47,11 +47,9 @@ msgstr "HTTP URLに対するリクエストが行われた場合、可能であ�
 msgid "If enabled the database will collect the SQL statements and add them to the bottom of the page for easier debugging"
 msgstr "有効にすると、デバッグを簡単にするためにSQL文がページ下部にまとめて表示されるようになります"
 
-
 #: zine/config.py:43
 msgid "My Zine Blog"
 msgstr "My Zine Blog"
-
 
 #: zine/config.py:44
 msgid "just another Zine blog"
@@ -60,8 +58,6 @@ msgstr "just another Zine blog"
 #: zine/config.py:45
 msgid "The base URL of the blog.  This has to be set to a full canonical URL (including http or https).  If not set the application will behave confusingly.  Remember to change this value if you move your blog to a new location."
 msgstr "このブログのベースURLを設定します。これは、完全な（httpまたはhttpsが含まれる）URLでなければなりません。この値が正しく設定されていないと、誤動作が発生します。ブログを別の場所に移動させる場合には、この値を変更するのを忘れないでください。"
-
-
 
 #: zine/config.py:50
 msgid "The email address given here is used by the notification system to send mails from.  Also plugins that send mails will use this address as sender address."
@@ -77,7 +73,7 @@ msgstr "このブログに主に一人のユーザだけが書き込む場合、
 
 #: zine/config.py:63
 msgid "If set to true the blog enables the maintainance mode."
-msgstr "チェックするとブログのメンテナンスモードが有効になります。"
+msgstr "このチェックボックスをオンにすると、ブログのメンテナンスモードが有効になります。"
 
 #: zine/config.py:66
 msgid "If there are multiple zine installations on the same host the cookie name should be set to something different for each blog."
@@ -86,7 +82,6 @@ msgstr "複数のZineが同じホストにインストールされている場�
 #: zine/config.py:70
 msgid "The secret key is used for vairous security related tasks in the system.  For example the cookie is signed with this value."
 msgstr "秘密鍵は、システムの様々なセキュリティ関連のタスクで使用されます。たとえば、クッキーはこの値で署名されます。"
-
 
 #: zine/config.py:76
 msgid "The iid uniquely identifies the Zine instance.  Currently this value is unused, but once set you should not modify it."
@@ -99,7 +94,6 @@ msgstr "MTAにメールを配信するかわりにインスタンスフォルダ
 #: zine/config.py:91
 msgid "If this is set to true, errors in Zine are not catched so that debuggers can catch it instead.  This is useful for plugin and core development."
 msgstr "このチェックボックスをオンにすると、デバッガがZineで起きたエラーを捕捉するようになります。これはプラグインとコア開発に役立ちます。"
-
 
 #: zine/config.py:110
 #, python-format
@@ -118,11 +112,9 @@ msgstr "日付の表記において0を補います。たとえば2009/4/22で�
 msgid "No Cache"
 msgstr "キャッシュなし"
 
-
 #: zine/config.py:125
 msgid "Simple Cache"
 msgstr "シンプルキャッシュ"
-
 
 #: zine/config.py:126
 msgid "memcached"
@@ -140,7 +132,6 @@ msgstr "すべてのコメントを自動的に承認する"
 msgid "An administrator must always approve the comment"
 msgstr "コメントは管理者が常に承認する"
 
-
 #: zine/config.py:146
 msgid "Automatically approve comments by known comment authors"
 msgstr "コメント投稿者が既知の場合、自動的にコメントを承認する"
@@ -149,13 +140,9 @@ msgstr "コメント投稿者が既知の場合、自動的にコメントを承
 msgid "The number of posts that are shown on a page.  This value might not be honored by some themes and is probably only used for the index page."
 msgstr "1ページに表示する投稿の数を設定します。この値はテーマによってはインデックスページにのみ適用されます。"
 
-
-
 #: zine/config.py:170
 msgid "This timeout is used by default for all network related operations. The default should be fine for most environments but if you have a very bad network connection during development you should increase it."
 msgstr "このタイムアウトの値は、ネットワーク関連のすべての動作に対してデフォルト値として使用されます。ほとんどの環境において初期値のままで問題ありませんが、開発中にネットワーク接続が悪い場合はより大きな値を設定してください。"
-
-
 
 #: zine/config.py:179
 msgid "It's possible to one or more comma separated paths here that are searched for plugins.  If the is not absolute, it's considered relative to the instance folder."
@@ -164,8 +151,6 @@ msgstr "プラグインを検索するパスをカンマ区切で指定します
 #: zine/config.py:186
 msgid "Set this to true if you want to see the most recent entries on the Zine reddit on your dashbaord."
 msgstr "Zine redditの最新エントリーをダッシュボード上に表示したい場合、チェックボックスをオンにしてください。"
-
-
 
 #: zine/config.py:241
 msgid ""
@@ -323,16 +308,13 @@ msgstr "公開状態"
 msgid "Draft"
 msgstr "下書き"
 
-
 #: zine/forms.py:250
 msgid "Published"
 msgstr "公開"
 
-
 #: zine/forms.py:251
 msgid "Protected"
 msgstr "保護"
-
 
 #: zine/forms.py:252
 msgid "Private"
@@ -342,18 +324,15 @@ msgstr "非公開"
 msgid "Publication date"
 msgstr "公開日時"
 
-
 #: zine/forms.py:254
 msgid "Clear this field to update to current time"
 msgstr "現在の時刻に更新する場合はこの項目をクリアしてください"
-
 
 #: zine/forms.py:255
 #: zine/forms.py:579
 #: zine/templates/admin/manage_categories.html:8
 msgid "Slug"
 msgstr "スラッグ"
-
 
 #: zine/forms.py:256
 msgid "Clear this field to autogenerate a new slug"
@@ -390,17 +369,13 @@ msgstr "パーサー"
 msgid "Enable comments"
 msgstr "コメントを有効にする"
 
-
 #: zine/forms.py:265
 msgid "Enable pingbacks"
 msgstr "ピンバックを有効にする"
 
-
 #: zine/forms.py:266
 msgid "Ping links"
 msgstr "Ping リンク"
-
-
 
 #: zine/forms.py:305
 #: zine/forms.py:482
@@ -411,7 +386,6 @@ msgstr "%sが存在しません"
 #: zine/forms.py:339
 msgid "This slug is already in use."
 msgstr "このスラッグはすでに使用されています。"
-
 
 #: zine/forms.py:344
 msgid "Selected parser is no longer available on the system."
@@ -467,7 +441,6 @@ msgstr "説明"
 msgid "This slug is already in use"
 msgstr "このスラッグはすでに使用されています"
 
-
 #: zine/forms.py:640
 msgid "Comments Per Page:"
 msgstr "1ページに表示するコメント数:"
@@ -486,7 +459,6 @@ msgstr "%sさんによってスパムとしてマークされたコメント"
 #: zine/templates/admin/manage_groups.html:8
 msgid "Groupname"
 msgstr "グループ名"
-
 
 #: zine/forms.py:713
 #: zine/forms.py:822
@@ -557,7 +529,6 @@ msgstr "グループ"
 msgid "List as author"
 msgstr "投稿者のリスト"
 
-
 #: zine/forms.py:827
 msgid "This user is listed as author"
 msgstr "このユーザーは投稿者としてリストされています"
@@ -574,11 +545,9 @@ msgstr "このユーザーによって書かれた投稿をどのように処理
 msgid "Delete them permanently"
 msgstr "完全に削除する"
 
-
 #: zine/forms.py:895
 msgid "Reassign posts"
 msgstr "投稿者を再設定する"
-
 
 #: zine/forms.py:898
 msgid "Reassign posts to"
@@ -634,7 +603,6 @@ msgstr "タイムゾーン"
 msgid "Cookie Name"
 msgstr "クッキー名"
 
-
 #: zine/forms.py:1049
 msgid "Comments enabled"
 msgstr "コメント有効"
@@ -643,23 +611,17 @@ msgstr "コメント有効"
 msgid "enable comments per default"
 msgstr "コメントをデフォルトで有効にする"
 
-
-
 #: zine/forms.py:1052
 msgid "Comment Moderation"
 msgstr "コメントのモデレーション"
-
 
 #: zine/forms.py:1055
 msgid "Pingbacks enabled"
 msgstr "ピンバック有効"
 
-
 #: zine/forms.py:1056
 msgid "enable pingbacks per default"
 msgstr "ピンバックをデフォルトで有効にする"
-
-
 
 #: zine/forms.py:1058
 msgid "Use flat comments"
@@ -681,31 +643,25 @@ msgstr "コメントパーサー"
 msgid "Posts per page"
 msgstr "1ページあたりの投稿数"
 
-
 #: zine/forms.py:1080
 msgid "Blog URL prefix"
 msgstr "ブログURLのプレフィックス"
-
 
 #: zine/forms.py:1082
 msgid "Admin URL prefix"
 msgstr "管理画面URLのプレフィックス"
 
-
 #: zine/forms.py:1084
 msgid "Category URL prefix"
 msgstr "カテゴリーURLのプレフィックス"
-
 
 #: zine/forms.py:1086
 msgid "Tag URL prefix"
 msgstr "タグURLのプレフィックス"
 
-
 #: zine/forms.py:1088
 msgid "Author Profiles URL prefix"
 msgstr "投稿者プロフィールURLのプレフィックス"
-
 
 #: zine/forms.py:1090
 msgid "Post permalink URL format"
@@ -715,11 +671,9 @@ msgstr "投稿パーマリンクURLのフォーマット"
 msgid "Limit slugs to ASCII"
 msgstr "スラッグをASCIIに制限する"
 
-
 #: zine/forms.py:1094
 msgid "Use zero-padded dates"
 msgstr "日付を0詰めする"
-
 
 #: zine/forms.py:1095
 msgid "Force HTTPS"
@@ -733,7 +687,6 @@ msgstr "キャッシュシステム"
 msgid "Default cache timeout"
 msgstr "デフォルトのキャッシュタイムアウト"
 
-
 #: zine/forms.py:1125
 msgid "Enable eager caching"
 msgstr "積極的キャッシュを有効にする"
@@ -741,9 +694,6 @@ msgstr "積極的キャッシュを有効にする"
 #: zine/forms.py:1126
 msgid "Enable"
 msgstr "有効"
-
-
-
 
 #: zine/forms.py:1133
 msgid "You have to provide at least one server to use memcached."
@@ -753,11 +703,9 @@ msgstr "memcachedを使用するには、少なくとも1台のサーバを指�
 msgid "You have to provide cache folder to use filesystem cache."
 msgstr "ファイルキャッシュシステムを使用する場合は、キャッシュフォルダを指定する必要があります。"
 
-
 #: zine/forms.py:1147
 msgid "Dump Download URL"
 msgstr "ダンプダウンロード用URL"
-
 
 #: zine/forms.py:1153
 msgid "Feed Download URL"
@@ -775,12 +723,9 @@ msgstr "新しいユーザーを作成する"
 msgid "Blog description"
 msgstr "ブログの説明"
 
-
-
 #: zine/forms.py:1310
 msgid "Load config values"
 msgstr "設定値を読み込む"
-
 
 #: zine/forms.py:1311
 msgid "Load the configuration values from the import."
@@ -791,23 +736,17 @@ msgstr "インポートから設定値を読み込む。"
 msgid "E-Mail"
 msgstr "電子メール"
 
-
 #: zine/notifications.py:283
 msgid "When a new comment is received."
 msgstr "新しいコメントを受け取ったとき。"
-
-
 
 #: zine/notifications.py:285
 msgid "When a comment requires moderation."
 msgstr "コメントのモデレーションが必要な場合。"
 
-
-
 #: zine/notifications.py:287
 msgid "When Zine found an urgent security alarm."
 msgstr "Zineが緊急のセキュリティ警告を見つけた場合。"
-
 
 #: zine/parsers.py:152
 msgid "Zine-Markup"
@@ -821,7 +760,6 @@ msgstr "HTML"
 msgid "source URL does not exist"
 msgstr "ソースURLが存在しません"
 
-
 #: zine/pingback.py:56
 msgid "The source URL does not contain a link to the target URL"
 msgstr "ソースURLにターゲットURLへのリンクが含まれていません"
@@ -834,11 +772,9 @@ msgstr "指定されたターゲットURLが存在しません"
 msgid "The specified target URL cannot be used as a target"
 msgstr "指定されたターゲットURLは使用できません"
 
-
 #: zine/pingback.py:59
 msgid "The pingback has already been registered"
 msgstr "ピンバックはすでに登録されています"
-
 
 #: zine/pingback.py:60
 #: zine/templates/403.html:2
@@ -855,8 +791,6 @@ msgstr "不明なサーバーエラー(%s)が発生しました"
 msgid "Could not install the plugin because the uploaded file is not a valid plugin file."
 msgstr "アップロードされたファイルは有効なプラグインファイルではないため、プラグインをインストールできませんでした。"
 
-
-
 #: zine/pluginsystem.py:336
 msgid "The plugin uploaded has a newer package version than this Zine installation can handle."
 msgstr "アップロードされたプラグインは、現在インストールされているZineで扱えるパッケージバージョンより新しいものです。"
@@ -865,7 +799,6 @@ msgstr "アップロードされたプラグインは、現在インストール
 msgid "A plugin with the same UID is already installed. Aborted."
 msgstr "同じUIDのプラグインがインストールされています。インストールを中止します。"
 
-
 #: zine/pluginsystem.py:341
 msgid "Could not install the package because the installer wasn't able to write the package information. Wrong permissions?"
 msgstr "インストーラーがパッケージ情報を書き込めなかったため、パッケージをインストールできませんでした。パーミッションが正しく設定されていない可能性があります。"
@@ -873,7 +806,6 @@ msgstr "インストーラーがパッケージ情報を書き込めなかった
 #: zine/pluginsystem.py:363
 msgid "Plugin setup error"
 msgstr "プラグインセットアップエラー"
-
 
 #: zine/pluginsystem.py:374
 #, python-format
@@ -912,7 +844,6 @@ msgstr "自分の作成したページを編集"
 msgid "can edit another person's pages"
 msgstr "他人の作成したページを編集"
 
-
 #: zine/privileges.py:170
 msgid "can view drafts"
 msgstr "下書きを閲覧"
@@ -921,21 +852,17 @@ msgstr "下書きを閲覧"
 msgid "can manage categories"
 msgstr "カテゴリーの管理"
 
-
 #: zine/privileges.py:173
 msgid "can moderate comments"
 msgstr "コメントをモデレート"
-
 
 #: zine/privileges.py:175
 msgid "can moderate comments on it's own entries"
 msgstr "自分の作成した投稿に対するコメントをモデレート"
 
-
 #: zine/privileges.py:177
 msgid "can moderate comments on it's own pages"
 msgstr "自分の作成したページに対するコメントをモデレート"
-
 
 #: zine/privileges.py:179
 msgid "can view protected entries"
@@ -961,11 +888,9 @@ msgstr "ドキュメントを含むプラグインはインストールされて
 msgid "now"
 msgstr "今すぐ"
 
-
 #: zine/importers/__init__.py:156
 msgid "set blog title from dump"
 msgstr "ブログのタイトルをダンプから設定"
-
 
 #: zine/importers/__init__.py:159
 msgid "set blog tagline from dump"
@@ -984,22 +909,17 @@ msgstr "トランザクションをコミットしています..."
 msgid "Updating configuration..."
 msgstr "設定をアップデートしています..."
 
-
 #: zine/importers/feed.py:99
 msgid "Unknown feed uploaded."
 msgstr "不明な形式のフィードがアップロードされました。"
-
 
 #: zine/importers/feed.py:145
 msgid "Importing of RSS feeds is currently not possible."
 msgstr "RSSフィードは現在インポートできません。"
 
-
 #: zine/importers/feed.py:323
 msgid "Feed Importer"
 msgstr "フィードインポーター"
-
-
 
 #: zine/importers/feed.py:334
 #: zine/importers/wordpress.py:239
@@ -1012,9 +932,6 @@ msgstr "以下のURLからダウンロード中にエラーが発生しました
 msgid "Error parsing uploaded file"
 msgstr "アップロードされたファイルの解析中にエラーが発生しました"
 
-
-
-
 #: zine/importers/feed.py:342
 #, python-format
 msgid "Error parsing feed: %s"
@@ -1025,8 +942,6 @@ msgstr "以下のフィードの解析中にエラーが発生しました: %s"
 msgid "Added imported items to queue."
 msgstr "インポートされたアイテムはキューに追加されました。"
 
-
-
 #: zine/importers/wordpress.py:248
 #, python-format
 msgid "Error parsing uploaded file: %s"
@@ -1036,12 +951,9 @@ msgstr "以下のアップロードされたファイルの解析中にエラー
 msgid "blocked by akismet"
 msgstr "Akismetによってブロックされました"
 
-
 #: zine/plugins/akismet_spam_filter/__init__.py:69
 msgid "The key is invalid."
 msgstr "APIキーが無効です。"
-
-
 
 #: zine/plugins/akismet_spam_filter/__init__.py:80
 msgid "Could not verify key because of a server to server connection error."
@@ -1057,7 +969,6 @@ msgstr "%sさんからのコメントをAkismetに報告しました"
 msgid "Akismet"
 msgstr "Akismet"
 
-
 #: zine/plugins/akismet_spam_filter/__init__.py:191
 #: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter_stats.html:2
 #: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter_stats.html:20
@@ -1072,7 +983,6 @@ msgstr "Akismetを有効にしました。"
 msgid "Akismet disabled."
 msgstr "Akismetを無効にしました。"
 
-
 #: zine/plugins/akismet_spam_filter/__init__.py:235
 msgid "Akismet Blocked Comments"
 msgstr "Akismetがコメントをブロックしました"
@@ -1081,13 +991,10 @@ msgstr "Akismetがコメントをブロックしました"
 msgid "Comments Blocked by Akismet"
 msgstr "Akismetによってブロックされたコメント"
 
-
-
 #: zine/plugins/akismet_spam_filter/templates/akismet_widget.html:4
 #, python-format
 msgid "Akismet has blocked <b>%(spam_comments)s</b> comments."
 msgstr "Akismet は<b>%(spam_comments)s</b>件のコメントをブロックしました。"
-
 
 #: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:2
 #: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:4
@@ -1112,13 +1019,10 @@ msgstr ""
 msgid "Update Key"
 msgstr "APIキーを更新"
 
-
-
 #: zine/plugins/creole_parser/__init__.py:57
 #, python-format
 msgid "Macro “%s” was passed a body but does not support it."
 msgstr "マクロ “%s” にbodyが渡されましたが、これはサポートされていません。"
-
 
 #: zine/plugins/creole_parser/__init__.py:109
 msgid "Creole"
@@ -1134,8 +1038,6 @@ msgstr "ダーク"
 #: zine/templates/admin/layout.html:6
 msgid "Administration"
 msgstr "管理"
-
-
 
 #: zine/plugins/miniblog_theme/templates/_widgets.html:7
 #: zine/plugins/vessel_theme/templates/_widgets.html:6
@@ -1180,11 +1082,6 @@ msgstr "Pygmentsテーマを変更しました。"
 msgid "Pygments"
 msgstr "Pygments"
 
-
-
-
-
-
 #: zine/plugins/pygments_support/templates/admin/pygments_support.html:5
 msgid ""
 "\n"
@@ -1217,23 +1114,19 @@ msgstr "選択"
 msgid "reStructuredText"
 msgstr "reStructuredText"
 
-
 #: zine/plugins/typography/__init__.py:129
 #: zine/plugins/typography/templates/admin/typography.html:2
 #: zine/plugins/typography/templates/admin/typography.html:33
 msgid "Typography"
 msgstr "文字体裁"
 
-
 #: zine/plugins/typography/__init__.py:146
 msgid "Typography settings could not be changed."
 msgstr "文字体裁の設定を変更できませんでした。"
 
-
 #: zine/plugins/typography/__init__.py:148
 msgid "Typography settings changed."
 msgstr "文字体裁の設定を変更しました。"
-
 
 #: zine/plugins/typography/templates/admin/typography.html:34
 msgid ""
@@ -1256,9 +1149,6 @@ msgstr "ダブルクォートのペア"
 #: zine/plugins/typography/templates/admin/typography.html:46
 msgid "Single Quote Pairs"
 msgstr "シングルクォートのペア"
-
-
-
 
 #: zine/plugins/typography/templates/admin/typography.html:53
 msgid "Use Common Character"
@@ -1301,7 +1191,6 @@ msgstr "カラーバリエーション"
 msgid "Color variation changed successfully."
 msgstr "カラーバリエーションを変更しました。"
 
-
 #: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:2
 #: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:4
 msgid "Configure Vessel Theme"
@@ -1334,12 +1223,9 @@ msgstr "キャンセル"
 msgid "Bookmarklet"
 msgstr "ブックマークレット"
 
-
 #: zine/shared/js/Admin.js:50
 msgid "Right click on the following link and choose “Add to favorites” or “Bookmark link” to create a posting shortcut."
 msgstr "以下のリンクを右クリックして、「お気に入りに追加」または「このリンクをブックマーク」を選択し、投稿ショートカットを作成してください。"
-
-
 
 #: zine/shared/js/Admin.js:54
 msgid "Next time you visit an interesting page, just select some text and click on the bookmark."
@@ -1349,12 +1235,9 @@ msgstr "ブログに載せたいページを見つけた場合には、テキス
 msgid "Blog It!"
 msgstr "Blog It!"
 
-
-
 #: zine/shared/js/Admin.js:60
 msgid "Right click on this link and choose “Add to favorites” or “Bookmark link” to create a posting shortcut."
 msgstr "以下のリンクを右クリックして、「お気に入りに追加」または「このリンクをブックマーク」を選択し、投稿ショートカットを作成してください。"
-
 
 #: zine/shared/js/Zine.js:31
 #, python-format
@@ -1380,8 +1263,6 @@ msgstr ""
 msgid "Page Not Found"
 msgstr "ページが見つかりません"
 
-
-
 #: zine/templates/404.html:5
 msgid "Sorry, the page you requested does not exist."
 msgstr "申し訳ありません。リクエストされたページは存在しません。"
@@ -1391,10 +1272,6 @@ msgid ""
 "You may have followed a bad link or mis-typed a URL.\n"
 "    That’s most likely what went wrong."
 msgstr "誤ったリンクをたどってきたか、URLをタイプミスしている可能性があります。"
-
-
-
-
 
 #: zine/templates/404.html:8
 #, python-format
@@ -1406,16 +1283,13 @@ msgstr ""
 "\n"
 "<a href=\"%(index_link)s\">トップページ</a>"
 
-
 #: zine/templates/500.html:2
 msgid "Zine Internal Server Error"
 msgstr "Zine Internal Server Error"
 
-
 #: zine/templates/500.html:4
 msgid "Internal Server Error"
 msgstr "Internal Server Error"
-
 
 #: zine/templates/500.html:5
 msgid ""
@@ -1433,9 +1307,6 @@ msgstr ""
 #: zine/templates/_about_zine.html:6
 msgid "About Zine"
 msgstr "Zineについて"
-
-
-
 
 #: zine/templates/_about_zine.html:9
 msgid ""
@@ -1456,10 +1327,6 @@ msgstr ""
 msgid "© Copyright %(years)s by the Zine Team. Some rights reserved."
 msgstr "© Copyright %(years)s by the Zine Team. Some rights reserved."
 
-
-
-
-
 #: zine/templates/_about_zine.html:17
 msgid ""
 "\n"
@@ -1472,9 +1339,6 @@ msgstr ""
 "      modification, are permitted provided that the following conditions\n"
 "      are met:"
 
-
-
-
 #: zine/templates/_about_zine.html:22
 msgid ""
 "Redistributions of source code must retain the above\n"
@@ -1484,7 +1348,6 @@ msgstr ""
 "Redistributions of source code must retain the above\n"
 "        copyright notice, this list of conditions and the following\n"
 "        disclaimer."
-
 
 #: zine/templates/_about_zine.html:25
 msgid ""
@@ -1498,7 +1361,6 @@ msgstr ""
 "        disclaimer in the documentation and/or other materials provided\n"
 "        with the distribution."
 
-
 #: zine/templates/_about_zine.html:29
 msgid ""
 "The names of the contributors may not be used to endorse\n"
@@ -1508,7 +1370,6 @@ msgstr ""
 "The names of the contributors may not be used to endorse\n"
 "        or promote products derived from this software without specific\n"
 "        prior written permission."
-
 
 #: zine/templates/_about_zine.html:34
 msgid ""
@@ -1536,11 +1397,9 @@ msgstr ""
 "      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
 "      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 
-
 #: zine/templates/_comment.html:5
 msgid "Pingback by"
 msgstr "Pingback by"
-
 
 #: zine/templates/_comment.html:6
 msgid "Comment by"
@@ -1549,7 +1408,6 @@ msgstr "Comment by"
 #: zine/templates/_comment.html:9
 msgid "Anonymous"
 msgstr "匿名"
-
 
 #: zine/templates/_comment.html:15
 msgid "reply to this comment"
@@ -1579,14 +1437,11 @@ msgstr[0] "%(comments)s件のコメント"
 msgid "Edit"
 msgstr "編集"
 
-
 #: zine/templates/_entry.html:31
 #: zine/templates/show_entry.html:8
 #, python-format
 msgid "written by %(author)s, on %(pub_date)s."
 msgstr "%(pub_date)sに%(author)sさんによって書かれました。"
-
-
 
 #: zine/templates/_entry.html:36
 #, python-format
@@ -1606,7 +1461,6 @@ msgstr "目次"
 #: zine/templates/widgets/post_archive_summary.html:2
 msgid "Archive"
 msgstr "アーカイブ"
-
 
 #: zine/templates/archive.html:12
 msgid "empty archive"
@@ -1637,7 +1491,6 @@ msgstr "投稿者"
 msgid "Zine Error"
 msgstr "Zineエラー"
 
-
 #: zine/templates/index.html:2
 msgid "Index"
 msgstr "インデックス"
@@ -1650,24 +1503,17 @@ msgstr "ようこそ"
 msgid "So far there are no entries in this blog."
 msgstr "このブログにはまだ投稿がありません。"
 
-
 #: zine/templates/internal_error.html:2
 msgid "Zine Internal Error"
 msgstr "Zine Internal Error"
-
 
 #: zine/templates/internal_error.html:4
 msgid "Internal Error"
 msgstr "Internal Error"
 
-
 #: zine/templates/internal_error.html:6
 msgid "Zine encountered an internal error during processing:"
 msgstr "処理中にZineの内部エラーが発生しました:"
-
-
-
-
 
 #: zine/templates/internal_error.html:13
 msgid ""
@@ -1679,7 +1525,6 @@ msgstr ""
 "\n"
 "    問題を解決するには、Zineのドキュメントを参照してください。\n"
 "  "
-
 
 #: zine/templates/internal_error.html:17
 msgid ""
@@ -1716,7 +1561,6 @@ msgstr ""
 msgid "Comments"
 msgstr "コメント"
 
-
 #: zine/templates/page.html:14
 #: zine/templates/show_entry.html:26
 msgid "Leave a Reply"
@@ -1726,12 +1570,9 @@ msgstr "コメントを残す"
 msgid "Zine Maintenance Mode"
 msgstr "Zineメンテナンスモード"
 
-
 #: zine/templates/show_author.html:12
 msgid "Posts written by user"
 msgstr "このユーザーによって書かれた投稿"
-
-
 
 #: zine/templates/show_author.html:15
 #, python-format
@@ -1743,12 +1584,10 @@ msgstr "%(post)s - %(date)s"
 msgid "Show “%(category)s”"
 msgstr "“%(category)s” を見る"
 
-
 #: zine/templates/show_category.html:5
 #, python-format
 msgid "Entries in the Category “%(category)s”"
 msgstr "カテゴリー “%(category)s” のエントリー"
-
 
 #: zine/templates/show_category.html:10
 #: zine/templates/show_tag.html:10
@@ -1759,7 +1598,6 @@ msgstr "公開されている投稿はありません"
 #, python-format
 msgid "Show “%(tag)s”"
 msgstr "“%(tag)s” を見る"
-
 
 #: zine/templates/show_tag.html:5
 #, python-format
@@ -1787,7 +1625,6 @@ msgstr "アカウントを削除"
 #: zine/templates/account/delete_account.html:6
 msgid "Do you really want to delete your account?"
 msgstr "本当にアカウントを削除してもよろしいですか？"
-
 
 #: zine/templates/account/delete_account.html:7
 msgid "All your comments will also be deleted!"
@@ -1863,13 +1700,10 @@ msgstr "オンラインドキュメントは見つかりませんでした。"
 msgid "Dashboard"
 msgstr "ダッシュボード"
 
-
-
 #: zine/templates/account/index.html:8
 #, python-format
 msgid "Howdy.  Welcome to your Zine account interface %(user)s."
 msgstr "%(user)sさん、ようこそZineアカウントインターフェイスへ。"
-
 
 #: zine/templates/account/index.html:11
 #, python-format
@@ -1935,9 +1769,6 @@ msgstr "ここから、受け取りたい通知を設定できます。"
 #: zine/templates/account/sorry_to_see_you_go.html:5
 msgid "Bye"
 msgstr "Bye"
-
-
-
 
 #: zine/templates/account/sorry_to_see_you_go.html:16
 msgid "We're sorry to see you go!"
@@ -2029,7 +1860,6 @@ msgstr[0] "下書き:"
 msgid "Approve Comment"
 msgstr "コメントを承認"
 
-
 #: zine/templates/admin/approve_comment.html:7
 #, python-format
 msgid ""
@@ -2056,7 +1886,6 @@ msgstr ""
 "\n"
 "    ここでは、ブログのタイトルや見出しなどの基本設定を行うことができます。\n"
 "  "
-
 
 #: zine/templates/admin/block_comment.html:7
 #, python-format
@@ -2085,8 +1914,6 @@ msgstr "本当に選択したコメントをブロックしますか？"
 msgid "Importing..."
 msgstr "インポート中..."
 
-
-
 #: zine/templates/admin/blogger_perform_import.html:5
 msgid ""
 "\n"
@@ -2100,7 +1927,6 @@ msgstr ""
 "    この処理には時間がかかる場合があります\n"
 "    <strong>ダウンロード中にキャンセルしないでください！</strong>\n"
 "  "
-
 
 #: zine/templates/admin/blogger_perform_import.html:11
 msgid ""
@@ -2121,11 +1947,6 @@ msgstr "インポート確認ページ"
 msgid "Cache Options"
 msgstr "キャッシュオプション"
 
-
-
-
-
-
 #: zine/templates/admin/cache.html:6
 msgid ""
 "\n"
@@ -2140,10 +1961,6 @@ msgstr ""
 "      サーバーの種類や訪問者数に応じて、キャッシュシステムの処理系を選択したり、\n"
 "      設定を変更することが出来ます。\n"
 "   "
-
-
-
-
 
 #: zine/templates/admin/cache.html:12
 msgid ""
@@ -2163,14 +1980,9 @@ msgstr ""
 msgid "Cache System"
 msgstr "キャッシュシステム"
 
-
-
 #: zine/templates/admin/cache.html:29
 msgid "Currently Zine supports three caching systems:"
 msgstr "現在、Zineは3種類のキャッシュシステムをサポートしています:"
-
-
-
 
 #: zine/templates/admin/cache.html:31
 msgid ""
@@ -2189,11 +2001,6 @@ msgstr ""
 "          memcachedが利用できるなら、シンプルキャッシュを使用するべきではありません。\n"
 "    "
 
-
-
-
-
-
 #: zine/templates/admin/cache.html:37
 msgid ""
 "<strong>memcached</strong>: This cache system uses one\n"
@@ -2206,9 +2013,6 @@ msgstr ""
 "          memcachedデーモンが最低1つは稼働している必要があります。\n"
 "          この方式は通信量の多いサイトで有効です。\n"
 "    "
-
-
-
 
 #: zine/templates/admin/cache.html:41
 msgid ""
@@ -2231,11 +2035,6 @@ msgstr "キャッシュシステムはデフォルトでは有効になってい
 msgid "Memcached Options"
 msgstr "Memcached オプション"
 
-
-
-
-
-
 #: zine/templates/admin/cache.html:50
 msgid ""
 "\n"
@@ -2255,9 +2054,6 @@ msgstr ""
 "        さらに<a href=\"http://gijsbert.org/cmemcache/\">cmemcache</a>または<a href=\"ftp://ftp.tummy.com/pub/python-memcached/\">python-memcached</a>いずれかのモジュールが必要です。\n"
 "  "
 
-
-
-
 #: zine/templates/admin/cache.html:59
 msgid ""
 "\n"
@@ -2275,8 +2071,6 @@ msgstr ""
 msgid "Filesystem Options"
 msgstr "ファイルシステム オプション"
 
-
-
 #: zine/templates/admin/cache.html:68
 msgid ""
 "\n"
@@ -2293,13 +2087,6 @@ msgstr ""
 "        パスを変更した場合に、変更前のフォルダには古いキャッシュデータが残ります。\n"
 "        古いデータはZineによって削除されません。\n"
 "  "
-
-
-
-
-
-
-
 
 #: zine/templates/admin/cache.html:75
 msgid ""
@@ -2320,23 +2107,9 @@ msgstr ""
 "        <em>使用しないでください</em>。\n"
 "  "
 
-
 #: zine/templates/admin/cache.html:85
 msgid "General Cache Settings"
 msgstr "キャッシュ共通設定"
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #: zine/templates/admin/cache.html:86
 msgid ""
@@ -2370,19 +2143,11 @@ msgstr "キャッシュの削除"
 msgid "Change Password"
 msgstr "パスワードの変更"
 
-
 #: zine/templates/admin/configuration.html:2
 #: zine/templates/admin/configuration.html:4
 #: zine/views/admin.py:147
 msgid "Configuration Editor"
 msgstr "設定エディタ"
-
-
-
-
-
-
-
 
 #: zine/templates/admin/configuration.html:5
 msgid ""
@@ -2405,7 +2170,6 @@ msgstr ""
 #: zine/templates/admin/configuration.html:48
 msgid "Disable Editor"
 msgstr "エディタを無効にする"
-
 
 #: zine/templates/admin/configuration.html:51
 msgid ""
@@ -2444,7 +2208,6 @@ msgstr ""
 msgid "Delete Comment"
 msgstr "コメントを削除"
 
-
 #: zine/templates/admin/delete_comment.html:7
 #, python-format
 msgid ""
@@ -2470,18 +2233,15 @@ msgstr "本当に選択されたコメントを削除しますか？"
 msgid "Delete All Comments"
 msgstr "すべてのコメントを削除"
 
-
 #: zine/templates/admin/delete_comments_all.html:7
 #, python-format
 msgid "Do you really want to delete ALL(%d) %s comments; not just the ones shown on the page you were in?"
 msgstr "本当に%d件すべての%sコメントを削除しますか？ （現在のページに表示されていないコメントもすべて削除されます）"
 
-
 #: zine/templates/admin/delete_entry.html:2
 #: zine/templates/admin/delete_entry.html:4
 msgid "Delete Entry"
 msgstr "エントリーを削除"
-
 
 #: zine/templates/admin/delete_entry.html:6
 #, python-format
@@ -2493,8 +2253,6 @@ msgstr ""
 "\n"
 "      本当にエントリー “%(entry_title)s” を削除しますか？\n"
 "    "
-
-
 
 #: zine/templates/admin/delete_entry.html:10
 #: zine/templates/admin/delete_page.html:10
@@ -2575,7 +2333,6 @@ msgstr ""
 msgid "Delete User"
 msgstr "ユーザーを削除"
 
-
 #: zine/templates/admin/delete_user.html:6
 #, python-format
 msgid ""
@@ -2632,7 +2389,6 @@ msgstr "スキップ"
 msgid "Important:"
 msgstr "重要:"
 
-
 #: zine/templates/admin/edit_entry.html:20
 #: zine/templates/admin/edit_page.html:21
 msgid ""
@@ -2648,7 +2404,6 @@ msgstr ""
 #: zine/templates/admin/manage_categories.html:21
 msgid "No categories."
 msgstr "カテゴリーはありません。"
-
 
 #: zine/templates/admin/edit_entry.html:42
 #: zine/templates/admin/edit_page.html:48
@@ -2701,7 +2456,6 @@ msgstr "ユーザーを編集"
 msgid "Export"
 msgstr "エクスポート"
 
-
 #: zine/templates/admin/export.html:5
 msgid ""
 "\n"
@@ -2721,7 +2475,6 @@ msgstr ""
 "    このファイルには添付ファイル、ブログの設定、プラグインによって格納されるデータは含まれていないので、\n"
 "    Zineブログの移動のために使用しないでください。\n"
 "  "
-
 
 #: zine/templates/admin/export.html:13
 msgid ""
@@ -2756,9 +2509,6 @@ msgstr ""
 msgid "Import"
 msgstr "インポート"
 
-
-
-
 #: zine/templates/admin/import.html:5
 msgid ""
 "\n"
@@ -2774,8 +2524,6 @@ msgstr ""
 "    どのデータをインポートするかを選択してください。\n"
 "    インポートを開始するには、以下からインポートを実行するシステムを選んでください。:\n"
 "  "
-
-
 
 #: zine/templates/admin/import.html:17
 msgid ""
@@ -2809,7 +2557,6 @@ msgstr ""
 "  このインポーターは Blogger.com からブログをインポートできます。\n"
 "  "
 
-
 #: zine/templates/admin/import_blogger.html:24
 #, python-format
 msgid ""
@@ -2821,20 +2568,13 @@ msgstr ""
 "   あなたは、%(google)sにより認証されています。\n"
 "  "
 
-
 #: zine/templates/admin/import_blogger.html:30
 msgid "Select Blog To Import"
 msgstr "インポートするブログを選択"
 
-
-
 #: zine/templates/admin/import_blogger.html:42
 msgid "Log out of Google"
 msgstr "Googleからログアウト"
-
-
-
-
 
 #: zine/templates/admin/import_blogger.html:50
 #, python-format
@@ -2852,7 +2592,6 @@ msgstr ""
 "  この方法は、推奨される安全な認証方法です。\n"
 "  "
 
-
 #: zine/templates/admin/import_blogger.html:57
 #, python-format
 msgid ""
@@ -2864,17 +2603,10 @@ msgstr ""
 "    <a href=\"%(url)s\">%(google)s アカウントへログイン</a>\n"
 "  "
 
-
 #: zine/templates/admin/import_feed.html:2
 #: zine/templates/admin/import_feed.html:4
 msgid "Import from Feed"
 msgstr "フィードからインポート"
-
-
-
-
-
-
 
 #: zine/templates/admin/import_feed.html:5
 msgid ""
@@ -2898,10 +2630,6 @@ msgstr "フィードをアップロード"
 msgid "Import from WordPress"
 msgstr "WordPressからインポート"
 
-
-
-
-
 #: zine/templates/admin/import_wordpress.html:5
 msgid ""
 "\n"
@@ -2923,14 +2651,10 @@ msgstr ""
 msgid "Upload Dump"
 msgstr "ダンプをアップロード"
 
-
-
 #: zine/templates/admin/index.html:8
 #, python-format
 msgid "Howdy.  Welcome to the Zine administration interface %(user)s."
 msgstr "%(user)sさん、ようこそZine管理インターフェイスへ。"
-
-
 
 #: zine/templates/admin/index.html:11
 #, python-format
@@ -2947,7 +2671,6 @@ msgstr "コメントをモデレート"
 #: zine/templates/admin/manage_entries.html:5
 msgid "Manage Entries"
 msgstr "投稿を管理"
-
 
 #: zine/templates/admin/index.html:22
 msgid "Configure Zine"
@@ -2966,7 +2689,6 @@ msgstr "ユーザーを管理"
 #: zine/templates/admin/index.html:25
 msgid "Get Help"
 msgstr "ヘルプを見る"
-
 
 #: zine/templates/admin/index.html:27
 #, python-format
@@ -2995,12 +2717,9 @@ msgstr "承認待ちのコメント"
 msgid "Last Posts"
 msgstr "最新の投稿"
 
-
 #: zine/templates/admin/index.html:76
 msgid "Zine at Reddit"
 msgstr "Zine at Reddit"
-
-
 
 #: zine/templates/admin/index.html:77
 #, python-format
@@ -3039,21 +2758,17 @@ msgstr "パッケージの場所"
 msgid "Shared Data"
 msgstr "共有データ"
 
-
 #: zine/templates/admin/information.html:31
 msgid "Builtin Templates"
 msgstr "組み込みテンプレート"
-
 
 #: zine/templates/admin/information.html:33
 msgid "Builtin Plugins"
 msgstr "組み込みプラグイン"
 
-
 #: zine/templates/admin/information.html:35
 msgid "Builtin Translations"
 msgstr "組み込み翻訳"
-
 
 #: zine/templates/admin/information.html:37
 msgid "Path to Instance"
@@ -3074,7 +2789,6 @@ msgstr "Pythonのバージョン"
 #: zine/templates/admin/information.html:46
 msgid "Platform"
 msgstr "プラットフォーム"
-
 
 #: zine/templates/admin/information.html:48
 msgid "Persistent Environment"
@@ -3108,12 +2822,9 @@ msgstr "マルチプロセス"
 msgid "WSGI Version"
 msgstr "WSGI バージョン"
 
-
 #: zine/templates/admin/information.html:63
 msgid "URL Endpoints"
 msgstr "URLエンドポイント"
-
-
 
 #: zine/templates/admin/information.html:64
 msgid ""
@@ -3125,12 +2836,9 @@ msgstr ""
 "    以下のエンドポイントがこのインスタンスに登録されています:\n"
 "  "
 
-
 #: zine/templates/admin/information.html:72
 msgid "Absolute URL Handlers"
 msgstr "絶対URLハンドラー"
-
-
 
 #: zine/templates/admin/information.html:73
 msgid ""
@@ -3142,12 +2850,9 @@ msgstr ""
 "    以下の絶対URLハンドラーがこのインスタンスに登録されています:\n"
 "  "
 
-
 #: zine/templates/admin/information.html:81
 msgid "View Handlers"
 msgstr "表示ハンドラー"
-
-
 
 #: zine/templates/admin/information.html:82
 msgid ""
@@ -3163,8 +2868,6 @@ msgstr ""
 msgid "Content Types"
 msgstr "コンテンツタイプ"
 
-
-
 #: zine/templates/admin/information.html:91
 msgid ""
 "\n"
@@ -3174,7 +2877,6 @@ msgstr ""
 "\n"
 "    以下のコンテンツタイプがこのインスタンスに登録されています:\n"
 "  "
-
 
 #: zine/templates/admin/information.html:103
 msgid ""
@@ -3190,9 +2892,6 @@ msgstr ""
 msgid "Services"
 msgstr "サービス"
 
-
-
-
 #: zine/templates/admin/information.html:112
 msgid ""
 "\n"
@@ -3204,14 +2903,9 @@ msgstr ""
 "    利用可能なサービスから呼び出せる、以下のサービスポイントがこのインスタンスに登録されています\n"
 "    "
 
-
 #: zine/templates/admin/information.html:121
 msgid "Installed APIs"
 msgstr "インストールされているAPI"
-
-
-
-
 
 #: zine/templates/admin/information.html:122
 msgid ""
@@ -3224,12 +2918,9 @@ msgstr ""
 "    以下のAPIがこのブログインスタンスにインストールされています。\n"
 "    マーク（*）されているAPIは推奨されているものです。"
 
-
 #: zine/templates/admin/information.html:135
 msgid "Markup Extensions"
 msgstr "マークアップ拡張"
-
-
 
 #: zine/templates/admin/information.html:136
 msgid ""
@@ -3241,7 +2932,6 @@ msgstr ""
 "    以下のマークアップ拡張がこのインスタンスに登録されています:\n"
 "  "
 
-
 #: zine/templates/admin/information.html:143
 msgid "no markup extensions installed."
 msgstr "マークアップ拡張はインストールされていません。"
@@ -3249,8 +2939,6 @@ msgstr "マークアップ拡張はインストールされていません。"
 #: zine/templates/admin/information.html:146
 msgid "Parsers"
 msgstr "パーサー"
-
-
 
 #: zine/templates/admin/information.html:147
 msgid ""
@@ -3279,7 +2967,6 @@ msgstr "UID"
 msgid "Location"
 msgstr "場所"
 
-
 #: zine/templates/admin/information.html:170
 msgid "Configuration Variables"
 msgstr "設定変数"
@@ -3305,10 +2992,6 @@ msgstr "テンプレートグローバル"
 msgid "Template Filters"
 msgstr "テンプレートフィルター"
 
-
-
-
-
 #: zine/templates/admin/information.html:198
 msgid ""
 "\n"
@@ -3322,13 +3005,10 @@ msgstr ""
 "    エクスポートされるファイルには、パスワードのような機密情報は含まれません。\n"
 "  "
 
-
 #: zine/templates/admin/inspect_import.html:2
 #: zine/templates/admin/inspect_import.html:4
 msgid "Inspect Import"
 msgstr "インポートの検査"
-
-
 
 #: zine/templates/admin/inspect_import.html:5
 msgid ""
@@ -3349,14 +3029,9 @@ msgstr "ブログの詳細"
 msgid "Dump ID"
 msgstr "ダンプID"
 
-
-
 #: zine/templates/admin/inspect_import.html:19
 msgid "If you have a special installation and want to rewrite the import programmatically you need this identifier."
 msgstr "特殊なインストールを行っていて、インポートデータをプログラムで書き換えたい場合はこのIDが必要です。"
-
-
-
 
 #: zine/templates/admin/inspect_import.html:24
 msgid ""
@@ -3377,10 +3052,6 @@ msgstr ""
 msgid "no author information"
 msgstr "投稿者情報なし"
 
-
-
-
-
 #: zine/templates/admin/inspect_import.html:37
 msgid ""
 "\n"
@@ -3394,8 +3065,6 @@ msgstr ""
 "      したがって、以下のリスト内のユーザーによる投稿を1つも選択しない場合、\n"
 "      ここで何を選択しても意味がありません。\n"
 "  "
-
-
 
 #: zine/templates/admin/inspect_import.html:42
 msgid "Posts"
@@ -3429,9 +3098,6 @@ msgstr "%(blog_title)s の管理"
 #: zine/views/admin.py:167
 msgid "Log"
 msgstr "ログ"
-
-
-
 
 #: zine/templates/admin/log.html:5
 msgid ""
@@ -3475,8 +3141,6 @@ msgstr "適用"
 #: zine/views/admin.py:163
 msgid "Maintenance"
 msgstr "メンテナンス"
-
-
 
 #: zine/templates/admin/maintenance.html:5
 msgid ""
@@ -3570,7 +3234,6 @@ msgstr "メールアドレス"
 msgid "Report Comment As %s"
 msgstr "コメントを%sとして報告"
 
-
 #: zine/templates/admin/mark_comment.html:7
 #, python-format
 msgid ""
@@ -3600,12 +3263,10 @@ msgstr "スパムコメントとして報告"
 msgid "Do you really want to report the selected comments as Spam?"
 msgstr "本当に選択されたコメントをスパムであると報告しますか？"
 
-
 #: zine/templates/admin/pages_config.html:2
 #: zine/templates/admin/pages_config.html:4
 msgid "Pages Configuration"
 msgstr "ページ設定"
-
 
 #: zine/templates/admin/pages_config.html:5
 msgid ""
@@ -3617,11 +3278,9 @@ msgstr ""
 "    ページ設定をしてください。\n"
 "  "
 
-
 #: zine/templates/admin/pages_config.html:10
 msgid "Show page title"
 msgstr "ページタイトルを表示"
-
 
 #: zine/templates/admin/pages_config.html:13
 msgid "Show the title of the page on top of the page body"
@@ -3631,13 +3290,9 @@ msgstr "本文の上にページタイトルを表示"
 msgid "Show children"
 msgstr "子ページを表示"
 
-
-
 #: zine/templates/admin/pages_config.html:19
 msgid "Show the child-pages on the bottom of the page body"
 msgstr "ページ本文の下に子ページを表示"
-
-
 
 #: zine/templates/admin/perform_import.html:5
 msgid ""
@@ -3661,7 +3316,6 @@ msgstr ""
 "\n"
 "    正常にデータをインポートしました。\n"
 "  "
-
 
 #: zine/templates/admin/plugins.html:2
 #: zine/templates/admin/plugins.html:4
@@ -3724,7 +3378,6 @@ msgstr ""
 msgid "Remove plugin"
 msgstr "プラグインを削除"
 
-
 #: zine/templates/admin/plugins.html:46
 msgid ""
 "\n"
@@ -3740,8 +3393,6 @@ msgstr ""
 #: zine/templates/admin/plugins.html:50
 msgid "Add New Plugin"
 msgstr "新しいプラグインを追加"
-
-
 
 #: zine/templates/admin/plugins.html:51
 msgid ""
@@ -3791,7 +3442,6 @@ msgstr ""
 "      再度使用したい場合は、このプラグインを再インストールしなければなりません。\n"
 "  "
 
-
 #: zine/templates/admin/theme.html:2
 #: zine/templates/admin/theme.html:4
 msgid "Theme Manager"
@@ -3801,12 +3451,10 @@ msgstr "テーマ管理"
 msgid "Select this theme"
 msgstr "このテーマを選択"
 
-
 #: zine/templates/admin/theme.html:20
 #, python-format
 msgid "by %(author)s"
 msgstr "投稿者: %(author)sさん"
-
 
 #: zine/templates/admin/theme.html:31
 msgid "Configure Theme"
@@ -3816,7 +3464,6 @@ msgstr "テーマを設定"
 #: zine/templates/admin/unblock_comment.html:4
 msgid "Unblock Comment"
 msgstr "コメントのブロックを解除"
-
 
 #: zine/templates/admin/unblock_comment.html:7
 #, python-format
@@ -3836,8 +3483,6 @@ msgstr ""
 msgid "URL Options"
 msgstr "URL オプション"
 
-
-
 #: zine/templates/admin/url_options.html:5
 msgid ""
 "\n"
@@ -3847,14 +3492,10 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-"    ここで基本的なURL設定を変更できます。\n"
+"    ここでは、基本的なURL設定を変更できます。\n"
 "    これは特に、インストールされるプラグインが新しいインデックスページを加えたり、\n"
 "    ブログを別の場所に移動させたい場合に役立ちます。\n"
 "  "
-
-
-
-
 
 #: zine/templates/admin/write_page.html:13
 msgid ""
@@ -3878,7 +3519,6 @@ msgstr "親ページ"
 msgid "Position"
 msgstr "場所"
 
-
 #: zine/templates/widgets/latest_comments.html:2
 msgid "Latest Comments"
 msgstr "最新のコメント"
@@ -3886,7 +3526,6 @@ msgstr "最新のコメント"
 #: zine/templates/widgets/latest_comments.html:7
 msgid "by"
 msgstr "by"
-
 
 #: zine/templates/widgets/latest_posts.html:2
 msgid "Latest Posts"
@@ -3914,8 +3553,6 @@ msgstr "警告"
 msgid "unkown file"
 msgstr "不明なファイル"
 
-
-
 #: zine/utils/forms.py:679
 msgid "No choices."
 msgstr "選択肢がありません。"
@@ -3932,14 +3569,12 @@ msgstr "このフィールドは必須項目です。"
 msgid "Invalid security token submitted."
 msgstr "無効なセキュリティトークンが送信されました。"
 
-
 #: zine/utils/forms.py:1144
 #: zine/utils/forms.py:1528
 #, python-format
 msgid "Please provide at least %d item."
 msgid_plural "Please provide at least %d items."
 msgstr[0] "少なくとも%d個のアイテムを入力してください。"
-
 
 #: zine/utils/forms.py:1151
 #: zine/utils/forms.py:1535
@@ -3953,8 +3588,6 @@ msgstr[0] "%d個以下のアイテムしか入力できません。"
 msgid "Please enter at least %d character."
 msgid_plural "Please enter at least %d characters."
 msgstr[0] "少なくとも%d文字を入力してください。"
-
-
 
 #: zine/utils/forms.py:1273
 #, python-format
@@ -4065,7 +3698,6 @@ msgstr "有効なネットワークアドレスを入力してください。"
 msgid "The port has to be numeric"
 msgstr "ポートは数値でなければなりません"
 
-
 #: zine/utils/validators.py:150
 msgid "Invalid character, < or > are not allowed."
 msgstr "不正な文字です。「<」 や「 >」 のような文字は許可されていません。"
@@ -4082,7 +3714,6 @@ msgstr "URLプレフィックスは、スラッシュから始まっている必
 msgid "URL prefix must not end with a slash."
 msgstr "スラッシュで終わるURLプレフィックスは許可されていません。"
 
-
 #: zine/utils/validators.py:179
 msgid "Invalid character, <, > or \\ are not allowed."
 msgstr "不正な文字です。「<」、「 >」 または、「\\」は許可されていません。"
@@ -4091,13 +3722,9 @@ msgstr "不正な文字です。「<」、「 >」 または、「\\」は許可
 msgid "URL format cannot start with a slash."
 msgstr "スラッシュから始まるURLフォーマットは許可されていません。"
 
-
-
 #: zine/utils/validators.py:185
 msgid "URL cannot contain //."
 msgstr "URLに「//」を含んではいけません。"
-
-
 
 #: zine/utils/validators.py:187
 msgid "URL cannot contain a reference toparent path."
@@ -4112,27 +3739,18 @@ msgstr "%s は未知のフォーマットコードです。"
 msgid "The text must not be empty."
 msgstr "テキストを入力してください。"
 
-
-
-
-
 #: zine/utils/zeml.py:304
 msgid "Error when loading dynamic ZEML element. The system ignored the element.  Maybe a disabled plugin caused the problem."
 msgstr "ダイナミックZEML要素をロード中にエラーが発生しました。システムはこの要素を無視しました。無効にしたプラグインの影響かもしれません。"
-
-
 
 #: zine/utils/zeml.py:680
 #, python-format
 msgid "Error loading dynamic element %s"
 msgstr "ダイナミック要素 %s をロード中に発生したエラー"
 
-
-
 #: zine/utils/zeml.py:694
 msgid "Error in markup"
 msgstr "マークアップのエラー"
-
 
 #: zine/utils/zeml.py:1118
 #, python-format
@@ -4142,7 +3760,6 @@ msgstr "タグ %s に無効な属性が指定されました。: %s"
 #: zine/views/account.py:40
 msgid "Profile"
 msgstr "プロフィール"
-
 
 #: zine/views/account.py:47
 msgid "About"
@@ -4238,8 +3855,6 @@ msgstr "ユーザー"
 msgid "Information"
 msgstr "情報"
 
-
-
 #: zine/views/admin.py:194
 #, python-format
 msgid "Zine is in maintenance mode. Don't forget to <a href=\"%s\">turn it off again</a> once you finish your changes."
@@ -4250,19 +3865,13 @@ msgstr "Zineはメンテナンスモードです。変更を完了したら、�
 msgid "Could not activate plugin “%(name)s”: %(error)s"
 msgstr "プラグイン “%(name)s” を有効化できませんでした: %(error)s"
 
-
-
 #: zine/views/admin.py:256
 msgid "No URLs pinged so far because the post is not publicly available"
 msgstr "投稿が一般公開されていないので、URLからの応答はありませんでした"
 
-
-
 #: zine/views/admin.py:259
 msgid "Could not ping URLs because the parser for the post is not available any longer."
 msgstr "投稿のためのパーサーが利用不能になっているため、URLの応答を確認できませんでした。"
-
-
 
 #: zine/views/admin.py:273
 #, python-format
@@ -4274,7 +3883,6 @@ msgstr "%(url)s からの応答を確認できませんでした。: %(error)s"
 msgid "The following link was pinged successfully: %s"
 msgid_plural "The following links where pinged successfully: %s"
 msgstr[0] "以下のリンクとの正常な接続を確認しました: %s"
-
 
 #: zine/views/admin.py:319
 msgid "Text here..."
@@ -4314,8 +3922,6 @@ msgstr "ページ %s は正常に更新されました。"
 msgid "The page %s was deleted successfully."
 msgstr "ページ %s は正常に削除されました。"
 
-
-
 #: zine/views/admin.py:559
 msgid "“Delete All” can only be issued for “Spam” and “Blocked” comment types."
 msgstr "“すべて削除”は“スパム”および“ブロック”されたコメントにのみ使用できます。"
@@ -4345,11 +3951,9 @@ msgstr "選択されたすべてのコメントをスパムでないと報告し
 msgid "All Comments"
 msgstr "すべてのコメント"
 
-
 #: zine/views/admin.py:632
 msgid "Comments Awaiting Moderation"
 msgstr "承認待ちコメント"
-
 
 #: zine/views/admin.py:640
 msgid "Approved Commments"
@@ -4369,8 +3973,6 @@ msgstr "スパム"
 msgid "Comments for “%s”"
 msgstr "“%s” に対するコメント"
 
-
-
 #: zine/views/admin.py:687
 #: zine/views/admin.py:719
 #: zine/views/admin.py:745
@@ -4380,35 +3982,25 @@ msgstr "“%s” に対するコメント"
 msgid "You're not allowed to manage this comment"
 msgstr "このコメントを管理する権限がありません"
 
-
-
 #: zine/views/admin.py:697
 #, python-format
 msgid "Comment by %s moderated successfully."
 msgstr "%s さんのコメントは正常にモデレートされました。"
-
-
 
 #: zine/views/admin.py:752
 #, python-format
 msgid "Comment by %s approved successfully."
 msgstr "%s さんのコメントは承認されました。"
 
-
-
 #: zine/views/admin.py:775
 #, python-format
 msgid "Comment by %s blocked successfully."
 msgstr "%s さんのコメントはブロックされました。"
 
-
-
 #: zine/views/admin.py:797
 #, python-format
 msgid "Comment by %s reported as Spam successfully."
 msgstr "%s さんのコメントはスパムとして報告されました。"
-
-
 
 #: zine/views/admin.py:820
 #, python-format
@@ -4434,19 +4026,15 @@ msgstr "カテゴリー %s は正常に更新されました。"
 msgid "Category %s deleted successfully."
 msgstr "カテゴリー %s は正常に削除されました。"
 
-
 #: zine/views/admin.py:933
 #, python-format
 msgid "User %s created successfully."
 msgstr "ユーザー %s は正常に作成されました。"
 
-
 #: zine/views/admin.py:937
 #, python-format
 msgid "User %s edited successfully."
 msgstr "ユーザー %s は正常に編集されました。"
-
-
 
 #: zine/views/admin.py:961
 msgid "You cannot delete yourself."
@@ -4462,12 +4050,9 @@ msgstr "グループ %s は正常に作成されました。"
 msgid "Group %s edited successfully."
 msgstr "グループ %s は正常に編集されました。"
 
-
-
 #: zine/views/admin.py:1057
 msgid "Configuration altered successfully."
 msgstr "設定は正常に変更されました。"
-
 
 #: zine/views/admin.py:1084
 msgid "URL configuration changed."
@@ -4477,16 +4062,13 @@ msgstr "URL設定が変更されました。"
 msgid "Theme changed successfully."
 msgstr "テーマは正常に変更されました。"
 
-
 #: zine/views/admin.py:1121
 msgid "This theme is not configurable"
 msgstr "このテーマの設定はありません"
 
-
 #: zine/views/admin.py:1133
 msgid "Plugin configuration changed"
 msgstr "プラグイン設定が変更されました"
-
 
 #: zine/views/admin.py:1142
 #, python-format
@@ -4511,12 +4093,9 @@ msgstr "キャッシュは正常にクリアされました。"
 msgid "Cache settings were changed successfully."
 msgstr "キャッシュ設定は正常に変更されました。"
 
-
 #: zine/views/admin.py:1218
 msgid "Configuration updated successfully."
 msgstr "設定は正常に更新されました。"
-
-
 
 #: zine/views/admin.py:1221
 msgid "Could not save the configuration because the configuration is invalid."
@@ -4539,8 +4118,6 @@ msgstr "ログの変更を保存しました。"
 msgid "Password changed successfully."
 msgstr "正常にパスワードを変更しました。"
 
-
-
 #: zine/views/blog.py:52
 #: zine/views/blog.py:86
 msgid "Recent Posts Feed"
@@ -4556,8 +4133,6 @@ msgstr "カテゴリー %s のすべての投稿"
 msgid "All posts tagged %s"
 msgstr "タグ %s が付けられたすべての投稿"
 
-
-
 #: zine/views/blog.py:197
 #, python-format
 msgid "All posts written by %s"
@@ -4567,7 +4142,6 @@ msgstr "%s さんのすべての投稿"
 #, python-format
 msgid "Comment %(num)d on %(post)s"
 msgstr "%(post)s に%(num)d件のコメント"
-
 
 #: zine/views/blog.py:451
 msgid "Comments Feed"
@@ -4586,8 +4160,6 @@ msgstr "ユーザー名を入力してください。"
 msgid "You have to enter a mail address."
 msgstr "メールアドレスを入力してください。"
 
-
-
 #: zine/websetup/__init__.py:132
 msgid "The mail address is not valid."
 msgstr "有効なメールアドレスではありません。"
@@ -4596,12 +4168,9 @@ msgstr "有効なメールアドレスではありません。"
 msgid "You have to enter a password."
 msgstr "パスワードを入力してください。"
 
-
-
 #: zine/websetup/__init__.py:137
 msgid "The two passwords do not match."
 msgstr "パスワードが一致しません。"
-
 
 #: zine/websetup/__init__.py:206
 #, python-format
@@ -4633,9 +4202,6 @@ msgstr "パスワード(確認)"
 msgid "Database"
 msgstr "データベース"
 
-
-
-
 #: zine/websetup/templates/database.html:4
 msgid ""
 "\n"
@@ -4658,9 +4224,6 @@ msgstr "SQLite"
 #: zine/websetup/templates/database.html:12
 msgid "sqlite://database.db"
 msgstr "sqlite://database.db"
-
-
-
 
 #: zine/websetup/templates/database.html:13
 msgid ""
@@ -4700,8 +4263,6 @@ msgstr "セットアップは失敗しました"
 msgid "The websetup was not able to finish the Zine installation successfully."
 msgstr "ウェブセットアップはZineを正常にインストールできませんでした。"
 
-
-
 #: zine/websetup/templates/error.html:5
 msgid ""
 "\n"
@@ -4714,11 +4275,9 @@ msgstr ""
 "    また、サポートページではベータ版が公開されていることもあります。\n"
 "  "
 
-
 #: zine/websetup/templates/finished.html:3
 msgid "Setup Finished"
 msgstr "セットアップが完了しました"
-
 
 #: zine/websetup/templates/finished.html:4
 msgid ""
@@ -4759,8 +4318,6 @@ msgstr "戻る"
 msgid "Welcome To The Zine Setup"
 msgstr "ようこそZineのセットアップへ"
 
-
-
 #: zine/websetup/templates/start.html:4
 msgid ""
 "\n"
@@ -4772,7 +4329,6 @@ msgstr ""
 "    ようこそZineのセットアップへ。 このウィザードでは、\n"
 "    いくつかの基本的な質問に回答してZineのセットアップを行います。\n"
 "  "
-
 
 #: zine/websetup/templates/start.html:8
 msgid ""
@@ -4791,7 +4347,6 @@ msgstr ""
 #: zine/websetup/templates/summary.html:3
 msgid "Setup Starting"
 msgstr "セットアップを開始します"
-
 
 #: zine/websetup/templates/summary.html:4
 msgid ""
