@@ -211,7 +211,8 @@ class ZemlTranslator(NodeVisitor):
         self.end_node()
 
     def visit_attribution(self, node):
-        self.begin_node(node, 'p', u'\u2013', CLASS='attribution')
+        self.begin_node(node, 'p', CLASS='attribution')
+        self.add_node('span', u'\u2013', CLASS='attribution-delimiter')
 
     def depart_attribution(self, node):
         self.end_node()
