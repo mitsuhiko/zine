@@ -89,6 +89,10 @@ class ZemlTranslator(NodeVisitor):
         'line_block': ('div', {'class': 'line-block'}),
         'literal_block': ('pre', {'class': 'literal-block'}),
         'definition_list': ('dl', {'class': 'docutils'}),
+        'table': ('table', {}),
+        'thead': ('thead', {}),
+        'tbody': ('tbody', {}),
+        'row': ('tr', {}),
     }
 
     def dispatch_visit(self, node):
@@ -185,6 +189,16 @@ class ZemlTranslator(NodeVisitor):
     def depart_paragraph(self, node):
         if self.context.pop():
             self.end_node()
+
+    def visit_entry(self, node):
+        attrs = {}
+        if node.has_key('morecols'):
+            attrs['colspan'] = node['morecols'] + 1
+        if node.has_key('morerows'):
+            attrs['rowspan'] = node['morerows'] + 1
+        self.begin_node(node, 'td', **attrs)
+    def depart_entry(self, node):
+        self.end_node()
 
     def visit_raw(self, node):
         if 'html' in node.get('format', '').split():
