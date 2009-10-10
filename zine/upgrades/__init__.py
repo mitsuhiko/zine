@@ -14,6 +14,13 @@ import sys
 from os.path import dirname, expanduser, join
 from optparse import OptionParser
 
+try:
+    import migrate
+except ImportError:
+    from zine._core import MissingDependency
+    raise MissingDependency("You need 'sqlalchemy-migrate' installed on your "
+                            "system.")
+
 from migrate.versioning import api, exceptions
 from migrate.versioning.util import construct_engine
 from zine import __version__ as VERSION, setup

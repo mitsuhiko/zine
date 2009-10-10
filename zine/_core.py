@@ -30,6 +30,9 @@ class InstanceNotInitialized(RuntimeError):
 class InstanceUpgradeRequired(RuntimeError):
     """Zine requires a database upgrade"""
 
+class MissingDependency(RuntimeError):
+    """Zine requires an external library which is not installed."""
+
 
 def _create_zine(instance_folder, timeout=5, in_reloader=True):
     """Creates a new Zine object and initialized it.  This is also aware of
