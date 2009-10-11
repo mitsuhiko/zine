@@ -894,11 +894,11 @@ class Zine(object):
 
     def repository_has_upgrade(self, repository, schema_version):
         try:
-            print repository.__dict__, schema_version.version, repository.latest
             if schema_version.version < repository.latest:
                 raise _core.InstanceUpgradeRequired()
         except (SQLAlchemyError, AttributeError):
-            print 'WE EVEN GOT HERE???'
+            self.log.error('WE EVEN GOT HERE??? schema_versions table does not '
+                           'yet exist at this stage?')
             # The schema_versions table does not yet exist. Let's create it
             db.session.rollback()
             from zine.database import metadata, schema_versions
@@ -1283,7 +1283,6 @@ class Zine(object):
     def send_error_notification(self, request, error):
         from zine.notifications import send_notification_template, ZINE_ERROR
         request_buffer = StringIO()
-        pprint(request.__dict__, request_buffer)
         request_buffer.seek(0)
         send_notification_template(
             ZINE_ERROR, 'notifications/on_server_error.zeml',
