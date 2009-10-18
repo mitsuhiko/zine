@@ -149,6 +149,34 @@ class WebSetup(object):
         value = request.values.get
         error = None
         database_uri = value('database_uri', '').strip()
+        
+        # set up the initial config
+        config_filename = path.join(self.instance_folder, 'zine.ini')
+        cfg = Configuration(config_filename)
+        t = cfg.edit()
+        t.update(
+            maintenance_mode=environment.MODE != 'development',
+            blog_url=request.url_root,
+            secret_key=gen_secret_key(),
+            database_uri=database_uri,
+            language=request.translations.language,
+            iid=new_iid(),
+            # load one plugin by default for a better theme
+            plugins='vessel_theme',
+            theme='vessel'
+        )
+        cfg._comments['[zine]'] = CONFIG_HEADER
+        try:
+            t.commit()
+        except ConfigurationTransactionError:
+            _ = request.translations.gettext
+            error = _('The configuration file (%s) could not be opened '
+                      'for writing. Please adjust your permissions and '
+                      'try again.') % config_filename
+            return render_response(request, 'error.html', {
+            'finished': False,
+            'error':    error
+            })
 
         try:
             from zine.database import init_database
@@ -183,29 +211,6 @@ class WebSetup(object):
                 privilege_id=privilege_id
             )
 
-            # set up the initial config
-            config_filename = path.join(self.instance_folder, 'zine.ini')
-            cfg = Configuration(config_filename)
-            t = cfg.edit()
-            t.update(
-                maintenance_mode=environment.MODE != 'development',
-                blog_url=request.url_root,
-                secret_key=gen_secret_key(),
-                database_uri=database_uri,
-                language=request.translations.language,
-                iid=new_iid(),
-                # load one plugin by default for a better theme
-                plugins='vessel_theme',
-                theme='vessel'
-            )
-            cfg._comments['[zine]'] = CONFIG_HEADER
-            try:
-                t.commit()
-            except ConfigurationTransactionError:
-                _ = request.translations.gettext
-                error = _('The configuration file (%s) could not be opened '
-                          'for writing. Please adjust your permissions and '
-                          'try again.') % config_filename
 
         # use a local variable, the global render_response could
         # be None because we reloaded zine and this module.
