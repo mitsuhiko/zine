@@ -37,7 +37,7 @@ def make_extension_directive(app, extension):
         def run(self):
             if self.arguments:
                 self.options[extension.argument_attribute] = self.arguments[0]
-            content = ''.join(self.content)
+            content = '\n'.join(self.content)
             reason = self.state.document.settings.parsing_reason
             if not extension.is_isolated:
                 content_tmp = RstParser(app).parse(content, reason)
