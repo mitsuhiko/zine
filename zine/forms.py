@@ -1205,6 +1205,9 @@ def delete_comment(comment):
                 parent = newparent
             else:
                 parent = None
+    # One could probably optimize this by tracking the amount of deleted
+    # comments
+    comment.post.sync_comment_count()
 
 
 def make_config_form():
