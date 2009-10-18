@@ -6,6 +6,8 @@
     <p>{% trans username=form.user.username|e %}
       Do you really want to delete the user “{{ username }}”?
     {% endtrans %}</p>
+
+    {%- if form.user.posts.count() > 0 %}
     <p>{% trans post_count=form.user.posts.count() %}
       What should happen to the {{ post_count }} post this user wrote?
     {% pluralize %}
@@ -13,6 +15,8 @@
     {% endtrans %}</p>
     {{ form.action() }}
     <p>{{ form.reassign_to.label() }}: {{ form.reassign_to() }}
+    {%- endif %}
+
     <div class="actions">
       <input type="submit" name="cancel" value="{{ _('No') }}">
       <input type="submit" name="confirm" value="{{ _('Yes') }}">
