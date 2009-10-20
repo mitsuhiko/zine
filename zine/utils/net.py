@@ -97,7 +97,7 @@ def get_content_length(data_or_fp):
         return len(data_or_fp)
     except TypeError:
         try:
-            return os.fstat(data_or_fp.fileno().st_size)
+            return os.fstat(data_or_fp.fileno()).st_size
         except (AttributeError, OSError):
             pass
 
