@@ -1071,9 +1071,9 @@ class Comment(_ZEMLContainer):
         request = get_request()
         if user is None:
             user = request.user
-        if user.has_privilege(MODERATE_OWN_ENTRIES | MODERATE_OWN_PAGES):
-            # Comment belongs to a post the user is the author. It's visible.
-            return self.post.author is user
+        if self.post.author is user and \
+           user.has_privilege(MODERATE_OWN_ENTRIES | MODERATE_OWN_PAGES):
+            return True
         elif user.has_privilege(MODERATE_COMMENTS):
             # User is able to manage comments. It's visible.
             return True
