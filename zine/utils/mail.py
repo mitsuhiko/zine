@@ -87,10 +87,6 @@ class EMail(object):
         if not self.subject or not self.text or not self.to_addrs:
             raise RuntimeError("Not all mailing parameters filled in")
 
-        from_addr = self.from_addr.encode('utf-8')
-        to_addrs = [x.encode('utf-8') for x in self.to_addrs]
-
-
         msg = MIMEText(self.text.encode('utf-8'))
 
         #: MIMEText sucks, it does not override the values on
@@ -99,7 +95,7 @@ class EMail(object):
         del msg['Content-Transfer-Encoding']
         del msg['Content-Type']
 
-        msg['From'] = from_addr.encode('utf-8')
+        msg['From'] = self.from_addr.encode('utf-8')
         msg['To'] = ', '.join(x.encode('utf-8') for x in self.to_addrs)
         msg['Subject'] = self.subject.encode('utf-8')
         msg['Content-Transfer-Encoding'] = '8bit'
