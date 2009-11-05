@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
 "POT-Creation-Date: 2009-01-10 22:36+0100\n"
-"PO-Revision-Date: 2009-10-29 13:44+0100\n"
+"PO-Revision-Date: 2009-11-05 21:52+0100\n"
 "Last-Translator: Restless Being <restless.being@gmail.com>\n"
 "Language-Team: pl <LL@li.org>\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
@@ -3215,7 +3215,7 @@ msgstr "Najnowsze komentarze"
 
 #: zine/templates/widgets/latest_comments.html:7
 msgid "by"
-msgstr ""
+msgstr "przez"
 
 #: zine/templates/widgets/latest_posts.html:2
 msgid "Latest Posts"
