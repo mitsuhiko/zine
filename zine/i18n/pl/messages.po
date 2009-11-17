@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
 "POT-Creation-Date: 2009-01-10 22:36+0100\n"
-"PO-Revision-Date: 2009-11-05 21:52+0100\n"
+"PO-Revision-Date: 2009-11-17 21:34+0100\n"
 "Last-Translator: Restless Being <restless.being@gmail.com>\n"
 "Language-Team: pl <LL@li.org>\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
@@ -102,7 +102,7 @@ msgstr "Użyj %year%, %month%, %day%, %hour%, %minute% i %second%. Zmiany będą
 
 #: zine/config.py:113
 msgid "Automatically generated slugs are limited to ASCII"
-msgstr "Automatycznie generowane slugi są ograniczone do ASCII"
+msgstr "Automatycznie generowane odnośniki są ograniczone do ASCII"
 
 #: zine/config.py:116
 msgid "Dates are zero padded like 2009/04/22 instead of 2009/4/22"
@@ -310,6 +310,7 @@ msgid "Publication status"
 msgstr "Status publikacji"
 
 #: zine/forms.py:250
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:3
 msgid "Draft"
 msgstr "Szkic"
 
@@ -318,10 +319,12 @@ msgid "Published"
 msgstr "Opublikowana"
 
 #: zine/forms.py:252
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:5
 msgid "Protected"
 msgstr "Chroniona"
 
 #: zine/forms.py:253
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:4
 msgid "Private"
 msgstr "Prywatna"
 
@@ -337,11 +340,11 @@ msgstr "Wyczyść to pole żeby uaktualnić do bieżacego czasu"
 #: zine/forms.py:580
 #: zine/templates/admin/manage_categories.html:8
 msgid "Slug"
-msgstr "Slug"
+msgstr "Odnośnik"
 
 #: zine/forms.py:257
 msgid "Clear this field to autogenerate a new slug"
-msgstr "Wyczyść to pole żeby automatycznie wygenerować nowy slug"
+msgstr "Wyczyść to pole żeby automatycznie wygenerować nowy odnośnik"
 
 #: zine/forms.py:258
 #: zine/forms.py:458
@@ -357,6 +360,7 @@ msgid "Tags"
 msgstr "Tagi"
 
 #: zine/forms.py:262
+#: zine/plugins/przykropatrzec_theme/templates/widgets/category_list.html:2
 #: zine/templates/_entry.html:4
 #: zine/templates/admin/_post_helpers.html:6
 #: zine/templates/widgets/category_list.html:2
@@ -390,7 +394,7 @@ msgstr "%s (nie znaleziony)"
 
 #: zine/forms.py:340
 msgid "This slug is already in use."
-msgstr "Ten slug jest już wykorzystywany."
+msgstr "Ten odnośnik jest już wykorzystywany."
 
 #: zine/forms.py:345
 msgid "Selected parser is no longer available on the system."
@@ -444,7 +448,7 @@ msgstr "Opis"
 
 #: zine/forms.py:602
 msgid "This slug is already in use"
-msgstr "Ten slug jest już wykorzystywany"
+msgstr "Ten odnośnik jest już wykorzystywany"
 
 #: zine/forms.py:641
 msgid "Comments Per Page:"
@@ -674,7 +678,7 @@ msgstr "Format URL dla stałego linka do wpisu"
 
 #: zine/forms.py:1107
 msgid "Limit slugs to ASCII"
-msgstr "Ogranicz slugi do ASCII"
+msgstr "Ogranicz odnośniki do ASCII"
 
 #: zine/forms.py:1109
 msgid "Use zero-padded dates"
@@ -1034,6 +1038,7 @@ msgid "Creole"
 msgstr ""
 
 #: zine/plugins/miniblog_theme/templates/_widgets.html:5
+#: zine/plugins/przykropatrzec_theme/templates/_widgets.html:7
 #: zine/plugins/vessel_theme/templates/_widgets.html:4
 #: zine/templates/account/layout.html:20
 #: zine/templates/admin/layout.html:6
@@ -1041,17 +1046,20 @@ msgid "Administration"
 msgstr "Administracja"
 
 #: zine/plugins/miniblog_theme/templates/_widgets.html:7
+#: zine/plugins/przykropatrzec_theme/templates/_widgets.html:10
 #: zine/plugins/vessel_theme/templates/_widgets.html:6
 #, python-format
 msgid "logged in as %(username)s."
 msgstr "zalogowany jako %(username)s."
 
 #: zine/plugins/miniblog_theme/templates/_widgets.html:8
+#: zine/plugins/przykropatrzec_theme/templates/_widgets.html:11
 #: zine/plugins/vessel_theme/templates/_widgets.html:7
 msgid "go to admin panel"
 msgstr "przejdź do panelu administracyjnego"
 
 #: zine/plugins/miniblog_theme/templates/layout.html:27
+#: zine/plugins/przykropatrzec_theme/templates/layout.html:72
 #: zine/plugins/vessel_theme/templates/layout.html:28
 #: zine/templates/layout.html:20
 #, python-format
@@ -1073,6 +1081,238 @@ msgstr "Panel Administracyjny"
 #: zine/templates/admin/layout.html:22
 msgid "Logout"
 msgstr "Wyloguj"
+
+#: zine/plugins/przykropatrzec_theme/views.py:27
+#: zine/views/blog.py:52
+#: zine/views/blog.py:86
+msgid "Recent Posts Feed"
+msgstr "Feed najnowszych wpisów"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:7
+#: zine/templates/_comment.html:5
+msgid "Pingback by"
+msgstr "Pingback od"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:11
+#: zine/templates/_comment.html:9
+msgid "Anonymous"
+msgstr "Anonimowy"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:15
+#, fuzzy
+msgid "link to this comment"
+msgstr "odpowiedz na ten komentarz"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:18
+#: zine/templates/_comment.html:15
+msgid "reply to this comment"
+msgstr "odpowiedz na ten komentarz"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:22
+#, fuzzy
+msgid "edit this comment"
+msgstr "odpowiedz na ten komentarz"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:25
+#, fuzzy
+msgid "block this comment"
+msgstr "odpowiedz na ten komentarz"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:28
+#, fuzzy
+msgid "approve this comment"
+msgstr "Zatwierdź komentarz"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:31
+#, fuzzy
+msgid "report as spam"
+msgstr "Oznacz i zgłoś jako \"Spam\""
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:34
+#, fuzzy
+msgid "delete this comment"
+msgstr "odpowiedz na ten komentarz"
+
+#: zine/plugins/przykropatrzec_theme/templates/_comment.html:85
+#: zine/templates/_comment.html:64
+msgid "Submit Comment"
+msgstr "Wyślj komentarz"
+
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:8
+#: zine/templates/_entry.html:18
+#, fuzzy, python-format
+msgid "%(comments)s comment"
+msgid_plural "%(comments)s comments"
+msgstr[0] "%(comments)s komentarz"
+msgstr[1] "%(comments)s komentarze"
+msgstr[2] "%(comments)s komentarzy"
+
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:12
+#: zine/templates/_entry.html:22
+#: zine/templates/admin/_comment.html:12
+#: zine/templates/admin/index.html:56
+msgid "Edit"
+msgstr "Edytuj"
+
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:15
+msgid "Visit Original"
+msgstr ""
+
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:40
+#: zine/plugins/przykropatrzec_theme/templates/show_entry.html:7
+#, fuzzy, python-format
+msgid "%(author)s,"
+msgstr "przez %(author)s"
+
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:45
+#: zine/templates/_entry.html:36
+#, python-format
+msgid "<strong>Scheduled Post:</strong> This entry will appear in %(time_span)s."
+msgstr "<strong>Zaharmonogramowany wpis:</strong> Ten wpis pojawi się o %(time_span)s."
+
+#: zine/plugins/przykropatrzec_theme/templates/_entry.html:55
+#: zine/templates/_entry.html:45
+msgid "Read on"
+msgstr "Czytaj dajel"
+
+#: zine/plugins/przykropatrzec_theme/templates/archive.html:2
+#: zine/plugins/przykropatrzec_theme/templates/archive.html:6
+#: zine/plugins/przykropatrzec_theme/templates/widgets/post_archive_summary.html:2
+#: zine/templates/archive.html:2
+#: zine/templates/archive.html:6
+#: zine/templates/widgets/post_archive_summary.html:2
+msgid "Archive"
+msgstr "Archiwum"
+
+#: zine/plugins/przykropatrzec_theme/templates/archive.html:12
+#: zine/templates/archive.html:12
+msgid "empty archive"
+msgstr "wyczyść archiwum"
+
+#: zine/plugins/przykropatrzec_theme/templates/archive.html:17
+#: zine/templates/archive.html:17
+#, python-format
+msgid "Archive for %(year)s"
+msgstr "Archiwum dla %(year)s"
+
+#: zine/plugins/przykropatrzec_theme/templates/archive.html:19
+#: zine/templates/archive.html:19
+#, python-format
+msgid "Archive for %(month)s"
+msgstr "Archiwum dla %(month)s"
+
+#: zine/plugins/przykropatrzec_theme/templates/archive.html:21
+#: zine/templates/archive.html:21
+#, python-format
+msgid "Archive for %(day)s"
+msgstr "Archiwum dla %(day)s"
+
+#: zine/plugins/przykropatrzec_theme/templates/index.html:13
+#: zine/templates/index.html:8
+msgid "Welcome"
+msgstr "Witaj"
+
+#: zine/plugins/przykropatrzec_theme/templates/index.html:15
+#: zine/templates/index.html:10
+msgid "So far there are no entries in this blog."
+msgstr "Jak dotąd nie ma żadnych wpisów na tym blogu."
+
+#: zine/plugins/przykropatrzec_theme/templates/show_author.html:12
+#: zine/templates/show_author.html:12
+msgid "Posts written by user"
+msgstr "Wpisy napisane przez użytkownika"
+
+#: zine/plugins/przykropatrzec_theme/templates/show_author.html:15
+#: zine/templates/show_author.html:15
+#, python-format
+msgid "%(post)s, on %(date)s"
+msgstr "%(post)s, %(date)s"
+
+#: zine/plugins/przykropatrzec_theme/templates/show_category.html:2
+#: zine/templates/show_category.html:2
+#, python-format
+msgid "Show “%(category)s”"
+msgstr "Pokaż “%(category)s”"
+
+#: zine/plugins/przykropatrzec_theme/templates/show_category.html:5
+#: zine/templates/show_category.html:5
+#, python-format
+msgid "Entries in the Category “%(category)s”"
+msgstr "Wpisy w kategorii “%(category)s”"
+
+#: zine/plugins/przykropatrzec_theme/templates/show_category.html:10
+#: zine/plugins/przykropatrzec_theme/templates/show_tag.html:10
+msgid "None found."
+msgstr ""
+
+#: zine/plugins/przykropatrzec_theme/templates/show_entry.html:47
+#: zine/templates/page.html:14
+#: zine/templates/show_entry.html:26
+msgid "Leave a Reply"
+msgstr "Napisz odpowiedź"
+
+#: zine/plugins/przykropatrzec_theme/templates/show_tag.html:2
+#: zine/templates/show_tag.html:2
+#, python-format
+msgid "Show “%(tag)s”"
+msgstr "Pokaż “%(tag)s”"
+
+#: zine/plugins/przykropatrzec_theme/templates/show_tag.html:5
+#: zine/templates/show_tag.html:5
+#, python-format
+msgid "Entries tagged “%(tag)s”"
+msgstr "Wpisy otagowane “%(tag)s”"
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/blurb_widget.html:2
+#: zine/views/account.py:47
+msgid "About"
+msgstr "O nas"
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/blurb_widget.html:7
+msgid "More"
+msgstr "Więcej"
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/dopplr_widget.html:2
+#, fuzzy
+msgid "Travel"
+msgstr "Zapisz"
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/flickr_widget.html:2
+msgid "Photos at Flickr"
+msgstr ""
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/latest_comments.html:2
+#: zine/templates/widgets/latest_comments.html:2
+msgid "Latest Comments"
+msgstr "Najnowsze komentarze"
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/latest_comments.html:7
+#: zine/templates/widgets/latest_comments.html:7
+msgid "by"
+msgstr "przez"
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/latest_posts.html:2
+#: zine/templates/widgets/latest_posts.html:2
+msgid "Latest Posts"
+msgstr "Najnowsze wpisy"
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/post_archive_summary.html:11
+#: zine/templates/widgets/post_archive_summary.html:11
+msgid "Complete archive"
+msgstr ""
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/twitter_widget.html:2
+msgid "Twitter"
+msgstr ""
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/twitter_widget.html:10
+msgid "Loading tweets..."
+msgstr ""
+
+#: zine/plugins/przykropatrzec_theme/templates/widgets/twitter_widget.html:13
+#, fuzzy
+msgid "Latest Tweets"
+msgstr "Najnowsze komentarze"
 
 #: zine/plugins/pygments_support/__init__.py:169
 msgid "Pygments theme changed successfully."
@@ -1357,25 +1597,9 @@ msgid ""
 "      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 msgstr ""
 
-#: zine/templates/_comment.html:5
-msgid "Pingback by"
-msgstr "Pingback od"
-
 #: zine/templates/_comment.html:6
 msgid "Comment by"
 msgstr "Komentarz od"
-
-#: zine/templates/_comment.html:9
-msgid "Anonymous"
-msgstr "Anonimowy"
-
-#: zine/templates/_comment.html:15
-msgid "reply to this comment"
-msgstr "odpowiedz na ten komentarz"
-
-#: zine/templates/_comment.html:64
-msgid "Submit Comment"
-msgstr "Wyślj komentarz"
 
 #: zine/templates/_comment.html:65
 msgid "Reset Form"
@@ -1385,63 +1609,15 @@ msgstr "Wyczyść formularz"
 msgid "Tagged as"
 msgstr "Tagi"
 
-#: zine/templates/_entry.html:18
-#, python-format
-msgid "%(comments)s comment"
-msgid_plural "%(comments)s comments"
-msgstr[0] "%(comments)s komentarz"
-msgstr[1] "%(comments)s komentarze"
-msgstr[2] "%(comments)s komentarzy"
-
-#: zine/templates/_entry.html:22
-#: zine/templates/admin/_comment.html:12
-#: zine/templates/admin/index.html:56
-msgid "Edit"
-msgstr "Edytuj"
-
 #: zine/templates/_entry.html:31
 #: zine/templates/show_entry.html:8
 #, python-format
 msgid "written by %(author)s, on %(pub_date)s."
 msgstr "napisane przez %(author)s, %(pub_date)s."
 
-#: zine/templates/_entry.html:36
-#, python-format
-msgid "<strong>Scheduled Post:</strong> This entry will appear in %(time_span)s."
-msgstr "<strong>Zaharmonogramowany wpis:</strong> Ten wpis pojawi się o %(time_span)s."
-
-#: zine/templates/_entry.html:45
-msgid "Read on"
-msgstr "Czytaj dajel"
-
 #: zine/templates/_help.html:8
 msgid "Table Of Contents"
 msgstr "Spis treści"
-
-#: zine/templates/archive.html:2
-#: zine/templates/archive.html:6
-#: zine/templates/widgets/post_archive_summary.html:2
-msgid "Archive"
-msgstr "Archiwum"
-
-#: zine/templates/archive.html:12
-msgid "empty archive"
-msgstr "wyczyść archiwum"
-
-#: zine/templates/archive.html:17
-#, python-format
-msgid "Archive for %(year)s"
-msgstr "Archiwum dla %(year)s"
-
-#: zine/templates/archive.html:19
-#, python-format
-msgid "Archive for %(month)s"
-msgstr "Archiwum dla %(month)s"
-
-#: zine/templates/archive.html:21
-#, python-format
-msgid "Archive for %(day)s"
-msgstr "Archiwum dla %(day)s"
 
 #: zine/templates/authors.html:2
 #: zine/templates/authors.html:4
@@ -1456,14 +1632,6 @@ msgstr "Błąd Zine"
 #: zine/templates/index.html:2
 msgid "Index"
 msgstr "Indeks"
-
-#: zine/templates/index.html:8
-msgid "Welcome"
-msgstr "Witaj"
-
-#: zine/templates/index.html:10
-msgid "So far there are no entries in this blog."
-msgstr "Jak dotąd nie ma żadnych wpisów na tym blogu."
 
 #: zine/templates/internal_error.html:2
 msgid "Zine Internal Error"
@@ -1513,48 +1681,14 @@ msgstr ""
 msgid "Comments"
 msgstr "Komentarze"
 
-#: zine/templates/page.html:14
-#: zine/templates/show_entry.html:26
-msgid "Leave a Reply"
-msgstr "Napisz odpowiedź"
-
 #: zine/templates/server_error.html:2
 msgid "Zine Maintenance Mode"
 msgstr "Tryb serwisowy Zine"
-
-#: zine/templates/show_author.html:12
-msgid "Posts written by user"
-msgstr "Wpisy napisane przez użytkownika"
-
-#: zine/templates/show_author.html:15
-#, python-format
-msgid "%(post)s, on %(date)s"
-msgstr "%(post)s, %(date)s"
-
-#: zine/templates/show_category.html:2
-#, python-format
-msgid "Show “%(category)s”"
-msgstr "Pokaż “%(category)s”"
-
-#: zine/templates/show_category.html:5
-#, python-format
-msgid "Entries in the Category “%(category)s”"
-msgstr "Wpisy w kategorii “%(category)s”"
 
 #: zine/templates/show_category.html:10
 #: zine/templates/show_tag.html:10
 msgid "No public posts found"
 msgstr "Nie znaleziono publicznych wpisów"
-
-#: zine/templates/show_tag.html:2
-#, python-format
-msgid "Show “%(tag)s”"
-msgstr "Pokaż “%(tag)s”"
-
-#: zine/templates/show_tag.html:5
-#, python-format
-msgid "Entries tagged “%(tag)s”"
-msgstr "Wpisy otagowane “%(tag)s”"
 
 #: zine/templates/tags.html:2
 #: zine/templates/tags.html:4
@@ -1563,7 +1697,7 @@ msgstr "Chmura tagów"
 
 #: zine/templates/tags.html:8
 #: zine/templates/widgets/tag_cloud.html:7
-#, python-format
+#, fuzzy, python-format
 msgid "%(count)s post tagged %(tag)s"
 msgid_plural "%(count)s posts tagged %(tag)s"
 msgstr[0] "%(count)s wpis otagowany %(tag)s"
@@ -1656,7 +1790,7 @@ msgid "Howdy.  Welcome to your Zine account interface %(user)s."
 msgstr "Cześć %(user)s. Witaj w swoim panelu Zine."
 
 #: zine/templates/account/index.html:11
-#, python-format
+#, fuzzy, python-format
 msgid "You have written <strong>%(your_comments)s</strong> comment so far."
 msgid_plural "You have written <strong>%(your_comments)s</strong> comments so far."
 msgstr[0] "Do tej pory napisałeś <strong>%(your_comments)s</strong> komentarz."
@@ -1803,6 +1937,7 @@ msgid "No pages."
 msgstr "Brak stron."
 
 #: zine/templates/admin/_post_helpers.html:32
+#, fuzzy
 msgid "Your draft:"
 msgid_plural "Your drafts:"
 msgstr[0] "Twój szkic:"
@@ -3209,24 +3344,8 @@ msgstr ""
 msgid "Position"
 msgstr ""
 
-#: zine/templates/widgets/latest_comments.html:2
-msgid "Latest Comments"
-msgstr "Najnowsze komentarze"
-
-#: zine/templates/widgets/latest_comments.html:7
-msgid "by"
-msgstr "przez"
-
-#: zine/templates/widgets/latest_posts.html:2
-msgid "Latest Posts"
-msgstr "Najnowsze wpisy"
-
 #: zine/templates/widgets/pages_navigation.html:2
 msgid "Navigation"
-msgstr ""
-
-#: zine/templates/widgets/post_archive_summary.html:11
-msgid "Complete archive"
 msgstr ""
 
 #: zine/utils/account.py:29
@@ -3381,11 +3500,11 @@ msgstr "Musisz podać poprawny URL."
 
 #: zine/utils/validators.py:117
 msgid "The slug is too long"
-msgstr "Slug jest zbyt długi"
+msgstr "Odnośnik jest zbyt długi"
 
 #: zine/utils/validators.py:119
 msgid "The slug must not start with a slash"
-msgstr "Slug nie może się zaczynać od ukośnika"
+msgstr "Odnośnik nie może się zaczynać od ukośnika"
 
 #: zine/utils/validators.py:137
 #: zine/utils/validators.py:140
@@ -3458,10 +3577,6 @@ msgstr "Niepoprawny atrybut przypisany do %s tag: %s"
 #: zine/views/account.py:40
 msgid "Profile"
 msgstr "Profil"
-
-#: zine/views/account.py:47
-msgid "About"
-msgstr "O nas"
 
 #: zine/views/account.py:51
 #: zine/views/admin.py:156
@@ -3817,11 +3932,6 @@ msgstr ""
 #: zine/views/admin.py:1447
 msgid "Password changed successfully."
 msgstr "Hasło zostało pomyślnie zmienione."
-
-#: zine/views/blog.py:52
-#: zine/views/blog.py:86
-msgid "Recent Posts Feed"
-msgstr "Feed najnowszych wpisów"
 
 #: zine/views/blog.py:118
 #, python-format
