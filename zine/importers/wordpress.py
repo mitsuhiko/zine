@@ -237,8 +237,9 @@ class WordPressImporter(Importer):
                 try:
                     dump = open_url(form.data['download_url']).stream
                 except Exception, e:
-                    error = _(u'Error downloading from URL: %s') % e
-            elif not dump:
+                    log.exception(_('Error downloading feed'))
+                    flash(_(u'Error downloading from URL: %s') % e, 'error')
+            if not dump:
                 return redirect_to('import/wordpress')
 
             try:

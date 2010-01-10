@@ -335,8 +335,9 @@ class FeedImporter(Importer):
                 try:
                     feed = open_url(form.data['download_url']).stream
                 except Exception, e:
-                    error = _(u'Error downloading from URL: %s') % e
-            elif not feed:
+                    log.exception(_('Error downloading feed'))
+                    flash(_(u'Error downloading from URL: %s') % e, 'error')
+            if not feed:
                 return redirect_to('import/feed')
 
             try:
