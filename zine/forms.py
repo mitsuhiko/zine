@@ -910,9 +910,8 @@ class DeleteUserForm(_UserBoundForm):
 
     def context_validate(self, data):
         if data['action'] == 'reassign' and not data['reassign_to']:
-            # XXX: Bad wording
-            raise ValidationError(_('You have to select the user that '
-                                    'gets the posts assigned.'))
+            raise ValidationError(_('You have to select a user to reassign '
+                                    'the posts to.'))
 
     def delete_user(self):
         """Deletes the user."""
