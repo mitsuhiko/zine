@@ -15,8 +15,7 @@ import urlparse
 import socket
 import httplib
 
-# XXX which Response is the right one? It's imported from werkzeug and zine...
-from werkzeug import Response, Headers, url_decode, cached_property
+from werkzeug import Headers, url_decode, cached_property
 from werkzeug.contrib.iterio import IterO
 
 from zine.application import Response, get_application
