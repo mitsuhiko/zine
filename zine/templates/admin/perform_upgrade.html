@@ -93,7 +93,7 @@
     {%- elif live_log is defined %}
       <h1>{{ _("Upgrading...") }}</h1>
       <p>{% trans %}Upgrade in progress.
-        <strong>Don't hit cancel!</strong>{% endtrans %}</p>
+        <strong>Do not hit cancel!</strong>{% endtrans %}</p>
       {%- for event in live_log %}{{ event }}{%- endfor %}
       <p class="finish">{% trans %}Database upgrade finished.{% endtrans %}</p>
       <br/>

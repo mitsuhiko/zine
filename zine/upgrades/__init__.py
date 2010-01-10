@@ -255,7 +255,7 @@ class ManageDatabase(object):
             nextver = ver + changeset.step
             doc = schema.repository.version(max(ver, nextver)). \
                                                         script().module.__doc__
-            yield '<h3>%s -> %s - %s</h3>\n' % (ver, nextver, doc)
+            yield '<h3>Version %s -> %s - %s</h3>\n' % (ver, nextver, doc)
             for message in schema.runchange(ver, change, changeset.step):
                 yield message
             yield '\n<p>Done!</p>\n'
