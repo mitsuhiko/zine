@@ -846,6 +846,9 @@ class Zine(object):
     def register_upgrade_repository(self, repo_id, repo_path):
         """This function is responsible for adding upgrade repositories to the
         database.
+
+        repo_id can be either a string or a Plugin instance, in which case the
+        plugin name is used as the repository ID.
         """
         from zine.models import SchemaVersion
         from zine.pluginsystem import Plugin
@@ -870,6 +873,11 @@ class Zine(object):
             db.session.commit()
 
     def check_if_upgrade_required(self):
+        """Check if all registered schema versions are the latest.
+
+        If an upgrade is required, this will raise
+        zine._core.InstanceUpgradeRequired.
+        """
         from zine.models import SchemaVersion
         from zine.upgrades.customisation import Repository
 
@@ -889,6 +897,7 @@ class Zine(object):
             remove(self.upgrade_lockfile)
 
     def repository_has_upgrade(self, repository, schema_version):
+        """Check for available upgrades in one repository."""
         from zine.models import SchemaVersion
         try:
             if schema_version.version < repository.latest:
@@ -897,6 +906,7 @@ class Zine(object):
             self.log.error('schema_versions table missing while checking '
                            'for upgrades?')
             # the schema_versions table does not yet exist, let's create it
+            # XXX can this happen at all?
             db.session.rollback()
             from zine.database import metadata, schema_versions
             metadata.bind = self.database_engine
