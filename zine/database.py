@@ -3,12 +3,11 @@
     zine.database
     ~~~~~~~~~~~~~
 
-    This module is a rather complex layer on top of SQLAlchemy 0.4.
-    Basically you will never use the `zine.database` module except you
-    are a core developer, but always the high level
-    :mod:`~zine.database.db` module which you can import from the
-    :mod:`zine.api` module.
+    This module is a rather complex layer on top of SQLAlchemy.
 
+    Basically you will never use the `zine.database` module except if you
+    are a core developer, but always the high level :mod:`~zine.database.db`
+    module which you can import from the :mod:`zine.api` module.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
