@@ -6,7 +6,7 @@
     This module holds the base parser informations and the dict of
     default parsers.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from zine.i18n import lazy_gettext

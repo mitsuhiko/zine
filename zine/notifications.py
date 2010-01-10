@@ -9,7 +9,7 @@
     Each user can subscribe to different kinds of events.  The general design
     is inspired by Growl.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
