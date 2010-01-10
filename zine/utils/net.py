@@ -9,12 +9,13 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from cStringIO import StringIO
+from cStringIO import StringIO, InputType
 import os
 import urlparse
 import socket
 import httplib
 
+# XXX which Response is the right one? It's imported from werkzeug and zine...
 from werkzeug import Response, Headers, url_decode, cached_property
 from werkzeug.contrib.iterio import IterO
 
@@ -95,6 +96,9 @@ def get_content_length(data_or_fp):
     try:
         return len(data_or_fp)
     except TypeError:
+        # special-case cStringIO objects which have no fs entry
+        if isinstance(data_or_fp, InputType):
+            return len(data_or_fp.getvalue())
         try:
             return os.fstat(data_or_fp.fileno()).st_size
         except (AttributeError, OSError):
