@@ -196,10 +196,10 @@ class ManageDatabase(object):
         """
         from zine.models import SchemaVersion
         if repo_id is None:
-            available_svs = SchemaVersion.query.all()
-            # Zine upgrades come first (XXX make that happen)
-            #for sv in available_svs[:]:
-            #    available_svs.insert(0, available_svs.pop(available_svs.index(sv)))
+            # get all repos, sort those with id "Zine*" first
+            available_svs = sorted(
+                SchemaVersion.query.order_by(SchemaVersion.repository_id.asc()),
+                key=lambda sv: not sv.repository_id.startswith('Zine'))
         else:
             available_svs = [SchemaVersion.query.get(repo_id)]
         # Now, run the available schema version upgrades
