@@ -520,7 +520,7 @@ class ZEAExtension(Extension):
                               _parser_data(element.findtext(zine.parser_data)))
             comments[int(element.attrib['id'])] = comment
             parent = element.findtext(zine.parent)
-            if parent is not None:
+            if parent:
                 unresolved_parents[comment] = int(parent)
 
         for comment, parent_id in unresolved_parents.iteritems():
