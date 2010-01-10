@@ -118,7 +118,8 @@ class ZemlTranslator(NodeVisitor):
         raise SkipNode
 
     def visit_citation_reference(self, node):
-        self.begin_node(node, 'a', CLASS='citation-reference', href='#'+node['refid'])
+        self.begin_node(node, 'a', CLASS='citation-reference',
+                        href='#'+node['refid'])
         self.add_text('[')
     def depart_citation_reference(self, node):
         self.add_text(']')
@@ -539,7 +540,7 @@ class ZemlTranslator(NodeVisitor):
                 self.add_text(token)
             else:
                 # Protect runs of multiple spaces; the last space can wrap:
-                # XXXX what to do about this for zeml???
+                # XXX what to do about this for zeml???
                 self.add_text('&nbsp;' * (len(token) - 1) + ' ')
         self.end_node()
         # Content already processed:
@@ -553,7 +554,7 @@ class ZemlTranslator(NodeVisitor):
             self.begin_node(node, 'h2', CLASS='subtitle')
         elif isinstance(node.parent, nodes.section):
             tag = 'h%s' % (self.section_level + self.initial_header_level - 1)
-            self.begin_node(node, 'h2', CLASS='section-subtitle')
+            self.begin_node(node, tag, CLASS='section-subtitle')
             self.begin_node(None, 'span', '', CLASS='section-subtitle')
             close_two = True
 
