@@ -146,6 +146,8 @@ DEFAULT_VARS = {
         (2, lazy_gettext(u'Automatically approve comments by known comment authors'))
                                             ], default=1),
     'pings_enabled':            BooleanField(default=True),
+    'plaintext_parser_nolinks': BooleanField(default=False, help_text=lazy_gettext(
+        u'If set to true, the plaintext parser will not create links automatically.')),
 
     # post view
     'posts_per_page':           IntegerField(default=10, help_text=lazy_gettext(

@@ -74,7 +74,7 @@ def macro_func(macro_name, arg_string, body, is_block, environ):
     are looked up the extensions are converted into macros.
     """
     global macros_set_up
-    args, kwarg = parse_args(arg_string)
+    args, kwargs = parse_args(arg_string)
     if macro_name == 'intro' and body:
         return intro_tag(body)
     if not macros_set_up:
