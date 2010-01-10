@@ -111,7 +111,6 @@ class Participant(object):
 
     def __init__(self, writer):
         self.app = writer.app
-        etree = writer.etree
         self.writer = writer
 
     def before_dump(self):
@@ -166,7 +165,7 @@ class Writer(object):
             return etree.tostring(node, encoding='utf-8')
 
         for participant in self.participants:
-            participant.setup()
+            participant.before_dump()
 
         # dump configuration
         cfg = self.z('configuration')
