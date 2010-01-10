@@ -116,8 +116,7 @@ def response(vary=(), timeout=None, cache_key=None):
             response = None
             if use_cache:
                 cache_key = key + request.path.encode('utf-8')
-                # XXX is cache_key meant here?
-                response = request.app.cache.get(key)
+                response = request.app.cache.get(cache_key)
 
             if response is None:
                 response = f(request, *args, **kwargs)

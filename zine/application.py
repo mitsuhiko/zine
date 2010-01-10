@@ -1247,8 +1247,7 @@ class Zine(object):
         for callback in iter_listeners('after-request-setup'):
             result = callback(request)
             if result is not None:
-                # XXX start_response is undefined
-                return result(environ, start_response)
+                return result
 
         # normal request dispatching
         try:
