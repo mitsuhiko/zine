@@ -17,7 +17,6 @@ from urlparse import urlparse
 from collections import deque
 from inspect import getdoc
 from traceback import format_exception
-from pprint import pprint
 from StringIO import StringIO
 
 from babel import Locale
@@ -833,10 +832,10 @@ class Zine(object):
             self.cfg.config_vars['comment_parser'].choices = \
             self.list_parsers()
 
-        # Register Zine's upgrade repository
+        # register Zine's upgrade repository
         from zine.upgrades import REPOSITORY_PATH
         self.register_upgrade_repository('Zine', REPOSITORY_PATH)
-        # Allow plugins to register their upgrade's repositories
+        # allow plugins to register their upgrade repositories
         emit_event('register-upgrade-repository')
 
         self.initialized = True
@@ -860,7 +859,7 @@ class Zine(object):
                 db.session.add(SchemaVersion(Repository(repo_path, repo_id)))
                 db.session.commit()
         except (SQLAlchemyError, AttributeError):
-            # The schema_versions table does not yet exist. Let's create it
+            # the schema_versions table does not yet exist, let's create it
             db.session.rollback()
             from zine.database import metadata, schema_versions
             metadata.bind = self.database_engine
@@ -868,7 +867,6 @@ class Zine(object):
                 schema_versions.create(self.database_engine)
             db.session.add(SchemaVersion(Repository(repo_path, repo_id)))
             db.session.commit()
-
 
     @property
     def upgrade_required(self):
@@ -880,30 +878,31 @@ class Zine(object):
             try:
                 self.repository_has_upgrade(repository, sv)
             except _core.InstanceUpgradeRequired:
-                # Set Zine in maintenance mode
+                # set Zine in maintenance mode
                 cfg = self.cfg.edit()
                 cfg['maintenance_mode'] = True
                 cfg.commit()
                 raise _core.InstanceUpgradeRequired()
 
-        # We got here, let's check for a bad upgrade lockfile left behind
+        # we got here, let's check for a bad upgrade lockfile left behind
         if path.isfile(self.upgrade_lockfile):
             remove(self.upgrade_lockfile)
 
     def repository_has_upgrade(self, repository, schema_version):
+        from zine.models import SchemaVersion
         try:
             if schema_version.version < repository.latest:
                 raise _core.InstanceUpgradeRequired()
         except (SQLAlchemyError, AttributeError):
             self.log.error('WE EVEN GOT HERE??? schema_versions table does not '
                            'yet exist at this stage?')
-            # The schema_versions table does not yet exist. Let's create it
+            # the schema_versions table does not yet exist, let's create it
             db.session.rollback()
             from zine.database import metadata, schema_versions
             metadata.bind = self.database_engine
             if not schema_versions.exists():
                 schema_versions.create(self.database_engine)
-            db.session.add(SchemaVersion(Repository(repo_path)))
+            db.session.add(SchemaVersion(repository))
             db.session.commit()
             raise _core.InstanceUpgradeRequired()
 

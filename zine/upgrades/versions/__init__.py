@@ -2,8 +2,8 @@
     zine.upgrades.versions
     ~~~~~~~~~~~~~~~~~~~~~~
 
-    This package implements contains the necessary upgrade/downgrade scripts
-    to maintain the database schema changes.
+    This package contains the necessary upgrade/downgrade scripts to maintain
+    the database schema changes.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.

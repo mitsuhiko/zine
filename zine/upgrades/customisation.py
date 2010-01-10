@@ -30,7 +30,9 @@ class PythonScript(MigratePythonScript):
     def create(cls, path, **opts):
         """Create an empty migration script at specified path
 
-        :returns: :class:`PythonScript instance <migrate.versioning.script.py.PythonScript>`"""
+        :returns: :class:`PythonScript instance
+                  <migrate.versioning.script.py.PythonScript>`
+        """
         cls.require_notfound(path)
 
         NEW_SCRIPT_TEMPLATE = """\"\"\"%s\"\"\"
@@ -65,7 +67,8 @@ def downgrade(migrate_engine):
     map_tables(session.mapper)
 
 """
-        open(path, 'w').write(NEW_SCRIPT_TEMPLATE % opts.get('description', ''))
+        open(path, 'w').write(NEW_SCRIPT_TEMPLATE %
+                              opts.get('description', ' '))
         return cls(path)
 
     def run(self, engine, step):
@@ -227,7 +230,7 @@ class Repository(MigrateRepository):
         if self.__class__.parent is not None:
             self._init_parent(repository_path)
         # __init__ from Repository
-        self.versions=Collection(join(repository_path, 'versions'))
+        self.versions = Collection(join(repository_path, 'versions'))
         self.config['repository_id'] = repository_id
 
     @classmethod
@@ -235,7 +238,8 @@ class Repository(MigrateRepository):
         return str(p) + ':' + str(k)
 
     def changeset(self, database, start, end=None):
-        """Create a changeset to migrate this database from ver. start to end/latest.
+        """Create a changeset to migrate this database from version
+        start to end/latest.
 
         :param database: name of database to generate changeset
         :param start: version to start at
@@ -243,7 +247,8 @@ class Repository(MigrateRepository):
         :type database: string
         :type start: int
         :type end: int
-        :returns: :class:`Changeset instance <migration.versioning.repository.Changeset>`
+        :returns: :class:`Changeset instance
+                  <migration.versioning.repository.Changeset>`
         """
         start = api.VerNum(start)
 
@@ -263,7 +268,7 @@ class Repository(MigrateRepository):
 
         versions = range(start + range_mod, end + range_mod, step)
         changes = []
-        for version in range(start + range_mod, end + range_mod, step):
+        for version in versions:
             try:
                 changes.append(self.version(version).script(database, op))
             except KeyError:

@@ -129,11 +129,11 @@ def setup(app, plugin):
     url rules, views etc.
     """
 
-    # we need to register eric's database upgrades repository;
-    # Basically it should be a folder which itself has another child folder
-    # named "versions" where the upgrade script(s) should reside.
-    # In "Eric the fish" case we pass the plugin's folder which has that child
-    # folder called "versions"
+    # since this plugin also shows how to do data migration, we need to register
+    # eric's database upgrades repository.  Basically it should be a directory
+    # which itself has a subdirectory named "versions" where the upgrade
+    # script(s) reside.  In Eric's case we pass the plugin's directory which has
+    # that subdirectory called "versions".
     app.register_upgrade_repository(plugin, dirname(__file__))
 
     # we want our fish to appear in the admin panel, so hook into the
