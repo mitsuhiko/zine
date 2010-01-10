@@ -119,8 +119,8 @@ class CommandLineInterface(object):
     def script(self, argv):
         parser = OptionParser(usage=self.usage % ('script', 'DESCRIPTION'),
                               description=self.commands['script'])
-        parser.add_option('-r', '--repository-id', help='the repository id',
-                          default='Zine', dest='repo_id')
+        parser.add_option('-r', '--repository-id', default='Zine', dest='repo_id',
+                          help='the repository id (default: Zine)')
         parser.add_option(
             '-f', '--filename',
             help="file name (without spaces and/or version number)")
@@ -212,7 +212,7 @@ class ManageDatabase(object):
                                              upgrade=True, **opts):
                     yield message
             except Exception, msg:
-                yield '<p>error upgrading %s: ' % repo_id
+                yield '<p>error upgrading %s: ' % sv.repository_id
                 yield str(msg)
                 yield '</p>\n'
 
