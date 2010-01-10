@@ -118,12 +118,12 @@ class WebUpgrades(object):
         if request.method == 'POST':
             open(self.lockfile, 'w').write('locked on database upgrade\n')
             mdb = ManageDatabase(request.app)
-            db.session.close()  # Close open sessions
+            db.session.close()  # close open sessions
             def finish():
-                # this runs after the upgrade finishes
+                # this is run from the template after the upgrade finishes
                 remove(self.lockfile)
-                db.session.close()  # Close open sessions
-                self.wants_reload = True    # Force application reload
+                db.session.close()  # close open sessions
+                self.wants_reload = True    # force application reload
                 return ''   # just because I need to return something to jinja
 
             return render_response(request, 'admin/perform_upgrade.html',

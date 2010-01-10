@@ -14,7 +14,7 @@
     }
 
     div.msg {
-      width: 90%;
+      width: 40em;
       margin: 0 auto 0 auto;
       padding: 20px;
       background-color: white;
@@ -30,19 +30,17 @@
     }
 
     h2 {
-      border-bottom: 1px solid #cfcfcf;
-      margin-left: 10px;
+      border-top: 5px solid #cfcfcf;
+      padding-top: 5px;
+      margin-left: -20px;
       margin-bottom: 0;
-      margin-right: 10px;
+      margin-right: -20px;
       text-align: center;
     }
 
     h3 {
-      font-weight: small;
-      border-bottom: 1px dashed #cfcfcf;
-      margin-left: 10px;
-      margin-bottom: 0;
-      margin-right: 150px;
+      font-weight: normal;
+      border-bottom: 1px solid #cfcfcf;
     }
 
     ul {
@@ -53,15 +51,9 @@
       text-align: left;
     }
 
-    p {
-      margin: 0;
-      padding: 0;
-    }
-
     div.message {
       border: 1px solid #E8B5B5;
-      margin: 0 -10px 10px -10px;
-      padding: 8px 8px 8px 32px;
+      padding: 8px;
       -moz-border-radius: 3px;
       -webkit-border-radius: 3px;
       border-radius: 3px;
@@ -72,15 +64,22 @@
       font-size: 80%;
       margin-top: 10px;
       margin-left: 10px;
-      margin-right: 150px;
-      padding-top: 0;
-      padding-bottom: 0;
+      margin-right: 10px;
       background-color: #F7FAFD;
       border-color: #B4D2E7;
     }
-    span.progress, dl dt {
+
+    .progress {
       font-size: 80%;
       font-family: 'Consolas', 'Bitstream Vera Sans Mono', 'Monaco', monospace;
+    }
+
+    p.finish {
+      border-top: 5px solid #cfcfcf;
+      padding-top: 5px;
+      margin-left: -20px;
+      margin-right: -20px;
+      text-align: center;
     }
 
   </style>
@@ -91,26 +90,33 @@
     {%- if in_progress %}
       <h1>{{ _("Upgrade In Progress") }}</h1>
       <p>{% trans %}<b>Database upgrade in progress!</b>{% endtrans %}</p>
-    {% elif live_log is defined %}
+    {%- elif live_log is defined %}
       <h1>{{ _("Upgrading...") }}</h1>
-      <p>{% trans %}Upgrade in process.
+      <p>{% trans %}Upgrade in progress.
         <strong>Don't hit cancel!</strong>{% endtrans %}</p>
       {%- for event in live_log %}{{ event }}{%- endfor %}
-      <p>{% trans %}Database upgraded successfully.{% endtrans %}</p>
+      <p class="finish">{% trans %}Database upgrade finished.{% endtrans %}</p>
       <br/>
-      <div class="message">{% trans %}Zine is in maintenance mode.
+      <div class="message">{% trans %}Zine maintenance mode has been switched on.
           Please <a href="{{ blog_url }}">check your blog</a> to see if the
-          upgrade was perfect.
-          Don't forget to <a href="{{ maintenance_url }}">turn it off again</a>
-          once you finish.
+          blog works fine with the upgraded database.
+          Don't forget to <a href="{{ maintenance_url }}">turn maintenance mode
+          off again</a> once you finish.
       {% endtrans %}</div>
+      {# XXX offer advice in case the upgrade failed? #}
       {{ finish() }}
-    {% else %}
-      <h1>{{ _("Upgrade") }}</h1>
+    {%- else %}
+      <h1>{{ _("Upgrade required") }}</h1>
       <p>{% trans %}<b>Zine requires a database upgrade!</b>{% endtrans %}</p>
+      <p>{% trans %}A database upgrade can become necessary when a new version
+          of Zine or one of your plugins is installed.{% endtrans %}</p>
+      <p>{% trans %}When you click “Perform upgrade”, your database will be
+          brought in sync with the format the installed software expects.  While
+          this is designed not to corrupt your database, you can back it up
+          now before clicking “Perform upgrade”.{% endtrans %}</p>
       <br/>
       <form action="" method="POST">
-        <input type="submit" name="upgrade" value="Upgrade!">
+        <input type="submit" name="upgrade" value="{{ _("Perform upgrade") }}">
       </form>
     {%- endif %}
   </div>

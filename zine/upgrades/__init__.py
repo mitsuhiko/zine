@@ -244,12 +244,13 @@ class ManageDatabase(object):
         schema = api.ControlledSchema(engine, repository)
         version = self._migrate_version(schema, version, upgrade)
 
+        yield '<h2>Migrating %s</h2>\n' % repository.id
+
         changeset = schema.changeset(version)
         if not changeset:
-            yield '<p>Repository %s is already up to date.</p>\n' % repository.id
+            yield '<p>This repository is already up to date.</p>\n'
             return
 
-        yield '<h2>Migrating %s</h2>\n' % repository.id
         for ver, change in changeset:
             nextver = ver + changeset.step
             doc = schema.repository.version(max(ver, nextver)). \

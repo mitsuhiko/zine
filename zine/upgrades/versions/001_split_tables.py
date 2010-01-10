@@ -284,11 +284,11 @@ def upgrade(migrate_engine):
     metadata1.bind = migrate_engine
     metadata2.bind = migrate_engine
 
-    yield '<div class="message info"><dl>'
-    yield '<dt>.</dt><dd> comment</dd>\n'
-    yield '<dt>+</dt><dd> comment with <tt>parent_id</tt></dd>\n'
-    yield '<dt>E</dt><dd> Error handling comment</dd>\n'
-    yield '</dl></div>\n'
+    yield '<div class="message info">'
+    yield '<span class="progress">.&nbsp;&nbsp;</span>comment<br/>\n'
+    yield '<span class="progress">+&nbsp;&nbsp;</span>comment with parent_id<br/>\n'
+    yield '<span class="progress">E&nbsp;&nbsp;</span>error handling comment<br/>\n'
+    yield '</div>\n'
 
     yield '<ul>'
     yield '  <li>Auto-loading needed extra tables</li>\n'
@@ -431,11 +431,11 @@ def downgrade(migrate_engine):
     metadata1.bind = migrate_engine
     metadata2.bind = migrate_engine
 
-    yield '<div class="message info"><dl>'
-    yield '<dt>.</dt><dd> comment</dd>\n'
-    yield '<dt>+</dt><dd> comment with <tt>parent_id</tt></dd>\n'
-    yield '<dt>E</dt><dd> Error handling comment</dd>\n'
-    yield '</dl></div>\n'
+    yield '<div class="message info">'
+    yield '<span class="progress">.&nbsp;&nbsp;</span>comment<br/>\n'
+    yield '<span class="progress">+&nbsp;&nbsp;</span>comment with parent_id<br/>\n'
+    yield '<span class="progress">E&nbsp;&nbsp;</span>error handling comment<br/>\n'
+    yield '</div>\n'
 
     yield '<ul>'
     yield '  <li>Auto-loading needed extra tables</li>\n'
