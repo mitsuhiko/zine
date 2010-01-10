@@ -195,11 +195,15 @@ class ZemlTranslator(NodeVisitor):
 
     def visit_entry(self, node):
         attrs = {}
+        tagname = 'td'
+        if isinstance(node.parent.parent, nodes.thead):
+            tagname = 'th'
         if node.has_key('morecols'):
             attrs['colspan'] = node['morecols'] + 1
         if node.has_key('morerows'):
             attrs['rowspan'] = node['morerows'] + 1
-        self.begin_node(node, 'td', **attrs)
+        self.begin_node(node, tagname, **attrs)
+
     def depart_entry(self, node):
         self.end_node()
 
