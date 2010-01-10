@@ -107,7 +107,8 @@ class RstParser(BaseParser):
             for extension in self.app.markup_extensions:
                 if extension.is_block_level:
                     directives.register_directive(
-                        extension.name, make_extension_directive(self.app, extension))
+                        extension.name,
+                        make_extension_directive(self.app, extension))
                 else:
                     roles.register_local_role(
                         extension.name, make_extension_role(extension))
