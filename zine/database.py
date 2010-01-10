@@ -247,6 +247,11 @@ cleanup_session = session.remove
 #: metadata for the core tables and the core table definitions
 metadata = db.MetaData()
 
+schema_versions = db.Table('schema_versions', metadata,
+    db.Column('repository_id', db.String(255), primary_key=True),
+    db.Column('repository_path', db.Text),
+    db.Column('version', db.Integer)
+)
 
 users = db.Table('users', metadata,
     db.Column('user_id', db.Integer, primary_key=True),

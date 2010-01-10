@@ -27,6 +27,12 @@ class InstanceNotInitialized(RuntimeError):
     instance folder.
     """
 
+class InstanceUpgradeRequired(RuntimeError):
+    """Zine requires a database upgrade"""
+
+class MissingDependency(RuntimeError):
+    """Zine requires an external library which is not installed."""
+
 
 def _create_zine(instance_folder, timeout=5, in_reloader=True):
     """Creates a new Zine object and initialized it.  This is also aware of
@@ -59,6 +65,10 @@ def _create_zine(instance_folder, timeout=5, in_reloader=True):
         _application = app = object.__new__(cls)
         try:
             app.__init__(instance_folder)
+            app.upgrade_required
+        except InstanceUpgradeRequired:
+            from zine.upgrades.webapp import WebUpgrades
+            _application = app = WebUpgrades(app)
         except:
             # if an exception happened, tear down the application
             # again so that we don't have a semi-initialized object
@@ -91,7 +101,9 @@ def _unload_zine():
                 for key, value in module.__dict__.items():
                     if key not in preserve and not key.startswith('__'):
                         module.__dict__.pop(key, None)
-            elif name.startswith('zine.') and name != 'zine._core':
+            elif name.startswith('zine.') and name not in (
+                                'zine._core', 'zine.upgrades',
+                                'zine.upgrades.customisation'):
                 # get rid of the module
                 sys.modules.pop(name, None)
                 # zero out the dict

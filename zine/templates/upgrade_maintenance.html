@@ -1,0 +1,9 @@
+{% extends "maintenance.html" %}
+{% block extended_contents %}
+  <style type="text/css">
+    p.small { font-size: 75%; text-align: center; }
+  </style>
+  <p class="small">
+    If you're an administrator, please <a href="{{ login_url }}">authenticate</a>.
+  </p>
+{% endblock %}

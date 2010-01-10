@@ -17,7 +17,7 @@ from subprocess import call as run
 join = os.path.join
 
 
-PACKAGES = '_dynamic _ext importers utils views websetup docs'.split()
+PACKAGES = '_dynamic _ext importers upgrades utils views websetup docs'.split()
 SCRIPTS = 'create-apache-config server shell'.split()
 DESTDIR = os.environ.get('DESTDIR')
 

@@ -635,6 +635,8 @@ class Zine(object):
                             'make_zine factory function.' %
                             self.__class__.__name__)
         self.instance_folder = path.abspath(instance_folder)
+        self.upgrade_lockfile = path.join(instance_folder,
+                                          '.upgrade_in_progress')
 
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup
@@ -831,10 +833,79 @@ class Zine(object):
             self.cfg.config_vars['comment_parser'].choices = \
             self.list_parsers()
 
+        # Register Zine's upgrade repository
+        from zine.upgrades import REPOSITORY_PATH
+        self.register_upgrade_repository('Zine', REPOSITORY_PATH)
+        # Allow plugins to register their upgrade's repositories
+        emit_event('register-upgrade-repository')
+
         self.initialized = True
 
         #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
+
+    def register_upgrade_repository(self, repo_id, repo_path):
+        """This function is responsible for adding upgrade repositories to the
+        database.
+        """
+        from zine.models import SchemaVersion
+        from zine.pluginsystem import Plugin
+        from zine.upgrades.customisation import Repository
+        if isinstance(repo_id, Plugin):
+            repo_id = repo_id.metadata.get('name')
+        repo_path = path.abspath(repo_path)
+        try:
+            sv = SchemaVersion.query.filter_by(repository_id=repo_id).first()
+            if not sv:
+                db.session.add(SchemaVersion(Repository(repo_path, repo_id)))
+                db.session.commit()
+        except (SQLAlchemyError, AttributeError):
+            # The schema_versions table does not yet exist. Let's create it
+            db.session.rollback()
+            from zine.database import metadata, schema_versions
+            metadata.bind = self.database_engine
+            if not schema_versions.exists():
+                schema_versions.create(self.database_engine)
+            db.session.add(SchemaVersion(Repository(repo_path, repo_id)))
+            db.session.commit()
+
+
+    @property
+    def upgrade_required(self):
+        from zine.models import SchemaVersion
+        from zine.upgrades.customisation import Repository
+
+        for sv in SchemaVersion.query.all():
+            repository = Repository(sv.repository_path, sv.repository_id)
+            try:
+                self.repository_has_upgrade(repository, sv)
+            except _core.InstanceUpgradeRequired:
+                # Set Zine in maintenance mode
+                cfg = self.cfg.edit()
+                cfg['maintenance_mode'] = True
+                cfg.commit()
+                raise _core.InstanceUpgradeRequired()
+
+        # We got here, let's check for a bad upgrade lockfile left behind
+        if path.isfile(self.upgrade_lockfile):
+            remove(self.upgrade_lockfile)
+
+    def repository_has_upgrade(self, repository, schema_version):
+        try:
+            if schema_version.version < repository.latest:
+                raise _core.InstanceUpgradeRequired()
+        except (SQLAlchemyError, AttributeError):
+            self.log.error('WE EVEN GOT HERE??? schema_versions table does not '
+                           'yet exist at this stage?')
+            # The schema_versions table does not yet exist. Let's create it
+            db.session.rollback()
+            from zine.database import metadata, schema_versions
+            metadata.bind = self.database_engine
+            if not schema_versions.exists():
+                schema_versions.create(self.database_engine)
+            db.session.add(SchemaVersion(Repository(repo_path)))
+            db.session.commit()
+            raise _core.InstanceUpgradeRequired()
 
     @property
     def wants_reload(self):
@@ -1210,7 +1281,6 @@ class Zine(object):
     def send_error_notification(self, request, error):
         from zine.notifications import send_notification_template, ZINE_ERROR
         request_buffer = StringIO()
-        pprint(request.__dict__, request_buffer)
         request_buffer.seek(0)
         send_notification_template(
             ZINE_ERROR, 'notifications/on_server_error.zeml',
