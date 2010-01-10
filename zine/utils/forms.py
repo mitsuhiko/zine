@@ -688,14 +688,6 @@ class _InputGroup(Widget):
         """Render the radio buttons widget as <ol>"""
         return self._as_list(html.ol, attrs)
 
-    def as_table(self, **attrs):
-        """Render the radio buttons widget as <table>"""
-        self._attr_setdefault(attrs)
-        return list_type(*[u'<tr><td>%s</td><td>%s</td></tr>' % (
-            choice,
-            choice.label
-        ) for choice in self.choices], **attrs)
-
     def render(self, **attrs):
         return self.as_ul(**attrs)
 
