@@ -894,7 +894,7 @@ class Zine(object):
 
     @setuponly
     def add_importer(self, importer):
-        """Register an importer.  For more informations about importers
+        """Register an importer.  For more information about importers
         see the :mod:`zine.importers`.
         """
         importer = importer(self)
