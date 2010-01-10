@@ -29,6 +29,7 @@ from sqlalchemy.exc import ArgumentError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.engine.url import make_url, URL
 from sqlalchemy.types import TypeDecorator
+from sqlalchemy.util import to_list
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from werkzeug import url_decode
@@ -206,11 +207,23 @@ session = orm.scoped_session(lambda: orm.create_session(get_engine(),
                              local_manager.get_ident)
 
 
+def mapper(cls, *args, **kwargs):
+    """Attaches a query and auto registers."""
+    if not hasattr(cls, 'query'):
+        cls.query = session.query_property(Query)
+    old_init = getattr(cls, '__init__', None)
+    def register_init(self, *args, **kwargs):
+        old_init(self, *args, **kwargs)
+        session.add(self)
+    cls.__init__ = register_init
+    return orm.mapper(cls, *args, **kwargs)
+
+
 # configure a declarative base.  This is unused in the code but makes it easier
 # for plugins to work with the database.
 class ModelBase(object):
     """Internal baseclass for `Model`."""
-Model = declarative_base(name='Model', cls=ModelBase, mapper=session.mapper)
+Model = declarative_base(name='Model', cls=ModelBase, mapper=mapper)
 ModelBase.query = session.query_property(Query)
 
 
@@ -236,7 +249,7 @@ db.get_engine = get_engine
 db.create_engine = create_engine
 db.session = session
 db.ZEMLParserData = ZEMLParserData
-db.mapper = session.mapper
+db.mapper = mapper
 db.association_proxy = association_proxy
 db.attribute_loaded = attribute_loaded
 db.AttributeExtension = AttributeExtension
