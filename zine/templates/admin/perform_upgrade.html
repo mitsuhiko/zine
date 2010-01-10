@@ -114,6 +114,10 @@
           brought in sync with the format the installed software expects.  While
           this is designed not to corrupt your database, you can back it up
           now before clicking “Perform upgrade”.{% endtrans %}</p>
+      {%- if repo_ids %}
+      <p>{% trans %}Components that need an upgrade:{% endtrans %}
+          {{ repo_ids|join(', ') }}</p> 
+      {%- endif %}
       <br/>
       <form action="" method="POST">
         <input type="submit" name="upgrade" value="{{ _("Perform upgrade") }}">

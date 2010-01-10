@@ -43,8 +43,9 @@ class WebUpgrades(object):
     """
     wants_reload = False
 
-    def __init__(self, app):
+    def __init__(self, app, repo_ids=None):
         self.app = app
+        self.repo_ids = repo_ids
         self.database_engine = app.database_engine
         self.lockfile = app.upgrade_lockfile
         self.blog_url = app.url_adapter.build('blog/index')
@@ -133,7 +134,8 @@ class WebUpgrades(object):
                                    in_progress=False)
 
         return render_response(request, 'admin/perform_upgrade.html',
-                               in_progress=isfile(self.lockfile))
+                               in_progress=isfile(self.lockfile),
+                               repo_ids=self.repo_ids)
 
     def __call__(self, environ, start_response):
         request = self.get_request(environ)

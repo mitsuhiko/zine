@@ -881,16 +881,21 @@ class Zine(object):
         from zine.models import SchemaVersion
         from zine.upgrades.customisation import Repository
 
+        to_upgrade = []
+
         for sv in SchemaVersion.query.all():
             repository = Repository(sv.repository_path, sv.repository_id)
             try:
                 self.repository_has_upgrade(repository, sv)
             except _core.InstanceUpgradeRequired:
-                # set Zine in maintenance mode
-                cfg = self.cfg.edit()
-                cfg['maintenance_mode'] = True
-                cfg.commit()
-                raise _core.InstanceUpgradeRequired()
+                to_upgrade.append(sv.repository_id)
+
+        if to_upgrade:
+            # set Zine in maintenance mode
+            cfg = self.cfg.edit()
+            cfg['maintenance_mode'] = True
+            cfg.commit()
+            raise _core.InstanceUpgradeRequired(to_upgrade)
 
         # we got here, let's check for a bad upgrade lockfile left behind
         if path.isfile(self.upgrade_lockfile):
