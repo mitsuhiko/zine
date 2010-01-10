@@ -5,19 +5,24 @@
     This package contains the necessary upgrade/downgrade scripts to maintain
     the database schema changes.
 
+    This __init__ contains often used helpers for the individual upgrade
+    scripts.  Do not import it outside of upgrade scripts as it replaces
+    some SQLAlchemy APIs with migrate's.
+
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from zine.database import db
-from migrate import changeset, versioning
 from sqlalchemy.exceptions import InternalError
 from sqlalchemy.orm import scoped_session, create_session, clear_mappers
 from sqlalchemy.sql import text, and_, or_
+
 import migrate
 from migrate import *
+from migrate import changeset, versioning
+
+from zine.database import db
 
 
-key = value = mod = None
 for mod in versioning, changeset:
     for key, value in mod.__dict__.iteritems():
         # Override SQLA stuff with migrate's stuff

@@ -23,6 +23,7 @@ except ImportError:
 from migrate.versioning import api
 from migrate.versioning.util import construct_engine
 from migrate.versioning.exceptions import KnownError
+
 from zine import __version__ as VERSION, setup
 # imported for side-effects
 from zine.upgrades import customisation

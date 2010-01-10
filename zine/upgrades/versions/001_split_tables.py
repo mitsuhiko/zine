@@ -1,9 +1,10 @@
 """Switch to split tables for comments, posts and texts"""
-from zine.upgrades.versions import *
+from copy import deepcopy
 
 from sqlalchemy.exceptions import ProgrammingError, OperationalError
 from sqlalchemy.types import MutableType, TypeDecorator
-from copy import deepcopy
+
+from zine.upgrades.versions import *
 
 metadata1 = db.MetaData()
 metadata2 = db.MetaData()
