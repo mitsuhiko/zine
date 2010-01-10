@@ -500,7 +500,6 @@ class ZemlTranslator(NodeVisitor):
 
     def visit_title(self, node):
         """Only 6 section levels are supported by HTML."""
-        check_id = 0
         if isinstance(node.parent, nodes.topic):
             self.begin_node(node, 'p', CLASS='topic-title first')
         elif isinstance(node.parent, nodes.sidebar):

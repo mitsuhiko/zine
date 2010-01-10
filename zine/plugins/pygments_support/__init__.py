@@ -127,8 +127,7 @@ def get_formatter(style=None, preview=False):
         else:
             cls = 'syntax'
         style_cls = lookup_style(style)
-        formatter = HtmlFormatter(style=lookup_style(style),
-                                  cssclass=cls)
+        formatter = HtmlFormatter(style=style_cls, cssclass=cls)
     except ValueError:
         return None
     if not preview:

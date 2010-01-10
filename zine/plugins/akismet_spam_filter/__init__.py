@@ -10,13 +10,13 @@
 """
 from os.path import dirname, join
 
-from werkzeug import escape, url_encode
+from werkzeug import url_encode
 
 import zine
 from zine.api import *
 from zine.widgets import Widget
 from zine.views.admin import flash, render_admin_response
-from zine.models import COMMENT_BLOCKED_SPAM, COMMENT_MODERATED, Comment
+from zine.models import COMMENT_BLOCKED_SPAM, Comment
 from zine.privileges import BLOG_ADMIN, MODERATE_COMMENTS, require_privilege
 from zine.utils.validators import ValidationError, check
 from zine.utils.http import redirect_to

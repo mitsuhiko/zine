@@ -12,7 +12,7 @@
 from zine.api import *
 from zine.forms import LoginForm, DeleteAccountForm, EditProfileForm, \
      make_notification_form
-from zine.i18n import _, ngettext
+from zine.i18n import _
 from zine.models import Comment
 from zine.privileges import ENTER_ADMIN_PANEL
 from zine.utils.account import flash, require_account_privilege

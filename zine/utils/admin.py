@@ -8,8 +8,6 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-import os
-from time import time
 from itertools import islice
 from datetime import datetime
 

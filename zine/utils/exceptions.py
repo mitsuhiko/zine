@@ -53,7 +53,6 @@ def summarize_exception(exc_info):
         prefix = _to_unicode(exc_type.__name__)
     message = _to_unicode(exc_value)
 
-    location = (None, None)
     filename = tb.tb_frame.f_globals.get('__file__')
     if filename is None:
         filename = _(u'unkown file')

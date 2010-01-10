@@ -16,7 +16,6 @@ from zine.forms import WordPressImportForm
 from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.i18n import lazy_gettext, _
 from zine.utils import log
-from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
 from zine.utils.xml import Namespace, html_entities, escape
 from zine.utils.zeml import parse_html, inject_implicit_paragraphs

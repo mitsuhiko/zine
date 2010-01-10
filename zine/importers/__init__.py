@@ -265,7 +265,7 @@ def rewrite_import(app, id, callback, title='Modified Import'):
     """
     if isinstance(app, basestring):
         from zine import setup
-        app = make_zine(app)
+        app = setup(app)
 
     blog = load_import_dump(app, id)
     callback(blog)

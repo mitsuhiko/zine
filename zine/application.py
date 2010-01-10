@@ -13,9 +13,7 @@
 import sys
 from os import path, remove, makedirs, walk, environ
 from time import time
-from itertools import izip
-from datetime import datetime, timedelta
-from urlparse import urlparse, urljoin
+from urlparse import urlparse
 from collections import deque
 from inspect import getdoc
 from traceback import format_exception
@@ -1249,6 +1247,7 @@ class Zine(object):
         for callback in iter_listeners('after-request-setup'):
             result = callback(request)
             if result is not None:
+                # XXX start_response is undefined
                 return result(environ, start_response)
 
         # normal request dispatching
@@ -1423,4 +1422,5 @@ class Zine(object):
 # import here because of circular dependencies
 from zine import i18n
 from zine.utils import log
+from zine.utils.net import NetException
 from zine.utils.http import make_external_url

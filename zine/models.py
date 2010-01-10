@@ -24,7 +24,7 @@ from zine.utils.text import gen_slug, gen_timestamped_slug, build_tag_uri, \
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
-from zine.privileges import Privilege, _Privilege, privilege_attribute, \
+from zine.privileges import _Privilege, privilege_attribute, \
      add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN, \
      VIEW_DRAFTS, VIEW_PROTECTED, MODERATE_OWN_ENTRIES, MODERATE_OWN_PAGES
 from zine.application import get_application, get_request, url_for
@@ -563,7 +563,7 @@ class _PostBase(object):
 
     def set_auto_slug(self):
         """Generate a slug for this post."""
-        cfg = get_application().cfg
+        #cfg = get_application().cfg
         slug = gen_slug(self.title)
         if not slug:
             slug = to_blog_timezone(self.pub_date).strftime('%H%M')

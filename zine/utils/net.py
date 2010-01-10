@@ -19,7 +19,6 @@ from werkzeug import Response, Headers, url_decode, cached_property
 from werkzeug.contrib.iterio import IterO
 
 from zine.application import Response, get_application
-from zine.utils.datastructures import OrderedDict
 from zine.utils.exceptions import ZineException
 
 
@@ -36,7 +35,7 @@ def open_url(url, data=None, timeout=None,
     """
     app = get_application()
     if timeout is None:
-        timeout = app.cfg['default_network_timeout'] 
+        timeout = app.cfg['default_network_timeout']
     parts = urlparse.urlsplit(url)
     if app is not None:
         blog_url = urlparse.urlsplit(app.cfg['blog_url'])

@@ -9,10 +9,9 @@
     :license: BSD, see LICENSE for more details.
 """
 
-from zine.importers import Tag, Post, Comment, Author
+from zine.importers import Tag, Comment
 from zine.importers.feed import Extension, SkipItem, atom
 from zine.utils.xml import Namespace
-from zine.utils.dates import parse_iso8601
 
 BLOGGER_LABEL_SCHEME_URI = 'http://www.blogger.com/atom/ns#'
 BLOGGER_KIND_SCHEME_URI = 'http://schemas.google.com/g/2005#kind'

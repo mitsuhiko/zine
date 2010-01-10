@@ -20,7 +20,6 @@ from zine import environment
 from zine.config import Configuration
 from zine.api import db
 from zine.config import ConfigurationTransactionError
-from zine.models import User
 from zine.utils.crypto import gen_pwhash, gen_secret_key, new_iid
 from zine.utils.validators import is_valid_email, check
 from zine.i18n import load_core_translations, has_language, list_languages
@@ -82,7 +81,7 @@ class WebSetup(object):
             self.next[view] = next
 
     def handle_view(self, request, name, ctx=None):
-        handler = self.views[name]
+        #handler = self.views[name]
         ctx = ctx or {}
         ctx.update({
             'current':     name,

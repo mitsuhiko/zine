@@ -17,9 +17,7 @@ import re
 import os
 import sys
 import time
-import urlparse
 from os import path
-from datetime import datetime, timedelta
 from types import ModuleType
 from copy import deepcopy
 
@@ -29,9 +27,8 @@ from sqlalchemy.interfaces import ConnectionProxy
 from sqlalchemy.orm.interfaces import AttributeExtension
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.util import to_list
 from sqlalchemy.engine.url import make_url, URL
-from sqlalchemy.types import MutableType, TypeDecorator
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from werkzeug import url_decode
@@ -158,7 +155,7 @@ class ZEMLParserData(TypeDecorator):
     def process_bind_param(self, value, dialect):
         if value is None:
             return
-        from zine.utils.zeml import dump_parser_data, RootElement
+        from zine.utils.zeml import dump_parser_data
         return dump_parser_data(value)
 
     def process_result_value(self, value, dialect):

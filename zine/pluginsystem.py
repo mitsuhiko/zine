@@ -81,17 +81,14 @@
 import __builtin__
 import re
 import sys
-import imp
 import inspect
 from os import path, listdir, walk, makedirs
 from types import ModuleType
 from shutil import rmtree
 from time import localtime, time
-from cStringIO import StringIO
-from base64 import b64encode
 
 from urllib import quote
-from werkzeug import cached_property, escape, find_modules, import_string
+from werkzeug import cached_property, escape
 
 from zine.application import get_application
 from zine.utils import log
@@ -151,7 +148,7 @@ def find_plugins(app):
 
 def install_package(app, package):
     """Install a plugin from a package to the instance plugin folder."""
-    from zipfile import ZipFile, ZipInfo, error as BadZipFile
+    from zipfile import ZipFile, error as BadZipFile
     import py_compile
     try:
         f = ZipFile(package)
@@ -162,7 +159,7 @@ def install_package(app, package):
     try:
         package_version = int(f.read('ZINE_PACKAGE'))
         plugin_name = f.read('ZINE_PLUGIN')
-    except (KeyError, ValueError), e:
+    except (KeyError, ValueError):
         raise InstallationError('invalid')
 
     # check if the package version is handleable
@@ -211,7 +208,7 @@ def get_package_metadata(package):
     """Get the metadata of a plugin in a package. Pass it a filepointer or
     filename. Raises a `ValueError` if the package is not valid.
     """
-    from zipfile import ZipFile, ZipInfo, error as BadZipFile
+    from zipfile import ZipFile, error as BadZipFile
     try:
         f = ZipFile(package)
     except (IOError, BadZipFile):
@@ -221,7 +218,7 @@ def get_package_metadata(package):
     try:
         package_version = int(f.read('ZINE_PACKAGE'))
         plugin_name = f.read('ZINE_PLUGIN')
-    except (KeyError, ValueError), e:
+    except (KeyError, ValueError):
         raise ValueError('not a valid package')
     if package_version > PACKAGE_VERSION:
         raise ValueError('incompatible package version')

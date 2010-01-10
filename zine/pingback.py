@@ -30,7 +30,7 @@ import re
 from xmlrpclib import ServerProxy
 
 from werkzeug.routing import RequestRedirect, NotFound
-from werkzeug import escape, unescape
+from werkzeug import unescape
 
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment

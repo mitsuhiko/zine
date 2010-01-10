@@ -63,7 +63,6 @@ from weakref import WeakKeyDictionary
 from babel import Locale, dates, UnknownLocaleError
 from babel.support import Translations as TranslationsBase
 from pytz import timezone, UTC
-from werkzeug.exceptions import NotFound
 
 import zine
 from zine.environment import LOCALE_PATH, LOCALE_DOMAIN, \

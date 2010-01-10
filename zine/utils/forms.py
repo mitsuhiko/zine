@@ -998,9 +998,10 @@ class Field(object):
 
     def _bind(self, form, memo):
         """Method that binds a field to a form. If `form` is None, a copy of
-        the field is returned."""
+        the field is returned.
+        """
         if form is not None and self.bound:
-            raise TypeError('%r already bound' % type(obj).__name__)
+            raise TypeError('%r already bound' % type(self).__name__)
         rv = object.__new__(self.__class__)
         rv.__dict__.update(self.__dict__)
         rv.validators = self.validators[:]
@@ -1513,7 +1514,6 @@ class MultiChoiceField(ChoiceField):
             known_choices[choice] = choice
             known_choices.setdefault(_to_string(choice), choice)
 
-        x = _to_list(value)
         for value in _to_list(value):
             for version in value, _to_string(value):
                 if version in known_choices:

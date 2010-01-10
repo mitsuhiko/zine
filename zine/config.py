@@ -220,7 +220,7 @@ def from_string(value, field):
     """Try to convert a value from string or fall back to the default."""
     try:
         return field(value)
-    except ValidationError, e:
+    except ValidationError:
         return field.get_default()
 
 

@@ -9,8 +9,6 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from werkzeug import escape
-
 from zine.i18n import lazy_gettext
 from zine.application import iter_listeners, get_application
 from zine.utils.zeml import parse_html, parse_zeml, sanitize, split_intro, \

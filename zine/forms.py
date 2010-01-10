@@ -14,7 +14,7 @@ from datetime import datetime
 from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.config import DEFAULT_VARS
-from zine.database import db, posts, comments, notification_subscriptions
+from zine.database import db, posts
 from zine.models import User, Group, Comment, Post, Category, Tag, \
      NotificationSubscription, STATUS_DRAFT, STATUS_PUBLISHED, \
      STATUS_PROTECTED, STATUS_PRIVATE, \
@@ -27,7 +27,7 @@ from zine.notifications import send_notification_template, NEW_COMMENT, \
 from zine.utils import forms, log, dump_json
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
-     is_valid_url, is_valid_slug, is_netaddr, is_not_whitespace_only
+     is_valid_url, is_valid_slug, is_not_whitespace_only
 from zine.utils.redirects import register_redirect, change_url_prefix
 
 

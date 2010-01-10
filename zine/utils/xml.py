@@ -13,7 +13,7 @@ import xmlrpclib
 from datetime import datetime
 from htmlentitydefs import name2codepoint
 
-from werkzeug import escape, import_string, BaseResponse
+from werkzeug import escape, BaseResponse
 from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
 
 from zine.utils import log

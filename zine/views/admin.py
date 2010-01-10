@@ -10,41 +10,29 @@
     :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from datetime import datetime
-from os import remove, sep as pathsep
-from os.path import exists
 from urlparse import urlparse
 
 from werkzeug import escape
 from werkzeug.exceptions import NotFound, BadRequest, Forbidden
 
-from zine.privileges import assert_privilege, require_privilege, \
+from zine.privileges import assert_privilege, \
      CREATE_ENTRIES, EDIT_OWN_ENTRIES, EDIT_OTHER_ENTRIES, \
      CREATE_PAGES, EDIT_OWN_PAGES, EDIT_OTHER_PAGES, MODERATE_COMMENTS, \
      MODERATE_OWN_ENTRIES, MODERATE_OWN_PAGES, MANAGE_CATEGORIES, BLOG_ADMIN
 from zine.i18n import _, ngettext
 from zine.application import get_request, url_for, emit_event, \
-     render_response, get_application
-from zine.models import User, Group, Post, Category, Comment, \
-     STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
-     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
-from zine.database import db, comments as comment_table, posts, \
-     post_categories, post_links, secure_database_uri
-from zine.utils import dump_json, load_json
-from zine.utils.validators import is_valid_email, is_valid_url, check
+     render_response
+from zine.models import User, Group, Post, Category, Comment
+from zine.database import db, secure_database_uri
 from zine.utils.admin import flash, load_zine_reddit, require_admin_privilege
-from zine.utils.text import gen_slug
 from zine.utils.pagination import AdminPagination
-from zine.utils.http import redirect_back, redirect_to, redirect
-from zine.utils.zeml import split_intro
-from zine.i18n import parse_datetime, format_system_datetime, \
-     list_timezones, has_timezone, list_languages, has_language
+from zine.utils.http import redirect_to, redirect
 from zine.importers import list_import_queue, load_import_dump, \
      delete_import_dump
 from zine.pluginsystem import install_package, InstallationError, \
-     SetupError, get_object_name
+     get_object_name
 from zine.pingback import pingback, PingbackError
-from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
+from zine.forms import ChangePasswordForm, PluginForm, \
      LogOptionsForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
@@ -52,7 +40,7 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
      DeleteGroupForm, ThemeOptionsForm, DeleteImportForm, ExportForm, \
      MaintenanceModeForm, MarkCommentForm, RemovePluginForm, \
-     make_config_form, make_import_form, make_notification_form
+     make_config_form, make_import_form
 
 #: how many posts / comments should be displayed per page?
 PER_PAGE = 20

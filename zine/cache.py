@@ -17,11 +17,6 @@ from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
 
 from zine.utils import local
 
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import new as md5
-
 
 def get_cache(app):
     """Return the cache for the application.  This is called during the
@@ -121,6 +116,7 @@ def response(vary=(), timeout=None, cache_key=None):
             response = None
             if use_cache:
                 cache_key = key + request.path.encode('utf-8')
+                # XXX is cache_key meant here?
                 response = request.app.cache.get(key)
 
             if response is None:
