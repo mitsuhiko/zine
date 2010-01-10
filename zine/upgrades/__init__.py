@@ -29,6 +29,7 @@ from zine.upgrades import customisation
 
 REPOSITORY_PATH = dirname(__file__)
 
+
 class CommandLineInterface(object):
 
     usage = '%%prog -I instancepath %s [options] %s'

@@ -9,18 +9,21 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-
 from os import remove
 from os.path import isfile
 from time import time
+
 from sqlalchemy.sql import and_
+
+from werkzeug.utils import redirect
+from werkzeug.contrib.securecookie import SecureCookie
+from werkzeug.wrappers import Response, Request
+
 from zine.database import db, privileges, users, user_privileges
 from zine.i18n import load_core_translations
 from zine.upgrades import ManageDatabase
 from zine.utils.crypto import check_pwhash
-from werkzeug.utils import redirect
-from werkzeug.contrib.securecookie import SecureCookie
-from werkzeug.wrappers import Response, Request
+
 
 def render_template(tmpl, _stream=False, **context):
     if _stream:
@@ -35,7 +38,11 @@ def render_response(request, template_name, **context):
 
 
 class WebUpgrades(object):
-    upgrade_required = wants_reload = False
+    """WSGI application that is used instead of the Zine application when
+    a database upgrade is required.
+    """
+    wants_reload = False
+
     def __init__(self, app):
         self.app = app
         self.database_engine = app.database_engine

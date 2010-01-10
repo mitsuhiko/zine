@@ -65,7 +65,7 @@ def _create_zine(instance_folder, timeout=5, in_reloader=True):
         _application = app = object.__new__(cls)
         try:
             app.__init__(instance_folder)
-            app.upgrade_required
+            app.check_if_upgrade_required()
         except InstanceUpgradeRequired:
             from zine.upgrades.webapp import WebUpgrades
             _application = app = WebUpgrades(app)

@@ -856,6 +856,7 @@ class Zine(object):
         try:
             sv = SchemaVersion.query.filter_by(repository_id=repo_id).first()
             if not sv:
+                # this always starts with version 0
                 db.session.add(SchemaVersion(Repository(repo_path, repo_id)))
                 db.session.commit()
         except (SQLAlchemyError, AttributeError):
@@ -868,8 +869,7 @@ class Zine(object):
             db.session.add(SchemaVersion(Repository(repo_path, repo_id)))
             db.session.commit()
 
-    @property
-    def upgrade_required(self):
+    def check_if_upgrade_required(self):
         from zine.models import SchemaVersion
         from zine.upgrades.customisation import Repository
 
@@ -894,8 +894,8 @@ class Zine(object):
             if schema_version.version < repository.latest:
                 raise _core.InstanceUpgradeRequired()
         except (SQLAlchemyError, AttributeError):
-            self.log.error('WE EVEN GOT HERE??? schema_versions table does not '
-                           'yet exist at this stage?')
+            self.log.error('schema_versions table missing while checking '
+                           'for upgrades?')
             # the schema_versions table does not yet exist, let's create it
             db.session.rollback()
             from zine.database import metadata, schema_versions
