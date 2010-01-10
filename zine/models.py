@@ -779,6 +779,15 @@ class Post(_PostBase, _ZEMLDualContainer):
             uid = build_tag_uri(app, self.pub_date, content_type, self.slug)
         self.uid = uid
 
+    @property
+    def comments_closed(self):
+        """True if commenting is no longer possible."""
+        app = get_application()
+        open_for = app.cfg['comments_open_for']
+        if open_for == 0:
+            return False
+        return self.pub_date + timedelta(days=open_for) < datetime.utcnow()
+
 
 class SummarizedPost(_PostBase):
     """Like a regular post but without text and parser data."""

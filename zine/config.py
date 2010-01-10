@@ -145,6 +145,9 @@ DEFAULT_VARS = {
         (1, lazy_gettext(u'An administrator must always approve the comment')),
         (2, lazy_gettext(u'Automatically approve comments by known comment authors'))
                                             ], default=1),
+    'comments_open_for':        IntegerField(default=0, help_text=lazy_gettext(
+        u'The number of days commenting is possible.  If set to zero, comments '
+        u'will be open forever.')),
     'pings_enabled':            BooleanField(default=True),
     'plaintext_parser_nolinks': BooleanField(default=False, help_text=lazy_gettext(
         u'If set to true, the plaintext parser will not create links automatically.')),

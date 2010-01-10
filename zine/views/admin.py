@@ -202,7 +202,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                                                set(plugins_to_deactivate)))
             cfg.commit()
             # we change the plugins inline so that the user get somewhat more
-            # informations
+            # information
             request.app.cfg.touch()
 
 

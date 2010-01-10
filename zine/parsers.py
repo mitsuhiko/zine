@@ -3,7 +3,7 @@
     zine.parsers
     ~~~~~~~~~~~~
 
-    This module holds the base parser informations and the dict of
+    This module holds the base parser information and the dict of
     default parsers.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.

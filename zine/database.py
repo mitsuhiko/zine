@@ -3,12 +3,11 @@
     zine.database
     ~~~~~~~~~~~~~
 
-    This module is a rather complex layer on top of SQLAlchemy 0.4.
-    Basically you will never use the `zine.database` module except you
-    are a core developer, but always the high level
-    :mod:`~zine.database.db` module which you can import from the
-    :mod:`zine.api` module.
+    This module is a rather complex layer on top of SQLAlchemy.
 
+    Basically you will never use the `zine.database` module except if you
+    are a core developer, but always the high level :mod:`~zine.database.db`
+    module which you can import from the :mod:`zine.api` module.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
@@ -206,11 +205,23 @@ session = orm.scoped_session(lambda: orm.create_session(get_engine(),
                              local_manager.get_ident)
 
 
+def mapper(cls, *args, **kwargs):
+    """Attaches a query and auto registers."""
+    if not hasattr(cls, 'query'):
+        cls.query = session.query_property(Query)
+    old_init = getattr(cls, '__init__', None)
+    def register_init(self, *args, **kwargs):
+        old_init(self, *args, **kwargs)
+        session.add(self)
+    cls.__init__ = register_init
+    return orm.mapper(cls, *args, **kwargs)
+
+
 # configure a declarative base.  This is unused in the code but makes it easier
 # for plugins to work with the database.
 class ModelBase(object):
     """Internal baseclass for `Model`."""
-Model = declarative_base(name='Model', cls=ModelBase, mapper=session.mapper)
+Model = declarative_base(name='Model', cls=ModelBase, mapper=mapper)
 ModelBase.query = session.query_property(Query)
 
 
@@ -236,7 +247,7 @@ db.get_engine = get_engine
 db.create_engine = create_engine
 db.session = session
 db.ZEMLParserData = ZEMLParserData
-db.mapper = session.mapper
+db.mapper = mapper
 db.association_proxy = association_proxy
 db.attribute_loaded = attribute_loaded
 db.AttributeExtension = AttributeExtension
