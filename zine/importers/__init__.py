@@ -283,6 +283,9 @@ class Importer(object):
     #: and internal addressing.
     name = None
 
+    #: an explanation of what this importer can import.
+    description = None
+
     @property
     def title(self):
         return self.name.title()

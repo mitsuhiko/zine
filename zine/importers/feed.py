@@ -321,6 +321,10 @@ class FeedImportError(UserException):
 class FeedImporter(Importer):
     name = 'feed'
     title = lazy_gettext(u'Feed Importer')
+    description = lazy_gettext(u'Handles ATOM feeds with optional extensions '
+                               u'such as those exported by Zine itself. '
+                               u'Plugins can add further extensions to be '
+                               u'recognized by this importer.')
 
     def configure(self, request):
         form = FeedImportForm()

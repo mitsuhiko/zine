@@ -226,6 +226,8 @@ def parse_feed(fd):
 class WordPressImporter(Importer):
     name = 'wordpress'
     title = 'WordPress'
+    description = lazy_gettext(u'Handles import of WordPress "extended RSS" '
+                               u' feeds.')
 
     def configure(self, request):
         form = WordPressImportForm()
