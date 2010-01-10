@@ -139,6 +139,8 @@ class NewCommentForm(forms.Form):
     def context_validate(self, data):
         if not self.post.comments_enabled:
             raise ValidationError(_('Post is closed for commenting.'))
+        elif self.post.comments_closed:
+            raise ValidationError(_('Commenting is no longer possible.'))
 
     def make_comment(self):
         """A handy helper to create a comment from the validated form."""
@@ -539,6 +541,7 @@ class BlockCommentForm(_CommentBoundForm):
             msg = _(u'blocked by %s') % self.req.user.display_name
         self.comment.status = COMMENT_BLOCKED_USER
         self.comment.bocked_msg = msg
+
 
 class MarkCommentForm(_CommentBoundForm):
     """Form used to block comments."""
@@ -1073,6 +1076,8 @@ class BasicOptionsForm(_ConfigForm):
     moderate_comments = config_field('moderate_comments',
                                      lazy_gettext(u'Comment Moderation'),
                                      widget=forms.RadioButtonGroup)
+    comments_open_for = config_field('comments_open_for',
+        label=lazy_gettext(u'Comments Open Period'))
     pings_enabled = config_field('pings_enabled',
         lazy_gettext(u'Pingbacks enabled'),
         help_text=lazy_gettext(u'enable pingbacks per default'))
