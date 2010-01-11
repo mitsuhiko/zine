@@ -13,35 +13,34 @@ $(function() {
   // fade in messages
   (function() {
     var shuttingDown = false;
-    var active = false;
-    var msg = null, left, top, right, bottom;
+    var hiddenMsg = null, left, top, right, bottom;
     var messages = $('div.message').hide().fadeIn('slow');
 
     function fadeInMsg() {
-      if (msg)
-        msg.css('visibility', 'visible').animate({'opacity': '1.0'}, 'fast');
-      msg = null;
+      hiddenMsg.css('visibility', 'visible').animate({opacity: '1.0'});
+      hiddenMsg = null;
     }
 
     messages.mouseenter(function() {
       if (shuttingDown && !$(this).is('.message-error'))
         return;
-      if (msg)
+      if (hiddenMsg)
         fadeInMsg();
-      msg = $(this);
+      var msg = $(this);
       var pos = msg.offset();
       left = pos.left - 2, top = pos.top - 2;
       right = left + msg.width() + parseInt(msg.css('padding-left')) +
               parseInt(msg.css('padding-right')) + 4;
       bottom = top + msg.height() + parseInt(msg.css('padding-top')) +
                parseInt(msg.css('padding-bottom')) + 4;
-      msg.animate({
-        opacity:      '0.01'
-      }, 'fast', function() { msg.css('visibility', 'hidden'); });
+      msg.animate({opacity: '0.01'}, 'fast', function() {
+        hiddenMsg = msg;
+        hiddenMsg.css('visibility', 'hidden');
+      });
     });
 
     $(document).mousemove(function(evt) {
-      if (!msg)
+      if (!hiddenMsg)
         return;
       if (evt.clientX < left || evt.clientX > right ||
           evt.clientY < top || evt.clientY > bottom)

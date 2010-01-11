@@ -828,15 +828,16 @@ table.notifications ul.choicegroup li {
 
 div.contents div.notification-messages {
     position: fixed;
-    top: 10px;
-    right: 20px;
+    top: 0;
+    right: 10px;
     width: 250px;
+    height: 0px;
     font-size: 13px;
 }
 
 div.contents div.message {
     border: 1px solid #B4D2E7;
-    margin: 0 -10px 10px -10px;
+    margin: 10px 0;
     padding: 8px 8px 8px 32px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
