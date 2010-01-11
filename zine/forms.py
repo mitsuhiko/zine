@@ -108,7 +108,7 @@ class NewCommentForm(forms.Form):
         message=lazy_gettext(u'You have to enter a valid URL or omit the field.')
     )])
     body = forms.TextField(lazy_gettext(u'Text'), min_length=2, max_length=6000,
-                           messages=dict(
+                           required=True, messages=dict(
         too_short=lazy_gettext(u'Your comment is too short.'),
         too_long=lazy_gettext(u'Your comment is too long.'),
         required=lazy_gettext(u'You have to enter a comment.')
@@ -139,7 +139,7 @@ class NewCommentForm(forms.Form):
     def context_validate(self, data):
         if not self.post.comments_enabled:
             raise ValidationError(_('Post is closed for commenting.'))
-        elif self.post.comments_closed:
+        if self.post.comments_closed:
             raise ValidationError(_('Commenting is no longer possible.'))
 
     def make_comment(self):
