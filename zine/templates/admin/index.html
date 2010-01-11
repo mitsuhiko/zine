@@ -67,8 +67,9 @@
       <ul class="last_posts">
       {%- for post in last_posts %}
         <li><a href="{{ url_for('admin/edit_post', post_id=post.id)
-          }}">{%- if post.title %}{{ post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>, {{ post.pub_date|datetimeformat('short') }}
-          [<a href="{{ url_for(post) }}">{{ _('show') }}</a>]
+          }}">{%- if post.title %}{{ post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>
+          [<a href="{{ url_for(post) }}">{{ _('show') }}</a>],
+          {{ post.pub_date|datetimeformat('short') }}
       {%- endfor %}
       </ul>
       {% endif %}
