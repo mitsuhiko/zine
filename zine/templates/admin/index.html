@@ -51,6 +51,7 @@
           comment.author|e }}</a>,
           {{ comment.pub_date|datetimeformat('short') }}
           on <a href="{{ url_for(comment.post) }}">{%- if comment.post.title %}{{ comment.post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>
+          [<a href="{{ url_for('admin/edit_post', post_id=comment.post.id) }}">{{ _('edit') }}</a>]
           <p class="actions">
             <a href="{{ url_for('admin/edit_comment', comment_id=comment.id)|e
              }}">{{ _("Edit") }}</a> |
@@ -67,6 +68,7 @@
       {%- for post in last_posts %}
         <li><a href="{{ url_for('admin/edit_post', post_id=post.id)
           }}">{%- if post.title %}{{ post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>, {{ post.pub_date|datetimeformat('short') }}
+          [<a href="{{ url_for(post) }}">{{ _('show') }}</a>]
       {%- endfor %}
       </ul>
       {% endif %}

@@ -335,6 +335,10 @@ div.contents input[name="save"] {
     font-weight: bold;
 }
 
+div.contents div.per_page {
+    float: right;
+}
+
 div.contents pre,
 div.contents tt,
 div.contents code {
