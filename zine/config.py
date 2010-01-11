@@ -37,41 +37,41 @@ DEFAULT_VARS = {
         u'consult the Zine help.')),
     'force_https':              BooleanField(default=False, help_text=l_(
         u'If a request to an http URL comes in, Zine will redirect to the same '
-        u'URL on https if this is savely possible.  This requires a working '
-        u'SSL setup or otherwise Zine will become unresponsive.')),
+        u'URL on https if this is safely possible.  This requires a working '
+        u'SSL setup, otherwise Zine will become unresponsive.')),
     'database_debug':           BooleanField(default=False, help_text=l_(
-        u'If enabled the database will collect the SQL statements and add them '
-        u'to the bottom of the page for easier debugging')),
+        u'If enabled, the database will collect all SQL statements and add '
+        u'them to the bottom of the page for easier debugging.')),
     'blog_title':               TextField(default=l_(u'My Zine Blog')),
     'blog_tagline':             TextField(default=l_(u'just another Zine blog')),
     'blog_url':                 TextField(default=u'', help_text=l_(
         u'The base URL of the blog.  This has to be set to a full canonical URL '
-        u'(including http or https).  If not set the application will behave '
+        u'(including http or https).  If not set, the application will behave '
         u'confusingly.  Remember to change this value if you move your blog '
         u'to a new location.')),
     'blog_email':               TextField(default=u'', help_text=l_(
         u'The email address given here is used by the notification system to send '
-        u'mails from.  Also plugins that send mails will use this address as '
-        u'sender address.'), validators=[is_valid_email()]),
+        u'emails from.  Also plugins that send mails will use this address as '
+        u'the sender address.'), validators=[is_valid_email()]),
     'timezone':                 ChoiceField(choices=sorted(list_timezones()),
         default=u'UTC', help_text=l_(
         u'The timezone of the blog.  All times and dates in the user interface '
         u'and on the website will be shown in this timezone.  It\'s save to '
-        u'change the timezone after posts were created because the information '
+        u'change the timezone after posts are created because the information '
         u'in the database is stored as UTC.')),
     'primary_author':           TextField(default=u'', help_text=l_(
         u'If this blog is written primarily by one author, some themes can ' \
         u'skip the author\'s name on posts unless written by a guest.')),
     'maintenance_mode':         BooleanField(default=False, help_text=l_(
-        u'If set to true the blog enables the maintainance mode.')),
+        u'If set to true, the blog enables the maintainance mode.')),
     'session_cookie_name':      TextField(default=u'zine_session',
-        help_text=l_(u'If there are multiple zine installations on '
-        u'the same host the cookie name should be set to something different '
+        help_text=l_(u'If there are multiple Zine installations on '
+        u'the same host, the cookie name should be set to something different '
         u'for each blog.')),
     'theme':                    TextField(default=u'default'),
     'secret_key':               TextField(default=u'', help_text=l_(
-        u'The secret key is used for vairous security related tasks in the '
-        u'system.  For example the cookie is signed with this value.')),
+        u'The secret key is used for various security related tasks in the '
+        u'system.  For example, the cookie is signed with this value.')),
     'language':                 ChoiceField(choices=list_languages(False),
                                             default=u'en'),
 
@@ -86,7 +86,7 @@ DEFAULT_VARS = {
                                                           key=lambda x: x[1])],
                                             default=u'warning'),
     'log_email_only':           BooleanField(default=_dev_mode,
-        help_text=l_(u'During development this is helpful to '
+        help_text=l_(u'During development activating this is helpful to '
         u'log emails into a mail.log file in your instance folder instead '
         u'of delivering them to your MTA.')),
     'passthrough_errors':       BooleanField(default=_dev_mode,
@@ -152,7 +152,8 @@ DEFAULT_VARS = {
         u'will be open forever.')),
     'pings_enabled':            BooleanField(default=True),
     'plaintext_parser_nolinks': BooleanField(default=False, help_text=l_(
-        u'If set to true, the plaintext parser will not create links automatically.')),
+        u'If set to true, the plaintext parser will not create links '
+        u'automatically.')),
 
     # post view
     'posts_per_page':           IntegerField(default=10, help_text=l_(
@@ -177,21 +178,22 @@ DEFAULT_VARS = {
     'default_network_timeout':  IntegerField(default=5, help_text=l_(
         u'This timeout is used by default for all network related operations. '
         u'The default should be fine for most environments but if you have a '
-        u'very bad network connection during development you should increase it.')),
+        u'very bad network connection during development you should increase '
+        u'it.')),
 
     # plugin settings
     'plugin_guard':             BooleanField(default=not _dev_mode),
     'plugins':                  CommaSeparated(TextField(), default=list),
     'plugin_searchpath':        CommaSeparated(TextField(), default=list,
-        help_text=l_(u'It\'s possible to one or more comma '
-        u'separated paths here that are searched for plugins.  If the '
+        help_text=l_(u'It\'s possible to put one or more comma '
+        u'separated paths here that are searched for plugins.  If a path '
         u'is not absolute, it\'s considered relative to the instance '
         u'folder.')),
 
     #admin settings
     'dashboard_reddit':         BooleanField(default=True, help_text=
         l_(u'Set this to true if you want to see the most recent '
-        u'entries on the Zine reddit on your dashbaord.'))
+        u'entries on the Zine reddit on your dashboard.'))
 }
 
 HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',
