@@ -89,7 +89,7 @@ DEFAULT_VARS = {
         u'of delivering them to your MTA.')),
     'passthrough_errors':       BooleanField(default=_dev_mode,
         help_text=lazy_gettext(u'If this is set to true, errors in Zine '
-        u'are not catched so that debuggers can catch it instead.  This is '
+        u'are not caught so that debuggers can catch it instead.  This is '
         u'useful for plugin and core development.')),
 
     # url settings
