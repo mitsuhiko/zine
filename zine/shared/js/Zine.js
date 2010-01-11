@@ -34,7 +34,7 @@ var Zine = {
           .click(function() {
             Zine.replyToNothing();
             return false;
-          }))
+          }));
       document.location = '#leave-reply';
       $('#comment-message').fadeIn();
     });
