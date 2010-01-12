@@ -180,8 +180,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     if request.app.cfg['maintenance_mode'] and \
                                         request.user.has_privilege(BLOG_ADMIN):
         flash(_(u'Zine is in maintenance mode. Don\'t forget to '
-                u'turn it off again once you finish your '
-                u'changes.') % url_for('admin/maintenance'))
+                u'turn it off again once you finish your changes.'))
 
     # check for broken plugins if we have the plugin guard enabled
     if request.app.cfg['plugin_guard']:
