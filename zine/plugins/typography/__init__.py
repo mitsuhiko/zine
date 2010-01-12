@@ -19,6 +19,7 @@ from zine.privileges import BLOG_ADMIN
 from zine.utils.http import redirect_to
 from zine.utils.admin import require_admin_privilege, flash
 from zine.utils import forms
+from zine.views.admin import render_admin_response
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
