@@ -35,7 +35,7 @@
     Plugin Metadata
     ---------------
 
-    To identify a plugin metadata are used. Zine requires a file
+    To identify a plugin metadata is used. Zine requires a file
     named `metadata.txt` to load some information about the plugin.
 
     Zine currently supports the following metadata information:
@@ -43,7 +43,7 @@
     :Name:
         The full name of the plugin.
     :Plugin URL:
-        The URL of the plugin (e.g download location)
+        The URL of the plugin (e.g download location).
     :Description:
         The full description of the plugin.
     :Author:
@@ -51,9 +51,9 @@
         Use the this field in the form of ``Name <author@webpage.xy>``
         where `Name` is the full name of the author.
     :Author URL:
-        The website of the plugin-author.
+        The website of the plugin author.
     :Contributors:
-        Add a list of all contributors seperated by a comma.
+        Add a list of all contributors separated by a comma.
         Use this field in the form of ``Name1 <n1@w1.xy>, Name2
         <n2@w2.xy>`` where `Name` is the full name of the author
         and the email is optional.
@@ -63,13 +63,13 @@
         *For themes only*
         A little preview of the theme deployed by the plugin.
     :Depends:
-        A list of plugins the plugin depends on.  All plugin-names will
-        be splitted by a comma and also named exactly as the depended plugin.
+        A list of plugins the plugin depends on.  All plugin names will
+        be split at a comma and also named exactly as the depended plugin.
         All plugins in this list will be activated if found but if one
-        is missed the admin will be informated about that and the plugin
+        is missing, the admin will be informed about that and the plugin
         won't be activated.
 
-    Each key can be suffixed with "[LANG_CODE]" for internationlization::
+    Each key can be suffixed with "[LANG_CODE]" for internationalization::
 
         Title: Example Plugin
         Title[de]: Beispielplugin
