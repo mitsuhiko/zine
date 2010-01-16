@@ -3,7 +3,7 @@ body {
     padding: 0;
     font-family: 'Trebuchet MS', sans-serif;
     font-size: 15px;
-    background-color: #456981;
+    background-color: #316081;
 }
 
 ::-moz-selection {
@@ -66,9 +66,8 @@ div.header div.metanav a:hover {
 }
 
 div.footer {
-    background: transparent url(img/footerbg.png) repeat-x bottom left;
-    border-top: 1px solid #0d334e;
-    padding: 10px 20px;
+    border-top: 1px solid #2a5471;
+    padding: 5px 20px;
     color: white;
     margin: 0;
 }
@@ -80,7 +79,7 @@ div.footer a {
 div.footer p {
     margin: 0;
     padding: 0;
-    font-size: 12px;
+    font-size: 11px;
     text-align: center;
 }
 
@@ -141,8 +140,9 @@ div.body ul.navbar li.active a:hover {
 div.body ul.ctxnavbar {
     margin: 0;
     padding: 0 0 0 16px;
-    height: 23px;
+    height: 22px;
     background-color: #316081;
+    border-bottom: 1px solid #325d7b;
     list-style: none;
 }
 
@@ -190,6 +190,7 @@ div.body div.contents {
     background: white;
     margin: 0;
     padding: 10px 30px 30px 30px;
+    border-bottom: 1px solid #ddd;
 }
 
 div.contents div.drafts-box {
@@ -197,38 +198,6 @@ div.contents div.drafts-box {
     margin: -15px 0 15px 0;
     padding: 8px 8px 8px 32px;
     background: #F7FCF7 url(img/info.png) no-repeat 9px 9px;
-}
-
-div.contents div.message {
-    border: 1px solid #B4D2E7;
-    margin: 0 -10px 10px -10px;
-    padding: 8px 8px 8px 32px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
-    background: #F7FAFD url(img/info.png) no-repeat 9px 9px;
-}
-
-div.contents div.message-add {
-    background-image: url(img/add.png);
-}
-
-div.contents div.message-remove {
-    background-image: url(img/remove.png);
-}
-
-div.contents div.message-error {
-    background-image: url(img/error.png);
-    background-color: #FCF7F7;
-    border-color: #E8B5B5;
-}
-
-div.contents div.message-ok {
-    background-image: url(img/ok.png);
-}
-
-div.contents div.message-configure {
-    background-image: url(img/configure.png);
 }
 
 div.contents h1 {
@@ -333,6 +302,10 @@ div.contents input[name="spam"]:hover {
 
 div.contents input[name="save"] {
     font-weight: bold;
+}
+
+div.contents div.per_page {
+    float: right;
 }
 
 div.contents pre,
@@ -668,6 +641,10 @@ div.dashboard div.links ul.last_posts li {
     border-color: #B4D2E7;
 }
 
+div.dashboard div.links li span.meta {
+    font-size: 11px;
+}
+
 div.dashboard div.links li a:hover {
     color: #ffa800!important;
 }
@@ -683,6 +660,12 @@ div.dashboard ul.comments li p.actions {
 }
 
 /* :::: POST LIST :::: */
+table.postlist span.meta {
+    float: right;
+    font-size: 11px;
+    padding: 3px 0 0 8px;
+}
+
 table.postlist tr.draft td {
     background-color: #DDF7DC;
 }
@@ -852,6 +835,48 @@ table.notifications ul.choicegroup {
 table.notifications ul.choicegroup li {
     display: inline;
     margin: 0;
+}
+
+div.contents div.notification-messages {
+    position: fixed;
+    top: 0;
+    right: 10px;
+    width: 250px;
+    height: 0px;
+    font-size: 13px;
+}
+
+div.contents div.message {
+    border: 1px solid #B4D2E7;
+    margin: 10px 0;
+    padding: 8px 8px 8px 32px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    background: #F7FAFD url(img/info.png) no-repeat 9px 9px;
+    text-shadow: 0 1px 1px #cbdce2;
+}
+
+div.contents div.message-add {
+    background-image: url(img/add.png);
+}
+
+div.contents div.message-remove {
+    background-image: url(img/remove.png);
+}
+
+div.contents div.message-error {
+    background-image: url(img/error.png);
+    background-color: #FCF7F7;
+    border-color: #E8B5B5;
+}
+
+div.contents div.message-ok {
+    background-image: url(img/ok.png);
+}
+
+div.contents div.message-configure {
+    background-image: url(img/configure.png);
 }
 
 /* :::: WIDGETS :::: */

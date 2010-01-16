@@ -3,23 +3,20 @@
     zine.utils.zeml
     ~~~~~~~~~~~~~~~
 
-    This module implements ZEML (Zine Extensible Markup Language) a simple
+    This module implements ZEML (Zine Extensible Markup Language), a simple
     HTML inspired markup language that plugins can extend.
 
     The rules for ZEML are documented as part of the parser.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
 import struct
-import weakref
 import cPickle as pickle
 from copy import deepcopy
 from StringIO import StringIO as UniStringIO
 from cStringIO import StringIO
-from operator import itemgetter
-from itertools import imap
 from urlparse import urlparse
 
 from werkzeug import escape
@@ -197,19 +194,19 @@ _empty_set = frozenset()
 
 
 def dumps(obj):
-    """Dumps an element into a string."""
+    """Dump an element into a string."""
     stream = StringIO()
     dump(obj, stream)
     return stream.getvalue()
 
 
 def loads(string):
-    """Loads an element from a string."""
+    """Load an element from a string."""
     return load(StringIO(string))
 
 
 def dump(obj, stream):
-    """Dumps an element into a stream."""
+    """Dump an element into a stream."""
     def _serialize(obj):
         if obj is None:
             stream.write('N')
@@ -263,7 +260,7 @@ def dump(obj, stream):
 
 
 def load(stream):
-    """Loads an element from a stream.  This function is optimized for
+    """Load an element from a stream.  This function is optimized for
     performance so that no further caching is needed.
     """
     def _load(parent=None, _get=stream.read, _read_struct=lambda s,
@@ -334,7 +331,7 @@ def load_parser_data(value):
 
 
 def attach_parents(element):
-    """Attaches all parents to a tree of elements."""
+    """Attach all parents to a tree of elements."""
     def _walk(element):
         for child in element.children:
             child.parent = element
@@ -412,8 +409,8 @@ class QueryResult(object):
 
     @property
     def last(self):
-        """Get the last element. This queries the all results first so you should
-        try to use first if possible.
+        """Get the last element. This queries all results first so you should
+        try to use first() if possible.
         """
         try:
             return self[-1]
@@ -470,7 +467,7 @@ class Attributes(OrderedDict):
     """An ordered dict for attributes."""
 
     def get_int(self, key, default=None):
-        """Returns an attribute as integer."""
+        """Return an attribute as integer."""
         try:
             return int(self[key])
         except (KeyError, ValueError, TypeError):
@@ -478,7 +475,7 @@ class Attributes(OrderedDict):
 
 
 class _BaseElement(object):
-    """Baseclass for all elements."""
+    """Base class for all elements."""
     __slots__ = ('__weakref__',)
 
     name = None
@@ -488,7 +485,7 @@ class _BaseElement(object):
     tail = u''
 
     def to_html(self, stream=None):
-        """Converts the element to HTML."""
+        """Convert the element to HTML."""
         if stream is None:
             buffer = []
             write = buffer.append
@@ -499,7 +496,7 @@ class _BaseElement(object):
             return u''.join(buffer)
 
     def to_text(self, simple=False, multiline=True, **options):
-        """Converts the element to text."""
+        """Convert the element to text."""
         if simple:
             result = [self.text]
             for child in self.children:
@@ -510,7 +507,7 @@ class _BaseElement(object):
         return (multiline and t.multiline or t.oneline)(self)
 
     def to_pseudoxml(self, level=0, nostrip=False, _result=None):
-        """Converts the element to a pseudo-XML representation for debugging."""
+        """Convert the element to a pseudo-XML representation for debugging."""
         def appendtext(text):
             if nostrip:
                 _result.extend(level * '  ' + x for x in self.text.splitlines())
@@ -585,13 +582,13 @@ class Element(_BaseElement):
     An element has five attributes:
 
     `name`
-        the name of the element as string if the element is named.
+        The name of the element as string if the element is named.
 
     `children`
         A regular list of `Element` or `DynamicElement` objects.
 
     `attributes`
-        an ordered dict of attributes this element has.  If the parser detects
+        An ordered dict of attributes this element has.  If the parser detects
         an element without value (as in ``<option selected>``) it stores
         `None` as value for that key.
 
@@ -600,7 +597,7 @@ class Element(_BaseElement):
 
     `tail`
         The tail text for the outer element.  To understand this, look at the
-        following example::
+        following example:
 
         >>> root = parse_zeml("1 <b>2</b> 3")
         >>> root.text
@@ -654,7 +651,7 @@ class RootElement(_BaseElement):
 class DynamicElement(_BaseElement):
     """A dynamic element.  A dynamic element has a slightly different
     interface than a normal element.  By definition it has only one attribute
-    in common with element that is the tail text.
+    in common with Element, that is the `tail` text.
 
     The serializer calls the `to_html` method when it wants to display the
     element but subclasses have to override `render()` to not break the tail
@@ -821,7 +818,7 @@ html_serializer = _HTMLSerializer()
 
 
 def parse_html(string):
-    """Parses an HTML fragment into a ZEML tree."""
+    """Parse an HTML fragment into a ZEML tree."""
     def _convert(element, root=False):
         if root:
             result = RootElement()
@@ -846,7 +843,7 @@ def parse_html(string):
 
 
 def parse_zeml(string, reason, extensions=None):
-    """Parses a ZEML string into a element tree."""
+    """Parse a ZEML string into a element tree."""
     p = Parser(string, reason, extensions)
     p.parse()
     attach_parents(p.result)
@@ -854,12 +851,12 @@ def parse_zeml(string, reason, extensions=None):
 
 
 def sanitize(tree):
-    """Sanitizes the tree and returns it."""
+    """Sanitize the tree and return it."""
     return Sanitizer().sanitize(tree)
 
 
 def split_intro(tree):
-    """Splits a tree into intro and body.  The tree will be modified!"""
+    """Split a tree into intro and body.  The tree will be modified!"""
     # for intro sections there must be...
     #   - no text before the first element
     #   - the first element must be <intro>
@@ -882,7 +879,7 @@ def split_intro(tree):
 
 def inject_implicit_paragraphs(tree):
     """Inject implicit paragraphs into the tree.  This mimicks the WordPress
-    automatic paragarph insertion and can be used to import markup from blogs
+    automatic paragraph insertion and can be used to import markup from blogs
     like WordPress that use implicit paragraphs.
 
     This however must not be used for any kind of ZEML trees because it only
@@ -1148,7 +1145,7 @@ class Parser(object):
         return element
 
     def enter(self, tag):
-        """Enters the given tag.  This will automatically leave the current
+        """Enter the given tag.  This will automatically leave the current
         element if the tag given can break it.
         """
         # if the tag is not nestable and we are directly inside a tag with
@@ -1162,7 +1159,7 @@ class Parser(object):
         return element
 
     def leave(self, tag):
-        """Leaves the tag given or the outermost tag if the tag is None.
+        """Leave the tag given or the outermost tag if the tag is None.
         This process is rather complex and defined as follows:
 
         -   if the tag is not given (None) or the tag has the name of the
@@ -1199,7 +1196,7 @@ class Parser(object):
                     closable = False
 
     def read_until(self, string):
-        """Reads everything to the string but doesn't consume the string."""
+        """Read everything to the string but don't consume the string."""
         pos = self.string.find(string, self.pos)
         if pos < 0:
             pos = self.end
@@ -1208,7 +1205,7 @@ class Parser(object):
         return rv
 
     def skip_until(self, string, skip_needle=True):
-        """Skips everything to the string given and consumes that one too.
+        """Skip everything to the string given and consume that one too.
         This function returns nothing.
         """
         self.read_until(string)
@@ -1216,21 +1213,21 @@ class Parser(object):
             self.pos = min(self.end, self.pos + len(string))
 
     def peek_char(self):
-        """Returns the next character or `None` but doesn't advance the pointer."""
+        """Return the next character or `None` but don't advance the pointer."""
         try:
             return self.string[self.pos]
         except IndexError:
             return None
 
     def get_char(self):
-        """Returns the next character or `None` and advances the pointer."""
+        """Return the next character or `None` and advance the pointer."""
         rv = self.peek_char()
         if rv is not None:
             self.pos += 1
             return rv
 
     def match(self, regexp):
-        """Matches a regular expression at the current position and returns
+        """Match a regular expression at the current position and return
         the match object.  If the match was successful the pointer is
         advanced automatically.
         """
@@ -1240,31 +1237,31 @@ class Parser(object):
             return match
 
     def test_string(self, string):
-        """Matches the string with the current position.  Does not advance
-        the pointer and returns a bool.
+        """Match the string with the current position.  Do not advance the
+        pointer and return a bool.
         """
         return self.string[self.pos:self.pos + len(string)] == string
 
     def write_text(self, text):
-        """Like `write_raw_text` but resolves entities."""
+        """Like `write_raw_text` but resolve entities."""
         self.write_raw_text(self.resolve_entities(text))
 
     def write_raw_text(self, text):
-        """Writes text to the current element."""
+        """Write text to the current element."""
         if self.current.children:
             self.current.children[-1].tail += text
         else:
             self.current.text += text
 
     def parse(self):
-        """Parses the whole string into a element tree."""
+        """Parse the whole string into an element tree."""
         while not self.finished:
             self.state = getattr(self, 'parse_' + self.state)()
         while not self.in_root_tag:
             self.leave(None)
 
     def parse_data(self):
-        """Parses everything up to the next tag."""
+        """Parse everything up to the next tag."""
         data = self.read_until('<')
         if data:
             if self.current.name in self.isolated_elements:
@@ -1277,7 +1274,7 @@ class Parser(object):
         return 'start_tag'
 
     def parse_start_tag(self):
-        """Parses a start tag or jumps to the comment/end_tag or data
+        """Parse a start tag or jumps to the comment/end_tag or data
         parsing function.
         """
         if self.peek_char() == u'/':
@@ -1322,7 +1319,7 @@ class Parser(object):
             element.attributes[name] = value
 
     def parse_end_tag(self):
-        """Parses and end tag."""
+        """Parse an end tag."""
         match = self.match(_tag_name_re)
         if match is not None:
             tag = match.group(1).lower()
@@ -1340,7 +1337,7 @@ class Parser(object):
         return 'data'
 
     def parse_comment(self):
-        """Parses everything to the end of the comment and returns to the
+        """Parse everything to the end of the comment and return to the
         data parser.
         """
         self.skip_until(u'-->')
@@ -1754,7 +1751,8 @@ class Textifier(object):
                             out.append(' ' + (cellline or '').ljust(
                                 cumwidth + 3 * cell.span - 2))
                         else:
-                            out.append(' ' + (cellline or '').ljust(realwidths[i] + 1))
+                            out.append(' ' + (cellline or '').ljust(
+                                realwidths[i] + 1))
                 out.append('|')
                 self.write(''.join(out))
 

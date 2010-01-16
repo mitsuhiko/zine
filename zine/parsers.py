@@ -3,14 +3,12 @@
     zine.parsers
     ~~~~~~~~~~~~
 
-    This module holds the base parser informations and the dict of
+    This module holds the base parser information and the dict of
     default parsers.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from werkzeug import escape
-
 from zine.i18n import lazy_gettext
 from zine.application import iter_listeners, get_application
 from zine.utils.zeml import parse_html, parse_zeml, sanitize, split_intro, \

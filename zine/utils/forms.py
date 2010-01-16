@@ -11,9 +11,9 @@
     handle intelligent backredirects (via :mod:`zine.utils.http`) and supports
     basic CSRF protection.
 
-    For usage informations see :class:`Form`
+    For usage information, see :class:`Form`.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
@@ -688,14 +688,6 @@ class _InputGroup(Widget):
         """Render the radio buttons widget as <ol>"""
         return self._as_list(html.ol, attrs)
 
-    def as_table(self, **attrs):
-        """Render the radio buttons widget as <table>"""
-        self._attr_setdefault(attrs)
-        return list_type(*[u'<tr><td>%s</td><td>%s</td></tr>' % (
-            choice,
-            choice.label
-        ) for choice in self.choices], **attrs)
-
     def render(self, **attrs):
         return self.as_ul(**attrs)
 
@@ -998,9 +990,10 @@ class Field(object):
 
     def _bind(self, form, memo):
         """Method that binds a field to a form. If `form` is None, a copy of
-        the field is returned."""
+        the field is returned.
+        """
         if form is not None and self.bound:
-            raise TypeError('%r already bound' % type(obj).__name__)
+            raise TypeError('%r already bound' % type(self).__name__)
         rv = object.__new__(self.__class__)
         rv.__dict__.update(self.__dict__)
         rv.validators = self.validators[:]
@@ -1256,10 +1249,9 @@ class TextField(Field):
 
     def convert(self, value):
         value = _to_string(value)
-        if self.required:
-            if not value:
-                raise ValidationError(self.messages['required'])
-        elif value:
+        if self.required and not value:
+            raise ValidationError(self.messages['required'])
+        if value:
             if self.min_length is not None and len(value) < self.min_length:
                 message = self.messages['too_short']
                 if message is None:
@@ -1513,7 +1505,6 @@ class MultiChoiceField(ChoiceField):
             known_choices[choice] = choice
             known_choices.setdefault(_to_string(choice), choice)
 
-        x = _to_list(value)
         for value in _to_list(value):
             for version in value, _to_string(value):
                 if version in known_choices:

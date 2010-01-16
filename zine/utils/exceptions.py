@@ -5,7 +5,7 @@
 
     Exception utility module.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from zine.i18n import _
@@ -53,7 +53,6 @@ def summarize_exception(exc_info):
         prefix = _to_unicode(exc_type.__name__)
     message = _to_unicode(exc_value)
 
-    location = (None, None)
     filename = tb.tb_frame.f_globals.get('__file__')
     if filename is None:
         filename = _(u'unkown file')

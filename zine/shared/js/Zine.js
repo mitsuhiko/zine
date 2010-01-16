@@ -5,7 +5,7 @@
  * Part of the Zine core framework. Provides default script
  * functions for the base templates.
  *
- * :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+ * :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
  * :license: BSD, see LICENSE for more details.
  */
 
@@ -23,7 +23,7 @@ var Zine = {
   },
   
   replyToComment : function(parent_id) {
-    $('form.comments input[@name="parent"]').val(parent_id);
+    $('form.comments input[name="parent"]').val(parent_id);
     $('#comment-message').hide();
     this.callJSONService('get_comment', {comment_id: parent_id}, function(c) {
       $('#comment-message')
@@ -34,14 +34,14 @@ var Zine = {
           .click(function() {
             Zine.replyToNothing();
             return false;
-          }))
+          }));
       document.location = '#leave-reply';
       $('#comment-message').fadeIn();
     });
   },
 
   replyToNothing : function() {
-    $('form.comments input[@name="parent"]').val('');
+    $('form.comments input[name="parent"]').val('');
     $('#comment-message').fadeOut();
   },
 

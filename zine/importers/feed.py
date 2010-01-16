@@ -6,7 +6,7 @@
     This importer can import web feeds.  Currently it is limited to ATOM
     plus optional Zine extensions.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from pickle import loads
@@ -151,7 +151,7 @@ class AtomParser(Parser):
 
     def __init__(self, tree):
         Parser.__init__(self, tree)
-        self.global_author = None 
+        self.global_author = None
 
         # use for the category fallback handling if no extension
         # takes over the handling.
@@ -163,9 +163,9 @@ class AtomParser(Parser):
 
     def parse(self):
         # atom allows the author to be defined for the whole feed
-        # before the entries.  Capture it here. 
+        # before the entries.  Capture it here.
         self.global_author = self.tree.find(atom.author)
-        
+
         for entry in self.tree.findall(atom.entry):
             post = self.parse_post(entry)
             if post is not None:
@@ -248,7 +248,7 @@ class AtomParser(Parser):
 
         author = entry.find(atom.author)
         if author is None:
-            author = self.global_author 
+            author = self.global_author
         email = author.findtext(atom.email)
         username = author.findtext(atom.name)
         uri = author.findtext(atom.uri)
@@ -321,6 +321,10 @@ class FeedImportError(UserException):
 class FeedImporter(Importer):
     name = 'feed'
     title = lazy_gettext(u'Feed Importer')
+    description = lazy_gettext(u'Handles ATOM feeds with optional extensions '
+                               u'such as those exported by Zine itself. '
+                               u'Plugins can add further extensions to be '
+                               u'recognized by this importer.')
 
     def configure(self, request):
         form = FeedImportForm()
@@ -331,8 +335,9 @@ class FeedImporter(Importer):
                 try:
                     feed = open_url(form.data['download_url']).stream
                 except Exception, e:
-                    error = _(u'Error downloading from URL: %s') % e
-            elif not feed:
+                    log.exception(_('Error downloading feed'))
+                    flash(_(u'Error downloading from URL: %s') % e, 'error')
+            if not feed:
                 return redirect_to('import/feed')
 
             try:
@@ -520,7 +525,7 @@ class ZEAExtension(Extension):
                               _parser_data(element.findtext(zine.parser_data)))
             comments[int(element.attrib['id'])] = comment
             parent = element.findtext(zine.parent)
-            if parent is not None:
+            if parent:
                 unresolved_parents[comment] = int(parent)
 
         for comment, parent_id in unresolved_parents.iteritems():

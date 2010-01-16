@@ -33,6 +33,6 @@
                                          _("Mark as Spam") }}</a>
        {% endif %}
      ]
-     <a href="{{ url_for(comment.post)|e }}">{%- if comment.post.title %}{{
+     <a href="{{ url_for('admin/edit_post', post_id=comment.post.id)|e }}">{%- if comment.post.title %}{{
        comment.post.title|e }}{%- else %}<em>#</em>{%- endif %}</a></p>
 {%- endmacro %}

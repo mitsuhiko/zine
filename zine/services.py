@@ -5,13 +5,14 @@
 
     The builtin (JSON) services.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from werkzeug import abort
 
 from zine.models import Comment, Tag
 from zine.privileges import MODERATE_COMMENTS
+from zine.utils.dates import to_timestamp
 
 
 def do_get_comment(req):
@@ -36,7 +37,7 @@ def do_get_comment(req):
         'body':         unicode(comment.body),
         'author':       comment.author,
         'email':        email,
-        'pub_date':     int(comment.pub_date.strftime('%s')),
+        'pub_date':     to_timestamp(comment.pub_date),
     }
 
 

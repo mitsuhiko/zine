@@ -61,7 +61,7 @@ token_order = (
 
     # The following are simple, context-independent replacement tokens
     TokenMatcher('EMDASH'  , r'(--)'    , replace=unichr(8212)),
-    # No way to reliably distinguish Endash from Hyphen, Dash & Minus, 
+    # No way to reliably distinguish Endash from Hyphen, Dash & Minus,
     # so we don't.  See: http://www.alistapart.com/articles/emen/
 
     TokenMatcher('ELLIPSIS', r'(\.\.\.)', replace=unichr(8230)),
@@ -88,18 +88,18 @@ replace_list = [
     Replacer(r'(``)', unichr(8220)),
     Replacer(r"('')", unichr(8221)),
 
-    # First we look for inter-word " and ' 
+    # First we look for inter-word " and '
     Replacer(r'(\b"\b)', unichr(34)), # double prime
     Replacer(r"(\b'\b)", unichr(8217)), # apostrophe
-    # Then we look for opening or closing " and ' 
-    Replacer(r'(\b"\B)', unichr(8221)), # close double quote 
+    # Then we look for opening or closing " and '
+    Replacer(r'(\b"\B)', unichr(8221)), # close double quote
     Replacer(r'(\B"\b)', unichr(8220)), # open double quote
     Replacer(r"(\b'\B)", unichr(8217)), # close single quote
     Replacer(r"(\B'\b)", unichr(8216)), # open single quote
 
-    # Then we look for space-padded opening or closing " and ' 
+    # Then we look for space-padded opening or closing " and '
     Replacer(r'(")(\s)', unichr(8221)+r'\2'), # close double quote
-    Replacer(r'(\s)(")', r'\1'+unichr(8220)), # open double quote 
+    Replacer(r'(\s)(")', r'\1'+unichr(8220)), # open double quote
     Replacer(r"(')(\s)", unichr(8217)+r'\2'), # close single quote
     Replacer(r"(\s)(')", r'\1'+unichr(8216)), # open single quote
 
@@ -291,7 +291,7 @@ class PottyMouth(object):
                  all_lists=True,      # disables all lists (<ol> and <ul>)
                  unordered_list=True, # disables all unordered lists (<ul>)
                  ordered_list=True,   # disables all ordered lists (<ol>)
-                 numbered_list=True,  # disables '\d+\.' lists 
+                 numbered_list=True,  # disables '\d+\.' lists
                  blockquote=True,     # disables '>' <blockquote>s
                  bold=True,           # disables *bold*
                  italic=True,         # disables _italics_
@@ -317,7 +317,7 @@ class PottyMouth(object):
             elif n == 'YOUTUBE' and not youtube:                       continue
             elif n == 'EMAIL' and not email:                           continue
             elif n in ('HASH','DASH','NUMBERDOT','ITEMSTAR','BULLET') and not all_lists:
-                continue 
+                continue
             elif n in ('DASH','ITEMSTAR','BULLET') and not unordered_list:
                 continue
             elif n in ('HASH','NUMBERDOT') and not ordered_list:
@@ -350,7 +350,7 @@ class PottyMouth(object):
                     content = m.groups()[0]
                     p += len(content)
 
-                    if tm.replace is not None: 
+                    if tm.replace is not None:
                         unmatched_collection += tm.replace
                         break
 
@@ -530,7 +530,7 @@ class PottyMouth(object):
                 pass
             else:
                 finished.append(top)
-            
+
         return finished
 
 
@@ -597,7 +597,7 @@ class PottyMouth(object):
         """Parse bold and italic and other balanced items"""
         stack = []
         finished = []
-        
+
         last_bold_idx = -1
         last_ital_idx = -1
 
@@ -732,7 +732,7 @@ class PottyMouth(object):
         for b in blocks:
             nb = self._parse_block(b)
             parsed_blocks.append(nb)
-        
+
         return parsed_blocks
 
 
