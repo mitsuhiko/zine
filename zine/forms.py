@@ -912,6 +912,8 @@ class DeleteUserForm(_UserBoundForm):
         ))
 
     def context_validate(self, data):
+        if self.user.posts.count() is 0:
+            data['action'] = None
         if data['action'] == 'reassign' and not data['reassign_to']:
             raise ValidationError(_('You have to select a user to reassign '
                                     'the posts to.'))
