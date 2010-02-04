@@ -14,7 +14,6 @@ Basics:
 Are those changes written to the config file correctly?
 	
 	>>> app.cfg.change_single('pings_enabled', False)
-	True
 	>>> [line for line in open(app.cfg.filename) if 'pings_enabled' in line][0]
 	'pings_enabled = False\n'
 
