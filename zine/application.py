@@ -1264,7 +1264,7 @@ class Zine(object):
                     response = _redirect(url_for('account/login',
                                                  next=request.path))
         except HTTPException, e:
-            response = e.get_response(request)
+            response = e.get_response(request.environ)
         except SQLAlchemyError, e:
             # Some database screwup?! Don't let Zine stay dispatching 500's
             db.session.rollback()
