@@ -149,7 +149,7 @@ class ZEMLParserData(TypeDecorator):
     to compare the trees.
     """
 
-    impl = sqlalchemy.Binary
+    impl = sqlalchemy.LargeBinary
 
     def process_bind_param(self, value, dialect):
         if value is None:
@@ -235,10 +235,14 @@ for mod in sqlalchemy, orm:
 del key, mod, value
 
 #: forward some session methods to the module as well
-for name in 'delete', 'save', 'flush', 'execute', 'begin', 'mapper', \
-            'commit', 'rollback', 'clear', 'refresh', 'expire', \
-            'query_property':
+for name in ('delete', 'flush', 'execute', 'begin', 'mapper',
+             'commit', 'rollback', 'refresh', 'expire',
+             'query_property'):
     setattr(db, name, getattr(session, name))
+
+# Some things changed names with SQLAlchemy 0.6.0
+db.save = session.add
+db.clear = session.expunge_all
 
 #: and finally hook our own implementations of various objects in
 db.Model = Model
