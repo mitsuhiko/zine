@@ -35,6 +35,7 @@ _rules = [
     (re.compile(r'\(c\)'), 'copyright', u'©'),
     (re.compile(r'\(r\)'), 'registered', u'®'),
     (re.compile(r'\(tm\)'), 'trademark', u'™'),
+    (re.compile(r'\!\?'), 'interrobang', u'‽'),
     (re.compile(r'\d\s+(x)\s+\d(?u)'), 'multiplication_sign', u'×'),
     (re.compile(r'(?:^|\s)(\')\d{2}(?u)'), 'single_abbr_quote', u'’'),
     (re.compile(r'\w(\')\w(?u)'), 'single_abbr_quote', u'’'),
