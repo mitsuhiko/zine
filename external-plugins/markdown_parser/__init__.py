@@ -8,15 +8,16 @@
     TODO: this parser does not support `<intro>` sections and has a
           very bad implementation as it requires multiple parsing steps.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os.path
 import re
 from zine.api import *
 from zine.parsers import BaseParser
-from zine.views.admin import flash, render_admin_response
-from zine.privileges import BLOG_ADMIN, require_privilege
+from zine.views.admin import render_admin_response
+from zine.privileges import BLOG_ADMIN
+from zine.utils.admin import flash, require_admin_privilege
 from zine.utils.zeml import parse_html
 from zine.utils import forms
 try:
@@ -39,7 +40,7 @@ class ConfigurationForm(forms.Form):
                     u'lines above and below to cut the post at that point.'))
 
 
-@require_privilege(BLOG_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def show_markdown_config(req):
     """Show Markdown Parser configuration options."""
     form = ConfigurationForm(initial=dict(

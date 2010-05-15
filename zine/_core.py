@@ -5,7 +5,7 @@
 
     Internal core module that survives reloads.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -33,7 +33,7 @@ def _create_zine(instance_folder, timeout=5, in_reloader=True):
     ongoing reloads.  If funky things occur and these do not resolve
     after `timeout` seconds a `RuntimeError` is raised.
     """
-    global _application
+    global _application, _setup_failed
     _setup_failed = False
     _setup_lock.acquire()
     try:
@@ -73,7 +73,7 @@ def _create_zine(instance_folder, timeout=5, in_reloader=True):
 
 def _unload_zine():
     """Unload all zine libraries."""
-    global _application
+    global _application, _setup_failed
     import sys
 
     _setup_lock.acquire()
@@ -98,6 +98,7 @@ def _unload_zine():
                 try:
                     for key, value in module.__dict__.iteritems():
                         setattr(module, key, None)
+                    # clear references
                     value = None
                 except:
                     pass
@@ -129,7 +130,7 @@ def get_wsgi_app(instance_folder):
     core module.  You have been warned.
     """
     # the reloader eats import errors, so make sure that the application
-    # properly before we create our proxy application.
+    # imports properly before we create our proxy application.
     import zine.application
 
     _dispatch_lock = allocate_lock()

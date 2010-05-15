@@ -6,7 +6,7 @@
     Run Zine in mod_wsgi.  For help on configuration have a look at the
     README file.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 

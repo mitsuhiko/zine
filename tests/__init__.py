@@ -13,7 +13,7 @@
     be patched to remove this incompatibility, the patch is at
     http://tinyurl.com/doctest-patch
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -83,7 +83,7 @@ def suite(modnames=[], return_covermods=False):
                 raise
 
         suites = [DocTestSuite(mod, extraglobs={'app': app})]
-        filename = modname[10:] + '.txt'
+        filename = modname[5:] + '.txt'
         if filename in test_files:
             globs = {'app': app}
             globs.update(mod.__dict__)

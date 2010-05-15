@@ -5,7 +5,7 @@
 
     Execute this file to regenerate the `setup-virtualenv` script.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os
@@ -27,7 +27,7 @@ REQUIREMENTS = [
     'Babel>=0.9.4'
 ]
 
-# for python 2.4/2.5 we want simplejson installed too.
+# for python 2.5 we want simplejson installed too.
 if sys.version_info < (2, 6):
     REQUIREMENTS.append('simplejson')
 

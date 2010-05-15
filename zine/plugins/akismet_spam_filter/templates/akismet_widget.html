@@ -2,6 +2,8 @@
 {% block title %}{{ widget.title }}{% endblock %}
 {% block body %}
   {% trans spam_comments=widget.spam_comments or 0 -%}
+    Akismet has blocked <b>{{ spam_comments }}</b> comment.
+  {%- pluralize -%}
     Akismet has blocked <b>{{ spam_comments }}</b> comments.
   {%- endtrans %}
 {% endblock %}

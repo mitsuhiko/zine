@@ -11,7 +11,7 @@
     last request could not send any more requests to external files. Those
     would already be returned by the normal Zine installation.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import sys
@@ -20,7 +20,6 @@ from zine import environment
 from zine.config import Configuration
 from zine.api import db
 from zine.config import ConfigurationTransactionError
-from zine.models import User
 from zine.utils.crypto import gen_pwhash, gen_secret_key, new_iid
 from zine.utils.validators import is_valid_email, check
 from zine.i18n import load_core_translations, has_language, list_languages
@@ -82,7 +81,7 @@ class WebSetup(object):
             self.next[view] = next
 
     def handle_view(self, request, name, ctx=None):
-        handler = self.views[name]
+        #handler = self.views[name]
         ctx = ctx or {}
         ctx.update({
             'current':     name,
@@ -149,6 +148,34 @@ class WebSetup(object):
         value = request.values.get
         error = None
         database_uri = value('database_uri', '').strip()
+        
+        # set up the initial config
+        config_filename = path.join(self.instance_folder, 'zine.ini')
+        cfg = Configuration(config_filename)
+        t = cfg.edit()
+        t.update(
+            maintenance_mode=environment.MODE != 'development',
+            blog_url=request.url_root,
+            secret_key=gen_secret_key(),
+            database_uri=database_uri,
+            language=request.translations.language,
+            iid=new_iid(),
+            # load one plugin by default for a better theme
+            plugins='vessel_theme',
+            theme='vessel'
+        )
+        cfg._comments['[zine]'] = CONFIG_HEADER
+        try:
+            t.commit()
+        except ConfigurationTransactionError:
+            _ = request.translations.gettext
+            error = _('The configuration file (%s) could not be opened '
+                      'for writing. Please adjust your permissions and '
+                      'try again.') % config_filename
+            return render_response(request, 'error.html', {
+            'finished': False,
+            'error':    error
+            })
 
         try:
             from zine.database import init_database
@@ -183,29 +210,6 @@ class WebSetup(object):
                 privilege_id=privilege_id
             )
 
-            # set up the initial config
-            config_filename = path.join(self.instance_folder, 'zine.ini')
-            cfg = Configuration(config_filename)
-            t = cfg.edit()
-            t.update(
-                maintenance_mode=environment.MODE != 'development',
-                blog_url=request.url_root,
-                secret_key=gen_secret_key(),
-                database_uri=database_uri,
-                language=request.translations.language,
-                iid=new_iid(),
-                # load one plugin by default for a better theme
-                plugins='vessel_theme',
-                theme='vessel'
-            )
-            cfg._comments['[zine]'] = CONFIG_HEADER
-            try:
-                t.commit()
-            except ConfigurationTransactionError:
-                _ = request.translations.gettext
-                error = _('The configuration file (%s) could not be opened '
-                          'for writing. Please adjust your permissions and '
-                          'try again.') % config_filename
 
         # use a local variable, the global render_response could
         # be None because we reloaded zine and this module.

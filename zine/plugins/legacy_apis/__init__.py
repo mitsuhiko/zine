@@ -14,7 +14,7 @@
     APIs marked with a star are not really supported.  For those only the
     subset required by MarsEdit for the wordpress support is implemented.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
@@ -22,7 +22,6 @@ from datetime import datetime
 from zine.api import get_request, url_for, db
 from zine.utils.xml import XMLRPC, Fault
 from zine.utils.forms import BooleanField
-from zine.utils import log
 from zine.models import User, Post, Category, Tag, STATUS_PUBLISHED, \
      STATUS_DRAFT
 from zine.privileges import CREATE_ENTRIES, CREATE_PAGES, BLOG_ADMIN, \
@@ -179,7 +178,7 @@ def metaweblog_edit_post(post_id, username, password, struct, publish):
     if post is None:
         raise Fault(404, 'No such post')
     if not post.can_edit():
-        raise Failt(403, 'missing privileges')
+        raise Fault(403, 'missing privileges')
     generic_edit_post(request, post, struct, publish)
     db.commit()
     return dump_post(post)
@@ -239,7 +238,7 @@ def wp_get_page(blog_id, page_id, username, password):
 def wp_get_pages(blog_id, username, password, number_of_pages):
     request = login(username, password)
     return map(dump_post, Post.query.filter_by(content_type='page')
-               .limit(numer_of_pages).all())
+               .limit(number_of_pages).all())
 
 
 def wp_new_page(username, password, struct, publish):
@@ -252,7 +251,7 @@ def wp_new_page(username, password, struct, publish):
     return dump_post(post)
 
 
-def wp_edit_page(blog_id, page_id, username, password, content, publish):
+def wp_edit_page(blog_id, page_id, username, password, struct, publish):
     request = login(username, password)
     page = Post.query.get(page_id)
     if not page or page.content_type != 'page':
@@ -261,12 +260,12 @@ def wp_edit_page(blog_id, page_id, username, password, content, publish):
         raise Fault(403, 'you don\'t have access to this page')
     generic_edit_post(request, page, struct, publish)
     db.commit()
-    return dump_post(post)
+    return dump_post(page)
 
 
 def wp_delete_page(blog_id, username, password, page_id):
     request = login(username, password)
-    page = Page.query.get(page_id)
+    page = Post.query.get(page_id)
     if page is None or page.content_type != 'page':
         raise Fault(404, 'no such page')
     if not page.can_edit():
@@ -278,7 +277,8 @@ def wp_delete_page(blog_id, username, password, page_id):
 
 def wp_get_page_list(blog_id, username, password):
     request = login(username, password)
-    return map(dump_page, Page.query.filter_by(content_type='page').all())
+    # XXX missing dump_page()
+    return map(dump_post, Post.query.filter_by(content_type='page').all())
 
 
 def wp_new_category(blog_id, username, password, struct):

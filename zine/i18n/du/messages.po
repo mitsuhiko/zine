@@ -1,0 +1,3940 @@
+# Dutch translations for PROJECT.
+# Copyright (C) 2009 The Zine Team
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <michel@crondor.net>, 2009.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: zine-i18n@pocoo.org\n"
+"POT-Creation-Date: 2009-01-10 22:36+0100\n"
+"PO-Revision-Date: 2009-03-10 11:48+0100\n"
+"Last-Translator: Michel Wilson <michel@crondor.net>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.3\n"
+
+#: zine/application.py:668
+msgid "Default Theme"
+msgstr "Standaard-stijl"
+
+#: zine/application.py:669
+msgid "Simple default theme that doesn't contain any style information."
+msgstr "Een simpel standaard-stijl die geen stijlinformatie bevat."
+
+#: zine/application.py:726
+#, python-format
+msgid "Theme “%s” is no longer available, falling back to default theme."
+msgstr "De stijl “%s” is niet meer beschikbaar, de standaard-stijl wordt gebruikt."
+
+#: zine/application.py:749
+#, python-format
+msgid "Copyright %(years)s by the Zine Team"
+msgstr "Copyright %(years)s door het Zine-team"
+
+#: zine/config.py:34
+msgid "My Zine Blog"
+msgstr "Mijn Zine-Blog"
+
+#: zine/config.py:35
+msgid "just another Zine blog"
+msgstr "alweer een Zine-blog"
+
+#: zine/config.py:82
+msgid "No Cache"
+msgstr "Geen cache"
+
+#: zine/config.py:83
+msgid "Simple Cache"
+msgstr "Simpele cache"
+
+#: zine/config.py:84
+msgid "memcached"
+msgstr "memcached"
+
+#: zine/config.py:85
+msgid "Filesystem"
+msgstr "Bestandssysteem"
+
+#: zine/config.py:102
+msgid "Automatically approve all comments"
+msgstr "Alle reacties automatisch goedkeuren"
+
+#: zine/config.py:103
+msgid "An administrator must always approve the comment"
+msgstr "Een beheerder moet de reacties altijd goedkeuren"
+
+#: zine/config.py:104
+msgid "Automatically approve comments by known comment authors"
+msgstr "Reacties van bekende reageerders automatisch goedkeuren"
+
+#: zine/config.py:187
+msgid ""
+"\n"
+"    <p>\n"
+"      This error can happen if the configuration file is not writeable.\n"
+"      Make sure the folder of the configuration file is writeable and\n"
+"      that the file itself is writeable as well.\n"
+"    "
+msgstr ""
+"\n"
+"    <p>\n"
+"      Deze fout kan onder andere worden veroorzaakt als er geen "
+"schrijftoegang mogelijk is tot het configuratiebestand.\n"
+"      Controleer of de map waar het configuratiebestand in staat "
+"schrijftoegang heeft, en dat het bestand zelf dit ook heeft.\n" 
+"    "
+
+#: zine/config.py:199
+#, python-format
+msgid "Could not save configuration file: %s"
+msgstr "Het configuratiebestand kon niet worden opgeslagen: %s"
+
+#: zine/forms.py:46
+#, python-format
+msgid "User “%(value)s” does not exist."
+msgstr "De gebruiker “%(value)s” bestaat niet."
+
+#: zine/forms.py:47
+msgid "You have to enter a username."
+msgstr "Je moet een gebruikersnaam invoeren."
+
+#: zine/forms.py:49
+#, python-format
+msgid "Failed login attempt, user “%s” does not exist"
+msgstr "Mislukte aanmeldpoging, gebruiker “%s” bestaat niet"
+
+#: zine/forms.py:57
+#, python-format
+msgid "Failed login attempt from “%s”, invalid password"
+msgstr "Mislukte aanmeldpoging van “%s”, incorrect wachtwoord"
+
+#: zine/forms.py:59
+msgid "Incorrect password."
+msgstr "Incorrect wachtwoord."
+
+#: zine/forms.py:64
+msgid "Old password"
+msgstr "Oud wachtwoord"
+
+#: zine/forms.py:66
+msgid "New password"
+msgstr "Nieuw wachtwoord"
+
+#: zine/forms.py:68
+msgid "Repeat password"
+msgstr "Herhaal wachtwoord"
+
+#: zine/forms.py:78
+msgid "The old password you've entered is wrong."
+msgstr "Het oude wachtwoord is incorrect."
+
+#: zine/forms.py:83
+msgid "The two passwords don't match."
+msgstr "De twee wachtwoorden komen niet overeen."
+
+#: zine/forms.py:92
+msgid "Name*"
+msgstr "Naam*"
+
+#: zine/forms.py:94
+msgid "Your name is too long."
+msgstr "Je naam is te lang."
+
+#: zine/forms.py:95
+msgid "You have to enter your name."
+msgstr "Je moet een naam invoeren."
+
+#: zine/forms.py:97
+msgid "Mail* (not published)"
+msgstr "E-mail* (niet openbaar)"
+
+#: zine/forms.py:100 zine/utils/validators.py:77
+msgid "You have to enter a valid e-mail address."
+msgstr "Je moet een geldig e-mail adres invoeren."
+
+#: zine/forms.py:102 zine/forms.py:399 zine/forms.py:717
+msgid "Website"
+msgstr "Website"
+
+#: zine/forms.py:103
+msgid "You have to enter a valid URL or omit the field."
+msgstr "Je moet een geldige URL invoeren, of het veld leeglaten."
+
+#: zine/forms.py:105 zine/forms.py:224 zine/forms.py:401 zine/parsers.py:99
+msgid "Text"
+msgstr "Tekst"
+
+#: zine/forms.py:107
+msgid "Your comment is too short."
+msgstr "Je reactie is te kort."
+
+#: zine/forms.py:108
+msgid "Your comment is too long."
+msgstr "Je reactie is te lang."
+
+#: zine/forms.py:109
+msgid "You have to enter a comment."
+msgstr "Je moet een reactie invoeren."
+
+#. this message is only displayed if the user tempered with
+#. the form data
+#: zine/forms.py:132
+msgid "Invalid object referenced."
+msgstr "Referentie naar een ongeldig object."
+
+#: zine/forms.py:136
+msgid "Post is closed for commenting."
+msgstr "Reageren op deze bijdrage is niet mogelijk."
+
+#: zine/forms.py:174
+msgid "Comment waiting for approval"
+msgstr "Reactie wacht op goedkeuring"
+
+#: zine/forms.py:193
+msgid "Disable plugin guard"
+msgstr "Plugin-guard uitschakelen"
+
+#: zine/forms.py:194
+msgid "If the plugin guard is disabled errors on plugin setup are not caught."
+msgstr "Als de plugin-guard is uitgeschakeld worden fouten tijdens "
+"plugin-initialisatie niet opgevangen."
+
+#: zine/forms.py:222 zine/templates/admin/_post_helpers.html:4
+#: zine/templates/admin/import.html:25 zine/templates/admin/inspect_import.html:49
+#: zine/templates/admin/write_page.html:7
+msgid "Title"
+msgstr "Titel"
+
+#: zine/forms.py:226
+msgid "Publication status"
+msgstr "Publicatiestatus"
+
+#: zine/forms.py:227
+msgid "Draft"
+msgstr "Concept"
+
+#: zine/forms.py:228
+msgid "Published"
+msgstr "Gepubliceerd"
+
+#: zine/forms.py:229
+msgid "Publication date"
+msgstr "Publicatiedatum"
+
+#: zine/forms.py:230 zine/forms.py:505
+#: zine/templates/admin/manage_categories.html:8
+msgid "Slug"
+msgstr "Slug"
+
+#: zine/forms.py:231 zine/forms.py:396 zine/templates/admin/_post_helpers.html:5
+#: zine/templates/admin/information.html:163
+#: zine/templates/admin/inspect_import.html:50
+msgid "Author"
+msgstr "Auteur"
+
+#: zine/forms.py:233 zine/templates/widgets/tag_cloud.html:2
+msgid "Tags"
+msgstr "Tags"
+
+#: zine/forms.py:235 zine/templates/_entry.html:4
+#: zine/templates/admin/_post_helpers.html:6
+#: zine/templates/widgets/category_list.html:2 zine/views/admin.py:79
+msgid "Categories"
+msgstr "Cagegorieën"
+
+#: zine/forms.py:237 zine/forms.py:403 zine/templates/admin/write_page.html:22
+msgid "Parser"
+msgstr "Parser"
+
+#: zine/forms.py:238
+msgid "Enable comments"
+msgstr "Reacties aanzetten"
+
+#: zine/forms.py:239
+msgid "Enable pingbacks"
+msgstr "Pingbacks activeren"
+
+#: zine/forms.py:240
+msgid "Ping links"
+msgstr "Ping links"
+
+#: zine/forms.py:278 zine/forms.py:421
+#, python-format
+msgid "%s (missing)"
+msgstr "%s (ontbreekt)"
+
+#: zine/forms.py:293
+msgid "This slug is already in use."
+msgstr "Deze slug is al in gebruik."
+
+#: zine/forms.py:298
+msgid "Selected parser is no longer available on the system."
+msgstr "De geselecteerde parser is niet meer beschikbaar in het systeem."
+
+#: zine/forms.py:397 zine/forms.py:715
+msgid "Email"
+msgstr "E-mail"
+
+#: zine/forms.py:402 zine/templates/admin/_post_helpers.html:8
+#: zine/templates/admin/import.html:24 zine/templates/admin/inspect_import.html:48
+msgid "Date"
+msgstr "Datum"
+
+#: zine/forms.py:404 zine/templates/admin/block_comment.html:2
+#: zine/templates/admin/block_comment.html:4
+msgid "Block Comment"
+msgstr "Blokkeer reacties"
+
+#: zine/forms.py:405 zine/forms.py:473
+msgid "Reason"
+msgstr "Reden"
+
+#: zine/forms.py:482
+#, python-format
+msgid "blocked by %s"
+msgstr "geblokkeerd door %s"
+
+#: zine/forms.py:506 zine/templates/admin/manage_categories.html:9
+msgid "Name"
+msgstr "Naam"
+
+#: zine/forms.py:508 zine/forms.py:713 zine/templates/admin/plugins.html:18
+msgid "Description"
+msgstr "Omschrijving"
+
+#: zine/forms.py:527
+msgid "This slug is already in use"
+msgstr "Deze slug is al in gebruik"
+
+#: zine/forms.py:610 zine/templates/admin/manage_groups.html:8
+msgid "Groupname"
+msgstr "Groepsnaam"
+
+#: zine/forms.py:613 zine/forms.py:721 zine/templates/admin/information.html:102
+msgid "Privileges"
+msgstr "Rechten"
+
+#: zine/forms.py:630
+msgid "This groupname is already in use"
+msgstr "Deze groepsnaam is al in gebruik"
+
+#: zine/forms.py:651
+msgid "What should Zine do with users assigned to this group?"
+msgstr "Wat moet Zine doen met de gebruikers die zijn toegekend aan "
+"deze groep?"
+
+#: zine/forms.py:654
+msgid "Do nothing, just detach the membership"
+msgstr "Niets doen, alleen het lidmaatschap opzeggen"
+
+#: zine/forms.py:655
+msgid "Move the users to another group"
+msgstr "Verplaats de gebruikers naar een andere groep"
+
+#: zine/forms.py:657
+msgid "Relocate users to"
+msgstr "Verplaats de gebruikers naar"
+
+#: zine/forms.py:670
+msgid "You have to select a group that gets the users assigned."
+msgstr "Je moet een groep selecteren waar de gebruikers aan worden toegewezen"
+
+#: zine/forms.py:708 zine/forms.py:743 zine/templates/admin/login.html:23
+#: zine/templates/admin/manage_users.html:8
+#: zine/websetup/templates/admin_account.html:10
+msgid "Username"
+msgstr "Gebruikersnaam"
+
+#: zine/forms.py:711 zine/forms.py:744 zine/templates/admin/manage_users.html:9
+msgid "Realname"
+msgstr "Echte naam"
+
+#: zine/forms.py:712
+msgid "Display name"
+msgstr "Schermnaam"
+
+#: zine/forms.py:719 zine/templates/admin/login.html:25
+#: zine/websetup/templates/admin_account.html:12
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: zine/forms.py:723 zine/views/admin.py:113
+msgid "Groups"
+msgstr "Groepen"
+
+#: zine/forms.py:725
+msgid "List as author"
+msgstr "Als auteur tonen"
+
+#: zine/forms.py:726
+msgid "This user is listed as author"
+msgstr "Deze gebruiker wordt getoond als auteur"
+
+#: zine/forms.py:755
+msgid "This username is already in use"
+msgstr "Deze gebruikersnaam is al bezet"
+
+#: zine/forms.py:790
+msgid "What should Zine do with posts written by this user?"
+msgstr "Wat moet Zine doen met bijdrages die geschreven zijn door deze gebruiker?"
+
+#: zine/forms.py:792
+msgid "Delete them permanently"
+msgstr "Permanent verwijderen"
+
+#: zine/forms.py:793
+msgid "Reassign posts"
+msgstr "Bijdrages opnieuw toewijzen"
+
+#: zine/forms.py:796
+msgid "Reassign posts to"
+msgstr "Bijdrages opnieuw toewijzen aan"
+
+#: zine/forms.py:811
+msgid "You have to select the user that gets the posts assigned."
+msgstr "Je moet een gebruiker uitkiezen aan welke de bijdrages worden "
+"toegewezen."
+
+#: zine/forms.py:852
+msgid "Filename"
+msgstr "Bestandsnaam"
+
+#: zine/forms.py:853
+msgid "Log Level"
+msgstr "Loggingsniveau"
+
+#: zine/forms.py:858 zine/forms.py:1028
+msgid "Blog title"
+msgstr "Blog-titel"
+
+#: zine/forms.py:859
+msgid "Blog tagline"
+msgstr "Blog-tagline"
+
+#: zine/forms.py:860
+msgid "Blog email"
+msgstr "Blog e-mail"
+
+#: zine/forms.py:861
+msgid "Language"
+msgstr "Taal"
+
+#: zine/forms.py:862
+msgid "Timezone"
+msgstr "Tijdzone"
+
+#: zine/forms.py:864
+msgid "Cookie Name"
+msgstr "Cookienaam"
+
+#: zine/forms.py:866
+msgid "Comments enabled"
+msgstr "Reageren toestaan"
+
+#: zine/forms.py:867
+msgid "enable comments per default"
+msgstr "reageren standaard toestaan"
+
+#: zine/forms.py:869
+msgid "Comment Moderation"
+msgstr "Moderatie van reacties"
+
+#: zine/forms.py:872
+msgid "Pingbacks enabled"
+msgstr "Pingbacks ingeschakeld"
+
+#: zine/forms.py:873
+msgid "enable pingbacks per default"
+msgstr "pingbacks standaard inschakelen"
+
+#: zine/forms.py:875
+msgid "Use flat comments"
+msgstr "Platte reacties gebruiken"
+
+#: zine/forms.py:876
+msgid "All comments are posted top-level"
+msgstr "Alle reacties worden bovenaan gepost"
+
+#: zine/forms.py:878
+msgid "Default parser"
+msgstr "Standaardparser"
+
+#: zine/forms.py:880
+msgid "Comment parser"
+msgstr "Reactieparser"
+
+#: zine/forms.py:882
+msgid "Posts per page"
+msgstr "Bijdrages per pagina"
+
+#: zine/forms.py:897
+msgid "Blog URL prefix"
+msgstr "URL-prefix voor blog"
+
+#: zine/forms.py:899
+msgid "Admin URL prefix"
+msgstr "URL-prefix voor beheer"
+
+#: zine/forms.py:901
+msgid "Category URL prefix"
+msgstr "URL-prefix voor categorieën"
+
+#: zine/forms.py:903
+msgid "Tag URL prefix"
+msgstr "URL-prefix voor tags"
+
+#: zine/forms.py:905
+msgid "Author Profiles URL prefix"
+msgstr "URL-prefix voor auteurprofielen"
+
+#: zine/forms.py:907
+msgid "Limit slugs to ASCII"
+msgstr "Slugs beperken tot ASCII"
+
+#: zine/forms.py:908
+msgid "Automatically generated slugs are limited to ASCII"
+msgstr "Automatisch gegenereerde slugs worden beperkt tot ASCII"
+
+#: zine/forms.py:929
+msgid "Cache system"
+msgstr "Cache-systeem"
+
+#: zine/forms.py:931
+msgid "Default cache timeout"
+msgstr "Stanaard cache-timeout"
+
+#: zine/forms.py:933
+msgid "Enable eager caching"
+msgstr "Gretig cachen"
+
+#: zine/forms.py:934
+msgid "Enable"
+msgstr "Inschakelen"
+
+#: zine/forms.py:941
+msgid "You have to provide at least one server to use memcached."
+msgstr "Je moet tenminste één server opgeven om memcached te kunnen "
+"gebruiken"
+
+#: zine/forms.py:945
+msgid "You have to provide cache folder to use filesystem cache."
+msgstr "Je moet een cachedirectory opgeven om de filesystem-cache te "
+"kunnen gebruiken"
+
+#: zine/forms.py:955
+msgid "Dump Download URL"
+msgstr "Dump download URL"
+
+#: zine/forms.py:961
+msgid "Feed Download URL"
+msgstr "Feed download URL"
+
+#: zine/forms.py:978
+msgid "Use default value"
+msgstr "Standaardwaarde gebruiken"
+
+#: zine/forms.py:1014
+msgid "Create new user"
+msgstr "Nieuwe gebruiker aanmaken"
+
+#: zine/forms.py:1030
+msgid "Blog description"
+msgstr "Blog-omschrijving"
+
+#: zine/forms.py:1035
+msgid "Load config values"
+msgstr "Laad configuratiewaarden"
+
+#: zine/forms.py:1036
+msgid "Load the configuration values from the import."
+msgstr "Laad de configuratiewaarden uit de import."
+
+#: zine/parsers.py:75
+msgid "Zine-Markup"
+msgstr "Zine-markup"
+
+#: zine/parsers.py:87
+msgid "HTML"
+msgstr "HTML"
+
+#: zine/pingback.py:66
+msgid "source URL does not exist"
+msgstr "bron-URL bestaat niet"
+
+#: zine/pingback.py:67
+msgid "The source URL does not contain a link to the target URL"
+msgstr "De bron-URL bevat geen link naar de doel-URL"
+
+#: zine/pingback.py:68
+msgid "The specified target URL does not exist"
+msgstr "De opgegeven doel-URL bestaat niet"
+
+#: zine/pingback.py:69
+msgid "The specified target URL cannot be used as a target"
+msgstr "De opgegeven doel-URL kan niet als doel worden gebruikt"
+
+#: zine/pingback.py:70
+msgid "The pingback has already been registered"
+msgstr "De pingback is al geregistreerd"
+
+#: zine/pingback.py:71 zine/templates/403.html:2 zine/templates/403.html:4
+msgid "Access Denied"
+msgstr "Toegang geweigerd"
+
+#: zine/pingback.py:72
+#, python-format
+msgid "An unknown server error (%s) occurred"
+msgstr "Er is een onbekende server-fout (%s) opgetreden"
+
+#: zine/pluginsystem.py:332
+msgid ""
+"Could not install the plugin because the uploaded file is not a valid plugin"
+" file."
+msgstr "De plugin kon niet worden geïnstalleerd omdat het opgestuurde bestand "
+"geen geldige plugin-file is."
+
+#: zine/pluginsystem.py:334
+msgid ""
+"The plugin uploaded has a newer package version than this Zine installation "
+"can handle."
+msgstr "De opgestuurde plugin heeft een nieuwere package version dan deze "
+"Zine-installatie aankan"
+
+#: zine/pluginsystem.py:337
+msgid "A plugin with the same UID is already installed. Aborted."
+msgstr "Een plugin met dezelfde UID is al geïnstalleerd. Afgebroken."
+
+#: zine/pluginsystem.py:339
+msgid ""
+"Could not install the package because the installer wasn't able to write the"
+" package information. Wrong permissions?"
+msgstr "Het pakket kon niet worden geïnstalleerd omdat de installer de "
+"pakket-informatie niet kon wegschrijven. Permissie-probleem?"
+
+#: zine/pluginsystem.py:361
+msgid "Plugin setup error"
+msgstr "Plugin-installatie-fout"
+
+#: zine/pluginsystem.py:372
+#, python-format
+msgid "Exception happend on setup: %(error)s (%(file)s, line %(line)d)"
+msgstr "Exception tijdens installatie: %(error)s (%(file)s, regel %(line)d)"
+
+#: zine/privileges.py:153
+msgid "can enter admin panel"
+msgstr "kan bij het beheerpaneel"
+
+#: zine/privileges.py:154
+msgid "can administer the blog"
+msgstr "kan het blog beheren"
+
+#: zine/privileges.py:155
+msgid "can create new entries"
+msgstr "kan nieuwe artikelen aanmaken"
+
+#: zine/privileges.py:156
+msgid "can edit his own entries"
+msgstr "kan eigen artikelen aanpassen"
+
+#: zine/privileges.py:157
+msgid "can edit another person's entries"
+msgstr "kan andermans artikelen aanpassen"
+
+#: zine/privileges.py:158
+msgid "can create new pages"
+msgstr "kan nieuwe paginas aanmaken"
+
+#: zine/privileges.py:159
+msgid "can edit his own pages"
+msgstr "kan eigen paginas aanpassen"
+
+#: zine/privileges.py:160
+msgid "can edit another person's pages"
+msgstr "kan andermans paginas aanpassen"
+
+#: zine/privileges.py:161
+msgid "can view drafts"
+msgstr "kan concepten bekijken"
+
+#: zine/privileges.py:162
+msgid "can manage categories"
+msgstr "kan categorieën beheren"
+
+#: zine/privileges.py:163
+msgid "can moderate comments"
+msgstr "kan reacties modereren"
+
+#: zine/docs/__init__.py:67
+msgid "no documented plugins installed."
+msgstr "geen gedocumenteerde plugins geïnstalleerd"
+
+#: zine/i18n/__init__.py:478
+msgid "now"
+msgstr "nu"
+
+#: zine/importers/__init__.py:152
+msgid "set blog title from dump"
+msgstr "stel blogtitel in uit dump"
+
+#: zine/importers/__init__.py:155
+msgid "set blog tagline from dump"
+msgstr "stel blog-tagline in uit dump"
+
+#: zine/importers/__init__.py:211 zine/importers/__init__.py:226
+msgid "done"
+msgstr "klaar"
+
+#: zine/importers/__init__.py:214
+msgid "Committing transaction..."
+msgstr "Transactie wordt opgeslagen..."
+
+#: zine/importers/__init__.py:219
+msgid "Updating configuration..."
+msgstr "Configuratie wordt bijgewerkt..."
+
+#: zine/importers/feed.py:89
+msgid "Unknown feed uploaded."
+msgstr "Onbekende feed geupload."
+
+#: zine/importers/feed.py:135
+msgid "Importing of RSS feeds is currently not possible."
+msgstr "Het importeren van RSS feeds is op het moment niet mogelijk."
+
+#: zine/importers/feed.py:294
+msgid "Feed Importer"
+msgstr "Feed-importeur"
+
+#: zine/importers/feed.py:305 zine/importers/wordpress.py:209
+#, python-format
+msgid "Error downloading from URL: %s"
+msgstr "Fout bij het downloaden van de URL: %s"
+
+#: zine/importers/feed.py:312 zine/importers/wordpress.py:216
+msgid "Error parsing uploaded file"
+msgstr "Fout bij het parsen van het opgestuurde bestand"
+
+#: zine/importers/feed.py:313
+#, python-format
+msgid "Error parsing feed: %s"
+msgstr "Fout bij het parsen van de feed: %s"
+
+#: zine/importers/feed.py:316 zine/importers/wordpress.py:220
+msgid "Added imported items to queue."
+msgstr "De geïmporteerde items zijn toegevoegd aan de queue."
+
+#: zine/importers/wordpress.py:217
+#, python-format
+msgid "Error parsing uploaded file: %s"
+msgstr "Fout bij het parsen van het opgestuurde bestand: %s"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:68
+msgid "The key is invalid."
+msgstr "De sleutel is ongeldig."
+
+#: zine/plugins/akismet_spam_filter/__init__.py:79
+msgid "Could not verify key because of a server to server connection error."
+msgstr "Kon de sleutel niet verifiëren wegens een server-to-server "
+"verbindingsprobleem."
+
+#: zine/plugins/akismet_spam_filter/__init__.py:147
+msgid "Akismet"
+msgstr "Akismet"
+
+#: zine/plugins/akismet_spam_filter/__init__.py:162
+msgid "Akismet has been successfully enabled."
+msgstr "Akismet is met succes ingeschakeld."
+
+#: zine/plugins/akismet_spam_filter/__init__.py:164
+msgid "Akismet disabled."
+msgstr "Akismet uitgeschakeld."
+
+#: zine/plugins/akismet_spam_filter/__init__.py:183
+msgid "Comments Blocked by Akismet"
+msgstr "Reacties geblokkeerd door Akismet"
+
+#: zine/plugins/akismet_spam_filter/templates/akismet_widget.html:4
+#, python-format
+msgid "Akismet has blocked <b>%(spam_comments)s</b> comments."
+msgstr "Akismet heeft <b>%(spam_comments)s</b> reacties geblokkeerd."
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:2
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:4
+msgid "Akismet Configuration"
+msgstr "Akismet configuratie"
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:5
+#, python-format
+msgid ""
+"\n"
+"    Akismet will help you to reduce or even completely eliminate the comment"
+" spam\n"
+"    you get on your site. If you don't have a WordPress.com account yet, you"
+" can\n"
+"    get one at <a href=\"%(api_link)s\">WordPress.com</a>.\n"
+"  "
+msgstr ""
+"\n"
+"    Akismet helpt bij het reduceren of zelfs geheel elimineren van\n"
+" reactiespam die je op je site krijgt. Als je nog geen\n"
+" WordPress.com-account hebt, kun je er een aanvragen bij\n"
+" can\n"
+"    <a href=\"%(api_link)s\">WordPress.com</a>.\n"
+"  "
+
+#: zine/plugins/akismet_spam_filter/templates/admin/akismet_spam_filter.html:14
+msgid "Update Key"
+msgstr "Sleutel bijwerken"
+
+#: zine/plugins/creole_parser/__init__.py:52
+msgid "Creole"
+msgstr "Creole"
+
+#: zine/plugins/dark_vessel_colorscheme/__init__.py:21
+msgid "Dark"
+msgstr "Donker"
+
+#: zine/plugins/eric_the_fish/__init__.py:92
+#: zine/plugins/eric_the_fish/templates/admin/eric_the_fish.html:2
+#: zine/plugins/eric_the_fish/templates/admin/eric_the_fish.html:4
+msgid "Eric The Fish"
+msgstr "Eric de Vis"
+
+#: zine/plugins/eric_the_fish/__init__.py:105
+msgid "The skin could not be changed."
+msgstr "De skin kon niet worden veranderd."
+
+#: zine/plugins/eric_the_fish/templates/admin/eric_the_fish.html:5
+msgid ""
+"\n"
+"    This is Eric's configuration page. From here you can configure what\n"
+"    Eric looks like.\n"
+"  "
+msgstr ""
+"\n"
+"    Dit is Eric z'n configuratiepagina. Hier kun je instellen hoe\n"
+"    Eric eruit ziet.\n"
+"  "
+
+#: zine/plugins/markdown_parser/__init__.py:23
+msgid "Markdown"
+msgstr "Markdown"
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:5
+#: zine/plugins/vessel_theme/templates/_widgets.html:4
+#: zine/templates/admin/layout.html:6 zine/templates/admin/login.html:5
+msgid "Administration"
+msgstr "Beheer"
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:7
+#: zine/plugins/vessel_theme/templates/_widgets.html:6
+#, python-format
+msgid "logged in as %(username)s."
+msgstr "aangemeld als %(username)s."
+
+#: zine/plugins/miniblog_theme/templates/_widgets.html:8
+#: zine/plugins/vessel_theme/templates/_widgets.html:7
+msgid "go to admin panel"
+msgstr "ga naar beheerpanel"
+
+#: zine/plugins/miniblog_theme/templates/layout.html:26
+#: zine/plugins/vessel_theme/templates/layout.html:27
+#: zine/templates/layout.html:19
+#, python-format
+msgid "Proudly powered by %(zine)s."
+msgstr "Proudly powered by %(zine)s."
+
+#: zine/plugins/myrtle_theme/templates/layout.html:27
+#, python-format
+msgid "Proudly powered by %(zine)s, %(theme)s designed by %(author)s."
+msgstr "Proudly powered by %(zine)s, %(theme)s-stijl ontworpen door %(author)s."
+
+#: zine/plugins/myrtle_theme/templates/layout.html:32
+#: zine/websetup/templates/finished.html:10
+msgid "Admin Panel"
+msgstr "Beheerpaneel"
+
+#: zine/plugins/myrtle_theme/templates/layout.html:33
+#: zine/templates/admin/layout.html:18
+msgid "Logout"
+msgstr "Afmelden"
+
+#: zine/plugins/pygments_support/__init__.py:144
+msgid "Pygments theme changed successfully."
+msgstr "Pygments-stijl veranderd."
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:2
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:4
+msgid "Pygments"
+msgstr "Pygments"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:5
+msgid ""
+"\n"
+"    Pygments allows you to select one of many themes for your code tags.\n"
+"    You can preview and select one below.\n"
+"  "
+msgstr ""
+"\n"
+"    Met Pygments kun je uit één van de vele stijlen voor je code-tags\n"
+"    kiezen. Hieronder kun je ze bekijken en er één uitkiezen.\n"
+"  "
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:13
+#: zine/views/admin.py:106
+msgid "Theme"
+msgstr "Stijl"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:15
+msgid "Preview"
+msgstr "Voorbeeld"
+
+#: zine/plugins/pygments_support/templates/admin/pygments_support.html:16
+msgid "Select"
+msgstr "Kiezen"
+
+#: zine/plugins/typography/__init__.py:94
+#: zine/plugins/typography/templates/admin/typography.html:2
+#: zine/plugins/typography/templates/admin/typography.html:33
+msgid "Typography"
+msgstr "Typography"
+
+#: zine/plugins/typography/__init__.py:111
+msgid "Typography settings could not be changed."
+msgstr "Fout bij het veranderen van de Typography-instellingen."
+
+#: zine/plugins/typography/__init__.py:113
+msgid "Typography settings changed."
+msgstr "Typography-instellingen veranderd."
+
+#: zine/plugins/typography/templates/admin/typography.html:34
+msgid ""
+"\n"
+"    From here you can configure the typography settings. Note that the\n"
+"    typography plugin has hardcoded semantics at the moment, so there is\n"
+"    no way to change the algorithm from this config panel.\n"
+"  "
+msgstr ""
+"\n"
+"    Hier kun je typografie-instellingen veranderen. Merk op dat de\n"
+"    semantiek op dit moment vastgelegd is in de typography-plugin,\n"
+"    er is dus geen manier om het algoritme aan te passen vanuit\n"
+"    het beheerpaneel.\n"
+"  "
+
+#: zine/plugins/typography/templates/admin/typography.html:41
+msgid "Double Quote Pairs"
+msgstr "Dubbele aanhalingstekens"
+
+#: zine/plugins/typography/templates/admin/typography.html:46
+msgid "Single Quote Pairs"
+msgstr "Enkele aanhalingstekens"
+
+#: zine/plugins/typography/templates/admin/typography.html:53
+msgid "Use Common Character"
+msgstr "Zelfde teken gebruiken"
+
+#: zine/plugins/typography/templates/admin/typography.html:59
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:11
+#: zine/templates/admin/basic_options.html:12 zine/templates/admin/cache.html:100
+#: zine/templates/admin/configuration.html:30
+#: zine/templates/admin/edit_category.html:14
+#: zine/templates/admin/edit_comment.html:38
+#: zine/templates/admin/edit_entry.html:50 zine/templates/admin/edit_group.html:13
+#: zine/templates/admin/edit_page.html:46 zine/templates/admin/edit_user.html:27
+#: zine/templates/admin/pages_config.html:23
+#: zine/templates/admin/url_options.html:13
+#: zine/templates/admin/write_page.html:51
+msgid "Save"
+msgstr "Opslaan"
+
+#: zine/plugins/vessel_theme/__init__.py:25
+msgid "Blue"
+msgstr "Blauw"
+
+#: zine/plugins/vessel_theme/__init__.py:26
+msgid "Gray"
+msgstr "Grijs"
+
+#: zine/plugins/vessel_theme/__init__.py:27
+msgid "Green"
+msgstr "Groen"
+
+#: zine/plugins/vessel_theme/__init__.py:33
+msgid "Color variation"
+msgstr "Kleurvariatie"
+
+#: zine/plugins/vessel_theme/__init__.py:62
+msgid "Color variation changed successfully."
+msgstr "Kleurvariate veranderd."
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:2
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:4
+msgid "Configure Vessel Theme"
+msgstr "Vessel-stijl aanpassen"
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:5
+msgid ""
+"\n"
+"    This theme comes with various color variations you can choose from.\n"
+"  "
+msgstr ""
+"\n"
+"    Bij deze stijl zitten een aantal kleurvariaties waar je uit kunt\n"
+"    kiezen.\n"
+"  "
+
+#: zine/plugins/vessel_theme/templates/admin/configure_vessel_theme.html:12
+#: zine/templates/admin/change_password.html:9
+#: zine/templates/admin/edit_category.html:16
+#: zine/templates/admin/edit_comment.html:40
+#: zine/templates/admin/edit_entry.html:55 zine/templates/admin/edit_group.html:18
+#: zine/templates/admin/edit_page.html:51 zine/templates/admin/edit_user.html:32
+#: zine/templates/admin/inspect_import.html:75
+#: zine/templates/admin/write_page.html:55
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: zine/shared/js/Admin.js:50
+msgid "Bookmarklet"
+msgstr "Bookmarklet"
+
+#: zine/shared/js/Admin.js:52
+msgid ""
+"Right click on the following link and choose “Add to favorites” or “Bookmark"
+" link” to create a posting shortcut."
+msgstr ""
+"Klik met rechts op de volgende link en kies “Voeg toe aan favorieten” of "
+"“Bookmark link” om snel een bijdrage aan te kunnen maken."
+
+#: zine/shared/js/Admin.js:56
+msgid ""
+"Next time you visit an interesting page, just select some text and click on "
+"the bookmark."
+msgstr ""
+"De volgende keer dat je een interessante pagina bezoekt hoef je alleen maar "
+"wat tekst te selecteren en op de bookmark te klikken"
+
+#: zine/shared/js/Admin.js:60
+msgid "Blog It!"
+msgstr "Blog het!"
+
+#: zine/shared/js/Admin.js:62
+msgid ""
+"Right click on this link and choose “Add to favorites” or “Bookmark link” to"
+" create a posting shortcut."
+"Klik met rechts op deze link en kies “Voeg toe aan favorieten” of "
+"“Bookmark link” om snel een bijdrage aan te kunnen maken."
+msgstr ""
+
+#: zine/shared/js/Zine.js:31
+#, python-format
+msgid "Replying to comment by %s."
+msgstr "Antwoord geven op reactie van %s."
+
+#: zine/shared/js/Zine.js:33
+msgid "(Create as top level comment)"
+msgstr "(Maak aan als top-level reactie)"
+
+#: zine/templates/403.html:5
+msgid ""
+"\n"
+"    The access to the requested resource was restricted.\n"
+"  "
+msgstr ""
+"\n"
+"    De opgevraagde resource is niet toegankelijk.\n"
+"  "
+
+#: zine/templates/404.html:2 zine/templates/404.html:4
+msgid "Page Not Found"
+msgstr "Pagina niet gevonden"
+
+#: zine/templates/404.html:5
+msgid "Sorry, the page you requested does not exist."
+msgstr "Sorry, de opgevraagde pagina bestaat niet"
+
+#: zine/templates/404.html:6
+msgid ""
+"You may have followed a bad link or mis-typed a URL.\n"
+"    That’s most likely what went wrong."
+msgstr ""
+"Waarschijnlijk heb je een verkeerde link gevolgd, of\n"
+"    een URL verkeerd ingevoerd."
+
+#: zine/templates/404.html:8
+#, python-format
+msgid ""
+"You may want to\n"
+"    have a look at the <a href=\"%(index_link)s\">blog index</a>."
+msgstr ""
+"Neem anders een\n"
+"    kijkje op de <a href=\"%(index_link)s\">beginpagina</a> van het blog."
+
+#: zine/templates/500.html:2
+msgid "Zine Internal Server Error"
+msgstr "Zine interne server-fout"
+
+#: zine/templates/500.html:4
+msgid "Internal Server Error"
+msgstr "Interne server-fout"
+
+#: zine/templates/500.html:5
+msgid ""
+"\n"
+"    An internal error happened in the application. The blog administrator\n"
+"    has been informed about the problem.\n"
+"  "
+msgstr ""
+
+#: zine/templates/_comment.html:5
+msgid "Pingback by"
+msgstr ""
+"\n"
+"    Er is een interne fout opgetreden in de applicatie. De beheerder van\n"
+"    het blog is geïnformeerd over het probleem.\n"
+"  "
+
+#: zine/templates/_comment.html:6
+msgid "Comment by"
+msgstr "Reactie van"
+
+#: zine/templates/_comment.html:13
+msgid "reply to this comment"
+msgstr "antwoorden op deze reactie"
+
+#: zine/templates/_comment.html:62
+msgid "Submit Comment"
+msgstr "Reageer"
+
+#: zine/templates/_comment.html:63
+msgid "Reset Form"
+msgstr "Formulier resetten"
+
+#: zine/templates/_entry.html:11
+msgid "Tagged as"
+msgstr "Getagd als"
+
+#: zine/templates/_entry.html:18
+#, python-format
+msgid "%(comments)s comment"
+msgid_plural "%(comments)s comments"
+msgstr[0] "%(comments)s reactie"
+msgstr[1] "%(comments)s reacties"
+
+#: zine/templates/_entry.html:22 zine/templates/admin/_comment.html:12
+#: zine/templates/admin/index.html:56
+msgid "Edit"
+msgstr "Aanpassen"
+
+#: zine/templates/_entry.html:31 zine/templates/show_entry.html:8
+#, python-format
+msgid "written by %(author)s, on %(pub_date)s."
+msgstr "geschreven door %(author)s, op %(pub_date)s."
+
+#: zine/templates/_entry.html:36
+#, python-format
+msgid "<strong>Scheduled Post:</strong> This entry will appear in %(time_span)s."
+msgstr "<strong>Geplande bijdrage:</strong> Dit artikel verschijnt in %(time_span)s."
+
+#: zine/templates/_entry.html:45
+msgid "Read on"
+msgstr "Verder lezen"
+
+#: zine/templates/archive.html:2 zine/templates/archive.html:6
+#: zine/templates/widgets/post_archive_summary.html:2
+msgid "Archive"
+msgstr "Archief"
+
+#: zine/templates/archive.html:12
+msgid "empty archive"
+msgstr "leeg archief"
+
+#: zine/templates/archive.html:17
+#, python-format
+msgid "Archive for %(year)s"
+msgstr "Archief voor %(year)s"
+
+#: zine/templates/archive.html:19
+#, python-format
+msgid "Archive for %(month)s"
+msgstr "Archief voor %(month)s"
+
+#: zine/templates/archive.html:21
+#, python-format
+msgid "Archive for %(day)s"
+msgstr "Archief voor %(day)s"
+
+#: zine/templates/authors.html:2 zine/templates/authors.html:4
+#: zine/templates/admin/inspect_import.html:23
+msgid "Authors"
+msgstr "Auteurs"
+
+#: zine/templates/error_layout.html:5
+msgid "Zine Error"
+msgstr "Zine-fout"
+
+#: zine/templates/index.html:2
+msgid "Index"
+msgstr "Overzicht"
+
+#: zine/templates/index.html:8
+msgid "Welcome"
+msgstr "Welkom"
+
+#: zine/templates/index.html:10
+msgid "So far there are no entries in this blog."
+msgstr "Er zijn nog geen artikelen op dit blog."
+
+#: zine/templates/internal_error.html:2
+msgid "Zine Internal Error"
+msgstr "Zine interne fout"
+
+#: zine/templates/internal_error.html:4
+msgid "Internal Error"
+msgstr "Interne fout"
+
+#: zine/templates/internal_error.html:6
+msgid "Zine encountered an internal error during processing:"
+msgstr "Zine kwam een interne fout tegen bij de verwerking:"
+
+#: zine/templates/internal_error.html:13
+msgid ""
+"\n"
+"    If you have troubles fixing the problem have a look at the Zine\n"
+"    documentation.\n"
+"  "
+msgstr ""
+"\n"
+"    Als je moeilijkheden hebt bij het oplossen van het probleem, kijk\n"
+"    dan in de Zine-documentatie.\n"
+"  "
+
+#: zine/templates/internal_error.html:17
+msgid ""
+"\n"
+"    This error is only visible to blog administrators.  If a regular user\n"
+"    triggered the error an entry to the log is added and a generic error\n"
+"    message is displayed.\n"
+"  "
+msgstr ""
+"\n"
+"    Deze fout is alleen zichtbaar voor blog-beheerders. Als een gewone\n"
+"    gebruiker deze fout veroorzaakt wordt er een aantekening in de logfile\n"
+"    gemaakt en wordt er een algemene foutmelding getoond.\n"
+"  "
+
+#: zine/templates/maintenance.html:40
+msgid "Maintenance Mode"
+msgstr "Onderhoudsmodus"
+
+#: zine/templates/maintenance.html:41
+msgid ""
+"\n"
+"      This Zine instance is currently in maintenance mode.\n"
+"      Please wait until the administrator reopens the blog."
+msgstr ""
+"\n"
+"      Deze Zine-installatie is op dit moment in onderhoudsmodus.\n"
+"      Wacht alsjeblieft tot de beheerder het blog weer opent."
+
+#: zine/templates/page.html:10 zine/templates/show_entry.html:22
+#: zine/templates/admin/_post_helpers.html:7
+#: zine/templates/admin/inspect_import.html:51 zine/views/admin.py:90
+msgid "Comments"
+msgstr "Reacties"
+
+#: zine/templates/page.html:14 zine/templates/show_entry.html:26
+msgid "Leave a Reply"
+msgstr "Laat een reactie achter"
+
+#: zine/templates/server_error.html:2
+msgid "Zine Maintenance Mode"
+msgstr "Zine onderhoudmodus"
+
+#: zine/templates/show_author.html:12
+msgid "Posts written by user"
+msgstr "Bijdrages geschreven door gebruiker"
+
+#: zine/templates/show_author.html:15
+#, python-format
+msgid "%(post)s, on %(date)s"
+msgstr "%(post)s, op %(date)s"
+
+#: zine/templates/show_category.html:2
+#, python-format
+msgid "Show “%(category)s”"
+msgstr "Toon “%(category)s”"
+
+#: zine/templates/show_category.html:5
+#, python-format
+msgid "Entries in the Category “%(category)s”"
+msgstr "Artikelen in de categorie “%(category)s”"
+
+#: zine/templates/show_category.html:10 zine/templates/show_tag.html:10
+msgid "No public posts found"
+msgstr "Geen openbare bijdrages gevonden"
+
+#: zine/templates/show_tag.html:2
+#, python-format
+msgid "Show “%(tag)s”"
+msgstr "Toon “%(tag)s”"
+
+#: zine/templates/show_tag.html:5
+#, python-format
+msgid "Entries tagged “%(tag)s”"
+msgstr "Artikelen getagd als “%(tag)s”"
+
+#: zine/templates/admin/_comment.html:14
+#: zine/templates/admin/edit_category.html:15
+#: zine/templates/admin/edit_comment.html:39
+#: zine/templates/admin/edit_entry.html:53 zine/templates/admin/edit_group.html:16
+#: zine/templates/admin/edit_page.html:49 zine/templates/admin/edit_user.html:30
+#: zine/templates/admin/index.html:58 zine/templates/admin/inspect_import.html:74
+#: zine/templates/admin/manage_comments.html:20
+#: zine/templates/admin/write_page.html:53
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: zine/templates/admin/_comment.html:16
+msgid "Not Spam"
+msgstr "Geen spam"
+
+#: zine/templates/admin/_comment.html:19 zine/templates/admin/index.html:60
+#: zine/templates/admin/manage_comments.html:19
+msgid "Approve"
+msgstr "Goedkeuren"
+
+#: zine/templates/admin/_comment.html:22
+msgid "Block"
+msgstr "Blokkeren"
+
+#: zine/templates/admin/_post_helpers.html:18
+msgid "no categories"
+msgstr "geen categorieën"
+
+#: zine/templates/admin/_post_helpers.html:24
+msgid "No pages."
+msgstr "Geen paginas."
+
+#: zine/templates/admin/_post_helpers.html:32
+msgid "Your draft:"
+msgid_plural "Your drafts:"
+msgstr[0] "Je concept:"
+msgstr[1] "Je concepten:"
+
+#: zine/templates/admin/about_zine.html:2 zine/templates/admin/about_zine.html:4
+msgid "About Zine"
+msgstr "Over Zine"
+
+#: zine/templates/admin/about_zine.html:7
+msgid ""
+"\n"
+"      Zine is an open source content publishing platform emphasizing ease\n"
+"      of use and extensibility. It provides powerful internal "
+"infrastructure,\n"
+"      a simple and intuitive user interface.\n"
+"    "
+msgstr ""
+"\n"
+"      Zine is een open-source contentpublicatieplatform waarbij de\n"
+"      nadruk ligt op gebruiksgemak en uitbreidbaarheid. Het beschikt over\n"
+"      een krachtige interne infrastructuur, en een simpele en intuïtieve\n"
+"      gebruikersinterface\n"
+"    "
+
+#: zine/templates/admin/about_zine.html:12
+#, python-format
+msgid "© Copyright %(years)s by the Zine Team. Some rights reserved."
+msgstr ""
+
+#: zine/templates/admin/about_zine.html:15
+msgid ""
+"\n"
+"      Redistribution and use in source and binary forms, with or without\n"
+"      modification, are permitted provided that the following conditions\n"
+"      are met:"
+msgstr ""
+
+#: zine/templates/admin/about_zine.html:20
+msgid ""
+"Redistributions of source code must retain the above\n"
+"        copyright notice, this list of conditions and the following\n"
+"        disclaimer."
+msgstr ""
+
+#: zine/templates/admin/about_zine.html:23
+msgid ""
+"Redistributions in binary form must reproduce the above\n"
+"        copyright notice, this list of conditions and the following\n"
+"        disclaimer in the documentation and/or other materials provided\n"
+"        with the distribution."
+msgstr ""
+
+#: zine/templates/admin/about_zine.html:27
+msgid ""
+"The names of the contributors may not be used to endorse\n"
+"        or promote products derived from this software without specific\n"
+"        prior written permission."
+msgstr ""
+
+#: zine/templates/admin/about_zine.html:32
+msgid ""
+"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n"
+"      “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n"
+"      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n"
+"      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n"
+"      OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n"
+"      SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n"
+"      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n"
+"      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
+"      THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
+"      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
+"      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+msgstr ""
+
+#: zine/templates/admin/approve_comment.html:2
+#: zine/templates/admin/approve_comment.html:4
+msgid "Approve Comment"
+msgstr "Reactie goedkeuren"
+
+#: zine/templates/admin/approve_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to approve the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"        Weet je zeker dat je de reactie van %(comment_author)s wilt "
+"        goedkeuren?\n"
+"      "
+
+#: zine/templates/admin/approve_comment.html:11
+#: zine/templates/admin/block_comment.html:12
+#: zine/templates/admin/delete_category.html:11
+#: zine/templates/admin/delete_comment.html:11
+#: zine/templates/admin/delete_comments.html:11
+#: zine/templates/admin/delete_entry.html:18
+#: zine/templates/admin/delete_group.html:17
+#: zine/templates/admin/delete_import.html:12
+#: zine/templates/admin/delete_page.html:18
+#: zine/templates/admin/delete_user.html:18
+#: zine/templates/admin/remove_plugin.html:13
+#: zine/templates/admin/unblock_comment.html:13
+msgid "Yes"
+msgstr "Ja"
+
+#: zine/templates/admin/approve_comment.html:12
+#: zine/templates/admin/block_comment.html:11
+#: zine/templates/admin/delete_category.html:10
+#: zine/templates/admin/delete_comment.html:10
+#: zine/templates/admin/delete_comments.html:10
+#: zine/templates/admin/delete_entry.html:17
+#: zine/templates/admin/delete_group.html:16
+#: zine/templates/admin/delete_import.html:11
+#: zine/templates/admin/delete_page.html:17
+#: zine/templates/admin/delete_user.html:17
+#: zine/templates/admin/remove_plugin.html:12
+#: zine/templates/admin/unblock_comment.html:12
+msgid "No"
+msgstr "Nee"
+
+#: zine/templates/admin/basic_options.html:2
+#: zine/templates/admin/basic_options.html:4
+msgid "Basic Options"
+msgstr "Basisopties"
+
+#: zine/templates/admin/basic_options.html:5
+msgid ""
+"\n"
+"    From here you can configure the basic blog settings like the blog\n"
+"    title and tagline.\n"
+"  "
+msgstr ""
+"\n"
+"    Hier kun je de basisinstellingen zoals de blogtitel en de \n"
+"    tagline aanpassen.\n"
+"  "
+
+#: zine/templates/admin/block_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to block the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"        Weet je zeker dat je de reactie van %(comment_author)s wilt"
+"        blokkeren?\n"
+"      "
+
+#: zine/templates/admin/blogger_perform_import.html:2
+#: zine/templates/admin/blogger_perform_import.html:4
+#: zine/templates/admin/perform_import.html:2
+#: zine/templates/admin/perform_import.html:4
+msgid "Importing..."
+msgstr "Importeren..."
+
+#: zine/templates/admin/blogger_perform_import.html:5
+msgid ""
+"\n"
+"    The importer will download your data from Blogger.com\n"
+"    This can take some time.\n"
+"    <strong>Don't hit cancel!</strong>\n"
+"  "
+msgstr ""
+"\n"
+"    De importeur gaat je data van Blogger.com downloaden.\n"
+"    Dit kan eventjes duren.\n"
+"    <strong>Druk niet op annuleren!</strong>\n"
+"  "
+
+#: zine/templates/admin/blogger_perform_import.html:11
+msgid ""
+"\n"
+"    Data import completed successfully. You can review your import here:\n"
+"  "
+msgstr ""
+"\n"
+"    Data succesvol geïmporteerd. Je kunt je import hier controleren:\n"
+"  "
+
+#: zine/templates/admin/blogger_perform_import.html:15
+msgid "Import review page"
+msgstr "Importcontrolepagina"
+
+#: zine/templates/admin/cache.html:2 zine/templates/admin/cache.html:4
+msgid "Cache Options"
+msgstr "Cache-opties"
+
+#: zine/templates/admin/cache.html:6
+msgid ""
+"\n"
+"      Zine comes with a cache system that allows you to survive a sudden\n"
+"      storm of visitors. The caching system has different backends you can\n"
+"      choose from and also different settings that you should set depending "
+"on\n"
+"      the type of server you have and the number of visitors.\n"
+"    "
+msgstr ""
+"\n"
+"      Bij Zine zit een cache-systeem waarmee je een plotselinge toename\n"
+"      van bezoekers kunt overleven. Dit cache-systeem heeft verschillende\n"
+"      backends waar je uit kunt kiezen, en verschillende instellingen die\n"
+"      je kunt zetten afhankelijk van het type server dat je hebt, en het\n"
+"      aantal bezoekers.\n"
+"    "
+
+#: zine/templates/admin/cache.html:12
+msgid ""
+"\n"
+"      Keep in mind that if caching is enabled templates will be cached too "
+"and\n"
+"      as a result of that, they are not reloaded. If you are trying to "
+"develop \n"
+"      plugins it might be a good idea to disable all caching.\n"
+"    "
+msgstr ""
+"\n"
+"      Hou in gedachten dat, als caching is ingeschakeld, templates ook\n"
+"      gecached zullen worden, met als resultaat dat ze niet overnieuw\n"
+"      worden geladen. Als je probeert om plugins te ontwikkelen dan\n"
+"      kan het een goed idee zijn om alle caching uit te schakelen.\n"
+"    "
+
+#: zine/templates/admin/cache.html:28
+msgid "Cache System"
+msgstr "Cache-systeem"
+
+#: zine/templates/admin/cache.html:29
+msgid "Currently Zine supports three caching systems:"
+msgstr "Zine ondersteunt momenteel drie cache-systemen"
+
+#: zine/templates/admin/cache.html:31
+msgid ""
+"<strong>Simple Cache</strong>: The simple cache is a very\n"
+"          basic memory cache inside the server process. This cache works "
+"only\n"
+"          if you have a persistent environment. Roughly speaking this cache\n"
+"          works better the higher the number of threads in a process and the"
+"\n"
+"          lower the number or processes. If you have the chance to use a\n"
+"          memcached you should not use the simple cache."
+msgstr ""
+"<strong>Simpele cache</strong>: De simpele cache is een heel\n"
+"          rudimentaire geheugencache in het serverproces zelf. Deze cache\n"
+"          werkt alleen als je een persistente omgeving hebt. Kort gezegd\n"
+"          werkt deze cache beter hoe meer threads er in een proces zijn,\n"
+"          en hoe minder processen er zijn. Als je de mogelijkheid hebt om\n"
+"          een memcached te gebruiken, gebruik de simpele cache dan niet."
+
+#: zine/templates/admin/cache.html:37
+msgid ""
+"<strong>memcached</strong>: This cache system uses one\n"
+"          or multiple remote memcached servers for storing the cache\n"
+"          information. It requires at least one running memcached daemon. "
+"This\n"
+"          is useful for high traffic sites."
+msgstr ""
+"<strong>memcached</strong>: Dit cachesysteem gebruikt één of\n"
+"          meerdere memcached servers op afstand om de cacheinformatie\n"
+"          op te slaan. Benodigd is op z'n minst één memcached daemon.\n"
+"          Nuttig voor sites met veel verkeer."
+
+#: zine/templates/admin/cache.html:41
+msgid ""
+"<strong>Filesystem</strong>: This cache system stores the\n"
+"          cache information on the filesystem. If IO is a problem for you,\n"
+"          you should not use this cache. However for most of the cases the \n"
+"          filesystem it should be fast enough."
+msgstr ""
+"<strong>Bestandssysteem</strong>: Dit cachesysteem slaat de\n"
+"          cacheinformation op in het bestandssysteem. Als IO een probleem\n"
+"          voor je is moet je deze cache niet gebruiken. Desalniettemin hoort\n"
+"          het bestandssysteem in de meeste gevallen vlug genoeg te zijn."
+
+#: zine/templates/admin/cache.html:46
+msgid "Per default no cache system is active."
+msgstr "Standaard is er geen cachesysteem actief."
+
+#: zine/templates/admin/cache.html:49
+msgid "Memcached Options"
+msgstr "Memcached-opties"
+
+#: zine/templates/admin/cache.html:50
+msgid ""
+"\n"
+"        In order to use the memcached system you have to provide the address"
+"\n"
+"        of at least one machine running memcached.  For further details have"
+"\n"
+"        a look at <a href=\"http://www.danga.com/memcached/\">the memcached\n"
+"        webpage</a>.  Separate multiple addresses with commas.  This also\n"
+"        requires either the <a href=\"http://gijsbert.org/cmemcache/\"\n"
+"        >cmemcache</a> or <a href=\"ftp://ftp.tummy.com/pub/python-"
+"memcached/\"\n"
+"        >python-memcached</a> module.\n"
+"      "
+msgstr ""
+"\n"
+"        Om het memcached-systeem te gebruiken moet je het adres opgeven van\n"
+"        ten minste één machine waarop memcached draait. Voor meer details,\n"
+"        kijk op <a href=\"http://www.danga.com/memcached/\">de \n"
+"        memcached-webpagina</a>. Meedere adressen scheiden met een komma.\n"
+"        Hiervoor is ook of de\n"
+"        <a href=\"http://gijsbert.org/cmemcache/\">cmemcache</a> of de\n"
+"        <a href=\"ftp://ftp.tummy.com/pub/python-memcached/\">puthon-memcached</a>\n"
+"        module nodig.\n"
+"      "
+
+#: zine/templates/admin/cache.html:59
+msgid ""
+"\n"
+"        If you for example have a memcached running on localhost (127.0.0.1)"
+"\n"
+"        port 11211 you would have to enter <code>127.0.0.1:11211</code> into"
+"\n"
+"        the following text field.\n"
+"      "
+msgstr ""
+"\n"
+"        Als je bijvoorbeeld een memcached hebt draaien op localhost\n"
+"        (127.0.0.1) op poort 11211 dan moet je <code>127.0.0.1:11211</code>\n"
+"        invoeren in het volgende tekstveld.\n"
+"      "
+
+#: zine/templates/admin/cache.html:67
+msgid "Filesystem Options"
+msgstr "Bestandssysteem-opties"
+
+#: zine/templates/admin/cache.html:68
+msgid ""
+"\n"
+"        When using the filesystem cache you can control where Zine puts\n"
+"        all the cache data.  This path is relative to your Zine instance\n"
+"        folder and will be created automatically by Zine.  Keep in mind\n"
+"        that if you change that path and old cache data is left in the old\n"
+"        folder, Zine won't clean up the data left for you.\n"
+"      "
+msgstr ""
+"\n"
+"        Als je de bestandssysteemcache gebruikt kan je instellen waar\n"
+"        Zine alle cachedata opslaat. Dit pad is relatief ten opzichte\n"
+"        van je Zine instance-map en wordt automatisch aangemaakt door\n"
+"        Zine. Hou in gedachten dat Zine de oude data niet voor je\n"
+"        opruimt als je dit pad verandert."
+"      "
+
+#: zine/templates/admin/cache.html:75
+msgid ""
+"\n"
+"        One thing you have to keep in mind is that the cache path "
+"<em>must</em>\n"
+"        be a directory that only Zine uses for file management. The\n"
+"        Zine code cleans up there from time to time and it could delete\n"
+"        files that are otherwise not tracked by Zine. This is especially\n"
+"        the case if you try to cache into <code>/tmp</code> or a similar\n"
+"        folder that all kinds of applications use for storing temporary "
+"files.\n"
+"      "
+msgstr ""
+"\n"
+"        Eén dit moet je in gedachten houden, dit is dat het cache-pad\n"
+"        een map <em>moet</em> zijn die alleen door Zine wordt gebruikt.\n"
+"        De Zine-code ruimt deze map van tijd tot tijd op, en zou\n"
+"        bestanden kunnen verwijderen die niet door Zine zijn aangemaakt.\n"
+"        Dit is in het bijzonder het geval als je in <code>/tmp</code>\n"
+"        probeert te cachen, of een soortgelijke map die door allerlei\n"
+"        applicaties wordt gebruikt voor het opslaan van tijdelijke data.\n"
+"      "
+
+#: zine/templates/admin/cache.html:85
+msgid "General Cache Settings"
+msgstr "Algemene cache-instellingen"
+
+#: zine/templates/admin/cache.html:86
+msgid ""
+"\n"
+"      The following configuration values are cache system-independent. You\n"
+"      can use them to fine-tune the caching. The timeout is the number of\n"
+"      seconds an item is cached per default. Some items have different cache"
+"\n"
+"      timeouts though. If “eager caching” is enabled the cache system will\n"
+"      cache a lot more but it will have visible side-effects. For example\n"
+"      new blog posts won't appear on the index or in the feed for up to the\n"
+"      default timeout.\n"
+"    "
+msgstr ""
+"\n"
+"      De volgende instellingen zijn cachesysteem-onafhankelijk. Je kunt ze\n"
+"      gebruiken om de caching te fine-tunen. De timeout is het aantal\n"
+"      seconden dat een item standaard wordt gecached. Bepaalde items hebben\n"
+"      echter verschillende timeouts. Als “gretig cachen” aanstaat zal het\n"
+"      cachesysteem een stuk meer cachen, maar zal dit zichtbare\n"
+"      neveneffecten hebben. Nieuwe bijdrages zullen bijvoorbeeld niet in\n"
+"      het overzict of in de feed verschijnen totdat de ingestelde\n"
+"      timeout is verstreken.\n"
+"    "
+
+#: zine/templates/admin/cache.html:101
+msgid "Clear Cache"
+msgstr "Cache legen"
+
+#: zine/templates/admin/change_password.html:2
+#: zine/templates/admin/change_password.html:4
+#: zine/templates/admin/change_password.html:8 zine/templates/admin/layout.html:17
+msgid "Change Password"
+msgstr "Wachtwoord wijzigen"
+
+#: zine/templates/admin/configuration.html:2
+#: zine/templates/admin/configuration.html:4 zine/views/admin.py:131
+msgid "Configuration Editor"
+msgstr "Configuratie-editor"
+
+#: zine/templates/admin/configuration.html:5
+msgid ""
+"\n"
+"    Here you can tune all registered configuration values. Note that some of"
+"\n"
+"    them (especially the core configuration values) can easily break your\n"
+"    installation if set to an illegal value. Don't alter any of those values"
+"\n"
+"    if you don't know what effect they have. This editor is especially\n"
+"    useful if you want to configure plugins that don't provide a "
+"configuration\n"
+"    page (yet).\n"
+"  "
+msgstr ""
+"\n"
+"    Hier kan je alle geregistreerde configuratiewaarden aanpassen. Merk op\n"
+"    dat een aantal hiervan (met name de `core'-configuratiewaarden)\n"
+"    gemakkelijk de boel stuk kunnen maken als je een ongeldige waarde\n"
+"    opgeeft. Verander deze waarden niet als je niet weet wat het gevolg is.\n"
+"    Deze editor is vooral nuttig als je plugins wilt configureren\n"
+"    die (nog) niet over een configuratiepagina beschikken.\n"
+"  "
+
+#: zine/templates/admin/configuration.html:31
+msgid "Disable Editor"
+msgstr "Editor uitschakelen"
+
+#: zine/templates/admin/configuration.html:34
+msgid ""
+"\n"
+"        The configuration editor is disabled because of this. If you really "
+"want\n"
+"        to use it, click the button to proceed.\n"
+"      "
+msgstr ""
+"\n"
+"        Hierom is de configuratieeditor uitgeschakeld. Als je hem echt\n"
+"        wilt gebruiken, klik dan op de knop om verder te gaan.\n"
+"      "
+
+#: zine/templates/admin/configuration.html:39
+msgid "Enable Editor"
+msgstr "Editor inschakelen"
+
+#: zine/templates/admin/delete_category.html:2
+#: zine/templates/admin/delete_category.html:4
+msgid "Delete Category"
+msgstr "Categorie verwijderen"
+
+#: zine/templates/admin/delete_category.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete category “%(category_name)s”?\n"
+"      "
+msgstr ""
+"\n"
+"        Weet je zeker dat je de categorie “%(category_name)s” wilt\n"
+"        verwijderen?\n"
+"      "
+
+#: zine/templates/admin/delete_comment.html:2
+#: zine/templates/admin/delete_comment.html:4
+msgid "Delete Comment"
+msgstr "Reactie verwijderen"
+
+#: zine/templates/admin/delete_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete the comment by %(comment_author)s?\n"
+"      "
+msgstr ""
+"\n"
+"        Weet je zeker dat je de reactie van %(comment_author)s\n"
+"        wilt verwijderen?\n"
+"      "
+
+#: zine/templates/admin/delete_comments.html:2
+#: zine/templates/admin/delete_comments.html:4
+msgid "Delete Comments"
+msgstr "Reacties verwijderen"
+
+#: zine/templates/admin/delete_comments.html:7
+msgid "Do you really want to delete the selected comments?"
+msgstr "Weet je zeker dat je de geselecteerde reacties wilt verwijderen?"
+
+#: zine/templates/admin/delete_entry.html:2
+#: zine/templates/admin/delete_entry.html:4
+msgid "Delete Entry"
+msgstr "Artikel verwijderen"
+
+#: zine/templates/admin/delete_entry.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete entry “%(entry_title)s”?\n"
+"    "
+msgstr ""
+"\n"
+"      Weet je zeker dat je het artikel “%(entry_title)s” wilt "
+"verwijderen?\n"
+"    "
+
+#: zine/templates/admin/delete_entry.html:10
+#: zine/templates/admin/delete_page.html:10
+#, python-format
+msgid ""
+"\n"
+"      This will also delete %(comment_count)s comment.\n"
+"    "
+msgid_plural ""
+"\n"
+"      This will also delete %(comment_count)s comments.\n"
+"    "
+msgstr[0] ""
+"\n"
+"      Dit verwijdert ook %(comment_count)s reactie.\n"
+"    "
+msgstr[1] ""
+"\n"
+"      Dit verwijdert ook %(comment_count)s reacties.\n"
+"    "
+
+#: zine/templates/admin/delete_group.html:2
+#: zine/templates/admin/delete_group.html:4
+msgid "Delete Group"
+msgstr "Groep verwijderen"
+
+#: zine/templates/admin/delete_group.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete the group “%(name)s”?\n"
+"    "
+msgstr ""
+"\n"
+"      Weet je zeker dat je de groep “%(name)s” wilt verwijderen?\n"
+"    "
+
+#: zine/templates/admin/delete_group.html:9
+msgid ""
+"\n"
+"      What should happen to the users assigned with this group?\n"
+"    "
+msgstr ""
+"\n"
+"      Wat moet er gebeuren met de gebruikers die toegekend zijn\n"
+"      aan deze groep?\n"
+"    "
+
+#: zine/templates/admin/delete_import.html:2
+#: zine/templates/admin/delete_import.html:4
+msgid "Delete Import Dump"
+msgstr "Verwijder geïmporteerde dump"
+
+#: zine/templates/admin/delete_import.html:7
+#, python-format
+msgid ""
+"\n"
+"        Do you really want to delete the imported dump “%(dump_title)s”?\n"
+"      "
+msgstr ""
+"\n"
+"        Weet je zeker dat je de geïmporteerde dump “%(dump_title)s”\n"
+"        wilt verwijderen?\n"
+"      "
+
+#: zine/templates/admin/delete_page.html:2 zine/templates/admin/delete_page.html:4
+msgid "Delete Page"
+msgstr "Verwijder pagina"
+
+#: zine/templates/admin/delete_page.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete page “%(page_title)s”?\n"
+"    "
+msgstr ""
+"\n"
+"      Weet je zeker dat je de pagina “%(page_title)s” wilt\n"
+"      verwijderen?\n"
+"    "
+
+#: zine/templates/admin/delete_user.html:2 zine/templates/admin/delete_user.html:4
+msgid "Delete User"
+msgstr "Gebruiker verwijderen"
+
+#: zine/templates/admin/delete_user.html:6
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to delete the user “%(username)s”?\n"
+"    "
+msgstr ""
+"\n"
+"      Weet je zeker dat je de gebruiker “%(username)s” wilt\n"
+"      verwijderen?\n"
+"    "
+
+#: zine/templates/admin/delete_user.html:9
+#, python-format
+msgid ""
+"\n"
+"      What should happen to the %(post_count)s post this user wrote?\n"
+"    "
+msgid_plural ""
+"\n"
+"      What should happen to the %(post_count)s posts this user wrote?\n"
+"    "
+msgstr[0] ""
+"\n"
+"      Wat moet er gebeuren met de %(post_count)s bijdrage die deze gebruiker\n"
+"      heeft geschreven?\n"
+"    "
+msgstr[1] ""
+"\n"
+"      Wat moet er gebeuren met de %(post_count)s bijdrages die deze gebruiker\n"
+"      heeft geschreven?\n"
+"    "
+
+#: zine/templates/admin/edit_category.html:3
+#: zine/templates/admin/edit_category.html:5
+msgid "Edit Category"
+msgstr "Categorie aanpassen"
+
+#: zine/templates/admin/edit_comment.html:3
+#: zine/templates/admin/edit_comment.html:5
+msgid "Edit Comment"
+msgstr "Reactie aanpassen"
+
+#: zine/templates/admin/edit_entry.html:4 zine/templates/admin/index.html:19
+#: zine/templates/admin/manage_entries.html:10
+msgid "New Entry"
+msgstr "Nieuw artikel"
+
+#: zine/templates/admin/edit_entry.html:4
+#, python-format
+msgid "Edit Entry “%s”"
+msgstr "Pas artikel “%s” aan"
+
+#: zine/templates/admin/edit_entry.html:11 zine/templates/admin/edit_page.html:11
+msgid "Important:"
+msgstr "Belangrijk:"
+
+#: zine/templates/admin/edit_entry.html:12 zine/templates/admin/edit_page.html:12
+msgid ""
+"This post was created with a parser that is no longer\n"
+"        available.  You won't be able to save the post with the same parser\n"
+"        unless you re-activate the plugin that provided it."
+msgstr ""
+"Deze bijdrage is gemaakt met een parser die niet meer\n"
+"        beschikbaar is. Het is niet mogelijk om deze bijdrage op te slaan\n"
+"        met dezelfde parser, behalve als je de plugin voor deze parser\n"
+"        weer activeert."
+
+#: zine/templates/admin/edit_entry.html:29
+#: zine/templates/admin/manage_categories.html:21
+msgid "No categories."
+msgstr "Geen categorieën"
+
+#: zine/templates/admin/edit_entry.html:33 zine/templates/admin/edit_page.html:31
+msgid "Discussion"
+msgstr "Discussie"
+
+#: zine/templates/admin/edit_entry.html:45
+msgid "View Entry"
+msgstr "Bekijk artikel"
+
+#: zine/templates/admin/edit_entry.html:51 zine/templates/admin/edit_group.html:14
+#: zine/templates/admin/edit_page.html:47 zine/templates/admin/edit_user.html:28
+msgid "Save and continue editing"
+msgstr "Opslaan en verder bewerken"
+
+#: zine/templates/admin/edit_group.html:3
+#: zine/templates/admin/manage_groups.html:22
+msgid "New Group"
+msgstr "Nieuwe group"
+
+#: zine/templates/admin/edit_group.html:3
+msgid "Edit Group"
+msgstr "Groep aanpassen"
+
+#: zine/templates/admin/edit_page.html:4 zine/templates/admin/manage_pages.html:10
+#: zine/templates/admin/write_page.html:2 zine/templates/admin/write_page.html:4
+msgid "New Page"
+msgstr "Nieuwe pagina"
+
+#: zine/templates/admin/edit_page.html:4
+#, python-format
+msgid "Edit Page “%s”"
+msgstr "Pas pagina “%s” aan"
+
+#: zine/templates/admin/edit_page.html:42 zine/templates/admin/write_page.html:46
+msgid "View Page"
+msgstr "Bekijk pagina"
+
+#: zine/templates/admin/edit_user.html:3 zine/templates/admin/manage_users.html:24
+msgid "New User"
+msgstr "Nieuwe gebruiker"
+
+#: zine/templates/admin/edit_user.html:3
+msgid "Edit User"
+msgstr "Gebruiker aanpassen"
+
+#: zine/templates/admin/export.html:2 zine/templates/admin/export.html:4
+#: zine/templates/admin/export.html:21 zine/templates/admin/information.html:206
+#: zine/views/admin.py:128
+msgid "Export"
+msgstr "Exporteren"
+
+#: zine/templates/admin/export.html:5
+msgid ""
+"\n"
+"    Here you can dump your Zine database information into an standardized\n"
+"    format (Atom) with Zine extensions which we call “Zine eXtended\n"
+"    Atom” (ZineXA).  You can use this file to import your posts into another"
+"\n"
+"    weblog software that supports Atom.  You should not use this file for\n"
+"    Zine migrations as this file will not include attachments, the blog\n"
+"    configuration and probably data stored by plugins.\n"
+"  "
+msgstr ""
+"\n"
+"    Hier kun je je Zine databaseinformate dumpen in een gestandaardiseerd\n"
+"    formaat (Atom) met Zine-extensions die we “Zine eXtended Atom”\n"
+"    (ZineXA) noemen.  Je kunt dit bestand gebruiken om je bijdrages te\n"
+"    importeren in andere weblogsoftware, welke Atom ondersteunt.\n"
+"    Je kunt dit bestand beter niet voor Zine-migraties gebruiken, omdat\n"
+"    blijlages, de blog-configuratie en waarschijnlijk de plugin-data\n"
+"    hier niet in staan.\n"
+"  "
+
+#: zine/templates/admin/export.html:13
+msgid ""
+"\n"
+"    Please keep in mind that the exported file will contain confidential\n"
+"    information such as password hashes and database passwords from the\n"
+"    configuration.\n"
+"  "
+msgstr ""
+"\n"
+"    Hou in gedachten dat het ge-exporteerde bestand vertrouwelijke\n"
+"    informatie bevat, zoals hashes van de wachtwoorden en\n"
+"    database-wachtwoorden uit de configuratie.\n"
+"  "
+
+#: zine/templates/admin/help.html:8
+msgid "Table Of Contents"
+msgstr "Inhoudsopgave"
+
+#: zine/templates/admin/help_404.html:4
+msgid "Documentation Not Found"
+msgstr "Documentatie niet gevonden"
+
+#: zine/templates/admin/help_404.html:5
+msgid "The online documentation could not be found."
+msgstr "De online documentatie is niet gevonden."
+
+#: zine/templates/admin/help_404.html:6
+msgid ""
+"Possibly you have to generate the docs first by running the\n"
+"\t  <tt>build-documentation</tt> script from zine's scripts\n"
+"\t  folder."
+msgstr ""
+"Waarschijnlijk moet je de documentatie eerst aanmaken door\n"
+"\t  het <ttbuild-documentation</tt> script uit te voeren uit\n"
+"\t  Zine's scriptmap."
+
+#: zine/templates/admin/import.html:2 zine/templates/admin/import.html:4
+#: zine/templates/admin/import_blogger.html:41
+#: zine/templates/admin/import_feed.html:17
+#: zine/templates/admin/import_wordpress.html:19 zine/views/admin.py:127
+msgid "Import"
+msgstr "Importeren"
+
+#: zine/templates/admin/import.html:5
+msgid ""
+"\n"
+"    If you have posts or comments in another system, Zine can import those\n"
+"    into this blog.  The data imported doesn't directly end up in the blog "
+"but a\n"
+"    queue so that you can pick which data you want to import.  To get "
+"started,\n"
+"    choose a system to import from below:\n"
+"  "
+msgstr ""
+"\n"
+"    Als je bijdrages of reacties hebt in een ander systeem dan kan Zine\n"
+"    deze importeren in dit blog. De geïmporteerde data belandt niet\n"
+"    direct in het blog, maar in een wachtrij, zodat je kunt kiezen welke\n"
+"    gegevens je wilt importeren. Kies hieronder een systeem om uit te\n"
+"    importeren om te beginnen:\n"
+"  "
+
+#: zine/templates/admin/import.html:17
+msgid ""
+"\n"
+"      The following list lists all the imports that are not yet in the "
+"database\n"
+"      or deleted.  Click on one of the links to inspect the imported data "
+"and\n"
+"      select what you want to have in the database.\n"
+"    "
+msgstr ""
+"\n"
+"      De volgende lijst bevat alle imports die nog niet in de database\n"
+"      voorkomen, of die verwijderd zijn. Klik op één van onderstaande\n"
+"      links om de geïmporteerde data te bekijken en selecteer wat je\n"
+"      in de database wilt hebben.\n"
+"    "
+
+#: zine/templates/admin/import.html:26
+msgid "Importer Used"
+msgstr "Gebruikte importer"
+
+#: zine/templates/admin/import_blogger.html:14
+#: zine/templates/admin/import_blogger.html:16
+msgid "Import from Blogger.com"
+msgstr "Import uit Blogger.com"
+
+#: zine/templates/admin/import_blogger.html:17
+msgid ""
+"\n"
+"  This importer allows you to import a blog from Blogger.com.\n"
+"  "
+msgstr ""
+"\n"
+"  Met deze importer kun je een blog van Blogger.com importeren.\n"
+"  "
+
+#: zine/templates/admin/import_blogger.html:24
+#, python-format
+msgid ""
+"\n"
+"  You are authenticated with %(google)s.\n"
+"  "
+msgstr ""
+"\n"
+"  Je bent aangemeld bij %(google)s.\n"
+"  "
+
+#: zine/templates/admin/import_blogger.html:30
+msgid "Select Blog To Import"
+msgstr "Selecteer het Blog om te importeren"
+
+#: zine/templates/admin/import_blogger.html:42
+msgid "Log out of Google"
+msgstr "Afmelden bij Google"
+
+#: zine/templates/admin/import_blogger.html:50
+#, python-format
+msgid ""
+"\n"
+"  You are not authenticated with %(google)s. You need to authenticate to "
+"continue\n"
+"  the import. This link will take you to %(google)s, and once you are\n"
+"  authenticated you will be redirected back to this importer. This is the\n"
+"  preferred way to authenticate, and although it's a bit clumsy, it is safe."
+"\n"
+"  "
+msgstr ""
+"\n"
+"  Je bent niet aangemeld bij %(google)s. Je moet je aanmelden om door te\n"
+"  kunnen gaan met de import. Deze link stuurt je door naar %(google)s, en\n"
+"  wanneer je bent aangemeld word je doorgestuurd naar deze importer. Dit\n"
+"  is de beste manier om aan te melden. Alhoewel het wat onhandig is, is\n"
+"  het wel veilig.\n"
+"  "
+
+#: zine/templates/admin/import_blogger.html:57
+#, python-format
+msgid ""
+"\n"
+"    <a href=\"%(url)s\">Log into your %(google)s account</a>\n"
+"  "
+msgstr ""
+"\n"
+"    <a href=\"%(url)s\">Aanmelden bij je %(google)s account</a>\n"
+"  "
+
+#: zine/templates/admin/import_feed.html:2 zine/templates/admin/import_feed.html:4
+msgid "Import from Feed"
+msgstr "Import van feed"
+
+#: zine/templates/admin/import_feed.html:5
+msgid ""
+"\n"
+"    This importer can be used to import standard compliant feeds with "
+"optional\n"
+"    proprietary extensions.  Because of different incompatible RSS standards"
+"\n"
+"    this importer can currently only handle Atom feeds.\n"
+"  "
+msgstr ""
+"\n"
+"    Deze importer kan gebruikt worden om standaard-feeds met optionele\n"
+"    niet-standaard extensies te importeren. Door de verschillende\n"
+"    niet-compatibele RSS-standaarden kan deze importer alleen Atom-feeds\n"
+"    aan.\n"
+"  "
+
+#: zine/templates/admin/import_feed.html:13
+msgid "Upload Feed"
+msgstr "Feed uploaden"
+
+#: zine/templates/admin/import_wordpress.html:2
+#: zine/templates/admin/import_wordpress.html:4
+msgid "Import from WordPress"
+msgstr "Importeren uit WordPress"
+
+#: zine/templates/admin/import_wordpress.html:5
+msgid ""
+"\n"
+"    This importer allows you to import posts and comments from your "
+"WordPress\n"
+"    blog into your new Zine blog.  Either upload your WordPress eXtended\n"
+"    RSS (WXR) file created in the WordPress admin panel or give the importer"
+"\n"
+"    the location of such a file on an external URL and it will import the "
+"posts,\n"
+"    comments, custom fields, and categories into this blog.\n"
+"  "
+msgstr ""
+"\n"
+"    Deze importer kan gebruikt worden om bijdragen en reacties uit je\n"
+"    WordPress-blog te importeren in je nieuwe Zine-blog. Je kunt of het\n"
+"    WordPress eXtended RSS (WXR)-bestand zoals aangemaakt in het\n"
+"    WordPress-beheerpaneel uploaden, of de importer de locatie geven\n"
+"    van zo'n bestand met een externe URL, en de importer zal de\n"
+"    reacties, eigen velden en categorieën importeren in dit blog.\n"
+"  "
+
+#: zine/templates/admin/import_wordpress.html:15
+msgid "Upload Dump"
+msgstr "Dump uploaden"
+
+#: zine/templates/admin/index.html:2 zine/templates/admin/index.html:5
+#: zine/views/admin.py:84
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: zine/templates/admin/index.html:8
+#, python-format
+msgid "Howdy.  Welcome to the Zine administration interface %(user)s."
+msgstr "Hoi. Welkom bij de Zine beheer-interface, %(user)s."
+
+#: zine/templates/admin/index.html:11
+#, python-format
+msgid "You have written <strong>%(your_posts)s</strong> post so far."
+msgid_plural "You have written <strong>%(your_posts)s</strong> posts so far."
+msgstr[0] "Je hebt tot dusver <strong>%(your_posts)s</strong> bijdrage gemaakt."
+msgstr[1] "Je hebt tot dusver <strong>%(your_posts)s</strong> bijdrages gemaakt."
+
+#: zine/templates/admin/index.html:17
+msgid "Quickstart"
+msgstr "Snelstart"
+
+#: zine/templates/admin/index.html:20
+msgid "Moderate Comments"
+msgstr "Reacties modereren"
+
+#: zine/templates/admin/index.html:21 zine/templates/admin/manage_entries.html:3
+#: zine/templates/admin/manage_entries.html:5
+msgid "Manage Entries"
+msgstr "Artikelen beheren"
+
+#: zine/templates/admin/index.html:22
+msgid "Configure Zine"
+msgstr "Zine configureren"
+
+#: zine/templates/admin/index.html:23
+msgid "Manage Plugins"
+msgstr "Plugins beheren"
+
+#: zine/templates/admin/index.html:24 zine/templates/admin/manage_users.html:2
+#: zine/templates/admin/manage_users.html:4
+msgid "Manage Users"
+msgstr "Gebruikers beheren"
+
+#: zine/templates/admin/index.html:25
+msgid "Get Help"
+msgstr "Krijg hulp"
+
+#: zine/templates/admin/index.html:27
+#, python-format
+msgid ""
+"\n"
+"        If you need help, have a look at the <a "
+"href=\"%(help)s\">documentation</a>.  If that doesn't solve your problems "
+"you might\n"
+"        find answers in the <a href=\"%(support)s\">support section</a> of "
+"the\n"
+"        <a href=\"%(website)s\">Zine website</a>.\n"
+"      "
+msgstr ""
+"\n"
+"        Als je hulp nodig hebt, neem een kijkje bij de\n"
+"        <a href=\"%(help)s\">documentatie</a>. Lost dat je probleem niet\n"
+"        op? Misschien kun je dan een antwoord vinden in het\n"
+"        <a href=\"%(support)s\">support-deel</a> van de\n"
+"        <a href=\"%(website)s\">Zine-website</a>.\n"
+"      "
+
+#: zine/templates/admin/index.html:37
+msgid "Drafts"
+msgstr "Concepten"
+
+#: zine/templates/admin/index.html:46
+msgid "Comments Awaiting Approval"
+msgstr "Reacties die op goedkeuring wachten"
+
+#: zine/templates/admin/index.html:65
+msgid "Last Posts"
+msgstr "Laatste bijdrages"
+
+#: zine/templates/admin/index.html:76
+msgid "Zine at Reddit"
+msgstr "Zine op Reddit"
+
+#: zine/templates/admin/index.html:77
+#, python-format
+msgid ""
+"\n"
+"        Zine is present at %(reddit)s.  The latest popular items in the Zine"
+"\n"
+"        subreddit are listed below:\n"
+"        "
+msgstr ""
+"\n"
+"        Zine is aanwezig op %(reddit)s.  The laatste populaire items in de\n"
+"        Zine-subreddit staan hieronder:\n"
+"        "
+
+#: zine/templates/admin/information.html:4
+#: zine/templates/admin/information.html:20
+msgid "About The System"
+msgstr "Over het systeem"
+
+#: zine/templates/admin/information.html:21
+msgid "Zine Environment"
+msgstr "Zine-omgeving"
+
+#: zine/templates/admin/information.html:23
+msgid "Zine Version"
+msgstr "Zine-versie"
+
+#: zine/templates/admin/information.html:25
+msgid "Distribution Mode"
+msgstr "Distributiemanier"
+
+#: zine/templates/admin/information.html:27
+msgid "Package Location"
+msgstr "Locatie van package"
+
+#: zine/templates/admin/information.html:29
+msgid "Shared Data"
+msgstr "Gedeelde data"
+
+#: zine/templates/admin/information.html:31
+msgid "Builtin Templates"
+msgstr "Ingebouwde templates"
+
+#: zine/templates/admin/information.html:33
+msgid "Builtin Plugins"
+msgstr "Ingebouwde plugins"
+
+#: zine/templates/admin/information.html:35
+msgid "Builtin Translations"
+msgstr "Ingebouwde vertalingen"
+
+#: zine/templates/admin/information.html:37
+msgid "Path to Instance"
+msgstr "Pad naar instance"
+
+#: zine/templates/admin/information.html:39
+msgid "Database URI"
+msgstr "Database URI"
+
+#: zine/templates/admin/information.html:42
+msgid "Hosting Environment"
+msgstr "Hosting-omgeving"
+
+#: zine/templates/admin/information.html:44
+msgid "Python Version"
+msgstr "Python-versie"
+
+#: zine/templates/admin/information.html:46
+msgid "Platform"
+msgstr "Platform"
+
+#: zine/templates/admin/information.html:48
+msgid "Persistent Environment"
+msgstr "Persistente omgeving"
+
+#: zine/templates/admin/information.html:49
+#: zine/templates/admin/information.html:59
+msgid "yes"
+msgstr "ja"
+
+#: zine/templates/admin/information.html:49
+#: zine/templates/admin/information.html:55
+#: zine/templates/admin/information.html:59
+msgid "no"
+msgstr "nee"
+
+#: zine/templates/admin/information.html:50
+msgid "Multithreaded"
+msgstr "Multithreaded"
+
+#: zine/templates/admin/information.html:53
+#, python-format
+msgid "yes (%(count)s active threads)"
+msgstr "ja (%(count)s actieve threads)"
+
+#: zine/templates/admin/information.html:58
+msgid "Multiprocess"
+msgstr "Multiproces"
+
+#: zine/templates/admin/information.html:60
+msgid "WSGI Version"
+msgstr "WSGI-versie"
+
+#: zine/templates/admin/information.html:63
+msgid "URL Endpoints"
+msgstr "URL-eindpunten"
+
+#: zine/templates/admin/information.html:64
+msgid ""
+"\n"
+"    The following endpoints are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    De volgende eindpunten zijn geregistreerd bij deze instantie:\n"
+"  "
+
+#: zine/templates/admin/information.html:72
+msgid "Absolute URL Handlers"
+msgstr "Absolute URL-handlers"
+
+#: zine/templates/admin/information.html:73
+msgid ""
+"\n"
+"    The following absolute URL handlers are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    De volgende absolute URL-handlers zijn geregistreerd bij deze\n"
+"    instantie:\n"
+"  "
+
+#: zine/templates/admin/information.html:81
+msgid "View Handlers"
+msgstr "View-handlers"
+
+#: zine/templates/admin/information.html:82
+msgid ""
+"\n"
+"    The following view handlers for endpoints are registered on this "
+"instance:\n"
+"  "
+msgstr ""
+"\n"
+"    De volgende view-handlers voor eindpunten zijn geregistreerd bij deze\n"
+"    instantie:\n"
+"  "
+
+#: zine/templates/admin/information.html:90
+msgid "Content Types"
+msgstr "Content-types"
+
+#: zine/templates/admin/information.html:91
+msgid ""
+"\n"
+"    The following content types are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    De volgende content-types zijn geregistreerd bij deze\n"
+"    instantie:\n"
+"  "
+
+#: zine/templates/admin/information.html:103
+msgid ""
+"\n"
+"    The following privileges are known to the system:\n"
+"  "
+msgstr ""
+"\n"
+"    De volgende rechten zijn bekent bij het system:\n"
+"  "
+
+#: zine/templates/admin/information.html:111
+msgid "Services"
+msgstr "Diensten"
+
+#: zine/templates/admin/information.html:112
+msgid ""
+"\n"
+"    The following servicepoints are registered on this instance to be "
+"callable\n"
+"    via one of the available services.\n"
+"    "
+msgstr ""
+"\n"
+"    De volgende servicepoints zijn geregistreerd bij deze instantie\n"
+"    om aanroepbaar te zijn via één van de beschikbare diensten.\n"
+"    "
+
+#: zine/templates/admin/information.html:121
+msgid "Installed APIs"
+msgstr "Geïnstalleerde APIs"
+
+#: zine/templates/admin/information.html:122
+msgid ""
+"\n"
+"    The following APIs are installed on this blog instance. APIs marked with"
+"\n"
+"    a star (*) are preferred.\n"
+"  "
+msgstr ""
+"\n"
+"    De volgende APIs zijn geïnstalleerd op deze blog-instantie. APIs\n"
+"    gemarkeerd met een ster (*) genieten de voorkeur.\n"
+"  "
+
+#: zine/templates/admin/information.html:135
+msgid "ZEML Element Handlers"
+msgstr "ZEML element-handlers"
+
+#: zine/templates/admin/information.html:136
+msgid ""
+"\n"
+"    The following ZEML element handlers are registered on this instance:\n"
+"  "
+msgstr ""
+"\n"
+"    De volgende ZEML element-handlers zijn geregistreerd bij\n"
+"    deze instantie:\n"
+"  "
+
+#: zine/templates/admin/information.html:143
+msgid "no ZEML element handlers installed."
+msgstr "geen ZEML element-handlers geïnstalleerd."
+
+#: zine/templates/admin/information.html:146
+msgid "Parsers"
+msgstr "Parsers"
+
+#: zine/templates/admin/information.html:147
+msgid ""
+"\n"
+"    The following parsers are currently installed:\n"
+"  "
+msgstr ""
+"\n"
+"    De volgende parsers zijn op dit moment geïnstalleerd:\n"
+"  "
+
+#: zine/templates/admin/information.html:156 zine/views/admin.py:107
+msgid "Plugins"
+msgstr "Plugins"
+
+#: zine/templates/admin/information.html:160
+msgid "active"
+msgstr "actief"
+
+#: zine/templates/admin/information.html:161
+msgid "UID"
+msgstr "UID"
+
+#: zine/templates/admin/information.html:165
+msgid "Location"
+msgstr "Locatie"
+
+#: zine/templates/admin/information.html:170
+msgid "Configuration Variables"
+msgstr "Configuratievariabelen"
+
+#: zine/templates/admin/information.html:173
+#: zine/templates/admin/write_page.html:11
+msgid "Key"
+msgstr "Sleutel"
+
+#: zine/templates/admin/information.html:174
+msgid "Value"
+msgstr "Waarde"
+
+#: zine/templates/admin/information.html:175
+msgid "Default"
+msgstr "Standaard"
+
+#: zine/templates/admin/information.html:185
+msgid "Template Globals"
+msgstr "Template globals"
+
+#: zine/templates/admin/information.html:191
+msgid "Template Filters"
+msgstr "Template-filters"
+
+#: zine/templates/admin/information.html:198
+msgid ""
+"\n"
+"    You can export this list and share it for troubleshooting by clicking\n"
+"    on the button below.  The resulting file is stripped of confidential\n"
+"    information such as passwords.\n"
+"  "
+msgstr ""
+
+#: zine/templates/admin/inspect_import.html:2
+#: zine/templates/admin/inspect_import.html:4
+msgid "Inspect Import"
+msgstr "Import inspecteren"
+
+#: zine/templates/admin/inspect_import.html:5
+msgid ""
+"\n"
+"    Here you can now inspect the imported data and select the data you want\n"
+"    to import into the database.\n"
+"  "
+msgstr ""
+"\n"
+"    Hier kun je de geïmporteerde data inspecteren en de data selecteren die\n"
+"    je in de database wilt importeren.\n"
+"  "
+
+#: zine/templates/admin/inspect_import.html:10
+msgid "Blog Details"
+msgstr "Blog-details"
+
+#: zine/templates/admin/inspect_import.html:17
+msgid "Dump ID"
+msgstr "Dump ID"
+
+#: zine/templates/admin/inspect_import.html:19
+msgid ""
+"If you have a special installation and want to rewrite the import "
+"programmatically you need this identifier."
+msgstr ""
+"Als je een speciale installatie hebt en je de import programmatisch wilt "
+"herschrijven heb je deze identifier nodig."
+
+#: zine/templates/admin/inspect_import.html:24
+msgid ""
+"\n"
+"      Chose the authors whose posts you want to import.  In the dropdown you"
+"\n"
+"      can select one of the already existing users if you want to change the"
+"\n"
+"      author during importing.  In the default settings a new and inactive "
+"user\n"
+"      without a password is created.\n"
+"    "
+msgstr ""
+"\n"
+"      Kies de auteurs wiens bijdrages je wilt importeren. In het keuzemenu\n"
+"      kun je een bestaande gebruiker selecteren als je de auteur wilt\n"
+"      veranderen tijdens het importeren. Standaard wordt een nieuwe en\n"
+"      inactieve gebruiker zonder password aangemaakt.\n"
+"    "
+
+#: zine/templates/admin/inspect_import.html:34
+msgid "no author information"
+msgstr "geen auteursinformatie"
+
+#: zine/templates/admin/inspect_import.html:37
+msgid ""
+"\n"
+"      Authors are only converted if at least one of their posts is coverted."
+"\n"
+"      So if you unselect all the posts by a user in the list below it "
+"doesn't\n"
+"      matter what you select here.\n"
+"    "
+msgstr ""
+"\n"
+"      Auteurs worden alleen omgezet als ten minste één van hun bijdrages\n"
+"      ook wordt omgezet. Als je dus alle posts van een gebruiker in de\n"
+"      onderstaande lijst deselecteert maakt het niet uit wat je hier\n"
+"      uitkiest.\n"
+"    "
+
+#: zine/templates/admin/inspect_import.html:42
+msgid "Posts"
+msgstr "Bijdrages"
+
+#: zine/templates/admin/inspect_import.html:43
+msgid ""
+"\n"
+"      Posts marked with a blue background are already imported.\n"
+"    "
+msgstr ""
+"\n"
+"      Bijdrages gemarkeerd met een blauwe achtergrond zijn al\n"
+"      geïmporteerd.\n"
+"    "
+
+#: zine/templates/admin/inspect_import.html:63
+msgid "unpublished"
+msgstr "niet gepubliceerd"
+
+#: zine/templates/admin/inspect_import.html:73
+msgid "Import into Blog"
+msgstr "Importeer in blog"
+
+#: zine/templates/admin/layout.html:14
+#, python-format
+msgid "%(blog_title)s Administration"
+msgstr "%(blog_title)s beheer"
+
+#: zine/templates/admin/layout.html:16
+msgid "View Blog"
+msgstr "Bekijk blog"
+
+#: zine/templates/admin/layout.html:47
+#, python-format
+msgid "Powered by %(zine)s %(version)s."
+msgstr "Powered by %(zine)s %(version)s."
+
+#: zine/templates/admin/log.html:2 zine/templates/admin/log.html:4
+#: zine/views/admin.py:129
+msgid "Log"
+msgstr "Log"
+
+#: zine/templates/admin/log.html:5
+msgid ""
+"\n"
+"    The log shows you important information about your system.  Whenever\n"
+"    problems happen, you can see it here.\n"
+"  "
+msgstr ""
+"\n"
+"    Het log laat belangrijke informatie over het systeem zien. Wanneer er\n"
+"    problemen zijn kun je het hier zien.\n"
+"  "
+
+#: zine/templates/admin/log.html:9
+msgid "Recorded Events"
+msgstr "Opgeslagen gebeurtenissen"
+
+#: zine/templates/admin/log.html:20
+msgid "The logfile is empty"
+msgstr "De logfile is leeg"
+
+#: zine/templates/admin/log.html:27
+msgid "▼ Down"
+msgstr "▼ Omlaag"
+
+#: zine/templates/admin/log.html:32
+msgid "Up ▲"
+msgstr "Omhoog ▲"
+
+#: zine/templates/admin/log.html:36
+msgid "Log Settings"
+msgstr "Log-instellingen"
+
+#: zine/templates/admin/log.html:40 zine/templates/admin/plugins.html:60
+msgid "Apply"
+msgstr "Toepassen"
+
+#: zine/templates/admin/login.html:5 zine/templates/admin/login.html:15
+#: zine/templates/admin/login.html:36
+msgid "Login"
+msgstr "Aanmelden"
+
+#: zine/templates/admin/login.html:11
+msgid "&laquo; back to the blog index"
+msgstr "&laquo; terug naar het blog-overzicht"
+
+#: zine/templates/admin/login.html:30
+msgid "Remember me"
+msgstr "Onthoud mij"
+
+#: zine/templates/admin/maintenance.html:2 zine/templates/admin/maintenance.html:4
+#: zine/views/admin.py:126
+msgid "Maintenance"
+msgstr "Onderhoud"
+
+#: zine/templates/admin/maintenance.html:5
+msgid ""
+"\n"
+"    From here you can set your blog into maintenance mode and do "
+"administrative\n"
+"    tasks.  It's recommend to enable maintenance mode before doing software\n"
+"    upgrades, imports, exports or plugin installations.  While it's not "
+"stricly\n"
+"    necessary for the latter it's good idea to test the changes before going"
+"\n"
+"    live with them.  As long as maintenance mode is enabled users will see a"
+"\n"
+"    message that says that the blog is in maintenance mode.\n"
+"  "
+msgstr ""
+"\n"
+"    Hier vandaan kun je je blog in onderhoudsmodus zetten en\n"
+"    administratieve taken uitvoeren. Het verdient de aanbeveling om de\n"
+"    onderhoudsmodus aan te zetten voordat je software upgrades, imports\n"
+"    exports of plugin-installaties uitvoert. Alhoewel het niet strict\n"
+"    noodzakelijk is voor dat laatste is het een goed idee om de\n"
+"    wijzigingen uit te testen voordat je `live' gaat. Zolang de\n"
+"    onderhoudsmodus aan staat zien de gebruikers een bericht dat het\n"
+"    blog in onderhoud is.\n"
+"  "
+
+#: zine/templates/admin/maintenance.html:16
+msgid "Disable maintenance mode"
+msgstr "Onderhoudsmodus uitzetten"
+
+#: zine/templates/admin/maintenance.html:17
+msgid "Enable maintenance mode"
+msgstr "Onderhoudsmodus aanzetten"
+
+#: zine/templates/admin/manage_categories.html:2
+#: zine/templates/admin/manage_categories.html:4
+msgid "Manage Categories"
+msgstr "Categorieën beheren"
+
+#: zine/templates/admin/manage_categories.html:7
+#: zine/templates/admin/manage_groups.html:7
+#: zine/templates/admin/manage_users.html:7
+msgid "ID"
+msgstr "ID"
+
+#: zine/templates/admin/manage_categories.html:10
+msgid "Number of Posts"
+msgstr "Aantal bijdragen"
+
+#: zine/templates/admin/manage_categories.html:26
+msgid "New Category"
+msgstr "Nieuwe categorie"
+
+#: zine/templates/admin/manage_comments.html:15
+msgid "No comments."
+msgstr "Geen reacties."
+
+#: zine/templates/admin/manage_comments.html:24
+msgid "Toggle selection"
+msgstr "Selectie omkeren"
+
+#: zine/templates/admin/manage_groups.html:2
+#: zine/templates/admin/manage_groups.html:4
+msgid "Manage Groups"
+msgstr "Groepen beheren"
+
+#: zine/templates/admin/manage_groups.html:17
+msgid "No groups."
+msgstr "Geen groepen."
+
+#: zine/templates/admin/manage_pages.html:3
+#: zine/templates/admin/manage_pages.html:5
+msgid "Manage Pages"
+msgstr "Paginas beheren"
+
+#: zine/templates/admin/manage_users.html:10
+msgid "Mail"
+msgstr "E-mail"
+
+#: zine/templates/admin/pages_config.html:2
+#: zine/templates/admin/pages_config.html:4
+msgid "Pages Configuration"
+msgstr "Configureer paginas"
+
+#: zine/templates/admin/pages_config.html:5
+msgid ""
+"\n"
+"    Configure your pages settings.\n"
+"  "
+msgstr ""
+"\n"
+"    Configureer je pagina-instellingen.\n"
+"  "
+
+#: zine/templates/admin/pages_config.html:10
+msgid "Show page title"
+msgstr "Toon paginatitel"
+
+#: zine/templates/admin/pages_config.html:13
+msgid "Show the title of the page on top of the page body"
+msgstr "Toon de titel van de pagina bovenaan de inhoud van de pagina"
+
+#: zine/templates/admin/pages_config.html:16
+msgid "Show children"
+msgstr "Laat kinderen zien"
+
+#: zine/templates/admin/pages_config.html:19
+msgid "Show the child-pages on the bottom of the page body"
+msgstr "Laat paginas onder deze pagina zien onder de inhoud van de pagina"
+
+#: zine/templates/admin/perform_import.html:5
+msgid ""
+"\n"
+"    The importer converts now all the collected and selected data for\n"
+"    Zine and inserts it into the database.  This can take some time.\n"
+"    <strong>Don't hit cancel!</strong>\n"
+"  "
+msgstr ""
+"\n"
+"    De importer zet nu al de verzamelde en geselecteerde data om voor\n"
+"    Zine, en voegt deze toe aan de database. Dit kan even duren.\n"
+"    <strong>Niet annuleren!</strong>\n"
+"  "
+
+#: zine/templates/admin/perform_import.html:11
+msgid ""
+"\n"
+"    Imported data successfully.\n"
+"  "
+msgstr ""
+"\n"
+"    Data importeren gelukt.\n"
+"  "
+
+#: zine/templates/admin/plugins.html:2 zine/templates/admin/plugins.html:4
+msgid "Plugin Management"
+msgstr "Plugin-beheer"
+
+#: zine/templates/admin/plugins.html:7
+msgid ""
+"\n"
+"      Plugins extend the functionality of the Zine system. Because of\n"
+"      security and convenience reasons you have to enable plugins by hand.\n"
+"      Some plugins could conflict with each other so it's up to you to\n"
+"      decide which plugins you want to enable. In case of doubt have a look\n"
+"      at the installation instructions of the plugin you've added.\n"
+"    "
+msgstr ""
+"\n"
+"      Plugins breiden de functionaliteit van Zine uit. Om\n"
+"      veiligheids- en gebruiksredenen moeten plugins met de hand aan\n"
+"      worden gezet. Bepaalde plugins kunnen met elkaar conflicteren,\n"
+"      het is aan jou om te bepalen welke je aan wilt zetten. In geval\n"
+"      van twijfel kun je de installatie-instructies bekijken van de\n"
+"      plugin die je hebt toegevoegd.\n"
+"    "
+
+#: zine/templates/admin/plugins.html:16
+msgid "Plugin"
+msgstr "Plugin"
+
+#: zine/templates/admin/plugins.html:17
+msgid "Version"
+msgstr "Versie"
+
+#: zine/templates/admin/plugins.html:19
+msgid "Activate"
+msgstr "Activeren"
+
+#: zine/templates/admin/plugins.html:27
+#, python-format
+msgid ""
+"\n"
+"          By %(author)s\n"
+"          "
+msgstr ""
+"\n"
+"          Door %(author)s\n"
+"          "
+
+#: zine/templates/admin/plugins.html:31
+#, python-format
+msgid ""
+"\n"
+"            and %(contributors)s\n"
+"          "
+msgstr ""
+"\n"
+"            en %(contributors)s\n"
+"          "
+
+#: zine/templates/admin/plugins.html:38
+msgid "Remove plugin"
+msgstr "Plugin verwijderen"
+
+#: zine/templates/admin/plugins.html:45
+msgid "Plugin Guard"
+msgstr "Plugin-guard"
+
+#: zine/templates/admin/plugins.html:46
+msgid ""
+"\n"
+"      Normally the plugin guard is enabled and catches exceptions during\n"
+"      plugin setup.  In some situations however this is not wanted, for\n"
+"      example if you want to debug a broken plugin.\n"
+"    "
+msgstr ""
+"\n"
+"      Normaal gesproken staat de plugin-guard aan en vangt deze exceptions\n"
+"      af tijdens de initialisatie van plugins. In sommige gevallen is dit\n"
+"      echter niet gewenst, bijvoorbeeld als je een kapotte plugin wilt\n"
+"      debuggen."
+"    "
+
+#: zine/templates/admin/plugins.html:52
+msgid "Add New Plugin"
+msgstr "Voeg nieuwe plugin toe"
+
+#: zine/templates/admin/plugins.html:53
+msgid ""
+"\n"
+"      if you have a plugin as zine <tt>.plugin</tt> file you can upload it\n"
+"      to your zine instance using the following form. plugins added this way"
+"\n"
+"      can also be completely removed.\n"
+"    "
+msgstr ""
+"\n"
+"      Als je een plugin als Zine <tt>.plugin</tt>-bestand hebt kan je 'm\n"
+"      uploaden naar deze Zine-instantie met onderstaand formulier.\n"
+"      Plugins die je op deze manier toevoegt kunnen ook in hun geheel\n"
+"      worden verwijderd.\n"
+"    "
+
+#: zine/templates/admin/reddit.html:7
+#, python-format
+msgid ""
+"from <em>%(domain)s</em>, submitted by %(author)s @ %(submitted)s, "
+"%(comments)s"
+msgstr ""
+"van <em>%(domain)s</em>, gesubmit door %(author)s @ %(submitted)s, "
+"%(comments)s"
+
+#: zine/templates/admin/reddit.html:12
+#, python-format
+msgid "%d comment"
+msgid_plural "%d comments"
+msgstr[0] "%d reactie"
+msgstr[1] "%d reacties"
+
+#: zine/templates/admin/reddit.html:20
+msgid "No items on the frontpage"
+msgstr "Geen items op de frontpage"
+
+#: zine/templates/admin/remove_plugin.html:2
+#: zine/templates/admin/remove_plugin.html:4
+msgid "Remove Plugin"
+msgstr "Plugin verwijderen"
+
+#: zine/templates/admin/remove_plugin.html:7
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to remove the plugin “%(plugin_name)s” permanently\n"
+"      from the instance folder? If you do so you have to reinstall the "
+"plugin\n"
+"      if you want to use it again.\n"
+"    "
+msgstr ""
+"\n"
+"      Weet je zeker dat je de plugin “%(plugin_name)s” permanent wilt\n"
+"      verwijderen van deze instance? Als je dit doet moet je de plugin\n"
+"      overnieuw installeren als je hem weer wilt gebruiken.\n"
+"      if you want to use it again.\n"
+"    "
+
+#: zine/templates/admin/theme.html:2 zine/templates/admin/theme.html:4
+msgid "Theme Manager"
+msgstr "Stijlbeheer"
+
+#: zine/templates/admin/theme.html:16
+#, python-format
+msgid "by %(author)s"
+msgstr "door %(author)s"
+
+#: zine/templates/admin/theme.html:27
+msgid "Configure Theme"
+msgstr "Stijl configureren"
+
+#: zine/templates/admin/unblock_comment.html:2
+#: zine/templates/admin/unblock_comment.html:4
+msgid "Unblock Comment"
+msgstr "Reactie deblokkeren"
+
+#: zine/templates/admin/unblock_comment.html:7
+#, python-format
+msgid ""
+"\n"
+"      Do you really want to unblock the comment by %(comment_author)s\n"
+"      which was blocked with the following reason: %(reason)s?\n"
+"    "
+msgstr ""
+"\n"
+"      Weet je zeker dat je de reactie van %(comment_author)s wilt\n"
+"      deblokkeren? Deze reactie is geblokkeerd met de volgende reden:\n"
+"      %(reason)s?\n"
+"    "
+
+#: zine/templates/admin/url_options.html:2 zine/templates/admin/url_options.html:4
+msgid "URL Options"
+msgstr "URL-opties"
+
+#: zine/templates/admin/url_options.html:5
+msgid ""
+"\n"
+"    Here you can change some basic URL configuration settings.  This is "
+"especially\n"
+"    useful if you have plugins installed that that add a new index page or "
+"if you\n"
+"    want to move the administration to a different location.\n"
+"  "
+msgstr ""
+"\n"
+"    Hier kan je een aantal URL-basisinstellingen wijzigen. Dit is vooral\n"
+"    nuttig als je plugins hebt geïnstalleerd die een nieuwe\n"
+"    overzichtspagina toevoegen, of als je het beheer naar een andere plek\n"
+"    wilt verplaatsen\n"
+"  "
+
+#: zine/templates/admin/write_page.html:13
+msgid ""
+"\n"
+"        The key is used to build the url. If no key is given it's just the "
+"title-slug.\n"
+"      "
+msgstr ""
+"\n"
+"        De sleutel wordt gebruikt om de URL op te bouwen. Als er geen\n"
+"        sleutel is gegeven is dit alleen de titel-slug.\n"
+"      "
+
+#: zine/templates/admin/write_page.html:18
+msgid "Content"
+msgstr "Content"
+
+#: zine/templates/admin/write_page.html:29
+msgid "Parent Page"
+msgstr "Hoort bij pagina"
+
+#: zine/templates/admin/write_page.html:40
+msgid "Position"
+msgstr "Positie"
+
+#: zine/templates/widgets/latest_comments.html:2
+msgid "Latest Comments"
+msgstr "Nieuwste reacties"
+
+#: zine/templates/widgets/latest_comments.html:7
+msgid "by"
+msgstr "door"
+
+#: zine/templates/widgets/latest_posts.html:2
+msgid "Latest Posts"
+msgstr "Nieuwste bijdrages"
+
+#: zine/templates/widgets/pages_navigation.html:2
+msgid "Navigation"
+msgstr "Navigatie"
+
+#: zine/templates/widgets/post_archive_summary.html:11
+msgid "Complete archive"
+msgstr "Compleet archief"
+
+#: zine/templates/widgets/tag_cloud.html:7
+#, python-format
+msgid "%(count)s post tagged %(tag)s"
+msgid_plural "%(count)s posts tagged %(tag)s"
+msgstr[0] "%(count)s bijdrage getagd met %(tag)s"
+msgstr[1] "%(count)s posts getagd met %(tag)s"
+
+#: zine/utils/admin.py:34
+msgid "Error"
+msgstr "Fout"
+
+#: zine/utils/exceptions.py:59
+msgid "unkown file"
+msgstr "onbekend bestand"
+
+#: zine/utils/forms.py:681
+msgid "No choices."
+msgstr "Geen keuzes."
+
+#: zine/utils/forms.py:781
+msgid "Submit"
+msgstr "Opsturen"
+
+#: zine/utils/forms.py:925
+msgid "This field is required."
+msgstr "Dit is een verplicht veld."
+
+#: zine/utils/forms.py:1093
+msgid "Invalid security token submitted."
+msgstr "Ongeldig security-token opgestuurd"
+
+#: zine/utils/forms.py:1146 zine/utils/forms.py:1528
+#, python-format
+msgid "Please provide at least %d item."
+msgid_plural "Please provide at least %d items."
+msgstr[0] "Geef alsjeblieft minstens %d item."
+msgstr[1] "Geef alsjeblieft minstens %d items."
+
+#: zine/utils/forms.py:1153 zine/utils/forms.py:1535
+#, python-format
+msgid "Please provide no more than %d item."
+msgid_plural "Please provide no more than %d items."
+msgstr[0] "Geef alsjeblieft niet meer dan %d item."
+msgstr[1] "Geef alsjeblieft niet meer dan %d items."
+
+#: zine/utils/forms.py:1266
+#, python-format
+msgid "Please enter at least %d character."
+msgid_plural "Please enter at least %d characters."
+msgstr[0] "Voer alsjeblieft minstens %d karakter in."
+msgstr[1] "Voer alsjeblieft minstens %d karakters in."
+
+#: zine/utils/forms.py:1273
+#, python-format
+msgid "Please enter no more than %d character."
+msgid_plural "Please enter no more than %d characters."
+msgstr[0] "Voer alsjeblieft niet meer dan %d karakter in."
+msgstr[1] "Voer alsjeblieft niet meer dan %d karakters in."
+
+#: zine/utils/forms.py:1297
+msgid "Please enter a valid date."
+msgstr "Voer alsjeblieft een geldige datum in."
+
+#: zine/utils/forms.py:1333
+#, python-format
+msgid "“%(value)s” does not exist"
+msgstr "“%(value)s” bestaat niet"
+
+#: zine/utils/forms.py:1392
+msgid "Invalid value."
+msgstr "Ongeldige waarde."
+
+#: zine/utils/forms.py:1393
+msgid "Key does not exist."
+msgstr "Sleutel bestaat niet."
+
+#: zine/utils/forms.py:1463
+msgid "Please enter a valid choice."
+msgstr "Voer alsjeblieft een geldige keuze in."
+
+#: zine/utils/forms.py:1522
+#, python-format
+msgid "“%s” is not a valid choice"
+msgstr "“%s” is geen geldige keuze."
+
+#: zine/utils/forms.py:1567
+msgid "Please enter a whole number."
+msgstr "Voer alsjeblieft een geheel getal in."
+
+#: zine/utils/forms.py:1593
+#, python-format
+msgid "Ensure this value is greater than or equal to %s."
+msgstr "Zorg ervoor dat deze waarde groter of gelijk is aan %s."
+
+#: zine/utils/forms.py:1599
+#, python-format
+msgid "Ensure this value is less than or equal to %s."
+msgstr "Zorg ervoor dat deze waarde kleiner of gelijk is aan %s"
+
+#: zine/utils/forms.py:1621
+msgid "True"
+msgstr "Waar"
+
+#: zine/utils/forms.py:1622
+msgid "False"
+msgstr "Onwaar"
+
+#: zine/utils/log.py:35
+msgid "critical"
+msgstr "kritiek"
+
+#: zine/utils/log.py:36
+msgid "error"
+msgstr "fout"
+
+#: zine/utils/log.py:37
+msgid "warning"
+msgstr "waarschuwing"
+
+#: zine/utils/log.py:38
+msgid "notice"
+msgstr "opmerking"
+
+#: zine/utils/log.py:39
+msgid "info"
+msgstr "informatie"
+
+#: zine/utils/log.py:40
+msgid "debug"
+msgstr "debug"
+
+#: zine/utils/pagination.py:109 zine/utils/pagination.py:112
+msgid "Next »"
+msgstr "Volgende »"
+
+#: zine/utils/pagination.py:116 zine/utils/pagination.py:119
+msgid "« Previous"
+msgstr "« Vorige"
+
+#: zine/utils/validators.py:98
+msgid "You have to enter a valid URL."
+msgstr "Je moet een geldige URL invoeren."
+
+#: zine/utils/validators.py:116
+msgid "The slug is too long"
+msgstr "De slug is te lang"
+
+#: zine/utils/validators.py:118
+msgid "The slug must not start with a slash"
+msgstr "De slug mag niet starten met een schuine streep"
+
+#: zine/utils/validators.py:136 zine/utils/validators.py:139
+msgid "You have to enter a valid net address."
+msgstr "Je moet een geldig net-adres invullen."
+
+#: zine/utils/validators.py:141
+msgid "The port has to be numeric"
+msgstr "De poort moet numeriek zijn"
+
+#: zine/utils/validators.py:149
+msgid "Invalid character, < or > are not allowed."
+msgstr "Ongeldige tekens, < of > zijn niet toegestaan."
+
+#: zine/utils/validators.py:151
+msgid "URL prefix must not be a sole slash."
+msgstr "De URL-prefix mag niet een enkele schuine streep zijn."
+
+#: zine/utils/validators.py:154
+msgid "URL prefix must start with a slash."
+msgstr "De URL-prefix moet beginnen met een schuine streep."
+
+#: zine/utils/validators.py:156
+msgid "URL prefix must not end with a slash."
+msgstr "De URL prefix mag niet eindigen op een schuine streep."
+
+#: zine/utils/validators.py:165
+msgid "The text must not be empty."
+msgstr "De tekst mag niet leeg zijn."
+
+#: zine/utils/zeml.py:300
+msgid ""
+"Error when loading dynamic ZEML element. The system ignored the element.  "
+"Maybe a disabled plugin caused the problem."
+msgstr ""
+"Fout bij het laden van een dynamisch ZEML-element. Het systeem heeft het "
+"element genegeerd. Een uitgeschakelde plugin kan dit probleem misschien "
+"oplossen."
+
+#: zine/utils/zeml.py:664
+#, python-format
+msgid "Error loading dynamic element %s"
+msgstr "Fout bij het laden van dynamisch element %s"
+
+#: zine/views/admin.py:77
+msgid "Entries"
+msgstr "Artikelen"
+
+#: zine/views/admin.py:78
+msgid "Pages"
+msgstr "Paginas"
+
+#: zine/views/admin.py:85
+msgid "Write"
+msgstr "Schrijf"
+
+#: zine/views/admin.py:86
+msgid "Entry"
+msgstr "Artikel"
+
+#: zine/views/admin.py:87
+msgid "Page"
+msgstr "Pagina"
+
+#: zine/views/admin.py:89
+msgid "Manage"
+msgstr "Beheer"
+
+#: zine/views/admin.py:91
+msgid "Overview"
+msgstr "Overzicht"
+
+#: zine/views/admin.py:93
+#, python-format
+msgid "Awaiting Moderation (%d)"
+msgstr "Wacht op moderatie (%d)"
+
+#: zine/views/admin.py:96
+#, python-format
+msgid "Spam (%d)"
+msgstr "Spam (%d)"
+
+#: zine/views/admin.py:103
+msgid "Options"
+msgstr "Opties"
+
+#: zine/views/admin.py:104
+msgid "Basic"
+msgstr "Basis"
+
+#: zine/views/admin.py:105
+msgid "URLs"
+msgstr "URLs"
+
+#: zine/views/admin.py:108
+msgid "Cache"
+msgstr "Cache"
+
+#: zine/views/admin.py:112
+msgid "Users"
+msgstr "Gebruikers"
+
+#: zine/views/admin.py:118
+msgid "Help"
+msgstr "Hulp"
+
+#: zine/views/admin.py:119
+msgid "About"
+msgstr "Over"
+
+#: zine/views/admin.py:124
+msgid "Information"
+msgstr "Informatie"
+
+#: zine/views/admin.py:134
+msgid "System"
+msgstr "Systeem"
+
+#: zine/views/admin.py:157
+#, python-format
+msgid ""
+"Zine is in maintenance mode. Don't forget to <a href=\"%s\">turn it off "
+"again</a> once you finish your changes."
+msgstr ""
+"Zine is in onderhoudsmodus. Vergeet het niet <a href=\"%s\">uit te "
+"zetten</a> wanneer je klaar bent."
+
+#: zine/views/admin.py:166
+#, python-format
+msgid "Could not activate plugin “%(name)s”: %(error)s"
+msgstr "Kan plugin “%(name)s” niet activeren: %(error)s"
+
+#: zine/views/admin.py:216
+msgid "No URLs pinged so far because the post is not publicly available"
+msgstr "Nog geen URLs gepingd omdat de bijdrage niet gepubliceerd is"
+
+#: zine/views/admin.py:219
+msgid ""
+"Could not ping URLs because the parser for the post is not available any "
+"longer."
+msgstr ""
+"Kan URLs niet pingen omdat de parser voor de bijdrage niet langer "
+"beschikbaar is."
+
+#: zine/views/admin.py:233
+#, python-format
+msgid "Could not ping %(url)s: %(error)s"
+msgstr "Kan %(url)s niet pingen: %(error)s"
+
+#: zine/views/admin.py:238
+#, python-format
+msgid "%s was pinged successfully."
+msgstr "Pingen van %s gelukt."
+
+#: zine/views/admin.py:277
+msgid "Text here..."
+msgstr "Tekst hier..."
+
+#: zine/views/admin.py:279
+msgid "Untitled Page"
+msgstr "Pagina zonder titel"
+
+#: zine/views/admin.py:349
+#, python-format
+msgid "The entry %s was created successfully."
+msgstr "Artikel %s aangemaakt."
+
+#: zine/views/admin.py:352
+#, python-format
+msgid "The entry %s was updated successfully."
+msgstr "Artikel %s bijgewerkt."
+
+#: zine/views/admin.py:385
+#, python-format
+msgid "The entry %s was deleted successfully."
+msgstr "Artikel %s verwijderd."
+
+#: zine/views/admin.py:427
+#, python-format
+msgid "The page %s was created successfully."
+msgstr "Pagina %s aangemaakt."
+
+#: zine/views/admin.py:430
+#, python-format
+msgid "The page %s was updated successfully."
+msgstr "Pagina %s bijgewerkt."
+
+#: zine/views/admin.py:463
+#, python-format
+msgid "The page %s was deleted successfully."
+msgstr "Pagina %s verwijderd."
+
+#: zine/views/admin.py:496
+msgid "Approved all the selected comments."
+msgstr "Alle geselecteerde reacties goedgekeurd."
+
+#: zine/views/admin.py:510
+msgid "All Comments"
+msgstr "Alle reacties"
+
+#: zine/views/admin.py:517
+msgid "Comments Awaiting Moderation"
+msgstr "Reacties die op moderatie wachten"
+
+#: zine/views/admin.py:524
+msgid "Spam"
+msgstr "Spam"
+
+#: zine/views/admin.py:537
+#, python-format
+msgid "Comments for “%s”"
+msgstr "Reacties voor “%s”"
+
+#: zine/views/admin.py:558
+#, python-format
+msgid "Comment by %s moderated successfully."
+msgstr "Reactie van %s gemodereerd."
+
+#: zine/views/admin.py:607
+#, python-format
+msgid "Comment by %s approved successfully."
+msgstr "Reactie van %s goedgekeurd."
+
+#: zine/views/admin.py:627
+#, python-format
+msgid "Comment by %s blocked successfully."
+msgstr "Reactie van %s geblokkeerd."
+
+#: zine/views/admin.py:667
+#, python-format
+msgid "Category %s created successfully."
+msgstr "Categorie %s aangemaakt."
+
+#: zine/views/admin.py:671
+#, python-format
+msgid "Category %s updated successfully."
+msgstr "Categorie %s gewijzigd."
+
+#: zine/views/admin.py:700
+#, python-format
+msgid "Category %s deleted successfully."
+msgstr "Categorie %s verwijderd."
+
+#: zine/views/admin.py:740
+#, python-format
+msgid "User %s created successfully."
+msgstr "Gebruiker %s aangemaakt."
+
+#: zine/views/admin.py:744
+#, python-format
+msgid "User %s edited successfully."
+msgstr "Gebruiker %s bijgewerkt."
+
+#: zine/views/admin.py:768
+msgid "You cannot delete yourself."
+msgstr "Je kunt jezelf niet verwijderen."
+
+#: zine/views/admin.py:808
+#, python-format
+msgid "Group %s created successfully."
+msgstr "Groep %s aangemaakt."
+
+#: zine/views/admin.py:812
+#, python-format
+msgid "Group %s edited successfully."
+msgstr "Groep %s bijgewerkt."
+
+#: zine/views/admin.py:863
+msgid "Configuration altered successfully."
+msgstr "Configuratie bijgewerkt."
+
+#: zine/views/admin.py:890
+msgid "URL configuration changed."
+msgstr "URL-configuratie bijgewerkt."
+
+#: zine/views/admin.py:911
+msgid "Theme changed successfully."
+msgstr "Stijl bijgewerkt."
+
+#: zine/views/admin.py:925
+msgid "This theme is not configurable"
+msgstr "Deze stijl is niet te configureren"
+
+#: zine/views/admin.py:937
+msgid "Plugin configuration changed"
+msgstr "Plugin-configuratie gewijzigd"
+
+#: zine/views/admin.py:946
+#, python-format
+msgid "Plugin “%s” added successfully. You can now enable it in the plugin list."
+msgstr "Plugin “%s” toegevoegd. Je kunt 'm nu aanzetten in de pluginlijst."
+
+#: zine/views/admin.py:973
+#, python-format
+msgid ""
+"Could not remove the plugin “%s” because an IO error occurred. Wrong "
+"permissions?"
+msgstr ""
+"Kon plugin “%s” niet verwijderen omdat er een IO-fout optrad."
+" Permissieprobleem?"
+
+#: zine/views/admin.py:976
+#, python-format
+msgid "The plugin “%s” was removed from the instance successfully."
+msgstr "De plugin “%s” is verwijderd van de instantie."
+
+#: zine/views/admin.py:994
+msgid "The cache was cleared successfully."
+msgstr "De cache is leeggemaakt."
+
+#: zine/views/admin.py:998
+msgid "Cache settings were changed successfully."
+msgstr "Cache-instellingen bijgewerkt."
+
+#: zine/views/admin.py:1038
+msgid "Maintenance mode disabled.  The blog is now publicly available."
+msgstr "Onderhoudsmodus uitgezet. De blog is nu openbaar beschikbaar."
+
+#: zine/views/admin.py:1099
+#, python-format
+msgid "The imported dump “%s” was deleted successfully."
+msgstr "De geïmporteerde dump “%s” is verwijderd."
+
+#: zine/views/admin.py:1226
+msgid "Log changes saved."
+msgstr "Log-wijzigingen opgeslagen."
+
+#: zine/views/admin.py:1250
+msgid "Password changed successfully."
+msgstr "Wachtwoord veranderd."
+
+#: zine/views/blog.py:52 zine/views/blog.py:84
+msgid "Recent Posts Feed"
+msgstr "Feed met recente bijdrages"
+
+#: zine/views/blog.py:115
+#, python-format
+msgid "All posts in category %s"
+msgstr "Alle bijdrages in categorie %s"
+
+#: zine/views/blog.py:142
+#, python-format
+msgid "All posts tagged %s"
+msgstr "Alle bijdrages getagd met %s"
+
+#: zine/views/blog.py:173
+#, python-format
+msgid "All posts written by %s"
+msgstr "Alle bijdrages geschreven door %s"
+
+#: zine/views/blog.py:370
+#, python-format
+msgid "Comment %(num)d on %(post)s"
+msgstr "Reactie %(num)d op %(post)s"
+
+#: zine/views/blog.py:427
+msgid "Comments Feed"
+msgstr "Feed met reacties"
+
+#: zine/websetup/__init__.py:105
+#, python-format
+msgid ""
+"Instance folder does not exist.  You have to create the folder “%s” before "
+"proceeding."
+msgstr ""
+"De instance-map bestaat niet. Je moet de map “%s” aanmaken voordat "
+"je verder gaat."
+
+#: zine/websetup/__init__.py:127
+msgid "You have to provide a username."
+msgstr "Je moet een gebruikersnaam opgeven."
+
+#: zine/websetup/__init__.py:130
+msgid "You have to enter a mail address."
+msgstr "Je moet een e-mailadres opgeven."
+
+#: zine/websetup/__init__.py:132
+msgid "The mail address is not valid."
+msgstr "Het e-mailadres is niet geldig."
+
+#: zine/websetup/__init__.py:135
+msgid "You have to enter a password."
+msgstr "Je moet een wachtwoord opgeven."
+
+#: zine/websetup/__init__.py:137
+msgid "The two passwords do not match."
+msgstr "De twee wachtwoorden komen niet overeen."
+
+#: zine/websetup/__init__.py:206
+#, python-format
+msgid ""
+"The configuration file (%s) could not be opened for writing. Please adjust "
+"your permissions and try again."
+msgstr ""
+"Het configuratiebestand (%s) kon niet worden geschreven. Pas de permissies "
+"aan en probeer het nog eens."
+
+#: zine/websetup/templates/admin_account.html:3
+msgid "Administrator Account"
+msgstr "Beheerdersaccount"
+
+#: zine/websetup/templates/admin_account.html:4
+msgid ""
+"\n"
+"    In order to log into your Zine installation you have to provide a\n"
+"    login name for the administration user. You can later rename or delete\n"
+"    that user if you want.\n"
+"  "
+msgstr ""
+"\n"
+"    Om in te kunnen loggen in je Zine-installatie moet je een\n"
+"    gebruikersnaam voor de beheerdersgebruiker opgeven. Later kun je deze\n"
+"    gebruiker hernoemen of verwijderen, mocht je dat willen.\n"
+"  "
+
+#: zine/websetup/templates/admin_account.html:14
+msgid "Password (repeat)"
+msgstr "Wachtwoord (herhaal)"
+
+#: zine/websetup/templates/admin_account.html:16
+msgid "E-Mail"
+msgstr "E-mail"
+
+#: zine/websetup/templates/database.html:3
+msgid "Database"
+msgstr "Database"
+
+#: zine/websetup/templates/database.html:4
+msgid ""
+"\n"
+"    Zine uses a database to store blog posts and other information. The\n"
+"    only information it requires therefore is a database URI. Depending on "
+"your\n"
+"    database this URI looks different. Have a look at the following table "
+"for\n"
+"    examples of database URIs.\n"
+"  "
+msgstr ""
+"\n"
+"    Zine gebruikt een database om blog-bijdrages en andere informatie\n"
+"    op te slaan. De enige informatie die nodig is daarom, is een\n"
+"    database-URI. Afhankelijk van de database ziet deze URI er\n"
+"    verschillend uit. Kijk in de volgende tabel voor een voorbeeld\n"
+"    van een paar database-URIs.\n"
+"  "
+
+#: zine/websetup/templates/database.html:11
+msgid "SQLite"
+msgstr "SQLite"
+
+#: zine/websetup/templates/database.html:12
+msgid "sqlite://database.db"
+msgstr "sqlite://database.db"
+
+#: zine/websetup/templates/database.html:13
+msgid ""
+"\n"
+"        The SQLite database path is either absolute (if it starts with three"
+"\n"
+"        slashes on OS X / Linux or two slashes and a drive letter on a\n"
+"        Windows system) or otherwise relative to the instance folder.\n"
+"      "
+msgstr ""
+"\n"
+"        Het SQLite database-pad is absoluut als het begint met drie\n"
+"        schuine strepen onder OS X / Linux, of twee schuine strepen en een\n"
+"        letter van een schijfstation onder Windows. Anders is het\n"
+"        relatief ten opzichte van de map van de instance.\n"
+"      "
+
+#: zine/websetup/templates/database.html:18
+msgid "MySQL"
+msgstr "MySQL"
+
+#: zine/websetup/templates/database.html:19
+msgid "mysql://username:password@host/database_name"
+msgstr "mysql://gebruiker:wachtwoord@systeem/database_naam"
+
+#: zine/websetup/templates/database.html:20
+msgid "Postgres"
+msgstr "Postgres"
+
+#: zine/websetup/templates/database.html:21
+msgid "postgres://username:password@host/database_name"
+msgstr "postgres://gebruiker:wachtwoord@systeem/database_naam"
+
+#: zine/websetup/templates/error.html:3
+msgid "Setup Failed"
+msgstr "Installatie mislukt"
+
+#: zine/websetup/templates/error.html:4
+msgid "The websetup was not able to finish the Zine installation successfully."
+msgstr "De webinstaller kon de Zine-installatie niet afmaken."
+
+#: zine/websetup/templates/error.html:5
+msgid ""
+"\n"
+"    If you need help for setting up Zine have a look at the support\n"
+"    wepage that will be there once a beta is available :-)\n"
+"  "
+msgstr ""
+"\n"
+"    Als je hulp nodig hebt met de installatie van Zine, neem een kijkje\n"
+"    op de support-webpagina. Deze verschijnt zodra er een beta\n"
+"    beschikbaar is :-)\n"
+"  "
+
+#: zine/websetup/templates/finished.html:3
+msgid "Setup Finished"
+msgstr "Installatie voltooid"
+
+#: zine/websetup/templates/finished.html:4
+msgid ""
+"\n"
+"    The setup was finished successfully. You can now go to the\n"
+"    admin panel and start configuring your blog. Don't forget\n"
+"    to disable the maintenance mode after you finish your configuration.\n"
+"  "
+msgstr ""
+"\n"
+"    De installatie is voltooid. Je kunt nu naar het beheer-paneel gaan\n"
+"    en een begin maken met de configuratie van je blog. Vergeet niet om\n"
+"    de onderhoudsmodus uit te zetten als je klaar bent met het\n"
+"    configureren.\n"
+"  "
+
+#: zine/websetup/templates/layout.html:5 zine/websetup/templates/layout.html:159
+msgid "Zine Setup"
+msgstr "Zine installatie"
+
+#: zine/websetup/templates/layout.html:168
+msgid "An Error Occurred"
+msgstr "Er is een fout opgetreden"
+
+#: zine/websetup/templates/layout.html:174
+msgid "Next"
+msgstr "Volgende"
+
+#: zine/websetup/templates/layout.html:174
+msgid "Install"
+msgstr "Installeer"
+
+#: zine/websetup/templates/layout.html:175
+msgid "Back"
+msgstr "Terug"
+
+#: zine/websetup/templates/start.html:3
+msgid "Welcome To The Zine Setup"
+msgstr "Welkom bij de Zine-installatie"
+
+#: zine/websetup/templates/start.html:4
+msgid ""
+"\n"
+"    Welcome to the Zine Setup. This Wizard will ask you some\n"
+"    basic questions and setup Zine for you.\n"
+"  "
+msgstr ""
+"\n"
+"    Welkom bij de Zine-installatie. Deze wizard zal je een paar\n"
+"    simpele vragen stellen en Zine voor je installeren.\n"
+"  "
+
+#: zine/websetup/templates/start.html:8
+msgid ""
+"\n"
+"    The setup tried to determine the language from your browser\n"
+"    settings.  If you want to step through the wizard in another\n"
+"    language select it from the dropdown menu below and press next.\n"
+"  "
+msgstr ""
+"\n"
+"    De installatie heeft geprobeerd de taal uit je\n"
+"    browser-instellingen af te leiden. Als je door de wizard heen\n"
+"    wilt in een andere taal, selecteer deze dan uit het menu\n"
+"    hieronder, en druk op Volgende.\n"
+"  "
+
+#: zine/websetup/templates/summary.html:3
+msgid "Setup Starting"
+msgstr "Installatie begint"
+
+#: zine/websetup/templates/summary.html:4
+msgid ""
+"\n"
+"    Zine knows now about all the information it needs to setup your\n"
+"    instance. After you click on the install button Zine will create\n"
+"    the database tables and insert the default information. Right after that"
+"\n"
+"    Zine will be online in maintenance mode which means that it's only\n"
+"    visible to the administrator, all other users will get a message that\n"
+"    shows that the blog is in maintenance mode right now.\n"
+"  "
+msgstr ""
+"\n"
+"    Zine weet nu alles wat nodig is om je instantie te installeren.\n"
+"    Nadat je op de installatieknop klikt gaat Zine de tabellen\n"
+"    aanmaken in de database, en de standaard-informatie toevoegen.\n"
+"    Direct daarna is Zine online in onderhoudsmodus, wat inhoudt dat\n"
+"    het alleen zichtbaar is voor de beheerder, alle andere gebruikers\n"
+"    krijgen een boodschap te zien dat het blog in onderhoud is.\n"
+

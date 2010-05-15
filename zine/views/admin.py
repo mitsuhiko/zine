@@ -7,44 +7,32 @@
     available for admins, editors and authors but not for subscribers. For
     subscribers a simplified account management system exists at /account.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from datetime import datetime
-from os import remove, sep as pathsep
-from os.path import exists
 from urlparse import urlparse
 
 from werkzeug import escape
 from werkzeug.exceptions import NotFound, BadRequest, Forbidden
 
-from zine.privileges import assert_privilege, require_privilege, \
+from zine.privileges import assert_privilege, \
      CREATE_ENTRIES, EDIT_OWN_ENTRIES, EDIT_OTHER_ENTRIES, \
      CREATE_PAGES, EDIT_OWN_PAGES, EDIT_OTHER_PAGES, MODERATE_COMMENTS, \
      MODERATE_OWN_ENTRIES, MODERATE_OWN_PAGES, MANAGE_CATEGORIES, BLOG_ADMIN
 from zine.i18n import _, ngettext
 from zine.application import get_request, url_for, emit_event, \
-     render_response, get_application
-from zine.models import User, Group, Post, Category, Comment, \
-     STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
-     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
-from zine.database import db, comments as comment_table, posts, \
-     post_categories, post_links, secure_database_uri
-from zine.utils import dump_json, load_json
-from zine.utils.validators import is_valid_email, is_valid_url, check
+     render_response
+from zine.models import User, Group, Post, Category, Comment
+from zine.database import db, secure_database_uri
 from zine.utils.admin import flash, load_zine_reddit, require_admin_privilege
-from zine.utils.text import gen_slug
 from zine.utils.pagination import AdminPagination
-from zine.utils.http import redirect_back, redirect_to, redirect
-from zine.utils.zeml import split_intro
-from zine.i18n import parse_datetime, format_system_datetime, \
-     list_timezones, has_timezone, list_languages, has_language
+from zine.utils.http import redirect_to, redirect
 from zine.importers import list_import_queue, load_import_dump, \
      delete_import_dump
 from zine.pluginsystem import install_package, InstallationError, \
-     SetupError, get_object_name
+     get_object_name
 from zine.pingback import pingback, PingbackError
-from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
+from zine.forms import ChangePasswordForm, PluginForm, \
      LogOptionsForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
@@ -52,7 +40,7 @@ from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
      DeleteGroupForm, ThemeOptionsForm, DeleteImportForm, ExportForm, \
      MaintenanceModeForm, MarkCommentForm, RemovePluginForm, \
-     make_config_form, make_import_form, make_notification_form
+     make_config_form, make_import_form
 
 #: how many posts / comments should be displayed per page?
 PER_PAGE = 20
@@ -164,7 +152,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('plugins', url_for('admin/plugins'), _(u'Plugins')),
             ('import', url_for('admin/import'), _(u'Import')),
             ('export', url_for('admin/export'), _(u'Export')),
-            ('log', url_for('admin/log'), _('Log'))
+            ('log', url_for('admin/log'), _(u'Log'))
         ]
 
     navigation_bar.append(('system', system_items[0][1], _(u'System'),
@@ -192,8 +180,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     if request.app.cfg['maintenance_mode'] and \
                                         request.user.has_privilege(BLOG_ADMIN):
         flash(_(u'Zine is in maintenance mode. Don\'t forget to '
-                u'<a href="%s">turn it off again</a> once you finish your '
-                u'changes.') % url_for('admin/maintenance'))
+                u'turn it off again once you finish your changes.'))
 
     # check for broken plugins if we have the plugin guard enabled
     if request.app.cfg['plugin_guard']:
@@ -214,7 +201,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                                                set(plugins_to_deactivate)))
             cfg.commit()
             # we change the plugins inline so that the user get somewhat more
-            # informations
+            # information
             request.app.cfg.touch()
 
 
@@ -262,16 +249,12 @@ def ping_post_links(form):
         this_url = url_for(form.post, _external=True)
         for url in form.find_new_links():
             host = urlparse(url)[1].decode('utf-8', 'ignore')
-            html_url = '<a href="%s">%s</a>' % (
-                escape(url, True),
-                escape(host)
-            )
             try:
                 pingback(this_url, url)
             except PingbackError, e:
                 if not e.ignore_silently:
                     flash(_(u'Could not ping %(url)s: %(error)s') % {
-                        'url': html_url,
+                        'url':   escape(host),
                         'error': e.message
                     }, 'error')
             else:
@@ -391,13 +374,12 @@ def edit_entry(request, post=None):
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
-                msg = _('The entry %s was created successfully.')
+                msg = _(u'The entry “%s” was created successfully.')
             else:
                 form.save_changes()
-                msg = _('The entry %s was updated successfully.')
+                msg = _(u'The entry “%s” was updated successfully.')
 
-            flash(msg % u'<a href="%s">%s</a>' % (escape(url_for(post)),
-                                                  escape(post.title)))
+            flash(msg % escape(post.title))
 
             db.commit()
             emit_event('after-post-saved', post)
@@ -427,7 +409,7 @@ def delete_entry(request, post):
         elif request.form.get('confirm') and form.validate(request.form):
             form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
-            flash(_(u'The entry %s was deleted successfully.') %
+            flash(_(u'The entry “%s” was deleted successfully.') %
                   escape(post.title), 'remove')
             db.commit()
             return form.redirect('admin/manage_entries')
@@ -470,13 +452,12 @@ def edit_page(request, post=None):
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
-                msg = _('The page %s was created successfully.')
+                msg = _(u'The page “%s” was created successfully.')
             else:
                 form.save_changes()
-                msg = _('The page %s was updated successfully.')
+                msg = _(u'The page “%s” was updated successfully.')
 
-            flash(msg % u'<a href="%s">%s</a>' % (escape(url_for(post)),
-                                                  escape(post.title)))
+            flash(msg % escape(post.title))
 
             db.commit()
             emit_event('after-post-saved', post)
@@ -506,7 +487,7 @@ def delete_page(request, post):
         elif request.form.get('confirm') and form.validate(request.form):
             form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
-            flash(_(u'The page %s was deleted successfully.') %
+            flash(_(u'The page “%s” was deleted successfully.') %
                   escape(post.title), 'remove')
             db.commit()
             return form.redirect('admin/manage_pages')
@@ -559,8 +540,8 @@ def _handle_comments(identifier, title, query, page, per_page, post_id=None,
             # delete all comments in current tab
             elif 'delete_all' in request.form:
                 if identifier not in ('spam', 'blocked'):
-                    flash(_('“Delete All” can only be issued for “Spam” and '
-                            '“Blocked” comment types.'), 'error')
+                    flash(_(u'“Delete All” can only be issued for “Spam” and '
+                            u'“Blocked” comment types.'), 'error')
                 elif 'confirm' in request.form:
                     comments = query.all()
                     # Don't use .count() means a 2nd query and it's
@@ -804,7 +785,7 @@ def report_comment_spam(request, comment_id):
 
     return render_admin_response('admin/mark_comment.html',
                                  'comments.overview', form=form.as_widget(),
-                                 form_action=_('Spam'))
+                                 form_action=_(u'Spam'))
 
 @require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
                          MODERATE_OWN_PAGES)
@@ -861,18 +842,14 @@ def edit_category(request, category_id=None):
         elif form.validate(request.form):
             if category is None:
                 category = form.make_category()
-                msg = _(u'Category %s created successfully.')
+                msg = _(u'Category “%s” created successfully.')
                 msg_type = 'add'
             else:
                 form.save_changes()
-                msg = _(u'Category %s updated successfully.')
+                msg = _(u'Category “%s” updated successfully.')
                 msg_type = 'info'
             db.commit()
-            html_category_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(category)),
-                escape(category.name)
-            )
-            flash(msg % html_category_detail, msg_type)
+            flash(msg % escape(category.name), msg_type)
             return redirect_to('admin/manage_categories')
 
     return render_admin_response('admin/edit_category.html',
@@ -934,18 +911,14 @@ def edit_user(request, user_id=None):
         elif form.validate(request.form):
             if user is None:
                 user = form.make_user()
-                msg = _(u'User %s created successfully.')
+                msg = _(u'User “%s” created successfully.')
                 icon = 'add'
             else:
                 form.save_changes()
-                msg = _(u'User %s edited successfully.')
+                msg = _(u'User “%s” edited successfully.')
                 icon = 'info'
             db.commit()
-            html_user_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(user)),
-                escape(user.username)
-            )
-            flash(msg % html_user_detail, icon)
+            flash(msg % escape(user.username), icon)
             if request.form.get('save'):
                 return form.redirect('admin/manage_users')
             return redirect_to('admin/edit_user', user_id=user.id)
@@ -1002,17 +975,14 @@ def edit_group(request, group_id=None):
         elif form.validate(request.form):
             if group is None:
                 group = form.make_group()
-                msg = _(u'Group %s created successfully.')
+                msg = _(u'Group “%s” created successfully.')
                 icon = 'add'
             else:
                 form.save_changes()
-                msg = _(u'Group %s edited successfully.')
+                msg = _(u'Group “%s” edited successfully.')
                 icon = 'info'
             db.commit()
-            html_group_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(group)),
-                escape(group.name))
-            flash(msg % html_group_detail, icon)
+            flash(msg % escape(group.name), icon)
 
             if request.form.get('save'):
                 return form.redirect('admin/manage_groups')
@@ -1134,7 +1104,7 @@ def plugins(request):
 
     if request.method == 'POST' and form.validate(request.form):
         form.apply()
-        flash(_('Plugin configuration changed'), 'configure')
+        flash(_(u'Plugin configuration changed'), 'configure')
 
         new_plugin = request.files.get('new_plugin')
         if new_plugin:
@@ -1427,7 +1397,7 @@ def log(request, page):
     form = LogOptionsForm()
     if request.method == 'POST' and form.validate(request.form):
         form.apply()
-        flash(_('Log changes saved.'), 'configure')
+        flash(_(u'Log changes saved.'), 'configure')
         return redirect_to('admin/log', page=page.number)
     return render_admin_response('admin/log.html', 'system.log',
                                  page=page, form=form.as_widget())

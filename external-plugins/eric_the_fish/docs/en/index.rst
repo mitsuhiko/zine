@@ -16,7 +16,7 @@ As the rest of the plugin, the documentation also is mainly an example —
 this time for documenting plugins.  You can build the docs from source
 using the ``build-documentation`` script distributed with Zine::
 
-	$ ./scripts/build-documentation zine/plugins/eric_the_fish
+    $ ./scripts/build-documentation zine/plugins/eric_the_fish
 
 After that, it shows up in the plugin section of the online help (that's
 what you're looking at right now).

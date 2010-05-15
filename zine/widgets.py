@@ -13,7 +13,7 @@
     Additionally widgets could be moved around from the admin panel in the
     future.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from zine.application import render_template
@@ -118,6 +118,18 @@ class IncludePage(Widget):
         return self.page is not None
 
 
+class PagesNavigation(Widget):
+    """Show a list of all pages."""
+
+    name = 'pages_navigation'
+    template = 'widgets/pages_navigation.html'
+
+    def __init__(self, show_title=False, show_drafts=False):
+        self.pages = Post.query.type('page').published().all()
+        if show_drafts:
+            self.pages += Post.query.type('page').drafts().all()
+        self.show_title = show_title
+
 #: list of all core widgets
 all_widgets = [PostArchiveSummary, LatestPosts, LatestComments, TagCloud,
-               CategoryList, IncludePage]
+               CategoryList, IncludePage, PagesNavigation]

@@ -5,7 +5,7 @@
 
     Implements an importer for WordPress extended RSS feeds.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
@@ -16,7 +16,6 @@ from zine.forms import WordPressImportForm
 from zine.importers import Importer, Blog, Tag, Category, Author, Post, Comment
 from zine.i18n import lazy_gettext, _
 from zine.utils import log
-from zine.utils.validators import is_valid_url
 from zine.utils.admin import flash
 from zine.utils.xml import Namespace, html_entities, escape
 from zine.utils.zeml import parse_html, inject_implicit_paragraphs
@@ -226,6 +225,8 @@ def parse_feed(fd):
 class WordPressImporter(Importer):
     name = 'wordpress'
     title = 'WordPress'
+    description = lazy_gettext(u'Handles import of WordPress "extended RSS" '
+                               u' feeds.')
 
     def configure(self, request):
         form = WordPressImportForm()
@@ -236,8 +237,9 @@ class WordPressImporter(Importer):
                 try:
                     dump = open_url(form.data['download_url']).stream
                 except Exception, e:
-                    error = _(u'Error downloading from URL: %s') % e
-            elif not dump:
+                    log.exception(_('Error downloading feed'))
+                    flash(_(u'Error downloading from URL: %s') % e, 'error')
+            if not dump:
                 return redirect_to('import/wordpress')
 
             try:
