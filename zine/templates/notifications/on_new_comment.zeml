@@ -1,0 +1,41 @@
+{% if comment.blocked %}
+<title>{% trans post=comment.post.title|e %}Comment on “{{
+  post }}” waiting for moderation{% endtrans %}</title>
+<summary>{% trans author=comment.author|e, summary=comment.summarize()|e
+  %}{{ author }} wrote a new comment that is waiting for moderation: “{{
+    summary }}”{% endtrans %}</summary>
+{%- else %}
+<title>{% trans post=comment.post.title|e %}New comment on “{{
+  post }}”{% endtrans %}</title>
+<summary>{% trans author=comment.author|e, summary=comment.summarize()|e
+  %}{{ author }} wrote a new comment: “{{ summary }}”{% endtrans %}</summary>
+{%- endif %}
+<details>
+  <ul>
+    <li>{% if comment.www -%}
+      <a href="{{ comment.www|e }}">{{ comment.author|e }}</a>
+    {%- else -%}
+      {{ comment.author|e }}
+    {%- endif %}</li>
+    {% if comment.email -%}
+    <li><a href="mailto:{{ comment.email|e }}">{{ _('E-Mail') }}</a>
+    {%- endif %}
+  </ul>
+</details>
+<longtext>{{ comment.body }}</longtext>
+<actions>
+  <ul>
+    <li><a href="{{ url_for(comment.post)|e }}">{{ _('all comments') }}</a>
+    <li><a href="{{ url_for('admin/delete_comment',
+                            comment_id=comment.id, _external=true) }}">{{ _('delete it') }}</a>
+    {%- if comment.blocked %}
+    <li><a href="{{ url_for('admin/approve_comment',
+                            comment_id=comment.id, _external=true) }}">{{ _('approve it') }}</a>
+    {%- else %}
+    <li><a href="{{ url_for('admin/block_comment',
+                            comment_id=comment.id, _external=true) }}">{{ _('block it') }}</a>
+    {%- endif %}
+    <li><a href="{{ url_for('admin/report_comment_spam',
+                            comment_id=comment.id, _external=true) }}">{{ _('spam it') }}</a>
+  </ul>
+</actions>

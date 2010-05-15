@@ -4,7 +4,7 @@
   {%- if widget.posts %}
   <ul>
   {%- for item in widget.posts %}
-    <li><a href="{{ url_for(item)|e }}">{{ item.title|e }}</a></li>
+    <li><a href="{{ url_for(item)|e }}">{%- if item.title %}{{ item.title|e }}{%- else %}<em>#</em>{%- endif %}</a></li>
   {%- endfor %}
   </ul>
   {%- endif %}

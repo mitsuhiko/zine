@@ -7,7 +7,7 @@
     API as well as some core importers we implement as part of the software
     and not as plugin.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os
@@ -21,7 +21,8 @@ from datetime import datetime, MAXYEAR
 from zine.i18n import _
 from zine.database import db, posts
 from zine.utils.xml import escape
-from zine.models import COMMENT_MODERATED
+from zine.utils.text import increment_string
+from zine.models import COMMENT_MODERATED, STATUS_PUBLISHED
 from zine.privileges import BLOG_ADMIN, ENTER_ADMIN_PANEL, require_privilege
 
 
@@ -97,15 +98,18 @@ def _perform_import(app, blog, d):
         """Adds an author to the author mapping and returns it."""
         if author.id not in author_mapping:
             author_rewrite = d['authors'][author.id]
-            if author_rewrite is not None:
+            if author_rewrite != '__zine_create_user':
                 user = User.query.get(int(author_rewrite))
             else:
-                user = User(author.username, None, author.email,
-                            author.real_name, author.description,
-                            author.www, author.is_author)
-                if author.pw_hash:
-                    user.pw_hash = author.pw_hash
-                user.own_privileges.update(author.privileges)
+                query = User.query.filter_by(username=author.username)
+                user = query.first()
+                if user is None:
+                    user = User(author.username, None, author.email,
+                                author.real_name, author.description,
+                                author.www, author.is_author)
+                    if author.pw_hash:
+                        user.pw_hash = author.pw_hash
+                    user.own_privileges.update(author.privileges)
             author_mapping[author.id] = user
         return author_mapping[author.id]
 
@@ -163,11 +167,16 @@ def _perform_import(app, blog, d):
         if old_post.already_imported or not d['posts'][old_post.id]:
             continue
 
+        slug = old_post.slug
+        while Post.query.autoflush(False).filter_by(slug=slug) \
+                  .limit(1).count():
+            slug = increment_string(slug)
         post = Post(old_post.title, prepare_author(old_post.author),
-                    old_post.text, old_post.slug, old_post.pub_date,
+                    old_post.text, slug, old_post.pub_date,
                     old_post.updated, old_post.comments_enabled,
                     old_post.pings_enabled, parser=old_post.parser,
-                    uid=old_post.uid, content_type=old_post.content_type)
+                    uid=old_post.uid, content_type=old_post.content_type,
+                    status=old_post.status, extra=old_post.extra)
         if old_post.parser_data is not None:
             post.parser_data.clear()
             post.parser_data.update(old_post.parser_data)
@@ -194,7 +203,11 @@ def _perform_import(app, blog, d):
                     else:
                         parent = _create_comment(comment.parent)
                     to_create.discard(comment.parent)
-                rv = Comment(post, comment.author, comment.body,
+                if isinstance(comment.author, Author):
+                    author = prepare_author(comment.author)
+                else:
+                    author = comment.author
+                rv = Comment(post, author, comment.body,
                              comment.author_email, comment.author_url, parent,
                              comment.pub_date, comment.remote_addr,
                              comment.parser, comment.is_pingback,
@@ -252,7 +265,7 @@ def rewrite_import(app, id, callback, title='Modified Import'):
     """
     if isinstance(app, basestring):
         from zine import setup
-        app = make_zine(app)
+        app = setup(app)
 
     blog = load_import_dump(app, id)
     callback(blog)
@@ -269,6 +282,9 @@ class Importer(object):
     #: the shortname of the importer.  This is used for the URLs
     #: and internal addressing.
     name = None
+
+    #: an explanation of what this importer can import.
+    description = None
 
     @property
     def title(self):
@@ -435,7 +451,7 @@ class Post(_Element):
                  tags=None, categories=None, comments=None,
                  comments_enabled=True, pings_enabled=True, updated=None,
                  uid=None, parser=None, parser_data=None,
-                 content_type='entry'):
+                 content_type='entry', status=STATUS_PUBLISHED, extra=None):
         self.slug = slug
         self.title = title
         self.link = link
@@ -453,6 +469,8 @@ class Post(_Element):
         self.parser = parser or 'html'
         self.parser_data = parser_data
         self.content_type = content_type
+        self.status = status
+        self.extra = extra or {}
 
     @property
     def text(self):

@@ -3,63 +3,119 @@
     zine.plugins.creole_parser
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Use Markdown for your blg posts.
+    Use Markdown for your blog posts.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from urlparse import urljoin
 
-from creoleparser import Parser, Creole10
-from creoleparser.elements import InlineElement
-from genshi.core import END, START, TEXT
+from genshi.core import END, START, TEXT, QName, Stream
+from genshi.builder import tag
+
+from creoleparser import create_dialect, creole11_base, Parser, parse_args
+
 from werkzeug import url_quote
 
 from zine.api import *
 from zine.parsers import BaseParser
-from zine.utils.zeml import RootElement, Element
+from zine.utils.zeml import RootElement, Element, MarkupErrorElement
+
+
+macros_set_up = False
+macros = {}
+
+macro_result = QName('http://zine.pocoo.org/#creolehack}macro-result')
+MACRO_SIGNAL = object()
 
 
 def path_func(page_name):
-    root = get_request().script_root
+    """If one uses wiki-links they are relative to the blog root."""
+    root = get_application().cfg['blog_url']
     if not root.endswith('/'):
         root += '/'
     return urljoin(root, url_quote(page_name))
 
 
-class ZineCreole(Creole10):
-
-    def __init__(self):
-        Creole10.__init__(self,
-            wiki_links_base_url=u'',
-            wiki_links_path_func=path_func,
-            wiki_links_space_char=u'_',
-            no_wiki_monospace=True,
-            use_additions=False
-        )
-        # support for <intro> ... </intro>
-        self.intro_marker = InlineElement('intro', ('<intro>', '</intro>'),
-                                          self.inline_elements +
-                                          self.block_elements)
-        self.block_elements.insert(0, self.intro_marker)
+def intro_tag(body):
+    """A simple bodied macro that is used to markup intro sections."""
+    contents = creole_parser.generate(body)
+    return tag.intro(contents).generate()
 
 
-creole_parser = Parser(dialect=ZineCreole())
+def wrap(tree):
+    """Returns a faked genshi stream with the tree wrapped."""
+    return Stream([(MACRO_SIGNAL, tree, (1, 0, None))])
+
+
+def make_macro(extension):
+    """Creates a creole macro from a markup extension."""
+    def macro(body, args, kwargs, is_block, environ):
+        if extension.is_void and body:
+            return wrap(MarkupErrorElement(
+                _(u'Macro “%s” was passed a body but does not '
+                  u'support it.') % extension.name))
+        # ensure the body is not None, this could break extensions that
+        # do not expect None as value.
+        body = body or u''
+        if not extension.is_isolated:
+            arg = CreoleParser().parse(body, environ['reason'])
+        else:
+            arg = body
+        if extension.argument_attribute and args:
+            kwargs[extension.argument_attribute] = u' '.join(args)
+        return wrap(extension.process(kwargs, arg, environ['reason']))
+    return macro
+
+
+def macro_func(macro_name, arg_string, body, is_block, environ):
+    """Looks up an extension as babel macro.  The first time the macros
+    are looked up the extensions are converted into macros.
+    """
+    global macros_set_up
+    args, kwargs = parse_args(arg_string)
+    if macro_name == 'intro' and body:
+        return intro_tag(body)
+    if not macros_set_up:
+        app = get_application()
+        for extension in app.markup_extensions:
+            macros[extension.name] = make_macro(extension)
+        macros_set_up = True
+    if macro_name in macros:
+        return macros[macro_name](body, args, kwargs, is_block, environ)
+
+
+zinecreole = create_dialect(creole11_base, wiki_links_base_url=u'',
+                            wiki_links_path_func=path_func,
+                            wiki_links_space_char=u'_',
+                            no_wiki_monospace=True,
+                            macro_func=macro_func)
+
+creole_parser = Parser(dialect=zinecreole())
 
 
 class CreoleParser(BaseParser):
+    """Creole wiki markup parser.
+
+    >>> p = CreoleParser(app=None)
+    >>> p.parse(u'Hello **there**', 'entry').to_html()
+    u'<p>Hello <strong>there</strong></p>\\n'
+    >>> p.parse(u'<<intro>>\\nHello //again//\\n<</intro>>\\n '
+    ... u'that was the __intro__.', 'entry').to_html()
+    u'<intro><p>Hello <em>again</em></p>\\n</intro><p> that was the <u>intro</u>.</p>\\n'
+    """
 
     name = _(u'Creole')
 
     def parse(self, input_data, reason):
         result = RootElement()
         stack = [result]
-        for kind, data, pos in creole_parser.generate(input_data):
-            if kind == START:
+        env = {'parser': self, 'reason': reason}
+        for kind, data, pos in creole_parser.generate(input_data, environ=env):
+            if kind is MACRO_SIGNAL:
+                stack[-1].children.append(data)
+            elif kind == START:
                 tag, attrs = data
-                # tt is deprecated but creoleparser is using it
-                if tag == 'tt':
-                    tag = 'code'
                 element = Element(tag)
                 for key, value in attrs:
                     element.attributes[key] = value

@@ -7,51 +7,40 @@
     available for admins, editors and authors but not for subscribers. For
     subscribers a simplified account management system exists at /account.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from datetime import datetime
-from os import remove, sep as pathsep
-from os.path import exists
 from urlparse import urlparse
 
 from werkzeug import escape
 from werkzeug.exceptions import NotFound, BadRequest, Forbidden
 
-from zine.privileges import assert_privilege, require_privilege, \
+from zine.privileges import assert_privilege, \
      CREATE_ENTRIES, EDIT_OWN_ENTRIES, EDIT_OTHER_ENTRIES, \
      CREATE_PAGES, EDIT_OWN_PAGES, EDIT_OTHER_PAGES, MODERATE_COMMENTS, \
-     MANAGE_CATEGORIES, BLOG_ADMIN
+     MODERATE_OWN_ENTRIES, MODERATE_OWN_PAGES, MANAGE_CATEGORIES, BLOG_ADMIN
 from zine.i18n import _, ngettext
 from zine.application import get_request, url_for, emit_event, \
-     render_response, get_application
-from zine.models import User, Group, Post, Category, Comment, \
-     STATUS_DRAFT, STATUS_PUBLISHED, COMMENT_MODERATED, COMMENT_UNMODERATED, \
-     COMMENT_BLOCKED_USER, COMMENT_BLOCKED_SPAM
-from zine.database import db, comments as comment_table, posts, \
-     post_categories, post_links, secure_database_uri
-from zine.utils import dump_json, load_json
-from zine.utils.validators import is_valid_email, is_valid_url, check
+     render_response
+from zine.models import User, Group, Post, Category, Comment
+from zine.database import db, secure_database_uri
 from zine.utils.admin import flash, load_zine_reddit, require_admin_privilege
-from zine.utils.text import gen_slug
 from zine.utils.pagination import AdminPagination
-from zine.utils.http import redirect_back, redirect_to, redirect
-from zine.i18n import parse_datetime, format_system_datetime, \
-     list_timezones, has_timezone, list_languages, has_language
+from zine.utils.http import redirect_to, redirect
 from zine.importers import list_import_queue, load_import_dump, \
      delete_import_dump
 from zine.pluginsystem import install_package, InstallationError, \
-     SetupError, get_object_name
+     get_object_name
 from zine.pingback import pingback, PingbackError
-from zine.forms import LoginForm, ChangePasswordForm, PluginForm, \
+from zine.forms import ChangePasswordForm, PluginForm, \
      LogOptionsForm, EntryForm, PageForm, BasicOptionsForm, URLOptionsForm, \
      PostDeleteForm, EditCommentForm, DeleteCommentForm, \
      ApproveCommentForm, BlockCommentForm, EditCategoryForm, \
      DeleteCategoryForm, EditUserForm, DeleteUserForm, \
      CommentMassModerateForm, CacheOptionsForm, EditGroupForm, \
      DeleteGroupForm, ThemeOptionsForm, DeleteImportForm, ExportForm, \
-     MaintenanceModeForm, make_config_form, make_import_form
-
+     MaintenanceModeForm, MarkCommentForm, RemovePluginForm, \
+     make_config_form, make_import_form
 
 #: how many posts / comments should be displayed per page?
 PER_PAGE = 20
@@ -72,29 +61,67 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     """
     request = get_request()
 
-    manage_items = [
-        ('entries', url_for('admin/manage_entries'), _(u'Entries')),
-        ('pages', url_for('admin/manage_pages'), _(u'Pages')),
-        ('categories', url_for('admin/manage_categories'), _(u'Categories'))
-    ]
-
     # set up the core navigation bar
     navigation_bar = [
-        ('dashboard', url_for('admin/index'), _(u'Dashboard'), []),
-        ('write', url_for('admin/new_entry'), _(u'Write'), [
-            ('entry', url_for('admin/new_entry'), _(u'Entry')),
-            ('page', url_for('admin/new_page'), _(u'Page'))
-        ]),
-        ('manage', url_for('admin/manage_entries'), _(u'Manage'), manage_items),
-        ('comments', url_for('admin/manage_comments'), _(u'Comments'), [
-            ('overview', url_for('admin/manage_comments'), _(u'Overview')),
-            ('unmoderated', url_for('admin/show_unmoderated_comments'),
-             _(u'Awaiting Moderation (%d)') %
-             Comment.query.unmoderated().count()),
-            ('spam', url_for('admin/show_spam_comments'),
-             _(u'Spam (%d)') % Comment.query.spam().count())
-        ])
+        ('dashboard', url_for('admin/index'), _(u'Dashboard'), [])
     ]
+
+    write_nav = []
+    if request.user.has_privilege(CREATE_ENTRIES):
+        write_nav.append(('entry', url_for('admin/new_entry'), _(u'Entry')))
+    if request.user.has_privilege(CREATE_PAGES):
+        write_nav.append(('page', url_for('admin/new_page'), _(u'Page')))
+    if request.user.has_privilege(CREATE_ENTRIES | CREATE_PAGES):
+        navigation_bar.append(
+            ('write', url_for('admin/new_entry'), _(u'Write'), write_nav)
+        )
+
+    manage_items = []
+    if request.user.has_privilege(EDIT_OWN_ENTRIES):
+        manage_items.append(
+            ('entries', url_for('admin/manage_entries'), _(u'Entries'))
+        )
+    if request.user.has_privilege(EDIT_OWN_PAGES):
+        manage_items.append(
+            ('pages', url_for('admin/manage_pages'), _(u'Pages')),
+        )
+    if request.user.has_privilege(MANAGE_CATEGORIES):
+        manage_items.append(
+            ('categories', url_for('admin/manage_categories'), _(u'Categories'))
+        )
+    if request.user.has_privilege(EDIT_OWN_ENTRIES | EDIT_OWN_PAGES |
+                                  MANAGE_CATEGORIES):
+        navigation_bar.append(
+            ('manage', url_for('admin/manage_entries'), _(u'Manage'),
+             manage_items)
+        )
+    if request.user.has_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                                  MODERATE_OWN_PAGES):
+        unmoderated = Comment.query.unmoderated()
+        approved = Comment.query.approved()
+        blocked = Comment.query.blocked()
+        spam = Comment.query.spam()
+
+        if request.user.has_privilege(MODERATE_OWN_ENTRIES |
+                                      MODERATE_OWN_PAGES):
+            unmoderated = unmoderated.for_user(request.user)
+            approved = approved.for_user(request.user)
+            blocked = blocked.for_user(request.user)
+            spam = spam.for_user(request.user)
+
+        navigation_bar.append(
+            ('comments', url_for('admin/manage_comments'), _(u'Comments'), [
+                ('overview', url_for('admin/manage_comments'), _(u'Overview')),
+                ('unmoderated', url_for('admin/show_unmoderated_comments'),
+                 _(u'Awaiting Moderation (%d)') % unmoderated.count()),
+                ('approved', url_for('admin/show_approved_comments'),
+                 _(u'Approved (%d)') % approved.count()),
+                ('blocked', url_for('admin/show_blocked_comments'),
+                 _(u'Blocked (%d)') % blocked.count()),
+                ('spam', url_for('admin/show_spam_comments'),
+                 _(u'Spam (%d)') % spam.count())
+            ])
+        )
 
     # set up the administration menu bar
     if request.user.has_privilege(BLOG_ADMIN):
@@ -103,8 +130,9 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                 ('basic', url_for('admin/basic_options'), _(u'Basic')),
                 ('urls', url_for('admin/urls'), _(u'URLs')),
                 ('theme', url_for('admin/theme'), _(u'Theme')),
-                ('plugins', url_for('admin/plugins'), _(u'Plugins')),
-                ('cache', url_for('admin/cache'), _(u'Cache'))
+                ('cache', url_for('admin/cache'), _(u'Cache')),
+                ('configuration', url_for('admin/configuration'),
+                 _(u'Configuration Editor'))
             ])
         ])
         manage_items.extend([
@@ -112,22 +140,19 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
             ('groups', url_for('admin/manage_groups'), _(u'Groups'))
         ])
 
-    # add the about items to the navigation bar
-    system_items = [
-        ('help', url_for('admin/help'), _(u'Help')),
-        ('about', url_for('admin/about_zine'), _(u'About'))
-    ]
+    # add the help item to the navigation bar
+    system_items = [('help', url_for('admin/help'), _(u'Help'))]
+
     if request.user.has_privilege(BLOG_ADMIN):
         system_items[0:0] = [
             ('information', url_for('admin/information'),
              _(u'Information')),
             ('maintenance', url_for('admin/maintenance'),
              _(u'Maintenance')),
+            ('plugins', url_for('admin/plugins'), _(u'Plugins')),
             ('import', url_for('admin/import'), _(u'Import')),
             ('export', url_for('admin/export'), _(u'Export')),
-            ('log', url_for('admin/log'), _('Log')),
-            ('configuration', url_for('admin/configuration'),
-             _(u'Configuration Editor'))
+            ('log', url_for('admin/log'), _(u'Log'))
         ]
 
     navigation_bar.append(('system', system_items[0][1], _(u'System'),
@@ -152,10 +177,10 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
 
     # if we are in maintenance_mode the user should know that, no matter
     # on which page he is.
-    if request.app.cfg['maintenance_mode']:
+    if request.app.cfg['maintenance_mode'] and \
+                                        request.user.has_privilege(BLOG_ADMIN):
         flash(_(u'Zine is in maintenance mode. Don\'t forget to '
-                u'<a href="%s">turn it off again</a> once you finish your '
-                u'changes.') % url_for('admin/maintenance'))
+                u'turn it off again once you finish your changes.'))
 
     # check for broken plugins if we have the plugin guard enabled
     if request.app.cfg['plugin_guard']:
@@ -176,7 +201,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
                                                set(plugins_to_deactivate)))
             cfg.commit()
             # we change the plugins inline so that the user get somewhat more
-            # informations
+            # information
             request.app.cfg.touch()
 
 
@@ -204,7 +229,8 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
         'messages': [{
             'type':     type,
             'msg':      msg
-        } for type, msg in request.session.pop('admin/flashed_messages', [])]
+        } for type, msg in request.session.pop('admin/flashed_messages', [])],
+        'active_pane': _active_menu_item
     }
     return render_response(template_name, **values)
 
@@ -223,16 +249,12 @@ def ping_post_links(form):
         this_url = url_for(form.post, _external=True)
         for url in form.find_new_links():
             host = urlparse(url)[1].decode('utf-8', 'ignore')
-            html_url = '<a href="%s">%s</a>' % (
-                escape(url, True),
-                escape(host)
-            )
             try:
                 pingback(this_url, url)
             except PingbackError, e:
                 if not e.ignore_silently:
                     flash(_(u'Could not ping %(url)s: %(error)s') % {
-                        'url': html_url,
+                        'url':   escape(host),
                         'error': e.message
                     }, 'error')
             else:
@@ -259,11 +281,9 @@ def index(request):
         return render_response('admin/reddit.html', items=load_zine_reddit())
 
     return render_admin_response('admin/index.html', 'dashboard',
-        drafts=Post.query.drafts().all(),
-        unmoderated_comments=Comment.query.unmoderated().all(),
-        your_posts=Post.query.filter(
-            Post.author_id == request.user.id
-        ).count(),
+        drafts=Post.query.drafts().all(), unmoderated_comments=
+            Comment.query.post_lightweight().unmoderated().for_user(request.user).all(),
+        your_posts=Post.query.filter(Post.author_id==request.user.id).count(),
         last_posts=Post.query.published(ignore_privileges=True)
             .order_by(Post.pub_date.desc()).limit(5).all(),
         show_reddit = request.app.cfg['dashboard_reddit']
@@ -331,10 +351,13 @@ dispatch_post_delete = _make_post_dispatcher('delete')
 def edit_entry(request, post=None):
     """Edit an existing entry or create a new one."""
     active_tab = post and 'manage.entries' or 'write.entry'
-    initial = None
+    initial = {}
     body = request.args.get('body')
+    title = request.args.get('title')
     if body:
-        initial = {'text': body}
+        initial['text'] = body
+    if title:
+        initial['title'] = title
     form = EntryForm(post, initial)
 
     if post is None:
@@ -351,13 +374,12 @@ def edit_entry(request, post=None):
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
-                msg = _('The entry %s was created successfully.')
+                msg = _(u'The entry “%s” was created successfully.')
             else:
                 form.save_changes()
-                msg = _('The entry %s was updated successfully.')
+                msg = _(u'The entry “%s” was updated successfully.')
 
-            flash(msg % u'<a href="%s">%s</a>' % (escape(url_for(post)),
-                                                  escape(post.title)))
+            flash(msg % escape(post.title))
 
             db.commit()
             emit_event('after-post-saved', post)
@@ -387,7 +409,7 @@ def delete_entry(request, post):
         elif request.form.get('confirm') and form.validate(request.form):
             form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
-            flash(_(u'The entry %s was deleted successfully.') %
+            flash(_(u'The entry “%s” was deleted successfully.') %
                   escape(post.title), 'remove')
             db.commit()
             return form.redirect('admin/manage_entries')
@@ -409,11 +431,12 @@ def manage_pages(request, page):
                                  pages=pages, pagination=pagination)
 
 
-@require_admin_privilege()
+@require_admin_privilege(EDIT_OWN_PAGES | EDIT_OTHER_PAGES)
 def edit_page(request, post=None):
     """Edit an existing entry or create a new one."""
     active_tab = post and 'manage.pages' or 'write.page'
     form = PageForm(post)
+
 
     if post is None:
         assert_privilege(CREATE_PAGES)
@@ -429,18 +452,17 @@ def edit_page(request, post=None):
         elif form.validate(request.form):
             if post is None:
                 post = form.make_post()
-                msg = _('The page %s was created successfully.')
+                msg = _(u'The page “%s” was created successfully.')
             else:
                 form.save_changes()
-                msg = _('The page %s was updated successfully.')
+                msg = _(u'The page “%s” was updated successfully.')
 
-            flash(msg % u'<a href="%s">%s</a>' % (escape(url_for(post)),
-                                                  escape(post.title)))
+            flash(msg % escape(post.title))
 
             db.commit()
             emit_event('after-post-saved', post)
             if form['ping_links']:
-                ping_post_links(request, post)
+                ping_post_links(form)
             if 'save_and_continue' in request.form:
                 return redirect_to('admin/edit_post', post_id=post.id)
             return form.redirect('admin/new_page')
@@ -448,7 +470,7 @@ def edit_page(request, post=None):
                                  form=form.as_widget())
 
 
-@require_admin_privilege()
+@require_admin_privilege(EDIT_OWN_PAGES | EDIT_OTHER_PAGES)
 def delete_page(request, post):
     """This dialog deletes a page.  Usually users are redirected here from the
     edit post view or the page indexpage.  If the page was not deleted the
@@ -456,7 +478,7 @@ def delete_page(request, post):
     page if the information is invalid.
     """
     form = PostDeleteForm(post)
-    if not post.can_edit():
+    if not post.can_edit(request.user):
         raise Forbidden()
 
     if request.method == 'POST':
@@ -465,7 +487,7 @@ def delete_page(request, post):
         elif request.form.get('confirm') and form.validate(request.form):
             form.add_invalid_redirect_target('admin/edit_post', post_id=post.id)
             form.delete_post()
-            flash(_(u'The page %s was deleted successfully.') %
+            flash(_(u'The page “%s” was deleted successfully.') %
                   escape(post.title), 'remove')
             db.commit()
             return form.redirect('admin/manage_pages')
@@ -474,15 +496,37 @@ def delete_page(request, post):
                                  form=form.as_widget())
 
 
-def _handle_comments(identifier, title, query, page):
+def _handle_comments(identifier, title, query, page, per_page, post_id=None,
+                     endpoint='admin/manage_comments'):
     request = get_request()
-    comments = query.limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
-    pagination = AdminPagination('admin/manage_comments', page, PER_PAGE,
-                                 query.count())
-    if not comments and page != 1:
-        raise NotFound()
+    if request.method == 'POST' and 'per_page_update' in request.form:
+        # Don't even filter the database query since we're redirecting
+        return redirect(url_for(endpoint, page=page, post_id=post_id,
+                                per_page=request.values.get('per_page')))
 
-    form = CommentMassModerateForm(comments)
+    if request.user.has_privilege(MODERATE_OWN_ENTRIES | MODERATE_OWN_PAGES):
+        query = query.for_user(request.user)
+
+    comments = query.post_lightweight().limit(per_page) \
+                    .offset(per_page * (page - 1))
+
+
+    pagination = AdminPagination(endpoint, page, per_page, query.count(),
+                                 post_id=post_id)
+
+    if not comments and page > 1:
+        # Since we can tweak how many comments are shown, maybe we've just
+        # changed how many we want to see per-page and there are not enought
+        # pages now for the chosen ammount
+        # Redirect to page-1 until comments are found.
+        return redirect(url_for(endpoint, page=page-1, per_page=per_page,
+                                post_id=post_id))
+
+    form = CommentMassModerateForm(comments, initial=dict(per_page=per_page))
+
+    tab = 'comments'
+    if identifier is not None:
+        tab += '.' + identifier
 
     if request.method == 'POST':
         if 'cancel' not in request.form and form.validate(request.form):
@@ -490,47 +534,116 @@ def _handle_comments(identifier, title, query, page):
                 if 'confirm' in request.form:
                     form.delete_selection()
                     db.commit()
-                    return redirect_to('admin/manage_comments')
-                return render_admin_response('admin/delete_comments.html',
+                    return redirect_to(endpoint, page=page, per_page=per_page)
+                return render_admin_response('admin/delete_comments.html', tab,
                                              form=form.as_widget())
+            # delete all comments in current tab
+            elif 'delete_all' in request.form:
+                if identifier not in ('spam', 'blocked'):
+                    flash(_(u'“Delete All” can only be issued for “Spam” and '
+                            u'“Blocked” comment types.'), 'error')
+                elif 'confirm' in request.form:
+                    comments = query.all()
+                    # Don't use .count() means a 2nd query and it's
+                    # aprox. 0.111 secs slower; rough average calculation :)
+                    count = len(comments)
+                    for comment in comments:
+                        # Although we're deleting spam or blocked comments,
+                        # they're still comments, so emit the right event
+                        emit_event('before-comment-deleted', comment)
+                        db.delete(comment)
+                    db.commit()
+                    # XXX: untranslatable
+                    flash(_(u'Deleted %d %s comments.') % (count, identifier))
+                    return redirect_to(endpoint, page=page, per_page=per_page)
+                return render_admin_response('admin/delete_comments_all.html',
+                                             tab, form=form.as_widget(),
+                                             comment_kind = identifier,
+                                             comment_count=query.count())
 
             # or approve them all
             elif 'approve' in request.form:
                 form.approve_selection()
                 db.commit()
                 flash(_(u'Approved all the selected comments.'))
-                return redirect_to('admin/manage_comments')
+                return redirect_to(endpoint, page=page, per_page=per_page)
 
-    tab = 'comments'
-    if identifier is not None:
-        tab += '.' + identifier
-    return render_admin_response('admin/manage_comments.html', tab,
-                                 comments_title=title, form=form.as_widget(),
-                                 pagination=pagination)
+            # or block them all
+            elif 'block' in request.form:
+                if 'confirm' in request.form:
+                    form.block_selection()
+                    db.commit()
+                    flash(_(u'Blocked all the selected comments.'))
+                    return redirect_to(endpoint, page=page, per_page=per_page)
+                return render_admin_response('admin/block_comments.html', tab,
+                                             form=form.as_widget())
+
+            # or mark them all as spam
+            elif 'spam' in request.form:
+                if 'confirm' in request.form:
+                    form.mark_selection_as_spam()
+                    db.commit()
+                    flash(_(u'Reported all the selected comments as SPAM.'))
+                    return redirect_to(endpoint, page=page, per_page=per_page)
+                return render_admin_response('admin/mark_spam_comments.html',
+                                             tab, form=form.as_widget())
+            # or mark them all as ham
+            elif 'ham' in request.form:
+                if 'confirm' in request.form:
+                    form.mark_selection_as_ham()
+                    db.commit()
+                    flash(_(u'Reported all the selected comments as NOT SPAM.'))
+                    return redirect_to(endpoint, page=page, per_page=per_page)
+                return render_admin_response('admin/mark_ham_comments.html',
+                                             tab, form=form.as_widget())
+    return render_admin_response(
+        'admin/manage_comments.html', tab, comments_title=title,
+        form=form.as_widget(), pagination=pagination,
+        akismet_active = request.app.plugins['akismet_spam_filter'].active)
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
-def manage_comments(request, page):
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
+def manage_comments(request, page, per_page):
     """Show all the comments."""
     return _handle_comments('overview', _(u'All Comments'),
-                            Comment.query, page)
+                            Comment.query, page, per_page)
 
-
-@require_admin_privilege(MODERATE_COMMENTS)
-def show_unmoderated_comments(request, page):
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
+def show_unmoderated_comments(request, page, per_page):
     """Show all unmoderated and user-blocked comments."""
     return _handle_comments('unmoderated', _(u'Comments Awaiting Moderation'),
-                            Comment.query.unmoderated(), page)
+                            Comment.query.unmoderated(), page, per_page,
+                            endpoint='admin/show_unmoderated_comments')
 
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
+def show_approved_comments(request, page, per_page):
+    """Show all moderated comments."""
+    return _handle_comments('approved', _(u'Approved Commments'),
+                            Comment.query.approved(), page, per_page,
+                            endpoint='admin/show_approved_comments')
 
-@require_admin_privilege(MODERATE_COMMENTS)
-def show_spam_comments(request, page):
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
+def show_blocked_comments(request, page, per_page):
     """Show all spam comments."""
-    return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page)
+    return _handle_comments('blocked', _(u'Blocked'),
+                            Comment.query.blocked(), page, per_page,
+                            endpoint='admin/show_blocked_comments')
+
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
+def show_spam_comments(request, page, per_page):
+    """Show all spam comments."""
+    return _handle_comments('spam', _(u'Spam'), Comment.query.spam(), page,
+                            per_page, endpoint='admin/show_spam_comments')
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
-def show_post_comments(request, page, post_id):
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
+def show_post_comments(request, page, post_id, per_page):
     """Show all comments for a single post."""
     post = Post.query.get(post_id)
     if post is None:
@@ -540,10 +653,13 @@ def show_post_comments(request, page, post_id):
         escape(post.title)
     )
     return _handle_comments(None, _(u'Comments for “%s”') % link,
-                            Comment.query.comments_for_post(post), page)
+                            Comment.query.comments_for_post(post), page,
+                            per_page, post_id=post_id,
+                            endpoint='admin/show_post_comments')
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def edit_comment(request, comment_id):
     """Edit a comment.  Unlike the post edit screen it's not possible to
     create new comments from here, that has to happen from the post page.
@@ -551,35 +667,41 @@ def edit_comment(request, comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = EditCommentForm(comment)
 
-    if request.method == 'POST' and form.validate(request.form):
+    if request.method == 'POST':
         if request.form.get('cancel'):
             return form.redirect('admin/manage_comments')
         elif request.form.get('delete'):
             return redirect_to('admin/delete_comment', comment_id=comment_id)
-        form.save_changes()
-        db.commit()
-        flash(_(u'Comment by %s moderated successfully.') %
-              escape(comment.author))
-        return form.redirect('admin/manage_comments')
+        elif form.validate(request.form):
+            form.save_changes()
+            db.commit()
+            flash(_(u'Comment by %s moderated successfully.') %
+                  escape(comment.author))
+            return form.redirect('admin/manage_comments')
 
     return render_admin_response('admin/edit_comment.html',
                                  'comments.overview', form=form.as_widget())
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def delete_comment(request, comment_id):
-    """This dialog delets a comment.  Usually users are redirected here from the
-    comment moderation page or the comment edit page.  If the comment was not
-    deleted, the user is taken back to the page he's coming from or back to
+    """This dialog deletes a comment.  Usually users are redirected here from
+    the comment moderation page or the comment edit page.  If the comment was
+    not deleted, the user is taken back to the page he's coming from or back to
     the edit page if the information is invalid.  The same happens if the post
     was deleted but if the referrer is the edit page. Then the user is taken
     back to the index so that he doesn't end up an a "page not found" error page.
     """
     comment = Comment.query.get(comment_id)
-    if comment is None:
+    if comment is None or comment.is_deleted:
         return redirect_to('admin/manage_comments')
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
 
     form = DeleteCommentForm(comment)
 
@@ -597,12 +719,15 @@ def delete_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def approve_comment(request, comment_id):
     """Approve a comment"""
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = ApproveCommentForm(comment)
 
     if request.method == 'POST' and form.validate(request.form):
@@ -617,12 +742,15 @@ def approve_comment(request, comment_id):
                                  'comments.overview', form=form.as_widget())
 
 
-@require_admin_privilege(MODERATE_COMMENTS)
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
 def block_comment(request, comment_id):
     """Block a comment."""
     comment = Comment.query.get(comment_id)
     if comment is None:
         raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
     form = BlockCommentForm(comment)
 
     if request.method == 'POST' and form.validate(request.form):
@@ -636,6 +764,51 @@ def block_comment(request, comment_id):
     return render_admin_response('admin/block_comment.html',
                                  'comments.overview', form=form.as_widget())
 
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
+def report_comment_spam(request, comment_id):
+    """Block a comment."""
+    comment = Comment.query.get(comment_id)
+    if comment is None:
+        raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
+    form = MarkCommentForm(comment)
+
+    if request.method == 'POST' and form.validate(request.form):
+        if request.form.get('confirm'):
+            form.mark_as_spam()
+            db.commit()
+            flash(_(u'Comment by %s reported as Spam successfully.') %
+                  escape(comment.author), 'configure')
+        return form.redirect('admin/manage_comments')
+
+    return render_admin_response('admin/mark_comment.html',
+                                 'comments.overview', form=form.as_widget(),
+                                 form_action=_(u'Spam'))
+
+@require_admin_privilege(MODERATE_COMMENTS | MODERATE_OWN_ENTRIES |
+                         MODERATE_OWN_PAGES)
+def report_comment_ham(request, comment_id):
+    """Block a comment."""
+    comment = Comment.query.get(comment_id)
+    if comment is None:
+        raise NotFound()
+    elif not comment.visible_for_user(request.user):
+        raise Forbidden(_(u'You\'re not allowed to manage this comment'))
+    form = MarkCommentForm(comment)
+
+    if request.method == 'POST' and form.validate(request.form):
+        if request.form.get('confirm'):
+            form.mark_as_ham()
+            db.commit()
+            flash(_(u'Comment by %s reported as NOT Spam successfully.') %
+                  escape(comment.author), 'configure')
+        return form.redirect('admin/manage_comments')
+
+    return render_admin_response('admin/mark_comment.html',
+                                 'comments.overview', form=form.as_widget(),
+                                 form_action=_(u'NOT Spam'))
 
 @require_admin_privilege(MANAGE_CATEGORIES)
 def manage_categories(request, page):
@@ -669,22 +842,18 @@ def edit_category(request, category_id=None):
         elif form.validate(request.form):
             if category is None:
                 category = form.make_category()
-                msg = _(u'Category %s created successfully.')
+                msg = _(u'Category “%s” created successfully.')
                 msg_type = 'add'
             else:
                 form.save_changes()
-                msg = _(u'Category %s updated successfully.')
+                msg = _(u'Category “%s” updated successfully.')
                 msg_type = 'info'
             db.commit()
-            html_category_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(category)),
-                escape(category.name)
-            )
-            flash(msg % html_category_detail, msg_type)
+            flash(msg % escape(category.name), msg_type)
             return redirect_to('admin/manage_categories')
 
-    return render_admin_response('admin/edit_category.html', 'manage.categories',
-                                 form=form.as_widget())
+    return render_admin_response('admin/edit_category.html',
+                                 'manage.categories', form=form.as_widget())
 
 
 @require_admin_privilege(MANAGE_CATEGORIES)
@@ -742,18 +911,14 @@ def edit_user(request, user_id=None):
         elif form.validate(request.form):
             if user is None:
                 user = form.make_user()
-                msg = _(u'User %s created successfully.')
+                msg = _(u'User “%s” created successfully.')
                 icon = 'add'
             else:
                 form.save_changes()
-                msg = _(u'User %s edited successfully.')
+                msg = _(u'User “%s” edited successfully.')
                 icon = 'info'
             db.commit()
-            html_user_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(user)),
-                escape(user.username)
-            )
-            flash(msg % html_user_detail, icon)
+            flash(msg % escape(user.username), icon)
             if request.form.get('save'):
                 return form.redirect('admin/manage_users')
             return redirect_to('admin/edit_user', user_id=user.id)
@@ -810,17 +975,14 @@ def edit_group(request, group_id=None):
         elif form.validate(request.form):
             if group is None:
                 group = form.make_group()
-                msg = _(u'Group %s created successfully.')
+                msg = _(u'Group “%s” created successfully.')
                 icon = 'add'
             else:
                 form.save_changes()
-                msg = _(u'Group %s edited successfully.')
+                msg = _(u'Group “%s” edited successfully.')
                 icon = 'info'
             db.commit()
-            html_group_detail = u'<a href="%s">%s</a>' % (
-                escape(url_for(group)),
-                escape(group.name))
-            flash(msg % html_group_detail, icon)
+            flash(msg % escape(group.name), icon)
 
             if request.form.get('save'):
                 return form.redirect('admin/manage_groups')
@@ -841,7 +1003,8 @@ def delete_group(request, group_id):
         if request.form.get('cancel'):
             return form.redirect('admin/edit_group', group_id=group.id)
         elif request.form.get('confirm') and form.validate(request.form):
-            form.add_invalid_redirect_target('admin/edit_group', group_id=group.id)
+            form.add_invalid_redirect_target('admin/edit_group',
+                                             group_id=group.id)
             form.delete_group()
             db.commit()
             return form.redirect('admin/manage_groups')
@@ -917,8 +1080,10 @@ def theme(request):
                 return redirect_to('admin/theme')
 
     return render_admin_response('admin/theme.html', 'options.theme',
-        themes=sorted(request.app.themes.values(),
-                      key=lambda x: x.name == 'default' or x.display_name.lower()),
+        themes=sorted(
+            request.app.themes.values(),
+            key=lambda x: x.name == 'default' or x.display_name.lower()
+        ),
         current_theme=request.app.theme,
         form=form.as_widget()
     )
@@ -939,7 +1104,7 @@ def plugins(request):
 
     if request.method == 'POST' and form.validate(request.form):
         form.apply()
-        flash(_('Plugin configuration changed'), 'configure')
+        flash(_(u'Plugin configuration changed'), 'configure')
 
         new_plugin = request.files.get('new_plugin')
         if new_plugin:
@@ -954,7 +1119,7 @@ def plugins(request):
 
         return redirect_to('admin/plugins')
 
-    return render_admin_response('admin/plugins.html', 'options.plugins',
+    return render_admin_response('admin/plugins.html', 'system.plugins',
         form=form.as_widget(),
         plugins=sorted(request.app.plugins.values(), key=lambda x: x.name)
     )
@@ -968,7 +1133,7 @@ def remove_plugin(request, plugin):
        not plugin.instance_plugin or \
        plugin.active:
         raise NotFound()
-    form = RemovePluginForm()
+    form = RemovePluginForm(plugin)
 
     if request.method == 'POST' and form.validate(request.form):
         if request.form.get('confirm'):
@@ -1024,10 +1189,14 @@ def configuration(request):
             request.session['ace_on'] = False
         elif form.validate(request.form):
             form.apply()
+            flash(_(u'Configuration updated successfully.'), 'configure')
             return redirect_to('admin/configuration')
+        else:
+            flash(_(u'Could not save the configuration because the '
+                    u'configuration is invalid.'), 'error')
 
     return render_admin_response('admin/configuration.html',
-                                 'system.configuration',
+                                 'options.configuration',
                                  form=form.as_widget(), editor_enabled=
                                  request.session.get('ace_on', False))
 
@@ -1172,11 +1341,11 @@ def information(request):
             'handler':      get_object_name(view)
         } for endpoint, view
             in request.app.views.iteritems()], key=lambda x: x['endpoint']),
-        zeml_element_handlers=[{
-            'tag':          handler.tag,
-            'name':         get_object_name(handler)
-        } for handler in sorted(request.app.zeml_element_handlers,
-                                key=lambda x: x.tag)],
+        markup_extensions=[{
+            'name':         handler.name,
+            'objname':      get_object_name(handler)
+        } for handler in sorted(request.app.markup_extensions,
+                                key=lambda x: x.name)],
         parsers=[{
             'key':          key,
             'name':         parser.name,
@@ -1228,17 +1397,10 @@ def log(request, page):
     form = LogOptionsForm()
     if request.method == 'POST' and form.validate(request.form):
         form.apply()
-        flash(_('Log changes saved.'), 'configure')
+        flash(_(u'Log changes saved.'), 'configure')
         return redirect_to('admin/log', page=page.number)
     return render_admin_response('admin/log.html', 'system.log',
                                  page=page, form=form.as_widget())
-
-
-@require_admin_privilege()
-def about_zine(request):
-    """Just show the zine license and some other legal stuff."""
-    return render_admin_response('admin/about_zine.html',
-                                 'system.about')
 
 
 @require_admin_privilege()
@@ -1258,7 +1420,6 @@ def change_password(request):
     return render_admin_response('admin/change_password.html',
         form=form.as_widget()
     )
-
 
 @require_admin_privilege()
 def help(req, page=''):
@@ -1281,21 +1442,3 @@ def help(req, page=''):
 
     return render_admin_response('admin/help.html', 'system.help', **parts)
 
-
-def login(request):
-    """Show a login page."""
-    if request.user.is_somebody:
-        return redirect_to('admin/index')
-    form = LoginForm()
-
-    if request.method == 'POST' and form.validate(request.form):
-        request.login(form['user'], form['permanent'])
-        return form.redirect('admin/index')
-
-    return render_response('admin/login.html', form=form.as_widget())
-
-
-def logout(request):
-    """Just logout and redirect to the login screen."""
-    request.logout()
-    return redirect_back('admin/login')

@@ -152,8 +152,15 @@
         padding: 0.3em 1em 0 1em;
     }
   </style>
+  <script type="text/javascript">
+    function focusFirstInput() {
+      var elements = document.getElementsByTagName('input');
+      if (elements.length > 0)
+        elements[0].focus();
+    }
+  </script>
 </head>
-<body>
+<body onload="focusFirstInput()">
   <div class="page">
     <div class="header">
       <h1>{{ _('Zine Setup') }}</h1>

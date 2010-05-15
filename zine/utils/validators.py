@@ -9,13 +9,14 @@
           raise `forms.ValidationError`\s.  They are used in hand validated
           forms currently which should be replaced by real forms soon.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
 from urlparse import urlparse
 
 from zine.i18n import lazy_gettext, _
+from zine.utils.text import _placeholder_re, _slug_parts
 
 
 _mail_re = re.compile(r'''(?xi)
@@ -154,6 +155,41 @@ def is_valid_url_prefix():
                 raise ValidationError(_(u'URL prefix must start with a slash.'))
             if value[-1:] == '/':
                 raise ValidationError(_(u'URL prefix must not end with a slash.'))
+    return validator
+
+
+def is_valid_url_format():
+    """Validates URL format.
+
+    >>> check(is_valid_url_format, '/%year%')
+    False
+    >>> check(is_valid_url_format, '%year%')
+    True
+    >>> check(is_valid_url_format, '%year%/%month%/')
+    True
+    >>> check(is_valid_url_format, '%year%/%month%/%day%/')
+    True
+    >>> check(is_valid_url_format, '%year%/%month%/%day%/%hour%%minute%-')
+    True
+    >>> check(is_valid_url_format, '%other%')
+    False
+    """
+    def validator(form, value):
+        if '<' in value or '>' in value or '\\' in value:
+            raise ValidationError(_(u'Invalid character, <, > or \\ are not '
+            'allowed.'))
+        if value:
+            if value.startswith('/'):
+                raise ValidationError(_(u'URL format cannot start with a slash.'))
+            if value.find('//') >= 0:
+                raise ValidationError(_(u'URL cannot contain //.'))
+            if value.find('/../') >= 0 or value.startswith('../'):
+                raise ValidationError(_(u'URL cannot contain a reference to'
+                'parent path.'))
+            for match in _placeholder_re.finditer(value):
+                if match.group(1) not in _slug_parts:
+                    raise ValidationError(_(u'Unknown format code %s.') %
+                                          match.group())
     return validator
 
 

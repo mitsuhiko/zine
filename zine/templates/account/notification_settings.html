@@ -1,0 +1,31 @@
+{% extends "account/layout.html" %}
+{% block title %}{{ _("Notification Settings") }}{% endblock %}
+{% block contents %}
+  <h1>{{ _("Notification Settings") }}</h1>
+  {% call form() %}
+    <p>{{ _('You can configure your notification subscriptions from here.') }}
+    <table class="notifications">
+      <thead>
+        <tr>
+          <th>&nbsp;
+          {%- for system in systems %}
+          <th>{{ system.name|e }}
+          {%- endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      {%- for type in notification_types %}
+        <tr>
+          <th>{{ type.description|e }}
+          {%- for system in systems %}
+          <td>{{ form.subscriptions[type.name][system.key]() }}
+          {%- endfor %}
+        </tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    <div class="actions">
+      <input type="submit" value="{{ _('Save') }}">
+    </div>
+  {% endcall %}
+{% endblock %}

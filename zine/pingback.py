@@ -23,22 +23,20 @@
     do we emit trackbacks.
 
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
-import urllib2
-import socket
-from urlparse import urljoin
-from xmlrpclib import ServerProxy, Fault
+from xmlrpclib import ServerProxy
 
 from werkzeug.routing import RequestRedirect, NotFound
-from werkzeug import escape, unescape
+from werkzeug import unescape
 
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment
 from zine.utils.exceptions import UserException
-from zine.utils.xml import XMLRPC, strip_tags
+from zine.utils.xml import XMLRPC, Fault, strip_tags
+from zine.utils.net import open_url, NetException
 
 
 _title_re = re.compile(r'<title>(.*?)</title>(?i)')
@@ -103,23 +101,19 @@ def pingback(source_uri, target_uri):
     """Try to notify the server behind `target_uri` that `source_uri`
     points to `target_uri`.  If that fails an `PingbackError` is raised.
     """
-    old_timeout = socket.getdefaulttimeout()
-    socket.setdefaulttimeout(2)
     try:
-        try:
-            url = urllib2.urlopen(target_uri)
-        except:
-            return False
-    finally:
-        socket.setdefaulttimeout(old_timeout)
+        response = open_url(target_uri)
+    except:
+        raise PingbackError(32)
 
     try:
-        pingback_uri = url.info()['X-Pingback']
+        pingback_uri = response.headers['X-Pingback']
     except KeyError:
-        match = _pingback_re.search(url.read())
+        match = _pingback_re.search(response.data)
         if match is None:
             raise PingbackError(33)
         pingback_uri = unescape(match.group(1))
+
     rpc = ServerProxy(pingback_uri)
     try:
         return rpc.pingback.ping(source_uri, target_uri)
@@ -137,8 +131,8 @@ def handle_pingback_request(source_uri, target_uri):
 
     # next we check if the source URL does indeed exist
     try:
-        url = urllib2.urlopen(source_uri)
-    except urllib2.HTTPError:
+        response = open_url(source_uri)
+    except NetException:
         raise Fault(16, 'The source URL does not exist.')
 
     # we only accept pingbacks for links below our blog URL
@@ -165,7 +159,7 @@ def handle_pingback_request(source_uri, target_uri):
     raise_later = None
     if handler is not None:
         try:
-            handler(url, target_uri, **values)
+            handler(response, target_uri, **values)
         except PingbackError, e:
             raise_later = e
 
@@ -174,7 +168,7 @@ def handle_pingback_request(source_uri, target_uri):
                            raise_later.means_missing):
         for handler in app.pingback_url_handlers:
             try:
-                if handler(url, target_uri, path_info):
+                if handler(response, target_uri, path_info):
                     raise_later = None
                     break
             except PingbackError, e:
@@ -200,16 +194,15 @@ def handle_pingback_request(source_uri, target_uri):
     )) % (endpoint, values, path_info, source_uri, target_uri, handler)
 
 
-def get_excerpt(url_info, url_hint, body_limit=1024 * 512):
-    """Get an excerpt from the given `url_info` (the object returned by
-    `urllib2.urlopen` or a string for a URL).  `url_hint` is the URL which
-    will be used as anchor for the excerpt.  The return value is a tuple
-    in the form ``(title, body)``.  If one of the two items could not be
-    calculated it will be `None`.
+def get_excerpt(response, url_hint, body_limit=1024 * 512):
+    """Get an excerpt from the given `response`.  `url_hint` is the URL
+    which will be used as anchor for the excerpt.  The return value is a
+    tuple in the form ``(title, body)``.  If one of the two items could
+    not be calculated it will be `None`.
     """
-    if isinstance(url_info, basestring):
-        url_info = urllib2.urlopen(url_info)
-    contents = url_info.read(body_limit)
+    if isinstance(response, basestring):
+        response = open_url(response)
+    contents = response.data[:body_limit]
     title_match = _title_re.search(contents)
     title = title_match and strip_tags(title_match.group(1)) or None
 
@@ -257,7 +250,7 @@ def inject_header(f):
     return oncall
 
 
-def pingback_post(url_info, target_uri, slug):
+def pingback_post(response, target_uri, slug):
     """This is the pingback handler for posts."""
     post = Post.query.filter_by(slug=slug).first()
     if post is None:
@@ -267,25 +260,25 @@ def pingback_post(url_info, target_uri, slug):
         raise PingbackError(33, 'no such post')
     elif not post.can_read():
         raise PingbackError(49, 'access denied')
-    title, excerpt = get_excerpt(url_info, target_uri)
+    title, excerpt = get_excerpt(response, target_uri)
     if not title:
         raise PingbackError(17, 'no title provided')
     elif not excerpt:
         raise PingbackError(17, 'no useable link to target')
     old_pingback = Comment.query.filter(
         (Comment.is_pingback == True) &
-        (Comment.www == url_info.url)
+        (Comment.www == response.url)
     ).first()
     if old_pingback:
         raise PingbackError(48, 'pingback has already been registered')
-    Comment(post, title, excerpt, '', url_info.url, is_pingback=True,
+    Comment(post, title, excerpt, '', response.url, is_pingback=True,
             submitter_ip=get_request().remote_addr, parser='text')
     db.commit()
     return True
 
 
 # the pingback service the application registers on creation
-service = XMLRPC()
+service = XMLRPC('pingback')
 service.register_function(handle_pingback_request, 'pingback.ping')
 
 # a dict of default pingback endpoints (non plugin endpoints)

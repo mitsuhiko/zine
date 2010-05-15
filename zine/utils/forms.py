@@ -11,14 +11,12 @@
     handle intelligent backredirects (via :mod:`zine.utils.http`) and supports
     basic CSRF protection.
 
-    For usage informations see :class:`Form`
+    For usage information, see :class:`Form`.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-import re
 from datetime import datetime
-from unicodedata import normalize
 from itertools import chain
 from threading import Lock
 try:
@@ -26,14 +24,13 @@ try:
 except ImportError:
     from sha import new as sha1
 
-from werkzeug import html, escape, cached_property, MultiDict
+from werkzeug import html, escape, MultiDict
 
 from zine.application import get_request, url_for
 from zine.database import db
 from zine.i18n import _, ngettext, lazy_gettext, parse_datetime, \
      format_system_datetime
 from zine.utils.http import get_redirect_target, _redirect, redirect_to
-from zine.utils.crypto import gen_random_identifier
 from zine.utils.validators import ValidationError
 from zine.utils.datastructures import OrderedDict, missing
 
@@ -668,13 +665,14 @@ class _InputGroup(Widget):
             return u''
         self._attr_setdefault(attrs)
         empty_msg = attrs.pop('empty_msg', None)
+        label = not attrs.pop('nolabel', False)
         class_ = attrs.pop('class_', attrs.pop('class', None))
         if class_ is None:
             class_ = 'choicegroup'
         attrs['class'] = class_
         choices = [u'<li>%s %s</li>' % (
             choice(),
-            choice.label()
+            label and choice.label() or u''
         ) for choice in self.choices]
         if not choices:
             if empty_msg is None:
@@ -689,14 +687,6 @@ class _InputGroup(Widget):
     def as_ol(self, **attrs):
         """Render the radio buttons widget as <ol>"""
         return self._as_list(html.ol, attrs)
-
-    def as_table(self, **attrs):
-        """Render the radio buttons widget as <table>"""
-        self._attr_setdefault(attrs)
-        return list_type(*[u'<tr><td>%s</td><td>%s</td></tr>' % (
-            choice,
-            choice.label
-        ) for choice in self.choices], **attrs)
 
     def render(self, **attrs):
         return self.as_ul(**attrs)
@@ -1000,9 +990,10 @@ class Field(object):
 
     def _bind(self, form, memo):
         """Method that binds a field to a form. If `form` is None, a copy of
-        the field is returned."""
+        the field is returned.
+        """
         if form is not None and self.bound:
-            raise TypeError('%r already bound' % type(obj).__name__)
+            raise TypeError('%r already bound' % type(self).__name__)
         rv = object.__new__(self.__class__)
         rv.__dict__.update(self.__dict__)
         rv.validators = self.validators[:]
@@ -1260,20 +1251,21 @@ class TextField(Field):
         value = _to_string(value)
         if self.required and not value:
             raise ValidationError(self.messages['required'])
-        if self.min_length is not None and len(value) < self.min_length:
-            message = self.messages['too_short']
-            if message is None:
-                message = ngettext(u'Please enter at least %d character.',
-                                   u'Please enter at least %d characters.',
-                                   self.min_length) % self.min_length
-            raise ValidationError(message)
-        if self.max_length is not None and len(value) > self.max_length:
-            message = self.messages['too_long']
-            if message is None:
-                message = ngettext(u'Please enter no more than %d character.',
-                                   u'Please enter no more than %d characters.',
-                                   self.max_length) % self.max_length
-            raise ValidationError(message)
+        if value:
+            if self.min_length is not None and len(value) < self.min_length:
+                message = self.messages['too_short']
+                if message is None:
+                    message = ngettext(u'Please enter at least %d character.',
+                                       u'Please enter at least %d characters.',
+                                       self.min_length) % self.min_length
+                raise ValidationError(message)
+            if self.max_length is not None and len(value) > self.max_length:
+                message = self.messages['too_long']
+                if message is None:
+                    message = ngettext(u'Please enter no more than %d character.',
+                                       u'Please enter no more than %d characters.',
+                                       self.max_length) % self.max_length
+                raise ValidationError(message)
         return value
 
     def should_validate(self, value):
@@ -1474,11 +1466,12 @@ class ChoiceField(Field):
     def convert(self, value):
         if not value and not self.required:
             return
-        for choice in self.choices:
-            if isinstance(choice, tuple):
-                choice = choice[0]
-            if _value_matches_choice(value, choice):
-                return choice
+        if self.choices:
+            for choice in self.choices:
+                if isinstance(choice, tuple):
+                    choice = choice[0]
+                if _value_matches_choice(value, choice):
+                    return choice
         raise ValidationError(self.messages['invalid_choice'])
 
     def _bind(self, form, memo):
@@ -1512,7 +1505,6 @@ class MultiChoiceField(ChoiceField):
             known_choices[choice] = choice
             known_choices.setdefault(_to_string(choice), choice)
 
-        x = _to_list(value)
         for value in _to_list(value):
             for version in value, _to_string(value):
                 if version in known_choices:

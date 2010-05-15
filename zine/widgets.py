@@ -13,11 +13,11 @@
     Additionally widgets could be moved around from the admin panel in the
     future.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from zine.application import render_template
-from zine.models import Post, Category, Tag, Comment
+from zine.models import Post, SummarizedPost, Category, Tag, Comment
 
 
 class Widget(object):
@@ -48,7 +48,8 @@ class PostArchiveSummary(Widget):
     template = 'widgets/post_archive_summary.html'
 
     def __init__(self, detail='months', limit=6, show_title=False):
-        self.__dict__.update(Post.query.get_archive_summary(detail, limit))
+        self.__dict__.update(SummarizedPost.query
+            .get_archive_summary(detail, limit))
         self.show_title = show_title
 
 
@@ -60,9 +61,10 @@ class LatestPosts(Widget):
 
     def __init__(self, limit=5, show_title=False, content_types=None):
         if content_types is None:
-            query = Post.query.for_index()
+            query = SummarizedPost.query.for_index()
         else:
-            query = Post.query.filter(Post.content_type.in_(content_types))
+            query = SummarizedPost.query.filter(SummarizedPost
+                .content_type.in_(content_types))
         self.posts = query.latest().limit(limit).all()
         self.show_title = show_title
 
@@ -116,6 +118,18 @@ class IncludePage(Widget):
         return self.page is not None
 
 
+class PagesNavigation(Widget):
+    """Show a list of all pages."""
+
+    name = 'pages_navigation'
+    template = 'widgets/pages_navigation.html'
+
+    def __init__(self, show_title=False, show_drafts=False):
+        self.pages = Post.query.type('page').published().all()
+        if show_drafts:
+            self.pages += Post.query.type('page').drafts().all()
+        self.show_title = show_title
+
 #: list of all core widgets
 all_widgets = [PostArchiveSummary, LatestPosts, LatestComments, TagCloud,
-               CategoryList, IncludePage]
+               CategoryList, IncludePage, PagesNavigation]

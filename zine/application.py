@@ -7,24 +7,28 @@
     and a couple of helper functions and classes.
 
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+import sys
 from os import path, remove, makedirs, walk, environ
 from time import time
-from itertools import izip
-from datetime import datetime, timedelta
-from urlparse import urlparse, urljoin
+from urlparse import urlparse
 from collections import deque
 from inspect import getdoc
+from traceback import format_exception
+from pprint import pprint
+from StringIO import StringIO
 
 from babel import Locale
 
 from jinja2 import Environment, BaseLoader, TemplateNotFound
 
+from sqlalchemy.exceptions import SQLAlchemyError
+
 from werkzeug import Request as RequestBase, Response as ResponseBase, \
      SharedDataMiddleware, url_quote, routing, redirect as _redirect, \
-     escape, cached_property
+     escape, cached_property, url_encode
 from werkzeug.exceptions import HTTPException, Forbidden, \
      NotFound
 from werkzeug.contrib.securecookie import SecureCookie
@@ -36,7 +40,6 @@ from zine.database import db, cleanup_session
 from zine.cache import get_cache
 from zine.utils import ClosingIterator, local, local_manager, dump_json, \
      htmlhelpers
-from zine.utils.mail import split_email
 from zine.utils.datastructures import ReadOnlyMultiMapping
 from zine.utils.exceptions import UserException
 
@@ -44,9 +47,9 @@ from zine.utils.exceptions import UserException
 #: the default theme settings
 DEFAULT_THEME_SETTINGS = {
     # pagination defaults
-    'pagination.normal':            '<a href="%(url)s">%(page)d</a>',
-    'pagination.active':            '<strong>%(page)d</strong>',
-    'pagination.commata':           '<span class="commata">,\n</span>',
+    'pagination.normal':            u'<a href="%(url)s">%(page)d</a>',
+    'pagination.active':            u'<strong>%(page)d</strong>',
+    'pagination.commata':           u'<span class="commata">,\n</span>',
     'pagination.ellipsis':          u'<span class="ellipsis"> …\n</span>',
     'pagination.threshold':         3,
     'pagination.left_threshold':    2,
@@ -56,6 +59,12 @@ DEFAULT_THEME_SETTINGS = {
     'pagination.gray_prev_link':    True,
     'pagination.gray_next_link':    True,
     'pagination.simple':            False,
+
+    # how many posts per page?
+    'author.per_page':              30,
+    'archive.per_page':             None,
+    'category.per_page':            None,
+    'tag.per_page':                 None,
 
     # datetime formatting settings
     'date.date_format.default':     'medium',
@@ -67,7 +76,25 @@ DEFAULT_THEME_SETTINGS = {
     'date.datetime_format.short':   None,
     'date.datetime_format.medium':  None,
     'date.datetime_format.full':    None,
-    'date.datetime_format.long':    None
+    'date.datetime_format.long':    None,
+
+    # query optimizations for overview pages.  Themes can change the
+    # eager/lazy loading settings of some queries to remove unnecessary
+    # overhead that is not in use for what they want to display.  For
+    # example a theme that wants to load a headline-overview of all the
+    # posts in a specific tag but no text at all it makes no sense to
+    # load the text and more just to throw away the information.
+    # for more information have a look at PostQuery.lightweight
+    'sql.index.lazy':               frozenset(['comments']),
+    'sql.author.lazy':              frozenset(['comments']),
+    'sql.archive.lazy':             frozenset(['comments']),
+    'sql.category.lazy':            frozenset(['comments']),
+    'sql.tag.lazy':                 frozenset(['comments']),
+    'sql.index.deferred':           frozenset(),
+    'sql.author.deferred':          frozenset(),
+    'sql.archive.deferred':         frozenset(),
+    'sql.category.deferred':        frozenset(),
+    'sql.tag.deferred':             frozenset()
 }
 
 
@@ -231,9 +258,9 @@ class InternalError(UserException):
 class Request(RequestBase):
     """This class holds the incoming request data."""
 
-
     def __init__(self, environ, app=None):
         RequestBase.__init__(self, environ)
+        self.queries = []
         if app is None:
             app = get_application()
         self.app = app
@@ -245,8 +272,7 @@ class Request(RequestBase):
         user = None
         cookie_name = app.cfg['session_cookie_name']
         session = SecureCookie.load_cookie(self, cookie_name,
-                                           app.cfg['secret_key']
-                                              .encode('utf-8'))
+                                           app.secret_key)
         user_id = session.get('uid')
         if user_id:
             user = User.query.options(db.eagerload('groups'),
@@ -366,7 +392,7 @@ class TemplateEventResult(list):
 
 
 class Theme(object):
-    """Represents a theme and is created automaticall by `add_theme`"""
+    """Represents a theme and is created automatically by `add_theme`."""
     app = None
 
     def __init__(self, name, template_path, metadata=None,
@@ -401,7 +427,7 @@ class Theme(object):
 
     @property
     def description(self):
-        """Return the description of the plugin."""
+        """Return the description of the theme."""
         return self.metadata.get('description', u'')
 
     @property
@@ -411,7 +437,8 @@ class Theme(object):
 
     @property
     def author_info(self):
-        """The author, mail and author URL of the plugin."""
+        """The author, mail and author URL of the theme."""
+        from zine.utils.mail import split_email
         return split_email(self.metadata.get('author', u'Nobody')) + \
                (self.metadata.get('author_url'),)
 
@@ -436,12 +463,12 @@ class Theme(object):
 
     @property
     def author_email(self):
-        """Return the author email address of the plugin."""
+        """Return the author email address of the theme."""
         return self.author_info[1]
 
     @property
     def author_url(self):
-        """Return the URL of the author of the plugin."""
+        """Return the URL of the author of the theme."""
         return self.author_info[2]
 
     @cached_property
@@ -585,10 +612,10 @@ class ThemeLoader(BaseLoader):
 class Zine(object):
     """The central application object.
 
-    Even though the :class:`Zine` class is a regular Python class, you
-    can't create instances by using the regular constructor.  The only
-    documented way to create this class is the :func:`make_zine`
-    function or by using one of the dispatchers created by :func:`make_app`.
+    Even though the :class:`Zine` class is a regular Python class, you can't
+    create instances by using the regular constructor.  The only documented way
+    to create this class is the :func:`zine._core.setup` function or by using
+    one of the dispatchers created by :func:`zine._core.get_wsgi_app`.
     """
 
     _setup_only = []
@@ -602,10 +629,10 @@ class Zine(object):
         return f
 
     def __init__(self, instance_folder):
-        # this check ensures that only make_app can create Zine instances
+        # this check ensures that only setup() can create Zine instances
         if get_application() is not self:
             raise TypeError('cannot create %r instances. use the '
-                            'make_zine factory function.' %
+                            'zine._core.setup() factory function.' %
                             self.__class__.__name__)
         self.instance_folder = path.abspath(instance_folder)
 
@@ -632,7 +659,8 @@ class Zine(object):
 
         # connect to the database
         self.database_engine = db.create_engine(self.cfg['database_uri'],
-                                                self.instance_folder)
+                                                self.instance_folder,
+                                                self.cfg['database_debug'])
 
         # now setup the cache system
         self.cache = get_cache(self)
@@ -648,7 +676,7 @@ class Zine(object):
         self.content_type_handlers = content_type_handlers.copy()
         self.admin_content_type_handlers = admin_content_type_handlers.copy()
         self.parsers = dict((k, v(self)) for k, v in all_parsers.iteritems())
-        self.zeml_element_handlers = []
+        self.markup_extensions = []
         self._url_rules = make_urls(self)
         self._absolute_url_handlers = absolute_url_handlers[:]
         self._services = all_services.copy()
@@ -676,6 +704,15 @@ class Zine(object):
         self.apis = {}
         self.importers = {}
         self.feed_importer_extensions = []
+
+        # the notification manager
+        from zine.notifications import NotificationManager, \
+             DEFAULT_NOTIFICATION_SYSTEMS, DEFAULT_NOTIFICATION_TYPES
+
+        self.notification_manager = NotificationManager()
+        for system in DEFAULT_NOTIFICATION_SYSTEMS:
+            self.add_notification_system(system)
+        self.notification_types = DEFAULT_NOTIFICATION_TYPES.copy()
 
         # register the pingback API.
         from zine import pingback
@@ -709,7 +746,8 @@ class Zine(object):
         for folder in self.cfg['plugin_searchpath']:
             folder = folder.strip()
             if folder:
-                self.plugin_searchpath.append(folder)
+                self.plugin_searchpath.append(
+                    path.join(self.instance_folder, folder))
         self.plugin_searchpath.append(BUILTIN_PLUGIN_FOLDER)
         set_plugin_searchpath(self.plugin_searchpath)
 
@@ -807,6 +845,11 @@ class Zine(object):
         """
         return self.cfg.changed_external
 
+    @property
+    def secret_key(self):
+        """Returns the secret key for the instance (binary!)"""
+        return self.cfg['secret_key'].encode('utf-8')
+
     @setuponly
     def add_template_filter(self, name, callback):
         """Add a Jinja2 template filter."""
@@ -833,7 +876,7 @@ class Zine(object):
         self._template_searchpath.append(path)
 
     @setuponly
-    def add_api(self, name, preferred, callback, blog_id=1):
+    def add_api(self, name, preferred, callback, blog_id=1, url_key=None):
         """Add a new API to the blog.  The newly added API is available at
         ``/_services/<name>`` and automatically exported in the RSD file.
         The `blog_id` is an unused oddity of the RSD file, preferred an
@@ -842,12 +885,16 @@ class Zine(object):
         """
         endpoint = 'services/' + name
         self.apis[name] = (blog_id, preferred, endpoint)
-        self.add_url_rule('/_services/' + name, endpoint=endpoint)
+        if url_key is None:
+            url_key = name.lower()
+        url = '/_services/' + url_key
+        self.add_url_rule(url, endpoint=endpoint)
         self.add_view(endpoint, callback)
+        return url
 
     @setuponly
     def add_importer(self, importer):
-        """Register an importer.  For more informations about importers
+        """Register an importer.  For more information about importers
         see the :mod:`zine.importers`.
         """
         importer = importer(self)
@@ -1033,9 +1080,9 @@ class Zine(object):
         self.parsers[name] = class_(self)
 
     @setuponly
-    def add_zeml_element_handler(self, element_handler):
-        """Register a new ZEML element handler."""
-        self.zeml_element_handlers.append(element_handler(self))
+    def add_markup_extension(self, extension):
+        """Register a new markup extension."""
+        self.markup_extensions.append(extension(self))
 
     @setuponly
     def add_widget(self, widget):
@@ -1072,6 +1119,18 @@ class Zine(object):
                                   on_before_metadata_assembled)
         """
         self._event_manager.connect(event, callback, position)
+
+    @setuponly
+    def add_notification_system(self, system):
+        """Add the notification system to the list of notification systems
+        the NotificationManager holds.
+        """
+        self.notification_manager.systems[system.key] = system(self)
+
+    @setuponly
+    def add_notification_type(self, type):
+        """Registers a new notification type on the instance."""
+        self.notification_manager.add_notification_type(type)
 
     def list_parsers(self):
         """Return a sorted list of parsers (parser_id, parser_name)."""
@@ -1110,11 +1169,13 @@ class Zine(object):
         request = get_request()
         javascript = [
             'Zine.ROOT_URL = %s' % dump_json(base_url),
-            'Zine.BLOG_URL = %s' % dump_json(base_url + self.cfg['blog_url_prefix'])
+            'Zine.BLOG_URL = %s' % dump_json(base_url +
+                                             self.cfg['blog_url_prefix'])
         ]
         if request is None or request.user.is_manager:
             javascript.append('Zine.ADMIN_URL = %s' %
-                              dump_json(base_url + self.cfg['admin_url_prefix']))
+                              dump_json(base_url +
+                                        self.cfg['admin_url_prefix']))
         result.append(u'<script type="text/javascript">%s;</script>' %
                       '; '.join(javascript))
 
@@ -1146,6 +1207,18 @@ class Zine(object):
         response.status_code = 404
         return response
 
+    def send_error_notification(self, request, error):
+        from zine.notifications import send_notification_template, ZINE_ERROR
+        request_buffer = StringIO()
+        pprint(request.__dict__, request_buffer)
+        request_buffer.seek(0)
+        send_notification_template(
+            ZINE_ERROR, 'notifications/on_server_error.zeml',
+            user=request.user, summary=error.message,
+            request_details=request_buffer.read(),
+            longtext=''.join(format_exception(*sys.exc_info()))
+        )
+
     def handle_server_error(self, request, exc_info=None, suppress_log=False):
         """Called if a server error happens.  Logs the error and returns a
         response with an error message.
@@ -1157,13 +1230,15 @@ class Zine(object):
         response.status_code = 500
         return response
 
-    def handle_internal_error(self, request, error):
+    def handle_internal_error(self, request, error, suppress_log=True):
         """Called if internal errors are caught."""
         if request.user.is_admin:
             response = render_response('internal_error.html', error=error)
             response.status_code = 500
             return response
-        return self.handle_server_error(request, suppress_log=True)
+        # We got here, meaning no admin has seen this error yet. Notify Them!
+        self.send_error_notification(request, error)
+        return self.handle_server_error(request, suppress_log=suppress_log)
 
     def dispatch_request(self, request):
         #! the after-request-setup event can return a response
@@ -1172,7 +1247,7 @@ class Zine(object):
         for callback in iter_listeners('after-request-setup'):
             result = callback(request)
             if result is not None:
-                return result(environ, start_response)
+                return result
 
         # normal request dispatching
         try:
@@ -1186,10 +1261,22 @@ class Zine(object):
                     response = render_response('403.html')
                     response.status_code = 403
                 else:
-                    response = _redirect(url_for('admin/login',
+                    response = _redirect(url_for('account/login',
                                                  next=request.path))
         except HTTPException, e:
-            response = e.get_response(request)
+            response = e.get_response(request.environ)
+        except SQLAlchemyError, e:
+            # Some database screwup?! Don't let Zine stay dispatching 500's
+            db.session.rollback()
+            response = self.handle_internal_error(request, e,
+                                                  suppress_log=False)
+
+        # in debug mode on HTML responses we inject the collected queries.
+        if self.cfg['database_debug'] and \
+           getattr(response, 'mimetype', None) == 'text/html' and \
+           isinstance(response.response, (list, tuple)):
+            from zine.utils.debug import inject_query_info
+            inject_query_info(request, response)
 
         return response
 
@@ -1212,14 +1299,27 @@ class Zine(object):
         # not an administrator. in that case just show a message that
         # the user is not privileged to view the blog right now. Exception:
         # the page is the login page for the blog.
+        # XXX: Remove 'admin_prefix' references for Zine 0.3
+        #      It still exists because some themes might depend on it.
+        js_translations = url_for('blog/serve_translations')
         admin_prefix = self.cfg['admin_url_prefix']
+        account_prefix = self.cfg['account_url_prefix']
         if self.cfg['maintenance_mode'] and \
-           request.path != admin_prefix and not \
-           request.path.startswith(admin_prefix + '/'):
-            if not request.user.is_admin:
+           request.path not in (account_prefix, admin_prefix, js_translations) \
+           and not (request.path.startswith(admin_prefix + '/') or
+                    request.path.startswith(account_prefix + '/')):
+            if not request.user.has_privilege(
+                                        self.privileges['ENTER_ADMIN_PANEL']):
                 response = render_response('maintenance.html')
                 response.status_code = 503
                 return response(environ, start_response)
+
+        # if HTTPS enforcement is active, we redirect to HTTPS if
+        # possibile without problems (no playload)
+        if self.cfg['force_https'] and request.method in ('GET', 'HEAD') and \
+           environ['wsgi.url_scheme'] == 'http':
+            response = _redirect('https' + request.url[4:], 301)
+            return response(environ, start_response)
 
         # wrap the real dispatching in a try/except so that we can
         # intercept exceptions that happen in the application.
@@ -1244,6 +1344,10 @@ class Zine(object):
         # update the session cookie at the request end if the
         # session data requires an update.
         if request.session.should_save:
+            # set the secret key explicitly at the end of the request
+            # to not log out the administrator if he changes the secret
+            # key in the config editor.
+            request.session.secret_key = self.secret_key
             cookie_name = self.cfg['session_cookie_name']
             if request.session.get('pmt'):
                 max_age = 60 * 60 * 24 * 31
@@ -1254,6 +1358,50 @@ class Zine(object):
                                         expires=expires, session_expires=expires)
 
         return response(environ, start_response)
+
+    def perform_subrequest(self, path, query=None, method='GET', data=None,
+                           timeout=None, response_wrapper=Response):
+        """Perform an internal subrequest against Zine.  This method spawns a
+        separate thread and lets an internal WSGI client answer the request.
+        The return value is then converted into a zine response object and
+        returned.
+
+        A separate thread is spawned so that the internal request does not
+        cause troubles for the current one in terms of persistent database
+        objects.
+
+        This is for example used in the `open_url` method to allow access to
+        blog local resources without dead-locking if the WSGI server does not
+        support concurrency (single threaded and just one process for example).
+        """
+        from werkzeug import Client
+        from threading import Event, Thread
+        event = Event()
+        response = []
+        input_stream = None
+        if hasattr(data, 'read'):
+            input_stream = data
+            data = None
+
+        def make_request():
+            try:
+                client = Client(self, response_wrapper)
+                response.append(client.open(path, self.cfg['blog_url'],
+                                            method=method, data=data,
+                                            query_string=url_encode(query),
+                                            input_stream=input_stream))
+            except:
+                response.append(sys.exc_info())
+            event.set()
+
+        Thread(target=make_request).start()
+        event.wait(timeout)
+        if not response:
+            raise NetException('Timeout on internal subrequest')
+        if isinstance(response[0], tuple):
+            exc_type, exc_value, tb = response[0]
+            raise exc_type, exc_value, tb
+        return response[0]
 
     def __call__(self, environ, start_response):
         """Make the application object a WSGI application."""
@@ -1273,4 +1421,5 @@ class Zine(object):
 # import here because of circular dependencies
 from zine import i18n
 from zine.utils import log
+from zine.utils.net import NetException
 from zine.utils.http import make_external_url

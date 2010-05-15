@@ -1,0 +1,23 @@
+  {{ title }}
+{%- if details %}
+------------------------------------------------------------------------
+{%- for detail in details %}
+  {%- if detail.is_textual %}
+  {{ detail.text }}
+  {%- else %}
+  {{ (detail.text ~ ':').ljust(23) }} {{ detail.link }}
+  {%- endif %}
+{%- endfor %}
+------------------------------------------------------------------------
+{%- endif %}
+
+{{ longtext }}
+
+{%- if actions %}
+
+------------------------------------------------------------------------
+{{ _('Actions') }}:
+{%- for action in actions %}
+  - {{ (action.text ~ ':').ljust(19) }} {{ action.link if action.link }}
+{%- endfor %}
+{%- endif %}

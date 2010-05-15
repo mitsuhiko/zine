@@ -1,0 +1,11 @@
+{% extends "account/layout.html" %}
+{% from "_help.html" import render_help_title, render_help_body %}
+{% block title %}{{ render_help_title(title) }}{% endblock %}
+{% block contents %}
+  {% if not_found is defined and not_found %}
+    <h2>{{ _("Documentation Not Found") }}</h2>
+    <p>{{ _("The online documentation could not be found.") }}</p>
+  {% else %}
+    {{ render_help_body(title, toc, body) }}
+  {% endif %}
+{% endblock %}

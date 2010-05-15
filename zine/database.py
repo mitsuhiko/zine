@@ -3,37 +3,43 @@
     zine.database
     ~~~~~~~~~~~~~
 
-    This module is a rather complex layer on top of SQLAlchemy 0.4.
-    Basically you will never use the `zine.database` module except you
-    are a core developer, but always the high level
-    :mod:`~zine.database.db` module which you can import from the
-    :mod:`zine.api` module.
+    This module is a rather complex layer on top of SQLAlchemy.
 
+    Basically you will never use the `zine.database` module except if you
+    are a core developer, but always the high level :mod:`~zine.database.db`
+    module which you can import from the :mod:`zine.api` module.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
 import os
 import sys
-import urlparse
+import time
 from os import path
-from datetime import datetime, timedelta
 from types import ModuleType
+from copy import deepcopy
 
 import sqlalchemy
 from sqlalchemy import orm
+from sqlalchemy.interfaces import ConnectionProxy
+from sqlalchemy.orm.interfaces import AttributeExtension
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.util import to_list
 from sqlalchemy.engine.url import make_url, URL
-from sqlalchemy.types import MutableType, TypeDecorator
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from werkzeug import url_decode
 from werkzeug.exceptions import NotFound
 
 from zine.utils import local_manager
+
+
+if sys.platform == 'win32':
+    _timer = time.clock
+else:
+    _timer = time.time
 
 
 _sqlite_re = re.compile(r'sqlite:(?:(?://(.*?))|memory)(?:\?(.*))?$')
@@ -50,7 +56,7 @@ def get_engine():
     return get_application().database_engine
 
 
-def create_engine(uri, relative_to=None, echo=False):
+def create_engine(uri, relative_to=None, debug=False):
     """Create a new engine.  This works a bit like SQLAlchemy's
     `create_engine` with the difference that it automaticaly set's MySQL
     engines to 'utf-8', and paths for SQLite are relative to the path
@@ -82,7 +88,7 @@ def create_engine(uri, relative_to=None, echo=False):
         if info.drivername == 'mysql':
             info.query.setdefault('charset', 'utf8')
 
-    options = {'convert_unicode': True, 'echo': echo}
+    options = {'convert_unicode': True}
 
     # alternative pool sizes / recycle settings and more.  These are
     # interpreter wide and not from the config for the following reasons:
@@ -96,6 +102,10 @@ def create_engine(uri, relative_to=None, echo=False):
         if value is not None:
             options[key] = int(value)
 
+    # if debugging is enabled, hook the ConnectionDebugProxy in
+    if debug:
+        options['proxy'] = ConnectionDebugProxy()
+
     return sqlalchemy.create_engine(info, **options)
 
 
@@ -104,7 +114,7 @@ def secure_database_uri(uri):
     obj = make_url(uri)
     if obj.password:
         obj.password = '***'
-    return unicode(obj).replace(':%2A%2A%2A@', ':***@')
+    return unicode(obj).replace(u':%2A%2A%2A@', u':***@', 1)
 
 
 def attribute_loaded(model, attribute):
@@ -114,10 +124,32 @@ def attribute_loaded(model, attribute):
     return attribute in model.__dict__
 
 
-class ZEMLParserData(MutableType, TypeDecorator):
-    """Holds parser data."""
+class ConnectionDebugProxy(ConnectionProxy):
+    """Helps debugging the database."""
 
-    impl = sqlalchemy.Binary
+    def cursor_execute(self, execute, cursor, statement, parameters,
+                       context, executemany):
+        start = _timer()
+        try:
+            return execute(cursor, statement, parameters, context)
+        finally:
+            from zine.application import get_request
+            from zine.utils.debug import find_calling_context
+            request = get_request()
+            if request is not None:
+                request.queries.append((statement, parameters, start,
+                                        _timer(), find_calling_context()))
+
+
+class ZEMLParserData(TypeDecorator):
+    """Holds parser data.  The implementation is rather ugly because it does
+    not really compare the trees for performance reasons but only the dirty
+    flags.  This might change in future versions if there is some sort of
+    support for this kind of hackery in SQLAlchemy or if we find a fast way
+    to compare the trees.
+    """
+
+    impl = sqlalchemy.LargeBinary
 
     def process_bind_param(self, value, dialect):
         if value is None:
@@ -127,19 +159,39 @@ class ZEMLParserData(MutableType, TypeDecorator):
 
     def process_result_value(self, value, dialect):
         from zine.utils.zeml import load_parser_data
-        return load_parser_data(value)
+        try:
+            return load_parser_data(value)
+        except ValueError: # Parser data invalid. Database corruption?
+            from zine.i18n import _
+            from zine.utils import log
+            log.exception(_(u'Error when loading parsed data from database. '
+                            u'Maybe the database was manually edited and got '
+                            u'corrupted? The system returned an empty value.'))
+            return {}
 
     def copy_value(self, value):
-        from copy import deepcopy
         return deepcopy(value)
+
+    def compare_values(self, x, y):
+        return x is y
+
+    def is_mutable(self):
+        return False
 
 
 class Query(orm.Query):
     """Default query class."""
 
+    def lightweight(self, deferred=None, lazy=None):
+        """Send a lightweight query which deferes some more expensive
+        things such as comment queries or even text and parser data.
+        """
+        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
+        return self.options(*args)
+
     def first(self, raise_if_missing=False):
         """Return the first result of this `Query` or None if the result
-        doesn't contain any row.  If `raise_if_missing` is set to `True`
+        doesn't contain any rows.  If `raise_if_missing` is set to `True`
         a `NotFound` exception is raised if no row is found.
         """
         rv = orm.Query.first(self)
@@ -153,11 +205,23 @@ session = orm.scoped_session(lambda: orm.create_session(get_engine(),
                              local_manager.get_ident)
 
 
+def mapper(cls, *args, **kwargs):
+    """Attaches a query and auto registers."""
+    if not hasattr(cls, 'query'):
+        cls.query = session.query_property(Query)
+    old_init = getattr(cls, '__init__', None)
+    def register_init(self, *args, **kwargs):
+        old_init(self, *args, **kwargs)
+        session.add(self)
+    cls.__init__ = register_init
+    return orm.mapper(cls, *args, **kwargs)
+
+
 # configure a declarative base.  This is unused in the code but makes it easier
 # for plugins to work with the database.
 class ModelBase(object):
     """Internal baseclass for `Model`."""
-Model = declarative_base(name='Model', cls=ModelBase, mapper=session.mapper)
+Model = declarative_base(name='Model', cls=ModelBase, mapper=mapper)
 ModelBase.query = session.query_property(Query)
 
 
@@ -171,10 +235,14 @@ for mod in sqlalchemy, orm:
 del key, mod, value
 
 #: forward some session methods to the module as well
-for name in 'delete', 'save', 'flush', 'execute', 'begin', 'mapper', \
-            'commit', 'rollback', 'clear', 'refresh', 'expire', \
-            'query_property':
+for name in ('delete', 'flush', 'execute', 'begin', 'mapper',
+             'commit', 'rollback', 'refresh', 'expire',
+             'query_property'):
     setattr(db, name, getattr(session, name))
+
+# Some things changed names with SQLAlchemy 0.6.0
+db.save = session.add
+db.clear = session.expunge_all
 
 #: and finally hook our own implementations of various objects in
 db.Model = Model
@@ -183,9 +251,10 @@ db.get_engine = get_engine
 db.create_engine = create_engine
 db.session = session
 db.ZEMLParserData = ZEMLParserData
-db.mapper = session.mapper
+db.mapper = mapper
 db.association_proxy = association_proxy
 db.attribute_loaded = attribute_loaded
+db.AttributeExtension = AttributeExtension
 
 #: called at the end of a request
 cleanup_session = session.remove
@@ -241,6 +310,13 @@ categories = db.Table('categories', metadata,
     db.Column('description', db.Text)
 )
 
+texts = db.Table('texts', metadata,
+    db.Column('text_id', db.Integer, primary_key=True),
+    db.Column('text', db.Text),
+    db.Column('parser_data', db.ZEMLParserData),
+    db.Column('extra', db.PickleType)
+)
+
 posts = db.Table('posts', metadata,
     db.Column('post_id', db.Integer, primary_key=True),
     db.Column('pub_date', db.DateTime),
@@ -248,14 +324,13 @@ posts = db.Table('posts', metadata,
     db.Column('slug', db.String(200), index=True, nullable=False),
     db.Column('uid', db.String(250)),
     db.Column('title', db.String(150)),
-    db.Column('text', db.Text),
+    db.Column('text_id', db.Integer, db.ForeignKey('texts.text_id')),
     db.Column('author_id', db.Integer, db.ForeignKey('users.user_id')),
-    db.Column('parser_data', db.ZEMLParserData),
     db.Column('comments_enabled', db.Boolean),
+    db.Column('comment_count', db.Integer, nullable=False, default=0),
     db.Column('pings_enabled', db.Boolean),
     db.Column('content_type', db.String(40), index=True),
-    db.Column('extra', db.PickleType),
-    db.Column('status', db.Integer)
+    db.Column('status', db.Integer),
 )
 
 post_links = db.Table('post_links', metadata,
@@ -292,9 +367,8 @@ comments = db.Table('comments', metadata,
     db.Column('author', db.String(160)),
     db.Column('email', db.String(250)),
     db.Column('www', db.String(200)),
-    db.Column('text', db.Text),
+    db.Column('text_id', db.Integer, db.ForeignKey('texts.text_id')),
     db.Column('is_pingback', db.Boolean, nullable=False),
-    db.Column('parser_data', db.ZEMLParserData),
     db.Column('parent_id', db.Integer, db.ForeignKey('comments.comment_id')),
     db.Column('pub_date', db.DateTime),
     db.Column('blocked_msg', db.String(250)),
@@ -306,6 +380,14 @@ redirects = db.Table('redirects', metadata,
     db.Column('redirect_id', db.Integer, primary_key=True),
     db.Column('original', db.String(200), unique=True),
     db.Column('new', db.String(200))
+)
+
+notification_subscriptions = db.Table('notification_subscriptions', metadata,
+    db.Column('subscription_id', db.Integer, primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id')),
+    db.Column('notification_system', db.String(50)),
+    db.Column('notification_id', db.String(100)),
+    db.UniqueConstraint('user_id', 'notification_system', 'notification_id')
 )
 
 

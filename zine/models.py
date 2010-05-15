@@ -5,10 +5,10 @@
 
     The core models and query helper functions.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from math import ceil, log
+from math import log
 from datetime import date, datetime, timedelta
 from urlparse import urljoin
 
@@ -16,21 +16,26 @@ from werkzeug.exceptions import NotFound
 
 from zine.database import users, categories, posts, post_links, \
      post_categories, post_tags, tags, comments, groups, group_users, \
-     privileges, user_privileges, group_privileges, db
+     privileges, user_privileges, group_privileges, texts, \
+     notification_subscriptions, db
 from zine.utils import zeml
-from zine.utils.text import gen_slug, build_tag_uri, increment_string
+from zine.utils.text import gen_slug, gen_timestamped_slug, build_tag_uri, \
+     increment_string
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
-from zine.privileges import Privilege, _Privilege, privilege_attribute, \
+from zine.privileges import _Privilege, privilege_attribute, \
      add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN, \
-     VIEW_DRAFTS
+     VIEW_DRAFTS, VIEW_PROTECTED, MODERATE_OWN_ENTRIES, MODERATE_OWN_PAGES
 from zine.application import get_application, get_request, url_for
 
+from zine.i18n import to_blog_timezone
 
 #: all kind of states for a post
 STATUS_DRAFT = 1
 STATUS_PUBLISHED = 2
+STATUS_PROTECTED = 3
+STATUS_PRIVATE = 4
 
 #: Comment Status
 COMMENT_MODERATED = 0
@@ -38,6 +43,7 @@ COMMENT_UNMODERATED = 1
 COMMENT_BLOCKED_USER = 2
 COMMENT_BLOCKED_SPAM = 3
 COMMENT_BLOCKED_SYSTEM = 4
+COMMENT_DELETED = 5
 
 #: moderation modes
 MODERATE_NONE = 0
@@ -62,6 +68,12 @@ class _ZEMLContainer(object):
         app = get_application()
         return self.parser not in app.parsers
 
+    def touch_parser_data(self):
+        """Mark the parser data as modified."""
+        # this is enough for sqlalchemy to pick it up as as change.
+        # it will only compare the object's identity.
+        self.parser_data = dict(self.parser_data)
+
     def _get_parser(self):
         if self.parser_data is not None:
             return self.parser_data.get('parser')
@@ -70,6 +82,7 @@ class _ZEMLContainer(object):
         if self.parser_data is None:
             self.parser_data = {}
         self.parser_data['parser'] = value
+        self.touch_parser_data()
 
     parser = property(_get_parser, _set_parser, doc="The name of the parser.")
     del _get_parser, _set_parser
@@ -82,7 +95,7 @@ class _ZEMLContainer(object):
 
     def _parse_text(self, text):
         from zine.parsers import parse
-        self.parser_data['body'] = parse(text, self.parser, 'post')
+        self.parser_data['body'] = parse(text, self.parser, self.parser_reason)
 
     def _get_text(self):
         return self._text
@@ -92,6 +105,7 @@ class _ZEMLContainer(object):
             self.parser_data = {}
         self._text = value
         self._parse_text(value)
+        self.touch_parser_data()
 
     text = property(_get_text, _set_text, doc="The raw text.")
     del _get_text, _set_text
@@ -127,6 +141,31 @@ class _ZEMLDualContainer(_ZEMLContainer):
         """The intro as zeml element."""
         if self.parser_data is not None:
             return self.parser_data.get('intro')
+
+
+class CommentCounterExtension(db.AttributeExtension):
+    """A simple attribute extension that helps the post to reflect
+    the number of public comments on the post table.
+
+    This will not count or "uncount" blocked or unmoderated comments.
+    To fight this problem there is a :meth:`Post.sync_comment_count`
+    method that should be called after comment moderation on affected
+    comments.
+    """
+
+    def append(self, state, value, initiator):
+        instance = state.obj()
+        if not value.blocked:
+            instance._comment_count += 1
+        return value
+
+    def remove(self, state, value, initiator):
+        instance = state.obj()
+        if not value.blocked:
+            instance._comment_count -= 1
+
+    def set(self, state, value, oldvalue, initiator):
+        return value
 
 
 class UserQuery(db.Query):
@@ -259,8 +298,7 @@ class AnonymousUser(User):
     is_somebody = is_author = False
     display_name = 'Nobody'
     real_name = description = username = ''
-    own_privileges = privileges = \
-        property(lambda x: frozenset())
+    own_privileges = privileges = property(lambda x: frozenset())
 
     def __init__(self):
         pass
@@ -272,22 +310,8 @@ class AnonymousUser(User):
         return False
 
 
-class PostQuery(db.Query):
+class _PostQueryBase(db.Query):
     """Add some extra methods to the post model."""
-
-    def lightweight(self, deferred=None, lazy=('comments',)):
-        """Send a lightweight query which deferes some more expensive
-        things such as comment queries or even text and parser data.
-        """
-        args = map(db.lazyload, lazy or ())
-        if deferred:
-            args.extend(map(db.defer, deferred))
-        # undefer the _comment_count query which is used by comment_count
-        # for lightweight post objects.  See Post.comment_count for more
-        # details.
-        if lazy and 'comments' in lazy:
-            args.append(db.undefer('_comment_count'))
-        return self.options(*args)
 
     def type(self, content_type):
         """Filter all posts by a given type."""
@@ -297,15 +321,40 @@ class PostQuery(db.Query):
         """Return all the types for the index."""
         types = get_application().cfg['index_content_types']
         if len(types) == 1:
-            return self.filter_by(content_type=types[0].strip())
-        return self.filter(Post.content_type.in_([x.strip() for x in types]))
+            return self.filter_by(content_type=types[0])
+        return self.filter(Post.content_type.in_(types))
 
-    def published(self, ignore_privileges=None):
+    def published(self, ignore_privileges=False, user=None):
         """Return a queryset for only published posts."""
-        return self.filter(
-            (Post.status == STATUS_PUBLISHED) &
-            (Post.pub_date <= datetime.utcnow())
-        )
+        if not user:
+            req = get_request()
+            user = req and req.user
+
+        if ignore_privileges or not user:
+            # Anonymous. Return only public entries.
+            return self.filter(
+                (Post.status == STATUS_PUBLISHED) &
+                (Post.pub_date <= datetime.utcnow())
+            )
+        elif not user.has_privilege(VIEW_PROTECTED):
+            # Authenticated user without protected viewing privilege
+            # Return public and their own private entries
+            return self.filter(
+                ((Post.status == STATUS_PUBLISHED) |
+                 ((Post.status == STATUS_PRIVATE) &
+                  (Post.author_id == user.id))) &
+                (Post.pub_date <= datetime.utcnow())
+            )
+        else:
+            # Authenticated and can view protected.
+            # Return public, protected and their own private
+            return self.filter(
+                ((Post.status == STATUS_PUBLISHED) |
+                 (Post.status == STATUS_PROTECTED) |
+                 ((Post.status == STATUS_PRIVATE) &
+                  (Post.author_id == user.id))) &
+                (Post.pub_date <= datetime.utcnow())
+            )
 
     def drafts(self, ignore_user=False, user=None):
         """Return a query that returns all drafts for the current user.
@@ -445,43 +494,8 @@ class PostQuery(db.Query):
         return q.all()
 
 
-class Post(_ZEMLDualContainer):
+class _PostBase(object):
     """Represents one blog post."""
-
-    query = db.query_property(PostQuery)
-    parser_reason = 'post'
-
-    def __init__(self, title, author, text, slug=None, pub_date=None,
-                 last_update=None, comments_enabled=True,
-                 pings_enabled=True, status=STATUS_PUBLISHED,
-                 parser=None, uid=None, content_type='entry'):
-        app = get_application()
-        self.content_type = content_type
-        self.title = title
-        self.author = author
-        if parser is None:
-            parser = app.cfg['default_parser']
-
-        self.parser = parser
-        self.text = text or u''
-        self.extra = {}
-
-        self.comments_enabled = comments_enabled
-        self.pings_enabled = pings_enabled
-        self.status = status
-
-        # set times now, they depend on status being set
-        self.touch_times(pub_date)
-        if last_update is not None:
-            self.last_update = last_update
-
-        # now bind the slug for which we need the times set.
-        self.bind_slug(slug)
-
-        # generate a UID if none is given
-        if uid is None:
-            uid = build_tag_uri(app, self.pub_date, content_type, self.slug)
-        self.uid = uid
 
     @property
     def _privileges(self):
@@ -528,7 +542,7 @@ class Post(_ZEMLDualContainer):
 
         # otherwise the comments are already available and we can savely
         # filter it.
-        if req.user.is_manager:
+        if req and req.user.is_manager:
             return len(self.comments)
         return len([x for x in self.comments if not x.blocked])
 
@@ -542,28 +556,19 @@ class Post(_ZEMLDualContainer):
         """True if this post is unpublished."""
         return self.status == STATUS_DRAFT
 
+    def sync_comment_count(self):
+        """Sync the reflected comment count."""
+        self._comment_count = Comment.query.comments_for_post(self) \
+            .filter(Comment.status==0).count()
+
     def set_auto_slug(self):
         """Generate a slug for this post."""
-        cfg = get_application().cfg
+        #cfg = get_application().cfg
         slug = gen_slug(self.title)
         if not slug:
-            slug = self.pub_date.strftime('%H:%M')
-        prefix = cfg['blog_url_prefix'].lstrip('/')
-        if prefix:
-            prefix += '/'
-        if cfg['fixed_url_date_digits']:
-            date_pattern = '%04d/%02d/%02d'
-        else:
-            date_pattern = '%d/%d/%d'
-        full_slug = u'%s%s/%s' % (
-            prefix,
-            date_pattern % (
-                self.pub_date.year,
-                self.pub_date.month,
-                self.pub_date.day,
-            ),
-            slug
-        )
+            slug = to_blog_timezone(self.pub_date).strftime('%H%M')
+
+        full_slug = gen_timestamped_slug(slug, self.content_type, self.pub_date)
 
         if full_slug != self.slug:
             while Post.query.autoflush(False).filter_by(slug=full_slug) \
@@ -641,7 +646,7 @@ class Post(_ZEMLDualContainer):
         for this thread defined.
         """
         # published posts are always accessible
-        if self.status == STATUS_PUBLISHED and \
+        if self.status == STATUS_PUBLISHED and self.pub_date is not None and \
            self.pub_date <= datetime.utcnow():
             return True
 
@@ -651,6 +656,12 @@ class Post(_ZEMLDualContainer):
         # users that are allowed to look at drafts may pass
         if user.has_privilege(VIEW_DRAFTS):
             return True
+
+        # if this is protected and user can view protected, allow them
+        if self.status == STATUS_PROTECTED and self.pub_date is not None and \
+            self.pub_date <= datetime.utcnow() and \
+            user.has_privilege(VIEW_PROTECTED):
+             return True
 
         # if we have the privilege to edit other entries or if we are
         # a blog administrator we can always look at posts.
@@ -671,6 +682,16 @@ class Post(_ZEMLDualContainer):
         return self.can_read(AnonymousUser())
 
     @property
+    def is_private(self):
+        """`True` if the post is marked private."""
+        return self.status == STATUS_PRIVATE
+
+    @property
+    def is_protected(self):
+        """`True` if the post is marked protected."""
+        return self.status == STATUS_PROTECTED
+
+    @property
     def is_scheduled(self):
         """True if the item is scheduled for appearing."""
         return self.status == STATUS_PUBLISHED and \
@@ -684,6 +705,86 @@ class Post(_ZEMLDualContainer):
             self.__class__.__name__,
             self.title
         )
+
+
+class PostQuery(_PostQueryBase):
+    """Add some extra methods to the post model."""
+
+    def theme_lightweight(self, key):
+        """A query for lightweight settings based on the theme.  For example
+        to use the lightweight settings for the author overview page you can
+        use this query::
+
+            Post.query.theme_lightweight('author_overview')
+        """
+        theme_settings = get_application().theme.settings
+        deferred = theme_settings.get('sql.%s.deferred' % key)
+        lazy = theme_settings.get('sql.%s.lazy' % key)
+        return self.lightweight(deferred, lazy)
+
+
+class SummarizedPostQuery(_PostQueryBase):
+    """Add some extra methods to the summarized post model."""
+
+
+class Post(_PostBase, _ZEMLDualContainer):
+    """A full blown post."""
+
+    query = db.query_property(PostQuery)
+    parser_reason = 'post'
+
+    def __init__(self, title, author, text, slug=None, pub_date=None,
+                 last_update=None, comments_enabled=True,
+                 pings_enabled=True, status=STATUS_PUBLISHED,
+                 parser=None, uid=None, content_type='entry', extra=None):
+        app = get_application()
+        self.content_type = content_type
+        self.title = title
+        self.author = author
+        if parser is None:
+            parser = app.cfg['default_parser']
+
+        self.parser = parser
+        self.text = text or u''
+        if extra:
+            self.extra = dict(extra)
+        else:
+            self.extra = {}
+
+        self.comments_enabled = comments_enabled
+        self.pings_enabled = pings_enabled
+        self.status = status
+
+        # set times now, they depend on status being set
+        self.touch_times(pub_date)
+        if last_update is not None:
+            self.last_update = last_update
+
+        # now bind the slug for which we need the times set.
+        self.bind_slug(slug)
+
+        # generate a UID if none is given
+        if uid is None:
+            uid = build_tag_uri(app, self.pub_date, content_type, self.slug)
+        self.uid = uid
+
+    @property
+    def comments_closed(self):
+        """True if commenting is no longer possible."""
+        app = get_application()
+        open_for = app.cfg['comments_open_for']
+        if open_for == 0:
+            return False
+        return self.pub_date + timedelta(days=open_for) < datetime.utcnow()
+
+
+class SummarizedPost(_PostBase):
+    """Like a regular post but without text and parser data."""
+
+    query = db.query_property(SummarizedPostQuery)
+
+    def __init__(self):
+        raise TypeError('You cannot create %r instance' % type(self).__name__)
 
 
 class PostLink(object):
@@ -703,7 +804,7 @@ class PostLink(object):
 
     def as_dict(self):
         """Return the values as dict.  Useful for feed building."""
-        result = {'href': href}
+        result = {'href': self.href}
         for key in 'rel', 'type', 'hreflang', 'title', 'length':
             value = getattr(self, key, None)
             if value is not None:
@@ -773,28 +874,42 @@ class Category(object):
 class CommentQuery(db.Query):
     """The manager for comments"""
 
+    def post_lightweight(self):
+        """Lightweight query that sets loading options for a light post
+        (not text etc.)
+        """
+        return self.lightweight(deferred=('post.text', 'post.parser_data',
+                                          'post.extra'), lazy=('user',))
+
     def approved(self):
         """Return only the approved comments."""
         return self.filter(Comment.status == COMMENT_MODERATED)
 
-    def blocked(self):
-        """Filter all blocked comments.  Blocked comments are all comments but
-        unmoderated and moderated comments.
+    def all_blocked(self):
+        """Return all blocked comments, by user, by spam checker or by system.
         """
         return self.filter(Comment.status.in_([COMMENT_BLOCKED_USER,
                                                COMMENT_BLOCKED_SPAM,
                                                COMMENT_BLOCKED_SYSTEM]))
+
+    def blocked(self):
+        """Filter all comments blocked by user(s)
+        """
+        return self.filter(Comment.status == COMMENT_BLOCKED_USER)
+
     def unmoderated(self):
         """Filter all the unmoderated comments and comments blocked by a user
         or system.
         """
-        return self.filter(Comment.status.in_([COMMENT_UNMODERATED,
-                                               COMMENT_BLOCKED_USER,
-                                               COMMENT_BLOCKED_SYSTEM]))
+        return self.filter(Comment.status == COMMENT_UNMODERATED)
 
     def spam(self):
         """Filter all the spam comments."""
         return self.filter(Comment.status == COMMENT_BLOCKED_SPAM)
+
+    def system(self):
+        """Filter all the spam comments."""
+        return self.filter(Comment.status == COMMENT_BLOCKED_SYSTEM)
 
     def latest(self, limit=None, ignore_privileges=False, ignore_blocked=True):
         """Filter the list of non blocked comments for anonymous users or
@@ -813,10 +928,28 @@ class CommentQuery(db.Query):
             req = get_request()
             if req:
                 user = req.user
-                if not user.has_privilege(MODERATE_COMMENTS):
+                if not user.has_privilege(MODERATE_COMMENTS |
+                                          MODERATE_OWN_ENTRIES |
+                                          MODERATE_OWN_PAGES):
                     query = query.approved()
 
+                elif user.has_privilege(MODERATE_OWN_ENTRIES |
+                                        MODERATE_OWN_PAGES):
+                    query = query.for_user(user)
+
         return query
+
+    def for_user(self, user=None):
+        request = get_request()
+        user = user or request.user
+        if user.has_privilege(MODERATE_COMMENTS):
+            return self
+        elif user.has_privilege(MODERATE_OWN_ENTRIES | MODERATE_OWN_PAGES):
+            return self.filter(Comment.post_id.in_(
+                db.session.query(Post.id).filter(Post.author_id==user.id))
+            )
+        return self
+
 
     def comments_for_post(self, post):
         """Return all comments for the blog post."""
@@ -841,7 +974,7 @@ class Comment(_ZEMLContainer):
         else:
             assert email is www is None, \
                 'email and www can only be provided if the author is ' \
-                'an anonmous user'
+                'an anonymous user'
             self.user = author
 
         if parser is None:
@@ -877,6 +1010,39 @@ class Comment(_ZEMLContainer):
     author = _union_property('author', 'display_name')
     del _union_property
 
+    def unbind_user(self):
+        """If a user is deleted, the cascading rules would also delete all
+        the comments created by this user, or cause a transaction error
+        because the relation is set to restrict, depending on the current
+        phase of the moon (this changed a lot in the past, i expect it to
+        continue to change).
+
+        This method unsets the user and updates the comment builtin columns
+        to the values from the user object.
+        """
+        assert self.user is not None
+        self._email= self.user.email
+        self._www = self.user.www
+        self._author = self.user.display_name
+        self.user = None
+
+    def _get_status(self):
+        return self._status
+
+    def _set_status(self, value):
+        was_blocked = self.blocked
+        self._status = value
+        now_blocked = self.blocked
+
+        # update the comment count on the post if the moderation flag
+        # changed from blocked to unblocked or vice versa
+        if was_blocked != now_blocked:
+            self.post._comment_count = (self.post._comment_count or 0) + \
+                                       (now_blocked and -1 or +1)
+
+    status = property(_get_status, _set_status)
+    del _get_status, _set_status
+
     @property
     def anonymous(self):
         """True if this comment is an anonymous comment."""
@@ -911,21 +1077,30 @@ class Comment(_ZEMLContainer):
 
     def visible_for_user(self, user=None):
         """Check if the current user or the user given can see this comment"""
-        if not self.blocked:
-            return True
+        request = get_request()
         if user is None:
-            user = get_request().user
-        return user.has_privilege(MODERATE_COMMENTS)
+            user = request.user
+        if self.post.author is user and \
+           user.has_privilege(MODERATE_OWN_ENTRIES | MODERATE_OWN_PAGES):
+            return True
+        elif user.has_privilege(MODERATE_COMMENTS):
+            # User is able to manage comments. It's visible.
+            return True
+        elif self.id in request.session.get('visible_comments', ()):
+            # Comment was made visible for current request. It's visible
+            return True
+        # Finally, comment is visible if not blocked
+        return not self.blocked
 
     @property
     def visible(self):
         """Check the current session it can see the comment or check against the
         current user.  To display a comment for a request you can use the
         `make_visible_for_request` function.  This is useful to show a comment
-        to a user that submited a comment which is not yet moderated.
+        to a user that submitted a comment which is not yet moderated.
         """
         request = get_request()
-        if self.id in request.session.get('visible_comments', ()):
+        if request is None:
             return True
         return self.visible_for_user(request.user)
 
@@ -941,7 +1116,7 @@ class Comment(_ZEMLContainer):
 
     @property
     def is_spam(self):
-        """This is true if the comment is currently flagges as spam."""
+        """This is true if the comment is currently flagged as spam."""
         return self.status == COMMENT_BLOCKED_SPAM
 
     @property
@@ -949,8 +1124,29 @@ class Comment(_ZEMLContainer):
         """True if the comment is not yet approved."""
         return self.status == COMMENT_UNMODERATED
 
+    @property
+    def is_deleted(self):
+        """True if the comment has been deleted."""
+        return self.status == COMMENT_DELETED
+
     def get_url_values(self):
         return url_for(self.post) + '#comment-%d' % self.id
+
+    def summarize(self, chars=140, ellipsis=u'…'):
+        """Summarizes the comment to the given number of characters."""
+        words = self.body.to_text(simple=True).split()
+        words.reverse()
+        length = 0
+        result = []
+        while words:
+            word = words.pop()
+            length += len(word) + 1
+            if length >= chars:
+                break
+            result.append(word)
+        if words:
+            result.append(ellipsis)
+        return u' '.join(result)
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -975,12 +1171,12 @@ class TagQuery(db.Query):
         q = ((pt.tag_id == t.tag_id) &
              (pt.post_id == p.post_id) &
              (p.status == STATUS_PUBLISHED) &
-             (p.pub_date >= datetime.utcnow()))
+             (p.pub_date <= datetime.utcnow()))
 
-        s = db.select([t.slug, t.name, db.func.count(p.post_id).label('s_count')],
-                      (pt.tag_id == t.tag_id) &
-                      (pt.post_id == p.post_id),
-                      group_by=[t.slug, t.name]).alias('post_count_query').c
+        s = db.select(
+            [t.tag_id, t.slug, t.name,
+             db.func.count(p.post_id).label('s_count')],
+            q, group_by=[t.slug, t.name, t.tag_id]).alias('post_count_query').c
 
         options = {'order_by': [db.asc(s.s_count)]}
         if max is not None:
@@ -988,9 +1184,11 @@ class TagQuery(db.Query):
 
         # the label statement circumvents a bug for sqlite3 on windows
         # see #65
-        q = db.select([s.slug, s.name, s.s_count.label('s_count')], **options)
+        q = db.select([s.tag_id, s.slug, s.name, s.s_count.label('s_count')],
+                      **options)
 
         items = [{
+            'id':       row.tag_id,
             'slug':     row.slug,
             'name':     row.name,
             'count':    row.s_count,
@@ -1042,16 +1240,40 @@ class Tag(object):
         )
 
 
+class NotificationSubscription(object):
+    """NotificationSubscriptions are part of the notification system.
+    An `NotificationSubscription` object expresses that the user the interest
+    belongs to _is interested in_ the occurrence of a certain kind of event.
+    That data is then used to inform the user once such an interesting event
+    occurs. The NotificationSubscription also knows via what notification
+    system the user wants to be notified.
+    """
+
+    def __init__(self, user, notification_system, notification_id):
+        self.user = user
+        self.notification_system = notification_system
+        self.notification_id = notification_id
+
+    def __repr__(self):
+        return "<%s (%s, %r, %r)>" % (
+            self.__class__.__name__,
+            self.user,
+            self.notification_system,
+            self.notification_id
+        )
+
+
 # connect the tables.
 db.mapper(User, users, properties={
     'id':               users.c.user_id,
     'display_name':     db.synonym('_display_name', map_column=True),
     'posts':            db.dynamic_loader(Post,
-                                          backref=db.backref('author', lazy=False),
+                                          backref=db.backref('author', lazy=True),
+                                          query_class=PostQuery,
                                           cascade='all, delete, delete-orphan'),
     'comments':         db.dynamic_loader(Comment,
                                           backref=db.backref('user', lazy=False),
-                                          cascade='all, delete, delete-orphan'),
+                                          cascade='all, delete'),
     '_own_privileges':  db.relation(_Privilege, lazy=True,
                                     secondary=user_privileges,
                                     collection_class=set,
@@ -1060,6 +1282,7 @@ db.mapper(User, users, properties={
 db.mapper(Group, groups, properties={
     'id':               groups.c.group_id,
     'users':            db.dynamic_loader(User, backref=db.backref('groups', lazy=True),
+                                          query_class=UserQuery,
                                           secondary=group_users),
     '_privileges':      db.relation(_Privilege, lazy=True,
                                     secondary=group_privileges,
@@ -1071,47 +1294,80 @@ db.mapper(_Privilege, privileges, properties={
 })
 db.mapper(Category, categories, properties={
     'id':               categories.c.category_id,
-    'posts':            db.dynamic_loader(Post, secondary=post_categories)
+    'posts':            db.dynamic_loader(Post, secondary=post_categories,
+                                          query_class=PostQuery)
 }, order_by=categories.c.name)
-db.mapper(Comment, comments, properties={
+db.mapper(Comment, db.join(comments, texts), properties={
     'id':           comments.c.comment_id,
-    'text':         db.synonym('_text', map_column=True),
-    'author':       db.synonym('_author', map_column=True),
-    'email':        db.synonym('_email', map_column=True),
-    'www':          db.synonym('_www', map_column=True),
+    'text_id':      [comments.c.text_id, texts.c.text_id],
+    '_text':        texts.c.text,
+    'text':         db.synonym('_text'),
+    '_author':      comments.c.author,
+    'author':       db.synonym('_author'),
+    '_email':       comments.c.email,
+    'email':        db.synonym('_email'),
+    '_www':         comments.c.www,
+    'www':          db.synonym('_www'),
+    '_status':      comments.c.status,
+    'status':       db.synonym('_status'),
     'children':     db.relation(Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
         order_by=[db.asc(comments.c.pub_date)],
         backref=db.backref('parent', remote_side=[comments.c.comment_id],
-                           primaryjoin=comments.c.parent_id == comments.c.comment_id),
+                           primaryjoin=comments.c.parent_id ==
+                                comments.c.comment_id),
         lazy=True
     )
-}, order_by=comments.c.pub_date.desc())
+}, order_by=comments.c.pub_date.desc(), primary_key=[comments.c.comment_id])
 db.mapper(PostLink, post_links, properties={
     'id':           post_links.c.link_id,
 })
 db.mapper(Tag, tags, properties={
     'id':           tags.c.tag_id,
-    'posts':        db.dynamic_loader(Post, secondary=post_tags)
+    'posts':        db.dynamic_loader(Post, secondary=post_tags,
+                                      query_class=PostQuery)
 }, order_by=tags.c.name)
-db.mapper(Post, posts, properties={
+db.mapper(Post, db.join(posts, texts), properties={
     'id':               posts.c.post_id,
-    'text':             db.synonym('_text', map_column=True),
-    'comments':         db.relation(Comment, backref='post',
+    'text_id':          [posts.c.text_id, texts.c.text_id],
+    '_text':            texts.c.text,
+    'text':             db.synonym('_text'),
+    'comments':         db.relation(Comment, backref=db.backref('post', lazy=True),
                                     primaryjoin=posts.c.post_id ==
                                         comments.c.post_id,
                                     order_by=[db.asc(comments.c.pub_date)],
                                     lazy=False,
-                                    cascade='all, delete, delete-orphan'),
+                                    cascade='all, delete, delete-orphan',
+                                    extension=CommentCounterExtension()),
     'links':            db.relation(PostLink, backref='post',
                                     cascade='all, delete, delete-orphan'),
     'categories':       db.relation(Category, secondary=post_categories, lazy=False,
                                     order_by=[db.asc(categories.c.name)]),
     'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
                                     order_by=[tags.c.name]),
-    '_comment_count':   db.column_property(
-        db.select([db.func.count(comments.c.comment_id)],
-                  (comments.c.post_id == posts.c.post_id) &
-                  (comments.c.status == COMMENT_MODERATED)
-        ).label('comment_count'), deferred=True)
+    '_comment_count':   posts.c.comment_count,
+    'comment_count':    db.synonym('_comment_count')
+}, order_by=posts.c.pub_date.desc(), primary_key=[posts.c.post_id])
+db.mapper(SummarizedPost, posts, properties={
+    'id':               posts.c.post_id,
+    'comments':         db.relation(Comment,
+                                    primaryjoin=posts.c.post_id ==
+                                        comments.c.post_id,
+                                    order_by=[db.asc(comments.c.pub_date)],
+                                    lazy=True, viewonly=True),
+    'links':            db.relation(PostLink, viewonly=True, lazy=True),
+    'categories':       db.relation(Category, secondary=post_categories, lazy=True,
+                                    order_by=[db.asc(categories.c.name)],
+                                    viewonly=True),
+    'tags':             db.relation(Tag, secondary=post_tags, lazy=True,
+                                    viewonly=True, order_by=[tags.c.name]),
+    'comment_count':    db.synonym('_comment_count', map_column=True)
 }, order_by=posts.c.pub_date.desc())
+db.mapper(NotificationSubscription, notification_subscriptions, properties={
+    'id':               notification_subscriptions.c.subscription_id,
+    'user':             db.relation(User, uselist=False, lazy=False,
+                            backref=db.backref('notification_subscriptions',
+                                               lazy='dynamic'
+                            )
+                        )
+})

@@ -4,16 +4,20 @@
 
     This module implements XML-related functions and classes.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
 import sys
+import xmlrpclib
+from datetime import datetime
 from htmlentitydefs import name2codepoint
-from SimpleXMLRPCServer import SimpleXMLRPCDispatcher
 
-from werkzeug import escape, import_string, BaseResponse
+from werkzeug import escape, BaseResponse
 from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
+
+from zine.utils import log
+from zine.i18n import _TranslationProxy
 
 
 _entity_re = re.compile(r'&([^;]+);')
@@ -29,6 +33,10 @@ XML_NS = 'http://www.w3.org/XML/1998/namespace'
 html_entities = name2codepoint.copy()
 html_entities['apos'] = 39
 del name2codepoint
+
+
+#: export the fault name
+Fault = xmlrpclib.Fault
 
 
 def replace_entities(string):
@@ -144,19 +152,114 @@ class AtomFeed(BaseAtomFeed):
     del zine
 
 
-class XMLRPC(object, SimpleXMLRPCDispatcher):
+class XMLRPC(object):
     """A XMLRPC dispatcher that uses our request and response objects.  It
     also works around a problem with Python 2.4 / 2.5 compatibility and
     registers the introspection functions automatically.
     """
+    charset = 'utf-8'
 
-    def __init__(self, no_introspection=False):
-        if sys.version_info[:2] < (2, 5):
-            SimpleXMLRPCDispatcher.__init__(self)
-        else:
-            SimpleXMLRPCDispatcher.__init__(self, False, 'utf-8')
+    def __init__(self, name='unamed', no_introspection=False,
+                 allow_none=True):
+        self.name = name
+        self.no_introspection = no_introspection
+        self.allow_none = allow_none
+        self.funcs = {}
         if not no_introspection:
             self.register_introspection_functions()
+
+    def register_function(self, function, name=None):
+        """Register a function to respond to XMLRPC requests."""
+        if name is None:
+            name = function.__name__
+        self.funcs[name] = function
+        return function
+
+    def register_functions(self, tuples):
+        for func, name in tuples:
+            self.register_function(func, name)
+
+    def register_introspection_functions(self):
+        """Register all introspection functions."""
+        self.funcs.update({
+            'system.methodHelp':        self._system_method_help,
+            'system.methodSignature':   self._system_method_signature,
+            'system.listMethods':       self._system_list_methods
+        })
+
+    def _system_list_methods(self):
+        """system.listMethods() => ['add', 'subtract', 'multiple']
+
+        Returns a list of the methods supported by the server.
+        """
+        return sorted(self.funcs.keys())
+
+    def _system_method_signature(self, method_name):
+        """Unsupported."""
+        return 'signatures not supported'
+
+    def _system_method_help(self, method_name):
+        """system.methodHelp('add') => "Adds two integers together"
+
+        Returns a string containing documentation for the specified method.
+        """
+        if method_name not in self.funcs:
+            return ''
+        import inspect
+        return inspect.getdoc(self.funcs[method_name])
+
+    def _dispatch(self, method, args):
+        """Dispatches the XML-RPC method.
+
+        XML-RPC calls are forwarded to a registered function that
+        matches the called XML-RPC method name. If no such function
+        exists then the call is forwarded to the registered instance,
+        if available.
+        """
+        func = self.funcs.get(method)
+        if func is None:
+            log.info('Client tried to access missing XMLRPC method %r on '
+                     'XMLRPC dispatcher "%s"' % (method, self.name), 'xmlrpc')
+            raise xmlrpclib.Fault(1, 'method "%s" is not supported' % method)
+        return func(*args)
+
+    def _wrap_obj(self, obj):
+        """Wraps some values in something older XMLRPC versions can handle."""
+        if isinstance(obj, (tuple, list)):
+            return map(self._wrap_obj, obj)
+        if isinstance(obj, dict):
+            return dict((k, self._wrap_obj(v)) for k, v in obj.iteritems())
+        if isinstance(obj, datetime):
+            return xmlrpclib.DateTime(obj.timetuple())
+        # make sure we can send translated strings over the wire.
+        if isinstance(obj, _TranslationProxy):
+            return unicode(obj)
+        return obj
+
+    def _marshaled_dispatch(self, data):
+        """Dispatches an XML-RPC method from marshalled (XML) data.
+
+        XML-RPC methods are dispatched from the marshalled (XML) data
+        using the _dispatch method and the result is returned as
+        marshalled data.
+        """
+        try:
+            params, method = xmlrpclib.loads(data)
+            response = xmlrpclib.dumps((self._wrap_obj(self._dispatch(method, params)),),
+                                       methodresponse=True, allow_none=True,
+                                       encoding=self.charset)
+        except xmlrpclib.Fault, fault:
+            response = xmlrpclib.dumps(fault, allow_none=self.allow_none,
+                                       encoding=self.charset)
+        except:
+            exc_type, exc_value, tb = exc_info = sys.exc_info()
+            log.exception('Exception in XMLRPC request:', 'xmlrpc', exc_info)
+            response = xmlrpclib.dumps(
+                xmlrpclib.Fault(1, '%s:%s' % (exc_type, exc_value)),
+                encoding=self.charset, allow_none=self.allow_none
+            )
+
+        return response
 
     def handle_request(self, request):
         if request.method == 'POST':
@@ -175,12 +278,23 @@ class XMLRPC(object, SimpleXMLRPCDispatcher):
 
 
 class Namespace(object):
+    """Attribute access to this class returns fully qualified names for the
+    given URI.
+
+    >>> ns = Namespace('http://zine.pocoo.org/')
+    >>> ns.foo
+    u'{http://zine.pocoo.org/}foo'
+    """
 
     def __init__(self, uri):
         self._uri = unicode(uri)
 
     def __getattr__(self, name):
         return u'{%s}%s' % (self._uri, name)
+
+    def __getitem__(self, name):
+        # to be able to use tag names using dashes
+        return getattr(self, name)
 
     def __repr__(self):
         return str(self)

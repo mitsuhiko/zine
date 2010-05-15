@@ -3,27 +3,27 @@
     zine.utils.zeml
     ~~~~~~~~~~~~~~~
 
-    This module implements ZEML (Zine Extensible Markup Language) a simple
+    This module implements ZEML (Zine Extensible Markup Language), a simple
     HTML inspired markup language that plugins can extend.
 
     The rules for ZEML are documented as part of the parser.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
 import struct
-import weakref
 import cPickle as pickle
 from copy import deepcopy
+from StringIO import StringIO as UniStringIO
 from cStringIO import StringIO
-from operator import itemgetter
 from urlparse import urlparse
 
 from werkzeug import escape
 
 from zine.i18n import _
 from zine.utils import log
+from zine.utils.text import wrap as wraptext
 from zine.utils.datastructures import OrderedDict
 
 
@@ -34,8 +34,8 @@ _tag_end_re = re.compile(r'\s*>(?u)')
 _entity_re = re.compile(r'&([^;]+);')
 _entity_re = re.compile(r'&([^;]+);')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
+_whitespace_re = re.compile(ur'\s+(?u)')
 _autoparagraphed_elements = set(['div', 'blockquote'])
-_missing = object()
 
 _entities = {
     'Aacute':       u'\xc1',        'aacute':       u'\xe1',
@@ -110,7 +110,7 @@ _entities = {
     'Ntilde':       u'\xd1',        'ntilde':       u'\xf1',
     'nu':           u'\u03bd',      'Nu':           u'\u039d',
     'Oacute':       u'\xd3',        'oacute':       u'\xf3',
-    'oacuteoacuteoacirc':u'\xf4',   'Ocirc':        u'\xd4',
+    'Ocirc':        u'\xd4',
     'ocirc':        u'\xf4',        'oelig':        u'\u0153',
     'OElig':        u'\u0152',      'ograve':       u'\xf2',
     'Ograve':       u'\xd2',        'oline':        u'\u203e',
@@ -194,19 +194,19 @@ _empty_set = frozenset()
 
 
 def dumps(obj):
-    """Dumps an element into a string."""
+    """Dump an element into a string."""
     stream = StringIO()
     dump(obj, stream)
     return stream.getvalue()
 
 
 def loads(string):
-    """Loads an element from a string."""
+    """Load an element from a string."""
     return load(StringIO(string))
 
 
 def dump(obj, stream):
-    """Dumps an element into a stream."""
+    """Dump an element into a stream."""
     def _serialize(obj):
         if obj is None:
             stream.write('N')
@@ -260,7 +260,7 @@ def dump(obj, stream):
 
 
 def load(stream):
-    """Loads an element from a stream.  This function is optimized for
+    """Load an element from a stream.  This function is optimized for
     performance so that no further caching is needed.
     """
     def _load(parent=None, _get=stream.read, _read_struct=lambda s,
@@ -319,7 +319,7 @@ def dump_parser_data(parser_data):
 
 def load_parser_data(value):
     if value is None:
-        return
+        return {}
     # the extra str() call is for databases like postgres that
     # insist on using buffers for binary data.
     in_ = StringIO(str(value))
@@ -331,7 +331,7 @@ def load_parser_data(value):
 
 
 def attach_parents(element):
-    """Attaches all parents to a tree of elements."""
+    """Attach all parents to a tree of elements."""
     def _walk(element):
         for child in element.children:
             child.parent = element
@@ -365,7 +365,7 @@ def _query(elements, expr):
             test = lambda x: x.attributes.get(key) != value
         elif '~=' in expr:
             key, value = expr.split('~=', 1)
-            test = lambda x: value in x.attributes.get(key).split()
+            test = lambda x: value in x.attributes.get(key, '').split()
         elif '=' in expr:
             key, value = expr.split('=', 1)
             test = lambda x: x.attributes.get(key) == value
@@ -409,8 +409,8 @@ class QueryResult(object):
 
     @property
     def last(self):
-        """Get the last element. This queries the all results first so you should
-        try to use first if possible.
+        """Get the last element. This queries all results first so you should
+        try to use first() if possible.
         """
         try:
             return self[-1]
@@ -467,7 +467,7 @@ class Attributes(OrderedDict):
     """An ordered dict for attributes."""
 
     def get_int(self, key, default=None):
-        """Returns an attribute as integer."""
+        """Return an attribute as integer."""
         try:
             return int(self[key])
         except (KeyError, ValueError, TypeError):
@@ -475,7 +475,7 @@ class Attributes(OrderedDict):
 
 
 class _BaseElement(object):
-    """Baseclass for all elements."""
+    """Base class for all elements."""
     __slots__ = ('__weakref__',)
 
     name = None
@@ -485,7 +485,7 @@ class _BaseElement(object):
     tail = u''
 
     def to_html(self, stream=None):
-        """Converts the element to HTML."""
+        """Convert the element to HTML."""
         if stream is None:
             buffer = []
             write = buffer.append
@@ -494,6 +494,39 @@ class _BaseElement(object):
         html_serializer.serialize(self, write)
         if stream is None:
             return u''.join(buffer)
+
+    def to_text(self, simple=False, multiline=True, **options):
+        """Convert the element to text."""
+        if simple:
+            result = [self.text]
+            for child in self.children:
+                result.append(child.to_text())
+                result.append(child.tail)
+            return u''.join(result)
+        t = Textifier(**options)
+        return (multiline and t.multiline or t.oneline)(self)
+
+    def to_pseudoxml(self, level=0, nostrip=False, _result=None):
+        """Convert the element to a pseudo-XML representation for debugging."""
+        def appendtext(text):
+            if nostrip:
+                _result.extend(level * '  ' + x for x in self.text.splitlines())
+            elif text.strip():
+                _result.extend(level * '  ' + x
+                               for x in self.text.strip().splitlines())
+        return_something = False
+        if _result is None:
+            return_something = True
+            _result = []
+        _result.append('%s<%s%s%s>' % (
+            level * '  ', self.name, self.attributes and ' ' or '',
+            ', '.join("%s=%r" % item for item in self.attributes.items())))
+        appendtext(self.text)
+        for child in self.children:
+            child.to_pseudoxml(level+1, nostrip, _result)
+            appendtext(self.tail)
+        if return_something:
+            return '\n'.join(_result)
 
     children = property(lambda x: [])
     attributes = property(lambda x: Attributes())
@@ -510,13 +543,15 @@ class _BaseElement(object):
                     self.attributes)
 
     def __eq__(self, other):
-        if self.__class__ is not other.__class__:
+        try:
+            return self.__class__ is other.__class__ and \
+                   self.name == other.name and \
+                   self.children == other.children and \
+                   self.attributes == other.attributes and \
+                   self.text == other.text and \
+                   self.tail == other.tail
+        except:
             return False
-        for key in 'name', 'children', 'attributes', 'text', 'tail':
-            if getattr(self, key, _missing) != \
-               getattr(other, key, _missing):
-                return False
-        return True
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -547,13 +582,13 @@ class Element(_BaseElement):
     An element has five attributes:
 
     `name`
-        the name of the element as string if the element is named.
+        The name of the element as string if the element is named.
 
     `children`
-        A regular liest of `Element` or `DynamicElement` objects.
+        A regular list of `Element` or `DynamicElement` objects.
 
     `attributes`
-        an ordered dict of attributes this element has.  If the parser detects
+        An ordered dict of attributes this element has.  If the parser detects
         an element without value (as in ``<option selected>``) it stores
         `None` as value for that key.
 
@@ -562,7 +597,7 @@ class Element(_BaseElement):
 
     `tail`
         The tail text for the outer element.  To understand this, look at the
-        following example::
+        following example:
 
         >>> root = parse_zeml("1 <b>2</b> 3")
         >>> root.text
@@ -600,6 +635,7 @@ class RootElement(_BaseElement):
     __slots__ = ('text', 'children')
     is_root = True
     is_dynamic = True
+    name = '#root'
 
     def __init__(self):
         self.text = u''
@@ -614,14 +650,14 @@ class RootElement(_BaseElement):
 
 class DynamicElement(_BaseElement):
     """A dynamic element.  A dynamic element has a slightly different
-    interface as a normal element.  By definition it has only one attribute
-    in common with element that is the tail text.
+    interface than a normal element.  By definition it has only one attribute
+    in common with Element, that is the `tail` text.
 
     The serializer calls the `to_html` method when it wants to display the
     element but subclasses have to override `render()` to not break the tail
     rendering.
     """
-
+    name = '#dynamic'
     is_dynamic = True
 
     def render(self):
@@ -650,6 +686,7 @@ class BrokenElement(DynamicElement):
     """Displayed as replacement for a broken dynamic element (an alement
     that can't be unpickled).
     """
+    name = '#broken'
 
     def __init__(self, obj_name, error):
         try:
@@ -666,8 +703,21 @@ class BrokenElement(DynamicElement):
         )
 
 
+class MarkupErrorElement(DynamicElement):
+    """Displayed in the place of erroneous markup."""
+    name = '#error'
+
+    def __init__(self, message):
+        self.message = message
+
+    def render(self):
+        return u'<div class="error"><strong>%s</strong>: %s</div>' % (
+               _('Error in markup'), escape(self.message))
+
+
 class HTMLElement(DynamicElement):
     """An element that stores HTML data."""
+    name = '#html'
 
     def __init__(self, value):
         self.value = value
@@ -768,7 +818,7 @@ html_serializer = _HTMLSerializer()
 
 
 def parse_html(string):
-    """Parses an HTML fragment into a ZEML tree."""
+    """Parse an HTML fragment into a ZEML tree."""
     def _convert(element, root=False):
         if root:
             result = RootElement()
@@ -792,21 +842,21 @@ def parse_html(string):
     return _convert(HTMLParser().parseFragment(string), True)
 
 
-def parse_zeml(string, element_handlers=None):
-    """Parses a ZEML string into a element tree."""
-    p = Parser(string, element_handlers)
+def parse_zeml(string, reason, extensions=None):
+    """Parse a ZEML string into a element tree."""
+    p = Parser(string, reason, extensions)
     p.parse()
     attach_parents(p.result)
     return p.result
 
 
 def sanitize(tree):
-    """Sanitizes the tree and returns it."""
+    """Sanitize the tree and return it."""
     return Sanitizer().sanitize(tree)
 
 
 def split_intro(tree):
-    """Splits a tree into intro and body.  The tree will be modified!"""
+    """Split a tree into intro and body.  The tree will be modified!"""
     # for intro sections there must be...
     #   - no text before the first element
     #   - the first element must be <intro>
@@ -829,7 +879,7 @@ def split_intro(tree):
 
 def inject_implicit_paragraphs(tree):
     """Inject implicit paragraphs into the tree.  This mimicks the WordPress
-    automatic paragarph insertion and can be used to import markup from blogs
+    automatic paragraph insertion and can be used to import markup from blogs
     like WordPress that use implicit paragraphs.
 
     This however must not be used for any kind of ZEML trees because it only
@@ -909,28 +959,10 @@ def inject_implicit_paragraphs(tree):
     return tree
 
 
-class ElementHandler(object):
-    """A dynamic element handler."""
-
-    tag = None
-    is_void = False
-    is_isolated = False
-    is_semi_isolated = False
-    is_block_level = False
-    broken_by = None
-
-    def __init__(self, app):
-        self.app = app
-
-    def process(self, element):
-        """Called if an element was matched."""
-        return element
-
-
 class Parser(object):
     """The ZEML parser.  This parser is able to parse the ZEML syntax which is
     heavily influenced by a mixture of real-world and on-the-paper HTML to get
-    a easy to read and write markup syntax.
+    an easy to read and write markup syntax.
 
     ZEML always represents fragmentary and never complete documents in the
     sense of HTML.  There is no support for meta elements and similar things by
@@ -962,7 +994,7 @@ class Parser(object):
     The parser has internal sets and mappings of element rules that inform it
     how to deal with elements.
 
-    The following flags for element exists:
+    The following flags for elements exist:
 
     `isolated`
         If an element is isolated everything until the end tag is processed
@@ -976,7 +1008,7 @@ class Parser(object):
         `textarea`.
 
     `void`
-        If an element is void it means that the parser will never push it to
+        If an element is void it means that the parser will never push it onto
         the stack of open elements and directly close it.  Void elements can
         never have children.  This is the default flag for elements like `br`.
 
@@ -986,12 +1018,12 @@ class Parser(object):
         information is mainly used for breaking rules.
 
     A more complex topic are breaking rules.  Breaking rules specify implicit
-    auto-close rules.  For example the ZEML markup ``<p>foo<p>bar`` is
+    auto-close rules.  For example, the ZEML markup ``<p>foo<p>bar`` is
     equivalent to ``<p>foo</p><p>bar</p>`` because the `p` element is
     automatically closed by all block tags.
 
     An important difference between ZEML and HTML is that in ZEML the text
-    directly behind an element is part of that element.  For example if you
+    directly following an element is part of that element.  For example, if you
     have the ZEML markup ``<p>foo<br>bar``, the `bar` text is the tail of the
     `br` element.
     """
@@ -1003,17 +1035,20 @@ class Parser(object):
     block_elements = set(['div', 'p', 'form', 'ul', 'ol', 'li', 'table', 'tr',
                           'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'dl',
                           'dt', 'dd', 'blockquote', 'h1', 'h2', 'h3', 'h4',
-                          'h5', 'h6'])
+                          'h5', 'h6', 'pre'])
     breaking_rules = [
         (['p'], set(['#block'])),
         (['li'], set(['li'])),
-        (['td', 'tr'], set(['td', 'th', 'tr', 'tbody', 'thead', 'tfoot'])),
+        (['td', 'th'], set(['td', 'th', 'tr', 'tbody', 'thead', 'tfoot'])),
         (['tr'], set(['tr', 'tbody', 'thead', 'tfoot'])),
-        (['dd', 'dt'], set(['dl', 'dt', 'dd']))
+        (['thead', 'tbody', 'tfoot'], set(['thead', 'tbody', 'tfoot'])),
+        (['dd', 'dt'], set(['dl', 'dt', 'dd'])),
+        (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], set(['#block']))
     ]
 
-    def __init__(self, string, element_handlers=None):
+    def __init__(self, string, parsing_reason, extensions=None):
         self.string = unicode(string)
+        self.parsing_reason = parsing_reason
         self.end = len(self.string)
         self.pos = 0
         self.result = RootElement()
@@ -1032,19 +1067,17 @@ class Parser(object):
                 self.breaking_rules[element] = breakers.copy()
 
         # register all element handlers.
-        self.element_handlers = {}
-        for element in element_handlers or ():
-            if element.is_isolated:
-                self.isolated_elements.add(element.tag)
-            if element.is_semi_isolated:
-                self.semi_isolated_elements.add(element.tag)
-            if element.is_void:
-                self.void_elements.add(element.tag)
-            if element.broken_by:
-                self.breaking_rules[element.tag] = set(element.broken_by)
-            if element.is_block_level:
-                self.block_elements.add(element.tag)
-            self.element_handlers[element.tag] = element
+        self.extensions = {}
+        for extension in extensions or ():
+            if extension.is_isolated:
+                self.isolated_elements.add(extension.name)
+            if extension.is_void:
+                self.void_elements.add(extension.name)
+            if extension.broken_by:
+                self.breaking_rules[extension.name] = set(extension.broken_by)
+            if extension.is_block_level:
+                self.block_elements.add(extension.name)
+            self.extensions[extension.name] = extension
 
     @property
     def finished(self):
@@ -1097,17 +1130,27 @@ class Parser(object):
         """Called after an element is left.  Calls element handlers to
         process them.
         """
-        if element.name in self.element_handlers:
-            element = self.element_handlers[element.name].process(element)
+        if element.name in self.extensions:
+            extension = self.extensions[element.name]
+            content = element
+            if extension.is_isolated:
+                content = element.text
+            bad_atts = set(element.attributes).difference(extension.attributes)
+            if bad_atts:
+                return MarkupErrorElement(
+                    _('Invalid attribute given to %s tag: %s') %
+                    (extension.name, bad_atts.pop()))
+            element = extension.process(element.attributes, content,
+                                        self.parsing_reason)
         return element
 
     def enter(self, tag):
-        """Enters the given tag.  This will automatically leave the current
+        """Enter the given tag.  This will automatically leave the current
         element if the tag given can break it.
         """
         # if the tag is not nestable and we are directly inside a tag with
         # the same name we pop.
-        if self.is_breaking(tag, self.current):
+        while self.is_breaking(tag, self.current):
             self.leave(None)
         element = Element(tag)
         self.current.children.append(element)
@@ -1116,7 +1159,7 @@ class Parser(object):
         return element
 
     def leave(self, tag):
-        """Leaves the tag given or the outermost tag if the tag is None.
+        """Leave the tag given or the outermost tag if the tag is None.
         This process is rather complex and defined as follows:
 
         -   if the tag is not given (None) or the tag has the name of the
@@ -1153,7 +1196,7 @@ class Parser(object):
                     closable = False
 
     def read_until(self, string):
-        """Reads everything to the string but doesn't consume the string."""
+        """Read everything to the string but don't consume the string."""
         pos = self.string.find(string, self.pos)
         if pos < 0:
             pos = self.end
@@ -1162,7 +1205,7 @@ class Parser(object):
         return rv
 
     def skip_until(self, string, skip_needle=True):
-        """Skips everything to the string given and consumes that one too.
+        """Skip everything to the string given and consume that one too.
         This function returns nothing.
         """
         self.read_until(string)
@@ -1170,21 +1213,21 @@ class Parser(object):
             self.pos = min(self.end, self.pos + len(string))
 
     def peek_char(self):
-        """Returns the next character or `None` but doesn't advance the pointer."""
+        """Return the next character or `None` but don't advance the pointer."""
         try:
             return self.string[self.pos]
         except IndexError:
             return None
 
     def get_char(self):
-        """Returns the next character or `None` and advances the pointer."""
+        """Return the next character or `None` and advance the pointer."""
         rv = self.peek_char()
         if rv is not None:
             self.pos += 1
             return rv
 
     def match(self, regexp):
-        """Matches a regular expression at the current position and returns
+        """Match a regular expression at the current position and return
         the match object.  If the match was successful the pointer is
         advanced automatically.
         """
@@ -1194,31 +1237,31 @@ class Parser(object):
             return match
 
     def test_string(self, string):
-        """Matches the string with the current position.  Does not advance
-        the pointer and returns a bool.
+        """Match the string with the current position.  Do not advance the
+        pointer and return a bool.
         """
         return self.string[self.pos:self.pos + len(string)] == string
 
     def write_text(self, text):
-        """Like `write_raw_text` but resolves entities."""
+        """Like `write_raw_text` but resolve entities."""
         self.write_raw_text(self.resolve_entities(text))
 
     def write_raw_text(self, text):
-        """Writes text to the current element."""
+        """Write text to the current element."""
         if self.current.children:
             self.current.children[-1].tail += text
         else:
             self.current.text += text
 
     def parse(self):
-        """Parses the whole string into a element tree."""
+        """Parse the whole string into an element tree."""
         while not self.finished:
             self.state = getattr(self, 'parse_' + self.state)()
         while not self.in_root_tag:
             self.leave(None)
 
     def parse_data(self):
-        """Parses everything up to the next tag."""
+        """Parse everything up to the next tag."""
         data = self.read_until('<')
         if data:
             if self.current.name in self.isolated_elements:
@@ -1231,7 +1274,7 @@ class Parser(object):
         return 'start_tag'
 
     def parse_start_tag(self):
-        """Parses a start tag or jumps to the comment/end_tag or data
+        """Parse a start tag or jumps to the comment/end_tag or data
         parsing function.
         """
         if self.peek_char() == u'/':
@@ -1276,7 +1319,7 @@ class Parser(object):
             element.attributes[name] = value
 
     def parse_end_tag(self):
-        """Parses and end tag."""
+        """Parse an end tag."""
         match = self.match(_tag_name_re)
         if match is not None:
             tag = match.group(1).lower()
@@ -1294,7 +1337,7 @@ class Parser(object):
         return 'data'
 
     def parse_comment(self):
-        """Parses everything to the end of the comment and returns to the
+        """Parse everything to the end of the comment and return to the
         data parser.
         """
         self.skip_until(u'-->')
@@ -1440,3 +1483,391 @@ class Sanitizer(object):
                 element.children.append(child)
 
         return element
+
+
+class Textifier(object):
+    """Convert ZEML into plain text with rudimentary markup."""
+    INDENT = 4
+    WIDTH = 72
+
+    class Skip(Exception):
+        """Raise this to skip visiting children and departure."""
+
+    class Cell(object):
+        """Represents a table cell."""
+        def __init__(self, lines, span):
+            self.lines = lines
+            self.span = span
+        def __iter__(self):
+            return iter(self.lines)
+
+    def __init__(self, initial_indent=0, max_width=WIDTH, collect_urls=False,
+                 ignore_relative_urls=True):
+        self.collect_urls = collect_urls
+        self.ignore_relative_urls = ignore_relative_urls
+        self.result = UniStringIO()
+
+        self.max_width = max_width
+        self.indentation = initial_indent
+        self.indentfirstline = 0
+        self.curpar = []
+        self.context = []
+        self.liststack = []
+        self.table = None
+        self.table_ncols = 0
+        self.keep_whitespace = False
+        self.collected_links = {}
+
+    def oneline(self, element):
+        return u' '.join(self.multiline(element).splitlines()).strip()
+
+    def multiline(self, element):
+        self.textify(element)
+        self.flush_par()
+        self.write_links()
+        return self.result.getvalue()
+
+    def textify(self, element):
+        """Convert one element and its children."""
+        if not element:
+            return
+        elname = element.name.replace('#', '_')
+        try:
+            getattr(self, 'visit_' + elname, self.visit_unknown)(element)
+        except self.Skip:
+            return
+        if element.text:
+            self.curpar.append(element.text)
+        for child in element.children:
+            self.textify(child)
+            if child.tail:
+                self.curpar.append(child.tail)
+        getattr(self, 'depart_' + elname, self.depart_unknown)(element)
+
+    def collect_link(self, link):
+        """Add a link to the collection of links, and return the number
+        to reference it with.
+        """
+        rv = self.collected_links.get(link)
+        if rv is None:
+            self.collected_links[link] = rv = len(self.collected_links) + 1
+        return rv
+
+    def write_links(self):
+        """Write all collected links."""
+        links = [(v, k) for k, v in self.collected_links.items()]
+        links.sort()
+        for i, link in links:
+            self.write('[%d] %s' % (i, link))
+
+    def flush_par(self, noskip=False, force=False, nowrap=False):
+        """Format and write the current paragraph."""
+        if nowrap:
+            par = self.get_par(wrap=False).splitlines()
+        else:
+            par = self.get_par(wrap=True)
+        if par or force:
+            for i, line in enumerate(par):
+                self.write(line, first=(i==0))
+            if not noskip:
+                self.write()
+
+    def get_par(self, wrap, width=None):
+        """Format and return the current paragraph, and reset it."""
+        if not self.curpar:
+            if wrap:
+                return []
+            else:
+                return ''
+        text = ''.join(self.curpar).lstrip()
+        if not self.keep_whitespace:
+            text = _whitespace_re.sub(u' ', text)
+        self.curpar = []
+        if wrap:
+            # must return a list!
+            return wraptext(text, width or
+                            (self.max_width - self.indentation)).splitlines()
+        else:
+            return text
+
+    def write(self, text='', nl=True, first=False):
+        """Write a line of text to the output buffer."""
+        indent = self.indentation * ' '
+        if first:
+            self.result.write(indent[:self.indentfirstline or None] + text)
+            self.indentfirstline = 0
+        elif text: # don't write indentation only
+            self.result.write(indent + text)
+        if nl:
+            self.result.write('\n')
+
+    # -- block element visitors
+
+    def hx_depart(c):
+        def depart(self, element):
+            par = self.get_par(wrap=False)
+            self.write(par)
+            self.write(c * len(par))
+            self.write()
+        return depart
+
+    depart_h1 = hx_depart('=')
+    depart_h2 = hx_depart('-')
+    depart_h3 = hx_depart('~')
+    depart_h4 = hx_depart('^')
+    depart_h5 = hx_depart('`')
+    depart_h6 = hx_depart('`')
+
+    def visit_p(self, element):
+        pass
+    def depart_p(self, element):
+        self.flush_par()
+
+    def visit_blockquote(self, element):
+        self.indentation += self.INDENT
+    def depart_blockquote(self, element):
+        self.flush_par()
+        self.indentation -= self.INDENT
+
+    def visit_ul(self, element):
+        self.flush_par()
+        self.liststack.append(None)
+    def depart_ul(self, element):
+        self.liststack.pop()
+        self.flush_par(force=True)
+    visit_dir = visit_ul
+    depart_dir = depart_ul
+
+    def visit_ol(self, element):
+        self.flush_par()
+        self.liststack.append(1)
+    def depart_ol(self, element):
+        self.liststack.pop()
+        self.flush_par(force=True)
+
+    def visit_li(self, element):
+        if self.liststack and self.liststack[-1] is not None:
+            indent = 4
+            self.curpar.append('%-3s ' % (str(self.liststack[-1]) + '.'))
+            self.liststack[-1] += 1
+        else:
+            indent = 2
+            self.curpar.append('* ')
+        self.indentfirstline = -indent
+        self.indentation += indent
+        self.context.append(indent)
+    def depart_li(self, element):
+        self.flush_par(noskip=True)
+        self.indentation -= self.context.pop()
+
+    def visit_dt(self, element):
+        pass
+    def depart_dt(self, element):
+        self.flush_par(noskip=True)
+
+    def visit_dd(self, element):
+        self.indentation += self.INDENT
+    def depart_dd(self, element):
+        self.flush_par()
+        self.indentation -= self.INDENT
+
+    def visit_pre(self, element):
+        self.keep_whitespace = True
+    def depart_pre(self, element):
+        self.flush_par(nowrap=True)
+        self.keep_whitespace = False
+
+    # -- table element visitors
+
+    def visit_table(self, element):
+        self.flush_par()
+        if self.table:
+            self.curpar.append('[[table]]')
+            raise self.Skip()
+        self.table = []
+        # find number of table columns
+        firstrow = element.query('/tbody/tr').first or \
+                   element.query('/thead/tr').first or \
+                   element.query('/tfoot/tr').first or \
+                   element.query('/tr').first
+        if firstrow is None:
+            raise self.Skip()
+        self.table_ncols = 0
+        for entry in firstrow.children:
+            if entry.name in ('td', 'th'):
+                span = max(entry.attributes.get_int('colspan', 1), 1)
+                self.table_ncols += span
+        available_width = self.max_width - self.indentation
+        self.table_colwidth = (available_width - 5) / self.table_ncols
+        if self.table_colwidth < 10:
+            self.table_colwidth = 10
+    def depart_table(self, element):
+        rows = []
+        ncols = self.table_ncols
+        realwidths = [0] * ncols
+        separator = 0
+
+        # find out the real columns widths, pass 1: single cells
+        for row_or_sep in self.table:
+            if row_or_sep == 'sep':
+                separator = len(rows)
+            else:
+                for i, cell in enumerate(row_or_sep):
+                    if cell and cell.span == 1 and cell.lines:
+                        maxwidth = max(map(len, cell.lines))
+                        realwidths[i] = max(realwidths[i], maxwidth)
+                rows.append(row_or_sep)
+        # pass 2: colspans
+        for row in rows:
+            for i, cell in enumerate(row):
+                if cell and cell.span > 1:
+                    maxwidth = max(map(len, cell.lines))
+                    if i + cell.span - 1 < ncols:
+                        cumwidth = sum(realwidths[j]
+                                       for j in range(i, i+cell.span))
+                        if cumwidth < maxwidth:
+                            realwidths[i] += (maxwidth - cumwidth)
+
+        def writesep(char='-'):
+            out = ['+']
+            for width in realwidths:
+                out.append(char * (width+2))
+                out.append('+')
+            self.write(''.join(out))
+
+        def writerow(row):
+            if len(row) == 1:
+                lines = [(x,) for x in row[0]]
+            else:
+                lines = map(None, *row)
+            for line in lines:
+                out = []
+                for i, (cellline, cell) in enumerate(zip(line, row)):
+                    if cell:
+                        out.append('|')
+                        if cell.span > 1:
+                            cumwidth = sum(realwidths[j]
+                                           for j in range(i, i+cell.span))
+                            out.append(' ' + (cellline or '').ljust(
+                                cumwidth + 3 * cell.span - 2))
+                        else:
+                            out.append(' ' + (cellline or '').ljust(
+                                realwidths[i] + 1))
+                out.append('|')
+                self.write(''.join(out))
+
+        for i, row in enumerate(rows):
+            if separator and i == separator:
+                writesep('=')
+            else:
+                writesep('-')
+            writerow(row)
+        writesep('-')
+        self.table = None
+        self.flush_par(force=True)
+
+    def visit_tbody(self, element):
+        self.table.append('sep')
+
+    def visit_tr(self, element):
+        self.table.append([])
+
+    def visit_caption(self, element):
+        self.table.append([])
+        self.visit_td(element, span=self.table_ncols)
+
+    def visit_td(self, element, span=None):
+        old_result = self.result
+        old_max_width = self.max_width
+        old_indentation = self.indentation
+        old_table = self.table
+        old_table_ncols = self.table_ncols
+        old_table_colwidth = self.table_colwidth
+
+        self.result = UniStringIO()
+        if span is None:
+            span = max(element.attributes.get_int('colspan', 1), 1)
+        self.max_width = self.table_colwidth * span
+        self.indentation = 0
+        self.table = None
+        rootel = RootElement()
+        rootel.text = element.text
+        rootel.children = element.children
+        self.textify(rootel)
+        old_table[-1].append(self.Cell(
+            self.result.getvalue().rstrip().splitlines(), span))
+        old_table[-1].extend([[]] * (span-1))
+
+        self.result = old_result
+        self.max_width = old_max_width
+        self.indentation = old_indentation
+        self.table = old_table
+        self.table_ncols = old_table_ncols
+        self.table_colwidth = old_table_colwidth
+
+        raise self.Skip
+    visit_th = visit_td
+
+    # -- inline element visitors
+
+    def simple_decorator(s):
+        def visit_or_depart(self, element):
+            self.curpar.append(s)
+        return visit_or_depart
+
+    visit_b = depart_b = simple_decorator('*')
+    visit_code = depart_code = simple_decorator('`')
+    visit_dfn = depart_dfn = simple_decorator('*')
+    visit_em = depart_em = simple_decorator('*')
+    visit_i = depart_i = simple_decorator('+')
+    visit_kbd = depart_kbd = simple_decorator('`')
+    visit_q = depart_q = simple_decorator('"')
+    visit_samp = depart_samp = simple_decorator('`')
+    visit_strong = depart_strong = simple_decorator('**')
+    visit_s = depart_s = simple_decorator('-')
+    visit_tt = depart_tt = simple_decorator('`')
+    visit_u = depart_u = simple_decorator('_')
+    visit_var = depart_var = simple_decorator('*')
+
+    def visit_a(self, element):
+        pass
+    def depart_a(self, element):
+        if 'href' in element.attributes:
+            if self.ignore_relative_urls and \
+               not urlparse(element.attributes['href']).scheme:
+                return
+            if self.collect_urls:
+                link_id = self.collect_link(element.attributes['href'])
+                self.curpar.append(' [%s]' % link_id)
+            else:
+                self.curpar.append(' <%s>' % element.attributes['href'])
+
+    def visit_img(self, element):
+        alt = element.attributes.get('alt', 'image')
+        if alt:
+            self.curpar.append('[%s]' % alt)
+
+    # -- special element visitors
+
+    def visit__html(self, element):
+        self.curpar.append('[[HTML]]')
+
+    def visit__dynamic(self, element):
+        self.curpar.append('[[dynamic content]]')
+
+    def depart__root(self, element):
+        self.flush_par()
+
+    def visit_script(self, element):
+        raise self.Skip()
+
+    def visit_style(self, element):
+        raise self.Skip()
+
+    def depart_div(self, element):
+        self.flush_par()
+
+    def visit_unknown(self, element):
+        pass
+    def depart_unknown(self, element):
+        pass

@@ -22,14 +22,14 @@
     </dl>
     <h2>{{ _("Authors") }}</h2>
     <p>{% trans %}
-      Chose the authors whose posts you want to import.  In the dropdown you
+      Choose the authors whose posts you want to import.  In the dropdown you
       can select one of the already existing users if you want to change the
       author during importing.  In the default settings a new and inactive user
       without a password is created.
     {% endtrans %}</p>
     <ul>
     {%- for author in blog.authors %}
-      <li>{{ form.authors[author.id]() }} &mdash; {{ author.username|e }}</li>
+      <li>{{ author.username|e }} &rarr; {{ form.authors[author.id]() }}</li>
     {%- else %}
       <li><em>{{ _("no author information") }}</em></li>
     {%- endfor %}

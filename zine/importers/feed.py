@@ -6,7 +6,7 @@
     This importer can import web feeds.  Currently it is limited to ATOM
     plus optional Zine extensions.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from pickle import loads
@@ -22,12 +22,22 @@ from zine.utils.xml import Namespace, to_text
 from zine.utils.http import redirect_to
 from zine.utils.zeml import load_parser_data
 from zine.utils.exceptions import UserException
+from zine.utils.net import open_url
 from zine.zxa import ZINE_NS, ATOM_NS, XML_NS, ZINE_TAG_URI, ZINE_CATEGORY_URI
 
 
 zine = Namespace(ZINE_NS)
 atom = Namespace(ATOM_NS)
 xml = Namespace(XML_NS)
+
+
+class SkipItem(Exception):
+    """Raised by
+
+    * Extension.postprocess_post() if the post should be skipped
+    * Extension.lookup_author() if the author should be skipped
+    * Extension.tag_or_category() if the category should be skipped
+    """
 
 
 def _get_text_content(elements, fallback=True):
@@ -107,21 +117,21 @@ class Parser(object):
                            for extension in self.app.feed_importer_extensions
                            if self.feed_type in extension.feed_types]
 
-    def find_tag(self, **critereon):
-        return self._find_criteron(self.tags, critereon)
+    def find_tag(self, **criterion):
+        return self._find_criterion(self.tags, criterion)
 
-    def find_category(self, **critereon):
-        return self._find_criteron(self.categories, critereon)
+    def find_category(self, **criterion):
+        return self._find_criterion(self.categories, criterion)
 
-    def find_author(self, **critereon):
-        return self._find_criteron(self.authors, critereon)
+    def find_author(self, **criterion):
+        return self._find_criterion(self.authors, criterion)
 
-    def find_post(self, **critereon):
-        return self._find_criteron(self.posts, critereon)
+    def find_post(self, **criterion):
+        return self._find_criterion(self.posts, criterion)
 
-    def _find_criteron(self, sequence, d):
+    def _find_criterion(self, sequence, d):
         if len(d) != 1:
-            raise TypeError('one critereon expected')
+            raise TypeError('one criterion expected')
         key, value = d.iteritems().next()
         for item in sequence:
             if getattr(item, key, None) == value:
@@ -141,6 +151,7 @@ class AtomParser(Parser):
 
     def __init__(self, tree):
         Parser.__init__(self, tree)
+        self.global_author = None
 
         # use for the category fallback handling if no extension
         # takes over the handling.
@@ -151,8 +162,14 @@ class AtomParser(Parser):
         self._authors_by_email = {}
 
     def parse(self):
+        # atom allows the author to be defined for the whole feed
+        # before the entries.  Capture it here.
+        self.global_author = self.tree.find(atom.author)
+
         for entry in self.tree.findall(atom.entry):
-            self.posts.append(self.parse_post(entry))
+            post = self.parse_post(entry)
+            if post is not None:
+                self.posts.append(post)
 
         self.blog = Blog(
             self.tree.findtext(atom.title),
@@ -212,7 +229,10 @@ class AtomParser(Parser):
         self.parse_comments(post)
 
         for extension in self.extensions:
-            extension.postprocess_post(post)
+            try:
+                extension.postprocess_post(post)
+            except SkipItem:
+                return None
 
         return post
 
@@ -227,11 +247,17 @@ class AtomParser(Parser):
                 self._authors_by_username[author.username] = author
 
         author = entry.find(atom.author)
+        if author is None:
+            author = self.global_author
         email = author.findtext(atom.email)
         username = author.findtext(atom.name)
+        uri = author.findtext(atom.uri)
 
         for extension in self.extensions:
-            rv = extension.lookup_author(author, entry, username, email)
+            try:
+                rv = extension.lookup_author(author, entry, username, email, uri)
+            except SkipItem:
+                return None
             if rv is not None:
                 _remember_author(rv)
                 return rv
@@ -260,7 +286,10 @@ class AtomParser(Parser):
 
         for category in entry.findall(atom.category):
             for extension in self.extensions:
-                rv = extension.tag_or_category(category)
+                try:
+                    rv = extension.tag_or_category(category)
+                except SkipItem:
+                    break
                 if rv is not None:
                     if isinstance(rv, Tag):
                         tags.append(rv)
@@ -292,6 +321,10 @@ class FeedImportError(UserException):
 class FeedImporter(Importer):
     name = 'feed'
     title = lazy_gettext(u'Feed Importer')
+    description = lazy_gettext(u'Handles ATOM feeds with optional extensions '
+                               u'such as those exported by Zine itself. '
+                               u'Plugins can add further extensions to be '
+                               u'recognized by this importer.')
 
     def configure(self, request):
         form = FeedImportForm()
@@ -300,10 +333,11 @@ class FeedImporter(Importer):
             feed = request.files.get('feed')
             if form.data['download_url']:
                 try:
-                    feed = urllib.urlopen(form.data['download_url'])
+                    feed = open_url(form.data['download_url']).stream
                 except Exception, e:
-                    error = _(u'Error downloading from URL: %s') % e
-            elif not feed:
+                    log.exception(_('Error downloading feed'))
+                    flash(_(u'Error downloading from URL: %s') % e, 'error')
+            if not feed:
                 return redirect_to('import/feed')
 
             try:
@@ -333,7 +367,11 @@ class Extension(object):
         """Called after the whole feed was parsed into a blog object."""
 
     def postprocess_post(self, post):
-        """Postprocess the post."""
+        """Postprocess the post.
+
+        If this method raises `SkipItem`, the post is thrown away without
+        giving it to other Extensions.
+        """
 
     def tag_or_category(self, element):
         """Passed a <category> element for Atom feeds.  Has to return a
@@ -343,9 +381,13 @@ class Extension(object):
         Categories and tags have to be stored in `parser.categories` or
         `parser.tags` so that the category/tag is actually unique.  The
         extension also has to look there first for matching categories.
+
+        If this method raises `SkipItem`, the category is immediately
+        thrown away without giving it to other Extensions or using the
+        default heuristic to create a category.
         """
 
-    def lookup_author(self, author, entry, username, email):
+    def lookup_author(self, author, entry, username, email, uri):
         """Lookup the author for an element.  `author` is an element
         that points to the author relevant element for the feed.
         `entry` points to the whole entry element.
@@ -354,6 +396,10 @@ class Extension(object):
         are unique.  Extensions have to look there first for matching
         author objects.  If an extension does not know how to handle
         the element `None` must be returned.
+
+        If this method raises `SkipItem`, the author is immediately
+        thrown away without giving it to other Extensions or using
+        the default heuristic to create an author object.
         """
 
     def parse_comments(self, post):
@@ -431,6 +477,8 @@ class ZEAExtension(Extension):
             blog.element.find(zine.configuration)))
 
     def postprocess_post(self, post):
+        if post.parser_data is not None:
+            return
         post.parser_data = _parser_data(post.element.findtext(zine.parser_data))
         content = _get_text_content(post.element.findall(atom.content),
                                     fallback=False)
@@ -440,7 +488,7 @@ class ZEAExtension(Extension):
         if content_type is not None:
             post.content_type = content_type
 
-    def lookup_author(self, author, entry, username, email):
+    def lookup_author(self, author, entry, username, email, uri):
         dependency = author.attrib.get(zine.dependency)
         if dependency is not None:
             return self._get_author(dependency)
@@ -477,7 +525,7 @@ class ZEAExtension(Extension):
                               _parser_data(element.findtext(zine.parser_data)))
             comments[int(element.attrib['id'])] = comment
             parent = element.findtext(zine.parent)
-            if parent is not None:
+            if parent:
                 unresolved_parents[comment] = int(parent)
 
         for comment, parent_id in unresolved_parents.iteritems():

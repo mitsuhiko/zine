@@ -6,11 +6,11 @@
     A simple default theme that also showcases some of the more advanced
     features of the Zine theme system.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from os.path import join, dirname
-from zine.api import url_for, _
+from zine.api import _
 from zine.views.admin import render_admin_response
 from zine.utils.admin import flash
 from zine.utils import forms

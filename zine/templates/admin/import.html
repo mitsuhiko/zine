@@ -10,7 +10,8 @@
   {% endtrans %}</p>
   <ul>
   {%- for importer in importers %}
-    <li><a href="{{ url_for(importer) }}">{{ importer.title|e }}</a></li>
+    <li><a href="{{ url_for(importer) }}">{{ importer.title|e }}</a>
+    {%- if importer.description %}: {{ importer.description|e }}{% endif %}</li>
   {%- endfor %}
   </ul>
   {%- if queue %}

@@ -49,7 +49,7 @@
 
     New languages are added with `add-translation`.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os
@@ -63,7 +63,6 @@ from weakref import WeakKeyDictionary
 from babel import Locale, dates, UnknownLocaleError
 from babel.support import Translations as TranslationsBase
 from pytz import timezone, UTC
-from werkzeug.exceptions import NotFound
 
 import zine
 from zine.environment import LOCALE_PATH, LOCALE_DOMAIN, \
@@ -126,7 +125,7 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
     def _parse(self, fileobj):
         TranslationsBase._parse(self, fileobj)
         try:
-            # Got the end of file minus 4 bytes 
+            # Got the end of file minus 4 bytes
             fileobj.seek(-4, 2)
             # Read stored pickled data file pointer position
             pickled_data_pointer_pos = struct.unpack('i', fileobj.read())
@@ -144,7 +143,7 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
         locale = Locale.parse(locale)
         catalog = find_catalog(path, domain, locale, gettext_lookup)
         if catalog:
-            return ZineTranslations(fileobj=open(catalog), locale=locale)
+            return ZineTranslations(fileobj=open(catalog, 'rb'), locale=locale)
         return ZineNullTranslations(locale=locale)
 
     # Always use the unicode versions, we don't support byte strings

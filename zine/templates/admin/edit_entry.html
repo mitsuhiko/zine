@@ -1,11 +1,19 @@
 {% extends "admin/layout.html" %}
-{% from "admin/_form_helpers.html" import render_formbox %}
-{% block title %}{{
-  _("New Entry") if form.new else _("Edit Entry “%s”") % form.post.title
-}}{% endblock %}
+{% from "admin/_form_helpers.html" import render_formbox, render_post_actions %}
+{% set title_suffix = _("New Entry") if form.new else _("Edit Entry") %}
+{% block title %}{% if form.post.title %}{{ form.post.title|e }} — {%
+  endif %}&#8203;{{ title_suffix }}{% endblock %}
 {% block contents %}
   <h1>{{ self.title() }}</h1>
-  {% call form() %}
+  {% if form.preview %}
+    <div class="preview" id="preview">
+      <h2 class="title">{{ _('Preview') }} (<a href="#post_form">{{ _('skip') }}</a>)</h2>
+      <div class="text">
+        {{ form.render_preview() }}
+      </div>
+    </div>
+  {% endif %}
+  {% call form(id="post_form") %}
     {%- if form.parser_missing %}
       <ul class="errors">
         <li><strong>{{ _("Important:") }}</strong>
@@ -20,8 +28,9 @@
     </div>
     <div class="formbox">
       <h3>{{ form.text.label() }}</h3>
-      {{ form.text(rows=12) }}
+      {{ form.text(rows=12, class='resizable') }}
     </div>
+    <div class="secondary">{{ render_post_actions(form) }}</div>
     {{ render_formbox(form.status, collapsed=false) }}
     {{ render_formbox(form.tags) }}
     <div class="formbox toggleable collapsed">
@@ -38,7 +47,7 @@
       </ul>
     </div>
     {{ render_formbox(form.pub_date) }}
-    {{ render_formbox(form.slug) }}
+    {{ render_formbox(form.slug, collapsed=not form.slug.value) }}
     {{ render_formbox(form.author) }}
     {% if not form.new %}
       <p class="preview">
@@ -46,13 +55,6 @@
       </p>
     {% endif %}
     <div class="post-bookmarklets"></div>
-    <div class="actions">
-      <input type="submit" name="save" value="{{ _('Save') }}">
-      <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">
-      {%- if not form.new %}
-        <input type="submit" name="delete" value="{{ _('Delete') }}">
-      {%- endif %}
-      <input type="submit" name="cancel" value="{{ _('Cancel') }}">
-    </div>
+    {{ render_post_actions(form) }}
   {% endcall %}
 {% endblock %}

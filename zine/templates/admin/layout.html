@@ -4,18 +4,22 @@
 <head>
   {%- block html_head %}
   <title>{% block title %}{% endblock %} &mdash; {{ cfg.blog_title|e }} {{ _("Administration") }}</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='admin/preview.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ url_for('core/shared', filename='admin/style.css') }}">
   {{ get_page_metadata() }}
+  <script type="text/javascript" src="{{ url_for('core/shared', filename='js/jquery.autocomplete.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('core/shared', filename='js/jquery.textarearesizer.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('core/shared', filename='js/Admin.js') }}"></script>
   {%- endblock %}
+  {% block page_head %}{% endblock %}
 </head>
 <body>
   <div class="header">
     <div class="title">{% trans blog_title=cfg.blog_title|e %}{{ blog_title }} Administration{% endtrans %}</div>
     <div class="metanav">
       <a href="{{ url_for('blog/index')|e }}">{{ _("View Blog") }}</a> |
-      <a href="{{ url_for('admin/change_password')|e }}">{{ _("Change Password") }}</a> |
-      <a href="{{ url_for('admin/logout') }}">{{ _("Logout") }}</a> |
+      <a href="{{ url_for('account/index')|e }}">{{ _("My Account") }}</a> |
+      <a href="{{ url_for('account/logout') }}">{{ _("Logout") }}</a> |
       <a href="{{ url_for('admin/help') }}">?</a>
     </div>
   </div>
@@ -35,9 +39,11 @@
     </ul>
     {%- endif %}
     <div class="contents">
+      <div class="notification-messages">
       {%- for message in admin.messages %}
         <div class="message message-{{ message.type }}">{{ message.msg }}</div>
       {%- endfor %}
+      </div>
       {{ emit_event('before-admin-contents-rendered', post) }}
       {% block contents %}{% endblock %}
       {{ emit_event('after-admin-contents-rendered', post) }}

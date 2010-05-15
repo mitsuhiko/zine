@@ -7,10 +7,10 @@
     python functions in the view modules.
 
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from zine.views import blog, admin
+from zine.views import blog, account, admin
 from zine import i18n
 
 
@@ -21,6 +21,7 @@ all_views = {
     'blog/archive':             blog.archive,
     'blog/show_category':       blog.show_category,
     'blog/show_tag':            blog.show_tag,
+    'blog/tags':                blog.tags,
     'blog/show_author':         blog.show_author,
     'blog/authors':             blog.authors,
     'blog/service_rsd':         blog.service_rsd,
@@ -28,6 +29,17 @@ all_views = {
     'blog/xml_service':         blog.xml_service,
     'blog/atom_feed':           blog.atom_feed,
     'blog/serve_translations':  i18n.serve_javascript,
+
+    # account views
+    'account/index':            account.index,
+    'account/login':            account.login,
+    'account/logout':           account.logout,
+    'account/delete':           account.delete_account,
+    'account/about_zine':       account.about_zine,
+    'account/help':             account.help,
+    'account/profile':          account.profile,
+    'account/notification_settings':
+                                account.notification_settings,
 
     # admin views
     'admin/index':              admin.index,
@@ -40,12 +52,16 @@ all_views = {
     'admin/delete_post':        admin.dispatch_post_delete,
     'admin/manage_comments':    admin.manage_comments,
     'admin/show_unmoderated_comments': admin.show_unmoderated_comments,
+    'admin/show_approved_comments': admin.show_approved_comments,
+    'admin/show_blocked_comments': admin.show_blocked_comments,
     'admin/show_spam_comments': admin.show_spam_comments,
     'admin/show_post_comments': admin.show_post_comments,
     'admin/edit_comment':       admin.edit_comment,
     'admin/delete_comment':     admin.delete_comment,
     'admin/approve_comment':    admin.approve_comment,
     'admin/block_comment':      admin.block_comment,
+    'admin/report_comment_spam': admin.report_comment_spam,
+    'admin/report_comment_ham': admin.report_comment_ham,
     'admin/manage_categories':  admin.manage_categories,
     'admin/new_category':       admin.edit_category,
     'admin/edit_category':      admin.edit_category,
@@ -74,11 +90,7 @@ all_views = {
     'admin/export':             admin.export,
     'admin/information':        admin.information,
     'admin/log':                admin.log,
-    'admin/about_zine':         admin.about_zine,
-    'admin/change_password':    admin.change_password,
     'admin/help':               admin.help,
-    'admin/login':              admin.login,
-    'admin/logout':             admin.logout
 }
 
 content_type_handlers = {

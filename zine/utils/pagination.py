@@ -5,7 +5,7 @@
 
     Pagination helpers.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import math
@@ -18,12 +18,14 @@ class Pagination(object):
 
     _skip_theme_defaults = False
 
-    def __init__(self, endpoint, page, per_page, total, url_args=None):
+    def __init__(self, endpoint, page, per_page, total, url_args=None,
+                 post_id=None):
         self.endpoint = endpoint
         self.page = page
         self.per_page = per_page
         self.total = total
         self.pages = int(math.ceil(self.total / float(self.per_page)))
+        self.post_id = post_id
         self.url_args = url_args or {}
         self.necessary = self.pages > 1
 
@@ -69,7 +71,9 @@ class Pagination(object):
         result = []
         prev = None
         next = None
-        get_link = lambda x: url_for(self.endpoint, page=x, **self.url_args)
+        get_link = lambda x: url_for(self.endpoint, page=x,
+                                     per_page=self.per_page,
+                                     post_id=self.post_id, **self.url_args)
 
         if simple:
             result.append(active % {

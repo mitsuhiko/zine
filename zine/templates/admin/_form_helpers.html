@@ -1,7 +1,20 @@
-{% macro render_formbox(field, label, class, toggleable=true, collapsed=true) %}
+{% macro render_formbox(field, label, class, toggleable=true, collapsed=true, disabled=false) %}
   <div class="formbox{{ " " + class if class }}{{ " toggleable" if toggleable
     }}{{ " collapsed" if collapsed and toggleable }}">
     <h3>{{ label if label else field.label() }}</h3>
-    {{ caller() if caller else field() }}
+    {{ caller(disabled=disabled) if caller else field(disabled=disabled) }}
+    {%- if field.help_text %} <span class="explanation">{{ field.help_text }}</span>{%- endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_post_actions(form) %}
+  <div class="actions">
+    <input type="submit" name="save" value="{{ _('Save') }}">
+    <input type="submit" name="save_and_continue" value="{{ _('Save and continue editing') }}">
+    {%- if not form.new %}
+      <input type="submit" name="delete" value="{{ _('Delete') }}">
+    {%- endif %}
+    <input type="submit" name="cancel" value="{{ _('Cancel') }}">
+    <input type="submit" name="preview" value="{{ _('Preview') }}">
   </div>
 {% endmacro %}

@@ -5,7 +5,7 @@
 
     This module contains a list of builtin privileges.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from werkzeug.exceptions import Forbidden
@@ -22,6 +22,9 @@ DEFAULT_PRIVILEGES = {}
 
 class _Expr(object):
 
+    def iter_privileges(self, cache=None):
+        raise NotImplementedError()
+
     def __and__(self, other):
         return _And(self, other)
 
@@ -33,19 +36,32 @@ class _Expr(object):
 
 
 class _Bin(_Expr):
+    joiner = 'BIN'
 
     def __init__(self, a, b):
         self.a = a
         self.b = b
 
+    def iter_privileges(self, cache=None):
+        if cache is None:
+            cache = set()
+        for op in self.a, self.b:
+            for item in op.iter_privileges(cache):
+                yield item
+
+    def __repr__(self):
+        return '(%r %s %r)' % (self.a, self.joiner, self.b)
+
 
 class _And(_Bin):
+    joiner = '&'
 
     def __call__(self, privileges):
         return self.a(privileges) and self.b(privileges)
 
 
 class _Or(_Bin):
+    joiner = '|'
 
     def __call__(self, privileges):
         return self.a(privileges) or self.b(privileges)
@@ -64,18 +80,24 @@ class _Privilege(object):
 
 class Privilege(_Expr):
 
-    def __init__(self, name, explanation):
+    def __init__(self, name, explanation, privilege_dependencies):
         self.name = name
         self.explanation = explanation
+        self.dependencies = privilege_dependencies
+
+    def iter_privileges(self, cache=None):
+        if cache is None:
+            cache = set([self])
+            yield self
+        elif self not in cache:
+            cache.add(self)
+            yield self
 
     def __call__(self, privileges):
         return self in privileges
 
     def __repr__(self):
-        return u'<%s %r>' % (
-            self.__class__.__name__,
-            self.name
-        )
+        return self.name
 
 
 def add_admin_privilege(privilege):
@@ -89,23 +111,51 @@ def add_admin_privilege(privilege):
     return privilege
 
 
-def bind_privileges(container, privileges):
+def bind_privileges(container, privileges, user=None):
     """Binds the privileges to the container.  The privileges can be a list
     of privilege names, the container must be a set.  This is called for
-    the http roundtrip in the form validation.
+    the HTTP round-trip in the form validation.
     """
+    if not user:
+        user = get_request().user
     app = get_application()
+    notification_types = app.notification_manager.notification_types
     current_map = dict((x.name, x) for x in container)
     currently_attached = set(x.name for x in container)
     new_privileges = set(privileges)
 
-    # remove outdated privileges
+    # remove out-dated privileges
     for name in currently_attached.difference(new_privileges):
         container.remove(current_map[name])
+        # remove any privilege dependencies that are not attached to other
+        # privileges
+        if current_map[name].dependencies:
+            for privilege in current_map[name].dependencies.iter_privileges():
+                try:
+                    container.remove(privilege)
+                except KeyError:
+                    # privilege probably already removed
+                    pass
+
+        # remove notification subscriptions that required the privilege
+        # being deleted.
+        for notification in user.notification_subscriptions:
+            privs = notification_types[notification.notification_id].privileges
+            if current_map[name] in privs.iter_privileges():
+                db.session.delete(notification)
+                break
+            for privilege in current_map[name].dependencies:
+                if privilege in privs.iter_privileges():
+                    db.session.delete(notification)
 
     # add new privileges
     for name in new_privileges.difference(currently_attached):
-        container.add(app.privileges[name])
+        privilege = app.privileges[name]
+        container.add(privilege)
+        # add dependable privileges
+        if privilege.dependencies:
+            for privilege in privilege.dependencies.iter_privileges():
+                container.add(privilege)
 
 
 def require_privilege(expr):
@@ -142,9 +192,9 @@ def privilege_attribute(lowlevel_attribute):
                                 creator=creator_func)
 
 
-def _register(name, description):
+def _register(name, description, privilege_dependencies=None):
     """Register a new builtin privilege."""
-    priv = Privilege(name, description)
+    priv = Privilege(name, description, privilege_dependencies)
     DEFAULT_PRIVILEGES[name] = priv
     globals()[name] = priv
     __all__.append(name)
@@ -152,15 +202,35 @@ def _register(name, description):
 
 _register('ENTER_ADMIN_PANEL', lazy_gettext(u'can enter admin panel'))
 _register('BLOG_ADMIN', lazy_gettext(u'can administer the blog'))
-_register('CREATE_ENTRIES', lazy_gettext(u'can create new entries'))
-_register('EDIT_OWN_ENTRIES', lazy_gettext(u'can edit his own entries'))
-_register('EDIT_OTHER_ENTRIES', lazy_gettext(u'can edit another person\'s entries'))
-_register('CREATE_PAGES', lazy_gettext(u'can create new pages'))
-_register('EDIT_OWN_PAGES', lazy_gettext(u'can edit his own pages'))
-_register('EDIT_OTHER_PAGES', lazy_gettext(u'can edit another person\'s pages'))
+_register('CREATE_ENTRIES', lazy_gettext(u'can create new entries'),
+          ENTER_ADMIN_PANEL)
+_register('EDIT_OWN_ENTRIES', lazy_gettext(u'can edit their own entries'),
+          (ENTER_ADMIN_PANEL | CREATE_ENTRIES))
+_register('EDIT_OTHER_ENTRIES', lazy_gettext(u'can edit another person\'s entries'),
+          ENTER_ADMIN_PANEL)
+_register('CREATE_PAGES', lazy_gettext(u'can create new pages'),
+          ENTER_ADMIN_PANEL)
+_register('EDIT_OWN_PAGES', lazy_gettext(u'can edit their own pages'),
+          (ENTER_ADMIN_PANEL | CREATE_PAGES))
+_register('EDIT_OTHER_PAGES', lazy_gettext(u'can edit another person\'s pages'),
+          ENTER_ADMIN_PANEL)
 _register('VIEW_DRAFTS', lazy_gettext(u'can view drafts'))
-_register('MANAGE_CATEGORIES', lazy_gettext(u'can manage categories'))
-_register('MODERATE_COMMENTS', lazy_gettext(u'can moderate comments'))
+_register('MANAGE_CATEGORIES', lazy_gettext(u'can manage categories'),
+          ENTER_ADMIN_PANEL)
+_register('MODERATE_COMMENTS', lazy_gettext(u'can moderate comments'),
+          ENTER_ADMIN_PANEL)
+_register('MODERATE_OWN_ENTRIES', lazy_gettext(u'can moderate comments on it\'s own entries'),
+          (ENTER_ADMIN_PANEL | CREATE_ENTRIES))
+_register('MODERATE_OWN_PAGES', lazy_gettext(u'can moderate comments on it\'s own pages'),
+          (ENTER_ADMIN_PANEL | CREATE_PAGES))
+_register('VIEW_PROTECTED', lazy_gettext(u'can view protected entries'))
+
+# Regular users permissions
+_register('ENTER_ACCOUNT_PANEL', lazy_gettext(u'can enter his account panel'))
+_register('EDIT_OWN_COMMENTS', lazy_gettext(u'can edit own comments'),
+          ENTER_ACCOUNT_PANEL)
+_register('DELETE_OWN_COMMENTS', lazy_gettext(u'can delete own comments'),
+          ENTER_ACCOUNT_PANEL)
 
 
 CONTENT_TYPE_PRIVILEGES = {

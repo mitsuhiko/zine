@@ -5,7 +5,7 @@
 
     Adds support for pygments to pre code blocks.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from os.path import join, dirname
@@ -18,7 +18,7 @@ try:
     from pygments import highlight
     from pygments.lexers import get_lexer_by_name
     from pygments.formatters import HtmlFormatter
-    from pygments.styles import get_all_styles
+    from pygments.styles import get_all_styles, get_style_by_name
     have_pygments = True
 except ImportError:
     have_pygments = False
@@ -26,12 +26,20 @@ except ImportError:
 from zine.api import *
 from zine.views.admin import render_admin_response, flash
 from zine.privileges import BLOG_ADMIN
+from zine.parsers import MarkupExtension
 from zine.utils import forms
-from zine.utils.zeml import HTMLElement, ElementHandler
+from zine.utils.zeml import HTMLElement
 from zine.utils.http import redirect_to
 
 
+#: cache for formatters
 _formatters = {}
+
+#: dict of styles
+STYLES = {}
+
+if have_pygments:
+    STYLES.update((x, None) for x in get_all_styles())
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
@@ -60,19 +68,21 @@ EXAMPLE = '''\
 '''
 
 
-class SourcecodeHandler(ElementHandler):
-    """Provides a ``<sourcecode>`` tag."""
-    tag = 'sourcecode'
+class SourcecodeExtension(MarkupExtension):
+    """Provides a ``sourcecode`` markup element."""
+    name = 'sourcecode'
     is_isolated = True
     is_block_level = True
+    attributes = set(['syntax'])
+    argument_attribute = 'syntax'
 
-    def process(self, element):
-        lexer_name = element.attributes.get('syntax', 'text')
+    def process(self, attributes, content, reason):
+        lexer_name = attributes.get('syntax', 'text')
         try:
             lexer = get_lexer_by_name(lexer_name)
         except ValueError:
             lexer = get_lexer_by_name('text')
-        return HTMLElement(highlight(element.text, lexer, get_formatter()))
+        return HTMLElement(highlight(content, lexer, get_formatter()))
 
 
 class ConfigurationForm(forms.Form):
@@ -84,6 +94,19 @@ def get_current_style():
     application.
     """
     return get_application().cfg['pygments_support/style']
+
+
+def lookup_style(name):
+    """Return the style object for the given name."""
+    rv = STYLES.get(name, 'default')
+    if rv is None:
+        return get_style_by_name(name)
+    return rv
+
+
+def add_style(name, style):
+    """Register a new style for pygments."""
+    STYLES[name] = style
 
 
 def get_formatter(style=None, preview=False):
@@ -103,7 +126,8 @@ def get_formatter(style=None, preview=False):
             cls = 'highlight_preview'
         else:
             cls = 'syntax'
-        formatter = HtmlFormatter(style=style, cssclass=cls)
+        style_cls = lookup_style(style)
+        formatter = HtmlFormatter(style=style_cls, cssclass=cls)
     except ValueError:
         return None
     if not preview:
@@ -132,9 +156,9 @@ def show_config(req):
     for the pygments plugin. So far this only allows changing the style.
     """
     active_style = get_current_style()
-    styles = set(get_all_styles())
+    styles = sorted([(x, x.title()) for x in STYLES])
     form = ConfigurationForm(initial=dict(style=active_style))
-    form.fields['style'].choices = sorted(styles)
+    form.fields['style'].choices = styles
 
     if req.method == 'POST' and form.validate(req.form):
         active_style = form['style']
@@ -180,7 +204,7 @@ def setup(app, plugin):
     app.connect_event('after-request-setup', inject_style)
     app.add_config_var('pygments_support/style',
                        forms.TextField(default=u'default'))
-    app.add_zeml_element_handler(SourcecodeHandler)
+    app.add_markup_extension(SourcecodeExtension)
     app.add_url_rule('/options/pygments', prefix='admin',
                      view=show_config, endpoint='pygments_support/config')
     app.add_url_rule('/_shared/pygments_support/<style>.css',

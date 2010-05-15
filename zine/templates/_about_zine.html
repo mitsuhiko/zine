@@ -1,0 +1,47 @@
+{% macro render_about_zine_title() -%}
+{% block title %}{{ _("About Zine") }}{% endblock %}
+{%- endmacro %}
+
+{% macro render_about_zine_body() -%}
+  <h1>{{ _("About Zine") }}</h1>
+  <div class="text">
+    <img src="{{ url_for('core/shared', filename='admin/img/logo.png') }}" alt="">
+    <p>{% trans %}
+      Zine is an open source content publishing platform emphasizing ease
+      of use and extensibility. It provides powerful internal infrastructure,
+      a simple and intuitive user interface.
+    {% endtrans %}</p>
+    <p>{% trans years="2008-2009" -%}
+      © Copyright {{ years }} by the Zine Team. Some rights reserved.
+    {%- endtrans %}</p>
+    <p>{% trans %}
+      Redistribution and use in source and binary forms, with or without
+      modification, are permitted provided that the following conditions
+      are met:{% endtrans %}</p>
+    <ul>
+      <li>{% trans %}Redistributions of source code must retain the above
+        copyright notice, this list of conditions and the following
+        disclaimer.{% endtrans %}
+      <li>{% trans %}Redistributions in binary form must reproduce the above
+        copyright notice, this list of conditions and the following
+        disclaimer in the documentation and/or other materials provided
+        with the distribution.{% endtrans %}
+      <li>{% trans %}The names of the contributors may not be used to endorse
+        or promote products derived from this software without specific
+        prior written permission.{% endtrans %}</li>
+    </ul>
+    <p>
+      {% trans %}THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+      “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+      OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+      SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+      THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.{% endtrans %}
+    </p>
+  </div>
+{%- endmacro %}

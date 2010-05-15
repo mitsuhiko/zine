@@ -10,7 +10,7 @@
     somewhat hack around the limitation by using a separate element tree for
     each item and wrap it in hand written XML.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from cPickle import dumps
@@ -111,7 +111,6 @@ class Participant(object):
 
     def __init__(self, writer):
         self.app = writer.app
-        etree = writer.etree
         self.writer = writer
 
     def before_dump(self):
@@ -166,7 +165,7 @@ class Writer(object):
             return etree.tostring(node, encoding='utf-8')
 
         for participant in self.participants:
-            participant.setup()
+            participant.before_dump()
 
         # dump configuration
         cfg = self.z('configuration')

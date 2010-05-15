@@ -3,7 +3,7 @@ body {
     padding: 0;
     font-family: 'Trebuchet MS', sans-serif;
     font-size: 15px;
-    background-color: #456981;
+    background-color: #316081;
 }
 
 ::-moz-selection {
@@ -27,7 +27,7 @@ a:hover {
 /* :::: ADMIN PANEL HEADER :::: */
 div.header {
     background: #316182 url(img/dialogbg.png) repeat-x left center;
-    padding: 26px 0 26px 30px;
+    padding: 22px 0 22px 30px;
     margin: 0;
 }
 
@@ -37,6 +37,8 @@ div.header div.title {
     font-family: 'Georgia', serif;
     padding: 0;
     font-size: 26px;
+    font-style: italic;
+    text-shadow: 0 1px 0 #061727;
 }
 
 div.header div.metanav {
@@ -64,9 +66,8 @@ div.header div.metanav a:hover {
 }
 
 div.footer {
-    background: transparent url(img/footerbg.png) repeat-x bottom left;
-    border-top: 1px solid #0d334e;
-    padding: 10px 20px;
+    border-top: 1px solid #2a5471;
+    padding: 5px 20px;
     color: white;
     margin: 0;
 }
@@ -78,7 +79,7 @@ div.footer a {
 div.footer p {
     margin: 0;
     padding: 0;
-    font-size: 12px;
+    font-size: 11px;
     text-align: center;
 }
 
@@ -113,15 +114,18 @@ div.body ul.navbar li a {
     -webkit-border-bottom-left-radius: 0;
     -webkit-border-bottom-right-radius: 0;
     border-radius: 2px 2px 0 0;
+    text-shadow: 0 1px 1px #041A30;
 }
 
 div.body ul.navbar li a:hover {
     background: #263d5b;
+    text-shadow: 0 1px 0 #000;
 }
 
 div.body ul.navbar li.active a {
     background-position: bottom;
     color: white;
+    text-shadow: 0 1px 2px #85A3C2;
 }
 
 div.body ul.navbar li.active a {
@@ -136,8 +140,9 @@ div.body ul.navbar li.active a:hover {
 div.body ul.ctxnavbar {
     margin: 0;
     padding: 0 0 0 16px;
-    height: 23px;
+    height: 22px;
     background-color: #316081;
+    border-bottom: 1px solid #325d7b;
     list-style: none;
 }
 
@@ -178,12 +183,14 @@ div.body ul.standalonebar li.active a,
 div.body ul.standalonebar li.active a:hover {
     background: white url(img/whitetab.png) repeat-x;
     color: #316182;
+    text-shadow: 0 1px 2px #CDDBE9;
 }
 
 div.body div.contents {
     background: white;
     margin: 0;
     padding: 10px 30px 30px 30px;
+    border-bottom: 1px solid #ddd;
 }
 
 div.contents div.drafts-box {
@@ -191,38 +198,6 @@ div.contents div.drafts-box {
     margin: -15px 0 15px 0;
     padding: 8px 8px 8px 32px;
     background: #F7FCF7 url(img/info.png) no-repeat 9px 9px;
-}
-
-div.contents div.message {
-    border: 1px solid #B4D2E7;
-    margin: 0 -10px 10px -10px;
-    padding: 8px 8px 8px 32px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
-    background: #F7FAFD url(img/info.png) no-repeat 9px 9px;
-}
-
-div.contents div.message-add {
-    background-image: url(img/add.png);
-}
-
-div.contents div.message-remove {
-    background-image: url(img/remove.png);
-}
-
-div.contents div.message-error {
-    background-image: url(img/error.png);
-    background-color: #FCF7F7;
-    border-color: #E8B5B5;
-}
-
-div.contents div.message-ok {
-    background-image: url(img/ok.png);
-}
-
-div.contents div.message-configure {
-    background-image: url(img/configure.png);
 }
 
 div.contents h1 {
@@ -233,6 +208,7 @@ div.contents h1 {
     font-size: 1.8em;
     font-weight: normal;
     border-bottom: 1px solid #eee;
+    text-shadow: 0 1px 3px #D3E3F3;
 }
 
 div.contents h2 {
@@ -242,6 +218,7 @@ div.contents h2 {
     font-family: 'Georgia', serif;
     font-weight: normal;
     font-size: 1.5em;
+    text-shadow: 0 1px 3px #D3E3F3;
 }
 
 div.contents input,
@@ -312,13 +289,23 @@ div.contents input[type="radio"]:focus {
     border: none;
 }
 
-div.contents input[name="delete"]:hover {
+div.contents input[name="delete"]:hover,
+div.contents input[name="delete_all"]:hover {
     background-color: #d00;
+    color: white;
+}
+
+div.contents input[name="spam"]:hover {
+    background-color: #fc0;
     color: white;
 }
 
 div.contents input[name="save"] {
     font-weight: bold;
+}
+
+div.contents div.per_page {
+    float: right;
 }
 
 div.contents pre,
@@ -339,6 +326,12 @@ div.contents div.actions {
     background-color: #EEF5FA;
     border-top: 1px solid #B4D2E7;
     border-bottom: 1px solid #B4D2E7;
+}
+
+div.contents div.secondary div.actions {
+    margin: 0;
+    padding: 3px;
+    border-top: 0;
 }
 
 div.contents table {
@@ -393,6 +386,7 @@ div.contents dl dt {
     margin: 0;
     padding: 0.5em 0 0.2em 0;
     color: #555;
+    text-shadow: 0 1px 1px #ddd;
 }
 
 div.contents dl dd {
@@ -468,6 +462,26 @@ div.formbox ul {
     padding: 5px 0 5px 10px;
 }
 
+div.preview {
+    border: 1px solid #B4D2E7;
+    padding: 0;
+    margin: 0 0 1em 0;
+}
+
+div.preview div.text {
+    margin: 1em;
+}
+
+div.preview h2.title {
+    margin: 0;
+    font-size: 18px;
+    padding: 4px;
+}
+
+div.preview div.text div.intro {
+    border-bottom: 1px solid #aaa;
+}
+
 ul.errors {
     background-color: #FCF7F7;
     border: 1px solid #E8B5B5;
@@ -479,6 +493,13 @@ ul.errors {
 ul.errors li {
     color: #802424;
     font-size: 0.9em;
+}
+
+div.contents dl dd.explanation {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+    font-style: italic;
 }
 
 /* :::: PAGINATION :::: */
@@ -620,6 +641,10 @@ div.dashboard div.links ul.last_posts li {
     border-color: #B4D2E7;
 }
 
+div.dashboard div.links li span.meta {
+    font-size: 11px;
+}
+
 div.dashboard div.links li a:hover {
     color: #ffa800!important;
 }
@@ -635,6 +660,12 @@ div.dashboard ul.comments li p.actions {
 }
 
 /* :::: POST LIST :::: */
+table.postlist span.meta {
+    float: right;
+    font-size: 11px;
+    padding: 3px 0 0 8px;
+}
+
 table.postlist tr.draft td {
     background-color: #DDF7DC;
 }
@@ -653,7 +684,6 @@ table.postlist td.tags {
 
 table.postlist td.date {
     color: #444;
-    font-size: 0.8em;
 }
 
 table.postlist .comments {
@@ -749,7 +779,24 @@ div.themes div.theme h2 {
     text-align: center;
 }
 
-div.themes div.theme h2 a {
+div.themes div.theme p.select {
+    margin: 0;
+    text-align: center;
+}
+
+div.themes div.theme p.select a {
+    display: block;
+    width: 240px;
+    background-color: #F7FAFD;
+    border: solid #B4D2E7;
+    border-width: 1px 1px 0 1px;
+    -moz-border-radius: 5px 5px 0 0;
+    -webkit-border-radius: 5px 5px 0 0;
+    border-radius: 5px 5px 0 0;
+    margin: 0 auto;
+    padding: 5px 0;
+    font-family: 'Georgia', sans-serif;
+    font-weight: bold;
     text-decoration: none;
 }
 
@@ -761,6 +808,7 @@ div.themes div.theme div.detail {
 div.themes div.theme img.preview {
     display: block;
     margin: auto;
+    border: 1px solid #B4D2E7;
 }
 
 div.themes div.theme div.detail blockquote {
@@ -775,6 +823,60 @@ div.themes div.theme div.detail p.author {
     padding: 0;
     font-size: 90%;
     text-align: center;
+}
+
+/* :::: NOTIFICATIONS :::: */
+table.notifications ul.choicegroup {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+table.notifications ul.choicegroup li {
+    display: inline;
+    margin: 0;
+}
+
+div.contents div.notification-messages {
+    position: fixed;
+    top: 0;
+    right: 10px;
+    width: 250px;
+    height: 0px;
+    font-size: 13px;
+}
+
+div.contents div.message {
+    border: 1px solid #B4D2E7;
+    margin: 10px 0;
+    padding: 8px 8px 8px 32px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    background: #F7FAFD url(img/info.png) no-repeat 9px 9px;
+    text-shadow: 0 1px 1px #cbdce2;
+}
+
+div.contents div.message-add {
+    background-image: url(img/add.png);
+}
+
+div.contents div.message-remove {
+    background-image: url(img/remove.png);
+}
+
+div.contents div.message-error {
+    background-image: url(img/error.png);
+    background-color: #FCF7F7;
+    border-color: #E8B5B5;
+}
+
+div.contents div.message-ok {
+    background-image: url(img/ok.png);
+}
+
+div.contents div.message-configure {
+    background-image: url(img/configure.png);
 }
 
 /* :::: WIDGETS :::: */
@@ -869,6 +971,7 @@ table.plugins td.description span.author {
 
 table.plugins td.plugin {
     font-weight: bold;
+    min-width: 200px;
 }
 
 table.plugins td.version {
@@ -885,6 +988,11 @@ table.plugins tr.plugin-active td {
     background-color: #DEEEF8;
 }
 
+span.bundlemarker {
+    font-weight: normal;
+    color: #444;
+}
+
 /* :::: CONFIG EDITOR :::: */
 table.config-table {
     border: 1px solid #B4D2E7;
@@ -897,12 +1005,54 @@ div.contents table.config-table th:last-child {
     border-radius: 0;
 }
 
+table.config-table td {
+    vertical-align: middle;
+}
+
+table.config-table tr.value td {
+    height: 3em;
+}
+
 table.config-table td.default {
     text-align: right;
 }
 
 table.config-table td input[type="text"] {
     width: 97%;
+}
+
+table.config-table tr.help_text {
+    background: #F1F8FD;
+    font-size: 0.85em;
+    letter-spacing: 0.04em;
+    color: #3A78A5;
+}
+
+table.config-table tr.errors {
+    background: #FCF7F7;
+    font-size: 0.85em;
+    letter-spacing: 0.04em;
+    color: #802424;
+}
+
+table.config-table tr.errors ul.errors {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+table.config-table tr.errors ul.errors li {
+    font-size: 1em;
+}
+
+table.config-table tr.has_followup td {
+    border-bottom: none;
+}
+
+table.config-table tr.help_text td.text,
+table.config-table tr.errors td.text {
+    padding-left: 15px;
+    padding-right: 25px;
 }
 
 /* :::: IMPORTER PAGE :::: */
@@ -962,6 +1112,17 @@ div.text {
     text-align: justify;
 }
 
+/* :::: NOTIFICATION SETTINGS :::: */
+table.notifications tbody th {
+    background: #fafafa;
+    border: none;
+    -moz-border-radius: 0!important;
+    -webkit-border-radius: 0!important;
+    border-radius: 0!important;
+    font-weight: normal;
+    border-bottom: 1px dotted #ccc;
+}
+
 /* :::: HELP :::: */
 div.help {
     font-family: 'Georgia', serif;
@@ -978,6 +1139,7 @@ div.help pre {
     border-left: none;
     border-right: none;
     line-height: 110%;
+    background-color: #fafafa;
 }
 
 div.help a.reference {
@@ -1308,4 +1470,54 @@ table.logfile tr.even td.level-warning {
 table.logfile td.module {
     font-size: 13px;
     text-align: right;
+}
+
+/* :::: AUTOCOMPLETE :::: */
+.ac_results {
+    padding: 0px;
+    border: 1px solid #222e4b;
+    background-color: white;
+    overflow: hidden;
+    z-index: 99999;
+}
+
+.ac_results ul {
+    width: 100%;
+    list-style-position: outside;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ac_results li {
+    margin: 0px;
+    padding: 3px 6px;
+    cursor: default;
+    display: block;
+    font-size: 13px;
+    line-height: 16px;
+    overflow: hidden;
+}
+
+.ac_loading {
+    background: white url('indicator.gif') right center no-repeat;
+}
+
+.ac_odd {
+    background-color: #fafafa;
+}
+
+.ac_over {
+    background-color: #456981;
+    color: white;
+}
+
+/* :::: TEXT AREA RESIZER :::: */
+.grippie {
+    margin-bottom: 3px;
+    height: 7px;
+    background: #D2DEE9;
+    border-top: 1px solid #B4D2E7;
+    border-bottom: 1px solid #B4D2E7;
+    cursor: row-resize;
 }

@@ -6,22 +6,18 @@
     This module implements all the views (some people call that controller)
     for the core module.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from os.path import exists
-from time import asctime, gmtime, time
 from datetime import date
 
 from zine import cache, pingback
 from zine.i18n import _
-from zine.database import db
-from zine.application import add_link, url_for, render_response, emit_event, \
-     iter_listeners, Response, get_application
-from zine.models import Post, Category, User, Comment, Tag
-from zine.utils import dump_json, ClosingIterator, log
+from zine.application import add_link, url_for, render_response, \
+     iter_listeners, Response
+from zine.models import Post, Category, User, Tag
+from zine.utils import dump_json, log
 from zine.utils.text import build_tag_uri
-from zine.utils.validators import is_valid_email, is_valid_url, check
 from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
 from zine.utils.http import redirect_to, redirect
 from zine.utils.redirects import lookup_redirect
@@ -44,8 +40,9 @@ def index(req, page=1):
     :Template name: ``index.html``
     :URL endpoint: ``blog/index``
     """
-    data = Post.query.published().for_index().get_list(endpoint='blog/index',
-                                                       page=page)
+    data = Post.query.theme_lightweight('index').published() \
+               .for_index().get_list(endpoint='blog/index',
+                                     page=page)
 
     add_link('alternate', url_for('blog/atom_feed'), 'application/atom+xml',
              _(u'Recent Posts Feed'))
@@ -64,7 +61,7 @@ def archive(req, year=None, month=None, day=None, page=1):
             a pagination object to render a pagination
 
         `year` / `month` / `day`:
-            integers or None, useful to entitle the page.
+            integers or None, useful to entitle the page
 
     :Template name: ``archive.html``
     :URL endpoint: ``blog/archive``
@@ -75,9 +72,11 @@ def archive(req, year=None, month=None, day=None, page=1):
                                      .get_archive_summary())
 
     url_args = dict(year=year, month=month, day=day)
-    data = Post.query.published().for_index().date_filter(year, month, day) \
-                     .get_list(page=page, endpoint='blog/archive',
-                               url_args=url_args)
+    per_page = req.app.theme.settings['archive.per_page']
+    data = Post.query.theme_lightweight('archive_overview') \
+               .published().for_index().date_filter(year, month, day) \
+               .get_list(page=page, endpoint='blog/archive',
+                         url_args=url_args, per_page=per_page)
 
     add_link('alternate', url_for('blog/atom_feed', **url_args),
              'application/atom+xml', _(u'Recent Posts Feed'))
@@ -99,16 +98,17 @@ def show_category(req, slug, page=1):
             a pagination object to render a pagination
 
         `category`
-            the category object for this page.
+            the category object for this page
 
     :Template name: ``show_category.html``
     :URL endpoint: ``blog/show_category``
     """
     category = Category.query.filter_by(slug=slug).first(True)
-    data = Post.query.filter(Post.categories.contains(category)) \
-               .lightweight().published() \
-               .get_list(page=page, endpoint='blog/show_category',
-                         url_args=dict(slug=slug))
+    per_page = req.app.theme.settings['category.per_page']
+    data = category.posts.theme_lightweight('category') \
+                   .published().get_list(page=page, per_page=per_page,
+                                         endpoint='blog/show_category',
+                                         url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', category=slug),
              'application/atom+xml', _(u'All posts in category %s') % category.name)
@@ -127,19 +127,38 @@ def show_tag(req, slug, page=1):
             a pagination object to render a pagination
 
         `tag`
-            the tag object for this page.
+            the tag object for this page
 
     :Template name: ``show_tag.html``
     :URL endpoint: ``blog/show_tag``
     """
     tag = Tag.query.filter_by(slug=slug).first(True)
-    data = Post.query.filter(Post.tags.contains(tag)).lightweight() \
-               .published().get_list(page=page, endpoint='blog/show_tag',
-                                     url_args=dict(slug=slug))
+    per_page = req.app.theme.settings['tag.per_page']
+    data = tag.posts.theme_lightweight('tag') \
+                    .published().get_list(page=page, endpoint='blog/show_tag',
+                                          per_page=per_page,
+                                          url_args=dict(slug=slug))
 
     add_link('alternate', url_for('blog/atom_feed', tag=slug),
              'application/atom+xml', _(u'All posts tagged %s') % tag.name)
     return render_response('show_tag.html', tag=tag, **data)
+
+
+def tags(req):
+    """
+    Show a tagcloud.
+
+    Available template variables:
+
+        `tags`:
+            list of tag summaries that contain the size of the cloud
+            item, the name of the tag and its slug
+
+    :Template name: ``tags.html``
+    :URL endpoint: ``blog/tags``
+    """
+    return render_response('tags.html',
+                           tags=Tag.query.get_cloud())
 
 
 def show_author(req, username, page=1):
@@ -149,13 +168,13 @@ def show_author(req, username, page=1):
 
         `posts`:
             a list of post objects this author wrote and are
-            visible on this page.
+            visible on this page
 
         `pagination`:
             a pagination object to render a pagination
 
         `user`
-            The user object for this author
+            the user object for this author
 
     :Template name: ``show_author.html``
     :URL endpoint: ``blog/show_author``
@@ -164,9 +183,11 @@ def show_author(req, username, page=1):
     if user is None or not user.is_author:
         raise NotFound()
 
-    data = Post.query.published().filter_by(author=user).lightweight() \
-               .get_list(page=page, per_page=30, endpoint='blog/show_author',
-                         url_args=dict(username=user.username))
+    per_page = req.app.theme.settings['author.per_page']
+    data = user.posts.theme_lightweight('author').published() \
+                     .get_list(page=page, per_page=per_page,
+                               endpoint='blog/show_author',
+                               url_args=dict(username=user.username))
 
     add_link('alternate', url_for('blog/atom_feed', author=user.username),
              'application/atom+xml', _(u'All posts written by %s') %
@@ -181,7 +202,7 @@ def authors(req):
     Available template variables:
 
         `authors`:
-            list of author objects to display.
+            list of author objects to display
 
     :Template name: ``authors.html``
     :URL endpoint: ``blog/authors``
@@ -198,15 +219,15 @@ def show_entry(req, post, comment_form):
     Available template variables:
 
         `post`:
-            The post object we display.
+            the post object we display
 
         `form`:
-            A dict of form values (name, email, www and body)
+            a dict of form values (name, email, www and body)
 
         `errors`:
-            List of error messages that occurred while posting the
-            comment. If empty the form was not submitted or everyhing
-            worked well.
+            list of error messages that occurred while posting the
+            comment, if empty the form was not submitted or everything
+            worked well
 
     Events emitted:
 
@@ -323,7 +344,7 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
                     subtitle=req.app.cfg['blog_tagline'])
 
     # the feed only contains published items
-    query = Post.query.published()
+    query = Post.query.lightweight(lazy=('comments',)).published()
 
     # feed for a category
     if category is not None:
@@ -351,7 +372,8 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
         for post in query.for_index().order_by(Post.pub_date.desc()) \
                          .limit(15).all():
             links = [link.as_dict() for link in post.links]
-            feed.add(post.title, unicode(post.body), content_type='html',
+            feed.add(post.title or '%s @ %s' % (post.author.display_name,
+                     post.pub_date), unicode(post.body), content_type='html',
                      author=post.author.display_name, links=links,
                      url=url_for(post, _external=True), id=post.uid,
                      updated=post.last_update, published=post.pub_date)
