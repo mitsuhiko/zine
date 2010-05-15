@@ -513,7 +513,7 @@ class ConfigTransaction(object):
         if key in self._converted_values:
             return self._converted_values[key]
         elif key in self._remove:
-            return self.cfg.config_vars[key][1]
+            return self.cfg.config_vars[key].get_default()
         return self.cfg[key]
 
     def __setitem__(self, key, value):
@@ -532,6 +532,11 @@ class ConfigTransaction(object):
         if isinstance(value, str):
             value = value.decode('utf-8')
         field = self.cfg.config_vars[key]
+
+        if value == field.get_default():
+            self.revert_to_default(key)
+            return
+
         self._values[key] = field.to_primitive(value)
         self._converted_values[key] = value
 

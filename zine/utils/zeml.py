@@ -599,7 +599,7 @@ class Element(_BaseElement):
         The tail text for the outer element.  To understand this, look at the
         following example:
 
-        >>> root = parse_zeml("1 <b>2</b> 3")
+        >>> root = parse_zeml("1 <b>2</b> 3", 'system')
         >>> root.text
         u'1 '
         >>> root.children[0].text

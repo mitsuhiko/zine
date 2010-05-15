@@ -83,7 +83,7 @@ def suite(modnames=[], return_covermods=False):
                 raise
 
         suites = [DocTestSuite(mod, extraglobs={'app': app})]
-        filename = modname[10:] + '.txt'
+        filename = modname[5:] + '.txt'
         if filename in test_files:
             globs = {'app': app}
             globs.update(mod.__dict__)
