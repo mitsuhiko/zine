@@ -4,7 +4,7 @@
     Zine CGI Runner
     ~~~~~~~~~~~~~~~
 
-    Run Zine as CGI. Requires python 2.5 or python 2.4 with
+    Run Zine as CGI. Requires python 2.5 with
     the wsgiref module installed.  For help con configuration
     have a look at the README file.
 
