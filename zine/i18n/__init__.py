@@ -143,7 +143,7 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
         locale = Locale.parse(locale)
         catalog = find_catalog(path, domain, locale, gettext_lookup)
         if catalog:
-            return ZineTranslations(fileobj=open(catalog), locale=locale)
+            return ZineTranslations(fileobj=open(catalog, 'rb'), locale=locale)
         return ZineNullTranslations(locale=locale)
 
     # Always use the unicode versions, we don't support byte strings
