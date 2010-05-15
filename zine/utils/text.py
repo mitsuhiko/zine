@@ -5,11 +5,10 @@
 
     This module provides various text utility functions.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
-import string
 import unicodedata
 from datetime import datetime
 from itertools import starmap
@@ -67,7 +66,6 @@ def gen_timestamped_slug(slug, content_type, pub_date=None):
     if content_type == 'entry':
         fixed = cfg['fixed_url_date_digits']
         def handle_match(match):
-            name = match.group()
             handler = _slug_parts.get(match.group(1))
             if handler is None:
                 return match.group(0)

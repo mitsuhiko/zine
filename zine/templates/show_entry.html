@@ -21,8 +21,11 @@
   {%- if entry.comments %}
     <h3>{{ _("Comments") }}</h3>
     {{ render_comments(entry) }}
+    {% if entry.comments_closed %}
+    <p><em>{{ _('Commenting is no longer possible.') }}</em>
+    {% endif %}
   {%- endif %}
-  {%- if entry.comments_enabled %}
+  {%- if entry.comments_enabled and not entry.comments_closed %}
     <h3 id="leave-reply">{{ _("Leave a Reply") }}</h3>
     {{ render_comment_editor(entry, form) }}
   {%- endif %}

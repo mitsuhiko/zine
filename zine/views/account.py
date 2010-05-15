@@ -5,14 +5,14 @@
 
     This module implements the account views.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 
 from zine.api import *
 from zine.forms import LoginForm, DeleteAccountForm, EditProfileForm, \
      make_notification_form
-from zine.i18n import _, ngettext
+from zine.i18n import _
 from zine.models import Comment
 from zine.privileges import ENTER_ADMIN_PANEL
 from zine.utils.account import flash, require_account_privilege
@@ -28,8 +28,8 @@ def render_account_response(template_name, _active_menu_item=None, **values):
     event.
 
     The second parameter can be the active menu item if wanted. For example
-    ``'account.notifications'`` would show the notifications button in the account
-    submenu. If the menu is a standalone menu like the dashboard (no
+    ``'account.notifications'`` would show the notifications button in the
+    account submenu. If the menu is a standalone menu like the dashboard (no
     child items) you can also just use ``'dashboard'`` to highlight that.
     """
     request = get_request()
@@ -205,11 +205,11 @@ def notification_settings(request):
         flash(_('Notification settings changed.'), 'configure')
         return form.redirect('account/notification_settings')
 
-    return render_account_response('account/notification_settings.html', 'notifications',
-        form=form.as_widget(),
-        systems=sorted(request.app.notification_manager.systems.values(),
-                       key=lambda x: x.name.lower()),
-        notification_types=sorted(
+    return render_account_response('account/notification_settings.html',
+        'notifications', form=form.as_widget(), systems=sorted(
+            request.app.notification_manager.systems.values(),
+            key=lambda x: x.name.lower()
+        ), notification_types=sorted(
             request.app.notification_manager.types(request.user),
             key=lambda x: x.description.lower()
         )

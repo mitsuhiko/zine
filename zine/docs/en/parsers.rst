@@ -86,7 +86,7 @@ Example code::
 
     This is another paragraph.  Paragraphs are usually separated by
     a wider gap in the theme.
-    
+
     -   This is an unordered list.
     -   Of multiple items.
 
@@ -122,7 +122,7 @@ Example code::
 
     This is another paragraph.  Paragraphs are usually separated by
     a wider gap in the theme.
-    
+
     * This is an unordered list.
     * Of multiple items.
 

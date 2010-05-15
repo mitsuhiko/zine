@@ -4,7 +4,7 @@
 
     This module implements XML-related functions and classes.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
@@ -13,7 +13,7 @@ import xmlrpclib
 from datetime import datetime
 from htmlentitydefs import name2codepoint
 
-from werkzeug import escape, import_string, BaseResponse
+from werkzeug import escape, BaseResponse
 from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
 
 from zine.utils import log

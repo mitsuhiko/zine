@@ -4,10 +4,11 @@
 
     This module implements date formatting and parsing functions.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
+from calendar import timegm
 from datetime import datetime, timedelta
 
 
@@ -19,6 +20,11 @@ _iso8601_re = re.compile(
     # time
     r'(?:T(\d{2}):(\d{2})(?::(\d{2}(?:\.\d+)?))?(Z|[+-]\d{2}:\d{2})?)?$'
 )
+
+
+def to_timestamp(value):
+    """Converts a datetime to an unix timestamp."""
+    return timegm(value.timetuple())
 
 
 def parse_iso8601(value):

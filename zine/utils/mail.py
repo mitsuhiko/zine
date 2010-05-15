@@ -4,7 +4,7 @@
 
     This module implements some email-related functions and classes.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os
@@ -16,7 +16,6 @@ except ImportError:
 from smtplib import SMTP, SMTPException
 from urlparse import urlparse
 
-from zine.utils import local
 from zine.utils.validators import is_valid_email, check
 
 

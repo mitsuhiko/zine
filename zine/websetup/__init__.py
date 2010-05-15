@@ -11,7 +11,7 @@
     last request could not send any more requests to external files. Those
     would already be returned by the normal Zine installation.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import sys
@@ -20,7 +20,6 @@ from zine import environment
 from zine.config import Configuration
 from zine.api import db
 from zine.config import ConfigurationTransactionError
-from zine.models import User
 from zine.utils.crypto import gen_pwhash, gen_secret_key, new_iid
 from zine.utils.validators import is_valid_email, check
 from zine.i18n import load_core_translations, has_language, list_languages
@@ -82,7 +81,7 @@ class WebSetup(object):
             self.next[view] = next
 
     def handle_view(self, request, name, ctx=None):
-        handler = self.views[name]
+        #handler = self.views[name]
         ctx = ctx or {}
         ctx.update({
             'current':     name,

@@ -5,14 +5,13 @@
 
     Import from the blogger.com extended feed format.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 
-from zine.importers import Tag, Post, Comment, Author
+from zine.importers import Tag, Comment
 from zine.importers.feed import Extension, SkipItem, atom
 from zine.utils.xml import Namespace
-from zine.utils.dates import parse_iso8601
 
 BLOGGER_LABEL_SCHEME_URI = 'http://www.blogger.com/atom/ns#'
 BLOGGER_KIND_SCHEME_URI = 'http://schemas.google.com/g/2005#kind'

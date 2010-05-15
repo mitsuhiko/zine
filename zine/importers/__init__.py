@@ -7,7 +7,7 @@
     API as well as some core importers we implement as part of the software
     and not as plugin.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os
@@ -265,7 +265,7 @@ def rewrite_import(app, id, callback, title='Modified Import'):
     """
     if isinstance(app, basestring):
         from zine import setup
-        app = make_zine(app)
+        app = setup(app)
 
     blog = load_import_dump(app, id)
     callback(blog)
@@ -282,6 +282,9 @@ class Importer(object):
     #: the shortname of the importer.  This is used for the URLs
     #: and internal addressing.
     name = None
+
+    #: an explanation of what this importer can import.
+    description = None
 
     @property
     def title(self):

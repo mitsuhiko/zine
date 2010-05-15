@@ -7,7 +7,7 @@
     a binding to memcached.
 
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import os
@@ -16,11 +16,6 @@ from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
      MemcachedCache
 
 from zine.utils import local
-
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import new as md5
 
 
 def get_cache(app):
@@ -121,7 +116,7 @@ def response(vary=(), timeout=None, cache_key=None):
             response = None
             if use_cache:
                 cache_key = key + request.path.encode('utf-8')
-                response = request.app.cache.get(key)
+                response = request.app.cache.get(cache_key)
 
             if response is None:
                 response = f(request, *args, **kwargs)

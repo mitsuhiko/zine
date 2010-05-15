@@ -5,7 +5,7 @@
 
     The form classes the zine core uses.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from copy import copy
@@ -14,7 +14,7 @@ from datetime import datetime
 from zine.i18n import _, lazy_gettext, list_languages
 from zine.application import get_application, get_request, emit_event
 from zine.config import DEFAULT_VARS
-from zine.database import db, posts, comments, notification_subscriptions
+from zine.database import db, posts
 from zine.models import User, Group, Comment, Post, Category, Tag, \
      NotificationSubscription, STATUS_DRAFT, STATUS_PUBLISHED, \
      STATUS_PROTECTED, STATUS_PRIVATE, \
@@ -27,7 +27,7 @@ from zine.notifications import send_notification_template, NEW_COMMENT, \
 from zine.utils import forms, log, dump_json
 from zine.utils.http import redirect_to
 from zine.utils.validators import ValidationError, is_valid_email, \
-     is_valid_url, is_valid_slug, is_netaddr, is_not_whitespace_only
+     is_valid_url, is_valid_slug, is_not_whitespace_only
 from zine.utils.redirects import register_redirect, change_url_prefix
 
 
@@ -108,7 +108,7 @@ class NewCommentForm(forms.Form):
         message=lazy_gettext(u'You have to enter a valid URL or omit the field.')
     )])
     body = forms.TextField(lazy_gettext(u'Text'), min_length=2, max_length=6000,
-                           messages=dict(
+                           required=True, messages=dict(
         too_short=lazy_gettext(u'Your comment is too short.'),
         too_long=lazy_gettext(u'Your comment is too long.'),
         required=lazy_gettext(u'You have to enter a comment.')
@@ -139,6 +139,8 @@ class NewCommentForm(forms.Form):
     def context_validate(self, data):
         if not self.post.comments_enabled:
             raise ValidationError(_('Post is closed for commenting.'))
+        if self.post.comments_closed:
+            raise ValidationError(_('Commenting is no longer possible.'))
 
     def make_comment(self):
         """A handy helper to create a comment from the validated form."""
@@ -540,6 +542,7 @@ class BlockCommentForm(_CommentBoundForm):
         self.comment.status = COMMENT_BLOCKED_USER
         self.comment.bocked_msg = msg
 
+
 class MarkCommentForm(_CommentBoundForm):
     """Form used to block comments."""
 
@@ -912,9 +915,8 @@ class DeleteUserForm(_UserBoundForm):
         if self.user.posts.count() is 0:
             data['action'] = None
         if data['action'] == 'reassign' and not data['reassign_to']:
-            # XXX: Bad wording
-            raise ValidationError(_('You have to select the user that '
-                                    'gets the posts assigned.'))
+            raise ValidationError(_('You have to select a user to reassign '
+                                    'the posts to.'))
 
     def delete_user(self):
         """Deletes the user."""
@@ -1003,10 +1005,20 @@ class EditProfileForm(_UserBoundForm):
 class DeleteAccountForm(_UserBoundForm):
     """Used for a user to delete a his own account."""
 
+    password = forms.TextField(
+        lazy_gettext(u"Your password is required to delete your account:"),
+        required=True, widget=forms.PasswordInput,
+        messages = dict(required=lazy_gettext(u'Your password is required!'))
+    )
+
     def __init__(self, user, initial=None):
         _UserBoundForm.__init__(self, user, forms.fill_dict(initial,
             action='delete'
         ))
+
+    def validate_password(self, value):
+        if not self.user.check_password(value):
+            raise ValidationError(_(u'Invalid password'))
 
     def delete_user(self):
         """Deletes the user's account."""
@@ -1066,6 +1078,8 @@ class BasicOptionsForm(_ConfigForm):
     moderate_comments = config_field('moderate_comments',
                                      lazy_gettext(u'Comment Moderation'),
                                      widget=forms.RadioButtonGroup)
+    comments_open_for = config_field('comments_open_for',
+        label=lazy_gettext(u'Comments Open Period'))
     pings_enabled = config_field('pings_enabled',
         lazy_gettext(u'Pingbacks enabled'),
         help_text=lazy_gettext(u'enable pingbacks per default'))
@@ -1207,8 +1221,8 @@ def delete_comment(comment):
                 parent = newparent
             else:
                 parent = None
-    # One could probably optimize this by tracking the amount of deleted
-    # comments
+    # XXX: one could probably optimize this by tracking the amount
+    # of deleted comments
     comment.post.sync_comment_count()
 
 

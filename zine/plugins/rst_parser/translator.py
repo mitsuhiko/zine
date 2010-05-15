@@ -5,14 +5,14 @@
 
     Translates a docutils node tree into a ZEML tree.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import copy
 import re
 
 from zine.parsers import parse_html
-from zine.utils.zeml import RootElement, Element
+from zine.utils.zeml import RootElement, Element, MarkupErrorElement
 
 from docutils import nodes
 from docutils.nodes import NodeVisitor, SkipNode
@@ -75,7 +75,9 @@ class ZemlTranslator(NodeVisitor):
         'caption': ('p', {'class': 'caption'}),
         'compound': ('div', {'class': 'compound'}),
         'emphasis': ('em', {}),
+        'field_list': ('table', {'class': 'field-list'}),
         'field': ('tr', {}),
+        'field_name': ('td', {'class': 'field-name'}),
         'field_body': ('td', {}),
         'inline': ('span', {}),
         'line_block': ('div', {'class': 'line-block'}),
@@ -89,6 +91,10 @@ class ZemlTranslator(NodeVisitor):
         'line_block': ('div', {'class': 'line-block'}),
         'literal_block': ('pre', {'class': 'literal-block'}),
         'definition_list': ('dl', {'class': 'docutils'}),
+        'table': ('table', {}),
+        'thead': ('thead', {}),
+        'tbody': ('tbody', {}),
+        'row': ('tr', {}),
     }
 
     def dispatch_visit(self, node):
@@ -118,7 +124,8 @@ class ZemlTranslator(NodeVisitor):
         raise SkipNode
 
     def visit_citation_reference(self, node):
-        self.begin_node(node, 'a', CLASS='citation-reference', href='#'+node['refid'])
+        self.begin_node(node, 'a', CLASS='citation-reference',
+                        href='#'+node['refid'])
         self.add_text('[')
     def depart_citation_reference(self, node):
         self.add_text(']')
@@ -186,6 +193,20 @@ class ZemlTranslator(NodeVisitor):
         if self.context.pop():
             self.end_node()
 
+    def visit_entry(self, node):
+        attrs = {}
+        tagname = 'td'
+        if isinstance(node.parent.parent, nodes.thead):
+            tagname = 'th'
+        if node.has_key('morecols'):
+            attrs['colspan'] = node['morecols'] + 1
+        if node.has_key('morerows'):
+            attrs['rowspan'] = node['morerows'] + 1
+        self.begin_node(node, tagname, **attrs)
+
+    def depart_entry(self, node):
+        self.end_node()
+
     def visit_raw(self, node):
         if 'html' in node.get('format', '').split():
             # not just using a HTMLElement so that the elements in here
@@ -211,7 +232,8 @@ class ZemlTranslator(NodeVisitor):
         self.end_node()
 
     def visit_attribution(self, node):
-        self.begin_node(node, 'p', u'\u2013', CLASS='attribution')
+        self.begin_node(node, 'p', CLASS='attribution')
+        self.add_node('span', u'\u2013', CLASS='attribution-delimiter')
 
     def depart_attribution(self, node):
         self.end_node()
@@ -478,7 +500,6 @@ class ZemlTranslator(NodeVisitor):
 
     def visit_title(self, node):
         """Only 6 section levels are supported by HTML."""
-        check_id = 0
         if isinstance(node.parent, nodes.topic):
             self.begin_node(node, 'p', CLASS='topic-title first')
         elif isinstance(node.parent, nodes.sidebar):
@@ -539,7 +560,7 @@ class ZemlTranslator(NodeVisitor):
                 self.add_text(token)
             else:
                 # Protect runs of multiple spaces; the last space can wrap:
-                # XXXX what to do about this for zeml???
+                # XXX what to do about this for zeml???
                 self.add_text('&nbsp;' * (len(token) - 1) + ' ')
         self.end_node()
         # Content already processed:
@@ -553,7 +574,7 @@ class ZemlTranslator(NodeVisitor):
             self.begin_node(node, 'h2', CLASS='subtitle')
         elif isinstance(node.parent, nodes.section):
             tag = 'h%s' % (self.section_level + self.initial_header_level - 1)
-            self.begin_node(node, 'h2', CLASS='section-subtitle')
+            self.begin_node(node, tag, CLASS='section-subtitle')
             self.begin_node(None, 'span', '', CLASS='section-subtitle')
             close_two = True
 
@@ -563,5 +584,23 @@ class ZemlTranslator(NodeVisitor):
         self.end_node()
         if self.context.pop():
             self.end_node()
+
+    def visit_system_message(self, node):
+        line = ''
+        if node.hasattr('line'):
+            line = ', line %s' % node['line']
+
+        # The text should be handled as a paragraph but we handle it here
+        # using MarkupErrorElement
+        text = node[0][0].astext()
+        message = 'System Message: %s/%s %s, %s\n' % \
+                  (node['type'], node['level'], line, text)
+        zeml_node = MarkupErrorElement(message)
+        zeml_node.parent = self.curnode
+        self.curnode.children.append(zeml_node)
+        self.curnode = zeml_node
+
+        self.end_node()
+        raise nodes.SkipNode
 
 

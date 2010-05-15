@@ -5,11 +5,9 @@
 
     This module implements the access to the redirect table.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from urlparse import urlparse
-
 from zine.application import get_application
 from zine.database import redirects, db
 from zine.utils.http import make_external_url

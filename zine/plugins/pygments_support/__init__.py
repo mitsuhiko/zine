@@ -5,7 +5,7 @@
 
     Adds support for pygments to pre code blocks.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from os.path import join, dirname
@@ -127,8 +127,7 @@ def get_formatter(style=None, preview=False):
         else:
             cls = 'syntax'
         style_cls = lookup_style(style)
-        formatter = HtmlFormatter(style=lookup_style(style),
-                                  cssclass=cls)
+        formatter = HtmlFormatter(style=style_cls, cssclass=cls)
     except ValueError:
         return None
     if not preview:

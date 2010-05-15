@@ -5,7 +5,7 @@
 
     Adds support for reStructuredText in posts.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from zine.i18n import lazy_gettext
@@ -107,7 +107,8 @@ class RstParser(BaseParser):
             for extension in self.app.markup_extensions:
                 if extension.is_block_level:
                     directives.register_directive(
-                        extension.name, make_extension_directive(self.app, extension))
+                        extension.name,
+                        make_extension_directive(self.app, extension))
                 else:
                     roles.register_local_role(
                         extension.name, make_extension_role(extension))

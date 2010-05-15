@@ -17,10 +17,10 @@
     </ul>
     {% if form.comments %}
     <div class="actions">
-      <div id="per_page" style="float: right;">
+      <div class="per_page">
         {{ form.per_page.label() }}
         {{ form.per_page() }}
-        <input type="submit" name="per_page_update" id="per_page_update" value="{{ _('Update') }}">
+        <input type="submit" name="per_page_update" value="{{ _('Update') }}">
       </div>
       {% if admin.active_pane == 'comments.unmoderated' %}
       <input type="submit" name="approve" value="{{ _('Approve') }}">
@@ -56,6 +56,7 @@
     </div>
     <script type="text/javascript">
       $(function() {
+        var ppuButton = $('input[name="per_page_update"]').hide();
         $('<input type="button" value="{{ _('Toggle selection') }}">')
           .click(function() {
             $('input.mark').each(function() {
@@ -64,9 +65,8 @@
           })
           .appendTo('div.actions');
         $('#f_per_page').bind('change', function() {
-          $('#per_page_update').click();
+          ppuButton.click();
         });
-        $('#per_page_update').hide();
       });
     </script>
     {% endif %}

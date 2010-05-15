@@ -35,7 +35,7 @@
     Plugin Metadata
     ---------------
 
-    To identify a plugin metadata are used. Zine requires a file
+    To identify a plugin metadata is used. Zine requires a file
     named `metadata.txt` to load some information about the plugin.
 
     Zine currently supports the following metadata information:
@@ -43,7 +43,7 @@
     :Name:
         The full name of the plugin.
     :Plugin URL:
-        The URL of the plugin (e.g download location)
+        The URL of the plugin (e.g download location).
     :Description:
         The full description of the plugin.
     :Author:
@@ -51,9 +51,9 @@
         Use the this field in the form of ``Name <author@webpage.xy>``
         where `Name` is the full name of the author.
     :Author URL:
-        The website of the plugin-author.
+        The website of the plugin author.
     :Contributors:
-        Add a list of all contributors seperated by a comma.
+        Add a list of all contributors separated by a comma.
         Use this field in the form of ``Name1 <n1@w1.xy>, Name2
         <n2@w2.xy>`` where `Name` is the full name of the author
         and the email is optional.
@@ -63,35 +63,32 @@
         *For themes only*
         A little preview of the theme deployed by the plugin.
     :Depends:
-        A list of plugins the plugin depends on.  All plugin-names will
-        be splitted by a comma and also named exactly as the depended plugin.
+        A list of plugins the plugin depends on.  All plugin names will
+        be split at a comma and also named exactly as the depended plugin.
         All plugins in this list will be activated if found but if one
-        is missed the admin will be informated about that and the plugin
+        is missing, the admin will be informed about that and the plugin
         won't be activated.
 
-    Each key can be suffixed with "[LANG_CODE]" for internationlization::
+    Each key can be suffixed with "[LANG_CODE]" for internationalization::
 
         Title: Example Plugin
         Title[de]: Beispielplugin
 
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import __builtin__
 import re
 import sys
-import imp
 import inspect
 from os import path, listdir, walk, makedirs
 from types import ModuleType
 from shutil import rmtree
 from time import localtime, time
-from cStringIO import StringIO
-from base64 import b64encode
 
 from urllib import quote
-from werkzeug import cached_property, escape, find_modules, import_string
+from werkzeug import cached_property, escape
 
 from zine.application import get_application
 from zine.utils import log
@@ -151,7 +148,7 @@ def find_plugins(app):
 
 def install_package(app, package):
     """Install a plugin from a package to the instance plugin folder."""
-    from zipfile import ZipFile, ZipInfo, error as BadZipFile
+    from zipfile import ZipFile, error as BadZipFile
     import py_compile
     try:
         f = ZipFile(package)
@@ -162,7 +159,7 @@ def install_package(app, package):
     try:
         package_version = int(f.read('ZINE_PACKAGE'))
         plugin_name = f.read('ZINE_PLUGIN')
-    except (KeyError, ValueError), e:
+    except (KeyError, ValueError):
         raise InstallationError('invalid')
 
     # check if the package version is handleable
@@ -211,7 +208,7 @@ def get_package_metadata(package):
     """Get the metadata of a plugin in a package. Pass it a filepointer or
     filename. Raises a `ValueError` if the package is not valid.
     """
-    from zipfile import ZipFile, ZipInfo, error as BadZipFile
+    from zipfile import ZipFile, error as BadZipFile
     try:
         f = ZipFile(package)
     except (IOError, BadZipFile):
@@ -221,7 +218,7 @@ def get_package_metadata(package):
     try:
         package_version = int(f.read('ZINE_PACKAGE'))
         plugin_name = f.read('ZINE_PLUGIN')
-    except (KeyError, ValueError), e:
+    except (KeyError, ValueError):
         raise ValueError('not a valid package')
     if package_version > PACKAGE_VERSION:
         raise ValueError('incompatible package version')

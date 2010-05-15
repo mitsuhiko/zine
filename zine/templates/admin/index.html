@@ -39,6 +39,7 @@
       {%- for draft in drafts %}
         <li><a href="{{ url_for('admin/edit_post',
           post_id=draft.id) }}">{{ draft.title|e }}</a>
+          <span class="meta">[<a href="{{ url_for(draft) }}">{{ _('show') }}</a>]</span>
       {%- endfor %}
       </ul>
       {% endif %}
@@ -51,6 +52,7 @@
           comment.author|e }}</a>,
           {{ comment.pub_date|datetimeformat('short') }}
           on <a href="{{ url_for(comment.post) }}">{%- if comment.post.title %}{{ comment.post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>
+          <span class="meta">[<a href="{{ url_for('admin/edit_post', post_id=comment.post.id) }}">{{ _('edit') }}</a>]</span>
           <p class="actions">
             <a href="{{ url_for('admin/edit_comment', comment_id=comment.id)|e
              }}">{{ _("Edit") }}</a> |
@@ -66,7 +68,9 @@
       <ul class="last_posts">
       {%- for post in last_posts %}
         <li><a href="{{ url_for('admin/edit_post', post_id=post.id)
-          }}">{%- if post.title %}{{ post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>, {{ post.pub_date|datetimeformat('short') }}
+          }}">{%- if post.title %}{{ post.title|e }}{%- else %}<em>#</em>{%- endif %}</a>
+          <span class="meta">[<a href="{{ url_for(post) }}">{{ _('show') }}</a>]</span>,
+          {{ post.pub_date|datetimeformat('short') }}
       {%- endfor %}
       </ul>
       {% endif %}
@@ -79,7 +83,7 @@
         subreddit are listed below:
         {% endtrans %}</p>
       <script type="text/javascript">
-	$('<div>').load('?load=reddit').appendTo('div.reddit');
+        $('<div>').load('?load=reddit').appendTo('div.reddit');
       </script>
     </div>
     {% endif %}

@@ -5,16 +5,15 @@
 
     Use Markdown for your blog posts.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from urlparse import urljoin
 
-from genshi.core import END, START, TEXT, QName, Attrs, Stream
+from genshi.core import END, START, TEXT, QName, Stream
 from genshi.builder import tag
 
 from creoleparser import create_dialect, creole11_base, Parser, parse_args
-from creoleparser.elements import BlockElement
 
 from werkzeug import url_quote
 

@@ -23,14 +23,14 @@
     do we emit trackbacks.
 
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import re
 from xmlrpclib import ServerProxy
 
 from werkzeug.routing import RequestRedirect, NotFound
-from werkzeug import escape, unescape
+from werkzeug import unescape
 
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment

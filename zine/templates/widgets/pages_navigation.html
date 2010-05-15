@@ -2,7 +2,7 @@
 {% block title %}{{ _('Navigation') }}{% endblock %}
 {% block body %}
   {%- if widget.pages %}
-  <ul class="pages_navigation">
+  <ul class="pages-navigation">
   {%- for item in widget.pages %}
     <li><a href="{{ url_for(item)|e }}">{{ item.title|e }}</a></li>
   {%- endfor %}

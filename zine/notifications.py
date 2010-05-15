@@ -9,7 +9,7 @@
     Each user can subscribe to different kinds of events.  The general design
     is inspired by Growl.
 
-    :copyright: (c) 2009 by the Zine Team, see AUTHORS for more details.
+    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
@@ -17,13 +17,13 @@ from urlparse import urlsplit
 
 from werkzeug import url_unquote
 
-from zine.models import NotificationSubscription, User
+from zine.models import NotificationSubscription
 from zine.application import get_application, get_request, render_template
 from zine.privileges import BLOG_ADMIN, ENTER_ACCOUNT_PANEL, MODERATE_COMMENTS,\
      MODERATE_OWN_PAGES, MODERATE_OWN_ENTRIES
-from zine.utils.zeml import parse_zeml, escape
+from zine.utils.zeml import parse_zeml
 from zine.utils.mail import send_email
-from zine.i18n import lazy_gettext, _
+from zine.i18n import lazy_gettext
 
 
 __all__ = ['DEFAULT_NOTIFICATION_TYPES', 'NotificationType']
