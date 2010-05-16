@@ -18,10 +18,11 @@ from zine.application import add_link, url_for, render_response, \
 from zine.models import Post, Category, User, Tag
 from zine.utils import dump_json, log
 from zine.utils.text import build_tag_uri
-from zine.utils.xml import generate_rsd, dump_xml, AtomFeed
+from zine.utils.xml import generate_rsd, dump_xml
 from zine.utils.http import redirect_to, redirect
 from zine.utils.redirects import lookup_redirect
 from zine.forms import NewCommentForm
+from zine.feeds import Rss201rev2Feed as RssFeed, Atom1Feed
 from werkzeug.exceptions import NotFound, Forbidden
 
 
@@ -335,14 +336,35 @@ def xml_service(req, identifier):
 @cache.response(vary=('user',))
 def atom_feed(req, author=None, year=None, month=None, day=None,
               category=None, tag=None, post=None):
+    feed = Atom1Feed(req.app.cfg['blog_title'], req.app.cfg['blog_url'],
+                    "", # Description not supported
+                    subtitle=req.app.cfg['blog_tagline'], feed_url=req.url)
+
+    results = populate_feed(req, feed, author, year, month, day, category,
+                         tag, post)
+
+    return Response(results, mimetype="application/atom+xml")
+
+
+@cache.response(vary=('user',))
+def rss_feed(req, author=None, year=None, month=None, day=None,
+              category=None, tag=None, post=None):
+    feed = RssFeed(req.app.cfg['blog_title'], req.app.cfg['blog_url'],
+                    "", # Description not supported
+                    subtitle=req.app.cfg['blog_tagline'], feed_url=req.url)
+
+    results = populate_feed(req, feed, author, year, month, day, category,
+                         tag, post)
+
+    return Response(results, mimetype="application/rss+xml")
+
+
+def populate_feed(req, feed, author=None, year=None, month=None, day=None,
+              category=None, tag=None, post=None):
     """Renders an atom feed requested.
 
     :URL endpoint: ``blog/atom_feed``
     """
-    feed = AtomFeed(req.app.cfg['blog_title'], feed_url=req.url,
-                    url=req.app.cfg['blog_url'],
-                    subtitle=req.app.cfg['blog_tagline'])
-
     # the feed only contains published items
     query = Post.query.lightweight(lazy=('comments',)).published()
 
@@ -371,12 +393,11 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
     if post is None:
         for post in query.for_index().order_by(Post.pub_date.desc()) \
                          .limit(15).all():
-            links = [link.as_dict() for link in post.links]
-            feed.add(post.title or '%s @ %s' % (post.author.display_name,
-                     post.pub_date), unicode(post.body), content_type='html',
-                     author=post.author.display_name, links=links,
-                     url=url_for(post, _external=True), id=post.uid,
-                     updated=post.last_update, published=post.pub_date)
+            alt_title = '%s @ %s' % (post.author.display_name, post.pub_date)
+            feed.add_item(post.title or alt_title,
+                          url_for(post, _external=True), unicode(post.body),
+                          author_name=post.author.display_name,
+                          pubdate=post.pub_date, unique_id=post.uid)
 
     # otherwise we create a feed for all the comments of a post.
     # the function is called this way by `dispatch_content_type`.
@@ -394,12 +415,12 @@ def atom_feed(req, author=None, year=None, month=None, day=None,
             author = {'name': comment.author}
             if comment.www:
                 author['uri'] = comment.www
-            feed.add(title, unicode(comment.body), content_type='html',
-                     author=author, url=url_for(comment, _external=True),
-                     id=uid, updated=comment.pub_date)
+            feed.add_item(title, url_for(comment, _external=True),
+                          unicode(comment.body), author_name=author,
+                          pubdate=comment.pub_date, unique_id=uid)
             comment_num += 1
 
-    return feed.get_response()
+    return feed.writeString('utf-8')
 
 
 @cache.response(vary=('user',))

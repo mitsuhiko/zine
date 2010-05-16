@@ -28,6 +28,7 @@ all_views = {
     'blog/json_service':        blog.json_service,
     'blog/xml_service':         blog.xml_service,
     'blog/atom_feed':           blog.atom_feed,
+    'blog/rss_feed':            blog.rss_feed,
     'blog/serve_translations':  i18n.serve_javascript,
 
     # account views

@@ -16,6 +16,12 @@ def make_urls(app):
     blog_urls = [
         Rule('/', defaults={'page': 1}, endpoint='blog/index'),
         Rule('/feed.atom', endpoint='blog/atom_feed'),
+        Submount('/feed', [
+            Rule('/', endpoint='blog/rss_feed'),
+            Rule('/rss', endpoint='blog/rss_feed'),
+            Rule('/rss2', endpoint='blog/rss_feed'),
+            Rule('/atom', endpoint='blog/atom_feed'),
+        ]),
         Rule('/page/<int:page>', endpoint='blog/index'),
         Rule('/archive', endpoint='blog/archive'),
         Submount(app.cfg['profiles_url_prefix'], [
@@ -23,17 +29,35 @@ def make_urls(app):
             Rule('/<string:username>', defaults={'page': 1}, endpoint='blog/show_author'),
             Rule('/<string:username>/page/<int:page>', endpoint='blog/show_author'),
             Rule('/<string:author>/feed.atom', endpoint='blog/atom_feed'),
+            Submount('/<string:author>/feed', [
+                Rule('/', endpoint='blog/rss_feed'),
+                Rule('/rss', endpoint='blog/rss_feed'),
+                Rule('/rss2', endpoint='blog/rss_feed'),
+                Rule('/atom', endpoint='blog/atom_feed'),
+            ]),
         ]),
         Submount(app.cfg['category_url_prefix'], [
             Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_category'),
             Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_category'),
-            Rule('/<string:category>/feed.atom', endpoint='blog/atom_feed')
+            Rule('/<string:category>/feed.atom', endpoint='blog/atom_feed'),
+            Submount('/<string:category>/feed', [
+                Rule('/', endpoint='blog/rss_feed'),
+                Rule('/rss', endpoint='blog/rss_feed'),
+                Rule('/rss2', endpoint='blog/rss_feed'),
+                Rule('/atom', endpoint='blog/atom_feed'),
+            ]),
         ]),
         Submount(app.cfg['tags_url_prefix'], [
             Rule('/', endpoint='blog/tags'),
             Rule('/<string:slug>', defaults={'page': 1}, endpoint='blog/show_tag'),
             Rule('/<string:slug>/page/<int:page>', endpoint='blog/show_tag'),
-            Rule('/<string:tag>/feed.atom', endpoint='blog/atom_feed')
+            Rule('/<string:tag>/feed.atom', endpoint='blog/atom_feed'),
+            Submount('/<string:tag>/feed', [
+                Rule('/', endpoint='blog/rss_feed'),
+                Rule('/rss', endpoint='blog/rss_feed'),
+                Rule('/rss2', endpoint='blog/rss_feed'),
+                Rule('/atom', endpoint='blog/atom_feed'),
+            ]),
         ]),
         Submount(app.cfg['account_url_prefix'], [
             Rule('/', endpoint='account/index'),
