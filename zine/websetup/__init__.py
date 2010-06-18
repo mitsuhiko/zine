@@ -186,8 +186,19 @@ class WebSetup(object):
         except Exception, error:
             error = str(error).decode('utf-8', 'ignore')
         else:
-            from zine.database import users, user_privileges, privileges
+            from zine.database import users, user_privileges, privileges, \
+                 schema_versions
             from zine.privileges import BLOG_ADMIN
+
+            # a newly created database has a schema version corresponding
+            # to the latest available version in the repository
+            from zine.upgrades import REPOSITORY_PATH
+            from zine.upgrades.customisation import Repository
+            repo = Repository(REPOSITORY_PATH, 'Zine')
+            e.execute(schema_versions.insert(),
+                      repository_id=repo.config.get('repository_id'),
+                      repository_path=repo.path,
+                      version=int(repo.latest))
 
             # create admin account
             user_id = e.execute(users.insert(),
@@ -199,12 +210,12 @@ class WebSetup(object):
                 extra={},
                 display_name='$username',
                 is_author=True
-            ).last_inserted_ids()[0]
+            ).inserted_primary_key[0]
 
             # insert a privilege for the user
             privilege_id = e.execute(privileges.insert(),
                 name=BLOG_ADMIN.name
-            ).last_inserted_ids()[0]
+            ).inserted_primary_key[0]
             e.execute(user_privileges.insert(),
                 user_id=user_id,
                 privilege_id=privilege_id

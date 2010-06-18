@@ -211,7 +211,8 @@ def mapper(cls, *args, **kwargs):
         cls.query = session.query_property(Query)
     old_init = getattr(cls, '__init__', None)
     def register_init(self, *args, **kwargs):
-        old_init(self, *args, **kwargs)
+        if old_init is not None:
+            old_init(self, *args, **kwargs)
         session.add(self)
     cls.__init__ = register_init
     return orm.mapper(cls, *args, **kwargs)
@@ -235,9 +236,8 @@ for mod in sqlalchemy, orm:
 del key, mod, value
 
 #: forward some session methods to the module as well
-for name in ('delete', 'flush', 'execute', 'begin', 'mapper',
-             'commit', 'rollback', 'refresh', 'expire',
-             'query_property'):
+for name in 'delete', 'flush', 'execute', 'begin',  'commit', 'rollback', \
+            'refresh', 'expire', 'query_property':
     setattr(db, name, getattr(session, name))
 
 # Some things changed names with SQLAlchemy 0.6.0
@@ -252,6 +252,7 @@ db.create_engine = create_engine
 db.session = session
 db.ZEMLParserData = ZEMLParserData
 db.mapper = mapper
+db.basic_mapper = orm.mapper
 db.association_proxy = association_proxy
 db.attribute_loaded = attribute_loaded
 db.AttributeExtension = AttributeExtension
@@ -262,6 +263,11 @@ cleanup_session = session.remove
 #: metadata for the core tables and the core table definitions
 metadata = db.MetaData()
 
+schema_versions = db.Table('schema_versions', metadata,
+    db.Column('repository_id', db.String(255), primary_key=True),
+    db.Column('repository_path', db.Text),
+    db.Column('version', db.Integer)
+)
 
 users = db.Table('users', metadata,
     db.Column('user_id', db.Integer, primary_key=True),

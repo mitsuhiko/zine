@@ -20,11 +20,12 @@ from subprocess import call
 
 # requirements without lxml, because lxml is special for OS X
 REQUIREMENTS = [
-    'Werkzeug>=0.4',
+    'Werkzeug>=0.6',
     'Jinja2>=2.1',
-    'SQLAlchemy==dev',
+    'SQLAlchemy>=0.6',
     'pytz',
-    'Babel>=0.9.4'
+    'Babel>=0.9.4',
+    'sqlalchemy-migrate>=0.6'
 ]
 
 # for python 2.5 we want simplejson installed too.
@@ -38,7 +39,7 @@ if sys.platform == 'darwin':
     print '=' * 60
     print 'It appears that you are using OS X.  If an installation error'
     print 'occurs on installing lxml, please make sure you have port'
-    print 'installed.
+    print 'installed.'
     print '=' * 60
 
     # no idea if that actually helps, but let's hope it does :D

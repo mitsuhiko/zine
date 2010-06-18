@@ -17,7 +17,7 @@ from werkzeug.exceptions import NotFound
 from zine.database import users, categories, posts, post_links, \
      post_categories, post_tags, tags, comments, groups, group_users, \
      privileges, user_privileges, group_privileges, texts, \
-     notification_subscriptions, db
+     notification_subscriptions, schema_versions, db
 from zine.utils import zeml
 from zine.utils.text import gen_slug, gen_timestamped_slug, build_tag_uri, \
      increment_string
@@ -176,6 +176,17 @@ class UserQuery(db.Query):
 
     def authors(self):
         return self.filter_by(is_author=True)
+
+
+class SchemaVersion(object):
+    """Represents a database schema version."""
+
+    query = db.query_property(db.Query)
+
+    def __init__(self, repos, version=0):
+        self.repository_id = repos.config.get('repository_id')
+        self.repository_path = repos.path
+        self.version = version
 
 
 class User(object):
@@ -1264,6 +1275,7 @@ class NotificationSubscription(object):
 
 
 # connect the tables.
+db.mapper(SchemaVersion, schema_versions)
 db.mapper(User, users, properties={
     'id':               users.c.user_id,
     'display_name':     db.synonym('_display_name', map_column=True),

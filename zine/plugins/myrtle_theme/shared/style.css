@@ -7,6 +7,16 @@ body {
     text-align: justify;
 }
 
+body:after { /* fix for chrome bug */
+    content: "";
+    display: block;
+    position: absolute;
+    height: 100%;
+    width: 1px;
+    top: 0;
+    left: 0;
+}
+
 a {
     color: #21421e;
     text-decoration: none;
