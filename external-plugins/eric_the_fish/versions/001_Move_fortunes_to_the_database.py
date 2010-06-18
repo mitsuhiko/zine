@@ -12,7 +12,7 @@ fortunes = db.Table('eric_the_fish_fortunes', metadata,
 
 # Define the objects here
 class Fortune(object):
-    query = db.query_property(db.Query)
+
     def __init__(self, text):
         self.text = text
 
