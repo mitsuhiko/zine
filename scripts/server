@@ -35,7 +35,7 @@ def _make_root_app(real_location):
 
 def main():
     parser = OptionParser(usage='%prog [options]')
-    parser.add_option('--hostname', '-a', dest='hostname', default='localhost')
+    parser.add_option('--hostname', '-a', dest='hostname', default='127.0.0.1')
     parser.add_option('--port', '-p', dest='port', type='int', default=4000)
     parser.add_option('--no-reloader', dest='reloader', action='store_false',
                       default=True, help='Disable the reloader')
