@@ -11,13 +11,52 @@
 
 $(function() {
   // fade in messages
-  var messages = $('div.message').hide().fadeIn('slow');
-  window.setTimeout(function() {
-    messages.each(function() {
-      if (!$(this).is('.message-error'))
-        $(this).animate({height: 'hide', opacity: 'hide'}, 'slow');
+  (function() {
+    var shuttingDown = false;
+    var hiddenMsg = null, left, top, right, bottom;
+    var messages = $('div.message').hide().fadeIn('slow');
+
+    function fadeInMsg() {
+      hiddenMsg.css('visibility', 'visible').animate({opacity: '1.0'});
+      hiddenMsg = null;
+    }
+
+    messages.mouseenter(function() {
+      if (shuttingDown && !$(this).is('.message-error'))
+        return;
+      if (hiddenMsg)
+        fadeInMsg();
+      var msg = $(this);
+      var pos = msg.offset();
+      left = pos.left - 2, top = pos.top - 2;
+      right = left + msg.width() + parseInt(msg.css('padding-left')) +
+              parseInt(msg.css('padding-right')) + 4;
+      bottom = top + msg.height() + parseInt(msg.css('padding-top')) +
+               parseInt(msg.css('padding-bottom')) + 4;
+      msg.animate({opacity: '0.01'}, 'fast', function() {
+        hiddenMsg = msg;
+        hiddenMsg.css('visibility', 'hidden');
+      });
     });
-  }, 8000);
+
+    $(document).mousemove(function(evt) {
+      if (!hiddenMsg)
+        return;
+      if (evt.clientX < left || evt.clientX > right ||
+          evt.clientY < top || evt.clientY > bottom)
+        fadeInMsg();
+    });
+
+    window.setTimeout(function() {
+      msg = null;
+      shuttingDown = true;
+      messages.each(function() {
+        if (!$(this).is('.message-error')) {
+          $(this).animate({height: 'hide', opacity: 'hide'}, 'slow');
+        }
+      });
+    }, 8000);
+  })();
 
   // support for toggleable sections
   $('div.toggleable').each(function() {

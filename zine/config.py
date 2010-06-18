@@ -27,69 +27,71 @@ from zine.application import InternalError
 
 _dev_mode = environment.MODE == 'development'
 
+l_ = lazy_gettext
+
 #: variables the zine core uses
 DEFAULT_VARS = {
     # core system settings
-    'database_uri':             TextField(default=u'', help_text=lazy_gettext(
+    'database_uri':             TextField(default=u'', help_text=l_(
         u'The database URI.  For more information about database settings '
         u'consult the Zine help.')),
-    'force_https':              BooleanField(default=False, help_text=lazy_gettext(
+    'force_https':              BooleanField(default=False, help_text=l_(
         u'If a request to an http URL comes in, Zine will redirect to the same '
-        u'URL on https if this is savely possible.  This requires a working '
-        u'SSL setup or otherwise Zine will become unresponsive.')),
-    'database_debug':           BooleanField(default=False, help_text=lazy_gettext(
-        u'If enabled the database will collect the SQL statements and add them '
-        u'to the bottom of the page for easier debugging')),
-    'blog_title':               TextField(default=lazy_gettext(u'My Zine Blog')),
-    'blog_tagline':             TextField(default=lazy_gettext(u'just another Zine blog')),
-    'blog_url':                 TextField(default=u'', help_text=lazy_gettext(
+        u'URL on https if this is safely possible.  This requires a working '
+        u'SSL setup, otherwise Zine will become unresponsive.')),
+    'database_debug':           BooleanField(default=False, help_text=l_(
+        u'If enabled, the database will collect all SQL statements and add '
+        u'them to the bottom of the page for easier debugging.')),
+    'blog_title':               TextField(default=l_(u'My Zine Blog')),
+    'blog_tagline':             TextField(default=l_(u'just another Zine blog')),
+    'blog_url':                 TextField(default=u'', help_text=l_(
         u'The base URL of the blog.  This has to be set to a full canonical URL '
-        u'(including http or https).  If not set the application will behave '
+        u'(including http or https).  If not set, the application will behave '
         u'confusingly.  Remember to change this value if you move your blog '
         u'to a new location.')),
-    'blog_email':               TextField(default=u'', help_text=lazy_gettext(
+    'blog_email':               TextField(default=u'', help_text=l_(
         u'The email address given here is used by the notification system to send '
-        u'mails from.  Also plugins that send mails will use this address as '
-        u'sender address.'), validators=[is_valid_email()]),
+        u'emails from.  Also plugins that send mails will use this address as '
+        u'the sender address.'), validators=[is_valid_email()]),
     'timezone':                 ChoiceField(choices=sorted(list_timezones()),
-        default=u'UTC', help_text=lazy_gettext(
+        default=u'UTC', help_text=l_(
         u'The timezone of the blog.  All times and dates in the user interface '
         u'and on the website will be shown in this timezone.  It\'s save to '
-        u'change the timezone after posts were created because the information '
+        u'change the timezone after posts are created because the information '
         u'in the database is stored as UTC.')),
-    'primary_author':           TextField(default=u'', help_text=lazy_gettext(
+    'primary_author':           TextField(default=u'', help_text=l_(
         u'If this blog is written primarily by one author, some themes can ' \
         u'skip the author\'s name on posts unless written by a guest.')),
-    'maintenance_mode':         BooleanField(default=False, help_text=lazy_gettext(
-        u'If set to true the blog enables the maintainance mode.')),
+    'maintenance_mode':         BooleanField(default=False, help_text=l_(
+        u'If set to true, the blog enables the maintainance mode.')),
     'session_cookie_name':      TextField(default=u'zine_session',
-        help_text=lazy_gettext(u'If there are multiple zine installations on '
-        u'the same host the cookie name should be set to something different '
+        help_text=l_(u'If there are multiple Zine installations on '
+        u'the same host, the cookie name should be set to something different '
         u'for each blog.')),
     'theme':                    TextField(default=u'default'),
-    'secret_key':               TextField(default=u'', help_text=lazy_gettext(
-        u'The secret key is used for vairous security related tasks in the '
-        u'system.  For example the cookie is signed with this value.')),
+    'secret_key':               TextField(default=u'', help_text=l_(
+        u'The secret key is used for various security related tasks in the '
+        u'system.  For example, the cookie is signed with this value.')),
     'language':                 ChoiceField(choices=list_languages(False),
                                             default=u'en'),
 
-    'iid':                      TextField(default=u'', help_text=lazy_gettext(
+    'iid':                      TextField(default=u'', help_text=l_(
         u'The iid uniquely identifies the Zine instance.  Currently this '
         u'value is unused, but once set you should not modify it.')),
 
     # log and development settings
     'log_file':                 TextField(default=u'zine.log'),
-    'log_level':                ChoiceField(choices=[(k, lazy_gettext(k)) for k, v
+    'log_level':                ChoiceField(choices=[(k, l_(k)) for k, v
                                                 in sorted(log.LEVELS.items(),
                                                           key=lambda x: x[1])],
                                             default=u'warning'),
     'log_email_only':           BooleanField(default=_dev_mode,
-        help_text=lazy_gettext(u'During development this is helpful to '
+        help_text=l_(u'During development activating this is helpful to '
         u'log emails into a mail.log file in your instance folder instead '
         u'of delivering them to your MTA.')),
     'passthrough_errors':       BooleanField(default=_dev_mode,
-        help_text=lazy_gettext(u'If this is set to true, errors in Zine '
-        u'are not catched so that debuggers can catch it instead.  This is '
+        help_text=l_(u'If this is set to true, errors in Zine '
+        u'are not caught so that debuggers can catch it instead.  This is '
         u'useful for plugin and core development.')),
 
     # url settings
@@ -107,13 +109,13 @@ DEFAULT_VARS = {
                                           validators=[is_valid_url_prefix()]),
     'post_url_format':          TextField(default=u'%year%/%month%/%day%/%slug%',
                                           validators=[is_valid_url_format()],
-                                          help_text=lazy_gettext(
+                                          help_text=l_(
         u'Use %year%, %month%, %day%, %hour%, %minute% and %second%. '
         u'Changes here will only affect new posts.')),
-    'ascii_slugs':              BooleanField(default=True, help_text=lazy_gettext(
+    'ascii_slugs':              BooleanField(default=True, help_text=l_(
         u'Automatically generated slugs are limited to ASCII')),
     'fixed_url_date_digits':    BooleanField(default=False,
-                                     help_text=lazy_gettext(u'Dates are zero '
+                                     help_text=l_(u'Dates are zero '
                                      u'padded like 2009/04/22 instead of '
                                      u'2009/4/22')),
 
@@ -121,10 +123,10 @@ DEFAULT_VARS = {
     'enable_eager_caching':     BooleanField(default=False),
     'cache_timeout':            IntegerField(default=300, min_value=10),
     'cache_system':             ChoiceField(choices=[
-        (u'null', lazy_gettext(u'No Cache')),
-        (u'simple', lazy_gettext(u'Simple Cache')),
-        (u'memcached', lazy_gettext(u'memcached')),
-        (u'filesystem', lazy_gettext(u'Filesystem'))
+        (u'null', l_(u'No Cache')),
+        (u'simple', l_(u'Simple Cache')),
+        (u'memcached', l_(u'memcached')),
+        (u'filesystem', l_(u'Filesystem'))
     ], default=u'null'),
     'memcached_servers':        CommaSeparated(TextField(
                                                     validators=[is_netaddr()]),
@@ -141,19 +143,20 @@ DEFAULT_VARS = {
     # comments and pingback
     'comments_enabled':         BooleanField(default=True),
     'moderate_comments':        ChoiceField(choices=[
-        (0, lazy_gettext(u'Automatically approve all comments')),
-        (1, lazy_gettext(u'An administrator must always approve the comment')),
-        (2, lazy_gettext(u'Automatically approve comments by known comment authors'))
+        (0, l_(u'Automatically approve all comments')),
+        (1, l_(u'An administrator must always approve the comment')),
+        (2, l_(u'Automatically approve comments by known comment authors'))
                                             ], default=1),
-    'comments_open_for':        IntegerField(default=0, help_text=lazy_gettext(
+    'comments_open_for':        IntegerField(default=0, help_text=l_(
         u'The number of days commenting is possible.  If set to zero, comments '
         u'will be open forever.')),
     'pings_enabled':            BooleanField(default=True),
-    'plaintext_parser_nolinks': BooleanField(default=False, help_text=lazy_gettext(
-        u'If set to true, the plaintext parser will not create links automatically.')),
+    'plaintext_parser_nolinks': BooleanField(default=False, help_text=l_(
+        u'If set to true, the plaintext parser will not create links '
+        u'automatically.')),
 
     # post view
-    'posts_per_page':           IntegerField(default=10, help_text=lazy_gettext(
+    'posts_per_page':           IntegerField(default=10, help_text=l_(
         u'The number of posts that are shown on a page.  This value might not be '
         u'honored by some themes and is probably only used for the index page.')),
     'use_flat_comments':        BooleanField(default=False),
@@ -172,24 +175,25 @@ DEFAULT_VARS = {
     'smtp_use_tls':             BooleanField(default=False),
 
     # network settings
-    'default_network_timeout':  IntegerField(default=5, help_text=lazy_gettext(
+    'default_network_timeout':  IntegerField(default=5, help_text=l_(
         u'This timeout is used by default for all network related operations. '
         u'The default should be fine for most environments but if you have a '
-        u'very bad network connection during development you should increase it.')),
+        u'very bad network connection during development you should increase '
+        u'it.')),
 
     # plugin settings
     'plugin_guard':             BooleanField(default=not _dev_mode),
     'plugins':                  CommaSeparated(TextField(), default=list),
     'plugin_searchpath':        CommaSeparated(TextField(), default=list,
-        help_text=lazy_gettext(u'It\'s possible to one or more comma '
-        u'separated paths here that are searched for plugins.  If the '
+        help_text=l_(u'It\'s possible to put one or more comma '
+        u'separated paths here that are searched for plugins.  If a path '
         u'is not absolute, it\'s considered relative to the instance '
         u'folder.')),
 
     #admin settings
     'dashboard_reddit':         BooleanField(default=True, help_text=
-        lazy_gettext(u'Set this to true if you want to see the most recent '
-        u'entries on the Zine reddit on your dashbaord.'))
+        l_(u'Set this to true if you want to see the most recent '
+        u'entries on the Zine reddit on your dashboard.'))
 }
 
 HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',

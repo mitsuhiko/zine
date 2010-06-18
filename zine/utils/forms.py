@@ -1249,10 +1249,9 @@ class TextField(Field):
 
     def convert(self, value):
         value = _to_string(value)
-        if self.required:
-            if not value:
-                raise ValidationError(self.messages['required'])
-        elif value:
+        if self.required and not value:
+            raise ValidationError(self.messages['required'])
+        if value:
             if self.min_length is not None and len(value) < self.min_length:
                 message = self.messages['too_short']
                 if message is None:

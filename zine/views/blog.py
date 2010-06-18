@@ -61,7 +61,7 @@ def archive(req, year=None, month=None, day=None, page=1):
             a pagination object to render a pagination
 
         `year` / `month` / `day`:
-            integers or None, useful to entitle the page.
+            integers or None, useful to entitle the page
 
     :Template name: ``archive.html``
     :URL endpoint: ``blog/archive``
@@ -98,7 +98,7 @@ def show_category(req, slug, page=1):
             a pagination object to render a pagination
 
         `category`
-            the category object for this page.
+            the category object for this page
 
     :Template name: ``show_category.html``
     :URL endpoint: ``blog/show_category``
@@ -127,7 +127,7 @@ def show_tag(req, slug, page=1):
             a pagination object to render a pagination
 
         `tag`
-            the tag object for this page.
+            the tag object for this page
 
     :Template name: ``show_tag.html``
     :URL endpoint: ``blog/show_tag``
@@ -152,7 +152,7 @@ def tags(req):
 
         `tags`:
             list of tag summaries that contain the size of the cloud
-            item, the name of the tag and it's slug
+            item, the name of the tag and its slug
 
     :Template name: ``tags.html``
     :URL endpoint: ``blog/tags``
@@ -168,13 +168,13 @@ def show_author(req, username, page=1):
 
         `posts`:
             a list of post objects this author wrote and are
-            visible on this page.
+            visible on this page
 
         `pagination`:
             a pagination object to render a pagination
 
         `user`
-            The user object for this author
+            the user object for this author
 
     :Template name: ``show_author.html``
     :URL endpoint: ``blog/show_author``
@@ -202,7 +202,7 @@ def authors(req):
     Available template variables:
 
         `authors`:
-            list of author objects to display.
+            list of author objects to display
 
     :Template name: ``authors.html``
     :URL endpoint: ``blog/authors``
@@ -219,15 +219,15 @@ def show_entry(req, post, comment_form):
     Available template variables:
 
         `post`:
-            The post object we display.
+            the post object we display
 
         `form`:
-            A dict of form values (name, email, www and body)
+            a dict of form values (name, email, www and body)
 
         `errors`:
-            List of error messages that occurred while posting the
-            comment. If empty the form was not submitted or everyhing
-            worked well.
+            list of error messages that occurred while posting the
+            comment, if empty the form was not submitted or everything
+            worked well
 
     Events emitted:
 

@@ -20,6 +20,7 @@ KEYWORDS = {
     '_': None,
     'gettext': None,
     'ngettext': (1, 2),
+    'l_': None,
     'lazy_gettext': None,
     'lazy_ngettext': (1, 2)
 }

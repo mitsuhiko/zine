@@ -391,7 +391,7 @@ class TemplateEventResult(list):
 
 
 class Theme(object):
-    """Represents a theme and is created automaticall by `add_theme`"""
+    """Represents a theme and is created automatically by `add_theme`."""
     app = None
 
     def __init__(self, name, template_path, metadata=None,
@@ -426,7 +426,7 @@ class Theme(object):
 
     @property
     def description(self):
-        """Return the description of the plugin."""
+        """Return the description of the theme."""
         return self.metadata.get('description', u'')
 
     @property
@@ -436,7 +436,7 @@ class Theme(object):
 
     @property
     def author_info(self):
-        """The author, mail and author URL of the plugin."""
+        """The author, mail and author URL of the theme."""
         from zine.utils.mail import split_email
         return split_email(self.metadata.get('author', u'Nobody')) + \
                (self.metadata.get('author_url'),)
@@ -462,12 +462,12 @@ class Theme(object):
 
     @property
     def author_email(self):
-        """Return the author email address of the plugin."""
+        """Return the author email address of the theme."""
         return self.author_info[1]
 
     @property
     def author_url(self):
-        """Return the URL of the author of the plugin."""
+        """Return the URL of the author of the theme."""
         return self.author_info[2]
 
     @cached_property
@@ -611,10 +611,10 @@ class ThemeLoader(BaseLoader):
 class Zine(object):
     """The central application object.
 
-    Even though the :class:`Zine` class is a regular Python class, you
-    can't create instances by using the regular constructor.  The only
-    documented way to create this class is the :func:`make_zine`
-    function or by using one of the dispatchers created by :func:`make_app`.
+    Even though the :class:`Zine` class is a regular Python class, you can't
+    create instances by using the regular constructor.  The only documented way
+    to create this class is the :func:`zine._core.setup` function or by using
+    one of the dispatchers created by :func:`zine._core.get_wsgi_app`.
     """
 
     _setup_only = []
@@ -628,10 +628,10 @@ class Zine(object):
         return f
 
     def __init__(self, instance_folder):
-        # this check ensures that only make_app can create Zine instances
+        # this check ensures that only setup() can create Zine instances
         if get_application() is not self:
             raise TypeError('cannot create %r instances. use the '
-                            'make_zine factory function.' %
+                            'zine._core.setup() factory function.' %
                             self.__class__.__name__)
         self.instance_folder = path.abspath(instance_folder)
         self.upgrade_lockfile = path.join(instance_folder,
@@ -1348,7 +1348,7 @@ class Zine(object):
                     response = _redirect(url_for('account/login',
                                                  next=request.path))
         except HTTPException, e:
-            response = e.get_response(request)
+            response = e.get_response(request.environ)
         except SQLAlchemyError, e:
             # Some database screwup?! Don't let Zine stay dispatching 500's
             db.session.rollback()

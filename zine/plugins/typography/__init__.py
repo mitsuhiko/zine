@@ -16,10 +16,10 @@ import re
 from os.path import dirname, join
 from zine.api import *
 from zine.privileges import BLOG_ADMIN
-from zine.views.admin import require_privilege, render_admin_response, \
-     flash
 from zine.utils.http import redirect_to
+from zine.utils.admin import require_admin_privilege, flash
 from zine.utils import forms
+from zine.views.admin import render_admin_response
 
 
 TEMPLATES = join(dirname(__file__), 'templates')
@@ -129,7 +129,7 @@ def add_config_link(req, navigation_bar):
                                     _('Typography')))
 
 
-@require_privilege(BLOG_ADMIN)
+@require_admin_privilege(BLOG_ADMIN)
 def show_config(req):
     """The configuration form."""
     form = ConfigurationForm(initial=dict((k, req.app.cfg['typography/' + k])
