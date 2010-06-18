@@ -4,7 +4,8 @@
 {% block title %}{% if form.post.title %}{{ form.post.title|e }} — {%
   endif %}&#8203;{{ title_suffix }}{% endblock %}
 {% block contents %}
-  <h1>{{ self.title() }}</h1>
+  <h1>{{ self.title() }}{% if not form.new %} <a href="{{ url_for(form.post)
+    }}" class="preview">{{ _("View Entry") }}</a>{% endif %}</h1>
   {% if form.preview %}
     <div class="preview" id="preview">
       <h2 class="title">{{ _('Preview') }} (<a href="#post_form">{{ _('skip') }}</a>)</h2>

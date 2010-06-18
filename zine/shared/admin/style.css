@@ -6,6 +6,16 @@ body {
     background-color: #316081;
 }
 
+body:after { /* fix for chrome bug */
+    content: "";
+    display: block;
+    position: absolute;
+    height: 100%;
+    width: 1px;
+    top: 0;
+    left: 0;
+}
+
 ::-moz-selection {
     background-color: #D0DFF0;
     color: #456981;
@@ -209,6 +219,13 @@ div.contents h1 {
     font-weight: normal;
     border-bottom: 1px solid #eee;
     text-shadow: 0 1px 3px #D3E3F3;
+}
+
+div.contents h1 a {
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 15px;
+    margin: 5px 10px 0 0;
+    float: right;
 }
 
 div.contents h2 {
