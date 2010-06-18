@@ -4,7 +4,7 @@ Zine 0.1 Installation Instructions
 For a working Zine instance you need to have the following libraries
 installed:
 
-- Python* 2.4 or highe
+- Python* 2.4 or higher
 - Werkzeug* 0.6 or higher
 - Jinja2*
 - A database (MySQL, SQLite or PostgreSQL and others are supported)
