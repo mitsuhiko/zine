@@ -29,7 +29,7 @@ def upgrade(migrate_engine):
     session = scoped_session(lambda: create_session(migrate_engine,
                                                     autoflush=True,
                                                     autocommit=False))
-    map_tables(session.mapper)
+    map_tables(db.basic_mapper)
     metadata.bind = migrate_engine
     if not fortunes.exists():
         fortunes.create(migrate_engine)
@@ -50,7 +50,7 @@ def downgrade(migrate_engine):
     session = scoped_session(lambda: create_session(migrate_engine,
                                                     autoflush=True,
                                                     autocommit=False))
-    map_tables(session.mapper)
+    map_tables(db.basic_mapper)
     yield '<p>Removing the fortunes from the database</p>\n'
 
     metadata.bind = migrate_engine

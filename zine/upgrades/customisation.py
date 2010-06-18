@@ -13,7 +13,8 @@ import warnings
 from os import listdir
 from os.path import dirname, join
 
-from migrate.versioning import api, base, exceptions
+from migrate.versioning import api, exceptions
+from migrate.versioning.config import operations as migrate_ops
 from migrate.versioning.repository import Repository as MigrateRepository
 from migrate.versioning.script.py import PythonScript as MigratePythonScript
 from migrate.versioning.schema import (ControlledSchema as
@@ -86,7 +87,7 @@ def downgrade(migrate_engine):
             op = 'downgrade'
         else:
             raise exceptions.ScriptError("%d is not a valid step" % step)
-        funcname = base.operations[op]
+        funcname = migrate_ops[op]
         script_func = self._func(funcname)
         try:
             #script_func(engine)

@@ -24,6 +24,8 @@ from migrate.versioning import api
 from migrate.versioning.util import construct_engine
 from migrate.versioning.exceptions import KnownError
 
+from werkzeug.utils import escape
+
 from zine import __version__ as VERSION, setup
 # imported for side-effects
 from zine.upgrades import customisation
@@ -213,7 +215,7 @@ class ManageDatabase(object):
                     yield message
             except Exception, msg:
                 yield '<p>error upgrading %s: ' % sv.repository_id
-                yield str(msg)
+                yield escape(str(msg).decode('utf-8', 'ignore'))
                 yield '</p>\n'
 
     def cmd_downgrade(self, repo_id, version=None, **opts):
@@ -236,7 +238,7 @@ class ManageDatabase(object):
                 yield message
         except Exception, msg:
             yield '<p>error downgrading %s: ' % repo_id
-            yield str(msg)
+            yield escape(str(msg).decode('utf-8', 'ignore'))
             yield '</p>\n'
 
     def _migrate(self, repository, version, upgrade, **opts):
