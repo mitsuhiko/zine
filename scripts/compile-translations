@@ -4,9 +4,8 @@
     Compile translations
     ~~~~~~~~~~~~~~~~~~~~
 
-    Compile translations into pickles containing the translated messages.
-    We do not use standard MO files because we have to store additional
-    information in those files.
+    Compile translations into (almost) standard MO files and append pickled
+    translations for client-side usage by javascript code.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
@@ -47,7 +46,7 @@ def main():
             parser.error('i18n folder missing')
         print 'Compiling', root
     else:
-        parser.error('incorrent number of arguments')
+        parser.error('incorrect number of arguments')
 
     for domain in domains:
         for lang in listdir(root):
@@ -95,9 +94,9 @@ def main():
                 else:
                     print
 
-                # Dump pickled data into standard catalog
+                # Dump pickled data at the end of the standard catalog
                 pickle.dump(client_messages, mo_file, 2)
-                # Write the pickled data pointer position
+                # Write offset of the start of the pickled data
                 mo_file.write(struct.pack('i', pickled_data_pointer_pos))
                 mo_file.close()
     print 'All done.'

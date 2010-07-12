@@ -36,7 +36,7 @@ def main():
     elif len(args) == 1:
         instance = args[0]
     else:
-        parser.error('incorrent number of arguments')
+        parser.error('incorrect number of arguments')
 
     print 'Resetting instance', instance
 

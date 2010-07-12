@@ -54,7 +54,7 @@ def main():
             parser.error('source folder missing')
         print 'Extracting from', root
     else:
-        parser.error('incorrent number of arguments')
+        parser.error('incorrect number of arguments')
 
     catalog = Catalog(msgid_bugs_address=BUGS_ADDRESS,
                       copyright_holder=COPYRIGHT, charset='utf-8')

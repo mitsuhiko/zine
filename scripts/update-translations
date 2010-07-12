@@ -37,7 +37,7 @@ def main():
             parser.error('source folder missing')
         print 'Updating', root
     else:
-        parser.error('incorrent number of arguments')
+        parser.error('incorrect number of arguments')
 
     if options.locale:
         for domain in domains:
