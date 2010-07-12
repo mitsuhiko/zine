@@ -4,7 +4,8 @@
     Update the translations
     ~~~~~~~~~~~~~~~~~~~~~~~
 
-    Update the translations from the POT.
+    This script updates the translations of the main application or a plugin
+    from a POT file.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
@@ -18,6 +19,10 @@ from babel.messages.pofile import write_po, read_po
 
 domains = ['messages']
 
+app_dir = 'zine'
+i18n_dir = 'i18n'
+app_path = path.realpath(path.join(path.dirname(__file__), path.pardir, app_dir))
+
 
 def main():
     global parser
@@ -29,10 +34,9 @@ def main():
     options, args = parser.parse_args()
     if not args:
         print 'Updating core strings'
-        root = path.abspath(path.join(path.dirname(__file__),
-                                      path.pardir, 'zine', 'i18n'))
+        root = path.join(app_path, i18n_dir)
     elif len(args) == 1:
-        root = path.join(path.abspath(args[0]), 'i18n')
+        root = path.join(path.abspath(args[0]), i18n_dir)
         if not path.isdir(root):
             parser.error('source folder missing')
         print 'Updating', root

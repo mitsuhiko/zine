@@ -4,13 +4,12 @@
     Add new Translation
     ~~~~~~~~~~~~~~~~~~~
 
-    This script adds a new translation to Zine or a Zine plugin.
+    This script adds a new translation to the main application or a plugin.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from os import makedirs
-from os.path import dirname, join, realpath, pardir, isdir, isfile
+from os import path, makedirs
 from optparse import OptionParser
 from datetime import datetime
 from babel import Locale, UnknownLocaleError
@@ -18,7 +17,11 @@ from babel.messages import Catalog
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
 
-zine = realpath(join(dirname(__file__), '..', 'zine'))
+app_dir = 'zine'
+i18n_dir = 'i18n'
+app_path = path.realpath(path.join(path.dirname(__file__), path.pardir, app_dir))
+app_i18n_path = path.join(app_path, i18n_dir)
+
 
 def main():
     global parser
@@ -56,10 +59,10 @@ def create_from_pot(locale, path):
 
 
 def write_catalog(catalog, folder):
-    target = join(folder, str(catalog.locale))
-    if not isdir(target):
+    target = path.join(folder, str(catalog.locale))
+    if not path.isdir(target):
         makedirs(target)
-    f = file(join(target, 'messages.po'), 'w')
+    f = file(path.join(target, 'messages.po'), 'w')
     try:
         write_po(f, catalog, width=79)
     finally:
@@ -67,18 +70,18 @@ def write_catalog(catalog, folder):
 
 
 def create_application_lang(locale):
-    catalog = create_from_pot(locale, join(zine, 'i18n', 'messages.pot'))
-    write_catalog(catalog, join(zine, 'i18n'))
+    catalog = create_from_pot(locale, path.join(app_i18n_path, 'messages.pot'))
+    write_catalog(catalog, app_i18n_path)
     print 'Created catalog for %s' % locale
 
 
 def create_plugin_lang(locale, path):
-    catalog = create_from_pot(locale, join(path, 'i18n', 'messages.pot'))
+    catalog = create_from_pot(locale, path.join(path, i18n_dir, 'messages.pot'))
 
     # incorporate existing translations from the application
-    zinepath = join(zine, 'i18n', str(locale), 'messages.po')
-    if isfile(zinepath):
-        f = file(zinepath)
+    app_messages = path.join(app_i18n_path, str(locale), 'messages.po')
+    if path.isfile(app_messages):
+        f = file(app_messages)
         try:
             translated = read_po(f)
         finally:
@@ -88,7 +91,7 @@ def create_plugin_lang(locale, path):
             if message.id and message.id in catalog:
                 catalog[message.id].string = message.string
 
-    write_catalog(catalog, join(path, 'i18n'))
+    write_catalog(catalog, path.join(path, i18n_dir))
     print 'Created catalog for %s' % locale
 
 

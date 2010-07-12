@@ -4,20 +4,26 @@
     Compile translations
     ~~~~~~~~~~~~~~~~~~~~
 
-    Compile translations into (almost) standard MO files and append pickled
-    translations for client-side usage by javascript code.
+    This script compiles translations of the main application or a plugin.
+    It writes standard MO files and then appends pickled translations for
+    client-side usage by javascript code.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
 import pickle
 import struct
-from os import listdir, path
+from os import path, listdir
 from optparse import OptionParser
 from babel.messages.pofile import read_po
 from babel.messages.mofile import write_mo
 
 domains = ['messages']
+
+app_dir = 'zine'
+i18n_dir = 'i18n'
+app_path = path.realpath(path.join(path.dirname(__file__), path.pardir, app_dir))
+app_i18n_path = path.join(app_path, i18n_dir)
 
 
 def is_untranslated(obj):
@@ -38,12 +44,11 @@ def main():
     options, args = parser.parse_args()
     if not args:
         print 'Compiling builtin languages'
-        root = path.abspath(path.join(path.dirname(__file__),
-                                      path.pardir, 'zine', 'i18n'))
+        root = app_i18n_path
     elif len(args) == 1:
-        root = path.join(path.abspath(args[0]), 'i18n')
+        root = path.join(path.abspath(args[0]), i18n_dir)
         if not path.isdir(root):
-            parser.error('i18n folder missing')
+            parser.error('%s folder missing' % i18n_dir)
         print 'Compiling', root
     else:
         parser.error('incorrect number of arguments')
