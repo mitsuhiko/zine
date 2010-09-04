@@ -17,7 +17,14 @@
         <div class="detail">
           <blockquote><p>{{ theme.description|e }}</p></blockquote>
           {%- if theme.has_author %}
-            <p class="author">{% trans author=theme.html_author_info %}by {{ author }}{% endtrans %}</p>
+            <p class="author">
+              {% trans author=theme.html_author_info %}by {{ author }}{% endtrans %}
+              {% if theme.contributors %}
+              {% trans contributors=theme.html_contributors_info %}
+                and {{ contributors }}
+              {% endtrans %}
+              {% endif %}
+            </p>
           {%- endif %}
         </div>
       </div>

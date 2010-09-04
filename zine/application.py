@@ -470,6 +470,32 @@ class Theme(object):
         """Return the URL of the author of the theme."""
         return self.author_info[2]
 
+    @property
+    def contributors(self):
+        """The Contributors of the plugin."""
+        from zine.utils.mail import split_email
+        data = self.metadata.get('contributors', '')
+        if not data:
+            return []
+        return [split_email(c.strip()) for c in
+        self.metadata.get('contributors', '').split(',')]
+
+    @property
+    def html_contributors_info(self):
+        from zine.utils.mail import check, is_valid_email
+        result = []
+        for contributor in self.contributors:
+            name, contact = contributor
+            if not contact:
+                result.append(escape(name))
+            else:
+                result.append('<a href="%s">%s</a>' % (
+                    escape(check(is_valid_email, contact) and
+                           'mailto:' + contact or contact),
+                    escape(name)
+                ))
+        return u', '.join(result)
+
     @cached_property
     def settings(self):
         return ReadOnlyMultiMapping(self._settings, DEFAULT_THEME_SETTINGS)
