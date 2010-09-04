@@ -140,7 +140,7 @@ def help(req, page=''):
     if rv is None:
         resource = get_resource(req.app, page)
         if resource is None:
-            return render_account_response('admin/help.html', 'system.help',
+            return render_account_response('account/help.html', 'system.help',
                                            not_found=True)
         return resource
 
