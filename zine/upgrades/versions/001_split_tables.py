@@ -285,9 +285,9 @@ def upgrade(migrate_engine):
     metadata2.bind = migrate_engine
 
     yield '<div class="message info">'
-    yield '<span class="progress">.&nbsp;&nbsp;</span>comment<br/>\n'
-    yield '<span class="progress">+&nbsp;&nbsp;</span>comment with parent_id<br/>\n'
-    yield '<span class="progress">E&nbsp;&nbsp;</span>error handling comment<br/>\n'
+    yield '<span class="progress">.&nbsp;&nbsp;</span>comment<br>\n'
+    yield '<span class="progress">+&nbsp;&nbsp;</span>comment with parent_id<br>\n'
+    yield '<span class="progress">E&nbsp;&nbsp;</span>error handling comment<br>\n'
     yield '</div>\n'
 
     yield '<ul>'
@@ -363,7 +363,7 @@ def upgrade(migrate_engine):
         for comment in post.comments:
             if n >= 100:
                 n = 0
-                yield '<br/>\n      '
+                yield '<br>\n      '
             parent_comment_new = None
             if comment.parent_id:
                 parent_comment_old = session.query(CommentOld) \
@@ -432,9 +432,9 @@ def downgrade(migrate_engine):
     metadata2.bind = migrate_engine
 
     yield '<div class="message info">'
-    yield '<span class="progress">.&nbsp;&nbsp;</span>comment<br/>\n'
-    yield '<span class="progress">+&nbsp;&nbsp;</span>comment with parent_id<br/>\n'
-    yield '<span class="progress">E&nbsp;&nbsp;</span>error handling comment<br/>\n'
+    yield '<span class="progress">.&nbsp;&nbsp;</span>comment<br>\n'
+    yield '<span class="progress">+&nbsp;&nbsp;</span>comment with parent_id<br>\n'
+    yield '<span class="progress">E&nbsp;&nbsp;</span>error handling comment<br>\n'
     yield '</div>\n'
 
     yield '<ul>'
@@ -494,7 +494,7 @@ def downgrade(migrate_engine):
         for comment in post.comments:
             if n >= 100:
                 n = 0
-                yield '<br/>\n      '
+                yield '<br>\n      '
             parent_comment_old = None
             if comment.parent_id:
                 parent_comment_new = session.query(CommentNew) \
