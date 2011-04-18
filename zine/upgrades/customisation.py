@@ -13,7 +13,16 @@ import warnings
 from os import listdir
 from os.path import dirname, join
 
-from migrate.versioning import api, exceptions
+# starting with 0.6.2 migrate wants to use version information, that
+# can be fixed then 
+# see http://code.google.com/p/sqlalchemy-migrate/issues/detail?id=111
+try:
+    # for > 0.6.1
+    from migrate import exceptions
+except ImportError:
+    from migrate.versioning import exceptions
+
+from migrate.versioning import api
 from migrate.versioning.config import operations as migrate_ops
 from migrate.versioning.repository import Repository as MigrateRepository
 from migrate.versioning.script.py import PythonScript as MigratePythonScript

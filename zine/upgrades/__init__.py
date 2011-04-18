@@ -22,7 +22,15 @@ except ImportError:
 
 from migrate.versioning import api
 from migrate.versioning.util import construct_engine
-from migrate.versioning.exceptions import KnownError
+
+# starting with 0.6.2 migrate wants to use version information, that
+# can be fixed then 
+# see http://code.google.com/p/sqlalchemy-migrate/issues/detail?id=111
+try:
+    # for > 0.6.1
+    from migrate.exceptions import KnownError
+except ImportError:
+    from migrate.versioning.exceptions import KnownError
 
 from werkzeug.utils import escape
 
