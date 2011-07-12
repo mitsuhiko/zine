@@ -267,20 +267,27 @@ class Request(RequestBase):
         engine = self.app.database_engine
 
         # get the session and try to get the user object for this request.
+        cookie_name = app.cfg['session_cookie_name']
+        self.session = SecureCookie.load_cookie(self, cookie_name,
+                                                app.secret_key)
+        user = self.get_user()
+        if user is None:
+            from zine.models import User
+            user = User.query.get_nobody()        
+        self.user = user
+
+    def get_user(self):
+        """
+        Return the User object for the current request, or None
+        """
         from zine.models import User
         user = None
-        cookie_name = app.cfg['session_cookie_name']
-        session = SecureCookie.load_cookie(self, cookie_name,
-                                           app.secret_key)
-        user_id = session.get('uid')
+        user_id = self.session.get('uid')
         if user_id:
             user = User.query.options(db.eagerload('groups'),
                                       db.eagerload('groups', '_privileges')) \
                              .get(user_id)
-        if user is None:
-            user = User.query.get_nobody()
-        self.user = user
-        self.session = session
+        return user
 
     @property
     def is_behind_proxy(self):
@@ -643,7 +650,9 @@ class Zine(object):
     one of the dispatchers created by :func:`zine._core.get_wsgi_app`.
     """
 
+    _request_class = Request
     _setup_only = []
+
     def setuponly(f, container=_setup_only):
         """Mark a function as "setup only".  After the setup those
         functions will be replaced with a dummy function that raises
@@ -1399,7 +1408,7 @@ class Zine(object):
         # and all the other stuff on the current thread but initialize
         # it afterwards.  We do this so that the request object can query
         # the database in the initialization method.
-        request = object.__new__(Request)
+        request = object.__new__(self._request_class)
         local.request = request
         local.page_metadata = []
         local.request_locals = {}
