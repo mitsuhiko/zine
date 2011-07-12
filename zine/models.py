@@ -237,11 +237,27 @@ class User(object):
     display_name = property(_get_display_name, _set_display_name)
     own_privileges = privilege_attribute('_own_privileges')
 
+    # This property can be used to attach extra Groups to a User
+    # without persisting the relation in the database.  This can
+    # be useful in a setup where an external application container 
+    # is managing some or all user groups.  Of course, the groups
+    # themselves have to be stored in the Zine database.  Note that
+    # even the special AnonymousUser supports this property, so
+    # it can be used to grant Permissions to the AnonymousUser too.
+    _transient_groups = None
+    def _set_transient_groups(self, groups):
+        self._transient_groups = groups
+    def _get_transient_groups(self):
+        return self._transient_groups or []
+    transient_groups = property(_get_transient_groups, _set_transient_groups)
+
     @property
     def privileges(self):
         """A read-only set with all privileges."""
         result = set(self.own_privileges)
         for group in self.groups:
+            result.update(group.privileges)
+        for group in self.transient_groups:
             result.update(group.privileges)
         return frozenset(result)
 
@@ -309,7 +325,7 @@ class AnonymousUser(User):
     is_somebody = is_author = False
     display_name = 'Nobody'
     real_name = description = username = ''
-    own_privileges = privileges = property(lambda x: frozenset())
+    groups = own_privileges = property(lambda x: frozenset())    
 
     def __init__(self):
         pass

@@ -1,0 +1,7 @@
+Name: Example Remote Auth
+Plugin URL: http://zine.pocoo.org
+Author: Ethan Jucovy <ethan.jucovy@gmail.com>
+Author URL: http://www.coactivate.org
+License: BSD
+Version: 0.1
+Description: This plugin demonstrates how you can implement custom authentication and authorization logic by overriding the Request.get_user method on a subclass, and adding per-request transient Groups to the User.  It is not intended to be secure or robust, so don't use it!  It's just a demonstration.
