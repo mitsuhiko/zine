@@ -27,7 +27,7 @@ from zine.models import User, Post, Category, Tag, STATUS_PUBLISHED, \
 from zine.privileges import CREATE_ENTRIES, CREATE_PAGES, BLOG_ADMIN, \
      MANAGE_CATEGORIES
 
-from werkzeug import escape
+from zine._compat import escape
 
 
 def login(username, password):

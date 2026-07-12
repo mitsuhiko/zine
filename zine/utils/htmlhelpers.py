@@ -11,7 +11,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from werkzeug import html
+from zine._compat import html
 
 
 def input_field(name, value='', type='text', **attr):

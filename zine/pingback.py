@@ -29,8 +29,10 @@
 import re
 from xmlrpc.client import ServerProxy
 
-from werkzeug.routing import RequestRedirect, NotFound
-from werkzeug import unescape
+from werkzeug.exceptions import NotFound
+from werkzeug.routing import RequestRedirect
+
+from zine._compat import unescape
 
 from zine.api import get_request, get_application, url_for, db, _
 from zine.models import Post, Comment

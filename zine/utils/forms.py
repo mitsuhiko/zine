@@ -21,8 +21,9 @@ from hashlib import sha1
 from itertools import chain
 from threading import Lock
 
-from werkzeug import html, escape, MultiDict
+from werkzeug.datastructures import MultiDict
 
+from zine._compat import escape, html
 from zine.application import get_request, url_for
 from zine.database import db
 from zine.i18n import _, ngettext, lazy_gettext, parse_datetime, \

@@ -15,7 +15,7 @@ from genshi.builder import tag
 
 from creoleparser import create_dialect, creole11_base, Parser, parse_args
 
-from werkzeug import url_quote
+from zine._compat import url_quote
 
 from zine.api import *
 from zine.parsers import BaseParser

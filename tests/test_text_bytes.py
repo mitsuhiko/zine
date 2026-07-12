@@ -3,7 +3,6 @@ import importlib.util
 import runpy
 import sys
 from email import message_from_string, policy
-from functools import cached_property
 from pathlib import Path
 from urllib.parse import urlsplit
 from types import ModuleType
@@ -209,10 +208,6 @@ def test_logger_writes_and_reads_utf8_text(monkeypatch, tmp_path):
 
 
 def test_http_handler_writes_bytes_to_socket(monkeypatch):
-    class Headers(dict):
-        def to_list(self):
-            return list(self.items())
-
     class Response:
         def __init__(self, *args, **kwargs):
             self.response = args[0] if args else []
@@ -233,16 +228,6 @@ def test_http_handler_writes_bytes_to_socket(monkeypatch):
         "_zine_test_net",
         "zine/utils/net.py",
         stubs=(
-            (
-                "werkzeug",
-                {
-                    "Headers": Headers,
-                    "url_decode": lambda value: value,
-                    "cached_property": cached_property,
-                },
-            ),
-            ("werkzeug.contrib", {}),
-            ("werkzeug.contrib.iterio", {"IterO": lambda value: value}),
             (
                 "zine.application",
                 {"Response": Response, "get_application": lambda: None},

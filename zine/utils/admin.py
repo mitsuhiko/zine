@@ -11,7 +11,7 @@
 from itertools import islice
 from datetime import datetime
 
-from werkzeug import url_quote
+from zine._compat import url_quote
 
 from zine.privileges import ENTER_ADMIN_PANEL, require_privilege
 from zine.utils import local, load_json

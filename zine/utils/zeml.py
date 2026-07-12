@@ -19,8 +19,7 @@ from io import BytesIO, StringIO
 from itertools import zip_longest
 from urllib.parse import urlparse
 
-from werkzeug import escape
-
+from zine._compat import escape
 from zine.i18n import _
 from zine.utils import log
 from zine.utils.text import wrap as wraptext

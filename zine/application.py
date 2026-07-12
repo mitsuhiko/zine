@@ -25,14 +25,16 @@ from jinja2 import Environment, BaseLoader, TemplateNotFound
 
 from sqlalchemy.exceptions import SQLAlchemyError
 
-from werkzeug import Request as RequestBase, Response as ResponseBase, \
-     SharedDataMiddleware, url_quote, routing, redirect as _redirect, \
-     escape, cached_property, url_encode
-from werkzeug.exceptions import HTTPException, Forbidden, \
-     NotFound
+import werkzeug.routing as routing
+from werkzeug.exceptions import HTTPException, Forbidden, NotFound
+from werkzeug.middleware.shared_data import SharedDataMiddleware
+from werkzeug.test import Client
+from werkzeug.utils import cached_property, redirect as _redirect
+from werkzeug.wrappers import Request as RequestBase, Response as ResponseBase
 from werkzeug.contrib.securecookie import SecureCookie
 
 from zine import _core
+from zine._compat import escape, url_encode, url_quote
 from zine.environment import SHARED_DATA, BUILTIN_TEMPLATE_PATH, \
      BUILTIN_PLUGIN_FOLDER
 from zine.database import db, cleanup_session
@@ -292,7 +294,7 @@ class Request(RequestBase):
     @property
     def is_behind_proxy(self):
         """Are we behind a proxy?"""
-        return environ.get('ZINE_BEHIND_PROXY') == '1'
+        return self.environ.get('ZINE_BEHIND_PROXY') == '1'
 
     def login(self, user, permanent=False):
         """Log the given user in. Can be user_id, username or
@@ -1492,7 +1494,6 @@ class Zine(object):
         blog local resources without dead-locking if the WSGI server does not
         support concurrency (single threaded and just one process for example).
         """
-        from werkzeug import Client
         from threading import Event, Thread
         event = Event()
         response = []

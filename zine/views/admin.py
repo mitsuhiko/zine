@@ -12,8 +12,9 @@
 """
 from urllib.parse import urlparse
 
-from werkzeug import escape
 from werkzeug.exceptions import NotFound, BadRequest, Forbidden
+
+from zine._compat import escape
 
 from zine.privileges import assert_privilege, \
      CREATE_ENTRIES, EDIT_OWN_ENTRIES, EDIT_OTHER_ENTRIES, \

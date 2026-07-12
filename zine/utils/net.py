@@ -15,9 +15,10 @@ import urllib.parse
 import socket
 import http.client
 
-from werkzeug import Headers, url_decode, cached_property
-from werkzeug.contrib.iterio import IterO
+from werkzeug.datastructures import Headers
+from werkzeug.utils import cached_property
 
+from zine._compat import url_decode
 from zine.application import Response, get_application
 from zine.utils.exceptions import ZineException
 
@@ -273,7 +274,7 @@ class HTTPHandler(URLHandler):
         self.send_buffered('%s %s HTTP/%s\r\n' % (self._method, str(path),
                                                   self.http_version))
         self.send_buffered('\r\n'.join('%s: %s' % item for item in
-                           self.headers.to_list()) + '\r\n\r\n')
+                           self.headers.to_wsgi_list()) + '\r\n\r\n')
         if isinstance(data, str):
             data = data.encode('utf-8')
         self.send(data)
@@ -340,7 +341,7 @@ class URLResponse(Response):
 
     @cached_property
     def stream(self):
-        return IterO(self.response)
+        return BytesIO(self.get_data())
 
 
 class HTTPResponse(URLResponse):

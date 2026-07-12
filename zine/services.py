@@ -8,7 +8,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from werkzeug import abort
+from werkzeug.exceptions import abort
 
 from zine.models import Comment, Tag
 from zine.privileges import MODERATE_COMMENTS

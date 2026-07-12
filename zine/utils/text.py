@@ -14,7 +14,7 @@ from datetime import datetime
 from itertools import starmap
 from urllib.parse import urlparse
 
-from werkzeug import url_quote
+from zine._compat import url_quote
 
 from zine._dynamic.translit_tab import LONG_TABLE, SHORT_TABLE, SINGLE_TABLE
 from functools import reduce

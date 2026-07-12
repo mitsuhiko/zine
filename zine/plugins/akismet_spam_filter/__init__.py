@@ -10,7 +10,7 @@
 """
 from os.path import dirname, join
 
-from werkzeug import url_encode
+from zine._compat import url_encode
 
 import zine
 from zine.api import *

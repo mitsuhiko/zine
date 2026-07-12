@@ -23,7 +23,8 @@ from zine.config import ConfigurationTransactionError
 from zine.utils.crypto import gen_pwhash, gen_secret_key, new_iid
 from zine.utils.validators import is_valid_email, check
 from zine.i18n import load_core_translations, has_language, list_languages
-from werkzeug import Request, Response, redirect
+from werkzeug.utils import redirect
+from werkzeug.wrappers import Request, Response
 from jinja2 import Environment, FileSystemLoader
 
 

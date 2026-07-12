@@ -13,9 +13,10 @@ import xmlrpc.client
 from datetime import datetime
 from html.entities import name2codepoint
 
-from werkzeug import escape, BaseResponse
 from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
+from werkzeug.wrappers import Response as BaseResponse
 
+from zine._compat import escape
 from zine.utils import log
 from zine.i18n import _TranslationProxy
 

@@ -32,7 +32,7 @@ try:
 except ImportError:
     from migrate.versioning.exceptions import KnownError
 
-from werkzeug.utils import escape
+from zine._compat import escape
 
 from zine import __version__ as VERSION, setup
 # imported for side-effects

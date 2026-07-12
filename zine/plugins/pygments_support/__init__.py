@@ -11,8 +11,9 @@
 from os.path import join, dirname
 from time import time, asctime, gmtime
 
-from werkzeug import escape
 from werkzeug.exceptions import NotFound
+
+from zine._compat import escape
 
 try:
     from pygments import highlight

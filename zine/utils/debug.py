@@ -11,7 +11,7 @@
 import re
 import sys
 
-from werkzeug import escape
+from zine._compat import escape
 
 from zine.application import url_for
 
@@ -66,7 +66,8 @@ def inject_query_info(request, response):
     """Injects the collected queries into the response."""
     if not request.queries:
         return
-    debug_info = render_query_table(request.queries).encode(response.charset)
+    charset = response.mimetype_params.get('charset', 'utf-8')
+    debug_info = render_query_table(request.queries).encode(charset)
 
     body = response.data
     match = _body_end_re.search(body)

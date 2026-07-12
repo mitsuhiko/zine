@@ -30,9 +30,9 @@ from sqlalchemy.engine.url import make_url, URL
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from werkzeug import url_decode
 from werkzeug.exceptions import NotFound
 
+from zine._compat import url_decode
 from zine.utils import local_manager
 
 

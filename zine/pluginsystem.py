@@ -88,8 +88,9 @@ from shutil import rmtree
 from time import localtime, time
 
 from urllib.parse import quote
-from werkzeug import cached_property, escape
+from werkzeug.utils import cached_property
 
+from zine._compat import escape
 from zine.application import get_application
 from zine.utils import log
 from zine.utils.mail import split_email, is_valid_email, check

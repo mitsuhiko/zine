@@ -10,8 +10,8 @@
 """
 from urllib.parse import urlparse, urljoin
 
-from werkzeug import redirect as _redirect
 from werkzeug.exceptions import BadRequest
+from werkzeug.utils import redirect as _redirect
 
 from zine.application import get_application, get_request, url_for
 from zine.utils import local

@@ -17,8 +17,7 @@ import os
 import pickle as pickle
 from mimetypes import guess_type
 
-from werkzeug import escape
-
+from zine._compat import escape
 from zine.application import Response, url_for
 from zine.i18n import _
 

@@ -15,7 +15,7 @@
 from datetime import datetime
 from urllib.parse import urlsplit
 
-from werkzeug import url_unquote
+from zine._compat import url_unquote
 
 from zine.models import NotificationSubscription
 from zine.application import get_application, get_request, render_template
