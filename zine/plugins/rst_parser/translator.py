@@ -36,7 +36,7 @@ class ZemlTranslator(NodeVisitor):
     def begin_node(self, node, tagname, **more_attributes):
         zeml_node = Element(tagname)
         attributes = zeml_node.attributes
-        for name, value in more_attributes.iteritems():
+        for name, value in more_attributes.items():
             attributes[name.lower()] = value
         if node is not None:
             classes = node.get('classes', [])
@@ -44,7 +44,7 @@ class ZemlTranslator(NodeVisitor):
                 classes.append(attributes['class'])
             if classes:
                 attributes['class'] = ' '.join(classes)
-            if node.has_key('ids') and node['ids']:
+            if 'ids' in node and node['ids']:
                 # support only one ID
                 attributes['id'] = node['ids'][0]
         zeml_node.parent = self.curnode
@@ -198,9 +198,9 @@ class ZemlTranslator(NodeVisitor):
         tagname = 'td'
         if isinstance(node.parent.parent, nodes.thead):
             tagname = 'th'
-        if node.has_key('morecols'):
+        if 'morecols' in node:
             attrs['colspan'] = node['morecols'] + 1
-        if node.has_key('morerows'):
+        if 'morerows' in node:
             attrs['rowspan'] = node['morerows'] + 1
         self.begin_node(node, tagname, **attrs)
 
@@ -268,9 +268,9 @@ class ZemlTranslator(NodeVisitor):
         usable.
         """
         atts = {}
-        if node.has_key('start'):
+        if 'start' in node:
             atts['start'] = node['start']
-        if node.has_key('enumtype'):
+        if 'enumtype' in node:
             atts['class'] = node['enumtype']
         # @@@ To do: prefix, suffix. How? Change prefix/suffix to a
         # single "format" attribute? Use CSS2?
@@ -392,8 +392,8 @@ class ZemlTranslator(NodeVisitor):
             self.end_node()
 
     def visit_target(self, node):
-        if not (node.has_key('refuri') or node.has_key('refid')
-                or node.has_key('refname')):
+        if not ('refuri' in node or 'refid' in node
+                or 'refname' in node):
             self.begin_node(node, 'span', CLASS='target')
             self.context.append(True)
         else:
@@ -406,11 +406,11 @@ class ZemlTranslator(NodeVisitor):
     def visit_image(self, node):
         atts = {}
         atts['src'] = node['uri']
-        if node.has_key('width'):
+        if 'width' in node:
             atts['width'] = node['width']
-        if node.has_key('height'):
+        if 'height' in node:
             atts['height'] = node['height']
-        if node.has_key('scale'):
+        if 'scale' in node:
             for att_name in 'width', 'height':
                 if att_name in atts:
                     match = re.match(r'([0-9.]+)(\S*)$', atts[att_name])
@@ -436,11 +436,11 @@ class ZemlTranslator(NodeVisitor):
             suffix = ''
         else:
             suffix = '\n'
-        if node.has_key('classes') and 'align-center' in node['classes']:
+        if 'classes' in node and 'align-center' in node['classes']:
             node['align'] = 'center'
 
         div_wrapper = False
-        if node.has_key('align'):
+        if 'align' in node:
             if node['align'] == 'center':
                 # "align" attribute is set in surrounding "div" element.
                 div_wrapper = True
@@ -465,11 +465,11 @@ class ZemlTranslator(NodeVisitor):
 
     def visit_reference(self, node):
         atts = {'class': 'reference'}
-        if node.has_key('refuri'):
+        if 'refuri' in node:
             atts['href'] = node['refuri']
             atts['class'] += ' external'
         else:
-            assert node.has_key('refid'), \
+            assert 'refid' in node, \
                    'References must have "refuri" or "refid" attribute.'
             atts['href'] = '#' + node['refid']
             atts['class'] += ' internal'

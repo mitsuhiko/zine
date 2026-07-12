@@ -13,7 +13,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from zine.i18n import lazy_gettext, _
 from zine.utils.text import _placeholder_re, _slug_parts
@@ -35,7 +35,7 @@ class ValidationError(ValueError):
             messages = [message]
         # make all items in the list unicode (this also evaluates
         # lazy translations in there)
-        messages = map(unicode, messages)
+        messages = list(map(str, messages))
         Exception.__init__(self, messages[0])
 
         from zine.utils.forms import ErrorList

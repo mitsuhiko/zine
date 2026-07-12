@@ -31,12 +31,12 @@ def main():
     else:
         parser.error('incorrect number of arguments')
     path = abspath(path)
-    print 'Building docs from', path
+    print('Building docs from', path)
 
     def callback(filename):
-        print filename
+        print(filename)
     walk(path, callback)
-    print 'All done.'
+    print('All done.')
 
 
 if __name__ == '__main__':

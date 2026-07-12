@@ -176,7 +176,7 @@ class PlainTextParser(BaseParser):
 
     def _to_text(self, token):
         """Convert a token to normal text."""
-        return replace_entities(unicode(token))
+        return replace_entities(str(token))
 
     def _to_zeml(self, node, untrusted=False):
         """Convert a potty-mouth node into a ZEML tree."""
@@ -196,7 +196,7 @@ class PlainTextParser(BaseParser):
                 result.attributes.update(node._attributes)
 
             for item in node:
-                if isinstance(item, (str, unicode, Token)):
+                if isinstance(item, (str, Token)):
                     add_text(result, self._to_text(item))
                 else:
                     child = convert(item, False)

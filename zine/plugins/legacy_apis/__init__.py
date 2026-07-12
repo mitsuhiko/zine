@@ -91,7 +91,7 @@ def dump_category(category):
 
 
 def dump_options(cfg, keys=None):
-    result = cfg.items()
+    result = list(cfg.items())
     if keys:
         result = [(k, v) for k, v in result if k in keys]
     return dict(result)
@@ -123,9 +123,9 @@ def generic_update(request, post, struct, publish):
     keywords = struct.get('mt_tags') or struct.get('mt_keywords')
     if isinstance(keywords, list):
         post.bind_tags(keywords)
-    elif isinstance(keywords, basestring):
+    elif isinstance(keywords, str):
         keywords = list(x.strip() for x in keywords.split(','))
-        post.bind_tags(filter(None, keywords))
+        post.bind_tags([_f for _f in keywords if _f])
 
     if publish:
         post.status = STATUS_PUBLISHED
@@ -197,13 +197,13 @@ def metaweblog_get_post(post_id, username, password):
 def metaweblog_get_recent_posts(blog_id, username, password, number_of_posts):
     request = login(username, password)
     number_of_posts = min(50, number_of_posts)
-    return map(dump_post, Post.query.filter_by(content_type='entry')
-               .limit(number_of_posts).all())
+    return list(map(dump_post, Post.query.filter_by(content_type='entry')
+               .limit(number_of_posts).all()))
 
 
 def metaweblog_get_categories(blog_id, username, password):
     request = login(username, password)
-    return map(dump_category, Category.query.all())
+    return list(map(dump_category, Category.query.all()))
 
 
 def blogger_delete_post(post_id, username, password, publish):
@@ -237,8 +237,8 @@ def wp_get_page(blog_id, page_id, username, password):
 
 def wp_get_pages(blog_id, username, password, number_of_pages):
     request = login(username, password)
-    return map(dump_post, Post.query.filter_by(content_type='page')
-               .limit(number_of_pages).all())
+    return list(map(dump_post, Post.query.filter_by(content_type='page')
+               .limit(number_of_pages).all()))
 
 
 def wp_new_page(username, password, struct, publish):
@@ -278,7 +278,7 @@ def wp_delete_page(blog_id, username, password, page_id):
 def wp_get_page_list(blog_id, username, password):
     request = login(username, password)
     # XXX missing dump_page()
-    return map(dump_post, Post.query.filter_by(content_type='page').all())
+    return list(map(dump_post, Post.query.filter_by(content_type='page').all()))
 
 
 def wp_new_category(blog_id, username, password, struct):
@@ -338,7 +338,7 @@ def wp_set_options(blog_id, username, password, options):
     if not request.user.has_privilege(BLOG_ADMIN):
         raise Fault(403, 'not enough privileges')
     t = request.app.cfg.edit()
-    for key, value in options.iteritems():
+    for key, value in options.items():
         if key in t:
             t[key] = value
     t.commit()
@@ -352,7 +352,7 @@ def mt_get_post_categories(post_id, username, password):
         raise Fault(404, 'no such post')
     if not post.can_read():
         raise Fault(403, 'you don\'t have privilegs to this post')
-    return map(dump_category, post.categories)
+    return list(map(dump_category, post.categories))
 
 
 def mt_set_post_categories(post_id, username, password, categories):

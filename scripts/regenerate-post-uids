@@ -37,7 +37,7 @@ def regenerate_post_uids(instance):
         post.uid = build_tag_uri(app, post.pub_date, post.content_type,
                                  post.slug)
     db.commit()
-    print "Done regenerating post uids."
+    print("Done regenerating post uids.")
 
 
 def main():

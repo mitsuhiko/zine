@@ -9,7 +9,9 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+from base64 import b64decode
 from pickle import loads
+
 from lxml import etree
 from zine.application import get_application
 from zine.i18n import _, lazy_gettext
@@ -81,12 +83,12 @@ def _to_bool(value):
 
 def _pickle(value):
     if value:
-        return loads(value.decode('base64'))
+        return loads(b64decode(value))
 
 
 def _parser_data(value):
     if value:
-        return load_parser_data(value.decode('base64'))
+        return load_parser_data(b64decode(value))
 
 
 def parse_feed(fd):
@@ -132,7 +134,7 @@ class Parser(object):
     def _find_criterion(self, sequence, d):
         if len(d) != 1:
             raise TypeError('one criterion expected')
-        key, value = d.iteritems().next()
+        key, value = next(iter(d.items()))
         for item in sequence:
             if getattr(item, key, None) == value:
                 return item
@@ -334,7 +336,7 @@ class FeedImporter(Importer):
             if form.data['download_url']:
                 try:
                     feed = open_url(form.data['download_url']).stream
-                except Exception, e:
+                except Exception as e:
                     log.exception(_('Error downloading feed'))
                     flash(_(u'Error downloading from URL: %s') % e, 'error')
             if not feed:
@@ -342,7 +344,7 @@ class FeedImporter(Importer):
 
             try:
                 blog = parse_feed(feed)
-            except Exception, e:
+            except Exception as e:
                 log.exception(_(u'Error parsing uploaded file'))
                 flash(_(u'Error parsing feed: %s') % e, 'error')
             else:
@@ -528,10 +530,10 @@ class ZEAExtension(Extension):
             if parent:
                 unresolved_parents[comment] = int(parent)
 
-        for comment, parent_id in unresolved_parents.iteritems():
+        for comment, parent_id in unresolved_parents.items():
             comment.parent = comments[parent_id]
 
-        return comments.values()
+        return list(comments.values())
 
 
 extensions = [ZEAExtension]

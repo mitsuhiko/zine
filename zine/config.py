@@ -11,6 +11,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+import ast
 import os
 from os import path
 from threading import Lock
@@ -82,7 +83,7 @@ DEFAULT_VARS = {
     # log and development settings
     'log_file':                 TextField(default=u'zine.log'),
     'log_level':                ChoiceField(choices=[(k, l_(k)) for k, v
-                                                in sorted(log.LEVELS.items(),
+                                                in sorted(list(log.LEVELS.items()),
                                                           key=lambda x: x[1])],
                                             default=u'warning'),
     'log_email_only':           BooleanField(default=_dev_mode,
@@ -201,26 +202,33 @@ HIDDEN_KEYS = set(('iid', 'secret_key', 'blogger_auth_token',
 
 
 def unquote_value(value):
-    """Unquote a configuration value."""
+    """Unquote a text configuration value."""
+    if isinstance(value, bytes):
+        value = value.decode('utf-8')
     if not value:
         return ''
     if value[0] in '"\'' and value[0] == value[-1]:
-        value = value[1:-1].decode('string-escape')
-    return value.decode('utf-8')
+        try:
+            return ast.literal_eval(value)
+        except (SyntaxError, ValueError):
+            return value[1:-1]
+    return value
 
 
 def quote_value(value):
-    """Quote a configuration value."""
+    """Quote a text configuration value."""
+    if isinstance(value, bytes):
+        value = value.decode('utf-8')
     if not value:
         return ''
     if value.strip() == value and value[0] not in '"\'' and \
        value[-1] not in '"\'' and len(value.splitlines()) == 1:
-        return value.encode('utf-8')
+        return value
     return '"%s"' % value.replace('\\', '\\\\') \
                          .replace('\n', '\\n') \
                          .replace('\r', '\\r') \
                          .replace('\t', '\\t') \
-                         .replace('"', '\\"').encode('utf-8')
+                         .replace('"', '\\"')
 
 
 def from_string(value, field):
@@ -255,12 +263,12 @@ class ConfigurationTransactionError(InternalError):
     ''')
 
     def __init__(self, message_or_exception):
-        if isinstance(message_or_exception, basestring):
+        if isinstance(message_or_exception, str):
             message = message_or_exception
             error = None
         else:
             message = _(u'Could not save configuration file: %s') % \
-                      str(message_or_exception).decode('utf-8', 'ignore')
+                      str(message_or_exception)
             error = message_or_exception
         InternalError.__init__(self, message)
         self.original_exception = error
@@ -301,7 +309,7 @@ class Configuration(object):
         self.exists = True
         section = 'zine'
         current_comment = ''
-        f = file(self.filename)
+        f = open(self.filename, encoding='utf-8')
         try:
             for line in f:
                 line = line.strip()
@@ -406,9 +414,9 @@ class Configuration(object):
 
     def export(self):
         """Like iteritems but with the raw values."""
-        for key, value in self.iteritems():
+        for key, value in self.items():
             value = self.config_vars[key].to_primitive(value)
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 yield key, value
 
     def get_detail_list(self):
@@ -417,7 +425,7 @@ class Configuration(object):
         """
         categories = {}
 
-        for key, field in self.config_vars.iteritems():
+        for key, field in self.config_vars.items():
             if key in self._values:
                 use_default = False
                 value = field.to_primitive(from_string(self._values[key], field))
@@ -447,7 +455,7 @@ class Configuration(object):
         return [{
             'items':    sorted(children, key=lambda x: x['name']),
             'name':     key
-        } for key, children in sorted(categories.items(), key=sort_func)]
+        } for key, children in sorted(list(categories.items()), key=sort_func)]
 
     def get_public_list(self, hide_insecure=False):
         """Return a list of publicly available information about the
@@ -457,7 +465,7 @@ class Configuration(object):
         from zine.application import emit_event
         from zine.database import secure_database_uri
         result = []
-        for key, field in self.config_vars.iteritems():
+        for key, field in self.config_vars.items():
             value = self[key]
             if hide_insecure:
                 if key in HIDDEN_KEYS:
@@ -491,7 +499,7 @@ class Configuration(object):
         return len(self.config_vars)
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, dict(self.items()))
+        return '<%s %r>' % (self.__class__.__name__, dict(list(self.items())))
 
 
 class ConfigTransaction(object):
@@ -529,7 +537,7 @@ class ConfigTransaction(object):
             key = key[5:]
         if key not in self.cfg.config_vars:
             raise KeyError(key)
-        if isinstance(value, str):
+        if isinstance(value, bytes):
             value = value.decode('utf-8')
         field = self.cfg.config_vars[key]
 
@@ -564,7 +572,7 @@ class ConfigTransaction(object):
 
     def update(self, *args, **kwargs):
         """Update multiple items at once."""
-        for key, value in dict(*args, **kwargs).iteritems():
+        for key, value in dict(*args, **kwargs).items():
             self[key] = value
 
     def commit(self):
@@ -584,7 +592,7 @@ class ConfigTransaction(object):
                 all.pop(key, None)
 
             sections = {}
-            for key, value in all.iteritems():
+            for key, value in all.items():
                 if '/' in key:
                     section, key = key.split('/', 1)
                 else:
@@ -596,14 +604,14 @@ class ConfigTransaction(object):
                 section[1].sort()
 
             try:
-                f = file(self.cfg.filename, 'w')
+                f = open(self.cfg.filename, 'w', encoding='utf-8')
                 try:
                     for idx, (section, items) in enumerate(sections):
                         if '[%s]' % section in self.cfg._comments:
                             f.write(self.cfg._comments['[%s]' % section])
                         elif idx:
                             f.write('\n')
-                        f.write('[%s]\n' % section.encode('utf-8'))
+                        f.write('[%s]\n' % section)
                         for key, value in items:
                             if section != 'zine':
                                 ckey = '%s/%s' % (section, key)
@@ -616,7 +624,7 @@ class ConfigTransaction(object):
                         f.write(self.cfg._comments[' end '])
                 finally:
                     f.close()
-            except IOError, e:
+            except IOError as e:
                 log.error('Could not write configuration: %s' % e, 'config')
                 raise ConfigurationTransactionError(e)
             self.cfg._values.update(self._values)

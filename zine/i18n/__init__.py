@@ -53,7 +53,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import os
-import cPickle as pickle
+import pickle as pickle
 import struct
 from gettext import NullTranslations
 from datetime import datetime
@@ -128,11 +128,11 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
             # Got the end of file minus 4 bytes
             fileobj.seek(-4, 2)
             # Read stored pickled data file pointer position
-            pickled_data_pointer_pos = struct.unpack('i', fileobj.read())
+            pickled_data_pointer_pos = struct.unpack('i', fileobj.read(4))
             fileobj.seek(pickled_data_pointer_pos[0])
             # Load pickled data
             self.client_keys.update(pickle.load(fileobj))
-        except EOFError:
+        except (EOFError, struct.error):
             # Catalog does not contain any pickled data at the end of it
             pass
 
@@ -150,7 +150,7 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
     gettext = TranslationsBase.ugettext
     ngettext = TranslationsBase.ungettext
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self._catalog)
 
 
@@ -166,7 +166,7 @@ class ZineNullTranslations(NullTranslations, _CustomAttrsTranslations):
         self.add_fallback(translations)
         self.client_keys.update(translations.client_keys)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self._fallback)
 
 
@@ -194,7 +194,7 @@ def gettext(string):
     """Translate a given string to the language of the application."""
     translations = get_translations()
     if translations is None:
-        return unicode(string)
+        return str(string)
     return translations.gettext(string)
 
 
@@ -205,8 +205,8 @@ def ngettext(singular, plural, n):
     translations = get_translations()
     if translations is None:
         if n == 1:
-            return unicode(singular)
-        return unicode(plural)
+            return str(singular)
+        return str(plural)
     return translations.ngettext(singular, plural, n)
 
 
@@ -228,11 +228,11 @@ class _TranslationProxy(object):
     def __contains__(self, key):
         return key in self.value
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.value)
 
     def __dir__(self):
-        return dir(unicode)
+        return dir(str)
 
     def __iter__(self):
         return iter(self.value)
@@ -242,9 +242,6 @@ class _TranslationProxy(object):
 
     def __str__(self):
         return str(self.value)
-
-    def __unicode__(self):
-        return unicode(self.value)
 
     def __add__(self, other):
         return self.value + other
@@ -301,7 +298,7 @@ class _TranslationProxy(object):
 
     def __repr__(self):
         try:
-            return 'i' + repr(unicode(self.value))
+            return 'i' + repr(str(self.value))
         except:
             return '<%s broken>' % self.__class__.__name__
 

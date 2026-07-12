@@ -8,12 +8,8 @@
     :license: BSD, see LICENSE for more details.
 """
 import string
+from hashlib import sha1, md5
 from random import choice, randrange
-try:
-    from hashlib import sha1, md5
-except ImportError:
-    from sha import new as sha1
-    from md5 import new as md5
 
 
 KEY_CHARS = string.ascii_letters + string.digits
@@ -27,7 +23,7 @@ def gen_salt(length=6):
     """Generate a random string of SALT_CHARS with specified ``length``."""
     if length <= 0:
         raise ValueError('requested salt of length <= 0')
-    return ''.join(choice(SALT_CHARS) for _ in xrange(length))
+    return ''.join(choice(SALT_CHARS) for _ in range(length))
 
 
 def new_iid():
@@ -49,7 +45,7 @@ def gen_activation_key(length=8):
     """
     if length <= 0:
         raise ValueError('requested key of length <= 0')
-    return ''.join(choice(KEY_CHARS) for _ in xrange(length))
+    return ''.join(choice(KEY_CHARS) for _ in range(length))
 
 
 def gen_random_identifier(length=8):
@@ -57,12 +53,12 @@ def gen_random_identifier(length=8):
     if length <= 0:
         raise ValueError('requested key of length <= 0')
     return choice(IDENTIFIER_START) + \
-           ''.join(choice(IDENTIFIER_CHAR) for _ in xrange(length - 1))
+           ''.join(choice(IDENTIFIER_CHAR) for _ in range(length - 1))
 
 
 def gen_secret_key():
     """Generate a new secret key."""
-    return ''.join(choice(SECRET_KEY_CHARS) for _ in xrange(64))
+    return ''.join(choice(SECRET_KEY_CHARS) for _ in range(64))
 
 
 def gen_password(length=8, add_numbers=True, mix_case=True,
@@ -78,12 +74,12 @@ def gen_password(length=8, add_numbers=True, mix_case=True,
     pw =  ''.join([choice(consonants) +
                    choice(vowels) +
                    choice(consonants + vowels) for _
-                   in xrange(length // 3 + 1)])[:length]
+                   in range(length // 3 + 1)])[:length]
     if add_numbers:
         n = length // 3
         if n > 0:
             pw = pw[:-n]
-            for _ in xrange(n):
+            for _ in range(n):
                 pw += choice('0123456789')
     if add_special_char:
         tmp = randrange(0, len(pw))
@@ -97,13 +93,20 @@ def gen_password(length=8, add_numbers=True, mix_case=True,
     return pw
 
 
+def _password_bytes(password):
+    if isinstance(password, str):
+        return password.encode('utf-8')
+    if isinstance(password, bytes):
+        return password
+    raise TypeError('password must be str or bytes')
+
+
 def gen_pwhash(password):
-    """Return a the password encrypted in sha format with a random salt."""
-    if isinstance(password, unicode):
-        password = password.encode('utf-8')
+    """Return the password hashed in SHA-1 format with a random salt."""
+    password = _password_bytes(password)
     salt = gen_salt(6)
     h = sha1()
-    h.update(salt)
+    h.update(salt.encode('ascii'))
     h.update(password)
     return 'sha$%s$%s' % (salt, h.hexdigest())
 
@@ -147,19 +150,23 @@ def check_pwhash(pwhash, password):
     >>> check_pwhash('md42$xyz$bcc27016b4fdceb2bd1b369d5dc46c3f', 'example')
     False
     """
-    if isinstance(password, unicode):
-        password = password.encode('utf-8')
+    password = _password_bytes(password)
+    if isinstance(pwhash, bytes):
+        pwhash = pwhash.decode('ascii')
     if pwhash.count('$') < 2:
         return False
     method, salt, hashval = pwhash.split('$', 2)
     if method == 'plain':
-        return hashval == password
+        try:
+            return hashval == password.decode('utf-8')
+        except UnicodeDecodeError:
+            return False
     elif method == 'md5':
         h = md5()
     elif method == 'sha':
         h = sha1()
     else:
         return False
-    h.update(salt)
+    h.update(salt.encode('utf-8'))
     h.update(password)
     return h.hexdigest() == hashval

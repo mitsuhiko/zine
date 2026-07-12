@@ -29,7 +29,7 @@ class Pagination(object):
         self.url_args = url_args or {}
         self.necessary = self.pages > 1
 
-    def __unicode__(self):
+    def __str__(self):
         return self.generate()
 
     def generate(self, **options):
@@ -65,7 +65,7 @@ class Pagination(object):
         simple = _getopt('simple')
         if options:
             raise TypeError('generate() got an unexpected keyword '
-                            'argument %r' % iter(options).next())
+                            'argument %r' % next(iter(options)))
 
         was_ellipsis = False
         result = []
@@ -85,7 +85,7 @@ class Pagination(object):
             if self.page < self.pages:
                 next = self.page + 1
         else:
-            for num in xrange(1, self.pages + 1):
+            for num in range(1, self.pages + 1):
                 if num == self.page:
                     was_ellipsis = False
                 if num - 1 == self.page:

@@ -37,7 +37,7 @@ from zine.utils import local_manager
 
 
 if sys.platform == 'win32':
-    _timer = time.clock
+    _timer = time.perf_counter
 else:
     _timer = time.time
 
@@ -114,7 +114,7 @@ def secure_database_uri(uri):
     obj = make_url(uri)
     if obj.password:
         obj.password = '***'
-    return unicode(obj).replace(u':%2A%2A%2A@', u':***@', 1)
+    return str(obj).replace(u':%2A%2A%2A@', u':***@', 1)
 
 
 def attribute_loaded(model, attribute):
@@ -186,7 +186,7 @@ class Query(orm.Query):
         """Send a lightweight query which deferes some more expensive
         things such as comment queries or even text and parser data.
         """
-        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
+        args = list(map(db.lazyload, lazy or ())) + list(map(db.defer, deferred or ()))
         return self.options(*args)
 
     def first(self, raise_if_missing=False):
@@ -230,7 +230,7 @@ ModelBase.query = session.query_property(Query)
 sys.modules['zine.database.db'] = db = ModuleType('db')
 key = value = mod = None
 for mod in sqlalchemy, orm:
-    for key, value in mod.__dict__.iteritems():
+    for key, value in mod.__dict__.items():
         if key in mod.__all__:
             setattr(db, key, value)
 del key, mod, value

@@ -8,8 +8,9 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from itertools import izip, imap
+
 from copy import deepcopy
+from functools import cmp_to_key
 
 
 class _Missing(object):
@@ -55,21 +56,28 @@ class ReadOnlyMultiMapping(object):
             return False
         return True
 
-    def _dict_method(name):
-        def proxy(self):
-            return getattr(self.as_dict(), name)()
-        proxy.__name__ = name
-        proxy.__doc__ = getattr(dict, name).__doc__
-        return proxy
+    def __iter__(self):
+        return iter(self.as_dict())
 
-    __iter__ = iterkeys = _dict_method('iterkeys')
-    itervalues = _dict_method('itervalues')
-    iteritems = _dict_method('iteritems')
-    keys = _dict_method('keys')
-    values = _dict_method('values')
-    items = _dict_method('items')
-    __len__ = _dict_method('__len__')
-    del _dict_method
+    iterkeys = __iter__
+
+    def itervalues(self):
+        return iter(self.as_dict().values())
+
+    def iteritems(self):
+        return iter(self.as_dict().items())
+
+    def keys(self):
+        return list(self.as_dict().keys())
+
+    def values(self):
+        return list(self.as_dict().values())
+
+    def items(self):
+        return list(self.as_dict().items())
+
+    def __len__(self):
+        return len(self.as_dict())
 
     def as_dict(self):
         result = {}
@@ -188,7 +196,7 @@ class OrderedDict(dict):
     def __deepcopy__(self, memo):
         d = memo.get(id(self), missing)
         memo[id(self)] = d = self.__class__()
-        dict.__init__(d, deepcopy(self.items(), memo))
+        dict.__init__(d, deepcopy(list(self.items()), memo))
         d._keys = self._keys[:]
         return d
 
@@ -214,10 +222,10 @@ class OrderedDict(dict):
         return self.__class__(self)
 
     def items(self):
-        return zip(self._keys, self.values())
+        return list(zip(self._keys, list(self.values())))
 
     def iteritems(self):
-        return izip(self._keys, self.itervalues())
+        return zip(self._keys, iter(self.values()))
 
     def keys(self):
         return self._keys[:]
@@ -246,22 +254,22 @@ class OrderedDict(dict):
         sources = []
         if len(args) == 1:
             if hasattr(args[0], 'iteritems'):
-                sources.append(args[0].iteritems())
+                sources.append(iter(args[0].items()))
             else:
                 sources.append(iter(args[0]))
         elif args:
             raise TypeError('expected at most one positional argument')
         if kwargs:
-            sources.append(kwargs.iteritems())
+            sources.append(iter(kwargs.items()))
         for iterable in sources:
             for key, val in iterable:
                 self[key] = val
 
     def values(self):
-        return map(self.get, self._keys)
+        return list(map(self.get, self._keys))
 
     def itervalues(self):
-        return imap(self.get, self._keys)
+        return map(self.get, self._keys)
 
     def index(self, item):
         return self._keys.index(item)
@@ -277,14 +285,14 @@ class OrderedDict(dict):
         if key is not None:
             self._keys.sort(key=lambda k: key((k, self[k])))
         elif cmp is not None:
-            self._keys.sort(lambda a, b: cmp((a, self[a]), (b, self[b])))
+            self._keys.sort(key=cmp_to_key(lambda a, b: cmp((a, self[a]), (b, self[b]))))
         else:
             self._keys.sort()
         if reverse:
             self._keys.reverse()
 
     def __repr__(self):
-        return '%s(%r)' % (type(self).__name__, self.items())
+        return '%s(%r)' % (type(self).__name__, list(self.items()))
 
     __copy__ = copy
     __iter__ = iterkeys

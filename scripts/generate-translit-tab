@@ -33,7 +33,7 @@ def read_table(path):
         from_spec, raw_to = line.strip().split(' ', 1)
         from_ord = int(from_spec[2:-1], 16)
 
-        raw = csv.reader([raw_to], 'transtab').next()
+        raw = next(csv.reader([raw_to], 'transtab'))
         long_char = _unpack_uchrs(raw[0])
         if len(raw) < 2:
             short_char = long_char
@@ -49,7 +49,7 @@ def read_table(path):
 
 def _unpack_uchrs(packed):
     chunks = packed.replace('<U', ' ').strip().split()
-    return ''.join(unichr(int(spec[:-1], 16)) for spec in chunks)
+    return ''.join(chr(int(spec[:-1], 16)) for spec in chunks)
 
 
 def update_mapping(long, short, single, path):
@@ -57,7 +57,7 @@ def update_mapping(long, short, single, path):
     try:
         data = src.read()
         pos = 0
-        for x in xrange(2):
+        for x in range(2):
             pos = data.find('"""', pos) + 1
         preamble = data[:pos + 3]
     finally:
@@ -91,7 +91,7 @@ def main():
                                 '_dynamic', 'translit_tab.py')
     table = read_table(os.path.join(args[0], 'transtab'))
     update_mapping(path=mapping_file, *table)
-    print 'All done.'
+    print('All done.')
 
 
 if __name__ == '__main__':

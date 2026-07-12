@@ -139,7 +139,7 @@ def show_config(req):
     if req.method == 'POST' and form.validate(req.form):
         if form.has_changed:
             t = req.app.cfg.edit()
-            for key, value in form.data.iteritems():
+            for key, value in form.data.items():
                 t['typography/' + key] = value
             try:
                 t.commit()

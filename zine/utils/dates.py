@@ -45,14 +45,14 @@ def parse_iso8601(value):
     seconds = groups[-2]
     if seconds is not None:
         if '.' in seconds:
-            args.extend(map(int, seconds.split('.')))
+            args.extend(list(map(int, seconds.split('.'))))
         else:
             args.append(int(seconds))
 
     rv = datetime(*args)
     tz = groups[-1]
     if tz and tz != 'Z':
-        args = map(int, tz[1:].split(':'))
+        args = list(map(int, tz[1:].split(':')))
         delta = timedelta(hours=args[0], minutes=args[1])
         if tz[0] == '+':
             rv -= delta

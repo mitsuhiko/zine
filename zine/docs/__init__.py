@@ -14,7 +14,7 @@
 """
 import re
 import os
-import cPickle as pickle
+import pickle as pickle
 from mimetypes import guess_type
 
 from werkzeug import escape
@@ -57,7 +57,7 @@ def _expand_page(app, page):
 def list_documented_plugins(app):
     """Return a list of all documented plugins."""
     plugins = []
-    for plugin in app.plugins.itervalues():
+    for plugin in app.plugins.values():
         if plugin.is_documented:
             plugins.append('<li><a href="%s">%s</a></li>' % (
                 url_for('admin/help', page='plugins/%s/' % plugin.name),
@@ -84,7 +84,7 @@ def load_page(app, identifier):
 
     for filename, is_index in _iter_file_choices(app, base, *parts):
         if os.path.isfile(filename):
-            f = file(filename, 'rb')
+            f = open(filename, 'rb')
             try:
                 return _expand_page(app, pickle.load(f)), is_index
             finally:
@@ -105,7 +105,7 @@ def get_resource(app, filename):
     for filename in os.path.join(base, app.cfg['language'], *parts), \
                     os.path.join(base, 'en', *parts):
         if os.path.isfile(filename):
-            f = file(filename, 'rb')
+            f = open(filename, 'rb')
             try:
                 return Response(f.read(), mimetype=guess_type(filename)[0] or
                                 'application/octet-stram')

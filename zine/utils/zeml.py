@@ -13,11 +13,10 @@
 """
 import re
 import struct
-import cPickle as pickle
+import pickle as pickle
 from copy import deepcopy
-from StringIO import StringIO as UniStringIO
-from cStringIO import StringIO
-from urlparse import urlparse
+from io import BytesIO, StringIO
+from urllib.parse import urlparse
 
 from werkzeug import escape
 
@@ -27,14 +26,14 @@ from zine.utils.text import wrap as wraptext
 from zine.utils.datastructures import OrderedDict
 
 
-_tag_name_re = re.compile(r'([\w.-]+)\b(?u)')
-_attribute_re = re.compile(r'\s*([\w.-]+)(?:\s*=\s*(".*?"|'
-                           "'.*?'|[^\s>]*))?(?us)")
-_tag_end_re = re.compile(r'\s*>(?u)')
-_entity_re = re.compile(r'&([^;]+);')
+_tag_name_re = re.compile(r'([\w.-]+)\b')
+_attribute_re = re.compile(
+    r'\s*([\w.-]+)(?:\s*=\s*(".*?"|\'.*?\'|[^\s>]*))?', re.DOTALL
+)
+_tag_end_re = re.compile(r'\s*>')
 _entity_re = re.compile(r'&([^;]+);')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
-_whitespace_re = re.compile(ur'\s+(?u)')
+_whitespace_re = re.compile(r'\s+')
 _autoparagraphed_elements = set(['div', 'blockquote'])
 
 _entities = {
@@ -187,56 +186,55 @@ except AttributeError:
 _short_struct = _struct('!H')
 _int_struct = _struct('!I')
 _long_struct = _struct('!l')
-_opcodes = map(intern, 'NISLMRED')
 del _struct
 
 _empty_set = frozenset()
 
 
 def dumps(obj):
-    """Dump an element into a string."""
-    stream = StringIO()
+    """Serialize an element to bytes."""
+    stream = BytesIO()
     dump(obj, stream)
     return stream.getvalue()
 
 
-def loads(string):
-    """Load an element from a string."""
-    return load(StringIO(string))
+def loads(data):
+    """Load an element from serialized bytes."""
+    return load(BytesIO(bytes(data)))
 
 
 def dump(obj, stream):
     """Dump an element into a stream."""
     def _serialize(obj):
         if obj is None:
-            stream.write('N')
-        elif isinstance(obj, (int, long)):
-            stream.write('I' + _long_struct.pack(obj))
-        elif isinstance(obj, basestring):
-            obj = unicode(obj).encode('utf-8')
-            stream.write('S' + _long_struct.pack(len(obj)) + obj)
+            stream.write(b'N')
+        elif isinstance(obj, int):
+            stream.write(b'I' + _long_struct.pack(obj))
+        elif isinstance(obj, str):
+            obj = obj.encode('utf-8')
+            stream.write(b'S' + _long_struct.pack(len(obj)) + obj)
         elif type(obj) is list:
-            stream.write('L' + _short_struct.pack(len(obj)))
+            stream.write(b'L' + _short_struct.pack(len(obj)))
             for item in obj:
                 _serialize(item)
         elif type(obj) is Attributes:
-            stream.write('M' + _short_struct.pack(len(obj)))
-            for key, value in obj.iteritems():
+            stream.write(b'M' + _short_struct.pack(len(obj)))
+            for key, value in obj.items():
                 _serialize(key)
                 _serialize(value)
         elif type(obj) is RootElement:
-            stream.write('R')
+            stream.write(b'R')
             _serialize(obj.text)
             _serialize(obj.children)
         elif type(obj) is Element:
-            stream.write('E')
+            stream.write(b'E')
             _serialize(obj.name)
             _serialize(obj.children)
             _serialize(obj.attributes)
             _serialize(obj.text)
             _serialize(obj.tail)
         elif isinstance(obj, DynamicElement):
-            stream.write('D')
+            stream.write(b'D')
             # pickle into a separate stream, then count the length and
             # write that information together with the class name to
             # the stream.  This is done for two purposes:
@@ -245,7 +243,7 @@ def dump(obj, stream):
             #   chance to resconstruct at least parts of the tree
             # - if the dynamic element is no longer available, the loading
             #   mechanism can recover.
-            pickled = StringIO()
+            pickled = BytesIO()
             pickle.dump(obj, pickled, 2)
             pickled = pickled.getvalue()
             _serialize('%s.%s' % (
@@ -266,24 +264,24 @@ def load(stream):
     def _load(parent=None, _get=stream.read, _read_struct=lambda s,
               _get=stream.read: s.unpack(_get(s.size))[0]):
         char = _get(1)
-        if char is 'N':
+        if char == b'N':
             return None
-        elif char is 'I':
+        elif char == b'I':
             return _read_struct(_long_struct)
-        elif char is 'S':
-            return unicode(_get(_read_struct(_long_struct)), 'utf-8')
-        elif char is 'L':
+        elif char == b'S':
+            return _get(_read_struct(_long_struct)).decode('utf-8')
+        elif char == b'L':
             return [_load(parent) for x in
-                    xrange(_read_struct(_short_struct))]
-        elif char is 'M':
+                    range(_read_struct(_short_struct))]
+        elif char == b'M':
             return Attributes([(_load(), _load()) for x in
-                              xrange(_read_struct(_short_struct))])
-        elif char is 'R':
+                              range(_read_struct(_short_struct))])
+        elif char == b'R':
             rv = object.__new__(RootElement)
             rv.text = _load()
             rv.children = _load(rv)
             return rv
-        elif char is 'E':
+        elif char == b'E':
             rv = object.__new__(Element)
             rv.name = _load()
             rv.children = _load(rv)
@@ -292,11 +290,11 @@ def load(stream):
             rv.tail = _load()
             rv.parent = parent
             return rv
-        elif char is 'D':
+        elif char == b'D':
             obj_name = _load()
             try:
                 rv = pickle.loads(_get(_read_struct(_long_struct)))
-            except Exception, e:
+            except Exception as e:
                 log.exception(_(u'Error when loading dynamic ZEML element. '
                                 u'The system ignored the element.  Maybe a '
                                 u'disabled plugin caused the problem.'))
@@ -308,10 +306,10 @@ def load(stream):
 
 
 def dump_parser_data(parser_data):
-    out = StringIO()
+    out = BytesIO()
     dump(len(parser_data), out)
-    for key, value in parser_data.iteritems():
-        assert isinstance(key, basestring), 'keys must be strings'
+    for key, value in parser_data.items():
+        assert isinstance(key, str), 'keys must be strings'
         dump(key, out)
         dump(value, out)
     return out.getvalue()
@@ -320,11 +318,11 @@ def dump_parser_data(parser_data):
 def load_parser_data(value):
     if value is None:
         return {}
-    # the extra str() call is for databases like postgres that
-    # insist on using buffers for binary data.
-    in_ = StringIO(str(value))
+    if isinstance(value, memoryview):
+        value = value.tobytes()
+    in_ = BytesIO(bytes(value))
     result = {}
-    for x in xrange(load(in_)):
+    for x in range(load(in_)):
         key = load(in_)
         result[key] = load(in_)
     return result
@@ -520,7 +518,7 @@ class _BaseElement(object):
             _result = []
         _result.append('%s<%s%s%s>' % (
             level * '  ', self.name, self.attributes and ' ' or '',
-            ', '.join("%s=%r" % item for item in self.attributes.items())))
+            ', '.join("%s=%r" % item for item in list(self.attributes.items()))))
         appendtext(self.text)
         for child in self.children:
             child.to_pseudoxml(level+1, nostrip, _result)
@@ -532,13 +530,10 @@ class _BaseElement(object):
     attributes = property(lambda x: Attributes())
     parent = None
 
-    def __unicode__(self):
+    def __str__(self):
         return self.to_html()
 
-    def __str__(self):
-        return unicode(self).encode('utf-8')
-
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.children or self.text or self.tail or
                     self.attributes)
 
@@ -668,7 +663,7 @@ class DynamicElement(_BaseElement):
         """Converts the element to HTML."""
         return self.render() + self.tail
 
-    def __nonzero__(self):
+    def __bool__(self):
         return True
 
     def __eq__(self, other):
@@ -690,9 +685,9 @@ class BrokenElement(DynamicElement):
 
     def __init__(self, obj_name, error):
         try:
-            message = unicode(error)
+            message = str(error)
         except UnicodeError:
-            message = str(error).decode('utf-8', 'replace')
+            message = repr(error)
         self.obj_name = obj_name
         self.message = message
 
@@ -796,7 +791,7 @@ class _HTMLSerializer(object):
                 boolean_attributes = \
                     self.boolean_attributes[None] | \
                     self.boolean_attributes.get(element.name, _empty_set)
-                for key, value in element.attributes.iteritems():
+                for key, value in element.attributes.items():
                     if key in boolean_attributes:
                         write(u' ' + key)
                     else:
@@ -911,7 +906,7 @@ def inject_implicit_paragraphs(tree):
     def make_paragraph(children):
         element = Element('p')
         for child in children:
-            if isinstance(child, unicode):
+            if isinstance(child, str):
                 if element.children:
                     element.children[-1].tail += child
                 else:
@@ -929,11 +924,11 @@ def inject_implicit_paragraphs(tree):
         paragraphs = [[]]
 
         for item in joined_text_iter(parent):
-            if isinstance(item, unicode):
+            if isinstance(item, str):
                 blockiter = iter(_paragraph_re.split(item))
                 for block in blockiter:
                     try:
-                        is_paragraph = blockiter.next()
+                        is_paragraph = next(blockiter)
                     except StopIteration:
                         is_paragraph = False
                     if block:
@@ -951,7 +946,7 @@ def inject_implicit_paragraphs(tree):
                 parent.children.append(paragraph)
             else:
                 for item in paragraph:
-                    if not isinstance(item, unicode) or item:
+                    if not isinstance(item, str) or item:
                         parent.children.append(make_paragraph(paragraph))
                         break
 
@@ -1047,7 +1042,7 @@ class Parser(object):
     ]
 
     def __init__(self, string, parsing_reason, extensions=None):
-        self.string = unicode(string)
+        self.string = str(string)
         self.parsing_reason = parsing_reason
         self.end = len(self.string)
         self.pos = 0
@@ -1106,9 +1101,9 @@ class Parser(object):
                 return _entities[name]
             try:
                 if name[:2] in ('#x', '#X'):
-                    return unichr(int(name[2:], 16))
+                    return chr(int(name[2:], 16))
                 elif name.startswith('#'):
-                    return unichr(int(name[1:]))
+                    return chr(int(name[1:]))
             except ValueError:
                 pass
             return m.group(0)
@@ -1189,7 +1184,7 @@ class Parser(object):
             for idx, element in enumerate(reversed(self.stack)):
                 if element.name == tag:
                     if closable:
-                        for num in xrange(idx + 1):
+                        for num in range(idx + 1):
                             self.leave(None)
                     break
                 elif not self.breaking_rules.get(element.name):
@@ -1471,7 +1466,7 @@ class Sanitizer(object):
                 else:
                     previous_child = element
             else:
-                for key, value in child.attributes.items():
+                for key, value in list(child.attributes.items()):
                     if key not in self.acceptable_attributes or \
                        (key in self.uri_attributes and
                         not self.is_allowed_uri(value)):
@@ -1505,7 +1500,7 @@ class Textifier(object):
                  ignore_relative_urls=True):
         self.collect_urls = collect_urls
         self.ignore_relative_urls = ignore_relative_urls
-        self.result = UniStringIO()
+        self.result = StringIO()
 
         self.max_width = max_width
         self.indentation = initial_indent
@@ -1555,7 +1550,7 @@ class Textifier(object):
 
     def write_links(self):
         """Write all collected links."""
-        links = [(v, k) for k, v in self.collected_links.items()]
+        links = [(v, k) for k, v in list(self.collected_links.items())]
         links.sort()
         for i, link in links:
             self.write('[%d] %s' % (i, link))
@@ -1714,14 +1709,14 @@ class Textifier(object):
             else:
                 for i, cell in enumerate(row_or_sep):
                     if cell and cell.span == 1 and cell.lines:
-                        maxwidth = max(map(len, cell.lines))
+                        maxwidth = max(list(map(len, cell.lines)))
                         realwidths[i] = max(realwidths[i], maxwidth)
                 rows.append(row_or_sep)
         # pass 2: colspans
         for row in rows:
             for i, cell in enumerate(row):
                 if cell and cell.span > 1:
-                    maxwidth = max(map(len, cell.lines))
+                    maxwidth = max(list(map(len, cell.lines)))
                     if i + cell.span - 1 < ncols:
                         cumwidth = sum(realwidths[j]
                                        for j in range(i, i+cell.span))
@@ -1739,7 +1734,7 @@ class Textifier(object):
             if len(row) == 1:
                 lines = [(x,) for x in row[0]]
             else:
-                lines = map(None, *row)
+                lines = list(*row)
             for line in lines:
                 out = []
                 for i, (cellline, cell) in enumerate(zip(line, row)):
@@ -1784,7 +1779,7 @@ class Textifier(object):
         old_table_ncols = self.table_ncols
         old_table_colwidth = self.table_colwidth
 
-        self.result = UniStringIO()
+        self.result = StringIO()
         if span is None:
             span = max(element.attributes.get_int('colspan', 1), 1)
         self.max_width = self.table_colwidth * span

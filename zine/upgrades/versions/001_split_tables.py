@@ -306,14 +306,14 @@ def upgrade(migrate_engine):
     yield '  <li>Dropping existing posts sequence if it exists</li>\n'
     try:
         posts_new_seq.drop(migrate_engine)
-    except Exception, err:
+    except Exception as err:
         pass
 
 
     yield '  <li>Dropping existing comments sequence if it exists</li>\n'
     try:
         new_comments_seq.drop(migrate_engine)
-    except Exception, err:
+    except Exception as err:
         pass
 
     yield '  <li>Querying for old posts from database</li>\n'

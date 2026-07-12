@@ -13,7 +13,7 @@
     :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 
 from werkzeug import url_unquote
 
@@ -288,7 +288,7 @@ class NotificationManager(object):
     def types(self, user=None):
         if not user:
             user = get_request().user
-        for notification in self.notification_types.itervalues():
+        for notification in self.notification_types.values():
             if user.has_privilege(notification.privileges):
                 yield notification
 

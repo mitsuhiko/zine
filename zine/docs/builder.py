@@ -11,8 +11,8 @@
 """
 import re
 import os
-import cPickle as pickle
-from urlparse import urlparse
+import pickle as pickle
+from urllib.parse import urlparse
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -85,12 +85,12 @@ def walk(directory, callback=lambda filename: None):
         for filename in filenames:
             if filename.endswith('.rst'):
                 relname = os.path.join(dirpath, filename)[len(directory) + 1:]
-                f = file(os.path.join(dirpath, filename))
+                f = open(os.path.join(dirpath, filename), encoding='utf-8')
                 try:
-                    d = generate_documentation(f.read().decode('utf-8'))
+                    d = generate_documentation(f.read())
                 finally:
                     f.close()
-                f = file(os.path.join(dirpath, filename[:-3] + 'page'), 'wb')
+                f = open(os.path.join(dirpath, filename[:-3] + 'page'), 'wb')
                 try:
                     pickle.dump(d, f, protocol=2)
                 finally:

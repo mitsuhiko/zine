@@ -9,9 +9,9 @@
 """
 import re
 import sys
-import xmlrpclib
+import xmlrpc.client
 from datetime import datetime
-from htmlentitydefs import name2codepoint
+from html.entities import name2codepoint
 
 from werkzeug import escape, BaseResponse
 from werkzeug.contrib.atom import AtomFeed as BaseAtomFeed
@@ -36,7 +36,7 @@ del name2codepoint
 
 
 #: export the fault name
-Fault = xmlrpclib.Fault
+Fault = xmlrpc.client.Fault
 
 
 def replace_entities(string):
@@ -48,15 +48,15 @@ def replace_entities(string):
     def handle_match(m):
         name = m.group(1)
         if name in html_entities:
-            return unichr(html_entities[name])
+            return chr(html_entities[name])
         if name[:2] in ('#x', '#X'):
             try:
-                return unichr(int(name[2:], 16))
+                return chr(int(name[2:], 16))
             except ValueError:
                 return u''
         elif name.startswith('#'):
             try:
-                return unichr(int(name[1:]))
+                return chr(int(name[1:]))
             except ValueError:
                 return u''
         return u''
@@ -104,7 +104,7 @@ def generate_rsd(app):
                .appendChild(document.createTextNode(value))
 
     apis = service.appendChild(document.createElement('apis'))
-    for name, (blog_id, preferred, endpoint) in app.apis.iteritems():
+    for name, (blog_id, preferred, endpoint) in app.apis.items():
         element = apis.appendChild(document.createElement('api'))
         element.setAttribute('name', name)
         element.setAttribute('blogID', str(blog_id))
@@ -123,11 +123,12 @@ def dump_xml(obj):
             return '<true/>'
         elif obj is False:
             return '<false/>'
-        elif isinstance(obj, basestring):
-            if isinstance(obj, str):
-                obj = obj.decode('utf-8', 'ignore')
-            return u'<string value="%s"/>' % (escape(obj, True))
-        elif isinstance(obj, (int, long)):
+        elif isinstance(obj, bytes):
+            obj = obj.decode('utf-8', 'ignore')
+            return u'<string value="%s"/>' % escape(obj, True)
+        elif isinstance(obj, str):
+            return u'<string value="%s"/>' % escape(obj, True)
+        elif isinstance(obj, int):
             return '<integer value="%s"/>' % str(obj)
         elif isinstance(obj, float):
             return '<float value="%s"/>' % str(obj)
@@ -136,7 +137,7 @@ def dump_xml(obj):
                                                 u'<value>%s</value></item>'
                                                 % (_inner_dump(key),
                                                    _inner_dump(value)) for
-                                                key, value in obj.iteritems())
+                                                key, value in obj.items())
         elif hasattr(obj, '__iter__'):
             return u'<list>%s</list>' % u''.join(map(obj, _inner_dump))
         else:
@@ -220,20 +221,20 @@ class XMLRPC(object):
         if func is None:
             log.info('Client tried to access missing XMLRPC method %r on '
                      'XMLRPC dispatcher "%s"' % (method, self.name), 'xmlrpc')
-            raise xmlrpclib.Fault(1, 'method "%s" is not supported' % method)
+            raise xmlrpc.client.Fault(1, 'method "%s" is not supported' % method)
         return func(*args)
 
     def _wrap_obj(self, obj):
         """Wraps some values in something older XMLRPC versions can handle."""
         if isinstance(obj, (tuple, list)):
-            return map(self._wrap_obj, obj)
+            return list(map(self._wrap_obj, obj))
         if isinstance(obj, dict):
-            return dict((k, self._wrap_obj(v)) for k, v in obj.iteritems())
+            return dict((k, self._wrap_obj(v)) for k, v in obj.items())
         if isinstance(obj, datetime):
-            return xmlrpclib.DateTime(obj.timetuple())
+            return xmlrpc.client.DateTime(obj.timetuple())
         # make sure we can send translated strings over the wire.
         if isinstance(obj, _TranslationProxy):
-            return unicode(obj)
+            return str(obj)
         return obj
 
     def _marshaled_dispatch(self, data):
@@ -244,18 +245,18 @@ class XMLRPC(object):
         marshalled data.
         """
         try:
-            params, method = xmlrpclib.loads(data)
-            response = xmlrpclib.dumps((self._wrap_obj(self._dispatch(method, params)),),
+            params, method = xmlrpc.client.loads(data)
+            response = xmlrpc.client.dumps((self._wrap_obj(self._dispatch(method, params)),),
                                        methodresponse=True, allow_none=True,
                                        encoding=self.charset)
-        except xmlrpclib.Fault, fault:
-            response = xmlrpclib.dumps(fault, allow_none=self.allow_none,
+        except xmlrpc.client.Fault as fault:
+            response = xmlrpc.client.dumps(fault, allow_none=self.allow_none,
                                        encoding=self.charset)
         except:
             exc_type, exc_value, tb = exc_info = sys.exc_info()
             log.exception('Exception in XMLRPC request:', 'xmlrpc', exc_info)
-            response = xmlrpclib.dumps(
-                xmlrpclib.Fault(1, '%s:%s' % (exc_type, exc_value)),
+            response = xmlrpc.client.dumps(
+                xmlrpc.client.Fault(1, '%s:%s' % (exc_type, exc_value)),
                 encoding=self.charset, allow_none=self.allow_none
             )
 
@@ -287,7 +288,7 @@ class Namespace(object):
     """
 
     def __init__(self, uri):
-        self._uri = unicode(uri)
+        self._uri = str(uri)
 
     def __getattr__(self, name):
         return u'{%s}%s' % (self._uri, name)
@@ -300,7 +301,4 @@ class Namespace(object):
         return str(self)
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
-
-    def __unicode__(self):
         return self._uri

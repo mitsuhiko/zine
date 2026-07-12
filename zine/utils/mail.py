@@ -9,12 +9,9 @@
 """
 import os
 import re
-try:
-    from email.mime.text import MIMEText
-except ImportError:
-    from email.MIMEText import MIMEText
+from email.mime.text import MIMEText
 from smtplib import SMTP, SMTPException
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from zine.utils.validators import is_valid_email, check
 
@@ -68,7 +65,7 @@ class EMail(object):
             from_addr
         )
         self.to_addrs = []
-        if isinstance(to_addrs, basestring):
+        if isinstance(to_addrs, str):
             self.add_addr(to_addrs)
         else:
             for addr in to_addrs:
@@ -86,19 +83,10 @@ class EMail(object):
         if not self.subject or not self.text or not self.to_addrs:
             raise RuntimeError("Not all mailing parameters filled in")
 
-        msg = MIMEText(self.text.encode('utf-8'))
-
-        #: MIMEText sucks, it does not override the values on
-        #: setitem, it appends them.  We get rid of some that
-        #: are predefined under some versions of python
-        del msg['Content-Transfer-Encoding']
-        del msg['Content-Type']
-
-        msg['From'] = self.from_addr.encode('utf-8')
-        msg['To'] = ', '.join(x.encode('utf-8') for x in self.to_addrs)
-        msg['Subject'] = self.subject.encode('utf-8')
-        msg['Content-Transfer-Encoding'] = '8bit'
-        msg['Content-Type'] = 'text/plain; charset=utf-8'
+        msg = MIMEText(str(self.text), 'plain', 'utf-8')
+        msg['From'] = self.from_addr
+        msg['To'] = ', '.join(self.to_addrs)
+        msg['Subject'] = self.subject
         return msg
 
     def format(self, sep='\r\n'):
@@ -107,7 +95,11 @@ class EMail(object):
 
     def log(self):
         """Logs the email"""
-        f = open(os.path.join(self.app.instance_folder, 'mail.log'), 'a')
+        f = open(
+            os.path.join(self.app.instance_folder, 'mail.log'),
+            'a',
+            encoding='utf-8',
+        )
         try:
             f.write('%s\n%s\n\n' % ('-' * 79, self.format('\n').rstrip()))
         finally:
@@ -117,13 +109,13 @@ class EMail(object):
         """Send the message."""
         try:
             smtp = SMTP(self.app.cfg['smtp_host'], self.app.cfg['smtp_port'])
-        except SMTPException, e:
+        except SMTPException as e:
             raise RuntimeError(str(e))
 
         if self.app.cfg['smtp_use_tls']:
             #smtp.set_debuglevel(1)
             smtp.ehlo()
-            if not smtp.esmtp_features.has_key('starttls'):
+            if 'starttls' not in smtp.esmtp_features:
                 # XXX: untranslated because python exceptions do not support
                 # unicode messages.
                 raise RuntimeError('TLS enabled but server does not '
@@ -135,14 +127,14 @@ class EMail(object):
             try:
                 smtp.login(self.app.cfg['smtp_user'],
                            self.app.cfg['smtp_password'])
-            except SMTPException, e:
+            except SMTPException as e:
                 raise RuntimeError(str(e))
 
         msgtext = self.format()
         try:
             try:
                 return smtp.sendmail(self.from_addr, self.to_addrs, msgtext)
-            except SMTPException, e:
+            except SMTPException as e:
                 raise RuntimeError(str(e))
         finally:
             if self.app.cfg['smtp_use_tls']:

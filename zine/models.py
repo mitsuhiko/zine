@@ -10,7 +10,7 @@
 """
 from math import log
 from datetime import date, datetime, timedelta
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 from werkzeug.exceptions import NotFound
 
@@ -330,7 +330,7 @@ class AnonymousUser(User):
     def __init__(self):
         pass
 
-    def __nonzero__(self):
+    def __bool__(self):
         return False
 
     def check_password(self, password):
@@ -447,7 +447,7 @@ class _PostQueryBase(db.Query):
 
             there_are_more = False
             if detail == 'years':
-                now, oldest = [x.replace(month=1, day=1) for x in now, oldest]
+                now, oldest = [x.replace(month=1, day=1) for x in (now, oldest)]
                 while True:
                     now = now.replace(year=now.year - 1)
                     if now < oldest:
@@ -456,7 +456,7 @@ class _PostQueryBase(db.Query):
                 else:
                     there_are_more = True
             elif detail == 'months':
-                now, oldest = [x.replace(day=1) for x in now, oldest]
+                now, oldest = [x.replace(day=1) for x in (now, oldest)]
                 while limit is None or len(result) < limit:
                     if not now.month - 1:
                         now = now.replace(year=now.year - 1, month=12)
@@ -879,7 +879,7 @@ class Category(object):
             # id as base for slug generation.
             category = Category.query.autoflush(False) \
                                .order_by(Category.id.desc()).first()
-            full_slug = unicode(category and category.id or u'1')
+            full_slug = str(category and category.id or u'1')
         if full_slug != self.slug:
             while Category.query.autoflush(False) \
                           .filter_by(slug=full_slug).limit(1).count():
@@ -993,7 +993,7 @@ class Comment(_ZEMLContainer):
                  pub_date=None, submitter_ip='0.0.0.0', parser=None,
                  is_pingback=False, status=COMMENT_MODERATED):
         self.post = post
-        if isinstance(author, basestring):
+        if isinstance(author, str):
             self.user = None
             self._author = author
             self._email = email
@@ -1250,7 +1250,7 @@ class Tag(object):
             # if slug generation failed we select the highest category
             # id as base for slug generation.
             tag = Tag.query.autoflush(False).order_by(Tag.id.desc()).first()
-            full_slug = unicode(tag and tag.id or u'1')
+            full_slug = str(tag and tag.id or u'1')
         if full_slug != self.slug:
             while Tag.query.autoflush(False) \
                           .filter_by(slug=full_slug).limit(1).count():

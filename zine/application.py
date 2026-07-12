@@ -13,11 +13,11 @@
 import sys
 from os import path, remove, makedirs, walk, environ
 from time import time
-from urlparse import urlparse
+from urllib.parse import urlparse
 from collections import deque
 from inspect import getdoc
 from traceback import format_exception
-from StringIO import StringIO
+from io import StringIO
 
 from babel import Locale
 
@@ -126,7 +126,7 @@ def url_for(endpoint, **args):
     if hasattr(endpoint, 'get_url_values'):
         rv = endpoint.get_url_values()
         if rv is not None:
-            if isinstance(rv, basestring):
+            if isinstance(rv, str):
                 return make_external_url(rv)
             endpoint, updated_args = rv
             args.update(updated_args)
@@ -218,7 +218,7 @@ def render_template(template_name, _stream=False, **context):
     This is used by `render_response`.  If the `template_name` is a list of
     strings the first template that exists is selected.
     """
-    if not isinstance(template_name, basestring):
+    if not isinstance(template_name, str):
         tmpl = select_template(template_name)
         template_name = tmpl.name
     else:
@@ -299,9 +299,9 @@ class Request(RequestBase):
         a full blown user object.
         """
         from zine.models import User
-        if isinstance(user, (int, long)):
+        if isinstance(user, int):
             user = User.query.get(user)
-        elif isinstance(user, basestring):
+        elif isinstance(user, str):
             user = User.query.filter_by(username=user).first()
         if user is None:
             raise RuntimeError('User does not exist')
@@ -347,7 +347,7 @@ class EventManager(object):
         """Connect a callback to an event."""
         assert position in ('before', 'after'), 'invalid position'
         listener_id = self._last_listener
-        event = intern(event)
+        event = sys.intern(event)
         if event not in self._listeners:
             self._listeners[event] = deque([callback])
         elif position == 'after':
@@ -390,11 +390,8 @@ class TemplateEventResult(list):
     def __init__(self, items):
         list.__init__(self, items)
 
-    def __unicode__(self):
-        return u''.join(map(unicode, self))
-
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return u''.join(map(str, self))
 
 
 class Theme(object):
@@ -517,9 +514,9 @@ class Theme(object):
         for fn in self.get_searchpath():
             fn = path.join(fn, *parts)
             if path.exists(fn):
-                f = file(fn)
+                f = open(fn, encoding='utf-8')
                 try:
-                    contents = f.read().decode('utf-8')
+                    contents = f.read()
                 finally:
                     f.close()
                 mtime = path.getmtime(fn)
@@ -536,9 +533,11 @@ class Theme(object):
 
     def get_overlay(self, template):
         """Return the source of an overlay."""
-        f = file(self.get_overlay_path(template))
+        f = open(
+            self.get_overlay_path(template), encoding='utf-8', errors='ignore'
+        )
         try:
-            lines = f.read().decode('utf-8', 'ignore').splitlines()
+            lines = f.read().splitlines()
         finally:
             f.close()
         return u'\n'.join(lines)
@@ -553,9 +552,9 @@ class Theme(object):
         data = u'\n'.join(data.splitlines())
         if not data.endswith('\n'):
             data += '\n'
-        f = file(filename, 'w')
+        f = open(filename, 'w', encoding='utf-8')
         try:
-            f.write(data.encode('utf-8'))
+            f.write(data)
         finally:
             f.close()
 
@@ -689,7 +688,7 @@ class Zine(object):
                               self.cfg['log_level'])
 
         # the iid of the application
-        self.iid = self.cfg['iid'].encode('utf-8')
+        self.iid = self.cfg['iid']
         if not self.iid:
             self.iid = '%x' % id(self)
 
@@ -711,7 +710,7 @@ class Zine(object):
         self.views = all_views.copy()
         self.content_type_handlers = content_type_handlers.copy()
         self.admin_content_type_handlers = admin_content_type_handlers.copy()
-        self.parsers = dict((k, v(self)) for k, v in all_parsers.iteritems())
+        self.parsers = dict((k, v(self)) for k, v in all_parsers.items())
         self.markup_extensions = []
         self._url_rules = make_urls(self)
         self._absolute_url_handlers = absolute_url_handlers[:]
@@ -1256,14 +1255,14 @@ class Zine(object):
         """Return a sorted list of parsers (parser_id, parser_name)."""
         # we call unicode to resolve the translations once.  parser.name
         # will very likely be a lazy translation
-        return sorted([(key, unicode(parser.name)) for key, parser in
-                       self.parsers.iteritems()], key=lambda x: x[1].lower())
+        return sorted([(key, str(parser.name)) for key, parser in
+                       self.parsers.items()], key=lambda x: x[1].lower())
 
     def list_privileges(self):
         """Return a sorted list of privileges."""
         # TODO: somehow add grouping...
-        result = [(x.name, unicode(x.explanation)) for x in
-                  self.privileges.values()]
+        result = [(x.name, str(x.explanation)) for x in
+                  list(self.privileges.values())]
         result.sort(key=lambda x: x[0] == 'BLOG_ADMIN' or x[1].lower())
         return result
 
@@ -1373,18 +1372,18 @@ class Zine(object):
             try:
                 endpoint, args = self.url_adapter.match(request.path)
                 response = self.views[endpoint](request, **args)
-            except NotFound, e:
+            except NotFound as e:
                 response = self.handle_not_found(request, e)
-            except Forbidden, e:
+            except Forbidden as e:
                 if request.user.is_somebody:
                     response = render_response('403.html')
                     response.status_code = 403
                 else:
                     response = _redirect(url_for('account/login',
                                                  next=request.path))
-        except HTTPException, e:
+        except HTTPException as e:
             response = e.get_response(request.environ)
-        except SQLAlchemyError, e:
+        except SQLAlchemyError as e:
             # Some database screwup?! Don't let Zine stay dispatching 500's
             db.session.rollback()
             response = self.handle_internal_error(request, e,
@@ -1453,7 +1452,7 @@ class Zine(object):
                 result = callback(response)
                 if result is not None:
                     response = result
-        except InternalError, e:
+        except InternalError as e:
             response = self.handle_internal_error(request, e)
         except:
             if self.cfg['passthrough_errors']:
@@ -1519,7 +1518,7 @@ class Zine(object):
             raise NetException('Timeout on internal subrequest')
         if isinstance(response[0], tuple):
             exc_type, exc_value, tb = response[0]
-            raise exc_type, exc_value, tb
+            raise exc_type(exc_value).with_traceback(tb)
         return response[0]
 
     def __call__(self, environ, start_response):

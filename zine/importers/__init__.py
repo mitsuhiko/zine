@@ -11,10 +11,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import os
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
+from hashlib import md5
 from time import time
 from pickle import dump, load, HIGHEST_PROTOCOL
 from datetime import datetime, MAXYEAR
@@ -34,9 +31,10 @@ _distant_future = datetime(MAXYEAR, 12, 31)
 def _make_id(*args):
     hash = md5()
     for arg in args:
-        if isinstance(arg, unicode):
-            arg = arg.encode('utf-8')
-        hash.update('|' + str(arg))
+        if not isinstance(arg, bytes):
+            arg = str(arg).encode('utf-8')
+        hash.update(b'|')
+        hash.update(arg)
     return hash.hexdigest()
 
 
@@ -50,7 +48,7 @@ def list_import_queue(app):
         if not id.isdigit():
             continue
         filename = os.path.join(path, id)
-        f = file(filename)
+        f = open(filename, 'rb')
         try:
             d = load(f)
         finally:
@@ -69,7 +67,7 @@ def load_import_dump(app, id):
     path = os.path.join(app.instance_folder, 'import_queue', str(id))
     if not os.path.isfile(path):
         return
-    f = file(path, 'rb')
+    f = open(path, 'rb')
     try:
         load(f)
         blog = load(f)
@@ -231,7 +229,7 @@ def _perform_import(app, blog, d):
     if d['load_config']:
         yield u'<li>%s' % _('Updating configuration...')
         t = app.cfg.edit()
-        for key, value in blog.config.iteritems():
+        for key, value in blog.config.items():
             if key in t and key not in ignored_config_keys:
                 t.set_from_string(key, value)
         t.commit()
@@ -263,13 +261,13 @@ def rewrite_import(app, id, callback, title='Modified Import'):
     thread or a string with the path to the instance folder.  The latter is
     useful for simple scripts that should rewrite imports.
     """
-    if isinstance(app, basestring):
+    if isinstance(app, str):
         from zine import setup
         app = setup(app)
 
     blog = load_import_dump(app, id)
     callback(blog)
-    f = file(os.path.join(app.instance_folder, 'import_queue',
+    f = open(os.path.join(app.instance_folder, 'import_queue',
                           '%d' % time()), 'wb')
     try:
         blog.dump(f, title)
@@ -306,7 +304,7 @@ class Importer(object):
             os.makedirs(path)
         except OSError:
             pass
-        f = file(os.path.join(path, '%d' % time()), 'wb')
+        f = open(os.path.join(path, '%d' % time()), 'wb')
         try:
             blog.dump(f, self.title)
         finally:
@@ -397,7 +395,7 @@ class Author(_Element):
                  id=None):
         if id is None:
             id = _make_id(username, email)
-        self.id = unicode(id)
+        self.id = str(id)
         self.username = username[:30]
         self.real_name = real_name or u''
         self.email = email or u''
@@ -497,7 +495,7 @@ class Comment(_Element):
                  pub_date, remote_addr, parser=None, is_pingback=False,
                  status=COMMENT_MODERATED, blocked_msg=u'',
                  parser_data=None):
-        if isinstance(author, basestring):
+        if isinstance(author, str):
             author = author[:400]
         self.author = author
         self.author_email = author_email

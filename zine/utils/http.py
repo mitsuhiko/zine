@@ -8,7 +8,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from urlparse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin
 
 from werkzeug import redirect as _redirect
 from werkzeug.exceptions import BadRequest
@@ -146,7 +146,7 @@ class RequestLocal(object):
 
     def __init__(self, **vars):
         self.__dict__.update(_vars=vars)
-        for key, value in vars.iteritems():
+        for key, value in vars.items():
             if value is None:
                 value = lambda: None
             vars[key] = value

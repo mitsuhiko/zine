@@ -12,7 +12,7 @@
 import sys
 from os.path import abspath, dirname
 from optparse import OptionParser
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 
 HELP_TEXT = '''\
@@ -45,11 +45,11 @@ def main():
     
     prefix = urlparse(app.cfg['blog_url'])[2].rstrip('/')
 
-    for alias, dst in app._shared_exports.iteritems():
+    for alias, dst in app._shared_exports.items():
         dst = abspath(dst)
         if len(dst.split()) != 1:
             dst = '"%s"' % dst
-        print 'Alias %s%s %s' % (prefix, alias, dst)
+        print('Alias %s%s %s' % (prefix, alias, dst))
 
 
 if __name__ == '__main__':

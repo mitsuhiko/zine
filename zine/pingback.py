@@ -27,7 +27,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
-from xmlrpclib import ServerProxy
+from xmlrpc.client import ServerProxy
 
 from werkzeug.routing import RequestRedirect, NotFound
 from werkzeug import unescape
@@ -117,7 +117,7 @@ def pingback(source_uri, target_uri):
     rpc = ServerProxy(pingback_uri)
     try:
         return rpc.pingback.ping(source_uri, target_uri)
-    except Fault, e:
+    except Fault as e:
         raise PingbackError(e.faultCode)
     except:
         raise PingbackError(32)
@@ -147,9 +147,9 @@ def handle_pingback_request(source_uri, target_uri):
     while 1:
         try:
             endpoint, values = app.url_adapter.match(path_info)
-        except RequestRedirect, e:
+        except RequestRedirect as e:
             path_info = e.new_url[len(blog_url):]
-        except NotFound, e:
+        except NotFound as e:
             break
         else:
             if endpoint in app.pingback_endpoints:
@@ -160,7 +160,7 @@ def handle_pingback_request(source_uri, target_uri):
     if handler is not None:
         try:
             handler(response, target_uri, **values)
-        except PingbackError, e:
+        except PingbackError as e:
             raise_later = e
 
     # if the handler was none or an acception happend in the
@@ -171,7 +171,7 @@ def handle_pingback_request(source_uri, target_uri):
                 if handler(response, target_uri, path_info):
                     raise_later = None
                     break
-            except PingbackError, e:
+            except PingbackError as e:
                 raise_later = e
                 # fatal error, abort
                 if not raise_later.means_missing:
@@ -200,7 +200,7 @@ def get_excerpt(response, url_hint, body_limit=1024 * 512):
     tuple in the form ``(title, body)``.  If one of the two items could
     not be calculated it will be `None`.
     """
-    if isinstance(response, basestring):
+    if isinstance(response, str):
         response = open_url(response)
     contents = response.data[:body_limit]
     title_match = _title_re.search(contents)

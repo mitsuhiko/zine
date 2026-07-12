@@ -29,7 +29,7 @@ app_i18n_path = path.join(app_path, i18n_dir)
 def is_untranslated(obj):
     if not obj:
         return True
-    elif isinstance(obj, basestring):
+    elif isinstance(obj, str):
         return not obj.strip()
     for translation in obj:
         if translation.strip():
@@ -43,13 +43,13 @@ def main():
                       action='store_true', help="show statistics")
     options, args = parser.parse_args()
     if not args:
-        print 'Compiling builtin languages'
+        print('Compiling builtin languages')
         root = app_i18n_path
     elif len(args) == 1:
         root = path.join(path.abspath(args[0]), i18n_dir)
         if not path.isdir(root):
             parser.error('%s folder missing' % i18n_dir)
-        print 'Compiling', root
+        print('Compiling', root)
     else:
         parser.error('incorrect number of arguments')
 
@@ -60,8 +60,8 @@ def main():
 
             if path.isfile(translations):
                 mo_file = open(translations.replace('.po', '.mo'), 'wb')
-                print 'Compiling %r' % lang,
-                f = file(translations)
+                print('Compiling %r' % lang, end=' ')
+                f = open(translations)
                 try:
                     catalog = read_po(f, locale=lang)
                 finally:
@@ -88,23 +88,23 @@ def main():
                             break
                 if options.statistics and len(catalog):
                     percentage = translated * 100 // len(catalog)
-                    print "-> %d of %d messages (%d%%) translated" % (
-                        translated, len(catalog), percentage),
+                    print("-> %d of %d messages (%d%%) translated" % (
+                        translated, len(catalog), percentage), end=' ')
                     if fuzzy:
                         if fuzzy == 1:
-                            print "%d of which is fuzzy" % fuzzy,
+                            print("%d of which is fuzzy" % fuzzy, end=' ')
                         else:
-                            print "%d of which are fuzzy" % fuzzy,
-                    print
+                            print("%d of which are fuzzy" % fuzzy, end=' ')
+                    print()
                 else:
-                    print
+                    print()
 
                 # Dump pickled data at the end of the standard catalog
                 pickle.dump(client_messages, mo_file, 2)
                 # Write offset of the start of the pickled data
                 mo_file.write(struct.pack('i', pickled_data_pointer_pos))
                 mo_file.close()
-    print 'All done.'
+    print('All done.')
 
 
 if __name__ == '__main__':

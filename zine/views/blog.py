@@ -395,7 +395,7 @@ def populate_feed(req, feed, author=None, year=None, month=None, day=None,
                          .limit(15).all():
             alt_title = '%s @ %s' % (post.author.display_name, post.pub_date)
             feed.add_item(post.title or alt_title,
-                          url_for(post, _external=True), unicode(post.body),
+                          url_for(post, _external=True), str(post.body),
                           author_name=post.author.display_name,
                           pubdate=post.pub_date, unique_id=post.uid)
 
@@ -416,7 +416,7 @@ def populate_feed(req, feed, author=None, year=None, month=None, day=None,
             if comment.www:
                 author['uri'] = comment.www
             feed.add_item(title, url_for(comment, _external=True),
-                          unicode(comment.body), author_name=author,
+                          str(comment.body), author_name=author,
                           pubdate=comment.pub_date, unique_id=uid)
             comment_num += 1
 

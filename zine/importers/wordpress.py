@@ -56,7 +56,7 @@ def parse_broken_wxr(fd):
     # sections from time to time
     inline_doctype = '<!DOCTYPE wordpress [ %s ]>' % ' '.join(
         '<!ENTITY %s "&#%d;">' % (name, codepoint)
-        for name, codepoint in html_entities.iteritems()
+        for name, codepoint in html_entities.items()
     )
 
     # fix two: wordpress 2.6 uses "excerpt:encoded" where excerpt is an
@@ -202,7 +202,7 @@ def parse_feed(fd):
              if x.text in tags],
             [categories[x.text] for x in item.findall('category')
              if x.text in categories],
-            comments.values(),
+            list(comments.values()),
             item.findtext('comment_status') != 'closed',
             item.findtext('ping_status') != 'closed',
             parser='html',
@@ -215,10 +215,10 @@ def parse_feed(fd):
         tree.findtext('link'),
         tree.findtext('description') or '',
         tree.findtext('language') or 'en',
-        tags.values(),
-        categories.values(),
+        list(tags.values()),
+        list(categories.values()),
         posts,
-        authors.values()
+        list(authors.values())
     )
 
 
@@ -236,7 +236,7 @@ class WordPressImporter(Importer):
             if form.data['download_url']:
                 try:
                     dump = open_url(form.data['download_url']).stream
-                except Exception, e:
+                except Exception as e:
                     log.exception(_('Error downloading feed'))
                     flash(_(u'Error downloading from URL: %s') % e, 'error')
             if not dump:
@@ -244,7 +244,7 @@ class WordPressImporter(Importer):
 
             try:
                 blog = parse_feed(dump)
-            except Exception, e:
+            except Exception as e:
                 raise
                 log.exception(_(u'Error parsing uploaded file'))
                 flash(_(u'Error parsing uploaded file: %s') % e, 'error')

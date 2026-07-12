@@ -88,15 +88,17 @@ class Logger(object):
         """
         if self._file is None or self._file.closed:
             try:
-                self._file = file(self.logfile, 'a+')
+                self._file = open(
+                    self.logfile, 'a+', encoding='utf-8', errors='replace'
+                )
             except IOError:
                 # grml.  log file not writable.  return a dummy
-                return file(os.devnull, 'w')
-            if self._file.tell() > 0:
-                self._file.seek(-1, 2)
-                char = self._file.read()
-                if char != '\n':
-                    self._file.write('\n')
+                return open(os.devnull, 'w')
+            self._file.seek(0)
+            contents = self._file.read()
+            if contents and not contents.endswith('\n'):
+                self._file.write('\n')
+            self._file.seek(0, 2)
         return self._file
 
     def get_location(self, frame):
@@ -105,21 +107,21 @@ class Logger(object):
         """
         if frame is None:
             return u'?'
-        return ('%s:%d' % (
+        return '%s:%d' % (
             frame.f_globals.get('__name__', frame.f_code.co_name),
             frame.f_lineno
-        )).encode('utf-8', 'replace')
+        )
 
     def log(self, level, message, module=None, frame=None):
         """Writes a single log entry to the stream."""
-        prefix = (u'[%s-%s-%s] %s: ' % (
+        prefix = u'[%s-%s-%s] %s: ' % (
             format_iso8601(datetime.utcnow()),
             level,
             self.get_location(frame),
             module or 'unknown'
-        )).encode('utf-8')
-        for line in message.splitlines():
-            self.file.write(prefix + (line + u'\n').encode('utf-8'))
+        )
+        for line in str(message).splitlines():
+            self.file.write(prefix + line + u'\n')
         self.file.flush()
 
 
@@ -163,7 +165,7 @@ class LogfilePage(object):
 
         _parse_line = _log_line_re.match
         for line in lines:
-            match = _parse_line(line.decode('utf-8', 'replace'))
+            match = _parse_line(line)
             # trash in the logfile :-/
             if match is None:
                 continue
@@ -192,7 +194,7 @@ class LogfileView(object):
             lines = []
             has_more = False
         else:
-            f = file(self.filename)
+            f = open(self.filename, encoding='utf-8', errors='replace')
             try:
                 lines, has_more = tail(f, self.per_page,
                                        self.per_page * (number - 1))
@@ -235,8 +237,7 @@ def exception(message=None, module=None, exc_info=None):
 
     if LEVELS['error'] >= logger.level:
         message = (message and message + '\n' or '') + \
-                  ''.join(format_exception(*exc_info)) \
-                    .decode('utf-8', 'ignore')
+                  ''.join(format_exception(*exc_info))
         logger.log('error', message, module, currentframe(1))
 
 

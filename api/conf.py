@@ -168,8 +168,8 @@ htmlhelp_basename = 'Zinedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'Zine.tex', ur'Zine Documentation',
-   ur'The Zine Team', 'manual'),
+  ('index', 'Zine.tex', r'Zine Documentation',
+   r'The Zine Team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

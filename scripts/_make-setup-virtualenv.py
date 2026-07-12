@@ -36,11 +36,11 @@ if sys.version_info < (2, 6):
 # so that we can compile lxml
 lxml_static_deps=False
 if sys.platform == 'darwin':
-    print '=' * 60
-    print 'It appears that you are using OS X.  If an installation error'
-    print 'occurs on installing lxml, please make sure you have port'
-    print 'installed.'
-    print '=' * 60
+    print('=' * 60)
+    print('It appears that you are using OS X.  If an installation error')
+    print('occurs on installing lxml, please make sure you have port')
+    print('installed.')
+    print('=' * 60)
 
     # no idea if that actually helps, but let's hope it does :D
     _dyld_path = os.environ.get('DYLD_LIBRARY_PATH', '')
@@ -72,11 +72,11 @@ def after_install(options, home_dir):
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(__file__) or '.')
-    f = file(FILENAME, 'w')
+    f = open(FILENAME, 'w')
     try:
         f.write(create_bootstrap_script(CODE % {
             'zine_path':    os.path.normpath(os.path.join('..', 'zine'))
         }))
     finally:
         f.close()
-    os.chmod(FILENAME, 0755)
+    os.chmod(FILENAME, 0o755)

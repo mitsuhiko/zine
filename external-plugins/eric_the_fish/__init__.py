@@ -104,7 +104,7 @@ def show_eric_options(req):
     if new_skin in SKINS:
         try:
             req.app.cfg.change_single('eric_the_fish/skin', new_skin)
-        except ConfigurationTransactionError, e:
+        except ConfigurationTransactionError as e:
             flash(_('The skin could not be changed.'), 'error')
         return redirect(url_for('eric_the_fish/config'))
 

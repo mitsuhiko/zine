@@ -49,13 +49,13 @@ def main():
     parser = OptionParser(usage='%prog [path]')
     options, args = parser.parse_args()
     if not args:
-        print 'Extracting core strings'
+        print('Extracting core strings')
         root = app_path
     elif len(args) == 1:
         root = path.join(path.abspath(args[0]))
         if not path.isdir(root):
             parser.error('source folder missing')
-        print 'Extracting from', root
+        print('Extracting from', root)
     else:
         parser.error('incorrect number of arguments')
 
@@ -64,7 +64,7 @@ def main():
 
     def callback(filename, method, options):
         if method != 'ignore':
-            print strip_path(filename, root)
+            print(strip_path(filename, root))
 
     extracted = extract_from_dir(root, METHODS, {}, KEYWORDS,
                                  COMMENT_TAGS, callback=callback,
@@ -78,13 +78,13 @@ def main():
     if not path.isdir(output_path):
         makedirs(output_path)
 
-    f = file(path.join(output_path, 'messages.pot'), 'w')
+    f = open(path.join(output_path, 'messages.pot'), 'w')
     try:
         write_po(f, catalog, width=79)
     finally:
         f.close()
 
-    print 'All done.'
+    print('All done.')
 
 
 if __name__ == '__main__':

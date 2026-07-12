@@ -8,7 +8,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 from genshi.core import END, START, TEXT, QName, Stream
 from genshi.builder import tag

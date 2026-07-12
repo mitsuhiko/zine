@@ -9,17 +9,20 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from cStringIO import StringIO, InputType
+from io import BytesIO
 import os
-import urlparse
+import urllib.parse
 import socket
-import httplib
+import http.client
 
 from werkzeug import Headers, url_decode, cached_property
 from werkzeug.contrib.iterio import IterO
 
 from zine.application import Response, get_application
 from zine.utils.exceptions import ZineException
+
+
+InputType = type(BytesIO())
 
 
 def open_url(url, data=None, timeout=None,
@@ -36,9 +39,9 @@ def open_url(url, data=None, timeout=None,
     app = get_application()
     if timeout is None:
         timeout = app.cfg['default_network_timeout']
-    parts = urlparse.urlsplit(url)
+    parts = urllib.parse.urlsplit(url)
     if app is not None:
-        blog_url = urlparse.urlsplit(app.cfg['blog_url'])
+        blog_url = urllib.parse.urlsplit(app.cfg['blog_url'])
         if allow_internal_requests and \
            parts.scheme in ('http', 'https') and \
            blog_url.netloc == parts.netloc and \
@@ -48,7 +51,7 @@ def open_url(url, data=None, timeout=None,
             if method is None:
                 method = data is not None and 'POST' or 'GET'
             make_response = lambda *a: URLResponse(url, *a)
-            return app.perform_subrequest(path.decode('utf-8'),
+            return app.perform_subrequest(path,
                                           url_decode(parts.query),
                                           method, data, timeout=timeout,
                                           response_wrapper=make_response,
@@ -56,12 +59,12 @@ def open_url(url, data=None, timeout=None,
     handler = _url_handlers.get(parts.scheme)
     if handler is None:
         raise URLError('unsupported URL schema %r' % parts.scheme)
-    if isinstance(data, basestring):
-        data = StringIO(data)
+    if isinstance(data, str):
+        data = BytesIO(data.encode('utf-8'))
     try:
         obj = handler(parts, timeout, **kwargs)
         return obj.open(data)
-    except Exception, e:
+    except Exception as e:
         if not isinstance(e, NetException):
             e = NetException('%s: %s' % (e.__class__.__name__, str(e)))
         raise e
@@ -80,7 +83,7 @@ def create_connection(address, timeout=30):
             sock.settimeout(timeout)
             sock.connect(sa)
             return sock
-        except socket.error, msg:
+        except socket.error as msg:
             if sock is not None:
                 sock.close()
 
@@ -165,9 +168,9 @@ class URLHandler(object):
     def host_string(self):
         host, port = self.addr
         try:
-            host = host.encode('ascii')
+            host.encode('ascii')
         except UnicodeError:
-            host = host.encode('idna')
+            host = host.encode('idna').decode('ascii')
         if port != self.default_port:
             host = '%s:%d' % (host, port)
         return host
@@ -182,7 +185,7 @@ class URLHandler(object):
 
     @property
     def url(self):
-        return urlparse.urlunsplit(self.parsed_url)
+        return urllib.parse.urlunsplit(self.parsed_url)
 
     @property
     def socket(self):
@@ -206,16 +209,20 @@ class URLHandler(object):
             self.send_buffer()
         if data is None:
             return
+        if isinstance(data, str):
+            data = data.encode('utf-8')
         try:
             if hasattr(data, 'read'):
                 while 1:
                     s = data.read(8192)
                     if not s:
                         break
+                    if isinstance(s, str):
+                        s = s.encode('utf-8')
                     self.socket.sendall(s)
             else:
                 self.socket.sendall(data)
-        except socket.error, v:
+        except socket.error as v:
             if v[0] == 32: # Broken pipe
                 self.close()
             raise
@@ -223,10 +230,12 @@ class URLHandler(object):
     def send_buffered(self, data):
         if hasattr(data, 'read'):
             data = data.read()
+        if isinstance(data, str):
+            data = data.encode('latin-1')
         self._buffer.append(data)
 
     def send_buffer(self):
-        buffer = ''.join(self._buffer)
+        buffer = b''.join(self._buffer)
         del self._buffer[:]
         self.send(buffer)
 
@@ -240,7 +249,7 @@ class HTTPHandler(URLHandler):
     default_port = 80
     http_version = '1.1'
 
-    STATE_IDLE, STATE_SENDING, STATE_SENT = range(3)
+    STATE_IDLE, STATE_SENDING, STATE_SENT = list(range(3))
 
     def __init__(self, parsed_url, timeout=30, method=None):
         URLHandler.__init__(self, parsed_url, timeout)
@@ -265,9 +274,8 @@ class HTTPHandler(URLHandler):
                                                   self.http_version))
         self.send_buffered('\r\n'.join('%s: %s' % item for item in
                            self.headers.to_list()) + '\r\n\r\n')
-        if isinstance(data, basestring):
-            self.send_buffered(data)
-            data = None
+        if isinstance(data, str):
+            data = data.encode('utf-8')
         self.send(data)
         self._state = self.STATE_SENT
 
@@ -316,7 +324,7 @@ class HTTPSHandler(HTTPHandler):
             from ssl import wrap_socket
         except ImportError:
             # 2.4 and 2.5
-            from httplib import FakeSocket
+            from http.client import FakeSocket
             def wrap_socket(sock, key, cert):
                 ssl = socket.ssl(sock, key, cert)
                 return FakeSocket(sock, ssl)
@@ -339,7 +347,7 @@ class HTTPResponse(URLResponse):
 
     def __init__(self, http_handler):
         self._socket = http_handler.socket
-        resp = httplib.HTTPResponse(self._socket,
+        resp = http.client.HTTPResponse(self._socket,
                                     method=http_handler._method)
         resp.begin()
         headers = resp.getheaders()

@@ -33,12 +33,9 @@ class Widget(object):
     #: in the template as `widget`.
     template = None
 
-    def __unicode__(self):
+    def __str__(self):
         """Render the template."""
         return render_template(self.template, widget=self)
-
-    def __str__(self):
-        return unicode(self).encode('utf-8')
 
 
 class PostArchiveSummary(Widget):

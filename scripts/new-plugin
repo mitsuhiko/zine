@@ -61,46 +61,46 @@ def main():
     else:
         parser.error('incorrect number of arguments')
 
-    print 'Welcome to the Plugin Wizard'
-    print 'This wizard will ask you a few questions to create a new'
-    print 'plugin skelleton.'
-    print
+    print('Welcome to the Plugin Wizard')
+    print('This wizard will ask you a few questions to create a new')
+    print('plugin skelleton.')
+    print()
 
     while 1:
-        name = raw_input('English Name of the Plugin: ').strip()
+        name = input('English Name of the Plugin: ').strip()
         if name:
             break
-        print 'Error: you have to provide a name'
+        print('Error: you have to provide a name')
 
     package = gen_ascii_slug(name, delim='_')
     while 1:
-        tmp = raw_input('Name of the package [%s]: ' % package)
+        tmp = input('Name of the package [%s]: ' % package)
         if not tmp:
             break
         if _ident_re.search(tmp):
             package = tmp
             break
-        print 'Error: invalid package name'
+        print('Error: invalid package name')
 
     while 1:
-        author = raw_input('Author: ').strip()
+        author = input('Author: ').strip()
         if author:
             break
-        print 'Error: You have to provide an author'
+        print('Error: You have to provide an author')
 
-    author_url = raw_input('Author URL: ')
-    plugin_url = raw_input('Plugin URL: ')
+    author_url = input('Author URL: ')
+    plugin_url = input('Plugin URL: ')
 
     folder = os.path.join(path, package)
     os.mkdir(folder)
 
-    f = file(os.path.join(folder, 'metadata.txt'), 'w')
+    f = open(os.path.join(folder, 'metadata.txt'), 'w', encoding='utf-8')
     try:
         for key, value in ('Name', name), ('Author', author), \
                           ('Author URL', author_url), \
                           ('Plugin URL', plugin_url):
             if value:
-                f.write('%s: %s\n' % (key, value.encode('utf-8')))
+                f.write('%s: %s\n' % (key, value))
         f.write('\nVersion: 0.1\nLicense: BSD\nDescription:\n')
     finally:
         f.close()

@@ -40,7 +40,7 @@ def config_field(cfgvar, label=None, **kwargs):
     field._position_hint = forms._next_position_hint()
     if label is not None:
         field.label = label
-    for name, value in kwargs.iteritems():
+    for name, value in kwargs.items():
         setattr(field, name, value)
     return field
 
@@ -215,11 +215,11 @@ class PluginForm(forms.Form):
     def __init__(self, initial=None):
         self.app = app = get_application()
         self.active_plugins.choices = sorted([(x.name, x.display_name)
-                                              for x in app.plugins.values()],
+                                              for x in list(app.plugins.values())],
                                              key=lambda x: x[1].lower())
         if initial is None:
             initial = dict(
-                active_plugins=[x.name for x in app.plugins.itervalues()
+                active_plugins=[x.name for x in app.plugins.values()
                                 if x.active]
             )
         forms.Form.__init__(self, initial)
@@ -912,7 +912,7 @@ class DeleteUserForm(_UserBoundForm):
         ))
 
     def context_validate(self, data):
-        if self.user.posts.count() is 0:
+        if self.user.posts.count() == 0:
             data['action'] = None
         if data['action'] == 'reassign' and not data['reassign_to']:
             raise ValidationError(_('You have to select a user to reassign '
@@ -1047,7 +1047,7 @@ class _ConfigForm(forms.Form):
         forms.Form.__init__(self, initial)
 
     def _apply(self, t, skip):
-        for key, value in self.data.iteritems():
+        for key, value in self.data.items():
             if key not in skip:
                 t[key] = value
 
@@ -1124,7 +1124,7 @@ class URLOptionsForm(_ConfigForm):
     force_https = config_field('force_https', lazy_gettext(u'Force HTTPS'))
 
     def _apply(self, t, skip):
-        for key, value in self.data.iteritems():
+        for key, value in self.data.items():
             if key not in skip:
                 old = t[key]
                 if old != value:
@@ -1253,8 +1253,8 @@ def make_config_form():
 
         def apply(self):
             t = self.cfg.edit()
-            for category, items in self.data['values'].iteritems():
-                for key, d in items.iteritems():
+            for category, items in self.data['values'].items():
+                for key, d in items.items():
                     if category != 'zine':
                         key = '%s/%s' % (category, key)
                     if d['use_default']:
@@ -1273,7 +1273,7 @@ def make_notification_form(user):
     subscriptions = {}
 
     systems = [(s.key, s.name) for s in
-               sorted(app.notification_manager.systems.values(),
+               sorted(list(app.notification_manager.systems.values()),
                       key=lambda x: x.name.lower())]
 
     for obj in app.notification_manager.types(user):
@@ -1295,7 +1295,7 @@ def make_notification_form(user):
                 user_subscriptions.setdefault(subscription.notification_id,
                     set()).add(subscription.notification_system)
 
-            for key, active in self['subscriptions'].iteritems():
+            for key, active in self['subscriptions'].items():
                 currently_set = user_subscriptions.get(key, set())
                 active = set(active)
 

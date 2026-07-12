@@ -22,7 +22,7 @@
     you want to dump all the plugins you have into plugin files you can use
     this snippet::
 
-        for plugin in app.plugins.itervalues():
+        for plugin in app.plugins.values():
             plugin.dump('%s-%s.plugin' % (
                 plugin.filesystem_name,
                 plugin.version
@@ -78,7 +78,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-import __builtin__
+import builtins
 import re
 import sys
 import inspect
@@ -87,7 +87,7 @@ from types import ModuleType
 from shutil import rmtree
 from time import localtime, time
 
-from urllib import quote
+from urllib.parse import quote
 from werkzeug import cached_property, escape
 
 from zine.application import get_application
@@ -98,7 +98,7 @@ from zine.i18n import ZineTranslations as Translations, lazy_gettext, _
 from zine.environment import BUILTIN_PLUGIN_FOLDER
 
 
-_py_import = __builtin__.__import__
+_py_import = builtins.__import__
 _i18n_key_re = re.compile(r'^(.*?)\[([^\]]+)\]$')
 
 #: a dict of all managed applications by iid.
@@ -158,8 +158,8 @@ def install_package(app, package):
     # get the package version
     try:
         package_version = int(f.read('ZINE_PACKAGE'))
-        plugin_name = f.read('ZINE_PLUGIN')
-    except (KeyError, ValueError):
+        plugin_name = f.read('ZINE_PLUGIN').decode('utf-8')
+    except (KeyError, ValueError, UnicodeDecodeError):
         raise InstallationError('invalid')
 
     # check if the package version is handleable
@@ -187,7 +187,7 @@ def install_package(app, package):
         except (IOError, OSError):
             pass
         try:
-            dst = file(dst_filename, 'wb')
+            dst = open(dst_filename, 'wb')
         except IOError:
             raise InstallationError('ioerror')
         try:
@@ -217,8 +217,8 @@ def get_package_metadata(package):
     # get the package version and name
     try:
         package_version = int(f.read('ZINE_PACKAGE'))
-        plugin_name = f.read('ZINE_PLUGIN')
-    except (KeyError, ValueError):
+        plugin_name = f.read('ZINE_PLUGIN').decode('utf-8')
+    except (KeyError, ValueError, UnicodeDecodeError):
         raise ValueError('not a valid package')
     if package_version > PACKAGE_VERSION:
         raise ValueError('incompatible package version')
@@ -232,14 +232,17 @@ def get_package_metadata(package):
 
 
 def parse_metadata(string_or_fp):
-    """Parse the metadata and return it as metadata object."""
+    """Parse UTF-8 metadata text and return it as a metadata object."""
     result = {}
     translations = {}
-    if isinstance(string_or_fp, basestring):
+    if isinstance(string_or_fp, (str, bytes)):
         fileiter = iter(string_or_fp.splitlines(True))
     else:
-        fileiter = iter(string_or_fp.readline, '')
-    fileiter = (line.decode('utf-8') for line in fileiter)
+        fileiter = iter(string_or_fp)
+    fileiter = (
+        line.decode('utf-8') if isinstance(line, bytes) else line
+        for line in fileiter
+    )
     for line in fileiter:
         line = line.strip()
         if not line or line.startswith('#'):
@@ -251,10 +254,10 @@ def parse_metadata(string_or_fp):
             key, value = line.split(':', 1)
         while value.endswith('\\'):
             try:
-                value = value[:-1] + fileiter.next().rstrip('\n')
+                value = value[:-1] + next(fileiter).rstrip('\n')
             except StopIteration:
                 pass
-        key = '_'.join(key.lower().split()).encode('ascii', 'ignore')
+        key = '_'.join(key.lower().split())
         value = value.lstrip()
         match = _i18n_key_re.match(key)
         if match is not None:
@@ -421,7 +424,7 @@ class Plugin(object):
                            ('ZINE_PACKAGE', PACKAGE_VERSION)]:
             zinfo = ZipInfo(name, localtime(time()))
             zinfo.compress_type = f.compression
-            zinfo.external_attr = (33188 & 0xFFFF) << 16L
+            zinfo.external_attr = (33188 & 0xFFFF) << 16
             f.writestr(zinfo, str(data))
 
         f.close()
@@ -429,7 +432,7 @@ class Plugin(object):
     @cached_property
     def metadata(self):
         try:
-            f = file(path.join(self.path, 'metadata.txt'))
+            f = open(path.join(self.path, 'metadata.txt'), encoding='utf-8')
         except IOError:
             return {}
         try:
@@ -578,7 +581,7 @@ class Plugin(object):
         Plugins listed here won't be loaded automaticly.
         """
         depends = self.metadata.get('depends', '').strip()
-        return filter(None, [x.strip() for x in depends.split(',')])
+        return [_f for _f in [x.strip() for x in depends.split(',')] if _f]
 
     def setup(self):
         """Setup the plugin."""

@@ -34,7 +34,7 @@ def do_get_comment(req):
     return {
         'id':           comment.id,
         'parent':       parent_id,
-        'body':         unicode(comment.body),
+        'body':         str(comment.body),
         'author':       comment.author,
         'email':        email,
         'pub_date':     to_timestamp(comment.pub_date),

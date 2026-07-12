@@ -23,31 +23,25 @@ class ZineException(Exception):
     def __str__(self):
         return self.message or ''
 
-    def __unicode__(self):
-        return str(self).decode('utf-8', 'ignore')
-
 
 class UserException(ZineException):
     """Baseclass for exception with unicode messages."""
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
-
-    def __unicode__(self):
         if self.message is None:
             return u''
-        return unicode(self.message)
+        return str(self.message)
 
 
 def summarize_exception(exc_info):
     def _to_unicode(x):
         try:
-            return unicode(x)
+            return str(x)
         except UnicodeError:
-            return str(x).encode('utf-8', 'replace')
+            return repr(x)
 
     exc_type, exc_value, tb = exc_info
-    if isinstance(exc_type, basestring):
+    if isinstance(exc_type, str):
         prefix = _to_unicode(exc_type)
     else:
         prefix = _to_unicode(exc_type.__name__)

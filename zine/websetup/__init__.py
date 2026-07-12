@@ -87,7 +87,7 @@ class WebSetup(object):
             'current':     name,
             'prev':        self.prev[name],
             'next':        self.next[name],
-            'values':      dict((k, v) for k, v in request.values.iteritems()
+            'values':      dict((k, v) for k, v in request.values.items()
                                 if not k.startswith('_')),
             'languages':   list_languages(self_translated=True)
         })
@@ -98,7 +98,7 @@ class WebSetup(object):
         _ = request.translations.gettext
         if not path.exists(self.instance_folder):
             folder = self.instance_folder
-            if not isinstance(folder, unicode):
+            if isinstance(folder, bytes):
                 folder = folder.decode(sys.getfilesystemencoding() or 'utf-8',
                                        'ignore')
             return {'error': _(u'Instance folder does not exist.  You have to '
@@ -113,7 +113,7 @@ class WebSetup(object):
         else:
             try:
                 db.create_engine(database_uri, self.instance_folder)
-            except Exception, e:
+            except Exception as e:
                 error = str(e)
         if error is not None:
             return {'error': error}
@@ -183,8 +183,8 @@ class WebSetup(object):
             # create database and all tables
             e = db.create_engine(database_uri, self.instance_folder)
             init_database(e)
-        except Exception, error:
-            error = str(error).decode('utf-8', 'ignore')
+        except Exception as error:
+            error = str(error)
         else:
             from zine.database import users, user_privileges, privileges, \
                  schema_versions

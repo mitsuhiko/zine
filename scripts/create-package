@@ -18,10 +18,10 @@ import subprocess
 from optparse import OptionParser
 
 
-IGNORED = map(re.compile, r'''
+IGNORED = list(map(re.compile, r'''
 ^artwork/
 ^\.hgignore$
-'''.strip().splitlines())
+'''.strip().splitlines()))
 
 EXTRA_RST = 'README INSTALL'.split()
 
@@ -83,20 +83,20 @@ def build(dst_dir, build_dir, options):
     documented_plugins = set()
 
     # copy all tracked files into the build dir
-    print 'Bootstrapping build directory [%s]' % build_dir
+    print('Bootstrapping build directory [%s]' % build_dir)
     for filename in find_files(options.force):
         target_folder = os.path.join(release_dir, os.path.dirname(filename))
         if not os.path.exists(target_folder):
             os.makedirs(target_folder)
         shutil.copy(filename, target_folder)
-        print filename
+        print(filename)
         match = _documented_plugin_re.match(filename)
         if match is not None:
             documented_plugins.add(match.group(1))
 
-    print 'The following plugins are documented:'
+    print('The following plugins are documented:')
     for plugin in sorted(documented_plugins):
-        print '  *', plugin
+        print('  *', plugin)
 
     # build translations
     run_script(release_dir, 'compile-translations')
@@ -135,10 +135,10 @@ def build(dst_dir, build_dir, options):
     finally:
         os.chdir(old_dir)
 
-    print '-' * 60
-    print 'Summary'
+    print('-' * 60)
+    print('Summary')
     for message in messages:
-        print message
+        print(message)
 
 
 def main():
@@ -164,8 +164,8 @@ def main():
             build(os.path.abspath(dst), build_dir, options)
         finally:
             shutil.rmtree(build_dir, ignore_errors=True)
-    except BuildError, e:
-        print >> sys.stderr, e
+    except BuildError as e:
+        print(e, file=sys.stderr)
 
 
 if __name__ == '__main__':

@@ -64,7 +64,7 @@ def main():
         call([sys.executable, compile_script, plugin.path, '-s'])
 
     plugin.dump(output_filename)
-    print 'Plugin written to %s' % output_filename
+    print('Plugin written to %s' % output_filename)
 
 
 if __name__ == '__main__':

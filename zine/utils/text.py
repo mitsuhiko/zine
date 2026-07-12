@@ -12,11 +12,12 @@ import re
 import unicodedata
 from datetime import datetime
 from itertools import starmap
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from werkzeug import url_quote
 
 from zine._dynamic.translit_tab import LONG_TABLE, SHORT_TABLE, SINGLE_TABLE
+from functools import reduce
 
 
 _punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
@@ -42,12 +43,12 @@ def gen_ascii_slug(text, delim=u'-'):
         word = _punctuation_re.sub(u'', transliterate(word))
         if word:
             result.append(word)
-    return unicode(delim.join(result))
+    return str(delim.join(result))
 
 
 def gen_unicode_slug(text, delim=u'-'):
     """Generate an unicode slug."""
-    return unicode(delim.join(_punctuation_re.split(text.lower())))
+    return str(delim.join(_punctuation_re.split(text.lower())))
 
 
 def gen_timestamped_slug(slug, content_type, pub_date=None):
@@ -89,7 +90,7 @@ def increment_string(string):
     match = _string_inc_re.search(string)
     if match is None:
         return string + u'2'
-    return string[:match.start()] + unicode(int(match.group(1)) + 1)
+    return string[:match.start()] + str(int(match.group(1)) + 1)
 
 
 def transliterate(string, table='long'):
@@ -101,7 +102,7 @@ def transliterate(string, table='long'):
         'short':    SHORT_TABLE,
         'single':   SINGLE_TABLE
     }[table]
-    return unicodedata.normalize('NFKC', unicode(string)).translate(table)
+    return unicodedata.normalize('NFKC', str(string)).translate(table)
 
 
 def wrap(text, width):
@@ -128,7 +129,7 @@ def build_tag_uri(app, date, resource, identifier):
     path = path.strip('/')
     if path:
         path = ',' + path
-    if not isinstance(identifier, basestring):
+    if not isinstance(identifier, str):
         identifier = str(identifier)
     return 'tag:%s,%s:%s/%s;%s' % (host, date.strftime('%Y-%m-%d'), path,
                                    url_quote(resource), url_quote(identifier))
@@ -139,7 +140,7 @@ def _make_date_slug_part(key, places):
         value = getattr(datetime, key)
         if fixed:
             return (u'%%0%dd' % places) % value
-        return unicode(value)
+        return str(value)
     return key, handler
 
 

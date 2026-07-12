@@ -93,14 +93,14 @@ def _unload_zine():
         _application = None
         _setup_failed = False
 
-        for name, module in sys.modules.items():
+        for name, module in list(sys.modules.items()):
             # in the main module delete everything but the stuff
             # that we want to have there.  Also make sure that
             # zine._core (which python internally imports) is not
             # removed.
             if name == 'zine':
                 preserve = set(module.__all__) | set(['_core'])
-                for key, value in module.__dict__.items():
+                for key, value in list(module.__dict__.items()):
                     if key not in preserve and not key.startswith('__'):
                         module.__dict__.pop(key, None)
             elif name.startswith('zine.') and name not in (
@@ -110,7 +110,7 @@ def _unload_zine():
                 sys.modules.pop(name, None)
                 # zero out the dict
                 try:
-                    for key, value in module.__dict__.iteritems():
+                    for key, value in module.__dict__.items():
                         setattr(module, key, None)
                     # clear references
                     value = None
@@ -174,7 +174,7 @@ def override_environ_config(pool_size=None, pool_recycle=None,
     in the os environment.  These are process wide configuration settings
     used for different deployments.
     """
-    for key, value in locals().items():
+    for key, value in list(locals().items()):
         if value is not None:
             if key == 'behind_proxy':
                 value = int(bool(value))

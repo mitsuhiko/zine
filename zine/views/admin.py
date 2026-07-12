@@ -10,7 +10,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from werkzeug import escape
 from werkzeug.exceptions import NotFound, BadRequest, Forbidden
@@ -186,7 +186,7 @@ def render_admin_response(template_name, _active_menu_item=None, **values):
     # check for broken plugins if we have the plugin guard enabled
     if request.app.cfg['plugin_guard']:
         plugins_to_deactivate = []
-        for plugin in request.app.plugins.itervalues():
+        for plugin in request.app.plugins.values():
             if plugin.active and plugin.setup_error is not None:
                 flash(_(u'Could not activate plugin “%(name)s”: %(error)s') % {
                     'name':     plugin.html_display_name,
@@ -249,10 +249,10 @@ def ping_post_links(form):
     else:
         this_url = url_for(form.post, _external=True)
         for url in form.find_new_links():
-            host = urlparse(url)[1].decode('utf-8', 'ignore')
+            host = urlparse(url)[1]
             try:
                 pingback(this_url, url)
-            except PingbackError, e:
+            except PingbackError as e:
                 if not e.ignore_silently:
                     flash(_(u'Could not ping %(url)s: %(error)s') % {
                         'url':   escape(host),
@@ -1082,7 +1082,7 @@ def theme(request):
 
     return render_admin_response('admin/theme.html', 'options.theme',
         themes=sorted(
-            request.app.themes.values(),
+            list(request.app.themes.values()),
             key=lambda x: x.name == 'default' or x.display_name.lower()
         ),
         current_theme=request.app.theme,
@@ -1111,7 +1111,7 @@ def plugins(request):
         if new_plugin:
             try:
                 plugin = install_package(request.app, new_plugin)
-            except InstallationError, e:
+            except InstallationError as e:
                 flash(e.message, 'error')
             else:
                 flash(_(u'Plugin “%s” added successfully. You can now '
@@ -1122,7 +1122,7 @@ def plugins(request):
 
     return render_admin_response('admin/plugins.html', 'system.plugins',
         form=form.as_widget(),
-        plugins=sorted(request.app.plugins.values(), key=lambda x: x.name)
+        plugins=sorted(list(request.app.plugins.values()), key=lambda x: x.name)
     )
 
 
@@ -1225,7 +1225,7 @@ def maintenance(request):
 def import_dump(request):
     """Show the current import queue or add new items."""
     return render_admin_response('admin/import.html', 'system.import',
-        importers=sorted(request.app.importers.values(),
+        importers=sorted(list(request.app.importers.values()),
                          key=lambda x: x.title.lower()),
         queue=list_import_queue(request.app)
     )
@@ -1318,13 +1318,13 @@ def information(request):
         database_uri = secure_database_uri(database_uri)
 
     content_types = {}
-    for name, func in request.app.content_type_handlers.iteritems():
+    for name, func in request.app.content_type_handlers.items():
         content_types[name] = {'name': name, 'show': get_object_name(func)}
-    for name, funcs in request.app.admin_content_type_handlers.iteritems():
+    for name, funcs in request.app.admin_content_type_handlers.items():
         if name in content_types:
-            for action, func in funcs.iteritems():
+            for action, func in funcs.items():
                 content_types[name][action] = get_object_name(func)
-    content_types = sorted(content_types.values(), key=lambda x: x['name'])
+    content_types = sorted(list(content_types.values()), key=lambda x: x['name'])
 
     response = render_admin_response('admin/information.html', 'system.information',
         apis=[{
@@ -1332,16 +1332,16 @@ def information(request):
             'blog_id':      blog_id,
             'preferred':    preferred,
             'endpoint':     endpoint
-        } for name, (blog_id, preferred, endpoint) in request.app.apis.iteritems()],
+        } for name, (blog_id, preferred, endpoint) in request.app.apis.items()],
         endpoints=[{
             'name':         rule.endpoint,
-            'rule':         unicode(rule)
+            'rule':         str(rule)
         } for rule in sorted(request.app.url_map._rules, key=lambda x: x.endpoint)],
         views=sorted([{
             'endpoint':     endpoint,
             'handler':      get_object_name(view)
         } for endpoint, view
-            in request.app.views.iteritems()], key=lambda x: x['endpoint']),
+            in request.app.views.items()], key=lambda x: x['endpoint']),
         markup_extensions=[{
             'name':         handler.name,
             'objname':      get_object_name(handler)
@@ -1351,7 +1351,7 @@ def information(request):
             'key':          key,
             'name':         parser.name,
             'id':           get_object_name(parser)
-        } for key, parser in request.app.parsers.iteritems()],
+        } for key, parser in request.app.parsers.items()],
         absolute_url_handlers=[get_object_name(handler) for handler
                                in request.app._absolute_url_handlers],
         content_types=content_types,
@@ -1359,7 +1359,7 @@ def information(request):
         servicepoints=sorted([{
             'name':         name,
             'handler':      get_object_name(service)
-        } for name, service in request.app._services.iteritems()],
+        } for name, service in request.app._services.items()],
             key=lambda x: x['name']),
         configuration=request.app.cfg.get_public_list(export),
         hosting_env={
@@ -1369,7 +1369,7 @@ def information(request):
             'multiprocess':     request.is_multiprocess,
             'wsgi_version':     '.'.join(map(str, request.environ['wsgi.version']))
         },
-        plugins=sorted(request.app.plugins.values(), key=lambda x: not x.active and x.name),
+        plugins=sorted(list(request.app.plugins.values()), key=lambda x: not x.active and x.name),
         python_version='<br>'.join(map(escape, python_version.splitlines())),
         zine_env=environment,
         zine_version=zine_version,

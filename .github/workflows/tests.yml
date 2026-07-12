@@ -24,12 +24,5 @@ jobs:
           enable-cache: true
       - name: Install dependencies
         run: uv sync --locked --extra test
-      - name: Compile import scaffold
-        run: >-
-          uv run python -m py_compile
-          zine/__init__.py
-          zine/_core.py
-          tests/__init__.py
-          tests/test_scaffold.py
-      - name: Test
+      - name: Compile and test
         run: uv run pytest

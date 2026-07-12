@@ -64,7 +64,7 @@ def copy_folder(src, dst, recurse=True, skip=(), delete_if_exists=False):
 def copy_servers(source, destination, lib_dir, python):
     silent(os.makedirs, destination)
     for filename in os.listdir(source):
-        f = file(join(source, filename))
+        f = open(join(source, filename))
         try:
             lines = list(f)
             if lines[0].startswith('#!'):
@@ -75,7 +75,7 @@ def copy_servers(source, destination, lib_dir, python):
                     break
         finally:
             f.close()
-        f = file(join(destination, filename), 'w')
+        f = open(join(destination, filename), 'w')
         try:
             f.write(''.join(lines))
         finally:
@@ -121,13 +121,13 @@ def copy_plugins(src_dir, lib_dir, share_dir):
 
 def copy_scripts(source, destination, lib_dir):
     silent(os.makedirs, destination)
-    f = file(join(source, '_init_zine.py'))
+    f = open(join(source, '_init_zine.py'))
     try:
         contents = f.read().replace('ZINE_LIB = None',
                                     'ZINE_LIB = %r' % strip_destdir(lib_dir))
     finally:
         f.close()
-    f = file(join(destination, '_init_zine.py'), 'w')
+    f = open(join(destination, '_init_zine.py'), 'w')
     try:
         f.write(contents)
     finally:
@@ -154,8 +154,8 @@ def main(prefix):
     lib_dir = join(dest_dir, 'lib', 'zine')
     share_dir = join(dest_dir, 'share', 'zine')
 
-    print 'Installing to ' + dest_dir
-    print 'Using ' + python
+    print('Installing to ' + dest_dir)
+    print('Using ' + python)
 
     # create some folders for us
     silent(os.makedirs, join(lib_dir, 'zine'))
@@ -201,12 +201,12 @@ def main(prefix):
     # copy the scripts
     copy_scripts(join(source, 'scripts'),
                  join(share_dir, 'scripts'), lib_dir)
-    print 'All done.'
+    print('All done.')
 
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print >> sys.stderr, 'error: install script only accepts a prefix'
+        print('error: install script only accepts a prefix', file=sys.stderr)
         sys.exit(1)
     os.chdir(os.path.join(os.path.dirname(__file__), '..'))
     main(sys.argv[1])

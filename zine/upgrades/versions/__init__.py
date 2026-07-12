@@ -24,7 +24,7 @@ from zine.database import db
 
 
 for mod in versioning, changeset:
-    for key, value in mod.__dict__.iteritems():
+    for key, value in mod.__dict__.items():
         # Override SQLA stuff with migrate's stuff
         if key in dir(mod):
             setattr(db, key, value)

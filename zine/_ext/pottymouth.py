@@ -52,7 +52,7 @@ token_order = (
     TokenMatcher('DASH'       ,  r'([\t ]*-[\t ]+)'     ),
     TokenMatcher('NUMBERDOT'  ,  r'([\t ]*\d+\.[\t ]+)' ),
     TokenMatcher('ITEMSTAR'   ,  r'([\t ]*\*[\t ]+)'    ),
-    TokenMatcher('BULLET'     , ur'([\t ]*\u2022[\t ]+)'),
+    TokenMatcher('BULLET'     , r'([\t ]*\u2022[\t ]+)'),
 
     TokenMatcher('UNDERSCORE' , r'(_)' ),
     TokenMatcher('STAR'       , r'(\*)'),
@@ -60,11 +60,11 @@ token_order = (
     TokenMatcher('RIGHT_ANGLE', r'(>[\t ]*(?:>[\t ]*)*)'),
 
     # The following are simple, context-independent replacement tokens
-    TokenMatcher('EMDASH'  , r'(--)'    , replace=unichr(8212)),
+    TokenMatcher('EMDASH'  , r'(--)'    , replace=chr(8212)),
     # No way to reliably distinguish Endash from Hyphen, Dash & Minus,
     # so we don't.  See: http://www.alistapart.com/articles/emen/
 
-    TokenMatcher('ELLIPSIS', r'(\.\.\.)', replace=unichr(8230)),
+    TokenMatcher('ELLIPSIS', r'(\.\.\.)', replace=chr(8230)),
     #TokenMatcher('SMILEY' , r'(:\))'   , replace=unichr(9786)), # smiley face, not in HTML 4.01, doesn't work in IE
     )
 
@@ -85,36 +85,36 @@ class Replacer(object):
 
 
 replace_list = [
-    Replacer(r'(``)', unichr(8220)),
-    Replacer(r"('')", unichr(8221)),
+    Replacer(r'(``)', chr(8220)),
+    Replacer(r"('')", chr(8221)),
 
     # First we look for inter-word " and '
-    Replacer(r'(\b"\b)', unichr(34)), # double prime
-    Replacer(r"(\b'\b)", unichr(8217)), # apostrophe
+    Replacer(r'(\b"\b)', chr(34)), # double prime
+    Replacer(r"(\b'\b)", chr(8217)), # apostrophe
     # Then we look for opening or closing " and '
-    Replacer(r'(\b"\B)', unichr(8221)), # close double quote
-    Replacer(r'(\B"\b)', unichr(8220)), # open double quote
-    Replacer(r"(\b'\B)", unichr(8217)), # close single quote
-    Replacer(r"(\B'\b)", unichr(8216)), # open single quote
+    Replacer(r'(\b"\B)', chr(8221)), # close double quote
+    Replacer(r'(\B"\b)', chr(8220)), # open double quote
+    Replacer(r"(\b'\B)", chr(8217)), # close single quote
+    Replacer(r"(\B'\b)", chr(8216)), # open single quote
 
     # Then we look for space-padded opening or closing " and '
-    Replacer(r'(")(\s)', unichr(8221)+r'\2'), # close double quote
-    Replacer(r'(\s)(")', r'\1'+unichr(8220)), # open double quote
-    Replacer(r"(')(\s)", unichr(8217)+r'\2'), # close single quote
-    Replacer(r"(\s)(')", r'\1'+unichr(8216)), # open single quote
+    Replacer(r'(")(\s)', chr(8221)+r'\2'), # close double quote
+    Replacer(r'(\s)(")', r'\1'+chr(8220)), # open double quote
+    Replacer(r"(')(\s)", chr(8217)+r'\2'), # close single quote
+    Replacer(r"(\s)(')", r'\1'+chr(8216)), # open single quote
 
     # Then we gobble up stand-alone ones
-    Replacer(r'(`)', unichr(8216)),
+    Replacer(r'(`)', chr(8216)),
     #Replacer(r'(")', unichr(8221)),
     #Replacer(r"(')", unichr(8217)),
     ]
 
 
 
-class Token(unicode):
+class Token(str):
 
     def __new__(cls, name, content=''):
-        self = unicode.__new__(cls, content)
+        self = str.__new__(cls, content)
         self.name = name
         return self
 
@@ -122,10 +122,10 @@ class Token(unicode):
         return '%s{%s}'%(self.name, self)
 
     def __add__(self, extra):
-        return Token(self.name, unicode.__add__(self, extra))
+        return Token(self.name, str.__add__(self, extra))
 
     def __str__(self):
-        return self.encode('ascii', 'xmlcharrefreplace')
+        return str.__str__(self)
 
 
 
@@ -187,7 +187,9 @@ class Node(list):
                 if isinstance(c, Node):
                     content += str(c)
                 else:
-                    content += escape(c).encode('ascii', 'xmlcharrefreplace')
+                    content += escape(c).encode(
+                        'ascii', 'xmlcharrefreplace'
+                    ).decode('ascii')
                 content += '\n'
             content = content.rstrip('\n')
             content = content.replace('\n', '\n  ')
@@ -205,8 +207,11 @@ class Node(list):
     def _attribute_string(self):
         content = ''
         if self._attributes:
-            for k, v in self._attributes.items():
-                content += ' %s="%s"' % (k, escape(v).encode('ascii', 'xmlcharrefreplace'))
+            for k, v in list(self._attributes.items()):
+                escaped = escape(v).encode(
+                    'ascii', 'xmlcharrefreplace'
+                ).decode('ascii')
+                content += ' %s="%s"' % (k, escaped)
         return content
 
 
@@ -334,7 +339,7 @@ class PottyMouth(object):
 
     def debug(self, *s):
         return
-        print ' '.join(map(str, s))
+        print(' '.join(map(str, s)))
 
 
     def tokenize(self, string):
@@ -355,12 +360,7 @@ class PottyMouth(object):
                         break
 
                     if unmatched_collection:
-                        try:
-                            found_tokens.append(Token('TEXT', unmatched_collection))
-                        except UnicodeDecodeError:
-                            found_tokens.append(Token('TEXT', unmatched_collection.decode('utf8')))
-                        except:
-                            raise
+                        found_tokens.append(Token('TEXT', unmatched_collection))
 
                     unmatched_collection = ''
 
@@ -743,7 +743,7 @@ if __name__ == '__main__':
                    url_white_lists=('https?://www\.mysite\.com/allowed/url\?id=\d+',),
                    )
     while True:
-        print 'input (end with Ctrl-D)>>'
+        print('input (end with Ctrl-D)>>')
         try:
             text = sys.stdin.read()
         except KeyboardInterrupt:
@@ -751,5 +751,5 @@ if __name__ == '__main__':
         if text:
             blocks = w.parse(text)
             for b in blocks:
-                print b
-            print '=' * 70
+                print(b)
+            print('=' * 70)

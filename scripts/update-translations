@@ -33,13 +33,13 @@ def main():
                       action='store_true', help="show statistics")
     options, args = parser.parse_args()
     if not args:
-        print 'Updating core strings'
+        print('Updating core strings')
         root = path.join(app_path, i18n_dir)
     elif len(args) == 1:
         root = path.join(path.abspath(args[0]), i18n_dir)
         if not path.isdir(root):
             parser.error('source folder missing')
-        print 'Updating', root
+        print('Updating', root)
     else:
         parser.error('incorrect number of arguments')
 
@@ -50,7 +50,7 @@ def main():
                 parser.error("unknown locale. %s not found." % filepath)
 
 
-    f = file(path.join(root, 'messages.pot'))
+    f = open(path.join(root, 'messages.pot'))
     try:
         template = read_po(f)
     finally:
@@ -64,9 +64,9 @@ def main():
                                path.join(root, options.locale, domain + '.po'):
                 continue
             if path.exists(filename):
-                print 'Updating %r' % lang,
+                print('Updating %r' % lang, end=' ')
                 locale = Locale.parse(lang)
-                f = file(filename)
+                f = open(filename)
                 try:
                     catalog = read_po(f, locale=locale, domain=domain)
                 finally:
@@ -76,7 +76,7 @@ def main():
                 # XXX: this is kinda dangerous, but as we are using a
                 # revision control system anyways that shouldn't make
                 # too many problems
-                f = file(filename, 'w')
+                f = open(filename, 'w')
                 try:
                     write_po(f, catalog, ignore_obsolete=True,
                              include_previous=False, width=79)
@@ -90,20 +90,20 @@ def main():
                                 fuzzy += 1
                         if len(catalog):
                             percentage = translated * 100 // len(catalog)
-                            print "-> %d of %d messages (%d%%) translated" % (
-                                translated, len(catalog), percentage),
+                            print("-> %d of %d messages (%d%%) translated" % (
+                                translated, len(catalog), percentage), end=' ')
                             if fuzzy:
                                 if fuzzy == 1:
-                                    print "%d of which is fuzzy" % fuzzy,
+                                    print("%d of which is fuzzy" % fuzzy, end=' ')
                                 else:
-                                    print "%d of which are fuzzy" % fuzzy,
-                            print
+                                    print("%d of which are fuzzy" % fuzzy, end=' ')
+                            print()
                     else:
-                        print
+                        print()
                     f.close()
 
 
-    print 'All done.'
+    print('All done.')
 
 
 if __name__ == '__main__':

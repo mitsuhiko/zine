@@ -35,7 +35,7 @@ def main():
 
     try:
         locale = Locale.parse(args[0])
-    except UnknownLocaleError, e:
+    except UnknownLocaleError as e:
         parser.error(str(e))
 
     if options.plugin is None:
@@ -46,8 +46,8 @@ def main():
 
 def create_from_pot(locale, path):
     try:
-        f = file(path)
-    except IOError, e:
+        f = open(path)
+    except IOError as e:
         parser.error(str(e))
     try:
         catalog = read_po(f, locale=locale)
@@ -62,7 +62,7 @@ def write_catalog(catalog, folder):
     target = path.join(folder, str(catalog.locale))
     if not path.isdir(target):
         makedirs(target)
-    f = file(path.join(target, 'messages.po'), 'w')
+    f = open(path.join(target, 'messages.po'), 'w')
     try:
         write_po(f, catalog, width=79)
     finally:
@@ -72,7 +72,7 @@ def write_catalog(catalog, folder):
 def create_application_lang(locale):
     catalog = create_from_pot(locale, path.join(app_i18n_path, 'messages.pot'))
     write_catalog(catalog, app_i18n_path)
-    print 'Created catalog for %s' % locale
+    print('Created catalog for %s' % locale)
 
 
 def create_plugin_lang(locale, path):
@@ -81,7 +81,7 @@ def create_plugin_lang(locale, path):
     # incorporate existing translations from the application
     app_messages = path.join(app_i18n_path, str(locale), 'messages.po')
     if path.isfile(app_messages):
-        f = file(app_messages)
+        f = open(app_messages)
         try:
             translated = read_po(f)
         finally:
@@ -92,7 +92,7 @@ def create_plugin_lang(locale, path):
                 catalog[message.id].string = message.string
 
     write_catalog(catalog, path.join(path, i18n_dir))
-    print 'Created catalog for %s' % locale
+    print('Created catalog for %s' % locale)
 
 
 if __name__ == '__main__':

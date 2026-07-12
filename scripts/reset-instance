@@ -38,7 +38,7 @@ def main():
     else:
         parser.error('incorrect number of arguments')
 
-    print 'Resetting instance', instance
+    print('Resetting instance', instance)
 
     if not options.keep_plugins:
         rmtree(instance)
@@ -80,7 +80,7 @@ def main():
     user.own_privileges.add(BLOG_ADMIN)
     db.commit()
 
-    print 'All done.'
+    print('All done.')
 
 
 if __name__ == '__main__':

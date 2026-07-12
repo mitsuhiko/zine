@@ -81,7 +81,7 @@ class BloggerExtension(Extension):
                 if not post_id:
                     continue
                 if post_id not in self._posts:
-                    print 'XXX unknown post for comment:', post_id
+                    print('XXX unknown post for comment:', post_id)
                     continue
                 post = self._posts[post_id]
                 author_tag = entry.find(atom.author)

@@ -77,7 +77,7 @@ def result(cache_key, vary=(), eager_caching=False, timeout=None,
                 key = cache_key
                 if admix_arguments:
                     key += ':%d' % hash((args[skip_posargs:],
-                                        frozenset(kwargs.iteritems())))
+                                        frozenset(iter(kwargs.items()))))
                 result = request.app.cache.get(key)
                 if result is not None:
                     return result
@@ -115,7 +115,7 @@ def response(vary=(), timeout=None, cache_key=None):
             use_cache = get_cache_context(vary, True, request)[1]
             response = None
             if use_cache:
-                cache_key = key + request.path.encode('utf-8')
+                cache_key = key + request.path
                 response = request.app.cache.get(cache_key)
 
             if response is None:

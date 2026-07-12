@@ -17,12 +17,9 @@
     :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
+from hashlib import sha1
 from itertools import chain
 from threading import Lock
-try:
-    from hashlib import sha1
-except ImportError:
-    from sha import new as sha1
 
 from werkzeug import html, escape, MultiDict
 
@@ -58,7 +55,7 @@ def fill_dict(_dict, **kwargs):
     """
     if _dict is None:
         return kwargs
-    for key, value in kwargs.iteritems():
+    for key, value in kwargs.items():
         if key not in _dict:
             _dict[key] = value
     return _dict
@@ -134,7 +131,7 @@ def _decode(data):
     if isinstance(data, MultiDict):
         listiter = data.iterlists()
     else:
-        listiter = ((k, [v]) for k, v in data.iteritems())
+        listiter = ((k, [v]) for k, v in data.items())
 
     def _split_key(name):
         result = name.split('.')
@@ -161,7 +158,7 @@ def _decode(data):
             return values
         elif container.pop(list_marker):
             return [_convert(x[1]) for x in sorted(container.items())]
-        return dict((k, _convert(v)) for k, v in container.iteritems())
+        return dict((k, _convert(v)) for k, v in container.items())
 
     result = {list_marker: False}
     for key, values in listiter:
@@ -172,7 +169,7 @@ def _decode(data):
         for part in parts:
             last_container = container
             container = _enter_container(container, part)
-            last_container[list_marker] = isinstance(part, (int, long))
+            last_container[list_marker] = isinstance(part, int)
         container[value_marker] = values[:]
 
     return _convert(result)
@@ -204,7 +201,7 @@ def _force_list(value):
     if value is None:
         return []
     try:
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             raise TypeError()
         return list(value)
     except TypeError:
@@ -227,21 +224,21 @@ def _make_name(parent, child):
     try:
         return str(result)
     except UnicodeError:
-        return unicode(result)
+        return str(result)
 
 
 def _to_string(value):
     """Convert a value to unicode, None means empty string."""
     if value is None:
         return u''
-    return unicode(value)
+    return str(value)
 
 
 def _to_list(value):
     """Similar to `_force_list` but always succeeds and never drops data."""
     if value is None:
         return []
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         return [value]
     try:
         return list(value)
@@ -329,13 +326,13 @@ class Widget(_Renderable):
 
         This error list is printable:
 
-        >>> print username.errors()
+        >>> print(username.errors())
         <ul class="errors"><li>This field is required.</li></ul>
 
         Like any other sequence that yields list items it provides
         `as_ul` and `as_ol` methods:
 
-        >>> print username.errors.as_ul()
+        >>> print(username.errors.as_ul())
         <ul><li>This field is required.</li></ul>
 
         Keep in mind that ``widget.errors()`` is equivalent to
@@ -399,7 +396,7 @@ class Widget(_Renderable):
                 for idx, value in enumerate(value):
                     _to_hidden(value, _make_name(name, idx))
             elif isinstance(value, dict):
-                for key, value in value.iteritems():
+                for key, value in value.items():
                     _to_hidden(value, _make_name(name, key))
             else:
                 _add_field(name, value)
@@ -427,13 +424,13 @@ class Widget(_Renderable):
     def label(self):
         """The label for the widget."""
         if self._field.label is not None:
-            return Label(unicode(self._field.label), self.id)
+            return Label(str(self._field.label), self.id)
 
     @property
     def help_text(self):
         """The help text of the widget."""
         if self._field.help_text is not None:
-            return unicode(self._field.help_text)
+            return str(self._field.help_text)
 
     @property
     def errors(self):
@@ -599,7 +596,7 @@ class SelectBox(Widget):
             else:
                 key = value = choice
             selected = _is_choice_selected(self._field, self.value, key)
-            items.append(html.option(unicode(value), value=unicode(key),
+            items.append(html.option(str(value), value=str(key),
                                      selected=selected))
         return html.select(name=self.name, *items, **attrs)
 
@@ -613,7 +610,7 @@ class _InputGroupMember(InternalWidget):
 
     def __init__(self, parent, value, label):
         InternalWidget.__init__(self, parent)
-        self.value = unicode(value)
+        self.value = str(value)
         self.label = Label(label, self.id)
 
     @property
@@ -816,7 +813,7 @@ class ListWidget(Widget):
         if attrs.pop('hide_empty', False) and not self:
             return u''
         items = []
-        for index in xrange(len(self) + attrs.pop('extra_rows', 1)):
+        for index in range(len(self) + attrs.pop('extra_rows', 1)):
             items.append(html.li(self[index]()) for item in self)
         # add an invisible item for the validator
         if not items:
@@ -824,7 +821,7 @@ class ListWidget(Widget):
         return factory(*items, **attrs)
 
     def __getitem__(self, index):
-        if not isinstance(index, (int, long)):
+        if not isinstance(index, int):
             raise TypeError('list widget indices must be integers')
         subwidget = self._subwidgets.get(index)
         if subwidget is None:
@@ -841,7 +838,7 @@ class ListWidget(Widget):
         return subwidget
 
     def __iter__(self):
-        for index in xrange(len(self)):
+        for index in range(len(self)):
             yield self[index]
 
     def __len__(self):
@@ -885,12 +882,12 @@ class MultipleValidationErrors(ValidationError):
         ))
         self.errors = errors
 
-    def __unicode__(self):
-        return ', '.join(map(unicode, self.errors.itervalues()))
+    def __str__(self):
+        return ', '.join(map(str, iter(self.errors.values())))
 
     def unpack(self, key=None):
         rv = {}
-        for name, error in self.errors.iteritems():
+        for name, error in self.errors.items():
             rv.update(error.unpack(_make_name(key, name)))
         return rv
 
@@ -908,10 +905,8 @@ class FieldMeta(type):
         return type.__new__(cls, name, bases, d)
 
 
-class Field(object):
+class Field(object, metaclass=FieldMeta):
     """Abstract field base class."""
-
-    __metaclass__ = FieldMeta
     messages = dict(required=lazy_gettext('This field is required.'))
     form = None
     widget = TextInput
@@ -973,7 +968,7 @@ class Field(object):
         """This can be overridden by subclasses and performs the value
         conversion.
         """
-        return unicode(value)
+        return str(value)
 
     def to_primitive(self, value):
         """Convert a value into a primitve (string or a list/dict of lists,
@@ -1045,10 +1040,10 @@ class Mapping(Field):
         value = _force_dict(value)
         errors = {}
         result = {}
-        for name, field in self.fields.iteritems():
+        for name, field in self.fields.items():
             try:
                 result[name] = field(value.get(name))
-            except ValidationError, e:
+            except ValidationError as e:
                 errors[name] = e
         if errors:
             raise MultipleValidationErrors(errors)
@@ -1057,14 +1052,14 @@ class Mapping(Field):
     def to_primitive(self, value):
         value = _force_dict(value)
         result = {}
-        for key, field in self.fields.iteritems():
+        for key, field in self.fields.items():
             result[key] = field.to_primitive(value.get(key))
         return result
 
     def _bind(self, form, memo):
         rv = Field._bind(self, form, memo)
         rv.fields = OrderedDict()
-        for key, field in self.fields.iteritems():
+        for key, field in self.fields.items():
             rv.fields[key] = _bind(field, form, memo)
         return rv
 
@@ -1150,14 +1145,14 @@ class Multiple(Field):
         for idx, item in enumerate(value):
             try:
                 result.append(self.field(item))
-            except ValidationError, e:
+            except ValidationError as e:
                 errors[idx] = e
         if errors:
             raise MultipleValidationErrors(errors)
         return result
 
     def to_primitive(self, value):
-        return map(self.field.to_primitive, _force_list(value))
+        return list(map(self.field.to_primitive, _force_list(value)))
 
     def _bind(self, form, memo):
         rv = Field._bind(self, form, memo)
@@ -1187,14 +1182,14 @@ class CommaSeparated(Multiple):
         self.sep = sep
 
     def convert(self, value):
-        if isinstance(value, basestring):
-            value = filter(None, [x.strip() for x in value.split(self.sep)])
+        if isinstance(value, str):
+            value = [_f for _f in [x.strip() for x in value.split(self.sep)] if _f]
         return Multiple.convert(self, value)
 
     def to_primitive(self, value):
         if value is None:
             return u''
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value
         return (self.sep + u' ').join(map(self.field.to_primitive, value))
 
@@ -1212,14 +1207,14 @@ class LineSeparated(CommaSeparated):
     widget = Textarea
 
     def convert(self, value):
-        if isinstance(value, basestring):
-            value = filter(None, [x.strip() for x in value.splitlines()])
+        if isinstance(value, str):
+            value = [_f for _f in [x.strip() for x in value.splitlines()] if _f]
         return Multiple.convert(self, value)
 
     def to_primitive(self, value):
         if value is None:
             return u''
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value
         return u'\n'.join(map(self.field.to_primitive, value))
 
@@ -1368,7 +1363,7 @@ class ModelField(Field):
                           .primary_key_from_instance(value)[0]
             else:
                 value = getattr(value, self.key)
-        return unicode(value)
+        return str(value)
 
 
 class HiddenModelField(ModelField):
@@ -1532,7 +1527,7 @@ class MultiChoiceField(ChoiceField):
         return result
 
     def to_primitive(self, value):
-        return map(unicode, _force_list(value))
+        return list(map(str, _force_list(value)))
 
 
 class IntegerField(Field):
@@ -1639,14 +1634,14 @@ class FormMeta(type):
                 fields.update(base._root_field.fields)
                 root_validator_functions.extend(base._root_field.validators)
 
-        for key, value in d.iteritems():
+        for key, value in d.items():
             if key.startswith('validate_') and callable(value):
                 validator_functions[key[9:]] = value
             elif isinstance(value, Field):
                 fields[key] = value
                 d[key] = FieldDescriptor(key)
 
-        for field_name, func in validator_functions.iteritems():
+        for field_name, func in validator_functions.items():
             if field_name in fields:
                 fields[field_name].validators.append(func)
 
@@ -1700,7 +1695,7 @@ class FieldDescriptor(object):
         del obj.fields[self.name]
 
 
-class Form(object):
+class Form(object, metaclass=FormMeta):
     """Form base class.
 
     >>> class PersonForm(Form):
@@ -1720,9 +1715,9 @@ class Form(object):
     >>> form = PersonForm()
     >>> form.validate({'name': '', 'age': 'fourty-two'})
     False
-    >>> print form.errors['age'][0]
+    >>> print(form.errors['age'][0])
     Please enter a whole number.
-    >>> print form.errors['name'][0]
+    >>> print(form.errors['name'][0])
     This field is required.
 
     You can also add custom validation routines for fields by adding methods
@@ -1808,7 +1803,6 @@ class Form(object):
 
     >>> field = TextField(default=u'foo')
     """
-    __metaclass__ = FormMeta
 
     csrf_protected = True
     redirect_tracking = True
@@ -1915,7 +1909,7 @@ class Form(object):
         # implicit switch between initial data and user submitted data
         # only happens on the "root level" for obvious reasons we only
         # have to hook the data in here.
-        for name, field in self._root_field.fields.iteritems():
+        for name, field in self._root_field.fields.items():
             if field.validate_on_omission and name not in self.raw_data:
                 self.raw_data.setdefault(name)
 
@@ -1924,7 +1918,7 @@ class Form(object):
         errors = {}
         try:
             data = self._root_field(d)
-        except ValidationError, e:
+        except ValidationError as e:
             errors = e.unpack()
         self.errors = errors
         if errors:

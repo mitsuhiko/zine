@@ -33,7 +33,7 @@ def build_eventmap(instance_folder):
     zine_root = os.path.realpath(os.path.dirname(zine.__file__))
     searchpath = [(zine_root, '__builtin__')]
 
-    for plugin in app.plugins.itervalues():
+    for plugin in app.plugins.values():
         path = os.path.realpath(plugin.path)
         if os.path.commonprefix([zine_root, path]) != zine_root:
             searchpath.append((plugin.path, plugin.name))
@@ -69,7 +69,7 @@ def build_eventmap(instance_folder):
             elif line:
                 break
             lineno -= 1
-        return '\n'.join(reversed(help_lines)).decode('utf-8')
+        return '\n'.join(reversed(help_lines))
 
     result = {}
     for folder, prefix in searchpath:
@@ -109,13 +109,13 @@ def main():
     results = build_eventmap(instance)
     sys.stdout.write('\rEvents emitted in %s:\n' % instance)
 
-    for event, occurrences in results.iteritems():
-        print
-        print '  ' + event
+    for event, occurrences in results.items():
+        print()
+        print('  ' + event)
         for prefix, filename, line, help in occurrences:
-            print '    in %s:%d (%s)' % (filename, line, prefix)
+            print('    in %s:%d (%s)' % (filename, line, prefix))
             for line in help.splitlines():
-                print '      ' + line
+                print('      ' + line)
 
 
 if __name__ == '__main__':

@@ -34,7 +34,7 @@ class ConfigurationForm(forms.Form):
 
     def __init__(self, initial=None):
         forms.Form.__init__(self, initial)
-        choices = sorted(variations.items(), key=lambda x: x[1].lower())
+        choices = sorted(list(variations.items()), key=lambda x: x[1].lower())
         self.fields['variation'].choices = choices
 
 

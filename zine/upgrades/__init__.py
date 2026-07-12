@@ -87,12 +87,12 @@ class CommandLineInterface(object):
         return self.zine_instance
 
     def _general_help(self):
-        print self.parser.format_help()
-        print "commands:"
+        print(self.parser.format_help())
+        print("commands:")
         longest = max([len(command) for command in self.commands])
         format = "  %%-%ds %%s" % max(8, longest + 1)
-        for name, description in self.commands.items():
-            print format % (name, description)
+        for name, description in list(self.commands.items()):
+            print(format % (name, description))
 
     def help(self, argv):
         self._general_help()
@@ -111,7 +111,7 @@ class CommandLineInterface(object):
                         message = message[:-1]
                     elif message.endswith('\n') and not trailing_new_line:
                         message = message.rstrip('\n')
-                    sys.stdout.write(message.encode('utf-8'))
+                    sys.stdout.write(message)
                     sys.stdout.flush()
 
     def list(self, argv):
@@ -184,7 +184,7 @@ class ManageDatabase(object):
         from zine.models import SchemaVersion
         sv = SchemaVersion.query.filter_by(repository_id=repo_id).first()
         if not sv:
-            print 'Repository by the id %s not known' % repo_id
+            print('Repository by the id %s not known' % repo_id)
             sys.exit(1)
         repos = api.Repository(sv.repository_path, sv.repository_id)
         new_script_version = repos.versions.latest + 1
@@ -221,9 +221,9 @@ class ManageDatabase(object):
                 for message in self._migrate(repository, version,
                                              upgrade=True, **opts):
                     yield message
-            except Exception, msg:
+            except Exception as msg:
                 yield '<p>error upgrading %s: ' % sv.repository_id
-                yield escape(str(msg).decode('utf-8', 'ignore'))
+                yield escape(str(msg))
                 yield '</p>\n'
 
     def cmd_downgrade(self, repo_id, version=None, **opts):
@@ -244,9 +244,9 @@ class ManageDatabase(object):
             for message in self._migrate(repository, version,
                                          upgrade=False, **opts):
                 yield message
-        except Exception, msg:
+        except Exception as msg:
             yield '<p>error downgrading %s: ' % repo_id
-            yield escape(str(msg).decode('utf-8', 'ignore'))
+            yield escape(str(msg))
             yield '</p>\n'
 
     def _migrate(self, repository, version, upgrade, **opts):

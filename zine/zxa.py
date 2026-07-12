@@ -13,7 +13,8 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from cPickle import dumps
+from base64 import b64encode
+from pickle import dumps
 from datetime import datetime
 from itertools import chain
 
@@ -141,7 +142,7 @@ class Writer(object):
         now = datetime.utcnow()
         posts = iter(Post.query.order_by(Post.last_update.desc()))
         try:
-            first_post = posts.next()
+            first_post = next(posts)
             last_update = first_post.last_update
             posts = chain((first_post,), posts)
         except StopIteration:
@@ -191,10 +192,10 @@ class Writer(object):
 
         # if we have dependencies (very likely) dump them now
         if self._dependencies:
-            yield '<zine:dependencies>'
-            for node in self._dependencies.itervalues():
+            yield b'<zine:dependencies>'
+            for node in self._dependencies.values():
                 yield dump_node(node)
-            yield '</zine:dependencies>'
+            yield b'</zine:dependencies>'
 
         yield XML_EPILOG.encode('utf-8')
 
@@ -208,13 +209,19 @@ class Writer(object):
         rv = self.new_dependency(self.z.user)
         self.z('username', text=user.username, parent=rv)
         self.z('email', text=user.email, parent=rv)
-        self.z('pw_hash', text=user.pw_hash.encode('base64'), parent=rv)
+        self.z(
+            'pw_hash',
+            text=b64encode(user.pw_hash.encode('utf-8')).decode('ascii'),
+            parent=rv,
+        )
         self.z('display_name', text=user._display_name, parent=rv)
         self.z('real_name', text=user.real_name, parent=rv)
         self.z('description', text=user.description, parent=rv)
         self.z('www', text=user.www, parent=rv)
         self.z('is_author', text=user.is_author and 'yes' or 'no', parent=rv)
-        self.z('extra', text=dumps(user.extra).encode('base64'))
+        self.z(
+            'extra', text=b64encode(dumps(user.extra)).decode('ascii'), parent=rv
+        )
         for participant in self.participants:
             participant.process_user(rv, user)
         privileges = self.z('privileges', parent=rv)
@@ -267,8 +274,11 @@ class Writer(object):
                 attrib['label'] = tag.name
             self.atom('category', attrib=attrib, parent=entry)
 
-        self.z('parser_data', text=dump_parser_data(post.parser_data).encode('base64'),
-               parent=entry)
+        self.z(
+            'parser_data',
+            text=b64encode(dump_parser_data(post.parser_data)).decode('ascii'),
+            parent=entry,
+        )
 
         for c in post.comments:
             comment = self.z('comment', parent=entry)
@@ -295,8 +305,11 @@ class Writer(object):
             self.z('content', type='html', text=c.body.to_html(),
                    parent=comment)
             self.z('content', type='text', text=c.text, parent=comment)
-            self.z('parser_data', text=dump_parser_data(c.parser_data).encode('base64'),
-                   parent=comment)
+            self.z(
+                'parser_data',
+                text=b64encode(dump_parser_data(c.parser_data)).decode('ascii'),
+                parent=comment,
+            )
 
         for participant in self.participants:
             participant.process_post(entry, post)

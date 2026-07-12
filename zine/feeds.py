@@ -9,37 +9,24 @@ http://diveintomark.org/archives/2004/02/04/incompatible-rss
 
 import types
 import datetime
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 from decimal import Decimal
 from xml.sax.saxutils import XMLGenerator
 
 
 def smart_str(s, encoding='utf-8', strings_only=False, errors='strict'):
-    """
-    Returns a bytestring version of 's', encoded as specified in 'encoding'.
-
-    If strings_only is True, don't convert (some) non-string-like objects.
-    """
-    if strings_only and isinstance(s, (types.NoneType, int)):
+    """Return ``s`` as bytes encoded with ``encoding``."""
+    if strings_only and isinstance(s, (type(None), int)):
         return s
-    if not isinstance(s, basestring):
-        try:
-            return str(s)
-        except UnicodeEncodeError:
-            if isinstance(s, Exception):
-                # An Exception subclass containing non-ASCII data that doesn't
-                # know how to print itself properly. We shouldn't raise a
-                # further exception.
-                return ' '.join([smart_str(arg, encoding, strings_only,
-                        errors) for arg in s])
-            return unicode(s).encode(encoding, errors)
-    elif isinstance(s, unicode):
-        return s.encode(encoding, errors)
-    elif s and encoding != 'utf-8':
+    if isinstance(s, bytes):
         return s.decode('utf-8', errors).encode(encoding, errors)
-    else:
-        return s
+    try:
+        return str(s).encode(encoding, errors)
+    except UnicodeError:
+        if not isinstance(s, Exception):
+            raise
+        return ' '.join(str(arg) for arg in s.args).encode(encoding, errors)
 
 
 def is_protected_type(obj):
@@ -49,57 +36,28 @@ def is_protected_type(obj):
     force_unicode(strings_only=True).
     """
     return isinstance(obj, (
-        types.NoneType,
-        int, long,
+        type(None),
+        int,
         datetime.datetime, datetime.date, datetime.time,
         float, Decimal)
     )
 
 
 def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
-    """
-    Similar to smart_unicode, except that lazy instances are resolved to
-    strings, rather than kept as lazy objects.
-
-    If strings_only is True, don't convert (some) non-string-like objects.
-    """
+    """Return ``s`` as text, decoding bytes with ``encoding``."""
     if strings_only and is_protected_type(s):
         return s
+    if isinstance(s, bytes):
+        return s.decode(encoding, errors)
     try:
-        if not isinstance(s, basestring,):
-            if hasattr(s, '__unicode__'):
-                s = unicode(s)
-            else:
-                try:
-                    s = unicode(str(s), encoding, errors)
-                except UnicodeEncodeError:
-                    if not isinstance(s, Exception):
-                        raise
-                    # If we get to here, the caller has passed in an Exception
-                    # subclass populated with non-ASCII data without special
-                    # handling to display as a string. We need to handle this
-                    # without raising a further exception. We do an
-                    # approximation to what the Exception's standard str()
-                    # output should be.
-                    s = ' '.join([force_unicode(arg, encoding, strings_only,
-                            errors) for arg in s])
-        elif not isinstance(s, unicode):
-            # Note: We use .decode() here, instead of unicode(s, encoding,
-            # errors), so that if s is a SafeString, it ends up being a
-            # SafeUnicode at the end.
-            s = s.decode(encoding, errors)
-    except UnicodeDecodeError, e:
+        return str(s)
+    except UnicodeError:
         if not isinstance(s, Exception):
             raise
-        else:
-            # If we get to here, the caller has passed in an Exception
-            # subclass populated with non-ASCII bytestring data without a
-            # working unicode method. Try to handle this without raising a
-            # further exception by individually forcing the exception args
-            # to unicode.
-            s = ' '.join([force_unicode(arg, encoding, strings_only,
-                    errors) for arg in s])
-    return s
+        return ' '.join(
+            force_unicode(arg, encoding, strings_only, errors)
+            for arg in s.args
+        )
 
 def iri_to_uri(iri):
     """
@@ -126,7 +84,7 @@ def iri_to_uri(iri):
     # converted.
     if iri is None:
         return iri
-    return urllib.quote(smart_str(iri), safe="/#%[]=:;$&()+,!?*@'~")
+    return urllib.parse.quote(smart_str(iri), safe="/#%[]=:;$&()+,!?*@'~")
 
 
 class SimplerXMLGenerator(XMLGenerator):
@@ -167,7 +125,7 @@ def get_tag_uri(url, date):
 
     See http://diveintomark.org/archives/2004/05/28/howto-atom-id
     """
-    url_split = urlparse.urlparse(url)
+    url_split = urllib.parse.urlparse(url)
 
     # Python 2.4 didn't have named attributes on split results or the hostname.
     hostname = getattr(url_split, 'hostname', url_split[1].split(':')[0])
@@ -281,7 +239,7 @@ class SyndicationFeed(object):
         """
         Returns the feed in the given encoding as a string.
         """
-        from StringIO import StringIO
+        from io import StringIO
         s = StringIO()
         self.write(s, encoding)
         return s.getvalue()
@@ -338,7 +296,7 @@ class RssFeed(SyndicationFeed):
             handler.addQuickElement(u"category", cat)
         if self.feed['feed_copyright'] is not None:
             handler.addQuickElement(u"copyright", self.feed['feed_copyright'])
-        handler.addQuickElement(u"lastBuildDate", rfc2822_date(self.latest_post_date()).decode('utf-8'))
+        handler.addQuickElement(u"lastBuildDate", rfc2822_date(self.latest_post_date()))
         if self.feed['ttl'] is not None:
             handler.addQuickElement(u"ttl", self.feed['ttl'])
 
@@ -372,7 +330,7 @@ class Rss201rev2Feed(RssFeed):
             handler.addQuickElement(u"dc:creator", item["author_name"], {u"xmlns:dc": u"http://purl.org/dc/elements/1.1/"})
 
         if item['pubdate'] is not None:
-            handler.addQuickElement(u"pubDate", rfc2822_date(item['pubdate']).decode('utf-8'))
+            handler.addQuickElement(u"pubDate", rfc2822_date(item['pubdate']))
         if item['comments'] is not None:
             handler.addQuickElement(u"comments", item['comments'])
         if item['unique_id'] is not None:
@@ -415,7 +373,7 @@ class Atom1Feed(SyndicationFeed):
         if self.feed['feed_url'] is not None:
             handler.addQuickElement(u"link", "", {u"rel": u"self", u"href": self.feed['feed_url']})
         handler.addQuickElement(u"id", self.feed['id'])
-        handler.addQuickElement(u"updated", rfc3339_date(self.latest_post_date()).decode('utf-8'))
+        handler.addQuickElement(u"updated", rfc3339_date(self.latest_post_date()))
         if self.feed['author_name'] is not None:
             handler.startElement(u"author", {})
             handler.addQuickElement(u"name", self.feed['author_name'])
@@ -441,7 +399,7 @@ class Atom1Feed(SyndicationFeed):
         handler.addQuickElement(u"title", item['title'])
         handler.addQuickElement(u"link", u"", {u"href": item['link'], u"rel": u"alternate"})
         if item['pubdate'] is not None:
-            handler.addQuickElement(u"updated", rfc3339_date(item['pubdate']).decode('utf-8'))
+            handler.addQuickElement(u"updated", rfc3339_date(item['pubdate']))
 
         # Author information.
         if item['author_name'] is not None:

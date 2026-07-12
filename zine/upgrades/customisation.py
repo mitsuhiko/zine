@@ -141,7 +141,7 @@ class Collection(MigrateCollection):
         # Create the versions member where the keys
         # are VerNum's and the values are Version's.
         self.versions = dict()
-        for num, files in tempVersions.items():
+        for num, files in list(tempVersions.items()):
             self.versions[api.VerNum(num)] = Version(num, path, files)
 
 class ControlledSchema(MigrateControlledSchema):
@@ -193,22 +193,22 @@ class Changeset(dict):
             self.add(change)
 
     def __iter__(self):
-        return iter(self.items())
+        return iter(list(self.items()))
 
     def keys(self):
         """
         In a series of upgrades x -> y, keys are version x. Sorted.
         """
-        ret = super(Changeset, self).keys()
+        ret = list(super(Changeset, self).keys())
         # Reverse order if downgrading
         ret.sort(reverse=(self.step < 1))
         return ret
 
     def values(self):
-        return [self[k] for k in self.keys()]
+        return [self[k] for k in list(self.keys())]
 
     def items(self):
-        return zip(self.keys(), self.values())
+        return list(zip(list(self.keys()), list(self.values())))
 
     def add(self, change):
         """Add new change to changeset"""
@@ -276,7 +276,7 @@ class Repository(MigrateRepository):
             range_mod = 0
             op = 'downgrade'
 
-        versions = range(start + range_mod, end + range_mod, step)
+        versions = list(range(start + range_mod, end + range_mod, step))
         changes = []
         for version in versions:
             try:

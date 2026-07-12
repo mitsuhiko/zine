@@ -207,7 +207,7 @@ def notification_settings(request):
 
     return render_account_response('account/notification_settings.html',
         'notifications', form=form.as_widget(), systems=sorted(
-            request.app.notification_manager.systems.values(),
+            list(request.app.notification_manager.systems.values()),
             key=lambda x: x.name.lower()
         ), notification_types=sorted(
             request.app.notification_manager.types(request.user),
