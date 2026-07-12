@@ -138,17 +138,6 @@ def test_shared_data_middleware_serves_static_files(tmp_path):
 
 
 def _load_application(monkeypatch):
-    class Session(dict):
-        should_save = False
-
-        def save_cookie(self, *args, **kwargs):
-            pass
-
-    class SecureCookie:
-        @staticmethod
-        def load_cookie(request, name, secret_key):
-            return Session()
-
     class Query:
         @staticmethod
         def get_nobody():
@@ -156,8 +145,6 @@ def _load_application(monkeypatch):
 
     db = SimpleNamespace(eagerload=lambda *args: None)
     _stub(monkeypatch, "sqlalchemy.exceptions", SQLAlchemyError=RuntimeError)
-    _stub(monkeypatch, "werkzeug.contrib")
-    _stub(monkeypatch, "werkzeug.contrib.securecookie", SecureCookie=SecureCookie)
     _stub(monkeypatch, "zine.database", db=db, cleanup_session=lambda: None)
     _stub(monkeypatch, "zine.cache", get_cache=lambda app: None)
     _stub(monkeypatch, "zine.i18n")

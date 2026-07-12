@@ -15,14 +15,15 @@ from time import time
 
 from sqlalchemy.sql import and_
 
+from werkzeug.datastructures import WWWAuthenticate
 from werkzeug.utils import redirect
-from werkzeug.contrib.securecookie import SecureCookie
 from werkzeug.wrappers import Response, Request
 
 from zine.database import db, privileges, users, user_privileges
 from zine.i18n import load_core_translations
 from zine.upgrades import ManageDatabase
 from zine.utils.crypto import check_pwhash
+from zine.session import SecureCookie
 
 
 def render_template(tmpl, _stream=False, **context):
@@ -106,7 +107,7 @@ class WebUpgrades(object):
                         return redirect('')
 
             response = Response()
-            response.www_authenticate.set_basic()
+            response.www_authenticate = WWWAuthenticate('basic')
             response.status_code = 401
             return response
 

@@ -12,8 +12,7 @@
 """
 import os
 
-from werkzeug.contrib.cache import NullCache, SimpleCache, FileSystemCache, \
-     MemcachedCache
+from cachelib import FileSystemCache, MemcachedCache, NullCache, SimpleCache
 
 from zine.utils import local
 
@@ -37,7 +36,7 @@ def get_cache_context(vary, eager_caching=False, request=None):
         # doesn't do anything anyways but if one tests for caching to
         # disable some more expensive caculations in the function we can
         # tell him to not perform anything if the cache won't hold the data
-        request.app.cache is NullCache or
+        isinstance(request.app.cache, NullCache) or
 
         # if this is an eager caching method and eager caching is disabled
         # we don't do anything here
@@ -115,19 +114,23 @@ def response(vary=(), timeout=None, cache_key=None):
             use_cache = get_cache_context(vary, True, request)[1]
             response = None
             if use_cache:
-                cache_key = key + request.path
-                response = request.app.cache.get(cache_key)
+                cache_key = key + request.full_path
+                cached = request.app.cache.get(cache_key)
+                if cached is not None:
+                    status, headers, data = cached
+                    response = Response(data, status=status, headers=headers)
 
             if response is None:
-                response = f(request, *args, **kwargs)
-
-            # make sure it's one of our request objects so that we
-            # have the `make_conditional` method on it.
-            Response.force_type(response)
+                response = Response.force_type(f(request, *args, **kwargs))
 
             if use_cache and response.status_code == 200:
                 response.freeze()
-                request.app.cache.set(key, response, timeout)
+                cached = (
+                    response.status_code,
+                    list(response.headers),
+                    response.get_data(),
+                )
+                request.app.cache.set(cache_key, cached, timeout)
                 response.make_conditional(request)
             return response
         oncall.__name__ = f.__name__
@@ -140,7 +143,8 @@ def response(vary=(), timeout=None, cache_key=None):
 #: the cache system factories.
 systems = {
     'null':         lambda app: NullCache(),
-    'simple':       lambda app: SimpleCache(app.cfg['cache_timeout']),
+    'simple':       lambda app: SimpleCache(
+                        default_timeout=app.cfg['cache_timeout']),
     'memcached':    lambda app: MemcachedCache([x.strip() for x in
                         app.cfg['memcached_servers']],
                         app.cfg['cache_timeout']),

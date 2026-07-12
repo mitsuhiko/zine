@@ -25,7 +25,9 @@ classifiers = [
 ]
 dependencies = [
     "Babel>=2.15",
+    "cachelib>=0.13",
     "html5lib>=1.1",
+    "itsdangerous>=2.2",
     "Jinja2>=3.1",
     "lxml>=5.2",
     "pytz>=2024.1",

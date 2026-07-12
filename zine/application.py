@@ -31,7 +31,6 @@ from werkzeug.middleware.shared_data import SharedDataMiddleware
 from werkzeug.test import Client
 from werkzeug.utils import cached_property, redirect as _redirect
 from werkzeug.wrappers import Request as RequestBase, Response as ResponseBase
-from werkzeug.contrib.securecookie import SecureCookie
 
 from zine import _core
 from zine._compat import escape, url_encode, url_quote
@@ -43,6 +42,7 @@ from zine.utils import ClosingIterator, local, local_manager, dump_json, \
      htmlhelpers
 from zine.utils.datastructures import ReadOnlyMultiMapping
 from zine.utils.exceptions import UserException
+from zine.session import SecureCookie
 
 
 #: the default theme settings
