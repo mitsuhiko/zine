@@ -1,0 +1,25 @@
+# Local agent state
+.pi/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.venv/
+
+# Local Zine instances and generated files
+instance/
+dumps/
+zine/i18n/*/messages.mo
+zine/docs/**/*.page
+zine/plugins/*/docs/**/*.page
+Makefile
+
+# Editors and operating systems
+.DS_Store
+.ropeproject/

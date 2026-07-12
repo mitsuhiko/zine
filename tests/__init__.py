@@ -155,7 +155,7 @@ def main():
     TextTestRunner(verbosity=options.verbose + 1).run(s)
     if use_coverage:
         coverage.stop()
-        print '\n\n' + '=' * 25 + ' coverage information ' + '=' * 25
+        print('\n\n' + '=' * 25 + ' coverage information ' + '=' * 25)
         coverage.report(covermods)
 
 
