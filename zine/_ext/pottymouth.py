@@ -31,7 +31,7 @@ URI_pattern = _URI_pattern + _URI_end_punctuation
 
 email_pattern = r'([^()<>@,;:\"\[\]\s]+@' + domain_pattern + ')'
 
-image_pattern = _URI_pattern + '\.(jpe?g|png|gif)' + _URI_end_punctuation
+image_pattern = _URI_pattern + r'\.(jpe?g|png|gif)' + _URI_end_punctuation
 
 # youtube_pattern matches:
 #  http://www.youtube.com/watch?v=KKTDRqQtPO8 and
@@ -164,7 +164,7 @@ class Node(list):
 
 
     def __init__(self, name, *contents, **kw):
-        super(list, self).__init__(self)
+        super().__init__()
         self.name = name.lower()
         self.extend(contents)
         self._attributes = kw.get('attributes', {})
@@ -307,8 +307,10 @@ class PottyMouth(object):
 
         self._url_check_domain = None
         if url_check_domains:
-            self._url_check_domain = re.compile('(\w+://)?((' + ')|('.join(url_check_domains) + '))',
-                                                flags=re.I)
+            self._url_check_domain = re.compile(
+                r'(\w+://)?((' + ')|('.join(url_check_domains) + '))',
+                flags=re.I,
+            )
 
         self._url_white_lists  = [re.compile(w) for w in url_white_lists]
         self.smart_quotes = smart_quotes
@@ -657,7 +659,7 @@ class PottyMouth(object):
                         leading_space_pad = False
                     stack.append(t)
             else:
-                raise str(type(t)) + ':' + str(t)
+                raise TypeError('%s: %s' % (type(t).__name__, t))
 
         if stack:
             # reduce stack, close out dangling * and _
@@ -740,7 +742,7 @@ class PottyMouth(object):
 if __name__ == '__main__':
     import sys
     w = PottyMouth(url_check_domains=('www.mysite.com', 'mysite.com'),
-                   url_white_lists=('https?://www\.mysite\.com/allowed/url\?id=\d+',),
+                   url_white_lists=(r'https?://www\.mysite\.com/allowed/url\?id=\d+',),
                    )
     while True:
         print('input (end with Ctrl-D)>>')

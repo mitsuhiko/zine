@@ -24,6 +24,8 @@ def parse(input_data, parser=None, reason='unknown'):
     reason 'post', a comment 'comment', an isolated page from a plugin maybe
     'page' etc.
     """
+    if isinstance(input_data, bytes):
+        input_data = input_data.decode('utf-8')
     input_data = u'\n'.join(input_data.splitlines())
     app = get_application()
     if parser is None:
@@ -203,9 +205,12 @@ class PlainTextParser(BaseParser):
                     # remove the useless empty spans
                     if child.name == 'span' and not child.attributes:
                         add_text(result, child.text)
-                        result.children.extend(child.children)
+                        for grandchild in child.children:
+                            grandchild.parent = result
+                            result.children.append(grandchild)
                         add_text(result, child.tail)
                     else:
+                        child.parent = result
                         result.children.append(child)
 
             # fixes an output bug from pottymouth

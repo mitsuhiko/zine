@@ -16,6 +16,7 @@ import struct
 import pickle as pickle
 from copy import deepcopy
 from io import BytesIO, StringIO
+from itertools import zip_longest
 from urllib.parse import urlparse
 
 from werkzeug import escape
@@ -419,23 +420,31 @@ class QueryResult(object):
         """Apply the expression on all result elements."""
         return _query(self, expr)
 
+    def _fetchone(self):
+        """Fetch one item from the result generator."""
+        if self._gen is None:
+            return False
+        try:
+            self._results.append(next(self._gen))
+        except StopIteration:
+            self._gen = None
+            return False
+        return True
+
     def _fetchall(self):
-        """Used internally to get all items from the generator."""
-        if self._gen is not None:
-            for item in self:
-                pass
+        """Fetch all remaining items from the result generator."""
+        while self._fetchone():
+            pass
 
     def __getitem__(self, idx):
         """Get a specific result item."""
-        if idx < 0:
+        if isinstance(idx, slice) or idx < 0:
             self._fetchall()
-        if self._gen is None or idx < len(self._results):
             return self._results[idx]
-        i = len(self._results)
-        for item in self:
-            if i == idx:
-                return item
-            i += 1
+        while idx >= len(self._results) and self._fetchone():
+            pass
+        if idx < len(self._results):
+            return self._results[idx]
         raise IndexError(idx)
 
     def __len__(self):
@@ -444,15 +453,14 @@ class QueryResult(object):
         return len(self._results)
 
     def __iter__(self):
-        """Iterate over the results."""
-        if self._gen is None:
-            for item in self._results:
-                yield item
-        else:
-            for item in self._gen:
-                self._results.append(item)
-                yield item
-            self._gen = None
+        """Iterate over cached and not-yet-fetched results."""
+        idx = 0
+        while True:
+            if idx < len(self._results):
+                yield self._results[idx]
+                idx += 1
+            elif not self._fetchone():
+                break
 
     def __repr__(self):
         return '<%s %r>' % (
@@ -498,7 +506,7 @@ class _BaseElement(object):
         if simple:
             result = [self.text]
             for child in self.children:
-                result.append(child.to_text())
+                result.append(child.to_text(simple=True))
                 result.append(child.tail)
             return u''.join(result)
         t = Textifier(**options)
@@ -596,11 +604,11 @@ class Element(_BaseElement):
 
         >>> root = parse_zeml("1 <b>2</b> 3", 'system')
         >>> root.text
-        u'1 '
+        '1 '
         >>> root.children[0].text
-        u'2'
+        '2'
         >>> root.children[0].tail
-        u' 3'
+        ' 3'
     """
     __slots__ = ('name', 'children', 'text', 'tail', 'attributes', 'parent')
 
@@ -814,27 +822,40 @@ html_serializer = _HTMLSerializer()
 
 def parse_html(string):
     """Parse an HTML fragment into a ZEML tree."""
+    if isinstance(string, bytes):
+        string = string.decode('utf-8')
+
+    def _append_text(element, text):
+        if not text:
+            return
+        if element.children:
+            element.children[-1].tail += text
+        else:
+            element.text += text
+
     def _convert(element, root=False):
         if root:
             result = RootElement()
         else:
-            result = Element(element.name)
-            result.attributes.update(element.attributes)
-        for child in element.childNodes:
-            if child.type == 4:
-                if result.children:
-                    result.children[-1].tail += child.value
-                else:
-                    result.text += child.value
-            # node type 6 are comments, skip them
-            elif child.type != 6:
-                new_child = _convert(child)
-                new_child.parent = result
-                result.children.append(new_child)
+            result = Element(element.tag)
+            result.attributes.update(element.attrib)
+        result.text = element.text or u''
+        for child in element:
+            # ElementTree represents comments with a callable tag.
+            if not isinstance(child.tag, str):
+                _append_text(result, child.tail)
+                continue
+            new_child = _convert(child)
+            new_child.parent = result
+            new_child.tail = child.tail or u''
+            result.children.append(new_child)
         return result
 
-    from html5lib import HTMLParser
-    return _convert(HTMLParser().parseFragment(string), True)
+    import html5lib
+    fragment = html5lib.parseFragment(
+        string, treebuilder='etree', namespaceHTMLElements=False
+    )
+    return _convert(fragment, True)
 
 
 def parse_zeml(string, reason, extensions=None):
@@ -862,13 +883,13 @@ def split_intro(tree):
     intro = RootElement()
     intro.text = child.text
     intro.children = child.children
+    for intro_child in intro.children:
+        intro_child.parent = intro
     body = RootElement()
+    body.text = child.tail
     body.children = tree.children
-    if child.tail:
-        if intro.children:
-            intro.children[-1].tail += child.tail
-        else:
-            body.text += child.tail
+    for body_child in body.children:
+        body_child.parent = body
     return intro, body
 
 
@@ -1042,6 +1063,8 @@ class Parser(object):
     ]
 
     def __init__(self, string, parsing_reason, extensions=None):
+        if isinstance(string, bytes):
+            string = string.decode('utf-8')
         self.string = str(string)
         self.parsing_reason = parsing_reason
         self.end = len(self.string)
@@ -1289,7 +1312,7 @@ class Parser(object):
             self.write_raw_text(u'<')
             return 'data'
 
-        element = self.enter(match.group(1))
+        element = self.enter(match.group(1).lower())
         while 1:
             match = self.match(_attribute_re)
             if match is None:
@@ -1443,39 +1466,37 @@ class Sanitizer(object):
         return u'; '.join(clean)
 
     def sanitize(self, element):
-        previous_child = None
+        original_children = element.children
+        element.children = []
 
         def write_text(text):
-            if previous_child:
-                previous_child.tail += text
+            if not text:
+                return
+            if element.children:
+                element.children[-1].tail += text
             else:
                 element.text += text
 
-        iterator = enumerate(element.children)
-        element.children = []
-        for idx, child in iterator:
+        for child in original_children:
             child = self.sanitize(child)
             if child.name not in self.acceptable_elements:
-                if child.text:
-                    write_text(child.text)
-                element.children.extend(child.children)
-                if child.tail:
-                    write_text(child.tail)
-                if child.children:
-                    previous_child = child.children[-1]
-                else:
-                    previous_child = element
-            else:
-                for key, value in list(child.attributes.items()):
-                    if key not in self.acceptable_attributes or \
-                       (key in self.uri_attributes and
-                        not self.is_allowed_uri(value)):
-                        del child.attributes[key]
-                style = child.attributes.get('style')
-                if style:
-                    child.attributes['style'] = self.clean_css(style)
-                previous_child = child
-                element.children.append(child)
+                write_text(child.text)
+                for grandchild in child.children:
+                    grandchild.parent = element
+                    element.children.append(grandchild)
+                write_text(child.tail)
+                continue
+
+            for key, value in list(child.attributes.items()):
+                if key not in self.acceptable_attributes or \
+                   (key in self.uri_attributes and
+                    not self.is_allowed_uri(value)):
+                    del child.attributes[key]
+            style = child.attributes.get('style')
+            if style:
+                child.attributes['style'] = self.clean_css(style)
+            child.parent = element
+            element.children.append(child)
 
         return element
 
@@ -1692,8 +1713,10 @@ class Textifier(object):
             if entry.name in ('td', 'th'):
                 span = max(entry.attributes.get_int('colspan', 1), 1)
                 self.table_ncols += span
+        if not self.table_ncols:
+            raise self.Skip()
         available_width = self.max_width - self.indentation
-        self.table_colwidth = (available_width - 5) / self.table_ncols
+        self.table_colwidth = (available_width - 5) // self.table_ncols
         if self.table_colwidth < 10:
             self.table_colwidth = 10
     def depart_table(self, element):
@@ -1731,10 +1754,9 @@ class Textifier(object):
             self.write(''.join(out))
 
         def writerow(row):
-            if len(row) == 1:
-                lines = [(x,) for x in row[0]]
-            else:
-                lines = list(*row)
+            lines = zip_longest(
+                *(cell.lines if cell else [] for cell in row), fillvalue=''
+            )
             for line in lines:
                 out = []
                 for i, (cellline, cell) in enumerate(zip(line, row)):

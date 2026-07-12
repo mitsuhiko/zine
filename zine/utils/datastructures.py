@@ -253,7 +253,7 @@ class OrderedDict(dict):
     def update(self, *args, **kwargs):
         sources = []
         if len(args) == 1:
-            if hasattr(args[0], 'iteritems'):
+            if hasattr(args[0], 'items'):
                 sources.append(iter(args[0].items()))
             else:
                 sources.append(iter(args[0]))
