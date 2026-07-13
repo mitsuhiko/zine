@@ -1487,8 +1487,11 @@ class MultiChoiceField(ChoiceField):
     def __init__(self, label=None, help_text=None, choices=None,
                  min_size=None, max_size=None, validators=None,
                  widget=None, messages=None, default=missing):
-        ChoiceField.__init__(self, label, help_text, min_size > 0, choices,
-                             validators, widget, messages, default)
+        ChoiceField.__init__(
+            self, label, help_text,
+            min_size is not None and min_size > 0,
+            choices, validators, widget, messages, default,
+        )
         self.min_size = min_size
         self.max_size = max_size
 
@@ -1522,7 +1525,7 @@ class MultiChoiceField(ChoiceField):
             if message is None:
                 message = ngettext(u'Please provide no more than %d item.',
                                    u'Please provide no more than %d items.',
-                                   self.min_size) % self.min_size
+                                   self.max_size) % self.max_size
             raise ValidationError(message)
 
         return result

@@ -10,9 +10,12 @@
     :license: BSD, see LICENSE for more details.
 """
 import sys
-from os.path import abspath, join, pardir, isfile, dirname
+from os.path import dirname
 from optparse import OptionParser
-from werkzeug import run_simple, Response, DispatcherMiddleware
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.middleware.profiler import ProfilerMiddleware
+from werkzeug.serving import run_simple
+from werkzeug.wrappers import Response
 
 
 sys.path.append(dirname(__file__))
@@ -60,7 +63,6 @@ def main():
 
     app = get_wsgi_app(instance)
     if options.profile:
-        from werkzeug.contrib.profiler import ProfilerMiddleware
         app = ProfilerMiddleware(app, stream=sys.stderr)
 
     if options.mount != '/':

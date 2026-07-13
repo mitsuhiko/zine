@@ -41,8 +41,10 @@ from zine.utils.xml import XMLRPC, Fault, strip_tags
 from zine.utils.net import open_url, NetException
 
 
-_title_re = re.compile(r'<title>(.*?)</title>(?i)')
-_pingback_re = re.compile(r'<link rel="pingback" href="([^"]+)" ?/?>(?i)')
+_title_re = re.compile(r'<title>(.*?)</title>', re.IGNORECASE)
+_pingback_re = re.compile(
+    r'<link rel="pingback" href="([^"]+)" ?/?>', re.IGNORECASE
+)
 _chunk_re = re.compile(r'\n\n|<(?:p|div|h\d)[^>]*>')
 
 
@@ -208,8 +210,10 @@ def get_excerpt(response, url_hint, body_limit=1024 * 512):
     title_match = _title_re.search(contents)
     title = title_match and strip_tags(title_match.group(1)) or None
 
-    link_re = re.compile(r'<a[^>]+?"\s*%s\s*"[^>]*>(.*?)</a>(?is)' %
-                         re.escape(url_hint))
+    link_re = re.compile(
+        r'<a[^>]+?"\s*%s\s*"[^>]*>(.*?)</a>' % re.escape(url_hint),
+        re.IGNORECASE | re.DOTALL,
+    )
     for chunk in _chunk_re.split(contents):
         match = link_re.search(chunk)
         if not match:

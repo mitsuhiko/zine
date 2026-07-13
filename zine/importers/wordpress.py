@@ -30,13 +30,21 @@ DC_METADATA = Namespace('http://purl.org/dc/elements/1.1/')
 WORDPRESS = Namespace('http://wordpress.org/export/1.0/')
 
 
-_xml_decl_re = re.compile(r'<\?xml.*?\?>(?s)')
-_meta_value_re = re.compile(r'(<wp:postmeta>.*?<wp:meta_value>)(.*?)'
-                            r'(</wp:meta_value>.*?</wp:postmeta>)(?s)')
-_comment_re = re.compile(r'(<wp:comment>.*?<wp:comment_content>)(.*?)'
-                         r'(</wp:comment_content>.*?</wp:comment>)(?s)')
-_content_encoded_re = re.compile(r'(<content:encoded>)<!\[CDATA\['
-                                 r'(.*?)\]\]>(</content:encoded>)(?s)')
+_xml_decl_re = re.compile(r'<\?xml.*?\?>', re.DOTALL)
+_meta_value_re = re.compile(
+    r'(<wp:postmeta>.*?<wp:meta_value>)(.*?)'
+    r'(</wp:meta_value>.*?</wp:postmeta>)',
+    re.DOTALL,
+)
+_comment_re = re.compile(
+    r'(<wp:comment>.*?<wp:comment_content>)(.*?)'
+    r'(</wp:comment_content>.*?</wp:comment>)',
+    re.DOTALL,
+)
+_content_encoded_re = re.compile(
+    r'(<content:encoded>)<!\[CDATA\[(.*?)\]\]>(</content:encoded>)',
+    re.DOTALL,
+)
 
 
 def _wordpress_to_html(markup):

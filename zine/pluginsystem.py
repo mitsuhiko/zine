@@ -313,12 +313,22 @@ class MetaData(object):
         proxy.__doc__ = getattr(dict, name).__doc__
         return proxy
 
-    __iter__ = iterkeys = _dict_method('iterkeys')
-    itervalues = _dict_method('itervalues')
-    iteritems = _dict_method('iteritems')
+    def __iter__(self):
+        return iter(self.as_dict())
+
     keys = _dict_method('keys')
     values = _dict_method('values')
     items = _dict_method('items')
+
+    def iterkeys(self):
+        return iter(self.keys())
+
+    def itervalues(self):
+        return iter(self.values())
+
+    def iteritems(self):
+        return iter(self.items())
+
     del _dict_method
 
     def as_dict(self):

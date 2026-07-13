@@ -15,7 +15,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import sys
-from os import path
+from os import path, remove
 from zine import environment
 from zine.config import Configuration
 from zine.api import db
@@ -115,10 +115,16 @@ class WebSetup(object):
         if not database_uri:
             error = 'You have to provide a database URI.'
         else:
+            engine = None
             try:
-                db.create_engine(database_uri, self.instance_folder)
+                engine = db.create_engine(database_uri, self.instance_folder)
+                with engine.connect():
+                    pass
             except Exception as e:
                 error = str(e)
+            finally:
+                if engine is not None:
+                    engine.dispose()
         if error is not None:
             return {'error': error}
 
@@ -181,20 +187,16 @@ class WebSetup(object):
             'error':    error
             })
 
+        engine = None
         try:
-            from zine.database import init_database
-
-            # create database and all tables
-            e = db.create_engine(database_uri, self.instance_folder)
-            init_database(e)
-        except Exception as error:
-            error = str(error)
-        else:
-            from zine.database import users, user_privileges, privileges
+            from zine.database import init_database, privileges, \
+                user_privileges, users
             from zine.privileges import BLOG_ADMIN
 
-            with e.begin() as connection:
-                # create admin account
+            # Create the fresh schema and initial administrator account.
+            engine = db.create_engine(database_uri, self.instance_folder)
+            init_database(engine)
+            with engine.begin() as connection:
                 user_id = connection.execute(users.insert().values(
                     username=value('admin_username'),
                     pw_hash=gen_pwhash(value('admin_password')),
@@ -205,8 +207,6 @@ class WebSetup(object):
                     display_name='$username',
                     is_author=True,
                 )).inserted_primary_key[0]
-
-                # insert a privilege for the user
                 privilege_id = connection.execute(
                     privileges.insert().values(name=BLOG_ADMIN.name)
                 ).inserted_primary_key[0]
@@ -214,7 +214,17 @@ class WebSetup(object):
                     user_id=user_id,
                     privilege_id=privilege_id,
                 ))
-
+        except Exception as setup_error:
+            error = str(setup_error)
+            # A configuration without a usable database would prevent the
+            # setup application from being shown on the next request.
+            try:
+                remove(config_filename)
+            except OSError:
+                pass
+        finally:
+            if engine is not None:
+                engine.dispose()
 
         # use a local variable, the global render_response could
         # be None because we reloaded zine and this module.
