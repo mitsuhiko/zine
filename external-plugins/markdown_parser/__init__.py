@@ -18,17 +18,14 @@ from zine.parsers import BaseParser
 from zine.views.admin import render_admin_response
 from zine.privileges import BLOG_ADMIN
 from zine.utils.admin import flash, require_admin_privilege
-from zine.utils.zeml import parse_html
+from zine.utils.zeml import parse_html, sanitize
 from zine.utils import forms
-try:
-    import markdown as md
-except ImportError:
-    from zine.plugins.markdown_parser import local_markdown as md
+import markdown as md
 
 TEMPLATES = os.path.join(os.path.dirname(__file__), 'templates')
 CFG_EXTENSIONS='markdown_parser/extensions'
 CFG_MAKEINTRO='markdown_parser/makeintro'
-MORE_TAG = re.compile(r'\n<!--\s*more\s*-->\n(?u)')
+MORE_TAG = re.compile(r'\n<!--\s*more\s*-->\n')
 
 
 class ConfigurationForm(forms.Form):
@@ -76,18 +73,21 @@ class MarkdownParser(BaseParser):
 
     def parse(self, input_data, reason):
         cfg = get_application().cfg
-        parser = md.Markdown(safe_mode=reason == 'comment' and 'escape',
-                             extensions=cfg[CFG_EXTENSIONS],
-                             #: For compatibility with the Pygments plugin
-                             extension_configs={'codehilite':
-                                                    {'css_class': 'syntax'}})
+        parser = md.Markdown(
+            extensions=cfg[CFG_EXTENSIONS],
+            # For compatibility with the Pygments plugin.
+            extension_configs={'codehilite': {'css_class': 'syntax'}},
+        )
         html = parser.convert(input_data)
         if cfg[CFG_MAKEINTRO]:
             if MORE_TAG.search(html):
                 #: Crude hack, but parse_html will correct any html
                 #: closure errors we introduce
                 html = u'<intro>' + MORE_TAG.sub(u'</intro>', html, 1)
-        return parse_html(html)
+        tree = parse_html(html)
+        if reason == 'comment':
+            tree = sanitize(tree)
+        return tree
 
 
 def setup(app, plugin):

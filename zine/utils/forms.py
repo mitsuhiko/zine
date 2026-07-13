@@ -21,6 +21,7 @@ from hashlib import sha1
 from itertools import chain
 from threading import Lock
 
+from markupsafe import Markup
 from werkzeug.datastructures import MultiDict
 
 from zine._compat import escape, html
@@ -130,7 +131,7 @@ def _decode(data):
     value_marker = object()
 
     if isinstance(data, MultiDict):
-        listiter = data.iterlists()
+        listiter = data.lists()
     else:
         listiter = ((k, [v]) for k, v in data.items())
 
@@ -462,7 +463,7 @@ class Widget(_Renderable):
         rv.append(html.dd(self(**attrs)))
         if self.help_text:
             rv.append(html.dd(self.help_text, class_='explanation'))
-        return u''.join(rv)
+        return Markup().join(rv)
 
     def _attr_setdefault(self, attrs):
         """Add an ID to the attrs if there is none."""
@@ -563,7 +564,7 @@ class Checkbox(Widget):
         if label:
             rv.append(html.dt(label()))
         rv.append(html.dd(self.with_help_text()))
-        return u''.join(rv)
+        return Markup().join(rv)
 
     def as_li(self, **attrs):
         """Return a li item."""
@@ -573,7 +574,7 @@ class Checkbox(Widget):
         if self.help_text:
             rv.append(html.div(self.help_text, class_='explanation'))
         rv.append(self.errors())
-        return html.li(u''.join(rv))
+        return html.li(Markup().join(rv))
 
     def render(self, **attrs):
         self._attr_setdefault(attrs)
@@ -668,14 +669,14 @@ class _InputGroup(Widget):
         if class_ is None:
             class_ = 'choicegroup'
         attrs['class'] = class_
-        choices = [u'<li>%s %s</li>' % (
-            choice(),
-            label and choice.label() or u''
-        ) for choice in self.choices]
+        choices = [
+            html.li(choice(), ' ', choice.label() if label else '')
+            for choice in self.choices
+        ]
         if not choices:
             if empty_msg is None:
                 empty_msg = _('No choices.')
-            choices.append(u'<li>%s</li>' % _(empty_msg))
+            choices.append(html.li(_(empty_msg)))
         return list_type(*choices, **attrs)
 
     def as_ul(self, **attrs):
@@ -749,8 +750,10 @@ class FormWidget(MappingWidget):
     @property
     def hidden_fields(self):
         """The hidden fields as string."""
-        return u''.join(html.input(type='hidden', name=name, value=value)
-                        for name, value in self.get_hidden_fields())
+        return Markup().join(
+            html.input(type='hidden', name=name, value=value)
+            for name, value in self.get_hidden_fields()
+        )
 
     @property
     def csrf_token(self):
@@ -777,7 +780,7 @@ class FormWidget(MappingWidget):
         # support jinja's caller
         caller = attrs.pop('caller', None)
         if caller is not None:
-            body = caller()
+            body = Markup(caller())
         else:
             body = self.as_dl() + self.default_actions()
 
@@ -786,7 +789,7 @@ class FormWidget(MappingWidget):
             # if there are hidden fields we put an invisible div around
             # it.  the HTML standard doesn't allow input fields as direct
             # childs of a <form> tag...
-            body = '<div style="display: none">%s</div>%s' % (hidden, body)
+            body = html.div(hidden, style='display: none') + body
 
         if with_errors:
             body = self.errors() + body

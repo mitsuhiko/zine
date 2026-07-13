@@ -22,3 +22,19 @@ class Fortune(object):
         self.text = text
 
 db.mapper(Fortune, fortunes)
+
+
+def initialize(engine):
+    """Create and seed Eric's table for a fresh-instance installation."""
+    from zine.plugins.eric_the_fish.fortunes import FORTUNES
+
+    fortunes.create(engine, checkfirst=True)
+    with engine.begin() as connection:
+        count = connection.scalar(
+            db.select(db.func.count()).select_from(fortunes)
+        )
+        if not count:
+            connection.execute(
+                fortunes.insert(),
+                [{'text': fortune} for fortune in FORTUNES],
+            )

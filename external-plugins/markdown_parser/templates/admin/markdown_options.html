@@ -2,76 +2,62 @@
 {% block title %}{{ _("Markdown Parser Options") }}{% endblock %}
 {% block contents %}
   <h1>{{ _("Markdown Parser Options") }}</h1>
-  <p>{% trans mdext='http://www.freewisdom.org/projects/python-markdown/Available_Extensions' %}
+  <p>{% trans mdext='https://python-markdown.github.io/extensions/' %}
     Markdown comes with several extensions to the basic markup syntax. You can
-    enable them here by specifying one per line. The Markdown-Python site has a
+    enable them here by specifying one per line. The Python-Markdown site has a
     <a href="{{ mdext }}">list of available extensions</a>.
   {% endtrans %}</p>
   <h2>{{ _("Common Extensions") }}</h2>
-  <ul class="errors"><li>{% trans upgrade="easy_install -U Markdown" %}
-    <strong>Note:</strong>
-    These extensions are part of the standard
-    Markdown-Python distribution from 2.0 onwards. You may need to upgrade
-    using <code>{{ upgrade }}</code> before they become available. Zine includes
-    Markdown 1.7 and will fallback to it if a system-wide Markdown is not
-    present.
-  {% endtrans %}</li></ul>
   <dl>
     <dt>abbr</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Abbreviations" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/abbreviations/" %}
       Adds the ability to define abbreviations. Specifically, any defined
       abbreviation is wrapped in an <code>&lt;abbr&gt;</code> tag.
       <a href="{{ more }}">More info</a>.
     {% endtrans %}</dd>
     <dt>def_list</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Definition_Lists" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/definition_lists/" %}
       Adds the ability to create definition lists.
       <a href="{{ more }}">More info</a>.
     {% endtrans %}</dd>
     <dt>fenced_code</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Fenced_Code_Blocks" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/fenced_code_blocks/" %}
       Adds a secondary way to define code blocks which overcomes
       a few limitations of the standard indented code blocks.
       <a href="{{ more }}">More info</a>.
     {% endtrans %}</dd>
     <dt>footnotes</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Footnotes" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/footnotes/" %}
       Adds footnote syntax.
       <a href="{{ more }}">More info</a>.
     {% endtrans %}</dd>
-    <dt>headerid</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/HeaderId" %}
-      Adds an ‘id’ attribute to HTML header elements (<code>h1-h6</code>)
-      in Markdown’s output.
-      <a href="{{ more }}">More info</a>.
-    {% endtrans %}</dd>
     <dt>tables</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Tables" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/tables/" %}
       Adds the ability to create tables in Markdown documents.
       <a href="{{ more }}">More info</a>.
     {% endtrans %}</dd>
     <dt>extra</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Extra" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/extra/" %}
       Shortcut to load the <code>abbr</code>, <code>def_list</code>,
-      <code>fenced_code</code>, <code>footnotes</code>, <code>headerid</code>
+      <code>fenced_code</code>, <code>footnotes</code>, <code>md_in_html</code>
       and <code>tables</code> extensions.
       <a href="{{ more }}">More info</a>.
     {% endtrans %}</dd>
     <dt>codehilite</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/CodeHilite" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/code_hilite/" %}
       Adds code/syntax highlighting to standard Markdown code blocks using
       Pygments. You must have the Zine Pygments Support plugin enabled for
       this to work.
       <a href="{{ more }}">More info</a>.
     {% endtrans %}</dd>
     <dt>toc</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/Table_of_Contents" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/toc/" %}
       Adds a Table of Contents to a Markdown document.
       <a href="{{ more }}">More info</a>.
     {% endtrans %}</dd>
     <!-- Hide wikilink until Zine has a mechanism for expanding partial slugs.
     <dt>wikilink</dt>
-    <dd>{% trans more="http://www.freewisdom.org/projects/python-markdown/WikiLinks" %}
+    <dd>{% trans more="https://python-markdown.github.io/extensions/wikilinks/" %}
       Adds WikiLinks. Specifically, any "[[bracketed]]" word
       is converted to a link.
       <a href="{{ more }}">More info</a>.

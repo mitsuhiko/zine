@@ -48,7 +48,7 @@ from zine.privileges import BLOG_ADMIN
 from zine.database import db
 
 # the last thing is importing the Fortunes database mapped object.
-from zine.plugins.eric_the_fish.database import Fortune
+from zine.plugins.eric_the_fish.database import Fortune, initialize
 
 # because we have an admin panel page we need to store the templates
 # somewhere. So here we calculate the path to the templates and save them
@@ -119,8 +119,9 @@ def show_eric_options(req):
 
 def get_fortune(req):
     """The servicepoint function. Just return one fortune from the database."""
-    fortune_ids = db.session.query(Fortune.id).all()
-    return {'fortune': db.session.query(Fortune).get(choice(fortune_ids)).text}
+    fortune_ids = db.session.scalars(db.select(Fortune.id)).all()
+    fortune = db.session.get(Fortune, choice(fortune_ids))
+    return {'fortune': fortune.text}
 
 
 def setup(app, plugin):
@@ -128,6 +129,10 @@ def setup(app, plugin):
     phase. Here we connect to the events and register our template paths,
     url rules, views etc.
     """
+
+    # External plugins no longer have migration repositories. Create the
+    # plugin's fresh-instance table directly and seed it once.
+    initialize(app.database_engine)
 
     # we want our fish to appear in the admin panel, so hook into the
     # correct event.
