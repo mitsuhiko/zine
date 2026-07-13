@@ -29,9 +29,12 @@ from jinja2 import Environment, FileSystemLoader
 
 
 template_path = path.join(path.dirname(__file__), 'templates')
-jinja_env = Environment(loader=FileSystemLoader(template_path),
-                        extensions=['jinja2.ext.i18n'])
-jinja_env.install_null_translations()
+jinja_env = Environment(
+    loader=FileSystemLoader(template_path),
+    extensions=['jinja2.ext.i18n'],
+    autoescape=False,
+)
+jinja_env.install_null_translations(newstyle=False)
 
 
 #: header for the config file

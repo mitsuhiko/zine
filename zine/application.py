@@ -807,8 +807,11 @@ class Zine(object):
 
         # init the template system with the core stuff
         from zine import models
-        env = Environment(loader=ThemeLoader(self),
-                          extensions=['jinja2.ext.i18n'])
+        env = Environment(
+            loader=ThemeLoader(self),
+            extensions=['jinja2.ext.i18n'],
+            autoescape=False,
+        )
         env.globals.update(
             cfg=self.cfg,
             theme=self.theme,
@@ -835,7 +838,7 @@ class Zine(object):
             timedeltaformat=i18n.format_timedelta
         )
 
-        env.install_gettext_translations(self.translations)
+        env.install_gettext_translations(self.translations, newstyle=False)
 
         # set up plugin template extensions
         env.globals.update(self._template_globals)

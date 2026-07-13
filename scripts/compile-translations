@@ -61,7 +61,7 @@ def main():
             if path.isfile(translations):
                 mo_file = open(translations.replace('.po', '.mo'), 'wb')
                 print('Compiling %r' % lang, end=' ')
-                f = open(translations)
+                f = open(translations, encoding='utf-8')
                 try:
                     catalog = read_po(f, locale=lang)
                 finally:
@@ -73,7 +73,7 @@ def main():
                 pickled_data_pointer_pos = mo_file.tell()
 
                 # Gather client messages
-                client_messages = set()
+                client_messages = []
                 if options.statistics:
                     translated = fuzzy = percentage = 0
                 for message in catalog:
@@ -84,7 +84,7 @@ def main():
                             fuzzy += 1
                     for fname, _ in message.locations:
                         if fname.endswith('.js'):
-                            client_messages.add(message)
+                            client_messages.append(message)
                             break
                 if options.statistics and len(catalog):
                     percentage = translated * 100 // len(catalog)
@@ -102,7 +102,8 @@ def main():
                 # Dump pickled data at the end of the standard catalog
                 pickle.dump(client_messages, mo_file, 2)
                 # Write offset of the start of the pickled data
-                mo_file.write(struct.pack('i', pickled_data_pointer_pos))
+                mo_file.write(b'ZINE')
+                mo_file.write(struct.pack('!I', pickled_data_pointer_pos))
                 mo_file.close()
     print('All done.')
 

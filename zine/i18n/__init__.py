@@ -103,9 +103,15 @@ class _CustomAttrsTranslations(object):
 
     def _get_plural_expr(self):
         if not self._plural_expr:
-            self._plural_expr = self._info.get(
+            plural_forms = (self._info or {}).get(
                 'plural-forms', 'nplurals=2; plural=(n != 1)'
-            ).split(';')[1].strip()[len('plural='):]
+            )
+            expressions = [
+                item.strip()[len('plural='):]
+                for item in plural_forms.split(';')
+                if item.strip().startswith('plural=')
+            ]
+            self._plural_expr = expressions[0] if expressions else '(n != 1)'
         return self._plural_expr
 
     def _set_plural_expr(self, plural_expr):
@@ -114,25 +120,33 @@ class _CustomAttrsTranslations(object):
     plural_expr = property(_get_plural_expr, _set_plural_expr)
     del _get_plural_expr, _set_plural_expr
 
+    def _merge_client_keys(self, messages):
+        for message in messages:
+            if message not in self.client_keys:
+                self.client_keys.append(message)
+
 
 class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
 
     def __init__(self, fileobj=None, locale=None):
-        self.client_keys = set()
+        self.client_keys = []
         self.locale = locale
-        TranslationsBase.__init__(self, fileobj=fileobj)
+        TranslationsBase.__init__(self, fileobj)
 
     def _parse(self, fileobj):
         TranslationsBase._parse(self, fileobj)
         try:
-            # Got the end of file minus 4 bytes
-            fileobj.seek(-4, 2)
-            # Read stored pickled data file pointer position
-            pickled_data_pointer_pos = struct.unpack('i', fileobj.read(4))
-            fileobj.seek(pickled_data_pointer_pos[0])
-            # Load pickled data
-            self.client_keys.update(pickle.load(fileobj))
-        except (EOFError, struct.error):
+            fileobj.seek(0, 2)
+            file_size = fileobj.tell()
+            fileobj.seek(-8, 2)
+            if fileobj.read(4) != b'ZINE':
+                return
+            pickled_data_pointer_pos = struct.unpack('!I', fileobj.read(4))[0]
+            if not 0 <= pickled_data_pointer_pos < file_size - 8:
+                raise ValueError('invalid client catalog offset')
+            fileobj.seek(pickled_data_pointer_pos)
+            self._merge_client_keys(pickle.load(fileobj))
+        except (EOFError, OSError, ValueError, pickle.PickleError, struct.error):
             # Catalog does not contain any pickled data at the end of it
             pass
 
@@ -143,12 +157,19 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
         locale = Locale.parse(locale)
         catalog = find_catalog(path, domain, locale, gettext_lookup)
         if catalog:
-            return ZineTranslations(fileobj=open(catalog, 'rb'), locale=locale)
+            with open(catalog, 'rb') as fileobj:
+                return cls(fileobj=fileobj, locale=locale)
         return ZineNullTranslations(locale=locale)
 
-    # Always use the unicode versions, we don't support byte strings
-    gettext = TranslationsBase.ugettext
-    ngettext = TranslationsBase.ungettext
+    gettext = TranslationsBase.gettext
+    ngettext = TranslationsBase.ngettext
+
+    def merge(self, translations):
+        if isinstance(translations, TranslationsBase):
+            TranslationsBase.merge(self, translations)
+        else:
+            self.add_fallback(translations)
+        self._merge_client_keys(translations.client_keys)
 
     def __bool__(self):
         return bool(self._catalog)
@@ -159,12 +180,12 @@ class ZineNullTranslations(NullTranslations, _CustomAttrsTranslations):
     def __init__(self, fileobj=None, locale=None):
         NullTranslations.__init__(self, fileobj)
         self.locale = locale
-        self.client_keys = set()
+        self.client_keys = []
 
     def merge(self, translations):
         """Update the translations with others."""
         self.add_fallback(translations)
-        self.client_keys.update(translations.client_keys)
+        self._merge_client_keys(translations.client_keys)
 
     def __bool__(self):
         return bool(self._fallback)
@@ -232,7 +253,7 @@ class _TranslationProxy(object):
         return bool(self.value)
 
     def __dir__(self):
-        return dir(str)
+        return dir(self.value)
 
     def __iter__(self):
         return iter(self.value)
@@ -242,6 +263,9 @@ class _TranslationProxy(object):
 
     def __str__(self):
         return str(self.value)
+
+    def __format__(self, format_spec):
+        return format(self.value, format_spec)
 
     def __add__(self, other):
         return self.value + other
@@ -298,7 +322,7 @@ class _TranslationProxy(object):
 
     def __repr__(self):
         try:
-            return 'i' + repr(str(self.value))
+            return repr(str(self.value))
         except:
             return '<%s broken>' % self.__class__.__name__
 
@@ -420,23 +444,21 @@ def list_timezones():
 
 def list_languages(self_translated=True):
     """Return a list of all languages."""
-    if self_translated:
-        locale = get_locale()
-    else:
-        locale = None
+    display_locale = get_locale() if self_translated else None
 
     found = set(['en'])
-    languages = [('en', Locale('en').get_display_name())]
+    english = Locale('en')
+    languages = [('en', english.get_display_name(display_locale))]
 
-    for locale in os.listdir(LOCALE_PATH):
+    for locale_name in os.listdir(LOCALE_PATH):
         try:
-            l = Locale.parse(locale)
+            l = Locale.parse(locale_name)
         except (ValueError, UnknownLocaleError):
             continue
         if str(l) not in found and \
            find_catalog(LOCALE_PATH, LOCALE_DOMAIN, l,
                         USE_GETTEXT_LOOKUP) is not None:
-            languages.append((str(l), l.get_display_name()))
+            languages.append((str(l), l.get_display_name(display_locale)))
             found.add(str(l))
 
     languages.sort(key=lambda x: x[1].lower())
