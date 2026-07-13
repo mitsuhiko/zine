@@ -143,31 +143,6 @@ class _ZEMLDualContainer(_ZEMLContainer):
             return self.parser_data.get('intro')
 
 
-class CommentCounterExtension(db.AttributeExtension):
-    """A simple attribute extension that helps the post to reflect
-    the number of public comments on the post table.
-
-    This will not count or "uncount" blocked or unmoderated comments.
-    To fight this problem there is a :meth:`Post.sync_comment_count`
-    method that should be called after comment moderation on affected
-    comments.
-    """
-
-    def append(self, state, value, initiator):
-        instance = state.obj()
-        if not value.blocked:
-            instance._comment_count += 1
-        return value
-
-    def remove(self, state, value, initiator):
-        instance = state.obj()
-        if not value.blocked:
-            instance._comment_count -= 1
-
-    def set(self, state, value, oldvalue, initiator):
-        return value
-
-
 class UserQuery(db.Query):
     """Add some extra query methods to the user object."""
 
@@ -514,8 +489,7 @@ class _PostQueryBase(db.Query):
         q = self
         for word in query.split():
             q = q.filter(
-                posts.c.body.like('%%%s%%' % word) |
-                posts.c.intro.like('%%%s%%' % word) |
+                texts.c.text.like('%%%s%%' % word) |
                 posts.c.title.like('%%%s%%' % word)
             )
         return q.all()
@@ -757,7 +731,7 @@ class SummarizedPostQuery(_PostQueryBase):
 class Post(_PostBase, _ZEMLDualContainer):
     """A full blown post."""
 
-    query = db.query_property(PostQuery)
+    query = db.query_property(PostQuery, posts.c.pub_date.desc())
     parser_reason = 'post'
 
     def __init__(self, title, author, text, slug=None, pub_date=None,
@@ -808,7 +782,9 @@ class Post(_PostBase, _ZEMLDualContainer):
 class SummarizedPost(_PostBase):
     """Like a regular post but without text and parser data."""
 
-    query = db.query_property(SummarizedPostQuery)
+    query = db.query_property(
+        SummarizedPostQuery, posts.c.pub_date.desc()
+    )
 
     def __init__(self):
         raise TypeError('You cannot create %r instance' % type(self).__name__)
@@ -861,7 +837,7 @@ class CategoryQuery(db.Query):
 class Category(object):
     """Represents a category."""
 
-    query = db.query_property(CategoryQuery)
+    query = db.query_property(CategoryQuery, categories.c.name)
 
     def __init__(self, name, description='', slug=None):
         self.name = name
@@ -986,7 +962,7 @@ class CommentQuery(db.Query):
 class Comment(_ZEMLContainer):
     """Represent one comment."""
 
-    query = db.query_property(CommentQuery)
+    query = db.query_property(CommentQuery, comments.c.pub_date.desc())
     parser_reason = 'comment'
 
     def __init__(self, post, author, text, email=None, www=None, parent=None,
@@ -1088,11 +1064,12 @@ class Comment(_ZEMLContainer):
             return True
         elif moderate == MODERATE_NONE:
             return False
-        return db.execute(comments.select(
+        statement = comments.select().where(
             (comments.c.author == self._author) &
             (comments.c.email == self._email) &
             (comments.c.status == COMMENT_MODERATED)
-        )).fetchone() is None
+        )
+        return db.execute(statement).fetchone() is None
 
     def make_visible_for_request(self, request=None):
         """Make the comment visible for the current request."""
@@ -1200,19 +1177,19 @@ class TagQuery(db.Query):
              (p.status == STATUS_PUBLISHED) &
              (p.pub_date <= datetime.utcnow()))
 
-        s = db.select(
-            [t.tag_id, t.slug, t.name,
-             db.func.count(p.post_id).label('s_count')],
-            q, group_by=[t.slug, t.name, t.tag_id]).alias('post_count_query').c
-
-        options = {'order_by': [db.asc(s.s_count)]}
-        if max is not None:
-            options['limit'] = max
+        counts = db.select(
+            t.tag_id, t.slug, t.name,
+            db.func.count(p.post_id).label('s_count')
+        ).where(q).group_by(t.slug, t.name, t.tag_id).alias('post_count_query')
+        s = counts.c
 
         # the label statement circumvents a bug for sqlite3 on windows
         # see #65
-        q = db.select([s.tag_id, s.slug, s.name, s.s_count.label('s_count')],
-                      **options)
+        q = db.select(
+            s.tag_id, s.slug, s.name, s.s_count.label('s_count')
+        ).order_by(db.asc(s.s_count))
+        if max is not None:
+            q = q.limit(max)
 
         items = [{
             'id':       row.tag_id,
@@ -1228,7 +1205,7 @@ class TagQuery(db.Query):
 
 class Tag(object):
     """A single tag."""
-    query = db.query_property(TagQuery)
+    query = db.query_property(TagQuery, tags.c.name)
 
     def __init__(self, name, slug=None):
         self.name = name
@@ -1290,112 +1267,183 @@ class NotificationSubscription(object):
         )
 
 
-# connect the tables.
+# Connect the tables with SQLAlchemy's imperative mapping API.
 db.mapper(SchemaVersion, schema_versions)
 db.mapper(User, users, properties={
-    'id':               users.c.user_id,
-    'display_name':     db.synonym('_display_name', map_column=True),
-    'posts':            db.dynamic_loader(Post,
-                                          backref=db.backref('author', lazy=True),
-                                          query_class=PostQuery,
-                                          cascade='all, delete, delete-orphan'),
-    'comments':         db.dynamic_loader(Comment,
-                                          backref=db.backref('user', lazy=False),
-                                          cascade='all, delete'),
-    '_own_privileges':  db.relation(_Privilege, lazy=True,
-                                    secondary=user_privileges,
-                                    collection_class=set,
-                                    cascade='all, delete')
+    'id': users.c.user_id,
+    'display_name': db.synonym('_display_name', map_column=True),
+    'posts': db.relationship(
+        Post,
+        backref=db.backref('author', lazy='select'),
+        query_class=PostQuery,
+        cascade='all, delete, delete-orphan',
+        lazy='dynamic',
+        order_by=posts.c.pub_date.desc(),
+    ),
+    'comments': db.relationship(
+        Comment,
+        backref=db.backref('user', lazy='joined'),
+        cascade='all, delete',
+        lazy='dynamic',
+        order_by=comments.c.pub_date.desc(),
+    ),
+    '_own_privileges': db.relationship(
+        _Privilege,
+        secondary=user_privileges,
+        collection_class=set,
+        cascade='all, delete',
+        lazy='select',
+    ),
 })
 db.mapper(Group, groups, properties={
-    'id':               groups.c.group_id,
-    'users':            db.dynamic_loader(User, backref=db.backref('groups', lazy=True),
-                                          query_class=UserQuery,
-                                          secondary=group_users),
-    '_privileges':      db.relation(_Privilege, lazy=True,
-                                    secondary=group_privileges,
-                                    collection_class=set,
-                                    cascade='all, delete')
+    'id': groups.c.group_id,
+    'users': db.relationship(
+        User,
+        backref=db.backref('groups', lazy='select'),
+        query_class=UserQuery,
+        secondary=group_users,
+        lazy='dynamic',
+    ),
+    '_privileges': db.relationship(
+        _Privilege,
+        secondary=group_privileges,
+        collection_class=set,
+        cascade='all, delete',
+        lazy='select',
+    ),
 })
 db.mapper(_Privilege, privileges, properties={
-    'id':               privileges.c.privilege_id,
+    'id': privileges.c.privilege_id,
 })
 db.mapper(Category, categories, properties={
-    'id':               categories.c.category_id,
-    'posts':            db.dynamic_loader(Post, secondary=post_categories,
-                                          query_class=PostQuery)
-}, order_by=categories.c.name)
+    'id': categories.c.category_id,
+    'posts': db.relationship(
+        Post,
+        secondary=post_categories,
+        query_class=PostQuery,
+        lazy='dynamic',
+        order_by=posts.c.pub_date.desc(),
+        back_populates='categories',
+    ),
+})
 db.mapper(Comment, db.join(comments, texts), properties={
-    'id':           comments.c.comment_id,
-    'text_id':      [comments.c.text_id, texts.c.text_id],
-    '_text':        texts.c.text,
-    'text':         db.synonym('_text'),
-    '_author':      comments.c.author,
-    'author':       db.synonym('_author'),
-    '_email':       comments.c.email,
-    'email':        db.synonym('_email'),
-    '_www':         comments.c.www,
-    'www':          db.synonym('_www'),
-    '_status':      comments.c.status,
-    'status':       db.synonym('_status'),
-    'children':     db.relation(Comment,
+    'id': comments.c.comment_id,
+    'text_id': db.column_property(comments.c.text_id, texts.c.text_id),
+    '_text': texts.c.text,
+    'text': db.synonym('_text'),
+    '_author': comments.c.author,
+    'author': db.synonym('_author'),
+    '_email': comments.c.email,
+    'email': db.synonym('_email'),
+    '_www': comments.c.www,
+    'www': db.synonym('_www'),
+    '_status': comments.c.status,
+    'status': db.synonym('_status'),
+    'children': db.relationship(
+        Comment,
         primaryjoin=comments.c.parent_id == comments.c.comment_id,
-        order_by=[db.asc(comments.c.pub_date)],
-        backref=db.backref('parent', remote_side=[comments.c.comment_id],
-                           primaryjoin=comments.c.parent_id ==
-                                comments.c.comment_id),
-        lazy=True
-    )
-}, order_by=comments.c.pub_date.desc(), primary_key=[comments.c.comment_id])
+        order_by=db.asc(comments.c.pub_date),
+        backref=db.backref(
+            'parent',
+            remote_side=[comments.c.comment_id],
+            primaryjoin=comments.c.parent_id == comments.c.comment_id,
+        ),
+        lazy='select',
+    ),
+}, primary_key=[comments.c.comment_id])
 db.mapper(PostLink, post_links, properties={
-    'id':           post_links.c.link_id,
+    'id': post_links.c.link_id,
 })
 db.mapper(Tag, tags, properties={
-    'id':           tags.c.tag_id,
-    'posts':        db.dynamic_loader(Post, secondary=post_tags,
-                                      query_class=PostQuery)
-}, order_by=tags.c.name)
-db.mapper(Post, db.join(posts, texts), properties={
-    'id':               posts.c.post_id,
-    'text_id':          [posts.c.text_id, texts.c.text_id],
-    '_text':            texts.c.text,
-    'text':             db.synonym('_text'),
-    'comments':         db.relation(Comment, backref=db.backref('post', lazy=True),
-                                    primaryjoin=posts.c.post_id ==
-                                        comments.c.post_id,
-                                    order_by=[db.asc(comments.c.pub_date)],
-                                    lazy=False,
-                                    cascade='all, delete, delete-orphan',
-                                    extension=CommentCounterExtension()),
-    'links':            db.relation(PostLink, backref='post',
-                                    cascade='all, delete, delete-orphan'),
-    'categories':       db.relation(Category, secondary=post_categories, lazy=False,
-                                    order_by=[db.asc(categories.c.name)]),
-    'tags':             db.relation(Tag, secondary=post_tags, lazy=False,
-                                    order_by=[tags.c.name]),
-    '_comment_count':   posts.c.comment_count,
-    'comment_count':    db.synonym('_comment_count')
-}, order_by=posts.c.pub_date.desc(), primary_key=[posts.c.post_id])
-db.mapper(SummarizedPost, posts, properties={
-    'id':               posts.c.post_id,
-    'comments':         db.relation(Comment,
-                                    primaryjoin=posts.c.post_id ==
-                                        comments.c.post_id,
-                                    order_by=[db.asc(comments.c.pub_date)],
-                                    lazy=True, viewonly=True),
-    'links':            db.relation(PostLink, viewonly=True, lazy=True),
-    'categories':       db.relation(Category, secondary=post_categories, lazy=True,
-                                    order_by=[db.asc(categories.c.name)],
-                                    viewonly=True),
-    'tags':             db.relation(Tag, secondary=post_tags, lazy=True,
-                                    viewonly=True, order_by=[tags.c.name]),
-    'comment_count':    db.synonym('_comment_count', map_column=True)
-}, order_by=posts.c.pub_date.desc())
-db.mapper(NotificationSubscription, notification_subscriptions, properties={
-    'id':               notification_subscriptions.c.subscription_id,
-    'user':             db.relation(User, uselist=False, lazy=False,
-                            backref=db.backref('notification_subscriptions',
-                                               lazy='dynamic'
-                            )
-                        )
+    'id': tags.c.tag_id,
+    'posts': db.relationship(
+        Post,
+        secondary=post_tags,
+        query_class=PostQuery,
+        lazy='dynamic',
+        order_by=posts.c.pub_date.desc(),
+        back_populates='tags',
+    ),
 })
+db.mapper(Post, db.join(posts, texts), properties={
+    'id': posts.c.post_id,
+    'text_id': db.column_property(posts.c.text_id, texts.c.text_id),
+    '_text': texts.c.text,
+    'text': db.synonym('_text'),
+    'comments': db.relationship(
+        Comment,
+        backref=db.backref('post', lazy='select'),
+        primaryjoin=posts.c.post_id == comments.c.post_id,
+        order_by=db.asc(comments.c.pub_date),
+        lazy='joined',
+        cascade='all, delete, delete-orphan',
+    ),
+    'links': db.relationship(
+        PostLink,
+        backref='post',
+        cascade='all, delete, delete-orphan',
+    ),
+    'categories': db.relationship(
+        Category,
+        secondary=post_categories,
+        lazy='joined',
+        order_by=db.asc(categories.c.name),
+        back_populates='posts',
+    ),
+    'tags': db.relationship(
+        Tag,
+        secondary=post_tags,
+        lazy='joined',
+        order_by=tags.c.name,
+        back_populates='posts',
+    ),
+    '_comment_count': posts.c.comment_count,
+    'comment_count': db.synonym('_comment_count'),
+}, primary_key=[posts.c.post_id])
+db.mapper(SummarizedPost, posts, properties={
+    'id': posts.c.post_id,
+    'comments': db.relationship(
+        Comment,
+        primaryjoin=posts.c.post_id == comments.c.post_id,
+        order_by=db.asc(comments.c.pub_date),
+        lazy='select',
+        viewonly=True,
+    ),
+    'links': db.relationship(PostLink, viewonly=True, lazy='select'),
+    'categories': db.relationship(
+        Category,
+        secondary=post_categories,
+        lazy='select',
+        order_by=db.asc(categories.c.name),
+        viewonly=True,
+    ),
+    'tags': db.relationship(
+        Tag,
+        secondary=post_tags,
+        lazy='select',
+        viewonly=True,
+        order_by=tags.c.name,
+    ),
+    'comment_count': db.synonym('_comment_count', map_column=True),
+})
+db.mapper(NotificationSubscription, notification_subscriptions, properties={
+    'id': notification_subscriptions.c.subscription_id,
+    'user': db.relationship(
+        User,
+        uselist=False,
+        lazy='joined',
+        backref=db.backref('notification_subscriptions', lazy='dynamic'),
+    ),
+})
+
+
+@db.event.listens_for(Post.comments, 'append')
+def _comment_added(post, comment, initiator):
+    if not comment.blocked:
+        post._comment_count = (post._comment_count or 0) + 1
+
+
+@db.event.listens_for(Post.comments, 'remove')
+def _comment_removed(post, comment, initiator):
+    if not comment.blocked:
+        post._comment_count = (post._comment_count or 0) - 1

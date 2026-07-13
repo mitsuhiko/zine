@@ -921,9 +921,11 @@ class DeleteUserForm(_UserBoundForm):
     def delete_user(self):
         """Deletes the user."""
         if self.data['action'] == 'reassign':
-            db.execute(posts.update(posts.c.author_id == self.user.id), dict(
-                author_id=self.data['reassign_to'].id
-            ))
+            db.execute(
+                posts.update()
+                .where(posts.c.author_id == self.user.id)
+                .values(author_id=self.data['reassign_to'].id)
+            )
 
         # find all the comments by this author and make them comments that
         # are no longer linked to the author.

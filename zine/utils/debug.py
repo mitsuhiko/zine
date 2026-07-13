@@ -16,7 +16,7 @@ from zine._compat import escape
 from zine.application import url_for
 
 
-_body_end_re = re.compile(r'</\s*(body|html)(?i)')
+_body_end_re = re.compile(r'</\s*(body|html)', re.IGNORECASE)
 
 
 def find_calling_context(skip=2):

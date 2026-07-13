@@ -23,7 +23,7 @@ from babel import Locale
 
 from jinja2 import Environment, BaseLoader, TemplateNotFound
 
-from sqlalchemy.exceptions import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError
 
 import werkzeug.routing as routing
 from werkzeug.exceptions import HTTPException, Forbidden, NotFound
@@ -286,9 +286,14 @@ class Request(RequestBase):
         user = None
         user_id = self.session.get('uid')
         if user_id:
-            user = User.query.options(db.eagerload('groups'),
-                                      db.eagerload('groups', '_privileges')) \
-                             .get(user_id)
+            from zine.models import Group
+            user = db.session.get(
+                User,
+                user_id,
+                options=(
+                    db.joinedload(User.groups).joinedload(Group._privileges),
+                ),
+            )
         return user
 
     @property

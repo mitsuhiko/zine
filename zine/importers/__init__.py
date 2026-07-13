@@ -364,7 +364,7 @@ class Blog(_Element):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        uids = set(x.uid for x in db.execute(db.select([posts.c.uid])))
+        uids = set(x.uid for x in db.execute(db.select(posts.c.uid)))
         for post in self.posts:
             post.already_imported = post.uid in uids
 

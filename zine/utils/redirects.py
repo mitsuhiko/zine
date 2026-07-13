@@ -25,9 +25,11 @@ def lookup_redirect(url):
     """Looks up a redirect.  If there is not redirect for the given URL,
     the return value is `None`.
     """
-    row = db.execute(redirects.select(
-        redirects.c.original == _strip_url(url)
-    )).fetchone()
+    row = db.execute(
+        redirects.select().where(
+            redirects.c.original == _strip_url(url)
+        )
+    ).fetchone()
     if row:
         return make_external_url(row.new)
 
@@ -35,16 +37,24 @@ def lookup_redirect(url):
 def register_redirect(original, new_url):
     """Register a new redirect.  Also an old one that may still exist."""
     original = _strip_url(original)
-    db.execute(redirects.delete(original=original))
-    db.execute(redirects.insert(), dict(
-        original=original,
-        new=_strip_url(new_url)
-    ))
+    db.execute(
+        redirects.delete().where(redirects.c.original == original)
+    )
+    db.execute(
+        redirects.insert().values(
+            original=original,
+            new=_strip_url(new_url),
+        )
+    )
 
 
 def unregister_redirect(url):
     """Unregister a redirect."""
-    rv = db.execute(redirects.delete(redirects.c.original == _strip_url(url)))
+    rv = db.execute(
+        redirects.delete().where(
+            redirects.c.original == _strip_url(url)
+        )
+    )
     if not rv.rowcount:
         raise ValueError('no such URL')
 

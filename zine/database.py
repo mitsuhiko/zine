@@ -21,11 +21,8 @@ from types import ModuleType
 from copy import deepcopy
 
 import sqlalchemy
-from sqlalchemy import orm
-from sqlalchemy.interfaces import ConnectionProxy
-from sqlalchemy.orm.interfaces import AttributeExtension
+from sqlalchemy import event, orm
 from sqlalchemy.exc import ArgumentError
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.engine.url import make_url, URL
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -62,7 +59,7 @@ def create_engine(uri, relative_to=None, debug=False):
     engines to 'utf-8', and paths for SQLite are relative to the path
     provided as `relative_to`.
 
-    Furthermore the engine is created with `convert_unicode` by default.
+    The returned engine uses SQLAlchemy's modern transaction semantics.
     """
     # special case sqlite.  We want nicer urls for that one.
     if uri.startswith('sqlite:'):
@@ -78,17 +75,17 @@ def create_engine(uri, relative_to=None, debug=False):
             query = url_decode(query).to_dict()
         else:
             query = {}
-        info = URL('sqlite', database=database, query=query)
+        info = URL.create('sqlite', database=database, query=query)
 
     else:
         info = make_url(uri)
 
         # if mysql is the database engine and no connection encoding is
         # provided we set it to utf-8
-        if info.drivername == 'mysql':
-            info.query.setdefault('charset', 'utf8')
+        if info.get_backend_name() == 'mysql' and 'charset' not in info.query:
+            info = info.update_query_dict({'charset': 'utf8'})
 
-    options = {'convert_unicode': True}
+    options = {}
 
     # alternative pool sizes / recycle settings and more.  These are
     # interpreter wide and not from the config for the following reasons:
@@ -102,19 +99,20 @@ def create_engine(uri, relative_to=None, debug=False):
         if value is not None:
             options[key] = int(value)
 
-    # if debugging is enabled, hook the ConnectionDebugProxy in
+    engine = sqlalchemy.create_engine(info, **options)
     if debug:
-        options['proxy'] = ConnectionDebugProxy()
-
-    return sqlalchemy.create_engine(info, **options)
+        ConnectionDebugProxy.install(engine)
+    return engine
 
 
 def secure_database_uri(uri):
     """Returns the database uri with confidental information stripped."""
     obj = make_url(uri)
     if obj.password:
-        obj.password = '***'
-    return str(obj).replace(u':%2A%2A%2A@', u':***@', 1)
+        obj = obj.set(password='***')
+    return obj.render_as_string(hide_password=False).replace(
+        u':%2A%2A%2A@', u':***@', 1
+    )
 
 
 def attribute_loaded(model, attribute):
@@ -124,21 +122,49 @@ def attribute_loaded(model, attribute):
     return attribute in model.__dict__
 
 
-class ConnectionDebugProxy(ConnectionProxy):
-    """Helps debugging the database."""
+class ConnectionDebugProxy(object):
+    """Collect SQL timing information using SQLAlchemy engine events."""
 
-    def cursor_execute(self, execute, cursor, statement, parameters,
-                       context, executemany):
-        start = _timer()
-        try:
-            return execute(cursor, statement, parameters, context)
-        finally:
-            from zine.application import get_request
-            from zine.utils.debug import find_calling_context
-            request = get_request()
-            if request is not None:
-                request.queries.append((statement, parameters, start,
-                                        _timer(), find_calling_context()))
+    @staticmethod
+    def install(engine):
+        event.listen(engine, 'before_cursor_execute',
+                     ConnectionDebugProxy.before_cursor_execute)
+        event.listen(engine, 'after_cursor_execute',
+                     ConnectionDebugProxy.after_cursor_execute)
+        event.listen(engine, 'handle_error', ConnectionDebugProxy.handle_error)
+
+    @staticmethod
+    def before_cursor_execute(connection, cursor, statement, parameters,
+                              context, executemany):
+        from zine.utils.debug import find_calling_context
+        context._zine_query = (_timer(), find_calling_context())
+
+    @staticmethod
+    def _record(context, statement, parameters):
+        query = getattr(context, '_zine_query', None)
+        if query is None:
+            return
+        del context._zine_query
+        from zine.application import get_request
+        request = get_request()
+        if request is not None:
+            start, calling_context = query
+            request.queries.append((statement, parameters, start,
+                                    _timer(), calling_context))
+
+    @staticmethod
+    def after_cursor_execute(connection, cursor, statement, parameters,
+                             context, executemany):
+        ConnectionDebugProxy._record(context, statement, parameters)
+
+    @staticmethod
+    def handle_error(exception_context):
+        context = exception_context.execution_context
+        if context is not None:
+            ConnectionDebugProxy._record(
+                context, exception_context.statement,
+                exception_context.parameters
+            )
 
 
 class ZEMLParserData(TypeDecorator):
@@ -150,6 +176,7 @@ class ZEMLParserData(TypeDecorator):
     """
 
     impl = sqlalchemy.LargeBinary
+    cache_ok = True
 
     def process_bind_param(self, value, dialect):
         if value is None:
@@ -182,48 +209,116 @@ class ZEMLParserData(TypeDecorator):
 class Query(orm.Query):
     """Default query class."""
 
+    def _loader_option(self, name, strategy):
+        if not isinstance(name, str):
+            return getattr(orm, strategy)(name)
+        entity = self.column_descriptions[0].get('entity')
+        if entity is None:
+            raise TypeError('loader options require a mapped entity')
+        parts = name.split('.')
+        attribute = getattr(entity, parts.pop(0))
+        if not parts:
+            return getattr(orm, strategy)(attribute)
+        option = orm.defaultload(attribute)
+        entity = attribute.property.mapper.class_
+        while len(parts) > 1:
+            attribute = getattr(entity, parts.pop(0))
+            option = option.defaultload(attribute)
+            entity = attribute.property.mapper.class_
+        return getattr(option, strategy)(getattr(entity, parts[0]))
+
     def lightweight(self, deferred=None, lazy=None):
-        """Send a lightweight query which deferes some more expensive
-        things such as comment queries or even text and parser data.
-        """
-        args = list(map(db.lazyload, lazy or ())) + list(map(db.defer, deferred or ()))
+        """Send a lightweight query which defers expensive attributes."""
+        args = [self._loader_option(name, 'lazyload') for name in lazy or ()]
+        args.extend(self._loader_option(name, 'defer')
+                    for name in deferred or ())
         return self.options(*args)
 
+    def get(self, ident):
+        """Load an object by primary key without the legacy ``Query.get``."""
+        entity = self.column_descriptions[0].get('entity')
+        if entity is None:
+            raise TypeError('get() requires a mapped entity')
+        primary_key = sqlalchemy.inspect(entity).primary_key
+        if isinstance(ident, dict):
+            values = [ident[column.key] for column in primary_key]
+        elif len(primary_key) == 1:
+            values = [ident]
+        else:
+            values = list(ident)
+        if len(values) != len(primary_key):
+            raise ValueError('incorrect number of primary-key values')
+        criteria = [column == value
+                    for column, value in zip(primary_key, values)]
+        return self.filter(*criteria).first()
+
     def first(self, raise_if_missing=False):
-        """Return the first result of this `Query` or None if the result
-        doesn't contain any rows.  If `raise_if_missing` is set to `True`
-        a `NotFound` exception is raised if no row is found.
-        """
-        rv = orm.Query.first(self)
+        """Return the first result, optionally raising :class:`NotFound`."""
+        rv = super().first()
         if rv is None and raise_if_missing:
             raise NotFound()
         return rv
 
 
-session = orm.scoped_session(lambda: orm.create_session(get_engine(),
-                             autoflush=True, autocommit=False),
-                             local_manager.get_ident)
+session = orm.scoped_session(
+    lambda: orm.Session(bind=get_engine(), autoflush=True),
+    scopefunc=local_manager.get_ident,
+)
 
 
-def mapper(cls, *args, **kwargs):
-    """Attaches a query and auto registers."""
-    if not hasattr(cls, 'query'):
-        cls.query = session.query_property(Query)
-    old_init = getattr(cls, '__init__', None)
+class _OrderedQueryProperty(object):
+    def __init__(self, query_class, order_by):
+        self.query_property = session.query_property(query_class)
+        self.order_by = order_by
+
+    def __get__(self, instance, owner):
+        query = self.query_property.__get__(instance, owner)
+        return query.order_by(self.order_by)
+
+
+def query_property(query_class=Query, order_by=None):
+    """Create the legacy model query descriptor used throughout Zine."""
+    if order_by is None:
+        return session.query_property(query_class)
+    return _OrderedQueryProperty(query_class, order_by)
+
+
+def _model_constructor(self, **kwargs):
+    for key, value in kwargs.items():
+        if not hasattr(type(self), key):
+            raise TypeError('%r is an invalid keyword argument for %s' %
+                            (key, type(self).__name__))
+        setattr(self, key, value)
+    session.add(self)
+
+
+_mapper_registry = orm.registry(constructor=_model_constructor)
+
+
+def mapper(cls, table, *args, **kwargs):
+    """Map a class imperatively and auto-register new instances."""
+    if 'query' not in cls.__dict__:
+        cls.query = query_property(Query)
+    old_init = cls.__dict__.get('__init__')
+
     def register_init(self, *args, **kwargs):
         if old_init is not None:
             old_init(self, *args, **kwargs)
+        elif args or kwargs:
+            raise TypeError('%s() takes no arguments' % cls.__name__)
         session.add(self)
+
     cls.__init__ = register_init
-    return orm.mapper(cls, *args, **kwargs)
+    return _mapper_registry.map_imperatively(cls, table, *args, **kwargs)
 
 
-# configure a declarative base.  This is unused in the code but makes it easier
-# for plugins to work with the database.
+# Configure a declarative base for plugins.
 class ModelBase(object):
     """Internal baseclass for `Model`."""
-Model = declarative_base(name='Model', cls=ModelBase, mapper=mapper)
-ModelBase.query = session.query_property(Query)
+
+
+Model = _mapper_registry.generate_base(name='Model', cls=ModelBase)
+ModelBase.query = query_property(Query)
 
 
 #: create a new module for all the database related functions and objects
@@ -231,13 +326,13 @@ sys.modules['zine.database.db'] = db = ModuleType('db')
 key = value = mod = None
 for mod in sqlalchemy, orm:
     for key, value in mod.__dict__.items():
-        if key in mod.__all__:
+        if not key.startswith('_'):
             setattr(db, key, value)
 del key, mod, value
 
 #: forward some session methods to the module as well
-for name in 'delete', 'flush', 'execute', 'begin',  'commit', 'rollback', \
-            'refresh', 'expire', 'query_property':
+for name in 'add', 'delete', 'flush', 'execute', 'begin', 'commit', \
+            'rollback', 'refresh', 'expire', 'get':
     setattr(db, name, getattr(session, name))
 
 # Some things changed names with SQLAlchemy 0.6.0
@@ -252,16 +347,16 @@ db.create_engine = create_engine
 db.session = session
 db.ZEMLParserData = ZEMLParserData
 db.mapper = mapper
-db.basic_mapper = orm.mapper
+db.basic_mapper = _mapper_registry.map_imperatively
+db.query_property = query_property
 db.association_proxy = association_proxy
 db.attribute_loaded = attribute_loaded
-db.AttributeExtension = AttributeExtension
 
 #: called at the end of a request
 cleanup_session = session.remove
 
 #: metadata for the core tables and the core table definitions
-metadata = db.MetaData()
+metadata = _mapper_registry.metadata
 
 schema_versions = db.Table('schema_versions', metadata,
     db.Column('repository_id', db.String(255), primary_key=True),
