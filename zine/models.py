@@ -24,6 +24,7 @@ from zine.utils.text import gen_slug, gen_timestamped_slug, build_tag_uri, \
 from zine.utils.pagination import Pagination
 from zine.utils.crypto import gen_pwhash, check_pwhash
 from zine.utils.http import make_external_url
+from zine.utils.dates import utcnow
 from zine.privileges import _Privilege, privilege_attribute, \
      add_admin_privilege, MODERATE_COMMENTS, ENTER_ADMIN_PANEL, BLOG_ADMIN, \
      VIEW_DRAFTS, VIEW_PROTECTED, MODERATE_OWN_ENTRIES, MODERATE_OWN_PAGES
@@ -325,7 +326,7 @@ class _PostQueryBase(db.Query):
             # Anonymous. Return only public entries.
             return self.filter(
                 (Post.status == STATUS_PUBLISHED) &
-                (Post.pub_date <= datetime.utcnow())
+                (Post.pub_date <= utcnow())
             )
         elif not user.has_privilege(VIEW_PROTECTED):
             # Authenticated user without protected viewing privilege
@@ -334,7 +335,7 @@ class _PostQueryBase(db.Query):
                 ((Post.status == STATUS_PUBLISHED) |
                  ((Post.status == STATUS_PRIVATE) &
                   (Post.author_id == user.id))) &
-                (Post.pub_date <= datetime.utcnow())
+                (Post.pub_date <= utcnow())
             )
         else:
             # Authenticated and can view protected.
@@ -344,7 +345,7 @@ class _PostQueryBase(db.Query):
                  (Post.status == STATUS_PROTECTED) |
                  ((Post.status == STATUS_PRIVATE) &
                   (Post.author_id == user.id))) &
-                (Post.pub_date <= datetime.utcnow())
+                (Post.pub_date <= utcnow())
             )
 
     def drafts(self, ignore_user=False, user=None):
@@ -398,7 +399,7 @@ class _PostQueryBase(db.Query):
         # ignore_privileges should no longer be a noop
         last = self.filter(Post.pub_date != None) \
                    .order_by(Post.pub_date.asc()).first()
-        now = datetime.utcnow()
+        now = utcnow()
 
         there_are_more = False
         result = []
@@ -574,7 +575,7 @@ class _PostBase(object):
 
         Additionally the `last_update` is always set to now.
         """
-        now = datetime.utcnow()
+        now = utcnow()
         if pub_date is None and self.status == STATUS_PUBLISHED:
             pub_date = now
         self.pub_date = pub_date
@@ -637,7 +638,7 @@ class _PostBase(object):
         """
         # published posts are always accessible
         if self.status == STATUS_PUBLISHED and self.pub_date is not None and \
-           self.pub_date <= datetime.utcnow():
+           self.pub_date <= utcnow():
             return True
 
         if user is None:
@@ -649,7 +650,7 @@ class _PostBase(object):
 
         # if this is protected and user can view protected, allow them
         if self.status == STATUS_PROTECTED and self.pub_date is not None and \
-            self.pub_date <= datetime.utcnow() and \
+            self.pub_date <= utcnow() and \
             user.has_privilege(VIEW_PROTECTED):
              return True
 
@@ -685,7 +686,7 @@ class _PostBase(object):
     def is_scheduled(self):
         """True if the item is scheduled for appearing."""
         return self.status == STATUS_PUBLISHED and \
-               self.pub_date > datetime.utcnow()
+               self.pub_date > utcnow()
 
     def get_url_values(self):
         return self.slug
@@ -765,7 +766,7 @@ class Post(_PostBase, _ZEMLDualContainer):
         open_for = app.cfg['comments_open_for']
         if open_for == 0:
             return False
-        return self.pub_date + timedelta(days=open_for) < datetime.utcnow()
+        return self.pub_date + timedelta(days=open_for) < utcnow()
 
 
 class SummarizedPost(_PostBase):
@@ -975,7 +976,7 @@ class Comment(_ZEMLContainer):
         self.text = text or ''
         self.parent = parent
         if pub_date is None:
-            pub_date = datetime.utcnow()
+            pub_date = utcnow()
         self.pub_date = pub_date
         self.blocked_msg = None
         self.submitter_ip = submitter_ip
@@ -1164,7 +1165,7 @@ class TagQuery(db.Query):
         q = ((pt.tag_id == t.tag_id) &
              (pt.post_id == p.post_id) &
              (p.status == STATUS_PUBLISHED) &
-             (p.pub_date <= datetime.utcnow()))
+             (p.pub_date <= utcnow()))
 
         counts = db.select(
             t.tag_id, t.slug, t.name,
@@ -1423,6 +1424,11 @@ db.mapper(NotificationSubscription, notification_subscriptions, properties={
         backref=db.backref('notification_subscriptions', lazy='dynamic'),
     ),
 })
+
+# Materialize relationship backrefs before the application accepts requests.
+# SQLAlchemy otherwise defers these until the first mapper operation, which is
+# too late after an in-process configuration reload.
+db.configure_mappers()
 
 
 @db.event.listens_for(Post.comments, 'append')

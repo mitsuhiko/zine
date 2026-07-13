@@ -81,8 +81,17 @@ def _unload_zine():
 
     _setup_lock.acquire()
     try:
+        old_application = _application
         _application = None
         _setup_failed = False
+
+        if old_application is not None:
+            try:
+                from zine.database import session
+                session.remove()
+                old_application.database_engine.dispose()
+            except Exception:
+                pass
 
         for name, module in list(sys.modules.items()):
             # in the main module delete everything but the stuff
@@ -95,16 +104,10 @@ def _unload_zine():
                     if key not in preserve and not key.startswith('__'):
                         module.__dict__.pop(key, None)
             elif name.startswith('zine.') and name != 'zine._core':
-                # get rid of the module
+                # Remove the module from the import cache. Existing references
+                # keep their module dictionaries intact until they are
+                # garbage-collected, which is required by modern SQLAlchemy.
                 sys.modules.pop(name, None)
-                # zero out the dict
-                try:
-                    for key, value in module.__dict__.items():
-                        setattr(module, key, None)
-                    # clear references
-                    value = None
-                except:
-                    pass
     finally:
         _setup_lock.release()
 

@@ -157,8 +157,7 @@ class AtomFeed(BaseAtomFeed):
 
 
 class XMLRPC(object):
-    """A XMLRPC dispatcher that uses our request and response objects.  It
-    also works around a problem with Python 2.4 / 2.5 compatibility and
+    """An XML-RPC dispatcher that uses our request and response objects and
     registers the introspection functions automatically.
     """
     charset = 'utf-8'

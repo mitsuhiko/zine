@@ -9,13 +9,13 @@
     :license: BSD, see LICENSE for more details.
 """
 from itertools import islice
-from datetime import datetime
 
 from zine._compat import url_quote
 
 from zine.privileges import ENTER_ADMIN_PANEL, require_privilege
 from zine.utils import local, load_json
 from zine.utils.net import open_url
+from zine.utils.dates import utcfromtimestamp
 from zine.i18n import _
 
 
@@ -68,7 +68,7 @@ def load_zine_reddit():
             d['url'] = reddit_url + d['url']
         result.append({
             'author':       d['author'],
-            'created':      datetime.utcfromtimestamp(d['created']),
+            'created':      utcfromtimestamp(d['created']),
             'score':        d['score'],
             'title':        d['title'],
             'comments':     d['num_comments'],

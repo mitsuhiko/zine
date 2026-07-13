@@ -68,7 +68,7 @@ def test_modern_werkzeug_local_manager_cleanup():
 
     local.request = "request"
     assert local.request == "request"
-    assert isinstance(local_manager.get_ident(), int)
+    assert not hasattr(local_manager, "get_ident")
     local_manager.cleanup()
     with pytest.raises(AttributeError):
         local.request
@@ -133,8 +133,11 @@ def test_shared_data_middleware_serves_static_files(tmp_path):
     client = Client(middleware, WerkzeugResponse)
 
     response = client.get("/shared/hello.txt")
-    assert response.status_code == 200
-    assert response.get_data(as_text=True) == "Hello middleware"
+    try:
+        assert response.status_code == 200
+        assert response.get_data(as_text=True) == "Hello middleware"
+    finally:
+        response.close()
 
 
 def _load_application(monkeypatch):

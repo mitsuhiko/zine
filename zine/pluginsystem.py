@@ -320,15 +320,6 @@ class MetaData(object):
     values = _dict_method('values')
     items = _dict_method('items')
 
-    def iterkeys(self):
-        return iter(self.keys())
-
-    def itervalues(self):
-        return iter(self.values())
-
-    def iteritems(self):
-        return iter(self.items())
-
     del _dict_method
 
     def as_dict(self):

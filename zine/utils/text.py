@@ -10,14 +10,14 @@
 """
 import re
 import unicodedata
-from datetime import datetime
+from functools import reduce
 from itertools import starmap
 from urllib.parse import urlparse
 
 from zine._compat import url_quote
 
 from zine._dynamic.translit_tab import LONG_TABLE, SHORT_TABLE, SINGLE_TABLE
-from functools import reduce
+from zine.utils.dates import utcnow
 
 
 _punctuation_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
@@ -57,7 +57,7 @@ def gen_timestamped_slug(slug, content_type, pub_date=None):
     from zine.i18n import to_blog_timezone
     cfg = get_application().cfg
     if pub_date is None:
-        pub_date = datetime.utcnow()
+        pub_date = utcnow()
     pub_date = to_blog_timezone(pub_date)
 
     prefix = cfg['blog_url_prefix'].strip(u'/')

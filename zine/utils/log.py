@@ -17,7 +17,6 @@ import re
 import os
 import sys
 from os import path
-from datetime import datetime
 from inspect import currentframe
 from warnings import warn
 from traceback import print_exception, format_exception
@@ -27,7 +26,7 @@ from werkzeug.exceptions import NotFound
 from zine.i18n import gettext
 from zine.application import get_application
 from zine.utils.io import tail
-from zine.utils.dates import format_iso8601, parse_iso8601
+from zine.utils.dates import format_iso8601, parse_iso8601, utcnow
 
 
 _ = lambda x: x
@@ -115,7 +114,7 @@ class Logger(object):
     def log(self, level, message, module=None, frame=None):
         """Writes a single log entry to the stream."""
         prefix = u'[%s-%s-%s] %s: ' % (
-            format_iso8601(datetime.utcnow()),
+            format_iso8601(utcnow()),
             level,
             self.get_location(frame),
             module or 'unknown'

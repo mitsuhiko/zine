@@ -22,6 +22,16 @@ _iso8601_re = re.compile(
 )
 
 
+def utcnow():
+    """Return the current UTC time in Zine's naive internal format."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def utcfromtimestamp(timestamp):
+    """Convert a timestamp to Zine's naive internal UTC format."""
+    return datetime.fromtimestamp(timestamp, timezone.utc).replace(tzinfo=None)
+
+
 def to_timestamp(value):
     """Converts a datetime to an unix timestamp."""
     return timegm(value.timetuple())

@@ -132,8 +132,7 @@ def get_tag_uri(url, date):
     """
     url_split = urllib.parse.urlparse(url)
 
-    # Python 2.4 didn't have named attributes on split results or the hostname.
-    hostname = getattr(url_split, 'hostname', url_split[1].split(':')[0])
+    hostname = url_split.hostname
     path = url_split[2]
     fragment = url_split[5]
 

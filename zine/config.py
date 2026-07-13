@@ -382,27 +382,15 @@ class Configuration(object):
         """Iterate over all keys"""
         return iter(self.config_vars)
 
-    iterkeys = __iter__
-
     def __contains__(self, key):
         """Check if a given key exists."""
         if key.startswith('zine/'):
             key = key[5:]
         return key in self.config_vars
 
-    def itervalues(self):
-        """Iterate over all values."""
-        for key in self:
-            yield self[key]
-
-    def iteritems(self):
-        """Iterate over all keys and values."""
-        for key in self:
-            yield key, self[key]
-
     def values(self):
         """Return a list of values."""
-        return list(self.itervalues())
+        return [self[key] for key in self]
 
     def keys(self):
         """Return a list of keys."""
@@ -410,10 +398,10 @@ class Configuration(object):
 
     def items(self):
         """Return a list of all key, value tuples."""
-        return list(self.iteritems())
+        return [(key, self[key]) for key in self]
 
     def export(self):
-        """Like iteritems but with the raw values."""
+        """Iterate over keys and their raw values."""
         for key, value in self.items():
             value = self.config_vars[key].to_primitive(value)
             if isinstance(value, str):

@@ -55,7 +55,7 @@ assert application.initialized
 assert application.theme.name == "vessel"
 assert application.plugins["vessel_theme"].active
 assert application.plugins["vessel_theme"].setup_error is None
-metadata = dict(application.plugins["vessel_theme"].metadata.iteritems())
+metadata = dict(application.plugins["vessel_theme"].metadata.items())
 assert metadata["name"] == "Vessel Theme"
 assert application.url_adapter.build("blog/index") == "/"
 assert application.url_adapter.build("admin/index") == "/admin/"
@@ -139,6 +139,8 @@ def test_fresh_setup_startup_and_development_server(tmp_path):
         except subprocess.TimeoutExpired:
             server.kill()
             server.wait(timeout=5)
+        if server.stdout is not None:
+            server.stdout.close()
 
 
 def test_failed_database_setup_does_not_hide_wizard(tmp_path):

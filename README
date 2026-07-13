@@ -26,11 +26,20 @@ be included in Zine 0.2 (tentatively set to be released in April, 2009):
   you want to develop plugins, that's the starting point.)
 
 
-Installation
-============
+Installation and Quickstart
+===========================
 
-See the file INSTALL for a list of dependencies and installation
-instructions.
+Zine supports Python 3.12 through 3.14.  From a source checkout, install all
+runtime, test, and documentation dependencies and start a fresh instance with::
+
+    $ uv sync --all-extras
+    $ mkdir instance
+    $ uv run zine-server -I instance
+
+Open ``http://127.0.0.1:4000/`` to complete the setup wizard.  Run the full
+regression suite with ``uv run pytest``.  Standard ``venv`` and ``pip``
+instructions, deployment examples, and installed command names are documented
+in INSTALL.
 
 
 License and Copyright

@@ -193,6 +193,9 @@ def test_logger_writes_and_reads_utf8_text(monkeypatch, tmp_path):
                 {
                     "format_iso8601": lambda value: value.isoformat(),
                     "parse_iso8601": __import__("datetime").datetime.fromisoformat,
+                    "utcnow": lambda: __import__("datetime").datetime.now(
+                        __import__("datetime").UTC
+                    ).replace(tzinfo=None),
                 },
             ),
         ),

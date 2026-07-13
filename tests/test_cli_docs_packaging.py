@@ -7,6 +7,7 @@ import sqlite3
 import subprocess
 import sys
 import tarfile
+from contextlib import closing
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -41,7 +42,7 @@ def test_instance_command_line_tools(tmp_path):
     )
     assert "All done." in result.stdout
     assert (instance / "zine.ini").is_file()
-    with sqlite3.connect(instance / "zine.db") as connection:
+    with closing(sqlite3.connect(instance / "zine.db")) as connection:
         assert connection.execute(
             "select username from users"
         ).fetchone() == ("admin",)

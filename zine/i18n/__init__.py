@@ -65,6 +65,7 @@ import zine
 from zine.environment import LOCALE_PATH, LOCALE_DOMAIN, \
      USE_GETTEXT_LOOKUP
 from zine.utils import dump_json
+from zine.utils.dates import utcnow
 
 
 __all__ = ['_', 'gettext', 'ngettext', 'lazy_gettext', 'lazy_ngettext']
@@ -444,7 +445,7 @@ def format_timedelta(datetime_or_timedelta, granularity='second'):
     timedelta.
     """
     if isinstance(datetime_or_timedelta, datetime):
-        datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
+        datetime_or_timedelta = utcnow() - datetime_or_timedelta
     return dates.format_timedelta(datetime_or_timedelta, granularity,
                                   locale=get_locale())
 
@@ -510,7 +511,7 @@ def parse_datetime(string, rebase=True):
     # shortcut: string as None or "now" or the current locale's
     # equivalent returns the current timestamp.
     if string is None or string.lower() in ('now', _('now')):
-        return datetime.utcnow().replace(microsecond=0)
+        return utcnow().replace(microsecond=0)
 
     def convert(format):
         """Helper that parses the string and convers the timezone."""
@@ -534,7 +535,7 @@ def parse_datetime(string, rebase=True):
             val = convert(fmt)
         except ValueError:
             continue
-        return to_utc(datetime.utcnow().replace(hour=val.hour,
+        return to_utc(utcnow().replace(hour=val.hour,
                       minute=val.minute, second=val.second, microsecond=0))
 
     # no try various types of date + time strings

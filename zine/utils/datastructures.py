@@ -59,14 +59,6 @@ class ReadOnlyMultiMapping(object):
     def __iter__(self):
         return iter(self.as_dict())
 
-    iterkeys = __iter__
-
-    def itervalues(self):
-        return iter(self.as_dict().values())
-
-    def iteritems(self):
-        return iter(self.as_dict().items())
-
     def keys(self):
         return list(self.as_dict().keys())
 
@@ -138,8 +130,8 @@ class OrderedDict(dict):
     >>> d2
     OrderedDict([('a', 'b'), ('c', 'd'), ('foo', 'bar'), ('spam', ['eggs'])])
 
-    All iteration methods as well as `keys`, `values` and `items` return
-    the values ordered by the the time the key-value pair is inserted:
+    Iteration as well as `keys`, `values` and `items` returns values ordered
+    by the time the key-value pair is inserted:
 
     >>> d.keys()
     ['a', 'c', 'foo', 'spam']
@@ -147,13 +139,6 @@ class OrderedDict(dict):
     ['b', 'd', 'bar', []]
     >>> d.items()
     [('a', 'b'), ('c', 'd'), ('foo', 'bar'), ('spam', [])]
-    >>> list(d.iterkeys())
-    ['a', 'c', 'foo', 'spam']
-    >>> list(d.itervalues())
-    ['b', 'd', 'bar', []]
-    >>> list(d.iteritems())
-    [('a', 'b'), ('c', 'd'), ('foo', 'bar'), ('spam', [])]
-
     Index based lookup is supported too by `byindex` which returns the
     key/value pair for an index:
 
@@ -224,14 +209,8 @@ class OrderedDict(dict):
     def items(self):
         return list(zip(self._keys, list(self.values())))
 
-    def iteritems(self):
-        return zip(self._keys, iter(self.values()))
-
     def keys(self):
         return self._keys[:]
-
-    def iterkeys(self):
-        return iter(self._keys)
 
     def pop(self, key, default=missing):
         if default is missing:
@@ -268,9 +247,6 @@ class OrderedDict(dict):
     def values(self):
         return list(map(self.get, self._keys))
 
-    def itervalues(self):
-        return map(self.get, self._keys)
-
     def index(self, item):
         return self._keys.index(item)
 
@@ -295,4 +271,6 @@ class OrderedDict(dict):
         return '%s(%r)' % (type(self).__name__, list(self.items()))
 
     __copy__ = copy
-    __iter__ = iterkeys
+
+    def __iter__(self):
+        return iter(self._keys)

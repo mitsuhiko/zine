@@ -6,8 +6,9 @@
     things, e.g. urls.
 
     TODO: convert most of the functions in this module into functions that
-          raise `forms.ValidationError`\s.  They are used in hand validated
-          forms currently which should be replaced by real forms soon.
+          raise instances of `forms.ValidationError`. They are used in hand
+          validated forms currently which should be replaced by real forms
+          soon.
 
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.

@@ -74,3 +74,4 @@ include = ["zine*"]
 minversion = "8.2"
 testpaths = ["tests"]
 addopts = ["--import-mode=importlib"]
+filterwarnings = ["error"]

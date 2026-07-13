@@ -12,7 +12,6 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from datetime import datetime
 from urllib.parse import urlsplit
 
 from zine._compat import url_unquote
@@ -23,6 +22,7 @@ from zine.privileges import BLOG_ADMIN, ENTER_ACCOUNT_PANEL, MODERATE_COMMENTS,\
      MODERATE_OWN_PAGES, MODERATE_OWN_ENTRIES
 from zine.utils.zeml import parse_zeml
 from zine.utils.mail import send_email
+from zine.utils.dates import utcnow
 from zine.i18n import lazy_gettext
 
 
@@ -137,7 +137,7 @@ class Notification(object):
     def __init__(self, id, message, user=Ellipsis):
         self.message = parse_zeml(message, 'system')
         self.id = id
-        self.sent_date = datetime.utcnow()
+        self.sent_date = utcnow()
         if user is Ellipsis:
             self.user = get_request().user
         else:

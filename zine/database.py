@@ -17,6 +17,7 @@ import os
 import sys
 import time
 from os import path
+from threading import get_ident
 from types import ModuleType
 from copy import deepcopy
 
@@ -30,7 +31,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from werkzeug.exceptions import NotFound
 
 from zine._compat import url_decode
-from zine.utils import local_manager
 
 
 if sys.platform == 'win32':
@@ -264,7 +264,7 @@ class Query(orm.Query):
 
 session = orm.scoped_session(
     lambda: orm.Session(bind=get_engine(), autoflush=True),
-    scopefunc=local_manager.get_ident,
+    scopefunc=get_ident,
 )
 
 
@@ -337,10 +337,6 @@ for name in 'add', 'delete', 'flush', 'execute', 'begin', 'commit', \
             'rollback', 'refresh', 'expire', 'get':
     setattr(db, name, getattr(session, name))
 
-# Some things changed names with SQLAlchemy 0.6.0
-db.save = session.add
-db.clear = session.expunge_all
-
 #: and finally hook our own implementations of various objects in
 db.Model = Model
 db.Query = Query
@@ -349,7 +345,6 @@ db.create_engine = create_engine
 db.session = session
 db.ZEMLParserData = ZEMLParserData
 db.mapper = mapper
-db.basic_mapper = _mapper_registry.map_imperatively
 db.query_property = query_property
 db.association_proxy = association_proxy
 db.attribute_loaded = attribute_loaded
