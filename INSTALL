@@ -9,7 +9,6 @@ installed:
 - Jinja2*
 - A database (MySQL, SQLite or PostgreSQL and others are supported)
 - SQLAlchemy* 0.6 or higher
-- sqlalchemy-migrate* 0.6 or higher
 - simplejson* [included in Python 2.6 and higher]
 - html5lib*
 - pytz*
@@ -22,7 +21,7 @@ easy_install / pip or might be available in Debian already.
 If you might use easy_install::
 
     $ easy_install Werkzeug Jinja2 MySQL-python SQLAlchemy simplejson \
-      pytz Babel lxml html5lib sqlalchemy-migrate
+      pytz Babel lxml html5lib
 
 To install lxml you may need the development packages of libxml2 and libxslt
 

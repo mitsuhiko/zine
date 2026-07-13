@@ -24,8 +24,7 @@ REQUIREMENTS = [
     'Jinja2>=2.1',
     'SQLAlchemy>=0.6',
     'pytz',
-    'Babel>=0.9.4',
-    'sqlalchemy-migrate>=0.6'
+    'Babel>=0.9.4'
 ]
 
 # for python 2.5 we want simplejson installed too.

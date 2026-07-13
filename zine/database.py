@@ -358,12 +358,6 @@ cleanup_session = session.remove
 #: metadata for the core tables and the core table definitions
 metadata = _mapper_registry.metadata
 
-schema_versions = db.Table('schema_versions', metadata,
-    db.Column('repository_id', db.String(255), primary_key=True),
-    db.Column('repository_path', db.Text),
-    db.Column('version', db.Integer)
-)
-
 users = db.Table('users', metadata,
     db.Column('user_id', db.Integer, primary_key=True),
     db.Column('username', db.String(30)),
@@ -492,12 +486,64 @@ notification_subscriptions = db.Table('notification_subscriptions', metadata,
 )
 
 
+CORE_TABLES = (
+    users,
+    groups,
+    group_users,
+    privileges,
+    user_privileges,
+    group_privileges,
+    categories,
+    texts,
+    posts,
+    post_links,
+    tags,
+    post_categories,
+    post_tags,
+    comments,
+    redirects,
+    notification_subscriptions,
+)
+
+
+class DatabaseSchemaError(RuntimeError):
+    """Raised when a configured database is not a current Zine database."""
+
+
+def validate_database(engine):
+    """Ensure that all core tables and columns match the current schema."""
+    inspector = sqlalchemy.inspect(engine)
+    actual_tables = set(inspector.get_table_names())
+    expected_tables = {table.name for table in CORE_TABLES}
+    problems = []
+
+    missing_tables = sorted(expected_tables - actual_tables)
+    if missing_tables:
+        problems.append('missing tables: %s' % ', '.join(missing_tables))
+
+    for table in CORE_TABLES:
+        if table.name not in actual_tables:
+            continue
+        actual_columns = {
+            column['name'] for column in inspector.get_columns(table.name)
+        }
+        expected_columns = {column.name for column in table.columns}
+        if actual_columns != expected_columns:
+            problems.append(
+                '%s columns differ (expected %s; found %s)' % (
+                    table.name,
+                    ', '.join(sorted(expected_columns)),
+                    ', '.join(sorted(actual_columns)),
+                )
+            )
+
+    if problems:
+        raise DatabaseSchemaError(
+            'database schema is not supported by this Zine port; create a '
+            'fresh instance (%s)' % '; '.join(problems)
+        )
+
+
 def init_database(engine):
-    """This is called from the websetup which explains why it takes an engine
-    and not a zine application.
-    """
-    # XXX: consider using something like this for mysql:
-    #   cx = engine.connect()
-    #   cx.execute('set storage_engine=innodb')
-    #   metadata.create_all(cx)
-    metadata.create_all(engine)
+    """Create the current core schema for a fresh Zine instance."""
+    metadata.create_all(engine, tables=CORE_TABLES)

@@ -190,40 +190,30 @@ class WebSetup(object):
         except Exception as error:
             error = str(error)
         else:
-            from zine.database import users, user_privileges, privileges, \
-                 schema_versions
+            from zine.database import users, user_privileges, privileges
             from zine.privileges import BLOG_ADMIN
 
-            # a newly created database has a schema version corresponding
-            # to the latest available version in the repository
-            from zine.upgrades import REPOSITORY_PATH
-            from zine.upgrades.customisation import Repository
-            repo = Repository(REPOSITORY_PATH, 'Zine')
-            e.execute(schema_versions.insert(),
-                      repository_id=repo.config.get('repository_id'),
-                      repository_path=repo.path,
-                      version=int(repo.latest))
+            with e.begin() as connection:
+                # create admin account
+                user_id = connection.execute(users.insert().values(
+                    username=value('admin_username'),
+                    pw_hash=gen_pwhash(value('admin_password')),
+                    email=value('admin_email'),
+                    real_name=u'',
+                    description=u'',
+                    extra={},
+                    display_name='$username',
+                    is_author=True,
+                )).inserted_primary_key[0]
 
-            # create admin account
-            user_id = e.execute(users.insert(),
-                username=value('admin_username'),
-                pw_hash=gen_pwhash(value('admin_password')),
-                email=value('admin_email'),
-                real_name=u'',
-                description=u'',
-                extra={},
-                display_name='$username',
-                is_author=True
-            ).inserted_primary_key[0]
-
-            # insert a privilege for the user
-            privilege_id = e.execute(privileges.insert(),
-                name=BLOG_ADMIN.name
-            ).inserted_primary_key[0]
-            e.execute(user_privileges.insert(),
-                user_id=user_id,
-                privilege_id=privilege_id
-            )
+                # insert a privilege for the user
+                privilege_id = connection.execute(
+                    privileges.insert().values(name=BLOG_ADMIN.name)
+                ).inserted_primary_key[0]
+                connection.execute(user_privileges.insert().values(
+                    user_id=user_id,
+                    privilege_id=privilege_id,
+                ))
 
 
         # use a local variable, the global render_response could

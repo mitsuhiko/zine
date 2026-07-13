@@ -32,7 +32,6 @@ dependencies = [
     "lxml>=5.2",
     "pytz>=2024.1",
     "SQLAlchemy>=2.0",
-    "sqlalchemy-migrate>=0.13",
     "Werkzeug>=3.0",
 ]
 

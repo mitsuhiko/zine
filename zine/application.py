@@ -675,8 +675,6 @@ class Zine(object):
                             'zine._core.setup() factory function.' %
                             self.__class__.__name__)
         self.instance_folder = path.abspath(instance_folder)
-        self.upgrade_lockfile = path.join(instance_folder,
-                                          '.upgrade_in_progress')
 
         # create the event manager, this is the first thing we have to
         # do because it could happen that events are sent during setup
@@ -703,6 +701,8 @@ class Zine(object):
         self.database_engine = db.create_engine(self.cfg['database_uri'],
                                                 self.instance_folder,
                                                 self.cfg['database_debug'])
+        from zine.database import validate_database
+        validate_database(self.database_engine)
 
         # now setup the cache system
         self.cache = get_cache(self)
@@ -876,94 +876,10 @@ class Zine(object):
             self.cfg.config_vars['comment_parser'].choices = \
             self.list_parsers()
 
-        # register Zine's upgrade repository
-        from zine.upgrades import REPOSITORY_PATH
-        self.register_upgrade_repository('Zine', REPOSITORY_PATH)
-        # allow plugins to register their upgrade repositories
-        emit_event('register-upgrade-repository')
-
         self.initialized = True
 
         #! called after the application and all plugins are initialized
         emit_event('application-setup-done')
-
-    def register_upgrade_repository(self, repo_id, repo_path):
-        """This function is responsible for adding upgrade repositories to the
-        database.
-
-        repo_id can be either a string or a Plugin instance, in which case the
-        plugin name is used as the repository ID.
-        """
-        from zine.models import SchemaVersion
-        from zine.pluginsystem import Plugin
-        from zine.upgrades.customisation import Repository
-        if isinstance(repo_id, Plugin):
-            repo_id = repo_id.metadata.get('name')
-        repo_path = path.abspath(repo_path)
-        try:
-            sv = SchemaVersion.query.filter_by(repository_id=repo_id).first()
-            if not sv:
-                # this always starts with version 0
-                db.session.add(SchemaVersion(Repository(repo_path, repo_id)))
-                db.session.commit()
-        except (SQLAlchemyError, AttributeError):
-            # the schema_versions table does not yet exist, let's create it
-            db.session.rollback()
-            from zine.database import metadata, schema_versions
-            metadata.bind = self.database_engine
-            if not schema_versions.exists():
-                schema_versions.create(self.database_engine)
-            db.session.add(SchemaVersion(Repository(repo_path, repo_id)))
-            db.session.commit()
-
-    def check_if_upgrade_required(self):
-        """Check if all registered schema versions are the latest.
-
-        If an upgrade is required, this will raise
-        zine._core.InstanceUpgradeRequired.
-        """
-        from zine.models import SchemaVersion
-        from zine.upgrades.customisation import Repository
-
-        to_upgrade = []
-
-        for sv in SchemaVersion.query.all():
-            repository = Repository(sv.repository_path, sv.repository_id)
-            try:
-                self.repository_has_upgrade(repository, sv)
-            except _core.InstanceUpgradeRequired:
-                to_upgrade.append(sv.repository_id)
-
-        if to_upgrade:
-            # set Zine in maintenance mode
-            cfg = self.cfg.edit()
-            cfg['maintenance_mode'] = True
-            cfg.commit()
-            raise _core.InstanceUpgradeRequired(to_upgrade)
-
-        # we got here, let's check for a bad upgrade lockfile left behind
-        if path.isfile(self.upgrade_lockfile):
-            remove(self.upgrade_lockfile)
-
-    def repository_has_upgrade(self, repository, schema_version):
-        """Check for available upgrades in one repository."""
-        from zine.models import SchemaVersion
-        try:
-            if schema_version.version < repository.latest:
-                raise _core.InstanceUpgradeRequired()
-        except (SQLAlchemyError, AttributeError):
-            self.log.error('schema_versions table missing while checking '
-                           'for upgrades?')
-            # the schema_versions table does not yet exist, let's create it
-            # XXX can this happen at all?
-            db.session.rollback()
-            from zine.database import metadata, schema_versions
-            metadata.bind = self.database_engine
-            if not schema_versions.exists():
-                schema_versions.create(self.database_engine)
-            db.session.add(SchemaVersion(repository))
-            db.session.commit()
-            raise _core.InstanceUpgradeRequired()
 
     @property
     def wants_reload(self):
