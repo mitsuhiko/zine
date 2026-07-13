@@ -16,8 +16,8 @@ from html.entities import name2codepoint
 from werkzeug.wrappers import Response as BaseResponse
 
 from zine._compat import escape
-from zine.feeds import Atom1Feed as BaseAtomFeed
 from zine.utils import log
+from zine.utils.atom import AtomFeed as BaseAtomFeed
 from zine.i18n import _TranslationProxy
 
 
@@ -140,7 +140,9 @@ def dump_xml(obj):
                                                    _inner_dump(value)) for
                                                 key, value in obj.items())
         elif hasattr(obj, '__iter__'):
-            return u'<list>%s</list>' % u''.join(map(obj, _inner_dump))
+            return u'<list>%s</list>' % u''.join(
+                _inner_dump(item) for item in obj
+            )
         else:
             return u'<invalid/>'
     return (u'<?xml version="1.0" encoding="utf-8"?>\n'
@@ -247,9 +249,12 @@ class XMLRPC(object):
         """
         try:
             params, method = xmlrpc.client.loads(data)
-            response = xmlrpc.client.dumps((self._wrap_obj(self._dispatch(method, params)),),
-                                       methodresponse=True, allow_none=True,
-                                       encoding=self.charset)
+            response = xmlrpc.client.dumps(
+                (self._wrap_obj(self._dispatch(method, params)),),
+                methodresponse=True,
+                allow_none=self.allow_none,
+                encoding=self.charset,
+            )
         except xmlrpc.client.Fault as fault:
             response = xmlrpc.client.dumps(fault, allow_none=self.allow_none,
                                        encoding=self.charset)

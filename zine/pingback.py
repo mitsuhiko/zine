@@ -48,6 +48,13 @@ _pingback_re = re.compile(
 _chunk_re = re.compile(r'\n\n|<(?:p|div|h\d)[^>]*>')
 
 
+def _response_text(response, limit=None):
+    data = response.get_data()
+    if limit is not None:
+        data = data[:limit]
+    return data.decode('utf-8', 'replace')
+
+
 class PingbackError(UserException):
     """Raised if the remote server caused an exception while pingbacking.
     This is not raised if the pingback function is unable to locate a
@@ -113,7 +120,7 @@ def pingback(source_uri, target_uri):
     try:
         pingback_uri = response.headers['X-Pingback']
     except KeyError:
-        match = _pingback_re.search(response.data)
+        match = _pingback_re.search(_response_text(response))
         if match is None:
             raise PingbackError(33)
         pingback_uri = unescape(match.group(1))
@@ -158,6 +165,7 @@ def handle_pingback_request(source_uri, target_uri):
         else:
             if endpoint in app.pingback_endpoints:
                 handler = app.pingback_endpoints[endpoint]
+            break
 
     # if we have an endpoint based handler use that one first
     raise_later = None
@@ -206,7 +214,7 @@ def get_excerpt(response, url_hint, body_limit=1024 * 512):
     """
     if isinstance(response, str):
         response = open_url(response)
-    contents = response.data[:body_limit]
+    contents = _response_text(response, body_limit)
     title_match = _title_re.search(contents)
     title = title_match and strip_tags(title_match.group(1)) or None
 

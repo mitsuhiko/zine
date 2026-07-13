@@ -75,6 +75,8 @@ def parse_broken_wxr(fd):
     extra = '<wxrfix xmlns:excerpt="ignore:me">'
 
     code = fd.read()
+    if isinstance(code, bytes):
+        code = code.decode('utf-8-sig')
     xml_decl = _xml_decl_re.search(code)
     if xml_decl is not None:
         code = code[:xml_decl.end()] + inline_doctype + extra + \
@@ -89,7 +91,7 @@ def parse_broken_wxr(fd):
     def escape_if_good_idea(match):
         before, content, after = match.groups()
         if not content.lstrip().startswith('<![CDATA['):
-            content = escape(content)
+            content = str(escape(content))
         return before + content + after
     code = _meta_value_re.sub(escape_if_good_idea, code)
     code = _comment_re.sub(escape_if_good_idea, code)
@@ -101,10 +103,10 @@ def parse_broken_wxr(fd):
     # this hack.
     def reescape_escaped_content(match):
         before, content, after = match.groups()
-        return before + escape(content) + after
+        return before + str(escape(content)) + after
     code = _content_encoded_re.sub(reescape_escaped_content, code)
 
-    return etree.fromstring(code).find('rss').find('channel')
+    return etree.fromstring(code.encode('utf-8')).find('rss').find('channel')
 
 
 def parse_wordpress_date(value):
@@ -142,7 +144,9 @@ def parse_feed(fd):
         categories[category.name] = category
 
     posts = []
-    clean_empty_tags = re.compile("\<(?P<tag>\w+?)\>[\r\n]?\</(?P=tag)\>")
+    clean_empty_tags = re.compile(
+        r'<(?P<tag>\w+?)>[\r\n]?</(?P=tag)>'
+    )
 
     for item in tree.findall('item'):
         status = {
@@ -253,7 +257,6 @@ class WordPressImporter(Importer):
             try:
                 blog = parse_feed(dump)
             except Exception as e:
-                raise
                 log.exception(_(u'Error parsing uploaded file'))
                 flash(_(u'Error parsing uploaded file: %s') % e, 'error')
             else:

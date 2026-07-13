@@ -139,7 +139,7 @@ class Writer(object):
                              emit_event('get-zxa-participants') if x]
 
     def _generate(self):
-        now = datetime.utcnow()
+        now = datetime.now()
         posts = iter(Post.query.order_by(Post.last_update.desc()))
         try:
             first_post = next(posts)
@@ -236,8 +236,9 @@ class Writer(object):
         self.atom('id', text=post.uid, parent=entry)
         self.atom('updated', text=format_iso8601(post.last_update),
                   parent=entry)
-        self.atom('published', text=format_iso8601(post.pub_date),
-                  parent=entry)
+        if post.pub_date is not None:
+            self.atom('published', text=format_iso8601(post.pub_date),
+                      parent=entry)
         self.atom('link', href=url, parent=entry)
 
         author = self.atom('author', parent=entry)
@@ -266,7 +267,8 @@ class Writer(object):
                 attrib['label'] = category.name
             element = self.atom('category', attrib=attrib, parent=entry)
             if category.description:
-                self.zine.description(category.description, parent=element)
+                self.z('description', text=category.description,
+                       parent=element)
 
         for tag in post.tags:
             attrib = dict(term=tag.slug, scheme=ZINE_TAG_URI)

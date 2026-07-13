@@ -124,7 +124,7 @@ def _perform_import(app, blog, d):
         if t is not None:
             tag_mapping[tag.slug] = t
             return t
-        t = tag_mapping[tag.id] = Tag(tag.name, tag.slug)
+        t = tag_mapping[tag.slug] = Tag(tag.name, tag.slug)
         return t
 
     def prepare_category(category):
@@ -140,9 +140,9 @@ def _perform_import(app, blog, d):
         if c is not None:
             category_mapping[category.slug] = c
             return c
-        c = category_mapping[category.id] = Category(category.name,
-                                                     category.description,
-                                                     category.slug)
+        c = category_mapping[category.slug] = Category(
+            category.name, category.description, category.slug
+        )
         return c
 
     # start debug output
@@ -229,7 +229,7 @@ def _perform_import(app, blog, d):
     if d['load_config']:
         yield u'<li>%s' % _('Updating configuration...')
         t = app.cfg.edit()
-        for key, value in blog.config.items():
+        for key, value in blog.configuration.items():
             if key in t and key not in ignored_config_keys:
                 t.set_from_string(key, value)
         t.commit()
@@ -336,7 +336,7 @@ class Blog(_Element):
     def __init__(self, title, link, description, language='en', tags=None,
                  categories=None, posts=None, authors=None,
                  configuration=None):
-        self.dump_date = datetime.utcnow()
+        self.dump_date = datetime.now()
         self.title = title
         self.link = link
         self.description = description

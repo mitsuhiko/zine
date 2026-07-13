@@ -9,7 +9,7 @@
 """
 import re
 from calendar import timegm
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 # this regexp also matches incompatible dates like 20070101 because
@@ -36,21 +36,17 @@ def parse_iso8601(value):
     if m is None:
         raise ValueError('not a valid iso8601 date value')
 
-    groups = m.groups()
-    args = []
-    for group in groups[:-2]:
-        if group is not None:
-            group = int(group)
-        args.append(group)
-    seconds = groups[-2]
+    year, month, day, hour, minute, seconds, tz = m.groups()
+    second = microsecond = 0
     if seconds is not None:
-        if '.' in seconds:
-            args.extend(list(map(int, seconds.split('.'))))
-        else:
-            args.append(int(seconds))
-
-    rv = datetime(*args)
-    tz = groups[-1]
+        whole, dot, fraction = seconds.partition('.')
+        second = int(whole)
+        if dot:
+            microsecond = int((fraction + '000000')[:6])
+    rv = datetime(
+        int(year), int(month or 1), int(day or 1),
+        int(hour or 0), int(minute or 0), second, microsecond,
+    )
     if tz and tz != 'Z':
         args = list(map(int, tz[1:].split(':')))
         delta = timedelta(hours=args[0], minutes=args[1])
@@ -63,5 +59,9 @@ def parse_iso8601(value):
 
 
 def format_iso8601(obj):
-    """Format a datetime object for iso8601"""
+    """Format a datetime object for ISO 8601 in UTC."""
+    if obj.tzinfo is not None:
+        obj = obj.astimezone(timezone.utc).replace(tzinfo=None)
+    if obj.microsecond:
+        return obj.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
     return obj.strftime('%Y-%m-%dT%H:%M:%SZ')

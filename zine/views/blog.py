@@ -412,12 +412,15 @@ def populate_feed(req, feed, author=None, year=None, month=None, day=None,
                 'num':  comment_num,
                 'post': post.title
             }
-            author = {'name': comment.author}
-            if comment.www:
-                author['uri'] = comment.www
-            feed.add_item(title, url_for(comment, _external=True),
-                          str(comment.body), author_name=author,
-                          pubdate=comment.pub_date, unique_id=uid)
+            feed.add_item(
+                title,
+                url_for(comment, _external=True),
+                str(comment.body),
+                author_name=comment.author,
+                author_link=comment.www,
+                pubdate=comment.pub_date,
+                unique_id=uid,
+            )
             comment_num += 1
 
     return feed.writeString('utf-8')

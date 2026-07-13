@@ -9,7 +9,6 @@ http://diveintomark.org/archives/2004/02/04/incompatible-rss
 
 import types
 import datetime
-import urllib.request, urllib.parse, urllib.error
 import urllib.parse
 from decimal import Decimal
 from xml.sax.saxutils import XMLGenerator
@@ -84,7 +83,11 @@ def iri_to_uri(iri):
     # converted.
     if iri is None:
         return iri
-    return urllib.parse.quote(smart_str(iri), safe="/#%[]=:;$&()+,!?*@'~")
+    value = smart_str(iri)
+    safe = "/#%[]=:;$&()+,!?*@'~"
+    if isinstance(value, bytes):
+        return urllib.parse.quote_from_bytes(value, safe=safe)
+    return urllib.parse.quote(value, safe=safe)
 
 
 class SimplerXMLGenerator(XMLGenerator):
@@ -98,26 +101,28 @@ class SimplerXMLGenerator(XMLGenerator):
         self.endElement(name)
 
 
+def _format_offset(date, separator=''):
+    offset = date.utcoffset()
+    if offset is None:
+        return None
+    total_minutes = int(offset.total_seconds() // 60)
+    sign = '+' if total_minutes >= 0 else '-'
+    hours, minutes = divmod(abs(total_minutes), 60)
+    return '%s%02d%s%02d' % (sign, hours, separator, minutes)
+
+
 def rfc2822_date(date):
-    # We do this ourselves to be timezone aware, email.Utils is not tz aware.
-    if date.tzinfo:
-        time_str = date.strftime('%a, %d %b %Y %H:%M:%S ')
-        offset = date.tzinfo.utcoffset(date)
-        timezone = (offset.days * 24 * 60) + (offset.seconds / 60)
-        hour, minute = divmod(timezone, 60)
-        return time_str + "%+03d%02d" % (hour, minute)
-    else:
-        return date.strftime('%a, %d %b %Y %H:%M:%S -0000')
+    offset = _format_offset(date)
+    if offset is None:
+        offset = '-0000'
+    return date.strftime('%a, %d %b %Y %H:%M:%S ') + offset
+
 
 def rfc3339_date(date):
-    if date.tzinfo:
-        time_str = date.strftime('%Y-%m-%dT%H:%M:%S')
-        offset = date.tzinfo.utcoffset(date)
-        timezone = (offset.days * 24 * 60) + (offset.seconds / 60)
-        hour, minute = divmod(timezone, 60)
-        return time_str + "%+03d:%02d" % (hour, minute)
-    else:
-        return date.strftime('%Y-%m-%dT%H:%M:%SZ')
+    offset = _format_offset(date, ':')
+    if offset is None or offset == '+00:00':
+        offset = 'Z'
+    return date.strftime('%Y-%m-%dT%H:%M:%S') + offset
 
 def get_tag_uri(url, date):
     """
@@ -260,7 +265,7 @@ class Enclosure(object):
     "Represents an RSS enclosure"
     def __init__(self, url, length, mime_type):
         "All args are expected to be Python Unicode objects"
-        self.length, self.mime_type = length, mime_type
+        self.length, self.mime_type = str(length), mime_type
         self.url = iri_to_uri(url)
 
 class RssFeed(SyndicationFeed):
@@ -289,7 +294,11 @@ class RssFeed(SyndicationFeed):
         handler.addQuickElement(u"title", self.feed['title'])
         handler.addQuickElement(u"link", self.feed['link'])
         handler.addQuickElement(u"description", self.feed['description'])
-        handler.addQuickElement(u"atom:link", None, {u"rel": u"self", u"href": self.feed['feed_url']})
+        if self.feed['feed_url'] is not None:
+            handler.addQuickElement(
+                u"atom:link", None,
+                {u"rel": u"self", u"href": self.feed['feed_url']},
+            )
         if self.feed['language'] is not None:
             handler.addQuickElement(u"language", self.feed['language'])
         for cat in self.feed['categories']:

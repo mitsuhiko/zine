@@ -86,6 +86,11 @@ def _pickle(value):
         return loads(b64decode(value))
 
 
+def _base64_text(value):
+    if value:
+        return b64decode(value).decode('utf-8')
+
+
 def _parser_data(value):
     if value:
         return load_parser_data(b64decode(value))
@@ -173,9 +178,11 @@ class AtomParser(Parser):
             if post is not None:
                 self.posts.append(post)
 
+        link = self.tree.find(atom.link)
+        link = link is not None and link.attrib.get('href') or None
         self.blog = Blog(
             self.tree.findtext(atom.title),
-            self.tree.findtext(atom.link),
+            link,
             self.tree.findtext(atom.subtitle),
             self.tree.attrib.get(xml.lang, u'en'),
             self.tags,
@@ -293,11 +300,11 @@ class AtomParser(Parser):
                 except SkipItem:
                     break
                 if rv is not None:
-                    if isinstance(rv, Tag):
-                        tags.append(rv)
-                    else:
+                    if isinstance(rv, Category):
                         categories.append(rv)
                         _remember_category(rv, category)
+                    else:
+                        tags.append(rv)
                     break
             else:
                 rv = self._categories_by_term.get(category.attrib['term'])
@@ -449,11 +456,12 @@ class ZEAExtension(Extension):
                 element.findtext(zine.real_name),
                 element.findtext(zine.description),
                 element.findtext(zine.www),
-                element.findtext(zine.pw_hash),
+                _base64_text(element.findtext(zine.pw_hash)),
                 _to_bool(element.findtext(zine.is_author)),
                 _pickle(element.findtext(zine.extra))
             )
-            for privilege in element.findall(zine.privilege):
+            privileges = '%s/%s' % (zine.privileges, zine.privilege)
+            for privilege in element.findall(privileges):
                 p = self.app.privileges.get(privilege.text)
                 if p is not None:
                     author.privileges.add(p)
@@ -464,14 +472,18 @@ class ZEAExtension(Extension):
     def _parse_tag(self, element):
         term = element.attrib['term']
         if term not in self._tags:
-            self._tags[term] = Tag(term, element.attrib.get('label'))
+            tag = self._tags[term] = Tag(term, element.attrib.get('label'))
+            self.parser.tags.append(tag)
         return self._tags[term]
 
     def _parse_category(self, element):
         term = element.attrib['term']
         if term not in self._categories:
-            self._categories[term] = Category(term, element.attrib.get('label'),
-                                              element.findtext(zine.description))
+            category = self._categories[term] = Category(
+                term, element.attrib.get('label'),
+                element.findtext(zine.description),
+            )
+            self.parser.categories.append(category)
         return self._categories[term]
 
     def handle_root(self, blog):
@@ -479,9 +491,10 @@ class ZEAExtension(Extension):
             blog.element.find(zine.configuration)))
 
     def postprocess_post(self, post):
-        if post.parser_data is not None:
-            return
-        post.parser_data = _parser_data(post.element.findtext(zine.parser_data))
+        if post.parser_data is None:
+            post.parser_data = _parser_data(
+                post.element.findtext(zine.parser_data)
+            )
         content = _get_text_content(post.element.findall(atom.content),
                                     fallback=False)
         if content is not None:
@@ -489,6 +502,20 @@ class ZEAExtension(Extension):
         content_type = post.element.findtext(zine.content_type)
         if content_type is not None:
             post.content_type = content_type
+        slug = post.element.findtext(zine.slug)
+        if slug is not None:
+            post.slug = slug
+        comments_enabled = post.element.findtext(zine.comments_enabled)
+        if comments_enabled is not None:
+            post.comments_enabled = _to_bool(comments_enabled)
+        pings_enabled = post.element.findtext(zine.pings_enabled)
+        if pings_enabled is not None:
+            post.pings_enabled = _to_bool(pings_enabled)
+        status = post.element.findtext(zine.status)
+        if status is not None:
+            post.status = int(status)
+            if post.element.find(atom.published) is None:
+                post.pub_date = None
 
     def lookup_author(self, author, entry, username, email, uri):
         dependency = author.attrib.get(zine.dependency)

@@ -13,6 +13,7 @@ from io import BytesIO
 import os
 import urllib.parse
 import socket
+import ssl
 import http.client
 
 from werkzeug.datastructures import Headers
@@ -21,9 +22,6 @@ from werkzeug.utils import cached_property
 from zine._compat import url_decode
 from zine.application import Response, get_application
 from zine.utils.exceptions import ZineException
-
-
-InputType = type(BytesIO())
 
 
 def open_url(url, data=None, timeout=None,
@@ -39,7 +37,8 @@ def open_url(url, data=None, timeout=None,
     """
     app = get_application()
     if timeout is None:
-        timeout = app.cfg['default_network_timeout']
+        timeout = (app.cfg['default_network_timeout']
+                   if app is not None else 30)
     parts = urllib.parse.urlsplit(url)
     if app is not None:
         blog_url = urllib.parse.urlsplit(app.cfg['blog_url'])
@@ -62,13 +61,18 @@ def open_url(url, data=None, timeout=None,
         raise URLError('unsupported URL schema %r' % parts.scheme)
     if isinstance(data, str):
         data = BytesIO(data.encode('utf-8'))
+    obj = None
     try:
         obj = handler(parts, timeout, **kwargs)
         return obj.open(data)
-    except Exception as e:
-        if not isinstance(e, NetException):
-            e = NetException('%s: %s' % (e.__class__.__name__, str(e)))
-        raise e
+    except Exception as error:
+        if obj is not None:
+            obj.close()
+        if isinstance(error, NetException):
+            raise
+        raise NetException(
+            '%s: %s' % (error.__class__.__name__, str(error))
+        ) from error
 
 
 def create_connection(address, timeout=30):
@@ -99,12 +103,18 @@ def get_content_length(data_or_fp):
     try:
         return len(data_or_fp)
     except TypeError:
-        # special-case cStringIO objects which have no fs entry
-        if isinstance(data_or_fp, InputType):
-            return len(data_or_fp.getvalue())
         try:
-            return os.fstat(data_or_fp.fileno()).st_size
-        except (AttributeError, OSError):
+            position = data_or_fp.tell()
+            data_or_fp.seek(0, os.SEEK_END)
+            length = data_or_fp.tell() - position
+            data_or_fp.seek(position)
+            return length
+        except (AttributeError, OSError, ValueError):
+            pass
+        try:
+            position = data_or_fp.tell()
+            return os.fstat(data_or_fp.fileno()).st_size - position
+        except (AttributeError, OSError, ValueError):
             pass
 
 
@@ -142,28 +152,14 @@ class URLHandler(object):
     @property
     def addr(self):
         """The address tuple."""
-        netloc = self.parsed_url.netloc
-        if netloc.startswith('['):
-            host_end = netloc.find(']')
-            if host_end < 0:
-                raise URLError('invalid ipv6 address')
-            host = netloc[1:host_end]
-            port = netloc[host_end + 2:]
-        else:
-            pieces = netloc.split(':', 1)
-            if len(pieces) == 1:
-                host = pieces[0]
-                port = None
-            else:
-                host, port = pieces
-        if not port:
-            port = self.default_port
-        else:
-            try:
-                port = int(port)
-            except ValueError:
-                raise URLError('not a valid port number')
-        return host, port
+        host = self.parsed_url.hostname
+        if not host:
+            raise URLError('URL does not contain a host')
+        try:
+            port = self.parsed_url.port
+        except ValueError:
+            raise URLError('not a valid port number')
+        return host, port or self.default_port
 
     @property
     def host_string(self):
@@ -172,6 +168,8 @@ class URLHandler(object):
             host.encode('ascii')
         except UnicodeError:
             host = host.encode('idna').decode('ascii')
+        if ':' in host:
+            host = '[%s]' % host
         if port != self.default_port:
             host = '%s:%d' % (host, port)
         return host
@@ -203,7 +201,7 @@ class URLHandler(object):
         if self._socket is not None:
             self._socket.close()
             self._socket = None
-            self.closed = True
+        self.closed = True
 
     def send(self, data):
         if self._buffer:
@@ -223,8 +221,8 @@ class URLHandler(object):
                     self.socket.sendall(s)
             else:
                 self.socket.sendall(data)
-        except socket.error as v:
-            if v[0] == 32: # Broken pipe
+        except OSError as error:
+            if error.errno == 32:  # Broken pipe
                 self.close()
             raise
 
@@ -252,9 +250,9 @@ class HTTPHandler(URLHandler):
 
     STATE_IDLE, STATE_SENDING, STATE_SENT = list(range(3))
 
-    def __init__(self, parsed_url, timeout=30, method=None):
+    def __init__(self, parsed_url, timeout=30, method=None, headers=None):
         URLHandler.__init__(self, parsed_url, timeout)
-        self.headers = Headers()
+        self.headers = Headers(headers)
         self._state = self.STATE_IDLE
         self._method = method
 
@@ -268,9 +266,16 @@ class HTTPHandler(URLHandler):
         return URLHandler.send(self, data)
 
     def send_request(self, data):
-        path = self.parsed_url.path or '/'
+        path = urllib.parse.quote(
+            self.parsed_url.path or '/',
+            safe="/%:@!$&'()*+,;=-._~",
+        )
         if self.parsed_url.query:
-            path += '?' + self.parsed_url.query
+            query = urllib.parse.quote(
+                self.parsed_url.query,
+                safe="=&?/%:@!$'()*+,;~-._",
+            )
+            path += '?' + query
         self.send_buffered('%s %s HTTP/%s\r\n' % (self._method, str(path),
                                                   self.http_version))
         self.send_buffered('\r\n'.join('%s: %s' % item for item in
@@ -312,25 +317,20 @@ class HTTPSHandler(HTTPHandler):
     """Opens HTTPS connections."""
     default_port = 443
 
-    def __init__(self, parsed_url, timeout=30,
-                 default_method=None, key_file=None,
-                 cert_file=None):
-        HTTPHandler.__init__(self, parsed_url, timeout, default_method)
+    def __init__(self, parsed_url, timeout=30, method=None, key_file=None,
+                 cert_file=None, headers=None, ssl_context=None):
+        HTTPHandler.__init__(self, parsed_url, timeout, method, headers)
         self.key_file = key_file
         self.cert_file = cert_file
+        self.ssl_context = ssl_context
 
     def connect(self):
-        try:
-            # 2.6 and higher
-            from ssl import wrap_socket
-        except ImportError:
-            # 2.4 and 2.5
-            from http.client import FakeSocket
-            def wrap_socket(sock, key, cert):
-                ssl = socket.ssl(sock, key, cert)
-                return FakeSocket(sock, ssl)
-        return wrap_socket(HTTPHandler.connect(self),
-                           self.key_file, self.cert_file)
+        context = self.ssl_context or ssl.create_default_context()
+        if self.cert_file is not None:
+            context.load_cert_chain(self.cert_file, self.key_file)
+        return context.wrap_socket(
+            HTTPHandler.connect(self), server_hostname=self.host
+        )
 
 
 class URLResponse(Response):
