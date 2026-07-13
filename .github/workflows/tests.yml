@@ -23,6 +23,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
       - name: Install dependencies
-        run: uv sync --locked --extra test
+        run: uv sync --locked --all-extras
       - name: Compile and test
         run: uv run pytest

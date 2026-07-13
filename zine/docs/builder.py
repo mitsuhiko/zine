@@ -20,8 +20,8 @@ from docutils.core import publish_parts
 from docutils.writers import html4css1
 
 
-_toc_re = re.compile(r'<!-- TOC -->(.*?)<!-- /TOC -->(?s)')
-_toc_contents_re = re.compile(r'<ul[^>]*>(.*)</ul>(?s)')
+_toc_re = re.compile(r'<!-- TOC -->(.*?)<!-- /TOC -->', re.S)
+_toc_contents_re = re.compile(r'<ul[^>]*>(.*)</ul>', re.S)
 
 
 def plugin_links_directive(name, arguments, options, content, lineno,

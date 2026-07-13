@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
     Bundle a Plugin
@@ -58,10 +58,10 @@ def main():
     elif not output_filename.endswith('.plugin'):
             output_filename += '.plugin'
 
-    if not options.dont_compile:
-        from subprocess import call
+    if not options.dont_compile and isdir(join(plugin.path, 'i18n')):
+        from subprocess import run
         compile_script = join(dirname(__file__), 'compile-translations')
-        call([sys.executable, compile_script, plugin.path, '-s'])
+        run([sys.executable, compile_script, plugin.path, '-s'], check=True)
 
     plugin.dump(output_filename)
     print('Plugin written to %s' % output_filename)

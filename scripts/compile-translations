@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
     Compile translations
@@ -61,7 +61,7 @@ def main():
             if path.isfile(translations):
                 mo_file = open(translations.replace('.po', '.mo'), 'wb')
                 print('Compiling %r' % lang, end=' ')
-                f = open(translations, encoding='utf-8')
+                f = open(translations, 'rb')
                 try:
                     catalog = read_po(f, locale=lang)
                 finally:

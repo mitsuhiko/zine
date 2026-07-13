@@ -1,58 +1,26 @@
 Server Information
 ==================
 
-This folder contains scripts for various deployment types.  Depending
-on the kind of Webserver and Webserver interface you should chose one
-of them or create your own.
+This folder contains templates for hosting Zine through standard Python web
+server interfaces.  Install Zine into the server's Python environment, copy
+the appropriate template, and set ``INSTANCE_FOLDER`` (or the
+``ZINE_INSTANCE`` environment variable) to a writable instance directory.
 
-The following files exist currently:
+``zine.wsgi``
+    A WSGI module for mod_wsgi or another server that imports an
+    ``application`` callable.
 
-`zine.cgi`
-    This file implements can be used to use Zine over CGI.  This
-    should *NOT* be used unless you have to.  Zine is not designed
-    for the run-once nature of CGI and will perform poorly on it.
+``zine.fcgi``
+    A FastCGI executable. Install Zine with the ``fastcgi`` extra to provide
+    its flup6 dependency. FastCGI is retained for compatible legacy hosting.
 
-`zine.fcgi`
-    This file serves Zine over FastCGI.  It requires the flup
-    module for Python.
+``zine.cgi``
+    A standard-library CGI executable. CGI starts Zine for every request and
+    performs poorly, so it should only be used when no persistent WSGI option
+    is available.
 
-`zine.wsgi`
-    This file can be used to execute Zine over mod_wsgi.
-
-Just take the file of choice, copy it to where you want it to be and
-adjust it.
-
-All this files have some variables you can configure and invoke the
-actual handler code.  Variables written in uppercase are there for
-you to change if you want.
-
-Some of these can be set from the process environment as well (for
-example via the apache `SetEnv` directive) if you prefix them with
-``ZINE_``.  This works for the following keys:
-
-`POOL_SIZE`
-    The size of the pool to be maintained.  This is the largest number
-    of connections that will be kept persistently in the pool.  Note
-    that the pool begins with no connections; once this number of
-    connections is requested, that number of connections will remain.
-    Defaults to 5.
-    If you are deploying Zine in a forking environment you want to set
-    this number to 1 or 2.
-
-`POOL_RECYCLE`
-    If set to non -1, number of seconds between connection recycling,
-    which means upon checkout, if this timeout is surpassed the
-    connection will be closed and replaced with a newly opened
-    connection.  Defaults to -1.
-
-`POOL_TIMEOUT`
-    The number of seconds to wait before giving up on returning a
-    connection.  Defaults to 30.
-
-`BEHIND_PROXY`
-    If you are proxying into Zine somehow (caching proxies or external
-    fastcgi/http servers) set this value to True to enable proxy support.
-    Do not set this to True if you are not using proxies as this would
-    be a security risk.
-    If you specify this value from the process environment use the values
-    ``1`` and ``0`` instead of ``True`` and ``False``.
+The templates retain process-wide database pool overrides.  Set
+``POOL_SIZE``, ``POOL_RECYCLE``, or ``POOL_TIMEOUT`` in a copied template, or
+set the corresponding ``ZINE_DATABASE_POOL_*`` environment variables (the
+historical ``ZINE_POOL_*`` names are also accepted).  Only enable
+``BEHIND_PROXY`` / ``ZINE_BEHIND_PROXY`` for requests from a trusted proxy.

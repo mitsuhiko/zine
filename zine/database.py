@@ -96,6 +96,8 @@ def create_engine(uri, relative_to=None, debug=False):
     #   server for the same instance or a development shell
     for key in 'pool_size', 'pool_recycle', 'pool_timeout':
         value = os.environ.get('ZINE_DATABASE_' + key.upper())
+        if value is None:
+            value = os.environ.get('ZINE_' + key.upper())
         if value is not None:
             options[key] = int(value)
 

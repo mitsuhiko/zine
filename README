@@ -44,21 +44,10 @@ Zine is released under a BSD-style license, see the LICENSE file for more
 details.
 
 
-Getting in touch with the developers
-====================================
+Development
+===========
 
-The best way to communicate with the developers is the IRC channel
-`#pocoo`_ on irc.freenode.net.  Beware, several projects have their
-"home" there, so be sure to tell the people you're talking about Zine.
+The source repository and issue tracker are hosted on GitHub:
 
-The wiki and bug tracker is available on the `Zine Development Center`_.
-If you encounter bugs or if you want to suggest a new feature be sure to
-file a new ticket there.
-
-Other resources:
-
--  `Main repository <http://dev.pocoo.org/hg/zine-main>`_
--  `bitbucket mirror <http://www.bitbucket.org/mitsuhiko/zine-main>`_
-
-.. _#pocoo: irc://irc.freenode.net/%23pocoo
-.. _Zine Development Center: http://dev.pocoo.org/projects/zine/
+-  `Zine repository <https://github.com/mitsuhiko/zine>`_
+-  `Issue tracker <https://github.com/mitsuhiko/zine/issues>`_

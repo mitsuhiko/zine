@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
     Build Translit-Tab
@@ -17,16 +17,16 @@ import csv
 from optparse import OptionParser
 
 
+sys.path.append(os.path.dirname(__file__))
 import _init_zine
 import zine
-sys.path.append(os.path.dirname(__file__))
 csv.register_dialect('transtab', delimiter=';')
 
 
 def read_table(path):
     long, short, single = {}, {}, {}
 
-    t = open(path)
+    t = open(path, encoding='utf-8')
     for line in t.readlines():
         if not line.startswith('<'):
             continue
@@ -53,7 +53,7 @@ def _unpack_uchrs(packed):
 
 
 def update_mapping(long, short, single, path):
-    src = open(path)
+    src = open(path, encoding='utf-8')
     try:
         data = src.read()
         pos = 0
@@ -63,9 +63,9 @@ def update_mapping(long, short, single, path):
     finally:
         src.close()
 
-    rewrite = open(path, 'wb')
+    rewrite = open(path, 'w', encoding='utf-8')
     try:
-        rewrite.writelines(preamble)
+        rewrite.write(preamble)
         _dump_dict(rewrite, 'LONG_TABLE', long)
         _dump_dict(rewrite, 'SHORT_TABLE', short)
         _dump_dict(rewrite, 'SINGLE_TABLE', single)

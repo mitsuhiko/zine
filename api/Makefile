@@ -4,14 +4,11 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-PAPER         =
 
 # Internal variables.
-PAPEROPT_a4     = -D latex_paper_size=a4
-PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d _build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+ALLSPHINXOPTS   = -d _build/doctrees $(SPHINXOPTS) .
 
-.PHONY: help clean html pickle json htmlhelp qthelp latex changes linkcheck
+.PHONY: help clean html pickle webpickle json htmlhelp qthelp latex changes linkcheck
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -21,7 +18,7 @@ help:
 	@echo "  json      to make JSON files"
 	@echo "  htmlhelp  to make HTML files and a HTML help project"
 	@echo "  qthelp    to make HTML files and a qthelp project"
-	@echo "  latex     to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
+	@echo "  latex     to make LaTeX files"
 	@echo "  changes   to make an overview over all changed/added/deprecated items"
 	@echo "  linkcheck to check all external links for integrity"
 

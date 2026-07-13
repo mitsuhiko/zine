@@ -1,56 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-    Create an Apache Config
-    ~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/env python3
+"""Generate Apache static aliases from a source checkout."""
 
-    This creates an apache config for static exports.
-
-    :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
-    :license: BSD, see LICENSE for more details.
-"""
+import os
 import sys
-from os.path import abspath, dirname
-from optparse import OptionParser
-from urllib.parse import urlparse
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from zine.cli import create_apache_config_main
 
 
-HELP_TEXT = '''\
-This script generates an Apache config for the static data Zine or
-Zine plugins export.  It's recommended to generate this configuration
-every time a plugin is enabled/disabled and included in the vhost
-of your regular Zine Apache configuration.
-
-This will greatly improve the performance of your Zine installation.\
-'''
-
-
-sys.path.append(dirname(__file__))
-from _init_zine import find_instance
-from zine import setup
-
-
-def main():
-    parser = OptionParser(usage='%prog [options]\n\n' + HELP_TEXT)
-    parser.add_option('--instance', '-I', dest='instance',
-                      help='Use the path provided as Zine instance.')
-    options, args = parser.parse_args()
-    if args:
-        parser.error('incorrect number of arguments')
-    instance = options.instance or find_instance()
-    if instance is None:
-        parser.error('instance not found.  Specify path to instance')
-
-    app = setup(instance)
-    
-    prefix = urlparse(app.cfg['blog_url'])[2].rstrip('/')
-
-    for alias, dst in app._shared_exports.items():
-        dst = abspath(dst)
-        if len(dst.split()) != 1:
-            dst = '"%s"' % dst
-        print('Alias %s%s %s' % (prefix, alias, dst))
-
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    create_apache_config_main()

@@ -1,1 +1,9 @@
+include AUTHORS INSTALL LICENSE README
+include scripts/*
+recursive-include api Makefile *.py *.rst
+prune api/_build
+recursive-include external-plugins *.css *.html *.js *.png *.py *.rst *.txt
+recursive-include servers README *.cgi *.fcgi *.wsgi
 recursive-include zine *.css *.html *.js *.png *.po *.pot *.rst *.txt *.zeml
+global-exclude *.mo *.page *.py[cod]
+global-exclude __pycache__

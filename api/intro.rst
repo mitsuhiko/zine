@@ -1,49 +1,34 @@
 Introduction
 ============
 
-To work on Zine you have to have a Mac running OS X, a BSD syystem or
-Linux.  It's currently not possible to develop on Windows as some of
-tools depend on a POSIX environment.  You may have success by using
-cygwin, but we don't have any experience with it.
+Zine development requires Python 3.12, 3.13, or 3.14.  The supported source
+checkout and command-line tools work on macOS, Linux, and other POSIX systems.
 
 Checking out the Code
 ---------------------
 
-Depending on what feature you want to work on you should check out one
-of the following mercurial repositories:
+Clone the Git repository from GitHub::
 
-- ``http://dev.pocoo.org/hg/zine-main`` — the main repository for new features
-- ``http://dev.pocoo.org/hg/zine-0.1`` — 0.1 maintenance branch for bugfixes and translations
-
-If you have troubles selecting the correct branch, ask in the `IRC channel`_.
-
-Clone the branch using hg::
-
-    $ hg clone http://dev.pocoo.org/hg/zine-0.1 zine
+    $ git clone https://github.com/mitsuhiko/zine.git
+    $ cd zine
 
 Creating a Development Environment
 ----------------------------------
 
-After you have cloned the code, step into the directory and initialize
-a new virtual python environment::
+The project uses standard ``pyproject.toml`` packaging.  With uv, create and
+synchronize a development environment with::
 
-    $ cd zine
-    $ ./scripts/setup-virtualenv env
+    $ uv sync --all-extras
 
-Now you have a virtual environment called “env” in the root of your repository
-initialized with all the libraries required for developing on that branch with
-the correct version.
+Alternatively, use the standard library's virtual environment support and
+install an editable checkout::
 
-Make sure to enable it before working on Zine::
+    $ python3 -m venv .venv
+    $ .venv/bin/python -m pip install -e '.[test,docs]'
 
-    $ source env/bin/activate
+Run the regression suite before and after making changes::
 
-To leave the virtual environment run this command::
+    $ uv run --extra test pytest
 
-    $ deactivate
-
-Check in often and merge often with upstream.  When you're happy with the result,
-create a bundle or patch and attach it to a ticket in the trac.
-
-
-.. _IRC channel: http://zine.pocoo.org/community/irc
+The source-checkout commands under ``scripts/`` and the installed ``zine-*``
+commands use the same application entry points.

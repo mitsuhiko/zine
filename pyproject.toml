@@ -42,8 +42,24 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
+    "build>=1.2",
     "pytest>=8.2",
+    "setuptools>=77",
 ]
+docs = [
+    "sphinx>=8.1",
+    "sphinxcontrib-serializinghtml>=2.0",
+]
+fastcgi = [
+    "flup6>=1.1.1",
+]
+
+[project.scripts]
+zine-create-apache-config = "zine.cli:create_apache_config_main"
+zine-regenerate-post-uids = "zine.cli:regenerate_post_uids_main"
+zine-reset-instance = "zine.cli:reset_instance_main"
+zine-server = "zine.cli:server_main"
+zine-shell = "zine.cli:shell_main"
 
 [project.urls]
 Source = "https://github.com/mitsuhiko/zine"

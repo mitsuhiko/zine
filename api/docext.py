@@ -1,4 +1,4 @@
-from sphinx.builders.html import PickleHTMLBuilder
+from sphinxcontrib.serializinghtml import PickleHTMLBuilder
 
 
 class WebBuilder(PickleHTMLBuilder):
@@ -16,4 +16,9 @@ class WebBuilder(PickleHTMLBuilder):
 
 
 def setup(app):
+    app.setup_extension('sphinxcontrib.serializinghtml')
     app.add_builder(WebBuilder)
+    return {
+        'parallel_read_safe': True,
+        'parallel_write_safe': True,
+    }

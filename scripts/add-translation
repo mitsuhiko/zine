@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
     Add new Translation
@@ -44,10 +44,10 @@ def main():
         create_plugin_lang(locale, options.plugin)
 
 
-def create_from_pot(locale, path):
+def create_from_pot(locale, filename):
     try:
-        f = open(path)
-    except IOError as e:
+        f = open(filename, 'rb')
+    except OSError as e:
         parser.error(str(e))
     try:
         catalog = read_po(f, locale=locale)
@@ -62,7 +62,7 @@ def write_catalog(catalog, folder):
     target = path.join(folder, str(catalog.locale))
     if not path.isdir(target):
         makedirs(target)
-    f = open(path.join(target, 'messages.po'), 'w')
+    f = open(path.join(target, 'messages.po'), 'wb')
     try:
         write_po(f, catalog, width=79)
     finally:
@@ -75,13 +75,15 @@ def create_application_lang(locale):
     print('Created catalog for %s' % locale)
 
 
-def create_plugin_lang(locale, path):
-    catalog = create_from_pot(locale, path.join(path, i18n_dir, 'messages.pot'))
+def create_plugin_lang(locale, plugin_path):
+    catalog = create_from_pot(
+        locale, path.join(plugin_path, i18n_dir, 'messages.pot')
+    )
 
     # incorporate existing translations from the application
     app_messages = path.join(app_i18n_path, str(locale), 'messages.po')
     if path.isfile(app_messages):
-        f = open(app_messages)
+        f = open(app_messages, 'rb')
         try:
             translated = read_po(f)
         finally:
@@ -91,7 +93,7 @@ def create_plugin_lang(locale, path):
             if message.id and message.id in catalog:
                 catalog[message.id].string = message.string
 
-    write_catalog(catalog, path.join(path, i18n_dir))
+    write_catalog(catalog, path.join(plugin_path, i18n_dir))
     print('Created catalog for %s' % locale)
 
 

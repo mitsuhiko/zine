@@ -461,8 +461,9 @@ class Plugin(object):
     def is_documented(self):
         """This property is True if the plugin has documentation."""
         for lang in self.app.cfg['language'], 'en':
-            if path.isfile(path.join(self.path, 'docs', lang, 'index.page')):
-                return True
+            for filename in 'index.page', 'index.rst':
+                if path.isfile(path.join(self.path, 'docs', lang, filename)):
+                    return True
         return False
 
     @cached_property

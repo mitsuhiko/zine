@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
     Build the Event-Map
@@ -9,6 +9,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
+import ast
 import sys
 import os
 import linecache
@@ -18,14 +19,6 @@ from optparse import OptionParser
 sys.path.append(os.path.dirname(__file__))
 from _init_zine import find_instance
 import zine
-
-
-try:
-    import _ast
-except ImportError:
-    can_build_eventmap = False
-else:
-    can_build_eventmap = True
 
 
 def build_eventmap(instance_folder):
@@ -38,23 +31,19 @@ def build_eventmap(instance_folder):
         if os.path.commonprefix([zine_root, path]) != zine_root:
             searchpath.append((plugin.path, plugin.name))
 
-    def walk_ast(ast):
-        if isinstance(ast, _ast.Call) and \
-           isinstance(ast.func, _ast.Name) and \
-           ast.func.id in ('emit_event', 'iter_listeners') and \
-           ast.args and \
-           isinstance(ast.args[0], _ast.Str):
-            yield ast.args[0].s, ast.func.lineno
-        for field in ast._fields or ():
-            value = getattr(ast, field)
-            if isinstance(value, (tuple, list)):
-                for node in value:
-                    if isinstance(node, _ast.AST):
-                        for item in walk_ast(node):
-                            yield item
-            elif isinstance(value, _ast.AST):
-                for item in walk_ast(value):
-                    yield item
+    def walk_ast(tree):
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if not isinstance(node.func, ast.Name):
+                continue
+            if node.func.id not in ('emit_event', 'iter_listeners'):
+                continue
+            if not node.args:
+                continue
+            event = node.args[0]
+            if isinstance(event, ast.Constant) and isinstance(event.value, str):
+                yield event.value, node.lineno
 
     def find_help(filename, lineno):
         help_lines = []
@@ -80,10 +69,11 @@ def build_eventmap(instance_folder):
                     continue
                 filename = os.path.join(dirpath, filename)
                 shortname = filename[offset:]
-                ast = compile(''.join(linecache.getlines(filename)),
-                              filename, 'exec', 0x400)
+                tree = ast.parse(
+                    ''.join(linecache.getlines(filename)), filename=filename
+                )
 
-                for event, lineno in walk_ast(ast):
+                for event, lineno in walk_ast(tree):
                     help = find_help(filename, lineno)
                     result.setdefault(event, []).append((prefix, shortname,
                                                          lineno, help))
@@ -98,8 +88,6 @@ def main():
     options, args = parser.parse_args()
     if args:
         parser.error('incorrect number of arguments')
-    if not can_build_eventmap:
-        parser.error('This script requires Python 2.5')
     instance = options.instance or find_instance()
     if instance is None:
         parser.error('instance not found.  Specify path to instance')

@@ -8,7 +8,7 @@
     :copyright: (c) 2010 by the Zine Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 """
-from os.path import abspath, join, dirname, pardir, isfile
+from os.path import abspath, join, dirname, pardir
 import sys
 
 # set to None first because the installation replaces this
@@ -23,17 +23,7 @@ sys.path.insert(0, ZINE_LIB)
 
 
 def find_instance():
-    """Find the Zine instance."""
-    instance = None
-    if isfile(join('instance', 'zine.ini')):
-        instance = abspath('instance')
-    else:
-        old_path = None
-        path = abspath('.')
-        while old_path != path:
-            path = abspath(join(path, pardir))
-            if isfile(join(path, 'zine.ini')):
-                instance = path
-                break
-            old_path = path
-    return instance
+    """Find the nearest Zine instance."""
+    from zine.cli import find_instance as locate_instance
+
+    return locate_instance()

@@ -27,8 +27,11 @@ _plugin_links_re = re.compile(r'<!-- PLUGIN_LINKS -->')
 
 def _iter_file_choices(app, base, *parts):
     for lang in app.cfg['language'], 'en':
-        yield os.path.join(base, lang, *parts) + '.page', False
-        yield os.path.join(base, lang, *(parts + ('index.page',))), True
+        for suffix, is_source in (('.page', False), ('.rst', True)):
+            yield os.path.join(base, lang, *parts) + suffix, False, is_source
+            yield os.path.join(
+                base, lang, *(parts + ('index' + suffix,))
+            ), True, is_source
 
 
 def _find_path(app, parts):
@@ -81,13 +84,17 @@ def load_page(app, identifier):
 
     base = _find_path(app, parts)
 
-    for filename, is_index in _iter_file_choices(app, base, *parts):
+    for filename, is_index, is_source in _iter_file_choices(app, base, *parts):
         if os.path.isfile(filename):
-            f = open(filename, 'rb')
-            try:
-                return _expand_page(app, pickle.load(f)), is_index
-            finally:
-                f.close()
+            if is_source:
+                from zine.docs.builder import generate_documentation
+
+                with open(filename, encoding='utf-8') as f:
+                    page = generate_documentation(f.read())
+            else:
+                with open(filename, 'rb') as f:
+                    page = pickle.load(f)
+            return _expand_page(app, page), is_index
 
 
 def get_resource(app, filename):

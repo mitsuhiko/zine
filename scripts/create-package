@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
     Create Package
     ~~~~~~~~~~~~~~
@@ -18,10 +18,7 @@ import subprocess
 from optparse import OptionParser
 
 
-IGNORED = list(map(re.compile, r'''
-^artwork/
-^\.hgignore$
-'''.strip().splitlines()))
+IGNORED = [re.compile(r'^artwork/')]
 
 EXTRA_RST = 'README INSTALL'.split()
 
@@ -40,17 +37,29 @@ class BuildError(Exception):
 
 
 def find_files(force):
-    allowed_states = frozenset('CI?')
-    tracked_states = frozenset('CM')
-    client = subprocess.Popen(['hg', 'status', '-A'], stdout=subprocess.PIPE)
-    for line in client.communicate()[0].splitlines():
-        line = line.split(None, 1)
-        if len(line) != 2:
+    if not force:
+        status = subprocess.run(
+            ['git', 'status', '--porcelain', '--untracked-files=no'],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+        if status:
+            raise BuildError('git working tree is not clean')
+    tracked = subprocess.run(
+        ['git', 'ls-files', '-z'],
+        check=True,
+        capture_output=True,
+    ).stdout
+    for raw_filename in tracked.split(b'\0'):
+        if not raw_filename:
             continue
-        status, filename = line
-        if not force and status not in allowed_states:
-            raise BuildError('hg unclean. Uncommited modifications?')
-        if status in tracked_states and not is_ignored(filename):
+        filename = os.fsdecode(raw_filename)
+        if not os.path.lexists(filename):
+            if force:
+                continue
+            raise BuildError('tracked file is missing: %s' % filename)
+        if not is_ignored(filename):
             yield filename
 
 
@@ -59,16 +68,19 @@ def get_zine_version():
     return rv
 
 
-def run_script(dir, script, args=None):
-    subprocess.call([os.path.join(dir, 'scripts', script)] + list(args or ()))
+def run_script(directory, script, args=None):
+    subprocess.run(
+        [sys.executable, os.path.join(directory, 'scripts', script),
+         *list(args or ())],
+        check=True,
+    )
 
 
 def delete_pycs(folder):
     for dirname, folders, files in os.walk(folder):
         for filename in files:
             if filename.endswith('.pyc'):
-                filename = os.path.join(folder, dirname, filename)
-                os.remove(filename)
+                os.remove(os.path.join(dirname, filename))
 
 
 def build(dst_dir, build_dir, options):
@@ -108,32 +120,29 @@ def build(dst_dir, build_dir, options):
                    [os.path.join(release_dir, 'zine', 'plugins', plugin)])
 
     # build extra rst files into .html files
-    old_dir = os.getcwd()
-    try:
-        os.chdir(release_dir)
-        for filename in EXTRA_RST:
-            subprocess.call(['rst2html.py', filename, filename + '.html'])
-    finally:
-        os.chdir(old_dir)
+    from docutils.core import publish_file
+    for filename in EXTRA_RST:
+        publish_file(
+            source_path=os.path.join(release_dir, filename),
+            destination_path=os.path.join(release_dir, filename + '.html'),
+            writer_name='html5',
+        )
 
     # delete .pyc files the documentation builder might have created
     delete_pycs(release_dir)
 
     # now create the archives
     messages = []
-    old_dir = os.getcwd()
-    try:
-        os.chdir(build_dir)
-        if options.tar:
-            tarball_filename = archive_base + '.tar.gz'
-            subprocess.call(['tar', 'vczf', tarball_filename, release_name])
-            messages.append('Created tarball in %s' % tarball_filename)
-        if options.zip:
-            zip_filename = archive_base + '.zip'
-            subprocess.call(['zip', '-r', zip_filename, release_name])
-            messages.append('Created zip file in %s' % zip_filename)
-    finally:
-        os.chdir(old_dir)
+    if options.tar:
+        tarball_filename = shutil.make_archive(
+            archive_base, 'gztar', root_dir=build_dir, base_dir=release_name
+        )
+        messages.append('Created tarball in %s' % tarball_filename)
+    if options.zip:
+        zip_filename = shutil.make_archive(
+            archive_base, 'zip', root_dir=build_dir, base_dir=release_name
+        )
+        messages.append('Created zip file in %s' % zip_filename)
 
     print('-' * 60)
     print('Summary')
@@ -164,8 +173,8 @@ def main():
             build(os.path.abspath(dst), build_dir, options)
         finally:
             shutil.rmtree(build_dir, ignore_errors=True)
-    except BuildError as e:
-        print(e, file=sys.stderr)
+    except (BuildError, subprocess.CalledProcessError) as e:
+        parser.error(str(e))
 
 
 if __name__ == '__main__':

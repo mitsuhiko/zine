@@ -19,17 +19,11 @@
     For display strings are translated to the language of the blog and all
     dates as converted to the blog timezone.
 
-    Translations are handled in a gettext inspired way via babel.  The
-    translatable strings are stored in POT and PO files but the files
-    Zine loads afterwards are stored in pickles rather than MO files.
-
-    The reason for that is that we have to put additional information into
-    these files.  Currently that is the information if strings are used on
-    the client too.
-
-    As a matter of fact we are using nearly nothing from the original gettext
-    library that comes with Python.  Differences in the API are outlined in
-    the `Translations` class docstring.
+    Translations are handled in a gettext-inspired way via Babel.  The
+    translatable strings are stored in POT and PO files.  Compiled MO files
+    contain a small Zine footer with the messages used by the browser.  A PO
+    catalog can also be compiled in memory when a source or wheel installation
+    does not contain generated MO files.
 
     Translation Workflow
     --------------------
@@ -44,7 +38,7 @@
     The `update-translations` script will automatically add new strings to
     the po files and try to do fuzzy matching.
 
-    To compile the translations into the pickled catalog files just use
+    To compile translations into MO catalog files, use
     `compile-translations`.
 
     New languages are added with `add-translation`.
@@ -56,11 +50,14 @@ import os
 import pickle as pickle
 import struct
 from gettext import NullTranslations
+from io import BytesIO
 from datetime import datetime
 from time import strptime
 from weakref import WeakKeyDictionary
 
 from babel import Locale, dates, UnknownLocaleError
+from babel.messages.mofile import write_mo
+from babel.messages.pofile import read_po
 from babel.support import Translations as TranslationsBase
 from pytz import timezone, UTC
 
@@ -159,6 +156,26 @@ class ZineTranslations(TranslationsBase, _CustomAttrsTranslations):
         if catalog:
             with open(catalog, 'rb') as fileobj:
                 return cls(fileobj=fileobj, locale=locale)
+        source = find_catalog(
+            path, domain, locale, gettext_lookup, extension='.po'
+        )
+        if source:
+            with open(source, 'rb') as fileobj:
+                source_catalog = read_po(fileobj, locale=locale)
+            compiled = BytesIO()
+            write_mo(compiled, source_catalog)
+            client_offset = compiled.tell()
+            client_messages = [
+                message
+                for message in source_catalog
+                if any(filename.endswith('.js')
+                       for filename, _ in message.locations)
+            ]
+            pickle.dump(client_messages, compiled, protocol=2)
+            compiled.write(b'ZINE')
+            compiled.write(struct.pack('!I', client_offset))
+            compiled.seek(0)
+            return cls(fileobj=compiled, locale=locale)
         return ZineNullTranslations(locale=locale)
 
     gettext = TranslationsBase.gettext
@@ -199,11 +216,10 @@ def get_translations():
         return None
 
 
-def find_catalog(path, domain, locale, gettext_lookup=False):
-    """Finds the catalog for the given locale on the path.  Return sthe
-    filename of the .mo file if found, otherwise `None` is returned.
-    """
-    args = [path, str(Locale.parse(locale)), domain + '.mo']
+def find_catalog(path, domain, locale, gettext_lookup=False,
+                 extension='.mo'):
+    """Return the filename of a translation catalog if it exists."""
+    args = [path, str(Locale.parse(locale)), domain + extension]
     if gettext_lookup:
         args.insert(-1, 'LC_MESSAGES')
     catalog = os.path.join(*args)

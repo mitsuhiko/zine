@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
     Extract Messages
@@ -70,15 +70,20 @@ def main():
                                  COMMENT_TAGS, callback=callback,
                                  strip_comment_tags=True)
 
-    for filename, lineno, message, comments in extracted:
-        catalog.add(message, None, [(strip_path(filename, root), lineno)],
-                    auto_comments=comments)
+    for filename, lineno, message, comments, context in extracted:
+        catalog.add(
+            message,
+            None,
+            [(strip_path(filename, root), lineno)],
+            auto_comments=comments,
+            context=context,
+        )
 
     output_path = path.join(root, i18n_dir)
     if not path.isdir(output_path):
         makedirs(output_path)
 
-    f = open(path.join(output_path, 'messages.pot'), 'w')
+    f = open(path.join(output_path, 'messages.pot'), 'wb')
     try:
         write_po(f, catalog, width=79)
     finally:

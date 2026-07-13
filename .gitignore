@@ -18,7 +18,6 @@ dumps/
 zine/i18n/*/messages.mo
 zine/docs/**/*.page
 zine/plugins/*/docs/**/*.page
-Makefile
 
 # Editors and operating systems
 .DS_Store
