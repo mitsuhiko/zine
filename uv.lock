@@ -30,6 +30,34 @@ wheels = [
 ]
 
 [[package]]
+name = "creoleparser"
+version = "0.7.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "genshi" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/77/2f/95024ce71189a1f6ff9a847bd7e0ba4dec3b2f51c7ab4ca423830e517711/Creoleparser-0.7.5.tar.gz", hash = "sha256:62999c115f3ece801ff31cdde7cab8f41df4ed95c189e1c6f02e7a036733a641", size = 36898, upload-time = "2019-06-10T21:29:24.674Z" }
+
+[[package]]
+name = "docutils"
+version = "0.23"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/39/a4/5180d9afc57e8fca05601dd652bdff19604c218814037fe90ffc7625a50a/docutils-0.23.tar.gz", hash = "sha256:746f5060322511280a1e50eb76846ed6bf2342984b2ac04dc42caa1a8d78799e", size = 2303823, upload-time = "2026-05-27T17:41:06.934Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/91/30151a39f7570f448ed84529390628a651d7f27c87d73c9b887f8189695e/docutils-0.23-py3-none-any.whl", hash = "sha256:25d013af9bf23bc1c7b2b093dff4208166c53a94786c9e447808335ef1185fea", size = 634701, upload-time = "2026-05-27T17:40:58.442Z" },
+]
+
+[[package]]
+name = "genshi"
+version = "0.7.11"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f3/a7/3f7a2b2cafa7af1938f1653855a0d47a0e44d4d5794571e4392343def34d/genshi-0.7.11.tar.gz", hash = "sha256:82c4f9bbf4b03be5162a24d6d8e4fdbfe3ed2602d3ebcbf505a33350a379dcb7", size = 237591, upload-time = "2026-05-17T13:27:07.574Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/27/503016bc329720ba2856eb4831d6ba36089cd6f15bc4fe85db69fea5b563/genshi-0.7.11-py3-none-any.whl", hash = "sha256:3fdd03ab9c255db1dd612f7189ba94e3310e2b77d5f94bce37e2952eb9977842", size = 179395, upload-time = "2026-05-17T13:27:04.912Z" },
+]
+
+[[package]]
 name = "greenlet"
 version = "3.5.3"
 source = { registry = "https://pypi.org/simple" }
@@ -393,10 +421,14 @@ source = { editable = "." }
 dependencies = [
     { name = "babel" },
     { name = "cachelib" },
+    { name = "creoleparser" },
+    { name = "docutils" },
+    { name = "genshi" },
     { name = "html5lib" },
     { name = "itsdangerous" },
     { name = "jinja2" },
     { name = "lxml" },
+    { name = "pygments" },
     { name = "pytz" },
     { name = "sqlalchemy" },
     { name = "werkzeug" },
@@ -411,10 +443,14 @@ test = [
 requires-dist = [
     { name = "babel", specifier = ">=2.15" },
     { name = "cachelib", specifier = ">=0.13" },
+    { name = "creoleparser", specifier = ">=0.7.5" },
+    { name = "docutils", specifier = ">=0.21" },
+    { name = "genshi", specifier = ">=0.7.9" },
     { name = "html5lib", specifier = ">=1.1" },
     { name = "itsdangerous", specifier = ">=2.2" },
     { name = "jinja2", specifier = ">=3.1" },
     { name = "lxml", specifier = ">=5.2" },
+    { name = "pygments", specifier = ">=2.18" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.2" },
     { name = "pytz", specifier = ">=2024.1" },
     { name = "sqlalchemy", specifier = ">=2.0" },

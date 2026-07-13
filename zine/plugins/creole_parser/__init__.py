@@ -91,7 +91,7 @@ zinecreole = create_dialect(creole11_base, wiki_links_base_url=u'',
                             no_wiki_monospace=True,
                             macro_func=macro_func)
 
-creole_parser = Parser(dialect=zinecreole())
+creole_parser = Parser(dialect=zinecreole)
 
 
 class CreoleParser(BaseParser):

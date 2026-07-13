@@ -209,6 +209,13 @@ class UnboundLogging(Warning):
     """Warning for unbound logging."""
 
 
+def _caller_frame():
+    frame = currentframe()
+    if frame is None or frame.f_back is None:
+        return None
+    return frame.f_back.f_back
+
+
 def _logging_func(name):
     level = LEVELS[name]
     def log(message, module=None):
@@ -220,7 +227,7 @@ def _logging_func(name):
                                 % message), stacklevel=2)
             return
         if level >= logger.level:
-            logger.log(name, message, module, currentframe(1))
+            logger.log(name, message, module, _caller_frame())
     log.__name__ = name
     return log
 
@@ -238,7 +245,7 @@ def exception(message=None, module=None, exc_info=None):
     if LEVELS['error'] >= logger.level:
         message = (message and message + '\n' or '') + \
                   ''.join(format_exception(*exc_info))
-        logger.log('error', message, module, currentframe(1))
+        logger.log('error', message, module, _caller_frame())
 
 
 # make a bunch of loggers

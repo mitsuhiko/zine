@@ -31,7 +31,7 @@ class Request(RequestBase):
         return user
 
     def __init__(self, environ, app=None):
-        RequestBase.__init__(self, environ)
+        RequestBase.__init__(self, environ, app)
         request_groups = set()
         current_user = self.user
 

@@ -9,9 +9,10 @@
     :license: BSD, see LICENSE for more details.
 """
 from os.path import join, dirname
-from time import time, asctime, gmtime
+from time import time
 
 from werkzeug.exceptions import NotFound
+from werkzeug.http import http_date
 
 from zine._compat import escape
 
@@ -147,7 +148,7 @@ def get_style(req, style):
     resp = Response(formatter.get_style_defs('div.syntax pre'),
                     mimetype='text/css')
     resp.headers['Cache-Control'] = 'public'
-    resp.headers['Expires'] = asctime(gmtime(time() + 3600))
+    resp.headers['Expires'] = http_date(time() + 3600)
     return resp
 
 

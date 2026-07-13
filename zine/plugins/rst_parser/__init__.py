@@ -70,13 +70,14 @@ class IntroDirective(Directive):
 
 
 def make_extension_role(extension):
-    def role(typ, rawtext, text, lineno, inliner, options={}, content=[]):
+    def role(typ, rawtext, text, lineno, inliner, options=None, content=None):
         if not extension.is_isolated:
-            content = Element('span')
-            content.text = utils.unescape(text)
+            role_content = Element('span')
+            role_content.text = utils.unescape(text)
         else:
-            content = utils.unescape(text)
-        element = extension.process({}, content)
+            role_content = utils.unescape(text)
+        reason = inliner.document.settings.parsing_reason
+        element = extension.process({}, role_content, reason)
         return [zeml(zeml=element)], []
     role.__name__ = '%s_role' % extension.name
     return role

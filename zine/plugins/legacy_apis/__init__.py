@@ -140,7 +140,7 @@ def generic_update(request, post, struct, publish):
         post.pings_enabled = bool(struct['mt_allow_pings'])
     if 'mt_allow_comments' in struct:
         post.comments_enabled = bool(struct['mt_allow_comments'])
-    post.last_update = datetime.utcnow()
+    post.last_update = datetime.now()
 
 
 def generic_new_post(request, struct, publish, content_type):
@@ -209,7 +209,7 @@ def metaweblog_get_categories(blog_id, username, password):
 def blogger_delete_post(post_id, username, password, publish):
     request = login(username, password)
     entry = Post.query.get(post_id)
-    if entry is None or entry.content_type != 'post':
+    if entry is None or entry.content_type != 'entry':
         raise Fault(404, 'No such post')
     db.delete(entry)
     db.commit()
@@ -246,7 +246,7 @@ def wp_new_page(username, password, struct, publish):
     if not request.user.has_privilege(CREATE_PAGES):
         raise Fault(403, 'you don\'t have the privileges to '
                     'create new pages')
-    post = generic_new_post(request, struct, publish, 'post')
+    post = generic_new_post(request, struct, publish, 'page')
     db.commit()
     return dump_post(post)
 

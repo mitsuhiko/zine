@@ -575,7 +575,7 @@ class ZemlTranslator(NodeVisitor):
         elif isinstance(node.parent, nodes.section):
             tag = 'h%s' % (self.section_level + self.initial_header_level - 1)
             self.begin_node(node, tag, CLASS='section-subtitle')
-            self.begin_node(None, 'span', '', CLASS='section-subtitle')
+            self.begin_node(None, 'span', CLASS='section-subtitle')
             close_two = True
 
         self.context.append(close_two)

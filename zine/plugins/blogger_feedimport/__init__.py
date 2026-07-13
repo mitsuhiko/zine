@@ -55,7 +55,7 @@ class BloggerExtension(Extension):
             if category.attrib.get('scheme') != BLOGGER_KIND_SCHEME_URI:
                 continue
             kind_uri = category.attrib.get('term')
-            if kind_uri.startswith(BLOGGER_KIND_BASE_URI):
+            if kind_uri and kind_uri.startswith(BLOGGER_KIND_BASE_URI):
                 return kind_uri[len(BLOGGER_KIND_BASE_URI):]
             else:
                 return None
@@ -158,7 +158,12 @@ class BloggerExtension(Extension):
         if scheme is None:
             return
         if scheme == BLOGGER_LABEL_SCHEME_URI:
-            return Tag(category.attrib['term'])
+            term = category.attrib['term']
+            tag = self.parser.find_tag(slug=term)
+            if tag is None:
+                tag = Tag(term)
+                self.parser.tags.append(tag)
+            return tag
         elif scheme == BLOGGER_KIND_SCHEME_URI:
             raise SkipItem
         # else it's not a blogger special category
