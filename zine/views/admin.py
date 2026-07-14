@@ -315,7 +315,7 @@ def bookmarklet(request):
 def manage_entries(request, page):
     """Show a list of entries."""
     entry_query = Post.query.type('entry')
-    entries = entry_query.order_by([Post.status, Post.pub_date.desc()]) \
+    entries = entry_query.order_by(Post.status, Post.pub_date.desc()) \
                          .limit(PER_PAGE).offset(PER_PAGE * (page - 1)).all()
     pagination = AdminPagination('admin/manage_entries', page, PER_PAGE,
                                  entry_query.count())

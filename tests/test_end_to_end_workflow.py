@@ -93,6 +93,29 @@ assert application.cfg["blog_title"] == "Ported Zine"
 assert application.cfg["moderate_comments"] == 0
 assert application.plugins["vessel_theme"].active
 assert application.plugins["vessel_theme"].setup_error is None
+
+# Database errors must reach Werkzeug's debugger in development mode instead
+# of being converted into a blank internal-error page.
+from sqlalchemy.exc import SQLAlchemyError
+
+original_entries_view = application.views["admin/manage_entries"]
+
+
+def fail_with_database_error(request, page):
+    raise SQLAlchemyError("debug database failure")
+
+
+application.views["admin/manage_entries"] = fail_with_database_error
+try:
+    try:
+        client.get("/admin/entries/")
+    except SQLAlchemyError as error:
+        assert "debug database failure" in str(error)
+    else:
+        raise AssertionError("database error did not pass through")
+finally:
+    application.views["admin/manage_entries"] = original_entries_view
+
 config_text = (instance / "zine.ini").read_text()
 assert "blog_title" in config_text and "Ported Zine" in config_text
 assert b"Ported Zine" in client.get("/").data
@@ -137,6 +160,9 @@ entry = Post.query.filter_by(slug="hello-python").one()
 assert entry.content_type == "entry"
 assert {tag.name for tag in entry.tags} == {"Python", "Porting"}
 assert [item.name for item in entry.categories] == ["Porting News"]
+managed_entries = client.get("/admin/entries/")
+assert managed_entries.status_code == 200
+assert b"Hello Python" in managed_entries.data
 public_entry = client.get("/hello-python")
 assert public_entry.status_code == 200
 assert b"First body" in public_entry.data

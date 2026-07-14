@@ -5,7 +5,7 @@
   <p>
     {% trans %}Zine encountered an internal error during processing:{% endtrans %}
   </p>
-  <p class="error">{{ error.message }}
+  <p class="error">{{ error|e }}
   {% if error.help_text %}
     {{ error.help_text }}
   {% endif %}

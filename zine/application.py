@@ -1310,8 +1310,11 @@ class Zine(object):
         except HTTPException as e:
             response = e.get_response(request.environ)
         except SQLAlchemyError as e:
-            # Some database screwup?! Don't let Zine stay dispatching 500's
+            # Roll back failed database work before either handing the error
+            # to Werkzeug's debugger or rendering the production error page.
             db.session.rollback()
+            if self.cfg['passthrough_errors']:
+                raise
             response = self.handle_internal_error(request, e,
                                                   suppress_log=False)
 
