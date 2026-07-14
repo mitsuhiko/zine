@@ -1189,7 +1189,9 @@ class Zine(object):
         # TODO: somehow add grouping...
         result = [(x.name, str(x.explanation)) for x in
                   list(self.privileges.values())]
-        result.sort(key=lambda x: x[0] == 'BLOG_ADMIN' or x[1].lower())
+        result.sort(
+            key=lambda item: (item[0] != 'BLOG_ADMIN', item[1].lower())
+        )
         return result
 
     def get_page_metadata(self):

@@ -120,6 +120,52 @@ config_text = (instance / "zine.ini").read_text()
 assert "blog_title" in config_text and "Ported Zine" in config_text
 assert b"Ported Zine" in client.get("/").data
 
+# Render every ID-independent administration page. This catches Python 2
+# ordering assumptions and other compatibility failures in less-used views.
+for admin_path in (
+    "/admin/",
+    "/admin/entries/",
+    "/admin/entries/new",
+    "/admin/pages/",
+    "/admin/pages/new",
+    "/admin/comments/",
+    "/admin/comments/unmoderated",
+    "/admin/comments/approved",
+    "/admin/comments/blocked",
+    "/admin/comments/spam",
+    "/admin/categories/",
+    "/admin/categories/new",
+    "/admin/users/",
+    "/admin/users/new",
+    "/admin/groups/",
+    "/admin/groups/new",
+    "/admin/options/basic",
+    "/admin/options/urls",
+    "/admin/options/theme/",
+    "/admin/options/theme/configure",
+    "/admin/options/cache",
+    "/admin/options/configuration",
+    "/admin/system/",
+    "/admin/system/maintenance",
+    "/admin/system/log",
+    "/admin/system/import/",
+    "/admin/system/export",
+    "/admin/system/plugins/",
+    "/admin/system/help/",
+):
+    response = client.get(admin_path)
+    assert response.status_code == 200, (admin_path, response.status_code)
+
+for account_path in (
+    "/account/",
+    "/account/profile",
+    "/account/notifications",
+    "/account/system/about",
+    "/account/system/help/",
+):
+    response = client.get(account_path)
+    assert response.status_code == 200, (account_path, response.status_code)
+
 from zine.database import db
 from zine.models import Category, Comment, Post, Tag
 
@@ -180,6 +226,10 @@ assert [tag.name for tag in entry.tags] == ["Python Modern"]
 assert b"Updated body" in client.get("/hello-python").data
 assert client.get("/categories/news").status_code == 200
 assert client.get("/tags/python-modern").status_code == 200
+for public_path in (
+    "/", "/archive", "/authors/", "/authors/admin", "/tags/", "/_services/"
+):
+    assert client.get(public_path).status_code == 200, public_path
 
 # Pages use the same CRUD pipeline but retain their distinct content type.
 page_data = {

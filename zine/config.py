@@ -436,9 +436,8 @@ class Configuration(object):
             """Sort by key, case insensitive, ignore leading underscores and
             move the implicit "zine" to the index.
             """
-            if item[0] == 'zine':
-                return 1
-            return item[0].lower().lstrip('_')
+            key = item[0]
+            return (key != 'zine', key.lower().lstrip('_'))
 
         return [{
             'items':    sorted(children, key=lambda x: x['name']),

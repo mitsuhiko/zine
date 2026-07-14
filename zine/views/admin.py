@@ -1084,7 +1084,9 @@ def theme(request):
     return render_admin_response('admin/theme.html', 'options.theme',
         themes=sorted(
             list(request.app.themes.values()),
-            key=lambda x: x.name == 'default' or x.display_name.lower()
+            key=lambda theme: (
+                theme.name != 'default', theme.display_name.lower()
+            )
         ),
         current_theme=request.app.theme,
         form=form.as_widget()
@@ -1370,7 +1372,10 @@ def information(request):
             'multiprocess':     request.is_multiprocess,
             'wsgi_version':     '.'.join(map(str, request.environ['wsgi.version']))
         },
-        plugins=sorted(list(request.app.plugins.values()), key=lambda x: not x.active and x.name),
+        plugins=sorted(
+            request.app.plugins.values(),
+            key=lambda plugin: (not plugin.active, plugin.name.lower()),
+        ),
         python_version='<br>'.join(map(escape, python_version.splitlines())),
         zine_env=environment,
         zine_version=zine_version,
