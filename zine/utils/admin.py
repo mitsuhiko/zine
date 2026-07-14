@@ -14,7 +14,7 @@ from zine._compat import url_quote
 
 from zine.privileges import ENTER_ADMIN_PANEL, require_privilege
 from zine.utils import local, load_json
-from zine.utils.net import open_url
+from zine.utils.net import NetException, open_url
 from zine.utils.dates import utcfromtimestamp
 from zine.i18n import _
 
@@ -51,31 +51,60 @@ def require_admin_privilege(expr=None):
 
 
 def load_zine_reddit():
-    """Load the zine reddit."""
-    reddit_url = 'http://www.reddit.com'
+    """Load the Zine subreddit without breaking the admin dashboard."""
+    reddit_url = 'https://www.reddit.com'
     reddit_zine_url = reddit_url + '/r/zine'
-
-    response = open_url(reddit_zine_url + '.json')
     try:
-        data = load_json(response.data)
+        response = open_url(
+            reddit_zine_url + '.json?raw_json=1',
+            headers={
+                'Accept': 'application/json',
+                'User-Agent': 'Zine/0.2 (+https://github.com/mitsuhiko/zine)',
+            },
+        )
+    except NetException:
+        return []
+
+    try:
+        if response.status_code != 200:
+            return []
+        try:
+            data = load_json(response.data)
+            children = data['data']['children']
+        except (KeyError, TypeError, ValueError):
+            return []
     finally:
         response.close()
 
     result = []
-    for item in islice(data['data']['children'], 20):
-        d = item['data']
-        if not d['url'].startswith("http"):
-            d['url'] = reddit_url + d['url']
-        result.append({
-            'author':       d['author'],
-            'created':      utcfromtimestamp(d['created']),
-            'score':        d['score'],
-            'title':        d['title'],
-            'comments':     d['num_comments'],
-            'url':          d['url'],
-            'domain':       d['domain'],
-            'author_url':   reddit_url + '/user/%s/' %
-                            url_quote(d['author']),
-            'comment_url':  '%s/comments/%s' % (reddit_zine_url, d['id'])
-        })
+    for item in islice(children, 20):
+        try:
+            data = item['data']
+            author = data['author']
+            url = data['url']
+            if not url.startswith(('http://', 'https://')):
+                url = reddit_url + url
+            permalink = data.get('permalink')
+            if permalink:
+                comment_url = reddit_url + permalink
+            else:
+                comment_url = '%s/comments/%s' % (
+                    reddit_zine_url, data['id']
+                )
+            created = data.get('created_utc')
+            if created is None:
+                created = data['created']
+            result.append({
+                'author': author,
+                'created': utcfromtimestamp(created),
+                'score': data['score'],
+                'title': data['title'],
+                'comments': data['num_comments'],
+                'url': url,
+                'domain': data['domain'],
+                'author_url': reddit_url + '/user/%s/' % url_quote(author),
+                'comment_url': comment_url,
+            })
+        except (KeyError, TypeError, ValueError):
+            continue
     return result
