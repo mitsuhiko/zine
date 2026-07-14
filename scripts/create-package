@@ -20,7 +20,10 @@ from optparse import OptionParser
 
 IGNORED = [re.compile(r'^artwork/')]
 
-EXTRA_RST = 'README INSTALL'.split()
+EXTRA_RST = (
+    ('INSTALL', 'INSTALL.html'),
+    ('README_OLD.txt', 'README_OLD.html'),
+)
 
 _documented_plugin_re = re.compile(r'^zine/plugins/([^/]+)/docs/')
 
@@ -121,12 +124,22 @@ def build(dst_dir, build_dir, options):
 
     # build extra rst files into .html files
     from docutils.core import publish_file
-    for filename in EXTRA_RST:
+    for source_name, destination_name in EXTRA_RST:
         publish_file(
-            source_path=os.path.join(release_dir, filename),
-            destination_path=os.path.join(release_dir, filename + '.html'),
+            source_path=os.path.join(release_dir, source_name),
+            destination_path=os.path.join(release_dir, destination_name),
             writer_name='html5',
         )
+
+    from markdown import markdown
+    with open(
+        os.path.join(release_dir, 'README.md'), encoding='utf-8'
+    ) as fileobj:
+        readme_html = markdown(fileobj.read(), extensions=['extra'])
+    with open(
+        os.path.join(release_dir, 'README.html'), 'w', encoding='utf-8'
+    ) as fileobj:
+        fileobj.write(readme_html)
 
     # delete .pyc files the documentation builder might have created
     delete_pycs(release_dir)

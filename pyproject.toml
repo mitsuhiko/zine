@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "Zine"
 version = "0.2.dev0"
 description = "A Python-powered blog engine"
-readme = "README"
+readme = "README.md"
 requires-python = ">=3.12,<3.15"
 license = "BSD-3-Clause"
 authors = [

@@ -1,4 +1,4 @@
-include AUTHORS INSTALL LICENSE README
+include AUTHORS INSTALL LICENSE README.md README_OLD.txt
 include scripts/*
 recursive-include api Makefile *.py *.rst
 prune api/_build

@@ -26,20 +26,11 @@ be included in Zine 0.2 (tentatively set to be released in April, 2009):
   you want to develop plugins, that's the starting point.)
 
 
-Installation and Quickstart
-===========================
+Installation
+============
 
-Zine supports Python 3.12 through 3.14.  From a source checkout, install all
-runtime, test, and documentation dependencies and start a fresh instance with::
-
-    $ uv sync --all-extras
-    $ mkdir instance
-    $ uv run zine-server -I instance
-
-Open ``http://127.0.0.1:4000/`` to complete the setup wizard.  Run the full
-regression suite with ``uv run pytest``.  Standard ``venv`` and ``pip``
-instructions, deployment examples, and installed command names are documented
-in INSTALL.
+See the file INSTALL for a list of dependencies and installation
+instructions.
 
 
 License and Copyright
@@ -53,10 +44,21 @@ Zine is released under a BSD-style license, see the LICENSE file for more
 details.
 
 
-Development
-===========
+Getting in touch with the developers
+====================================
 
-The source repository and issue tracker are hosted on GitHub:
+The best way to communicate with the developers is the IRC channel
+`#pocoo`_ on irc.freenode.net.  Beware, several projects have their
+"home" there, so be sure to tell the people you're talking about Zine.
 
--  `Zine repository <https://github.com/mitsuhiko/zine>`_
--  `Issue tracker <https://github.com/mitsuhiko/zine/issues>`_
+The wiki and bug tracker is available on the `Zine Development Center`_.
+If you encounter bugs or if you want to suggest a new feature be sure to
+file a new ticket there.
+
+Other resources:
+
+-  `Main repository <http://dev.pocoo.org/hg/zine-main>`_
+-  `bitbucket mirror <http://www.bitbucket.org/mitsuhiko/zine-main>`_
+
+.. _#pocoo: irc://irc.freenode.net/%23pocoo
+.. _Zine Development Center: http://dev.pocoo.org/projects/zine/

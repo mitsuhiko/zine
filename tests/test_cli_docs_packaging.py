@@ -246,9 +246,16 @@ def test_standard_source_and_wheel_packages(tmp_path):
             name for name in names if name.endswith("entry_points.txt")
         ))
         assert b"zine-server = zine.cli:server_main" in entry_points
+        metadata = archive.read(next(
+            name for name in names if name.endswith("METADATA")
+        ))
+        assert b"Description-Content-Type: text/markdown" in metadata
+        assert b"revival of the historical Zine 0.2" in metadata
         assert "zine/templates/index.html" in names
     with tarfile.open(source) as archive:
         names = archive.getnames()
+        assert any(name.endswith("README.md") for name in names)
+        assert any(name.endswith("README_OLD.txt") for name in names)
         assert any(name.endswith("scripts/server") for name in names)
         assert any(name.endswith("servers/zine.wsgi") for name in names)
         assert any(
